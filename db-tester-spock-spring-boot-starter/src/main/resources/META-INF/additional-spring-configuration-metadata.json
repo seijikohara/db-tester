@@ -1,0 +1,16 @@
+{
+  "properties": [
+    {
+      "name": "db-tester.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Whether DB Tester auto-configuration is enabled.",
+      "defaultValue": true
+    },
+    {
+      "name": "db-tester.auto-register-data-sources",
+      "type": "java.lang.Boolean",
+      "description": "Whether to automatically register Spring DataSource beans with the DataSourceRegistry.",
+      "defaultValue": true
+    }
+  ]
+}

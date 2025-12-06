@@ -1,0 +1,8 @@
+[Scenario],ID,COLUMN1,COLUMN2
+shouldUseAlphabeticalOrdering,1,1,Laptop
+shouldUseAlphabeticalOrdering,2,1,Smartphone
+shouldUseAlphabeticalOrdering,3,2,Novel
+shouldUseManualOrdering,1,1,Laptop
+shouldUseManualOrdering,2,1,Smartphone
+shouldHandleManyToManyRelationships,1,1,Laptop
+shouldHandleManyToManyRelationships,2,2,Novel

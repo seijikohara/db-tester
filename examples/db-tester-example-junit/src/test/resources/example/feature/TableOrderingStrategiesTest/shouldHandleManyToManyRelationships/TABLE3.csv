@@ -1,0 +1,3 @@
+[Scenario],ID,COLUMN1
+shouldHandleManyToManyRelationships,1,Popular
+shouldHandleManyToManyRelationships,2,Sale

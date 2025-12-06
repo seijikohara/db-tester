@@ -1,0 +1,4 @@
+[Scenario],ID,COLUMN1,COLUMN2
+shouldHandleManyToManyRelationships,1,1,Laptop
+shouldHandleManyToManyRelationships,2,2,Novel
+shouldHandleManyToManyRelationships,5,4,Cable

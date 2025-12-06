@@ -1,0 +1,7 @@
+[Scenario],ID,COLUMN1
+should use alphabetical ordering,1,Electronics
+should use alphabetical ordering,2,Books
+should use manual ordering,1,Electronics
+should use manual ordering,2,Books
+should handle many to many relationships,1,Electronics
+should handle many to many relationships,2,Books

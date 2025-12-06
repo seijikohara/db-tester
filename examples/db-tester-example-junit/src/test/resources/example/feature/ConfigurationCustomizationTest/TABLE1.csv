@@ -1,0 +1,5 @@
+[TestCase],ID,COLUMN1,COLUMN2,COLUMN3
+shouldUseCustomScenarioMarker,1,Alice,ACTIVE,2024-01-01
+shouldUseCustomExpectationSuffix,1,Alice,ACTIVE,2024-01-01
+shouldUseCustomOperationDefaults,1,Alice,ACTIVE,2024-01-01
+shouldUseCustomOperationDefaults,2,Bob,ACTIVE,2024-01-10

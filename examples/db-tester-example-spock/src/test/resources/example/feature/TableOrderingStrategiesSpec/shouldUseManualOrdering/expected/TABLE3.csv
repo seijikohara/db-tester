@@ -1,0 +1,5 @@
+[Scenario],ID,COLUMN1
+should use manual ordering,1,Popular
+should use manual ordering,2,Sale
+should use manual ordering,3,New
+should use manual ordering,4,Featured

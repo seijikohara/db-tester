@@ -1,0 +1,11 @@
+[Scenario],COLUMN1,COLUMN2
+shouldUseAlphabeticalOrdering,1,1
+shouldUseAlphabeticalOrdering,1,2
+shouldUseAlphabeticalOrdering,2,3
+shouldUseManualOrdering,1,1
+shouldUseManualOrdering,1,4
+shouldUseManualOrdering,2,3
+shouldHandleManyToManyRelationships,1,1
+shouldHandleManyToManyRelationships,2,2
+shouldHandleManyToManyRelationships,5,1
+shouldHandleManyToManyRelationships,5,5

@@ -1,0 +1,9 @@
+[Scenario],ID,COLUMN1
+shouldUseAlphabeticalOrdering,1,Popular
+shouldUseAlphabeticalOrdering,2,Sale
+shouldUseAlphabeticalOrdering,3,New
+shouldUseManualOrdering,1,Popular
+shouldUseManualOrdering,2,Sale
+shouldUseManualOrdering,3,New
+shouldHandleManyToManyRelationships,1,Popular
+shouldHandleManyToManyRelationships,2,Sale

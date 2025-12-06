@@ -1,0 +1,3 @@
+[Scenario],ID,COLUMN1
+shouldHandleManyToManyRelationships,1,Electronics
+shouldHandleManyToManyRelationships,2,Books

@@ -1,0 +1,15 @@
+[Scenario],ID,COLUMN1,COLUMN2
+shouldUseCustomResourceLocation,1,Product,Seattle
+shouldUseCustomResourceLocation,2,Finance,Chicago
+shouldUseCustomResourceLocation,3,Marketing,Tokyo
+shouldHandleMultipleScenarios,1,Engineering,San Francisco
+shouldHandleMultipleScenarios,2,Sales,New York
+scenario1,1,Engineering,San Francisco
+scenario2,2,Sales,New York
+shouldUseClassLevelAnnotation,1,HR,Boston
+multiDataSet,1,Engineering,San Francisco
+multiDataSet,2,Sales,New York
+multiDataSet,3,Product,Seattle
+multiDataSet,4,Research,Osaka
+shouldMergeMultipleDataSets,1,Engineering,San Francisco
+shouldMergeMultipleDataSets,2,Sales,New York

@@ -1,0 +1,7 @@
+[Scenario],ID,COLUMN1
+shouldUseAlphabeticalOrdering,1,Electronics
+shouldUseAlphabeticalOrdering,2,Books
+shouldUseManualOrdering,1,Electronics
+shouldUseManualOrdering,2,Books
+shouldHandleManyToManyRelationships,1,Electronics
+shouldHandleManyToManyRelationships,2,Books

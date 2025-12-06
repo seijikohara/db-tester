@@ -1,0 +1,6 @@
+-- Schema for USERS table used in UserRepositoryTest
+CREATE TABLE IF NOT EXISTS USERS (
+    ID BIGINT PRIMARY KEY,
+    NAME VARCHAR(255) NOT NULL,
+    EMAIL VARCHAR(255) NOT NULL
+);

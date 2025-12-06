@@ -1,0 +1,4 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+createUser,1,john_doe,john@example.com,true
+createUser,2,jane_doe,jane@example.com,true
+updateStatus,1,john_doe,john@example.com,false

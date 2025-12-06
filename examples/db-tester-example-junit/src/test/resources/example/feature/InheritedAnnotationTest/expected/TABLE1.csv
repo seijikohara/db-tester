@@ -1,0 +1,7 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+shouldUseInheritedPreparation,1,Laptop,10,Warehouse A
+shouldUseInheritedPreparation,2,Keyboard,50,Warehouse A
+shouldUseInheritedPreparation,3,Monitor,20,Warehouse B
+overrideSetup,1,Laptop,50,Warehouse A
+combinedTest,1,Laptop,10,Warehouse C
+combinedTest,2,Keyboard,50,Warehouse A

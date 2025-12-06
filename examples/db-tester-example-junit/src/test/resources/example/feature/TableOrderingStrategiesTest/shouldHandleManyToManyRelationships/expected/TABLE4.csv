@@ -1,0 +1,5 @@
+[Scenario],COLUMN1,COLUMN2
+shouldHandleManyToManyRelationships,1,1
+shouldHandleManyToManyRelationships,2,2
+shouldHandleManyToManyRelationships,5,1
+shouldHandleManyToManyRelationships,5,5

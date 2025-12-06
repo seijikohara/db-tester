@@ -1,0 +1,3 @@
+[Scenario],ID,COLUMN1
+shouldUseManualOrdering,1,Electronics
+shouldUseManualOrdering,2,Books

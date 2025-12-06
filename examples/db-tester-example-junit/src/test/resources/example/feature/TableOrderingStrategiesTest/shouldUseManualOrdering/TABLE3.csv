@@ -1,0 +1,4 @@
+[Scenario],ID,COLUMN1
+shouldUseManualOrdering,1,Popular
+shouldUseManualOrdering,2,Sale
+shouldUseManualOrdering,3,New

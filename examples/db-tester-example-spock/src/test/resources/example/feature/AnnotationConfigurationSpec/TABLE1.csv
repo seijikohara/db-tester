@@ -1,0 +1,7 @@
+[Scenario],ID,COLUMN1,COLUMN2
+scenario1,1,Engineering,San Francisco
+scenario2,2,Sales,New York
+classLevel,1,HR,Boston
+multiDataSet1,1,Engineering,San Francisco
+multiDataSet1,2,Sales,New York
+multiDataSet1,3,Product,Seattle

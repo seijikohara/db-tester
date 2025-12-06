@@ -1,0 +1,14 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+shouldUseCleanInsertOperation,1,Laptop,10,2024-01-01 10:00:00
+shouldUseCleanInsertOperation,2,Mouse,50,2024-01-01 10:00:00
+shouldUseInsertOperation,1,Keyboard,20,2024-01-02 11:00:00
+shouldUseInsertOperation,2,Monitor,15,2024-01-02 11:00:00
+shouldUseUpdateOperation,1,Laptop,5,2024-01-03 12:00:00
+shouldUseUpdateOperation,2,Monitor,5,2024-01-03 12:00:00
+shouldUseRefreshOperation,1,Laptop,12,2024-01-04 13:00:00
+shouldUseRefreshOperation,2,Mouse,55,2024-01-04 13:00:00
+shouldUseDeleteOperation,1,Laptop,10,
+shouldUseDeleteOperation,2,Mouse,5,2024-01-01 10:00:00
+shouldUseDeleteOperation,3,Tablet,20,
+shouldUseTruncateInsertOperation,1,Laptop,10,2024-01-01 10:00:00
+shouldUseTruncateInsertOperation,2,Mouse,5,2024-01-01 10:00:00

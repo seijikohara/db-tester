@@ -1,5 +1,131 @@
-# Ignore Gradle project-specific cache directory
-.gradle
+# =========================================
+# Java
+# =========================================
+*.class
+*.log
+*.ctxt
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
 
-# Ignore Gradle build output directory
-build
+# Java crash logs
+hs_err_pid*
+replay_pid*
+
+# =========================================
+# Gradle
+# =========================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle local configuration
+gradle-app.setting
+gradle-app.properties
+
+# =========================================
+# Maven
+# =========================================
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# =========================================
+# Eclipse
+# =========================================
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.classpath
+.project
+
+# =========================================
+# VS Code
+# =========================================
+.vscode/
+.history/
+*.code-workspace
+
+# =========================================
+# JetBrains (IntelliJ, PyCharm, etc.)
+# =========================================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# =========================================
+# OS Files
+# =========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.nfs*
+
+# =========================================
+# Logs & Temporary Files
+# =========================================
+logs/
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+
+# =========================================
+# Environment Files
+# =========================================
+# Uncomment if you want to ignore local environment configs
+# .env
+# .env.local
+
+# =========================================
+# Claude Code
+# =========================================
+# Version control: .claude/agents/, .claude/commands/, .claude/settings.json
+# Exclude: personal settings, sessions, history, and logs
+
+# Personal and local settings
+.claude/settings.local.json
+
+# Session data and history
+.claude/history/
+.claude/sessions/
+
+# Logs
+.claude/*.log
+
+# Development artifacts
+.claude/.dev/

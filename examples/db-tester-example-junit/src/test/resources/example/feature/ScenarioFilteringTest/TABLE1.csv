@@ -1,0 +1,5 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+shouldCreateActiveUser,1,alice,alice@example.com,ACTIVE
+shouldCreateInactiveUser,1,bob,bob@example.com,INACTIVE
+shouldHandleMultipleUsers,1,eve,eve@example.com,ACTIVE
+shouldHandleMultipleUsers,2,frank,frank@example.com,INACTIVE

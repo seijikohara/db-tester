@@ -1,0 +1,266 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (MAJOR.MINOR.PATCH format, e.g., 1.2.0)'
+        required: true
+        type: string
+      dry-run:
+        description: 'Dry-run mode (skip actual deployment)'
+        required: false
+        type: boolean
+        default: true
+
+env:
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Fetch all history for tag comparison
+
+      - name: Validate version format
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          SEMVER_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
+
+          if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
+            echo "::error::Invalid version format: $VERSION"
+            echo "::error::Version must be in MAJOR.MINOR.PATCH format (e.g., 1.2.0)"
+            exit 1
+          fi
+          echo "✅ Version format is valid: $VERSION"
+
+      - name: Check tag does not exist
+        run: |
+          TAG="v${{ github.event.inputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "::error::Tag $TAG already exists"
+            exit 1
+          fi
+          echo "✅ Tag $TAG does not exist yet"
+
+      - name: Validate version is newer
+        id: version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          TAG="v$VERSION"
+          LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
+
+          if [[ -n "$LATEST_TAG" ]]; then
+            LATEST_VERSION="${LATEST_TAG#v}"
+            echo "Latest existing tag: $LATEST_TAG (version: $LATEST_VERSION)"
+
+            HIGHER_VERSION=$(printf '%s\n%s' "$LATEST_VERSION" "$VERSION" | sort -V | tail -n 1)
+
+            if [[ "$HIGHER_VERSION" != "$VERSION" ]]; then
+              echo "::error::Version $VERSION is not newer than the latest version $LATEST_VERSION"
+              exit 1
+            fi
+
+            if [[ "$HIGHER_VERSION" == "$LATEST_VERSION" && "$VERSION" == "$LATEST_VERSION" ]]; then
+              echo "::error::Version $VERSION is the same as the latest version"
+              exit 1
+            fi
+
+            echo "✅ Version $VERSION is newer than $LATEST_VERSION"
+          else
+            echo "ℹ️ No existing tags found. This will be the first release."
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Validate GPG key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+        run: |
+          # Check if secrets are set
+          if [[ -z "$GPG_PRIVATE_KEY" ]]; then
+            echo "::error::GPG_PRIVATE_KEY secret is not set"
+            exit 1
+          fi
+          if [[ -z "$GPG_PASSPHRASE" ]]; then
+            echo "::error::GPG_PASSPHRASE secret is not set"
+            exit 1
+          fi
+          if [[ -z "$GPG_KEY_ID" ]]; then
+            echo "::error::GPG_KEY_ID secret is not set"
+            exit 1
+          fi
+          echo "✅ All GPG secrets are configured"
+
+          # Try to import the key
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import 2>&1 || {
+            echo "::error::Failed to import GPG private key. Check GPG_PRIVATE_KEY format (should be ASCII armor)."
+            exit 1
+          }
+          echo "✅ GPG key imported successfully"
+
+          # Verify key ID exists
+          if ! gpg --list-secret-keys "$GPG_KEY_ID" >/dev/null 2>&1; then
+            echo "::error::GPG_KEY_ID ($GPG_KEY_ID) does not match imported key"
+            echo "Available keys:"
+            gpg --list-secret-keys --keyid-format SHORT
+            exit 1
+          fi
+          echo "✅ GPG key ID verified: $GPG_KEY_ID"
+
+          # Test signing with passphrase
+          echo "test" | gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
+            --local-user "$GPG_KEY_ID" --armor --detach-sign >/dev/null 2>&1 || {
+            echo "::error::Failed to sign with GPG key. Check GPG_PASSPHRASE."
+            exit 1
+          }
+          echo "✅ GPG signing test passed"
+
+      - name: Validate Maven Central credentials
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+        run: |
+          if [[ -z "$MAVEN_CENTRAL_USERNAME" ]]; then
+            echo "::error::MAVEN_CENTRAL_USERNAME secret is not set"
+            exit 1
+          fi
+          if [[ -z "$MAVEN_CENTRAL_TOKEN" ]]; then
+            echo "::error::MAVEN_CENTRAL_TOKEN secret is not set"
+            exit 1
+          fi
+          echo "✅ Maven Central credentials are configured"
+
+      - name: Summary
+        run: |
+          echo "## Validation Passed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Version" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Credentials" >> $GITHUB_STEP_SUMMARY
+          echo "- **GPG Key:** ✅ Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- **Maven Central:** ✅ Configured" >> $GITHUB_STEP_SUMMARY
+
+  build-and-dry-run:
+    name: Build and Dry-Run
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Required for axion-release-plugin
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Create local tag
+        run: git tag ${{ needs.validate.outputs.tag }}
+
+      - name: Build and test with release version
+        run: ./gradlew clean build
+
+      - name: Verify version
+        run: |
+          echo "Expected version: ${{ needs.validate.outputs.version }}"
+          ./gradlew currentVersion
+
+      - name: Dry-run summary
+        run: |
+          echo "## Dry-Run Completed ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All checks passed. Ready for release approval." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.validate.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+
+  release:
+    name: Release to Maven Central
+    needs: [validate, build-and-dry-run]
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry-run }}
+    environment:
+      name: maven-central
+      url: https://central.sonatype.com/artifact/io.github.seijikohara/db-tester
+
+    steps:
+      - name: Generate GitHub App Token
+        id: generate_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.DEV_AUTOMATION_APP_ID }}
+          private-key: ${{ secrets.DEV_AUTOMATION_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # Required for axion-release-plugin
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create local tag
+        run: git tag ${{ needs.validate.outputs.tag }}
+
+      - name: Build with release version
+        run: ./gradlew clean build
+
+      - name: Publish to Maven Central
+        run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.GPG_PRIVATE_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Push tag
+        run: git push origin ${{ needs.validate.outputs.tag }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.validate.outputs.tag }}
+          name: Release ${{ needs.validate.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          token: ${{ steps.generate_token.outputs.token }}
+
+      - name: Release summary
+        run: |
+          echo "## Release Completed 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** ${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** ${{ needs.validate.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Maven Central:** https://central.sonatype.com/artifact/io.github.seijikohara/db-tester/${{ needs.validate.outputs.version }}" >> $GITHUB_STEP_SUMMARY
