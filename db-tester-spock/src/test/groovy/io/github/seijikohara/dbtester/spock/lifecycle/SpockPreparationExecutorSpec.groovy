@@ -5,9 +5,9 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
+import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.internal.context.TestContext
 import spock.lang.Specification
 
 /**

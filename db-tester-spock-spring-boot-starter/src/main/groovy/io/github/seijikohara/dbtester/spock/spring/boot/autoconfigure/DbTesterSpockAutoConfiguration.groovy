@@ -1,7 +1,11 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.Configuration
+import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.OperationDefaults
+import io.github.seijikohara.dbtester.api.loader.DataSetLoader
+import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import javax.sql.DataSource
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -36,14 +40,53 @@ import org.springframework.context.annotation.Bean
 class DbTesterSpockAutoConfiguration {
 
 	/**
-	 * Creates a default Configuration bean if not already present.
+	 * Creates a Configuration bean from the DB Tester properties.
 	 *
-	 * @return the configuration, never null
+	 * <p>If no custom configuration is provided, this method builds a Configuration from the
+	 * properties defined in {@code application.properties} or {@code application.yml}.
+	 *
+	 * @param properties the DB Tester properties
+	 * @return the configuration built from properties
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	Configuration dbTesterConfiguration() {
-		return Configuration.defaults()
+	Configuration dbTesterConfiguration(DbTesterProperties properties) {
+		def conventionProps = properties.convention
+		def operationProps = properties.operation
+
+		def conventions = new ConventionSettings(
+				conventionProps.baseDirectory,
+				conventionProps.expectationSuffix,
+				conventionProps.scenarioMarker,
+				conventionProps.dataFormat,
+				conventionProps.tableMergeStrategy
+				)
+
+		def operations = new OperationDefaults(
+				operationProps.preparation,
+				operationProps.expectation
+				)
+
+		def loader = loadDataSetLoader()
+
+		return new Configuration(conventions, operations, loader)
+	}
+
+	/**
+	 * Loads the DataSetLoader implementation via ServiceLoader.
+	 *
+	 * @return the DataSetLoader instance
+	 */
+	private DataSetLoader loadDataSetLoader() {
+		return ServiceLoader.load(DataSetLoaderProvider)
+				.findFirst()
+				.map { it.loader }
+				.orElseThrow {
+					new IllegalStateException(
+							"No DataSetLoaderProvider implementation found. " +
+							"Add db-tester-core to your classpath."
+							)
+				}
 	}
 
 	/**
@@ -52,7 +95,7 @@ class DbTesterSpockAutoConfiguration {
 	 * <p>The registry is populated with DataSources by the {@link DataSourceRegistrar} when tests are
 	 * executed. This lazy initialization ensures proper integration with Spock's test lifecycle.
 	 *
-	 * @return the data source registry, never null
+	 * @return the data source registry
 	 */
 	@Bean
 	@ConditionalOnMissingBean
@@ -67,8 +110,8 @@ class DbTesterSpockAutoConfiguration {
 	 * {@link DataSourceRegistry}. It is used by the {@code SpringBootDatabaseTestExtension} to
 	 * populate the registry before test execution.
 	 *
-	 * @param properties the DB Tester properties (must not be null)
-	 * @return the data source registrar, never null
+	 * @param properties the DB Tester properties
+	 * @return the data source registrar
 	 */
 	@Bean
 	@ConditionalOnMissingBean

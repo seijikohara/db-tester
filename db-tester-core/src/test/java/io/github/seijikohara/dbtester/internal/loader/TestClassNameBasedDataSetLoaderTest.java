@@ -10,10 +10,12 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation;
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
+import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.operation.Operation;
-import io.github.seijikohara.dbtester.internal.context.TestContext;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +46,9 @@ class TestClassNameBasedDataSetLoaderTest {
     registry = new DataSourceRegistry();
     registry.registerDefault(mockDataSource);
 
-    final var conventions = new ConventionSettings(null, "/expected", "SCENARIO");
+    final var conventions =
+        new ConventionSettings(
+            null, "/expected", "SCENARIO", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
     final var operationDefaults = new OperationDefaults(Operation.CLEAN_INSERT, Operation.NONE);
     final var loader = new TestClassNameBasedDataSetLoader();
     configuration = new Configuration(conventions, operationDefaults, loader);
@@ -279,17 +283,17 @@ class TestClassNameBasedDataSetLoaderTest {
     }
 
     /**
-     * Verifies that loadPreparationDataSets loads multiple data sets when multiple @DataSet
-     * annotations.
+     * Verifies that loadPreparationDataSets merges data sets when multiple @DataSet annotations.
+     *
+     * <p>When multiple @DataSet annotations are specified, they are merged into a single DataSet
+     * according to the configured TableMergeStrategy.
      *
      * @throws NoSuchMethodException if method cannot be found
      */
     @Test
     @Tag("normal")
-    @DisplayName(
-        "should load multiple data sets when Preparation has multiple @DataSet annotations")
-    void shouldLoadMultipleDataSets_whenPreparationHasMultipleDataSets()
-        throws NoSuchMethodException {
+    @DisplayName("should merge data sets when Preparation has multiple @DataSet annotations")
+    void shouldMergeDataSets_whenPreparationHasMultipleDataSets() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
       final var testClass = TestHelperWithMultipleDataSets.class;
@@ -300,10 +304,17 @@ class TestClassNameBasedDataSetLoaderTest {
       final var result = loader.loadPreparationDataSets(context);
 
       // Then
+      // Both datasets have the same table name (users.csv), so they are merged into one table
+      // with rows from both datasets combined (UNION_ALL strategy by default)
       assertAll(
-          "multiple data sets should be loaded",
+          "data sets should be merged into one",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(2, result.size(), "should have two data sets"));
+          () -> assertEquals(1, result.size(), "should have one merged data set"),
+          () ->
+              assertEquals(
+                  1,
+                  result.get(0).getTables().size(),
+                  "should have one table (same name tables are merged)"));
     }
 
     /**

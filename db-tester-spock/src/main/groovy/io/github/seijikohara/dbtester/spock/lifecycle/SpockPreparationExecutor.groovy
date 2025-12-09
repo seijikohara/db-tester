@@ -2,10 +2,10 @@ package io.github.seijikohara.dbtester.spock.lifecycle
 
 import groovy.util.logging.Slf4j
 import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.context.TestContext
+import io.github.seijikohara.dbtester.api.dataset.DataSet
 import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.internal.context.TestContext
-import io.github.seijikohara.dbtester.internal.dataset.ScenarioDataSet
-import io.github.seijikohara.dbtester.internal.dbunit.DbUnitOperations
+import io.github.seijikohara.dbtester.api.spi.OperationProvider
 
 /**
  * Executes the preparation phase of database testing for Spock specifications.
@@ -16,13 +16,13 @@ import io.github.seijikohara.dbtester.internal.dbunit.DbUnitOperations
 @Slf4j
 class SpockPreparationExecutor {
 
-	private final DbUnitOperations dbUnitOperations = new DbUnitOperations()
+	private final OperationProvider operationProvider = ServiceLoader.load(OperationProvider).findFirst().orElseThrow()
 
 	/**
 	 * Executes the preparation phase.
 	 *
-	 * @param context the test context (must not be null)
-	 * @param preparation the preparation annotation (must not be null)
+	 * @param context the test context
+	 * @param preparation the preparation annotation
 	 */
 	void execute(TestContext context, Preparation preparation) {
 		Objects.requireNonNull(context, 'context must not be null')
@@ -32,7 +32,7 @@ class SpockPreparationExecutor {
 				context.testClass().simpleName,
 				context.testMethod().name)
 
-		List<ScenarioDataSet> dataSets = context.configuration().loader().loadPreparationDataSets(context)
+		List<DataSet> dataSets = context.configuration().loader().loadPreparationDataSets(context)
 
 		if (dataSets.empty) {
 			log.debug('No preparation datasets found')
@@ -41,28 +41,28 @@ class SpockPreparationExecutor {
 
 		def operation = preparation.operation()
 
-		dataSets.each { scenarioDataSet ->
-			executeDataSet(context, scenarioDataSet, operation)
+		dataSets.each { dataSet ->
+			executeDataSet(context, dataSet, operation)
 		}
 	}
 
 	/**
 	 * Executes a single dataset against the database.
 	 *
-	 * <p>This method resolves the DataSource from either the scenario dataset itself or falls back
-	 * to the default registry. It then delegates to DbUnit operations to apply the dataset using
-	 * the specified operation.
+	 * <p>This method resolves the DataSource from either the dataset itself or falls back
+	 * to the default registry. It then delegates to the operation executor to apply the dataset
+	 * using the specified operation.
 	 *
-	 * @param context the test context providing access to the data source registry (must not be null)
-	 * @param scenarioDataSet the dataset to execute containing tables and optional data source (must not be null)
-	 * @param operation the database operation to perform (must not be null)
+	 * @param context the test context providing access to the data source registry
+	 * @param dataSet the dataset to execute containing tables and optional data source
+	 * @param operation the database operation to perform
 	 */
-	private void executeDataSet(TestContext context, ScenarioDataSet scenarioDataSet, Operation operation) {
-		def dataSource = scenarioDataSet.dataSource
+	private void executeDataSet(TestContext context, DataSet dataSet, Operation operation) {
+		def dataSource = dataSet.dataSource
 				.orElseGet { -> context.registry().get('') }
 
 		log.debug('Applying {} operation with dataset', operation)
 
-		dbUnitOperations.execute(operation, scenarioDataSet, dataSource)
+		operationProvider.execute(operation, dataSet, dataSource)
 	}
 }

@@ -6,9 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
+import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
-import io.github.seijikohara.dbtester.internal.domain.ScenarioName;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -72,7 +73,8 @@ class DataSetFactoryTest {
       final var scenarioMarker = new ScenarioMarker("SCENARIO");
 
       // When
-      final var dataSet = factory.createDataSet(tempDir, List.of(), scenarioMarker, null);
+      final var dataSet =
+          factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
 
       // Then
       assertAll(
@@ -106,7 +108,8 @@ class DataSetFactoryTest {
       final var scenarioNames = List.of(new ScenarioName("scenario1"));
 
       // When
-      final var dataSet = factory.createDataSet(tempDir, scenarioNames, scenarioMarker, null);
+      final var dataSet =
+          factory.createDataSet(tempDir, scenarioNames, scenarioMarker, DataFormat.CSV, null);
 
       // Then
       final var table = dataSet.getTables().get(0);
@@ -135,7 +138,8 @@ class DataSetFactoryTest {
       final var scenarioMarker = new ScenarioMarker("SCENARIO");
 
       // When
-      final var dataSet = factory.createDataSet(tempDir, List.of(), scenarioMarker, null);
+      final var dataSet =
+          factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
 
       // Then
       assertAll(
@@ -163,7 +167,8 @@ class DataSetFactoryTest {
       final var exception =
           assertThrows(
               DataSetLoadException.class,
-              () -> factory.createDataSet(tempDir, List.of(), scenarioMarker, null));
+              () ->
+                  factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
 
       final var message = exception.getMessage();
       assertTrue(
@@ -191,7 +196,8 @@ class DataSetFactoryTest {
       final var exception =
           assertThrows(
               DataSetLoadException.class,
-              () -> factory.createDataSet(tempDir, List.of(), scenarioMarker, null));
+              () ->
+                  factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
 
       final var message = exception.getMessage();
       assertTrue(
@@ -216,7 +222,9 @@ class DataSetFactoryTest {
       // When & Then
       assertThrows(
           DataSetLoadException.class,
-          () -> factory.createDataSet(nonExistentDir, List.of(), scenarioMarker, null));
+          () ->
+              factory.createDataSet(
+                  nonExistentDir, List.of(), scenarioMarker, DataFormat.CSV, null));
     }
   }
 

@@ -9,9 +9,16 @@ description = "DB Tester Spock Spring Boot Starter - Spring Boot AutoConfigurati
 dependencies {
     // Groovy BOM for version management
     implementation(platform(libs.groovy.bom))
+    implementation(platform(libs.spock.bom))
 
     // Public API dependency
     api(project(":db-tester-spock"))
+
+    // Core implementation (provides SPI implementations)
+    implementation(project(":db-tester-core"))
+
+    // Spock Spring integration - provides SpringExtension for ApplicationContext access
+    implementation(libs.spock.spring)
 
     // Internal implementation
     implementation(libs.spring.boot.autoconfigure)

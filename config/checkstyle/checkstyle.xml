@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+  "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+  "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<!--
+  Checkstyle configuration for db-tester project.
+  Enforces coding standards from docs/code-styles/JAVA.md.
+-->
+<module name="Checker">
+  <property name="severity" value="error"/>
+  <property name="charset" value="UTF-8"/>
+  <property name="fileExtensions" value="java"/>
+
+  <!-- Exclude module-info.java and package-info.java from all checks -->
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value="module\-info\.java$"/>
+  </module>
+  <module name="BeforeExecutionExclusionFileFilter">
+    <property name="fileNamePattern" value="package\-info\.java$"/>
+  </module>
+
+  <module name="TreeWalker">
+    <!-- =================================================================== -->
+    <!-- Variables and Parameters: All must be final                         -->
+    <!-- Ref: docs/code-styles/JAVA.md - Variables and Parameters           -->
+    <!-- =================================================================== -->
+
+    <!--
+      FinalParameters: All method parameters must be final.
+      Exceptions: Unused parameters using underscore pattern (_)
+    -->
+    <module name="FinalParameters">
+      <property name="ignorePrimitiveTypes" value="false"/>
+    </module>
+
+    <!--
+      FinalLocalVariable: All local variables must be final.
+      This encourages immutability and use of "final var".
+    -->
+    <module name="FinalLocalVariable">
+      <property name="validateEnhancedForLoopVariable" value="true"/>
+      <property name="tokens" value="VARIABLE_DEF"/>
+    </module>
+
+    <!-- =================================================================== -->
+    <!-- Import Statements: No star imports                                  -->
+    <!-- Ref: docs/code-styles/JAVA.md - Import Statements                  -->
+    <!-- =================================================================== -->
+
+    <!--
+      AvoidStarImport: Star imports are prohibited.
+      Requires importing each class individually.
+    -->
+    <module name="AvoidStarImport"/>
+
+    <!-- =================================================================== -->
+    <!-- Class Design: Enforce immutability patterns                         -->
+    <!-- Ref: docs/code-styles/JAVA.md - Records and Immutability           -->
+    <!-- =================================================================== -->
+
+    <!--
+      HideUtilityClassConstructor: Utility classes should have private constructor.
+      Note: Not strictly required by JAVA.md but supports immutability principles.
+    -->
+    <module name="HideUtilityClassConstructor"/>
+
+    <!-- =================================================================== -->
+    <!-- Coding Style: Naming conventions and modifiers                      -->
+    <!-- Ref: docs/code-styles/JAVA.md - Naming Conventions                 -->
+    <!-- =================================================================== -->
+
+    <!--
+      ModifierOrder: Modifiers should be in the recommended order.
+      public protected private abstract default static final transient volatile synchronized native strictfp
+    -->
+    <module name="ModifierOrder"/>
+
+    <!--
+      Note: RedundantModifier is disabled because the project style requires final on all parameters,
+      even in interfaces where it is technically redundant. This is consistent with the
+      "All parameters and local variables must be final" rule in docs/code-styles/JAVA.md.
+    -->
+
+    <!-- =================================================================== -->
+    <!-- Suppress filter for generated code and specific patterns            -->
+    <!-- =================================================================== -->
+
+    <module name="SuppressionXpathSingleFilter">
+      <!-- Allow non-final parameters in lambdas (they are effectively final) -->
+      <property name="checks" value="FinalParameters"/>
+      <property name="query" value="//LAMBDA"/>
+    </module>
+
+    <module name="SuppressionXpathSingleFilter">
+      <!-- Allow non-final catch parameters (often unused or re-thrown) -->
+      <property name="checks" value="FinalParameters"/>
+      <property name="query" value="//LITERAL_CATCH"/>
+    </module>
+
+    <module name="SuppressionXpathSingleFilter">
+      <!--
+        Allow Spring Boot Application classes without private constructor.
+        These classes have @SpringBootApplication and a main() method.
+      -->
+      <property name="checks" value="HideUtilityClassConstructor"/>
+      <property name="query" value="//CLASS_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='SpringBootApplication']]"/>
+    </module>
+
+    <module name="SuppressionXpathSingleFilter">
+      <!--
+        Allow JUnit test classes without private constructor.
+        Test classes with @ExtendWith are not utility classes despite having
+        static fields and nested test classes.
+      -->
+      <property name="checks" value="HideUtilityClassConstructor"/>
+      <property name="query" value="//CLASS_DEF[./MODIFIERS/ANNOTATION/IDENT[@text='ExtendWith']]"/>
+    </module>
+
+  </module>
+
+  <!-- Suppress checks for test files if needed -->
+  <module name="SuppressionFilter">
+    <property name="file" value="${config_loc}/suppressions.xml"/>
+    <property name="optional" value="true"/>
+  </module>
+
+</module>

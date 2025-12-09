@@ -1,0 +1,4 @@
+[TestCase],ID,NAME,STATUS,CREATED_DATE
+shouldUseCustomScenarioMarkerFromProperties,1,Alpha Feature,ACTIVE,2024-01-15
+shouldUseCustomScenarioMarkerFromProperties,2,Beta Feature,ENABLED,2024-02-01
+shouldUseCustomExpectationSuffixFromProperties,1,Config Item Alpha,DISABLED,2024-01-01

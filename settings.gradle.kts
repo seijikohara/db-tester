@@ -2,6 +2,15 @@
 // Configuration Cache can be enabled via --configuration-cache flag or gradle.properties
 // Note: Some plugins (e.g., Spotless) may not fully support Configuration Cache yet
 
+// Plugin version management
+// https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_management
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
 plugins {
     // Toolchain resolver for automatic JDK provisioning
     // https://docs.gradle.org/current/userguide/toolchains.html
@@ -23,6 +32,7 @@ dependencyResolutionManagement {
 include(
     // Core modules (published to Maven Central)
     "db-tester-bom",
+    "db-tester-api",
     "db-tester-core",
     "db-tester-junit",
     "db-tester-spock",

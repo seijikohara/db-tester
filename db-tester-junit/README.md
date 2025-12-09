@@ -1,14 +1,24 @@
 # DB Tester - JUnit Module
 
-This module provides JUnit integration for the DB Tester framework. It provides annotation-driven data preparation and validation using convention-based test data management.
+This module provides JUnit integration for the DB Tester framework through `DatabaseTestExtension`.
 
 ## Overview
 
-The JUnit module includes:
-
 - **JUnit Extension** - `DatabaseTestExtension` for test lifecycle integration
-- **Lifecycle Management** - `PreparationExecutor` and `ExpectationVerifier` for automatic execution of preparation and expectation phases
-- **ExtensionContext Integration** - Integration with JUnit extension model
+- **Lifecycle Management** - `PreparationExecutor` and `ExpectationVerifier` execute preparation and expectation phases
+- **ExtensionContext Integration** - Integrates with JUnit extension model
+
+## Architecture
+
+```
+db-tester-api (compile-time dependency)
+        ↑
+db-tester-junit
+        ↓
+db-tester-core (runtime dependency, loaded via ServiceLoader)
+```
+
+This module depends **only on `db-tester-api`** at compile time. The `db-tester-core` module is loaded at runtime via Java ServiceLoader mechanism.
 
 ## Requirements
 
@@ -36,7 +46,7 @@ dependencies {
 </dependency>
 ```
 
-Replace `VERSION` with the latest version from [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit).
+For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit).
 
 ## Usage
 
@@ -61,17 +71,6 @@ class UserRepositoryTest {
 }
 ```
 
-### Extension Registration
-
-Register the extension at the class level:
-
-```java
-@ExtendWith(DatabaseTestExtension.class)
-class MyDatabaseTest {
-    // ...
-}
-```
-
 ### DataSource Registration
 
 Register data sources in `@BeforeAll`:
@@ -81,48 +80,37 @@ Register data sources in `@BeforeAll`:
 static void setup(ExtensionContext context) {
     DataSourceRegistry registry = DatabaseTestExtension.getRegistry(context);
     registry.registerDefault(dataSource);
-    // Or with a name for multiple data sources
     registry.register("secondary", secondaryDataSource);
 }
 ```
 
-### Annotation Usage
+### Class-Level Annotations
 
-Use annotations at class or method level:
+Apply annotations at the class level for all test methods:
 
 ```java
-// Class-level: applies to all test methods
+@ExtendWith(DatabaseTestExtension.class)
 @Preparation
 @Expectation
 class UserRepositoryTest {
 
     @Test
     void testCreateUser() {
-        // Uses class-level @Preparation and @Expectation
-    }
-
-    @Test
-    @Preparation  // Method-level override
-    void testWithCustomPreparation() {
-        // Uses method-level @Preparation
+        // Uses class-level annotations
     }
 }
 ```
 
-## Configuration
+### Method-Level Annotations
 
-### Convention-Based Loading
+Override class-level annotations at the method level:
 
-Test data files are resolved based on test class and method names:
-
-```
-src/test/resources/
-  com/example/
-    UserRepositoryTest/           # Test class name
-      testCreateUser/             # Test method name (optional)
-        USERS.csv                 # Preparation data
-        expected/                 # Expectation directory
-          USERS.csv               # Expected data
+```java
+@Test
+@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+void testWithCustomPreparation() {
+    // Uses custom data location
+}
 ```
 
 ### Scenario Filtering
@@ -139,28 +127,31 @@ Each test loads only rows matching its method name.
 
 ### Configuration Customization
 
-Customize conventions via Configuration API:
-
 ```java
 @BeforeAll
 static void setup(ExtensionContext context) {
-    Configuration config = Configuration.builder()
-        .conventionSettings(
-            ConventionSettings.builder()
-                .scenarioMarker(ScenarioMarker.of("[TestCase]"))
-                .expectationSuffix("expected")
-                .build()
+    Configuration config = Configuration.withConventions(
+        new ConventionSettings(
+            null,                        // baseDirectory (null for classpath)
+            "/expected",                 // expectationSuffix
+            "[TestCase]",                // scenarioMarker
+            DataFormat.CSV,              // dataFormat
+            TableMergeStrategy.UNION_ALL // tableMergeStrategy
         )
-        .build();
+    );
     DatabaseTestExtension.setConfiguration(context, config);
 }
 ```
 
-### Java Platform Module System (JPMS)
+## Java Platform Module System (JPMS)
 
-**Automatic-Module-Name**: `io.github.seijikohara.dbtester.junit`
+**Module name**: `io.github.seijikohara.dbtester.junit`
 
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
+This module provides full JPMS support with a `module-info.java` descriptor.
+
+```java
+requires io.github.seijikohara.dbtester.junit;
+```
 
 ## Key Classes
 
@@ -173,8 +164,11 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 
 ## Related Modules
 
-- [db-tester-core](../db-tester-core/) - Core API and implementation
-- [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) - Spring Boot auto-configuration
+| Module | Description |
+|--------|-------------|
+| [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
+| [`db-tester-core`](../db-tester-core/) | Internal implementation (loaded at runtime) |
+| [`db-tester-junit-spring-boot-starter`](../db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration |
 
 ## Documentation
 

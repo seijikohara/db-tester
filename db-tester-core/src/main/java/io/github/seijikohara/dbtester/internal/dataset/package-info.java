@@ -11,12 +11,12 @@
  *       implementation
  *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleRow} - basic row
  *       implementation
- *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.ScenarioDataSetFactory} - factory
- *       for creating scenario-filtered datasets
  * </ul>
  *
  * <p><strong>Note:</strong> This is an internal package and is not part of the public API. Classes
  * in this package may change without notice.
+ *
+ * @see io.github.seijikohara.dbtester.api.dataset
  */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.dataset;

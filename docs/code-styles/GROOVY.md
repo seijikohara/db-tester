@@ -495,16 +495,17 @@ def cleanupSpec() {
  */
 class DatabaseTestInterceptor implements IMethodInterceptor {
 
-    /** The preparation annotation (may be null). */
+    /** The preparation annotation, or {@code null} if not specified. */
+    @Nullable
     private final Preparation preparation
 
     /**
      * Creates a new interceptor with the given annotations.
      *
-     * @param preparation the preparation annotation (may be null)
-     * @param expectation the expectation annotation (may be null)
+     * @param preparation the preparation annotation, or {@code null} if not specified
+     * @param expectation the expectation annotation, or {@code null} if not specified
      */
-    DatabaseTestInterceptor(Preparation preparation, Expectation expectation) {
+    DatabaseTestInterceptor(@Nullable Preparation preparation, @Nullable Expectation expectation) {
         this.preparation = preparation
         this.expectation = expectation
     }

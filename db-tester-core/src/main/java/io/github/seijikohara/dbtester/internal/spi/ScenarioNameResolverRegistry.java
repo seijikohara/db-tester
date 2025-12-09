@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
-import io.github.seijikohara.dbtester.internal.domain.ScenarioName;
+import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
+import io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.List;
@@ -13,8 +14,6 @@ import java.util.ServiceLoader;
  * provides methods to resolve scenario names using the most appropriate resolver for a given test
  * method.
  *
- * <h2>Resolver Selection</h2>
- *
  * <p>When resolving a scenario name, the registry:
  *
  * <ol>
@@ -23,8 +22,6 @@ import java.util.ServiceLoader;
  *   <li>Uses the highest-priority resolver that can handle the method
  *   <li>Falls back to {@link Method#getName()} if no resolver matches
  * </ol>
- *
- * <h2>Thread Safety</h2>
  *
  * <p>This class is thread-safe. The resolver list is loaded once during class initialization and is
  * immutable thereafter.

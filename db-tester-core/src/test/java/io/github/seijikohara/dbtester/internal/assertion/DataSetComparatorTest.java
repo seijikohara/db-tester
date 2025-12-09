@@ -9,15 +9,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.internal.dataset.DataSet;
-import io.github.seijikohara.dbtester.internal.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
-import io.github.seijikohara.dbtester.internal.dataset.Table;
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.DataValue;
-import io.github.seijikohara.dbtester.internal.domain.TableName;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -341,7 +341,7 @@ class DataSetComparatorTest {
             .collect(
                 java.util.stream.Collectors.toMap(
                     col -> col,
-                    col -> new DataValue(values.get(columns.indexOf(col))),
+                    col -> new CellValue(values.get(columns.indexOf(col))),
                     (v1, v2) -> v1,
                     java.util.LinkedHashMap::new));
     final var row = new SimpleRow(rowValues);
@@ -361,7 +361,7 @@ class DataSetComparatorTest {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final var rows =
         rowValues.stream()
-            .map(value -> new SimpleRow(Map.of(columns.getFirst(), new DataValue(value))))
+            .map(value -> new SimpleRow(Map.of(columns.getFirst(), new CellValue(value))))
             .map(Row.class::cast)
             .toList();
     return new SimpleTable(new TableName(tableName), columns, rows);

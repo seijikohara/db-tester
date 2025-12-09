@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
-import io.github.seijikohara.dbtester.internal.dataset.DataSetFormatRegistry;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
+import io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -19,56 +19,19 @@ import org.jspecify.annotations.Nullable;
  * locations or convention-based paths. It supports both classpath and file system locations,
  * providing detailed error messages when directories cannot be found.
  *
- * <h2>Resolution Strategy</h2>
+ * <p>The resolver supports two resolution modes: custom location (when a resource location is
+ * explicitly provided) and convention-based (when no location is provided, a path is constructed
+ * based on the test class package and name).
  *
- * <p>The resolver supports two resolution modes:
+ * <p>Supported location formats include classpath ({@code classpath:com/example/TestClass/}) and
+ * file system ({@code /absolute/path/to/data/}).
  *
- * <ul>
- *   <li><strong>Custom Location:</strong> When a resource location is explicitly provided, it is
- *       used directly
- *   <li><strong>Convention-Based:</strong> When no location is provided, a path is constructed
- *       based on the test class package and name
- * </ul>
+ * <p>For convention-based resolution, the path is constructed from the test class name. For
+ * example, for test class {@code com.example.service.UserServiceTest}, the base path would be
+ * {@code classpath:com/example/service/UserServiceTest/}.
  *
- * <h2>Location Formats</h2>
- *
- * <p>Supported location formats:
- *
- * <ul>
- *   <li><strong>Classpath:</strong> {@code classpath:com/example/TestClass/}
- *   <li><strong>File System:</strong> {@code /absolute/path/to/data/}
- * </ul>
- *
- * <h2>Convention-Based Path Construction</h2>
- *
- * <p>For a test class {@code com.example.service.UserServiceTest}:
- *
- * <ul>
- *   <li>Base path: {@code classpath:com/example/service/UserServiceTest/}
- *   <li>With suffix: {@code classpath:com/example/service/UserServiceTest/[suffix]/}
- * </ul>
- *
- * <h2>Validation</h2>
- *
- * <p>The resolver validates that:
- *
- * <ul>
- *   <li>The resolved directory exists
- *   <li>The path points to a directory (not a file)
- *   <li>The directory contains at least one supported data file
- * </ul>
- *
- * <h2>Error Handling</h2>
- *
- * <p>When directories cannot be found, the resolver provides detailed error messages including:
- *
- * <ul>
- *   <li>The expected classpath or file system location
- *   <li>Hints about creating directories or using custom locations
- *   <li>Suggestions for correcting path issues
- * </ul>
- *
- * <h2>Thread Safety</h2>
+ * <p>The resolver validates that the resolved directory exists, points to a directory (not a file),
+ * and contains at least one supported data file.
  *
  * <p>This record is immutable and thread-safe.
  *
@@ -104,11 +67,11 @@ record DirectoryResolver(Class<?> testClass) {
    * @throws IllegalStateException if the directory contains no supported files
    */
   void validateDirectoryContainsSupportedFiles(final Path directory) {
-    final var supportedFileExtensions = DataSetFormatRegistry.getSupportedExtensions();
+    final var supportedFileExtensions = FormatRegistry.getSupportedExtensions();
     if (supportedFileExtensions.isEmpty()) {
       throw new IllegalStateException(
           """
-          No dataset format providers are registered. Register a DataSetFormatProvider implementation before executing database tests.""");
+          No format providers are registered. Register a FormatProvider implementation before executing database tests.""");
     }
 
     try (final var files = Files.list(directory)) {

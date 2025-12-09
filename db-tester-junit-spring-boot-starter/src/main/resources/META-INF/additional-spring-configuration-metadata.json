@@ -11,6 +11,165 @@
       "type": "java.lang.Boolean",
       "description": "Whether to automatically register Spring DataSource beans with the DataSourceRegistry.",
       "defaultValue": true
+    },
+    {
+      "name": "db-tester.convention.base-directory",
+      "type": "java.lang.String",
+      "description": "Base directory for dataset resolution. Null means resolve from classpath relative to test class."
+    },
+    {
+      "name": "db-tester.convention.expectation-suffix",
+      "type": "java.lang.String",
+      "description": "Suffix appended to preparation path for expectation datasets.",
+      "defaultValue": "/expected"
+    },
+    {
+      "name": "db-tester.convention.scenario-marker",
+      "type": "java.lang.String",
+      "description": "Column name that identifies scenario markers in dataset files.",
+      "defaultValue": "[Scenario]"
+    },
+    {
+      "name": "db-tester.convention.data-format",
+      "type": "io.github.seijikohara.dbtester.api.config.DataFormat",
+      "description": "File format for dataset files (CSV or TSV).",
+      "defaultValue": "CSV"
+    },
+    {
+      "name": "db-tester.convention.table-merge-strategy",
+      "type": "io.github.seijikohara.dbtester.api.config.TableMergeStrategy",
+      "description": "Strategy for merging tables from multiple datasets (FIRST, LAST, UNION, UNION_ALL).",
+      "defaultValue": "UNION_ALL"
+    },
+    {
+      "name": "db-tester.operation.preparation",
+      "type": "io.github.seijikohara.dbtester.api.operation.Operation",
+      "description": "Default operation for test preparation phase.",
+      "defaultValue": "CLEAN_INSERT"
+    },
+    {
+      "name": "db-tester.operation.expectation",
+      "type": "io.github.seijikohara.dbtester.api.operation.Operation",
+      "description": "Default operation for expectation verification phase.",
+      "defaultValue": "NONE"
+    }
+  ],
+  "hints": [
+    {
+      "name": "db-tester.convention.data-format",
+      "values": [
+        {
+          "value": "CSV",
+          "description": "Comma-Separated Values format (.csv files)"
+        },
+        {
+          "value": "TSV",
+          "description": "Tab-Separated Values format (.tsv files)"
+        }
+      ]
+    },
+    {
+      "name": "db-tester.convention.table-merge-strategy",
+      "values": [
+        {
+          "value": "FIRST",
+          "description": "Use only the first occurrence of each table"
+        },
+        {
+          "value": "LAST",
+          "description": "Use only the last occurrence of each table"
+        },
+        {
+          "value": "UNION",
+          "description": "Merge all tables, removing duplicate rows"
+        },
+        {
+          "value": "UNION_ALL",
+          "description": "Merge all tables, keeping all rows including duplicates"
+        }
+      ]
+    },
+    {
+      "name": "db-tester.operation.preparation",
+      "values": [
+        {
+          "value": "NONE",
+          "description": "No-op operation"
+        },
+        {
+          "value": "UPDATE",
+          "description": "Updates existing rows without inserting new ones"
+        },
+        {
+          "value": "INSERT",
+          "description": "Inserts only new rows"
+        },
+        {
+          "value": "REFRESH",
+          "description": "Upserts rows by updating matches and inserting new entries"
+        },
+        {
+          "value": "DELETE",
+          "description": "Deletes only the dataset rows identified by primary key"
+        },
+        {
+          "value": "DELETE_ALL",
+          "description": "Removes all rows from the referenced tables"
+        },
+        {
+          "value": "TRUNCATE_TABLE",
+          "description": "Truncates the tables, resetting identity columns where supported"
+        },
+        {
+          "value": "CLEAN_INSERT",
+          "description": "Deletes all rows before inserting the dataset"
+        },
+        {
+          "value": "TRUNCATE_INSERT",
+          "description": "Truncates the tables before inserting the dataset"
+        }
+      ]
+    },
+    {
+      "name": "db-tester.operation.expectation",
+      "values": [
+        {
+          "value": "NONE",
+          "description": "No-op operation"
+        },
+        {
+          "value": "UPDATE",
+          "description": "Updates existing rows without inserting new ones"
+        },
+        {
+          "value": "INSERT",
+          "description": "Inserts only new rows"
+        },
+        {
+          "value": "REFRESH",
+          "description": "Upserts rows by updating matches and inserting new entries"
+        },
+        {
+          "value": "DELETE",
+          "description": "Deletes only the dataset rows identified by primary key"
+        },
+        {
+          "value": "DELETE_ALL",
+          "description": "Removes all rows from the referenced tables"
+        },
+        {
+          "value": "TRUNCATE_TABLE",
+          "description": "Truncates the tables, resetting identity columns where supported"
+        },
+        {
+          "value": "CLEAN_INSERT",
+          "description": "Deletes all rows before inserting the dataset"
+        },
+        {
+          "value": "TRUNCATE_INSERT",
+          "description": "Truncates the tables before inserting the dataset"
+        }
+      ]
     }
   ]
 }

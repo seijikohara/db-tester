@@ -1,7 +1,8 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.DataValue;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import java.util.Map;
 
 /**
@@ -12,14 +13,14 @@ import java.util.Map;
 public final class SimpleRow implements Row {
 
   /** The column values. */
-  private final Map<ColumnName, DataValue> values;
+  private final Map<ColumnName, CellValue> values;
 
   /**
    * Creates a new row with the given values.
    *
    * @param values the column values
    */
-  public SimpleRow(final Map<ColumnName, DataValue> values) {
+  public SimpleRow(final Map<ColumnName, CellValue> values) {
     this.values = Map.copyOf(values);
   }
 
@@ -29,7 +30,7 @@ public final class SimpleRow implements Row {
    * @return immutable mapping of columns to their values
    */
   @Override
-  public Map<ColumnName, DataValue> getValues() {
+  public Map<ColumnName, CellValue> getValues() {
     return values;
   }
 
@@ -37,10 +38,10 @@ public final class SimpleRow implements Row {
    * {@inheritDoc}
    *
    * @param column the identifier of the column to look up
-   * @return the data value for the requested column, or {@link DataValue#NULL} when absent
+   * @return the data value for the requested column, or {@link CellValue#NULL} when absent
    */
   @Override
-  public DataValue getValue(final ColumnName column) {
-    return values.getOrDefault(column, DataValue.NULL);
+  public CellValue getValue(final ColumnName column) {
+    return values.getOrDefault(column, CellValue.NULL);
   }
 }

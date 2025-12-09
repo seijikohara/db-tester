@@ -10,7 +10,9 @@ import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
+import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -138,7 +140,9 @@ class DatabaseTestExtensionTest {
     void shouldStoreConfiguration_whenCalled() {
       // Given
       final var customConfig =
-          Configuration.withConventions(new ConventionSettings("/custom", "/verify", "[Test]"));
+          Configuration.withConventions(
+              new ConventionSettings(
+                  "/custom", "/verify", "[Test]", DataFormat.CSV, TableMergeStrategy.UNION_ALL));
       final var rootContext = mock(ExtensionContext.class);
 
       when(mockContext.getTestClass()).thenReturn(Optional.of(TestClass.class));

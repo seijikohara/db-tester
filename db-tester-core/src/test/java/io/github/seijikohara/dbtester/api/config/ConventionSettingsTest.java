@@ -41,7 +41,15 @@ class ConventionSettingsTest {
                   "/expected", settings.expectationSuffix(), "expectationSuffix should be default"),
           () ->
               assertEquals(
-                  "[Scenario]", settings.scenarioMarker(), "scenarioMarker should be default"));
+                  "[Scenario]", settings.scenarioMarker(), "scenarioMarker should be default"),
+          () ->
+              assertEquals(
+                  DataFormat.CSV, settings.dataFormat(), "dataFormat should be CSV by default"),
+          () ->
+              assertEquals(
+                  TableMergeStrategy.UNION_ALL,
+                  settings.tableMergeStrategy(),
+                  "tableMergeStrategy should be UNION_ALL by default"));
     }
 
     /** Verifies that standard returns consistent instances. */
@@ -75,9 +83,11 @@ class ConventionSettingsTest {
       final var baseDir = "/custom/base";
       final var suffix = "/outcome";
       final var marker = "[TestCase]";
+      final var format = DataFormat.TSV;
+      final var strategy = TableMergeStrategy.FIRST;
 
       // When
-      final var settings = new ConventionSettings(baseDir, suffix, marker);
+      final var settings = new ConventionSettings(baseDir, suffix, marker, format, strategy);
 
       // Then
       assertAll(
@@ -85,7 +95,11 @@ class ConventionSettingsTest {
           () -> assertEquals(baseDir, settings.baseDirectory(), "baseDirectory should match"),
           () ->
               assertEquals(suffix, settings.expectationSuffix(), "expectationSuffix should match"),
-          () -> assertEquals(marker, settings.scenarioMarker(), "scenarioMarker should match"));
+          () -> assertEquals(marker, settings.scenarioMarker(), "scenarioMarker should match"),
+          () -> assertEquals(format, settings.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  strategy, settings.tableMergeStrategy(), "tableMergeStrategy should match"));
     }
 
     /** Verifies that constructor accepts null base directory. */
@@ -94,7 +108,9 @@ class ConventionSettingsTest {
     @DisplayName("should accept null base directory")
     void should_accept_null_base_directory() {
       // Given & When
-      final var settings = new ConventionSettings(null, "/expected", "[Scenario]");
+      final var settings =
+          new ConventionSettings(
+              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -106,7 +122,8 @@ class ConventionSettingsTest {
     @DisplayName("should accept empty strings for suffix and marker")
     void should_accept_empty_strings_for_suffix_and_marker() {
       // Given & When
-      final var settings = new ConventionSettings(null, "", "");
+      final var settings =
+          new ConventionSettings(null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
 
       // Then
       assertAll(
@@ -130,8 +147,12 @@ class ConventionSettingsTest {
     @DisplayName("should be equal when values are the same")
     void should_be_equal_when_values_are_the_same() {
       // Given
-      final var settings1 = new ConventionSettings("/base", "/expected", "[Scenario]");
-      final var settings2 = new ConventionSettings("/base", "/expected", "[Scenario]");
+      final var settings1 =
+          new ConventionSettings(
+              "/base", "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+      final var settings2 =
+          new ConventionSettings(
+              "/base", "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
 
       // When & Then
       assertAll(
@@ -146,11 +167,105 @@ class ConventionSettingsTest {
     @DisplayName("should be equal when both have null base directory")
     void should_be_equal_when_both_have_null_base_directory() {
       // Given
-      final var settings1 = new ConventionSettings(null, "/expected", "[Scenario]");
-      final var settings2 = new ConventionSettings(null, "/expected", "[Scenario]");
+      final var settings1 =
+          new ConventionSettings(
+              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+      final var settings2 =
+          new ConventionSettings(
+              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");
+    }
+  }
+
+  /** Tests for the withDataFormat method. */
+  @Nested
+  @DisplayName("withDataFormat() method")
+  class WithDataFormatMethod {
+
+    /** Tests for the withDataFormat method. */
+    WithDataFormatMethod() {}
+
+    /** Verifies that withDataFormat returns a new instance with the specified format. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified data format")
+    void should_return_new_instance_with_specified_data_format() {
+      // Given
+      final var original = ConventionSettings.standard();
+
+      // When
+      final var modified = original.withDataFormat(DataFormat.TSV);
+
+      // Then
+      assertAll(
+          "should have new data format while preserving other values",
+          () -> assertEquals(DataFormat.TSV, modified.dataFormat(), "dataFormat should be TSV"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.expectationSuffix(),
+                  modified.expectationSuffix(),
+                  "expectationSuffix should match"),
+          () ->
+              assertEquals(
+                  original.scenarioMarker(),
+                  modified.scenarioMarker(),
+                  "scenarioMarker should match"),
+          () ->
+              assertEquals(
+                  original.tableMergeStrategy(),
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should match"));
+    }
+  }
+
+  /** Tests for the withTableMergeStrategy method. */
+  @Nested
+  @DisplayName("withTableMergeStrategy() method")
+  class WithTableMergeStrategyMethod {
+
+    /** Tests for the withTableMergeStrategy method. */
+    WithTableMergeStrategyMethod() {}
+
+    /** Verifies that withTableMergeStrategy returns a new instance with the specified strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified merge strategy")
+    void should_return_new_instance_with_specified_merge_strategy() {
+      // Given
+      final var original = ConventionSettings.standard();
+
+      // When
+      final var modified = original.withTableMergeStrategy(TableMergeStrategy.FIRST);
+
+      // Then
+      assertAll(
+          "should have new merge strategy while preserving other values",
+          () ->
+              assertEquals(
+                  TableMergeStrategy.FIRST,
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should be FIRST"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.expectationSuffix(),
+                  modified.expectationSuffix(),
+                  "expectationSuffix should match"),
+          () ->
+              assertEquals(
+                  original.scenarioMarker(),
+                  modified.scenarioMarker(),
+                  "scenarioMarker should match"),
+          () ->
+              assertEquals(
+                  original.dataFormat(), modified.dataFormat(), "dataFormat should match"));
     }
   }
 }

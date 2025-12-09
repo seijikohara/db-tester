@@ -57,7 +57,7 @@ import spock.lang.Unroll
  *
  * <p>This specification illustrates:
  * <ul>
- *   <li>Automatic CSV file resolution based on specification class and feature method names
+ *   <li>CSV file resolution based on specification class and feature method names
  *   <li>Method-level {@code @Preparation} and {@code @Expectation} annotations
  * </ul>
  */
@@ -672,7 +672,7 @@ import spock.lang.Specification
  *
  * <p>This specification illustrates:
  * <ul>
- *   <li>Automatic CSV file resolution based on specification class and feature method names
+ *   <li>CSV file resolution based on specification class and feature method names
  *   <li>Method-level {@code @Preparation} and {@code @Expectation} annotations
  * </ul>
  */

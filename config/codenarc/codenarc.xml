@@ -1,0 +1,207 @@
+<?xml version="1.0"?>
+<!--
+  CodeNarc configuration for db-tester project.
+  Enforces coding standards from docs/code-styles/GROOVY.md.
+-->
+<ruleset xmlns="http://codenarc.org/ruleset/1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://codenarc.org/ruleset/1.0 http://codenarc.org/ruleset-schema.xsd"
+         xsi:noNamespaceSchemaLocation="http://codenarc.org/ruleset-schema.xsd">
+
+  <description>CodeNarc rules for db-tester Groovy modules</description>
+
+  <!-- =================================================================== -->
+  <!-- Import Rules                                                        -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Import Statements                -->
+  <!-- =================================================================== -->
+
+  <!-- Star imports are prohibited -->
+  <rule class="org.codenarc.rule.imports.NoWildcardImportsRule"/>
+
+  <!-- Remove unused imports -->
+  <rule class="org.codenarc.rule.imports.UnusedImportRule"/>
+
+  <!-- Avoid duplicate imports -->
+  <rule class="org.codenarc.rule.imports.DuplicateImportRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Syntax Conventions                                                  -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Syntax Conventions               -->
+  <!-- =================================================================== -->
+
+  <!-- Omit unnecessary semicolons -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessarySemicolonRule"/>
+
+  <!-- Omit unnecessary parentheses for closures -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessaryParenthesesForMethodCallWithClosureRule"/>
+
+  <!--
+    Avoid unnecessary getter calls (use property access).
+    Note: In Spock tests, explicit getter calls are often required for stubbing
+    to work correctly (e.g., context.getBeanFactory() >> mock).
+  -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessaryGetterRule">
+    <property name="doNotApplyToClassNames" value="*Spec,*Test"/>
+  </rule>
+
+  <!--
+    Avoid unnecessary setter calls (use property access).
+    Note: In Spock tests, explicit setter calls may be required for interface method stubs.
+  -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessarySetterRule">
+    <property name="doNotApplyToClassNames" value="*Spec,*Test"/>
+  </rule>
+
+  <!-- Omit public modifier (Groovy default) -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessaryPublicModifierRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Type Declarations                                                   -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Type Declarations                -->
+  <!-- =================================================================== -->
+
+  <!-- Never mix def with type (def String name) -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessaryDefInVariableDeclarationRule"/>
+
+  <!-- Avoid unnecessary Object references -->
+  <rule class="org.codenarc.rule.unnecessary.UnnecessaryObjectReferencesRule"/>
+
+  <!-- =================================================================== -->
+  <!-- String Handling                                                     -->
+  <!-- Ref: docs/code-styles/GROOVY.md - String Handling                  -->
+  <!-- =================================================================== -->
+
+  <!--
+    Prefer GStrings for interpolation.
+    Note: This rule is disabled because it incorrectly flags annotation attribute values
+    (which require double quotes in Groovy) and log messages with placeholders ({}).
+    The project style prefers single quotes for plain strings where possible.
+  -->
+  <!-- <rule class="org.codenarc.rule.unnecessary.UnnecessaryGStringRule"/> -->
+
+  <!-- =================================================================== -->
+  <!-- Collections                                                         -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Collections                      -->
+  <!-- =================================================================== -->
+
+  <!-- Use native list syntax [] instead of new ArrayList() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitArrayListInstantiationRule"/>
+
+  <!-- Use native map syntax [:] instead of new HashMap() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitHashMapInstantiationRule"/>
+
+  <!-- Use native set syntax as Set instead of new HashSet() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitHashSetInstantiationRule"/>
+
+  <!-- Use native linked list syntax instead of new LinkedList() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitLinkedListInstantiationRule"/>
+
+  <!-- Use native stack syntax instead of new Stack() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitStackInstantiationRule"/>
+
+  <!-- Use native tree set syntax instead of new TreeSet() -->
+  <rule class="org.codenarc.rule.groovyism.ExplicitTreeSetInstantiationRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Closures                                                            -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Closures                         -->
+  <!-- =================================================================== -->
+
+  <!-- Use implicit 'it' for single-parameter closures when appropriate -->
+  <rule class="org.codenarc.rule.groovyism.ClosureAsLastMethodParameterRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Null Safety                                                         -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Safe Navigation                  -->
+  <!-- =================================================================== -->
+
+  <!-- Encourage safe navigation operator -->
+  <rule class="org.codenarc.rule.groovyism.GStringExpressionWithinStringRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Code Quality                                                        -->
+  <!-- =================================================================== -->
+
+  <!--
+    Empty blocks should have a comment explaining why.
+    Note: EmptyMethodRule allows methods marked with @Override annotation.
+    Test stub methods in Spock specs may be empty for testing purposes.
+  -->
+  <rule class="org.codenarc.rule.basic.EmptyClassRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyMethodRule">
+    <!--
+      Allow empty methods in test classes (stubs for testing).
+      Note: The pattern includes nested classes within test classes (e.g., *Spec$*).
+    -->
+    <property name="doNotApplyToClassNames" value="*Spec,*Test,*Spec$*,*Test$*"/>
+  </rule>
+  <rule class="org.codenarc.rule.basic.EmptyCatchBlockRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyIfStatementRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyElseBlockRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyFinallyBlockRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyForStatementRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyWhileStatementRule"/>
+  <rule class="org.codenarc.rule.basic.EmptySwitchStatementRule"/>
+  <rule class="org.codenarc.rule.basic.EmptyTryBlockRule"/>
+
+  <!-- Prevent common bugs -->
+  <rule class="org.codenarc.rule.basic.DeadCodeRule"/>
+  <rule class="org.codenarc.rule.basic.DuplicateCaseStatementRule"/>
+  <rule class="org.codenarc.rule.basic.ReturnFromFinallyBlockRule"/>
+
+  <!-- =================================================================== -->
+  <!-- Naming Conventions                                                  -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Naming Conventions               -->
+  <!-- =================================================================== -->
+
+  <!--
+    Class names: PascalCase.
+    Note: Nested class names may contain '$' when referenced via reflection,
+    but the pattern only checks the simple name.
+  -->
+  <rule class="org.codenarc.rule.naming.ClassNameRule">
+    <property name="regex" value="[A-Z][a-zA-Z0-9$]*"/>
+  </rule>
+
+  <!--
+    Method names: camelCase for production code.
+    Note: Spock test methods use string literals (e.g., 'should do something'),
+    which are transformed to valid method names at compile time.
+    This rule is lenient enough to allow Spock-style test names including
+    special characters like hyphens (e.g., 'non-null').
+  -->
+  <rule class="org.codenarc.rule.naming.MethodNameRule">
+    <property name="regex" value="[a-z][a-zA-Z0-9_ \-]*"/>
+  </rule>
+
+  <!--
+    Field names: camelCase.
+    Note: static final logger fields are commonly named in lowercase (e.g., 'logger', 'log').
+    This is an accepted convention in the Java/Groovy ecosystem.
+  -->
+  <rule class="org.codenarc.rule.naming.FieldNameRule">
+    <property name="regex" value="[a-z][a-zA-Z0-9]*"/>
+    <property name="staticFinalRegex" value="[A-Z][A-Z0-9_]*"/>
+    <property name="ignoreFieldNames" value="log,logger"/>
+  </rule>
+
+  <!-- Variable names: camelCase -->
+  <rule class="org.codenarc.rule.naming.VariableNameRule">
+    <property name="regex" value="[a-z_][a-zA-Z0-9]*"/>
+  </rule>
+
+  <!-- Package names: lowercase -->
+  <rule class="org.codenarc.rule.naming.PackageNameRule">
+    <property name="regex" value="[a-z][a-z0-9.]*"/>
+  </rule>
+
+  <!-- =================================================================== -->
+  <!-- Logging                                                             -->
+  <!-- Ref: docs/code-styles/GROOVY.md - Logging                          -->
+  <!-- =================================================================== -->
+
+  <!-- Avoid println in production code -->
+  <rule class="org.codenarc.rule.logging.PrintlnRule"/>
+  <rule class="org.codenarc.rule.logging.PrintStackTraceRule"/>
+
+</ruleset>

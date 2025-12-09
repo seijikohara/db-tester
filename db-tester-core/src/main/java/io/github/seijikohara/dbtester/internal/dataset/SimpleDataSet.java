@@ -1,6 +1,8 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import io.github.seijikohara.dbtester.internal.domain.TableName;
+import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;

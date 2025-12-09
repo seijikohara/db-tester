@@ -4,7 +4,7 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation;
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
-import io.github.seijikohara.dbtester.internal.context.TestContext;
+import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.PreparationExecutor;
 import java.util.Optional;

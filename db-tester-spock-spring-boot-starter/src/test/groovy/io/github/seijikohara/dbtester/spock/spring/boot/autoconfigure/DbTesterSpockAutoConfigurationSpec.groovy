@@ -33,7 +33,7 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 
 	def 'should return default Configuration'() {
 		when: 'getting dbTesterConfiguration'
-		def config = autoConfiguration.dbTesterConfiguration()
+		def config = autoConfiguration.dbTesterConfiguration(properties)
 
 		then: 'configuration is not null'
 		config != null
@@ -42,7 +42,7 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 
 	def 'should return Configuration with conventions'() {
 		when: 'getting dbTesterConfiguration'
-		def config = autoConfiguration.dbTesterConfiguration()
+		def config = autoConfiguration.dbTesterConfiguration(properties)
 
 		then: 'configuration has conventions'
 		config.conventions() != null
@@ -50,7 +50,7 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 
 	def 'should return Configuration with operations'() {
 		when: 'getting dbTesterConfiguration'
-		def config = autoConfiguration.dbTesterConfiguration()
+		def config = autoConfiguration.dbTesterConfiguration(properties)
 
 		then: 'configuration has operations'
 		config.operations() != null
@@ -58,7 +58,7 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 
 	def 'should return Configuration with loader'() {
 		when: 'getting dbTesterConfiguration'
-		def config = autoConfiguration.dbTesterConfiguration()
+		def config = autoConfiguration.dbTesterConfiguration(properties)
 
 		then: 'configuration has loader'
 		config.loader() != null
@@ -122,7 +122,7 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 
 	def 'should create all beans successfully'() {
 		when: 'creating all beans'
-		def config = autoConfiguration.dbTesterConfiguration()
+		def config = autoConfiguration.dbTesterConfiguration(properties)
 		def registry = autoConfiguration.dbTesterDataSourceRegistry()
 		def registrar = autoConfiguration.dataSourceRegistrar(properties)
 

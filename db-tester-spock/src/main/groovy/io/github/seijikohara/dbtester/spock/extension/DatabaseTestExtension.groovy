@@ -2,116 +2,110 @@ package io.github.seijikohara.dbtester.spock.extension
 
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
+import java.lang.annotation.Annotation
 import org.spockframework.runtime.extension.IGlobalExtension
-import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.SpecInfo
 
 /**
  * Global Spock extension for database testing.
  *
  * <p>This extension automatically detects {@link Preparation} and {@link Expectation} annotations
- * from the db-tester API module on specifications and feature methods, adding the appropriate
- * interceptors to handle database setup and verification.
+ * on specifications and feature methods, adding the appropriate interceptors to handle database
+ * setup and verification.
  *
  * <p>This extension is registered via the Spock extension mechanism (META-INF/services) and
  * automatically applies to all specifications in the classpath.
  *
+ * <p>For Spring Boot integration, use {@code db-tester-spock-spring-boot-starter} which provides
+ * automatic DataSource discovery from the Spring ApplicationContext. When Spring test annotations
+ * are detected, this extension skips the spec to avoid conflicts with the Spring Boot extension.
+ *
  * @see Preparation
  * @see Expectation
+ * @see DatabaseTestInterceptor
  */
 class DatabaseTestExtension implements IGlobalExtension {
 
 	/**
-	 * Performs initialization when the extension starts.
-	 *
-	 * <p>This implementation performs no initialization as none is required.
+	 * Spring test annotation class names to detect (checked via name to avoid Spring dependency).
+	 * Includes both direct annotations and meta-annotation markers.
 	 */
+	private static final List<String> SPRING_TEST_ANNOTATION_NAMES = [
+		'org.springframework.test.context.ContextConfiguration',
+		'org.springframework.test.context.BootstrapWith'  // Meta-annotation used by @SpringBootTest, @WebMvcTest, etc.
+	]
+
 	@Override
 	void start() {
 		// No initialization needed
 	}
 
-	/**
-	 * Visits a specification and registers database test interceptors for annotated features.
-	 *
-	 * <p>This method checks for class-level and method-level {@link Preparation} and
-	 * {@link Expectation} annotations, adding {@link DatabaseTestInterceptor} instances
-	 * to features that require database setup or verification.
-	 *
-	 * <p>Spring Boot tests are skipped as they are handled by
-	 * {@code SpringBootDatabaseTestExtension} from the {@code db-tester-spock-spring-boot-starter}
-	 * module.
-	 *
-	 * @param spec the specification info to visit (must not be null)
-	 */
 	@Override
 	void visitSpec(SpecInfo spec) {
-		// Skip Spring Boot tests - they are handled by SpringBootDatabaseTestExtension
-		// from db-tester-spock-spring-boot-starter
-		if (isSpringBootTest(spec)) {
+		// Skip Spring-managed specs (handled by db-tester-spock-spring-boot-starter)
+		if (isSpringSpec(spec)) {
 			return
 		}
 
-		// Check for class-level annotations
-		def classPreparation = spec.reflection.getAnnotation(Preparation)
-		def classExpectation = spec.reflection.getAnnotation(Expectation)
-
-		// Visit each feature method
-		spec.allFeatures.each { feature ->
-			visitFeature(feature, classPreparation, classExpectation)
-		}
-	}
-
-	/**
-	 * Checks if the specification is a Spring Boot test.
-	 *
-	 * <p>Spring Boot tests should be handled by {@code SpringBootDatabaseTestExtension}
-	 * from the {@code db-tester-spock-spring-boot-starter} module.
-	 *
-	 * @param spec the specification info (must not be null)
-	 * @return {@code true} if this is a Spring Boot test, {@code false} otherwise
-	 */
-	private boolean isSpringBootTest(SpecInfo spec) {
 		def specClass = spec.reflection
+		def classPreparation = specClass.getAnnotation(Preparation)
+		def classExpectation = specClass.getAnnotation(Expectation)
 
-		// Check for common Spring test annotations
-		return specClass.annotations.any { annotation ->
-			def annotationType = annotation.annotationType()
-			annotationType.name.contains('SpringBootTest') ||
-					annotationType.name.contains('ContextConfiguration') ||
-					annotationType.name.contains('SpringJUnitConfig')
-		}
+		spec.allFeatures
+				.collect { feature ->
+					def method = feature.featureMethod.reflection
+					[
+						feature    : feature,
+						preparation: method.getAnnotation(Preparation) ?: classPreparation,
+						expectation: method.getAnnotation(Expectation) ?: classExpectation
+					]
+				}
+				.findAll { it.preparation || it.expectation }
+				.each {
+					it.feature.addInterceptor(new DatabaseTestInterceptor(
+							it.preparation as Preparation,
+							it.expectation as Expectation
+							))
+				}
 	}
 
-	/**
-	 * Performs cleanup when the extension stops.
-	 *
-	 * <p>This implementation performs no cleanup as none is required.
-	 */
 	@Override
 	void stop() {
 		// No cleanup needed
 	}
 
 	/**
-	 * Visits a feature method and adds interceptors for any database testing annotations.
+	 * Checks if the specification is a Spring-managed test by annotation name.
 	 *
-	 * @param feature the feature method info
-	 * @param classPreparation class-level preparation annotation (may be null)
-	 * @param classExpectation class-level expectation annotation (may be null)
+	 * <p>Uses annotation class names to avoid compile-time Spring dependency.
+	 * Checks both direct annotations and meta-annotations (annotations on annotations).
 	 */
-	private void visitFeature(FeatureInfo feature, Preparation classPreparation, Expectation classExpectation) {
-		// Method-level annotations take precedence
-		def methodPreparation = feature.featureMethod.reflection.getAnnotation(Preparation)
-		def methodExpectation = feature.featureMethod.reflection.getAnnotation(Expectation)
+	private static boolean isSpringSpec(SpecInfo spec) {
+		def specClass = spec.reflection
+		hasSpringAnnotation(specClass.annotations)
+	}
 
-		// Use method-level annotation if present, otherwise use class-level
-		def effectivePreparation = methodPreparation ?: classPreparation
-		def effectiveExpectation = methodExpectation ?: classExpectation
+	/**
+	 * Recursively checks if any annotation matches Spring test annotations.
+	 * This handles meta-annotations like @SpringBootTest which is annotated with @BootstrapWith.
+	 */
+	private static boolean hasSpringAnnotation(Annotation[] annotations, Set<String> visited = []) {
+		annotations.any { annotation ->
+			def annotationTypeName = annotation.annotationType().name
 
-		// Add interceptors if annotations are present
-		if (effectivePreparation != null || effectiveExpectation != null) {
-			feature.addInterceptor(new DatabaseTestInterceptor(effectivePreparation, effectiveExpectation))
+			// Avoid infinite recursion for cyclic annotations
+			if (visited.contains(annotationTypeName)) {
+				return false
+			}
+
+			// Check if this annotation is a Spring test annotation
+			if (SPRING_TEST_ANNOTATION_NAMES.contains(annotationTypeName)) {
+				return true
+			}
+
+			// Check meta-annotations (annotations on this annotation)
+			def newVisited = visited + annotationTypeName
+			hasSpringAnnotation(annotation.annotationType().annotations, newVisited)
 		}
 	}
 }

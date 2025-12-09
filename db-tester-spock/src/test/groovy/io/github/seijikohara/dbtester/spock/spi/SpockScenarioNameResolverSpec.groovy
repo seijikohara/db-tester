@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.spock.spi
 
-import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolver
+import io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
 import spock.lang.Specification
 
 /**

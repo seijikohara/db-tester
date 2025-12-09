@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.DataValue;
-import io.github.seijikohara.dbtester.internal.domain.TableName;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -263,7 +265,7 @@ class SimpleDataSetTest {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final var rows = new ArrayList<Row>();
     for (int i = 0; i < rowCount; i++) {
-      rows.add(new SimpleRow(Map.of(columns.getFirst(), new DataValue(i))));
+      rows.add(new SimpleRow(Map.of(columns.getFirst(), new CellValue(i))));
     }
     return new SimpleTable(new TableName(tableName), columns, rows);
   }

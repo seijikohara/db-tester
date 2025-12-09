@@ -1,8 +1,13 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
 import io.github.seijikohara.dbtester.api.config.Configuration;
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
+import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
+import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
+import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -51,15 +56,50 @@ public class DbTesterJUnitAutoConfiguration {
   }
 
   /**
-   * Creates a default Configuration bean if not already present.
+   * Creates a Configuration bean from the DB Tester properties.
+   *
+   * <p>If no custom configuration is provided, this method builds a Configuration from the
+   * properties defined in {@code application.properties} or {@code application.yml}.
    *
    * @param properties the DB Tester properties
-   * @return the configuration
+   * @return the configuration built from properties
    */
   @Bean
   @ConditionalOnMissingBean
   public Configuration dbTesterConfiguration(final DbTesterProperties properties) {
-    return Configuration.defaults();
+    final DbTesterProperties.ConventionProperties conventionProps = properties.getConvention();
+    final DbTesterProperties.OperationProperties operationProps = properties.getOperation();
+
+    final ConventionSettings conventions =
+        new ConventionSettings(
+            conventionProps.getBaseDirectory(),
+            conventionProps.getExpectationSuffix(),
+            conventionProps.getScenarioMarker(),
+            conventionProps.getDataFormat(),
+            conventionProps.getTableMergeStrategy());
+
+    final OperationDefaults operations =
+        new OperationDefaults(operationProps.getPreparation(), operationProps.getExpectation());
+
+    final DataSetLoader loader = loadDataSetLoader();
+
+    return new Configuration(conventions, operations, loader);
+  }
+
+  /**
+   * Loads the DataSetLoader implementation via ServiceLoader.
+   *
+   * @return the DataSetLoader instance
+   */
+  private DataSetLoader loadDataSetLoader() {
+    return ServiceLoader.load(DataSetLoaderProvider.class)
+        .findFirst()
+        .map(DataSetLoaderProvider::getLoader)
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    "No DataSetLoaderProvider implementation found. "
+                        + "Add db-tester-core to your classpath."));
   }
 
   /**

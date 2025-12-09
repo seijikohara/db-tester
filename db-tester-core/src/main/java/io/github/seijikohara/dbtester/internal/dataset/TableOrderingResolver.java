@@ -1,8 +1,10 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
+import static io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants.LOAD_ORDER_FILE;
+
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
-import io.github.seijikohara.dbtester.internal.domain.TableName;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,12 +15,9 @@ import java.util.stream.Stream;
 /**
  * Handles creation and reuse of table ordering files for dataset directories.
  *
- * <p>The table ordering file name is {@value #TABLE_ORDERING_FILE}.
+ * <p>The load order file name is {@value LoadOrderConstants#LOAD_ORDER_FILE}.
  */
 public abstract class TableOrderingResolver {
-
-  /** The name of the table ordering file. */
-  private static final String TABLE_ORDERING_FILE = "table-ordering.txt";
 
   /** Creates a table ordering resolver. */
   protected TableOrderingResolver() {}
@@ -44,7 +43,7 @@ public abstract class TableOrderingResolver {
    * @throws DataSetLoadException if file operations fail
    */
   public final Path ensureTableOrdering(final Path directory) {
-    final var orderingFile = directory.resolve(TABLE_ORDERING_FILE);
+    final var orderingFile = directory.resolve(LOAD_ORDER_FILE);
     if (!Files.exists(orderingFile)) {
       createDefaultTableOrdering(directory, orderingFile);
     }

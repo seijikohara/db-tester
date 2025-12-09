@@ -6,30 +6,6 @@
  * automatically registers Spring-managed {@link javax.sql.DataSource} beans with the database
  * testing framework.
  *
- * <h2>Usage</h2>
- *
- * <p>Add the dependency to your build file:
- *
- * <pre>{@code
- * testImplementation("io.github.seijikohara:db-tester-junit-spring-boot-starter")
- * }</pre>
- *
- * <p>Use in your tests:
- *
- * <pre>{@code
- * @SpringBootTest
- * @ExtendWith(SpringBootDatabaseTestExtension.class)
- * class MyRepositoryTest {
- *
- *     @Preparation
- *     @Expectation
- *     @Test
- *     void testCreate() {
- *         // Test logic
- *     }
- * }
- * }</pre>
- *
  * @see
  *     io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.DbTesterJUnitAutoConfiguration
  * @see

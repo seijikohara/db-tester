@@ -27,7 +27,7 @@ import org.springframework.context.ConfigurableApplicationContext
 final class DataSourceRegistrar implements ApplicationContextAware {
 
 	/** Default bean name used as fallback when no primary DataSource is found. */
-	private static final String DEFAULT_DATASOURCE_BEAN_NAME = "dataSource"
+	private static final String DEFAULT_DATASOURCE_BEAN_NAME = 'dataSource'
 
 	/** Logger for tracking DataSource registration activity. */
 	private static final Logger logger = LoggerFactory.getLogger(DataSourceRegistrar)
@@ -41,7 +41,7 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Creates a new registrar with the specified properties.
 	 *
-	 * @param properties the configuration properties (must not be null)
+	 * @param properties the configuration properties
 	 */
 	DataSourceRegistrar(DbTesterProperties properties) {
 		this.properties = properties
@@ -52,7 +52,7 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	 *
 	 * <p>This method is called by Spring during bean initialization.
 	 *
-	 * @param applicationContext the Spring application context (must not be null)
+	 * @param applicationContext the Spring application context
 	 * @throws BeansException if context setting fails
 	 */
 	@Override
@@ -73,20 +73,20 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	 *
 	 * <p>If auto-registration is disabled in properties, this method does nothing.
 	 *
-	 * @param registry the DataSourceRegistry to populate (must not be null)
+	 * @param registry the DataSourceRegistry to populate
 	 * @throws IllegalStateException if application context is not set
 	 */
 	void registerAll(DataSourceRegistry registry) {
 		if (!properties.autoRegisterDataSources) {
-			logger.debug("Auto-registration disabled")
+			logger.debug('Auto-registration disabled')
 			return
 		}
 
 		def context = resolveApplicationContext()
 		def dataSources = context.getBeansOfType(DataSource)
 
-		if (dataSources.isEmpty()) {
-			logger.debug("No DataSource beans found")
+		if (dataSources.empty) {
+			logger.debug('No DataSource beans found')
 			return
 		}
 
@@ -96,11 +96,11 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Registers the discovered DataSources with the registry.
 	 *
-	 * @param registry the registry to populate (must not be null)
-	 * @param dataSources the map of bean names to DataSource instances (must not be null)
+	 * @param registry the registry to populate
+	 * @param dataSources the map of bean names to DataSource instances
 	 */
 	private void registerDataSources(DataSourceRegistry registry, Map<String, DataSource> dataSources) {
-		logger.info("Registering {} DataSource(s) with DataSourceRegistry", dataSources.size())
+		logger.info('Registering {} DataSource(s) with DataSourceRegistry', dataSources.size())
 
 		// Register each DataSource by name
 		dataSources.each { name, dataSource ->
@@ -122,7 +122,7 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	 * <p>Resolution priority: single DataSource (automatic default), primary-annotated DataSource,
 	 * DataSource named "dataSource".
 	 *
-	 * @param dataSources the map of discovered DataSources (must not be null)
+	 * @param dataSources the map of discovered DataSources
 	 * @return the default DataSource entry, or {@code null} if none found
 	 */
 	private Map.Entry<String, DataSource> resolveDefaultDataSource(Map<String, DataSource> dataSources) {
@@ -144,7 +144,7 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Finds the primary DataSource bean from the context.
 	 *
-	 * @param dataSources the map of discovered DataSources (must not be null)
+	 * @param dataSources the map of discovered DataSources
 	 * @return the primary DataSource entry, or {@code null} if none found
 	 */
 	private Map.Entry<String, DataSource> findPrimaryDataSource(Map<String, DataSource> dataSources) {
@@ -158,8 +158,8 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Finds a DataSource by its bean name.
 	 *
-	 * @param dataSources the map of discovered DataSources (must not be null)
-	 * @param beanName the bean name to search for (must not be null)
+	 * @param dataSources the map of discovered DataSources
+	 * @param beanName the bean name to search for
 	 * @return the matching DataSource entry, or {@code null} if not found
 	 */
 	private Map.Entry<String, DataSource> findDataSourceByName(Map<String, DataSource> dataSources, String beanName) {
@@ -169,15 +169,15 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Checks if a bean is marked as primary.
 	 *
-	 * @param context the application context (must not be null)
-	 * @param beanName the bean name to check (must not be null)
+	 * @param context the application context
+	 * @param beanName the bean name to check
 	 * @return {@code true} if the bean is primary, {@code false} otherwise
 	 */
 	private boolean isPrimaryBean(ApplicationContext context, String beanName) {
 		if (context instanceof ConfigurableApplicationContext) {
 			def factory = context.beanFactory
 			if (factory.containsBeanDefinition(beanName)) {
-				return factory.getBeanDefinition(beanName).isPrimary()
+				return factory.getBeanDefinition(beanName).primary
 			}
 		}
 		logger.debug("Unable to determine if bean '{}' is primary", beanName)
@@ -187,14 +187,14 @@ final class DataSourceRegistrar implements ApplicationContextAware {
 	/**
 	 * Resolves the application context, throwing if not set.
 	 *
-	 * @return the application context, never null
+	 * @return the application context
 	 * @throws IllegalStateException if the context is not set
 	 */
 	private ApplicationContext resolveApplicationContext() {
 		if (applicationContext == null) {
 			throw new IllegalStateException(
-			"ApplicationContext not set. " +
-			"Ensure this bean is managed by Spring and properly initialized.")
+			'ApplicationContext not set. ' +
+			'Ensure this bean is managed by Spring and properly initialized.')
 		}
 		return applicationContext
 	}

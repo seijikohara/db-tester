@@ -4,9 +4,8 @@
  * <p>This package provides internal implementations for loading datasets from resources, including:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.loader.DataSetLoaderProviderImpl} -
- *       implements the {@link io.github.seijikohara.dbtester.internal.spi.DataSetLoaderProvider}
- *       SPI
+ *   <li>{@link io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider} -
+ *       implements the {@link io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider} SPI
  *   <li>{@link io.github.seijikohara.dbtester.internal.loader.TestClassNameBasedDataSetLoader} -
  *       convention-based loader that resolves dataset files based on test class and method names
  * </ul>

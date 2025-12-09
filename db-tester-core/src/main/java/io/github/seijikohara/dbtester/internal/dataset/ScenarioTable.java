@@ -1,7 +1,9 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.TableName;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
 
 /**

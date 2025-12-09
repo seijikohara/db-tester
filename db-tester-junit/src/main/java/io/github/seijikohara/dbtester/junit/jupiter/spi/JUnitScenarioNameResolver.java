@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.junit.jupiter.spi;
 
-import io.github.seijikohara.dbtester.internal.domain.ScenarioName;
-import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolver;
+import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
+import io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 import java.lang.reflect.Method;
 
 /**

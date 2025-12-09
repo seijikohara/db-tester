@@ -9,6 +9,9 @@ dependencies {
     // Public API dependency
     api(project(":db-tester-junit"))
 
+    // Core implementation (provides SPI implementations)
+    implementation(project(":db-tester-core"))
+
     // Internal implementation
     implementation(libs.spring.boot.autoconfigure)
     annotationProcessor(libs.spring.boot.configuration.processor)

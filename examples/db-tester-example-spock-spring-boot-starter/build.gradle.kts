@@ -16,10 +16,23 @@ dependencies {
     // Spring Boot dependencies
     implementation(libs.spring.boot.starter.data.jpa)
     runtimeOnly(libs.h2)
-
-    // Test dependencies
-    testImplementation(project(":db-tester-spock-spring-boot-starter"))
-    testImplementation(libs.spring.boot.starter.test)
-    testImplementation(libs.spock.spring)
 }
 
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            dependencies {
+                implementation(project(":db-tester-spock-spring-boot-starter"))
+                implementation(libs.spring.boot.starter.test)
+                implementation(libs.spock.spring)
+            }
+            targets.configureEach {
+                testTask.configure {
+                    testLogging {
+                        events("passed", "skipped", "failed")
+                    }
+                }
+            }
+        }
+    }
+}

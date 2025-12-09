@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>Automatic alphabetical table ordering (default)
- *   <li>Manual ordering via {@code table-ordering.txt} file
- *   <li>Programmatic ordering via {@code table-ordering.txt} in custom directories
+ *   <li>Manual ordering via {@code load-order.txt} file
+ *   <li>Programmatic ordering via {@code load-order.txt} in custom directories
  *   <li>Handling foreign key constraints
  *   <li>Complex table dependencies (many-to-many relationships)
  * </ul>
@@ -173,9 +173,9 @@ public final class TableOrderingStrategiesTest {
   }
 
   /**
-   * Demonstrates manual table ordering via table-ordering.txt file.
+   * Demonstrates manual table ordering via load-order.txt file.
    *
-   * <p>Uses {@code table-ordering.txt} to specify correct insertion order for foreign keys.
+   * <p>Uses {@code load-order.txt} to specify correct insertion order for foreign keys.
    *
    * <p>Test flow:
    *
@@ -202,7 +202,7 @@ public final class TableOrderingStrategiesTest {
   /**
    * Demonstrates custom resource location for table ordering.
    *
-   * <p>Uses {@code table-ordering.txt} in a custom directory to explicitly control table insertion
+   * <p>Uses {@code load-order.txt} in a custom directory to explicitly control table insertion
    * order.
    *
    * <p>Test flow:

@@ -6,13 +6,17 @@ plugins {
 description = "DB Tester JUnit - JUnit Jupiter Extension for database testing"
 
 dependencies {
-    // Public API dependencies
-    api(project(":db-tester-core"))
+    // Public API dependencies (only db-tester-api)
+    api(project(":db-tester-api"))
     api(platform(libs.junit.bom))
     api(libs.junit.jupiter.api)
 
-    // Internal implementation dependencies
+    // JUnit Jupiter implementation
     implementation(libs.junit.jupiter)
+
+    // Compile-time dependency for logging
+    compileOnly(platform(libs.slf4j.bom))
+    compileOnly(libs.slf4j.api)
 }
 
 testing {
@@ -22,6 +26,7 @@ testing {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.junit.jupiter)
+                runtimeOnly(project(":db-tester-core"))
                 runtimeOnly(libs.slf4j.simple)
             }
         }

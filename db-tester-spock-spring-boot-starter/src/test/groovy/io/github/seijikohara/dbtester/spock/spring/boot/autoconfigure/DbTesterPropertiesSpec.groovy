@@ -1,5 +1,8 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
+import io.github.seijikohara.dbtester.api.config.DataFormat
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.operation.Operation
 import spock.lang.Specification
 
 /**
@@ -92,5 +95,72 @@ class DbTesterPropertiesSpec extends Specification {
 		then: 'only enabled is changed back'
 		properties.enabled
 		!properties.autoRegisterDataSources
+	}
+
+	def 'should have convention property with correct defaults'() {
+		expect: 'convention defaults are correct'
+		properties.convention != null
+		properties.convention.baseDirectory == null
+		properties.convention.expectationSuffix == '/expected'
+		properties.convention.scenarioMarker == '[Scenario]'
+		properties.convention.dataFormat == DataFormat.CSV
+		properties.convention.tableMergeStrategy == TableMergeStrategy.UNION_ALL
+	}
+
+	def 'should allow modifying convention properties'() {
+		when: 'modifying convention properties'
+		properties.convention.baseDirectory = '/custom/base'
+		properties.convention.expectationSuffix = '/verify'
+		properties.convention.scenarioMarker = '[TestCase]'
+		properties.convention.dataFormat = DataFormat.TSV
+		properties.convention.tableMergeStrategy = TableMergeStrategy.FIRST
+
+		then: 'convention properties are modified'
+		properties.convention.baseDirectory == '/custom/base'
+		properties.convention.expectationSuffix == '/verify'
+		properties.convention.scenarioMarker == '[TestCase]'
+		properties.convention.dataFormat == DataFormat.TSV
+		properties.convention.tableMergeStrategy == TableMergeStrategy.FIRST
+	}
+
+	def 'should allow replacing convention'() {
+		given: 'a new convention instance'
+		def newConvention = new DbTesterProperties.ConventionProperties()
+		newConvention.dataFormat = DataFormat.TSV
+
+		when: 'replacing convention'
+		properties.convention = newConvention
+
+		then: 'convention is replaced'
+		properties.convention.dataFormat == DataFormat.TSV
+	}
+
+	def 'should have operation property with correct defaults'() {
+		expect: 'operation defaults are correct'
+		properties.operation != null
+		properties.operation.preparation == Operation.CLEAN_INSERT
+		properties.operation.expectation == Operation.NONE
+	}
+
+	def 'should allow modifying operation properties'() {
+		when: 'modifying operation properties'
+		properties.operation.preparation = Operation.INSERT
+		properties.operation.expectation = Operation.DELETE_ALL
+
+		then: 'operation properties are modified'
+		properties.operation.preparation == Operation.INSERT
+		properties.operation.expectation == Operation.DELETE_ALL
+	}
+
+	def 'should allow replacing operation'() {
+		given: 'a new operation instance'
+		def newOperation = new DbTesterProperties.OperationProperties()
+		newOperation.preparation = Operation.TRUNCATE_INSERT
+
+		when: 'replacing operation'
+		properties.operation = newOperation
+
+		then: 'operation is replaced'
+		properties.operation.preparation == Operation.TRUNCATE_INSERT
 	}
 }

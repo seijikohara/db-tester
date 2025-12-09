@@ -267,20 +267,22 @@ private static final long DEFAULT_TIMEOUT_MS = 30_000L;
 
 ### Tag Format Standards
 
-**@param format**: `@param paramName the [noun] [constraint]`
+**Null documentation policy**: This project uses `@NullMarked` packages with NullAway for compile-time null safety. Non-null is the default and does not require documentation. Only document nullable cases.
+
+**@param format**: `@param paramName the [noun]`
 
 | Pattern | Example |
 |---------|---------|
-| Required parameter | `@param context the test context (must not be null)` |
+| Non-null parameter | `@param context the test context` |
 | Nullable parameter | `@param handler the failure handler, or {@code null} for default` |
-| Collection | `@param columns the column names (must not be null, may be empty)` |
+| Collection | `@param columns the column names (may be empty)` |
 
 **@return format by type**:
 
 | Return Type | Format | Example |
 |-------------|--------|---------|
-| Simple value | `the [noun], never null` | `@return the configuration, never null` |
-| Collection | `immutable list of [noun], never null` | `@return immutable list of tables, never null` |
+| Simple value | `the [noun]` | `@return the configuration` |
+| Collection | `immutable list of [noun]` | `@return immutable list of tables` |
 | Optional | `an Optional containing [noun], or empty if [condition]` | `@return an Optional containing the table, or empty if not found` |
 | boolean | `{@code true} if [condition], {@code false} otherwise` | `@return {@code true} if registered, {@code false} otherwise` |
 | Nullable | `the [noun], or {@code null} if [condition]` | `@return the entry, or {@code null} if not found` |

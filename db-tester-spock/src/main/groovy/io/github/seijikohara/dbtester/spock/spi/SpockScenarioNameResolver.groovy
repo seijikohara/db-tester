@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.spock.spi
 
-import io.github.seijikohara.dbtester.internal.domain.ScenarioName
-import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolver
+import io.github.seijikohara.dbtester.api.scenario.ScenarioName
+import io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
 import java.lang.reflect.Method
 import org.spockframework.runtime.model.FeatureMetadata
 
@@ -36,8 +36,8 @@ final class SpockScenarioNameResolver implements ScenarioNameResolver {
 	 * annotation is not present (which shouldn't happen for Spock features), falls back to the method
 	 * name.
 	 *
-	 * @param testMethod the test method to resolve the scenario name from (must not be null)
-	 * @return the scenario name based on the feature metadata or method name, never null
+	 * @param testMethod the test method to resolve the scenario name from
+	 * @return the scenario name based on the feature metadata or method name
 	 */
 	@Override
 	ScenarioName resolve(Method testMethod) {
@@ -55,7 +55,7 @@ final class SpockScenarioNameResolver implements ScenarioNameResolver {
 	 * <p>Returns {@code true} only if the method has a {@link FeatureMetadata} annotation, indicating
 	 * it is a Spock feature method.
 	 *
-	 * @param testMethod the test method to check (must not be null)
+	 * @param testMethod the test method to check
 	 * @return {@code true} if the method has {@code @FeatureMetadata}, {@code false} otherwise
 	 */
 	@Override

@@ -3,12 +3,7 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.operation.Operation
-import java.lang.reflect.Method
 import org.spockframework.runtime.extension.IMethodInterceptor
-import org.spockframework.runtime.extension.IMethodInvocation
-import org.spockframework.runtime.model.FeatureInfo
-import org.spockframework.runtime.model.MethodInfo
-import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 
 /**

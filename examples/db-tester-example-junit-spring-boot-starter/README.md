@@ -4,13 +4,10 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 
 ## Overview
 
-The example project demonstrates:
-
-- **Automatic DataSource Registration** - Spring-managed `DataSource` beans are automatically registered via `SpringBootDatabaseTestExtension`
+- **Auto-Registration** - Spring-managed `DataSource` beans are registered via `SpringBootDatabaseTestExtension`
 - **Convention-Based Loading** - CSV dataset resolution based on test class and method names
-- **Annotation-Driven Testing** - `@Preparation` and `@Expectation` annotations for declarative test data management
-- **Spring Data JPA Integration** - Testing Spring Data repositories with DB Tester
-- **Multiple DataSource Support** - Handling multiple DataSource beans
+- **Property-Based Configuration** - Configure DB Tester via `application.properties`
+- **Spring Data JPA Integration** - Testing Spring Data repositories
 
 ## Prerequisites
 
@@ -26,20 +23,20 @@ The example project demonstrates:
 ./gradlew :examples:db-tester-example-junit-spring-boot-starter:test
 ```
 
-### Test Classes
+## Test Classes
 
 | Test Class | Description |
 |------------|-------------|
-| `UserRepositoryTest` | Basic Spring Data JPA integration with automatic DataSource registration |
+| `UserRepositoryTest` | Spring Data JPA integration with automatic DataSource registration |
 | `MultipleDataSourcesTest` | Multiple DataSource support with `@Primary` detection |
+| `PropertiesConfigurationTest` | Property-based configuration demonstration |
 
-### Basic Example
+## Basic Example
 
 ```java
 @SpringBootTest
 @ExtendWith(SpringBootDatabaseTestExtension.class)
 class UserRepositoryTest {
-    // No @BeforeAll setup needed - DataSource is auto-registered
 
     @Autowired
     private UserRepository userRepository;
@@ -51,41 +48,6 @@ class UserRepositoryTest {
         userRepository.save(new User("Alice", "alice@example.com"));
     }
 }
-```
-
-### Multiple DataSources Example
-
-```java
-@SpringBootTest(classes = {ExampleApplication.class, MultiDataSourceConfig.class})
-@ExtendWith(SpringBootDatabaseTestExtension.class)
-class MultipleDataSourcesTest {
-    // Both mainDb and archiveDb are automatically registered
-}
-```
-
-## Project Structure
-
-```
-src/
-├── main/java/
-│   └── io/github/seijikohara/dbtester/example/springboot/
-│       ├── ExampleApplication.java
-│       ├── User.java
-│       └── UserRepository.java
-└── test/
-    ├── java/example/
-    │   ├── UserRepositoryTest.java
-    │   └── MultipleDataSourcesTest.java
-    └── resources/
-        ├── application.properties
-        ├── schema.sql
-        └── example/
-            ├── UserRepositoryTest/
-            │   ├── USERS.csv
-            │   └── expected/
-            │       └── USERS.csv
-            └── MultipleDataSourcesTest/
-                └── USERS.csv
 ```
 
 ## Related Modules

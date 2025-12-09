@@ -1,10 +1,11 @@
 package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.context.TestContext;
+import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
-import io.github.seijikohara.dbtester.internal.context.TestContext;
-import io.github.seijikohara.dbtester.internal.dataset.ScenarioDataSet;
-import io.github.seijikohara.dbtester.internal.dbunit.DbUnitOperations;
+import io.github.seijikohara.dbtester.api.spi.OperationProvider;
+import java.util.ServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +20,12 @@ public final class PreparationExecutor {
   /** Logger for tracking preparation execution. */
   private static final Logger logger = LoggerFactory.getLogger(PreparationExecutor.class);
 
-  /** The DbUnit operations bridge. */
-  private final DbUnitOperations dbUnitOperations = new DbUnitOperations();
+  /** The operation provider for database operations. */
+  private final OperationProvider operationProvider;
 
   /** Creates a new preparation executor. */
   public PreparationExecutor() {
-    // Default constructor
+    this.operationProvider = ServiceLoader.load(OperationProvider.class).findFirst().orElseThrow();
   }
 
   /**
@@ -50,27 +51,26 @@ public final class PreparationExecutor {
     }
 
     final var operation = preparation.operation();
-    dataSets.forEach(scenarioDataSet -> executeDataSet(context, scenarioDataSet, operation));
+    dataSets.forEach(dataSet -> executeDataSet(context, dataSet, operation));
   }
 
   /**
    * Executes a single dataset against the database.
    *
-   * <p>This method resolves the DataSource from either the scenario dataset itself or falls back to
-   * the default registry. It then delegates to DbUnit operations to apply the dataset using the
+   * <p>This method resolves the DataSource from either the dataset itself or falls back to the
+   * default registry. It then delegates to the operation executor to apply the dataset using the
    * specified operation.
    *
    * @param context the test context providing access to the data source registry
-   * @param scenarioDataSet the dataset to execute containing tables and optional data source
+   * @param dataSet the dataset to execute containing tables and optional data source
    * @param operation the database operation to perform (CLEAN_INSERT, INSERT, etc.)
    */
   private void executeDataSet(
-      final TestContext context, final ScenarioDataSet scenarioDataSet, final Operation operation) {
-    final var dataSource =
-        scenarioDataSet.getDataSource().orElseGet(() -> context.registry().get(""));
+      final TestContext context, final DataSet dataSet, final Operation operation) {
+    final var dataSource = dataSet.getDataSource().orElseGet(() -> context.registry().get(""));
 
     logger.debug("Applying {} operation with dataset", operation);
 
-    dbUnitOperations.execute(operation, scenarioDataSet, dataSource);
+    operationProvider.execute(operation, dataSet, dataSource);
   }
 }

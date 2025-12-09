@@ -1,9 +1,15 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.operation.Operation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -155,6 +161,171 @@ class DbTesterPropertiesTest {
               assertTrue(
                   properties.isAutoRegisterDataSources(),
                   "autoRegisterDataSources should be true"));
+    }
+  }
+
+  /** Tests for the convention property. */
+  @Nested
+  @DisplayName("convention property")
+  class ConventionProperty {
+
+    /** Tests for the convention property. */
+    ConventionProperty() {}
+
+    /** Verifies that convention has correct default values. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have correct default values")
+    void should_have_correct_default_values() {
+      // Given & When
+      final var convention = properties.getConvention();
+
+      // Then
+      assertAll(
+          "convention default values should be correct",
+          () -> assertNotNull(convention, "convention should not be null"),
+          () -> assertNull(convention.getBaseDirectory(), "baseDirectory should default to null"),
+          () ->
+              assertEquals(
+                  "/expected",
+                  convention.getExpectationSuffix(),
+                  "expectationSuffix should default to /expected"),
+          () ->
+              assertEquals(
+                  "[Scenario]",
+                  convention.getScenarioMarker(),
+                  "scenarioMarker should default to [Scenario]"),
+          () ->
+              assertEquals(
+                  DataFormat.CSV, convention.getDataFormat(), "dataFormat should default to CSV"),
+          () ->
+              assertEquals(
+                  TableMergeStrategy.UNION_ALL,
+                  convention.getTableMergeStrategy(),
+                  "tableMergeStrategy should default to UNION_ALL"));
+    }
+
+    /** Verifies that convention properties can be modified. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow modifying convention properties")
+    void should_allow_modifying_convention_properties() {
+      // Given
+      final var convention = properties.getConvention();
+
+      // When
+      convention.setBaseDirectory("/custom/base");
+      convention.setExpectationSuffix("/verify");
+      convention.setScenarioMarker("[TestCase]");
+      convention.setDataFormat(DataFormat.TSV);
+      convention.setTableMergeStrategy(TableMergeStrategy.FIRST);
+
+      // Then
+      assertAll(
+          "convention modified values should be correct",
+          () ->
+              assertEquals("/custom/base", convention.getBaseDirectory(), "baseDirectory mismatch"),
+          () ->
+              assertEquals(
+                  "/verify", convention.getExpectationSuffix(), "expectationSuffix mismatch"),
+          () ->
+              assertEquals("[TestCase]", convention.getScenarioMarker(), "scenarioMarker mismatch"),
+          () -> assertEquals(DataFormat.TSV, convention.getDataFormat(), "dataFormat mismatch"),
+          () ->
+              assertEquals(
+                  TableMergeStrategy.FIRST,
+                  convention.getTableMergeStrategy(),
+                  "tableMergeStrategy mismatch"));
+    }
+
+    /** Verifies that convention can be replaced. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow replacing convention")
+    void should_allow_replacing_convention() {
+      // Given
+      final var newConvention = new DbTesterProperties.ConventionProperties();
+      newConvention.setDataFormat(DataFormat.TSV);
+
+      // When
+      properties.setConvention(newConvention);
+
+      // Then
+      assertEquals(
+          DataFormat.TSV, properties.getConvention().getDataFormat(), "dataFormat mismatch");
+    }
+  }
+
+  /** Tests for the operation property. */
+  @Nested
+  @DisplayName("operation property")
+  class OperationProperty {
+
+    /** Tests for the operation property. */
+    OperationProperty() {}
+
+    /** Verifies that operation has correct default values. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have correct default values")
+    void should_have_correct_default_values() {
+      // Given & When
+      final var operation = properties.getOperation();
+
+      // Then
+      assertAll(
+          "operation default values should be correct",
+          () -> assertNotNull(operation, "operation should not be null"),
+          () ->
+              assertEquals(
+                  Operation.CLEAN_INSERT,
+                  operation.getPreparation(),
+                  "preparation should default to CLEAN_INSERT"),
+          () ->
+              assertEquals(
+                  Operation.NONE,
+                  operation.getExpectation(),
+                  "expectation should default to NONE"));
+    }
+
+    /** Verifies that operation properties can be modified. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow modifying operation properties")
+    void should_allow_modifying_operation_properties() {
+      // Given
+      final var operation = properties.getOperation();
+
+      // When
+      operation.setPreparation(Operation.INSERT);
+      operation.setExpectation(Operation.DELETE_ALL);
+
+      // Then
+      assertAll(
+          "operation modified values should be correct",
+          () -> assertEquals(Operation.INSERT, operation.getPreparation(), "preparation mismatch"),
+          () ->
+              assertEquals(
+                  Operation.DELETE_ALL, operation.getExpectation(), "expectation mismatch"));
+    }
+
+    /** Verifies that operation can be replaced. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow replacing operation")
+    void should_allow_replacing_operation() {
+      // Given
+      final var newOperation = new DbTesterProperties.OperationProperties();
+      newOperation.setPreparation(Operation.TRUNCATE_INSERT);
+
+      // When
+      properties.setOperation(newOperation);
+
+      // Then
+      assertEquals(
+          Operation.TRUNCATE_INSERT,
+          properties.getOperation().getPreparation(),
+          "preparation mismatch");
     }
   }
 }

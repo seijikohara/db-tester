@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.DataValue;
-import io.github.seijikohara.dbtester.internal.domain.TableName;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +42,8 @@ class SimpleTableTest {
       final var row1 =
           new SimpleRow(
               Map.of(
-                  new ColumnName("ID"), new DataValue(1),
-                  new ColumnName("NAME"), new DataValue("Alice")));
+                  new ColumnName("ID"), new CellValue(1),
+                  new ColumnName("NAME"), new CellValue("Alice")));
       final var rows = List.<Row>of(row1);
 
       // When
@@ -84,11 +85,11 @@ class SimpleTableTest {
       final var tableName = new TableName("USERS");
       final var columns = List.of(new ColumnName("ID"));
       final var mutableRows = new ArrayList<Row>();
-      mutableRows.add(new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(1))));
+      mutableRows.add(new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(1))));
 
       // When
       final var table = new SimpleTable(tableName, columns, mutableRows);
-      mutableRows.add(new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(2))));
+      mutableRows.add(new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(2))));
 
       // Then
       assertEquals(1, table.getRows().size(), "rows should not be affected by modification");
@@ -201,8 +202,8 @@ class SimpleTableTest {
     void shouldReturnAllRows_whenCalled() {
       // Given
       final var columns = List.of(new ColumnName("ID"));
-      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(1)));
-      final var row2 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(2)));
+      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(1)));
+      final var row2 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(2)));
       final var rows = List.<Row>of(row1, row2);
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 
@@ -220,7 +221,7 @@ class SimpleTableTest {
     void shouldReturnUnmodifiableList_whenCalled() {
       // Given
       final var columns = List.of(new ColumnName("ID"));
-      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(1)));
+      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(1)));
       final var rows = List.<Row>of(row1);
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 
@@ -250,9 +251,9 @@ class SimpleTableTest {
     void shouldReturnCorrectCount_whenCalled() {
       // Given
       final var columns = List.of(new ColumnName("ID"));
-      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(1)));
-      final var row2 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(2)));
-      final var row3 = new SimpleRow(Map.of(new ColumnName("ID"), new DataValue(3)));
+      final var row1 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(1)));
+      final var row2 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(2)));
+      final var row3 = new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(3)));
       final var rows = List.<Row>of(row1, row2, row3);
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 

@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
+import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.util.Optional;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -44,12 +45,13 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
   }
 
   /**
-   * Automatically registers Spring-managed DataSources before all tests in a test class.
+   * Automatically registers Spring-managed DataSources and Configuration before all tests.
    *
    * <p>This method:
    *
    * <ol>
    *   <li>Retrieves the Spring {@link ApplicationContext} using {@link SpringExtension}
+   *   <li>Registers the Spring-managed {@link Configuration} bean with the extension context
    *   <li>Checks if {@link DataSourceRegistrar} is available in the context
    *   <li>If available and auto-registration is enabled, registers all DataSources with the {@link
    *       io.github.seijikohara.dbtester.api.config.DataSourceRegistry}
@@ -65,6 +67,7 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
   public void beforeAll(final ExtensionContext context) {
     try {
       final var applicationContext = SpringExtension.getApplicationContext(context);
+      registerConfigurationFromContext(context, applicationContext);
       registerDataSourcesFromContext(context, applicationContext);
     } catch (final IllegalStateException e) {
       // Spring context not available - this is expected for non-Spring tests
@@ -72,6 +75,33 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
           "Spring ApplicationContext not available, skipping automatic DataSource registration: {}",
           e.getMessage());
     }
+  }
+
+  /**
+   * Registers Configuration from the Spring ApplicationContext.
+   *
+   * <p>If a Configuration bean is available in the Spring context, it will be used by the test
+   * extension. This allows configuration to be customized via application.properties.
+   *
+   * @param context the extension context
+   * @param applicationContext the Spring application context
+   */
+  private void registerConfigurationFromContext(
+      final ExtensionContext context, final ApplicationContext applicationContext) {
+
+    Optional.of(applicationContext)
+        .filter(ctx -> ctx.containsBean("dbTesterConfiguration"))
+        .map(ctx -> ctx.getBean("dbTesterConfiguration", Configuration.class))
+        .ifPresentOrElse(
+            configuration -> {
+              setConfiguration(context, configuration);
+              logger.debug(
+                  "Registered Spring-managed Configuration with database testing framework");
+            },
+            () ->
+                logger.debug(
+                    "Configuration bean not found in ApplicationContext, "
+                        + "using default configuration"));
   }
 
   /**

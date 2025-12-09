@@ -1,14 +1,24 @@
 # DB Tester - Spock Module
 
-This module provides [Spock Framework](https://spockframework.org/) integration for the DB Tester framework. It provides annotation-driven database testing in Spock specifications using the same annotations as JUnit.
+This module provides [Spock Framework](https://spockframework.org/) integration for the DB Tester framework through a global extension.
 
 ## Overview
 
-The Spock module includes:
+- **Global Extension** - `DatabaseTestExtension` registers via Spock extension mechanism
+- **Method Interceptor** - `DatabaseTestInterceptor` manages test lifecycle
+- **Lifecycle Management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` execute preparation and expectation phases
 
-- **Global Extension** - `DatabaseTestExtension` for automatic registration via Spock's extension mechanism
-- **Method Interceptor** - `DatabaseTestInterceptor` for test lifecycle management
-- **Lifecycle Management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` for automatic execution of preparation and expectation phases
+## Architecture
+
+```
+db-tester-api (compile-time dependency)
+        ↑
+db-tester-spock
+        ↓
+db-tester-core (runtime dependency, loaded via ServiceLoader)
+```
+
+This module depends **only on `db-tester-api`** at compile time. The `db-tester-core` module is loaded at runtime via Java ServiceLoader mechanism.
 
 ## Requirements
 
@@ -37,7 +47,7 @@ dependencies {
 </dependency>
 ```
 
-Replace `VERSION` with the latest version from [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spock).
+For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spock).
 
 ## Usage
 
@@ -53,7 +63,6 @@ class UserRepositorySpec extends Specification {
     DataSourceRegistry dbTesterRegistry
 
     def setupSpec() {
-        // Initialize dataSource and registry
         dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
     }
@@ -65,24 +74,26 @@ class UserRepositorySpec extends Specification {
         userRepository.create(new User("Alice", "alice@example.com"))
 
         then:
-        // Database state is verified by @Expectation
         noExceptionThrown()
     }
 }
 ```
 
-### Automatic Extension Registration
+The extension is registered via Spock Global Extension mechanism (`META-INF/services`). No manual registration is required.
 
-The extension is automatically registered via Spock's Global Extension mechanism (META-INF/services). No manual registration is required.
+### DataSource Registration
 
-### Annotation Support
-
-Use annotations from `db-tester-core`:
+Register data sources in `setupSpec()` using a `@Shared` field:
 
 ```groovy
-import io.github.seijikohara.dbtester.api.annotation.Preparation
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.DataSet
+@Shared
+DataSourceRegistry dbTesterRegistry
+
+def setupSpec() {
+    dbTesterRegistry = new DataSourceRegistry()
+    dbTesterRegistry.registerDefault(dataSource)
+    dbTesterRegistry.register("secondary", secondaryDataSource)
+}
 ```
 
 ### Class-Level Annotations
@@ -97,10 +108,6 @@ class UserRepositorySpec extends Specification {
     def "should create user"() {
         // Uses class-level annotations
     }
-
-    def "should update user"() {
-        // Uses class-level annotations
-    }
 }
 ```
 
@@ -109,51 +116,10 @@ class UserRepositorySpec extends Specification {
 Override class-level annotations at the method level:
 
 ```groovy
-class UserRepositorySpec extends Specification {
-
-    @Preparation
-    @Expectation
-    def "should create user"() {
-        // Uses method-level annotations
-    }
-
-    @Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
-    def "should create user with custom data"() {
-        // Uses custom data location
-    }
+@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+def "should create user with custom data"() {
+    // Uses custom data location
 }
-```
-
-### DataSource Registration
-
-Register data sources in `setupSpec()` using a `@Shared` field:
-
-```groovy
-@Shared
-DataSourceRegistry dbTesterRegistry
-
-def setupSpec() {
-    dbTesterRegistry = new DataSourceRegistry()
-    dbTesterRegistry.registerDefault(dataSource)
-    // Or with a name for multiple data sources
-    dbTesterRegistry.register("secondary", secondaryDataSource)
-}
-```
-
-## Configuration
-
-### Convention-Based Loading
-
-Test data files are resolved based on specification class and feature method names:
-
-```
-src/test/resources/
-  com/example/
-    UserRepositorySpec/               # Specification class name
-      should create user/             # Feature method name (spaces replaced)
-        USERS.csv                     # Preparation data
-        expected/                     # Expectation directory
-          USERS.csv                   # Expected data
 ```
 
 ### Scenario Filtering
@@ -166,29 +132,28 @@ should create user,1,Alice,alice@example.com
 should update user,1,Alice Updated,alice.updated@example.com
 ```
 
-Each feature loads only rows matching its method name.
+Feature method names with spaces map directly to `[Scenario]` column values.
 
 ### Configuration Customization
-
-Customize conventions via Configuration API using a `@Shared` field:
 
 ```groovy
 @Shared
 Configuration dbTesterConfiguration
 
 def setupSpec() {
-    dbTesterConfiguration = Configuration.builder()
-        .conventionSettings(
-            ConventionSettings.builder()
-                .scenarioMarker(ScenarioMarker.of("[TestCase]"))
-                .expectationSuffix("expected")
-                .build()
+    dbTesterConfiguration = Configuration.withConventions(
+        new ConventionSettings(
+            null,                        // baseDirectory (null for classpath)
+            '/expected',                 // expectationSuffix
+            '[TestCase]',                // scenarioMarker
+            DataFormat.CSV,              // dataFormat
+            TableMergeStrategy.UNION_ALL // tableMergeStrategy
         )
-        .build()
+    )
 }
 ```
 
-### Java Platform Module System (JPMS)
+## Java Platform Module System (JPMS)
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.spock`
 
@@ -206,8 +171,11 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 
 ## Related Modules
 
-- [db-tester-core](../db-tester-core/) - Core API and implementation
-- [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) - Spring Boot auto-configuration
+| Module | Description |
+|--------|-------------|
+| [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
+| [`db-tester-core`](../db-tester-core/) | Internal implementation (loaded at runtime) |
+| [`db-tester-spock-spring-boot-starter`](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration |
 
 ## Documentation
 

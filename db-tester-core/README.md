@@ -1,34 +1,47 @@
 # DB Tester - Core Module
 
-This module provides both the public API and internal implementation of the DB Tester framework. It contains the annotations, configuration interfaces, DbUnit bridge, dataset loaders, and other components.
+This module provides the internal implementation of the DB Tester framework. It implements the SPI interfaces defined in `db-tester-api` and contains database operations, dataset loaders, and format providers.
 
 ## Overview
 
-The core module includes:
-
-- **Public API** - Annotations (`@Preparation`, `@Expectation`), configuration, and assertion interfaces
-- **DbUnit Bridge** - Complete isolation of DbUnit dependencies using the Bridge pattern
+- **SPI Implementations** - Default providers for operations, assertions, and data loading
+- **Database Operations** - Pure JDBC implementation for database setup and verification
 - **Dataset Loaders** - Convention-based and custom data loading implementations
-- **Format Providers** - CSV format support with scenario-based filtering
+- **Format Providers** - CSV and TSV format support with scenario filtering
+
+## Architecture
+
+```
+db-tester-api (public API)
+        ↑
+db-tester-core (SPI implementations)
+        ↑
+db-tester-junit / db-tester-spock (test framework integration)
+```
+
+- **Depends on**: `db-tester-api`
+- **Is loaded at runtime** by `db-tester-junit` and `db-tester-spock` via ServiceLoader
 
 ## Requirements
 
 - Java 21 or later
-- DbUnit 3 or later (transitive dependency)
 
 ## Installation
 
-> **Note**: This module is typically not used directly. Instead, use the integration modules:
-> - [db-tester-junit](../db-tester-junit/) for JUnit
-> - [db-tester-spock](../db-tester-spock/) for Spock Framework
-> - [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) for Spring Boot with JUnit
-> - [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) for Spring Boot with Spock
+This module is loaded automatically at runtime by the integration modules. Direct dependency is not required for typical usage.
+
+Use the integration modules instead:
+
+- [db-tester-junit](../db-tester-junit/) for JUnit
+- [db-tester-spock](../db-tester-spock/) for Spock Framework
+- [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) for Spring Boot with JUnit
+- [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) for Spring Boot with Spock
 
 ### Gradle
 
 ```kotlin
 dependencies {
-    implementation("io.github.seijikohara:db-tester-core:VERSION")
+    runtimeOnly("io.github.seijikohara:db-tester-core:VERSION")
 }
 ```
 
@@ -39,95 +52,80 @@ dependencies {
     <groupId>io.github.seijikohara</groupId>
     <artifactId>db-tester-core</artifactId>
     <version>VERSION</version>
+    <scope>runtime</scope>
 </dependency>
 ```
 
-Replace `VERSION` with the latest version from [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-core).
+For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-core).
 
-## Usage
+## Package Structure
 
-### Convention-Based Loading
+| Package | Description |
+|---------|-------------|
+| `internal.assertion` | Database assertion and comparison implementations |
+| `internal.dataset` | DataSet, Table, Row implementations |
+| `internal.domain` | Internal type-safe domain value objects |
+| `internal.format` | Format parsing framework |
+| `internal.format.csv` | CSV format provider implementation |
+| `internal.format.tsv` | TSV format provider implementation |
+| `internal.format.parser` | Delimited text parsing utilities |
+| `internal.format.spi` | Format provider SPI (`FormatProvider`, `FormatRegistry`) |
+| `internal.jdbc` | Pure JDBC database operations |
+| `internal.loader` | Data loading and merging implementations |
+| `internal.scenario` | Scenario filtering logic |
+| `internal.spi` | Default SPI implementations |
 
-The default loader resolves data files based on test class and method names:
+## SPI Providers
 
+This module provides implementations for the SPI interfaces defined in `db-tester-api`:
+
+| SPI Interface | Implementation |
+|---------------|----------------|
+| `OperationProvider` | `DefaultOperationProvider` |
+| `ExpectationProvider` | `DefaultExpectationProvider` |
+| `AssertionProvider` | `DefaultAssertionProvider` |
+| `DataSetLoaderProvider` | `DefaultDataSetLoaderProvider` |
+
+Internal format providers:
+
+| Internal SPI | Implementations |
+|--------------|-----------------|
+| `FormatProvider` | `CsvFormatProvider`, `TsvFormatProvider` |
+
+These are registered via `META-INF/services/` and loaded via ServiceLoader.
+
+## Java Platform Module System (JPMS)
+
+**Module name**: `io.github.seijikohara.dbtester.core`
+
+This module provides full JPMS support with a `module-info.java` descriptor.
+
+```java
+requires io.github.seijikohara.dbtester.core;
 ```
-src/test/resources/
-  com/example/
-    UserServiceTest/           # Test class name
-      testCreateUser/          # Test method name (optional)
-        USERS.csv              # Preparation data
-        expected/              # Expectation directory
-          USERS.csv            # Expected data
-        table-ordering.txt     # Optional: explicit table order
-```
-
-### Supported Data Formats
-
-| Format | Extension | Description |
-|--------|-----------|-------------|
-| CSV | `.csv` | Comma-separated values with scenario filtering support |
 
 ## Key Classes
 
-### Public API (`io.github.seijikohara.dbtester.api`)
-
-| Package | Description |
-|---------|-------------|
-| `annotation` | `@Preparation`, `@Expectation`, `@DataSet` annotations |
-| `assertion` | `DatabaseAssertion` for programmatic assertions |
-| `config` | `Configuration`, `DataSourceRegistry` for setup |
-| `exception` | Exception types for error handling |
-| `loader` | `DataSetLoader` interface for custom loaders |
-| `operation` | `Operation` enum (CLEAN_INSERT, INSERT, UPDATE, etc.) |
-
-### Internal Implementation (`io.github.seijikohara.dbtester.internal`)
-
-| Package | Description |
-|---------|-------------|
-| `assertion` | Database assertion implementations |
-| `context` | Test execution context |
-| `dataset` | DataSet, Table, Row interfaces and implementations |
-| `dbunit` | DbUnit bridge layer (complete isolation) |
-| `domain` | Type-safe domain value objects |
-| `loader` | Data loading implementations |
-| `spi` | Service provider interfaces |
-
-## Configuration
-
-### DbUnit Isolation via Bridge Pattern
-
-The framework completely isolates DbUnit dependencies using the Bridge pattern. This ensures framework code remains DbUnit-independent and allows future migration to other database testing libraries.
-
-**Key Principles**:
-
-1. **Complete isolation** - All DbUnit dependencies consolidated in `internal.dbunit`
-2. **Single entry point** - `DatabaseBridge` (Singleton) is the primary interface
-3. **Type safety** - DbUnit types never leak outside bridge package hierarchy
-4. **Path-based API** - Framework uses `java.nio.file.Path` throughout
-5. **Exception isolation** - DbUnit exceptions wrapped in framework exceptions
-
-### SPI Registration
-
-This module registers implementations via `META-INF/services/`:
-
-- `io.github.seijikohara.dbtester.internal.spi.DatabaseBridgeProvider` - Database bridge implementation
-- `io.github.seijikohara.dbtester.internal.spi.DataSetLoaderProvider` - Convention-based data loader
-- `io.github.seijikohara.dbtester.internal.dataset.DataSetFormatProvider` - CSV format provider
-
-### Java Platform Module System (JPMS)
-
-**Automatic-Module-Name**: `io.github.seijikohara.dbtester.core`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
-Full `module-info.java` support is not available because DbUnit does not support JPMS.
+| Class | Description |
+|-------|-------------|
+| `DefaultOperationProvider` | Executes database operations (INSERT, DELETE) |
+| `DefaultExpectationProvider` | Verifies database state against expected datasets |
+| `DefaultAssertionProvider` | Provides assertion logic for dataset comparison |
+| `DefaultDataSetLoaderProvider` | Loads datasets from file system or classpath |
+| `DataSetComparator` | Compares expected and actual datasets |
+| `OperationExecutor` | Coordinates JDBC operation execution |
+| `TableReader` | Reads table data from database |
+| `FormatRegistry` | Manages format providers (CSV, TSV) |
+| `DataSetMerger` | Merges multiple datasets using configured strategy |
 
 ## Related Modules
 
-- [db-tester-junit](../db-tester-junit/) - JUnit extension
-- [db-tester-spock](../db-tester-spock/) - Spock Framework extension
-- [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) - Spring Boot auto-configuration for JUnit
-- [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) - Spring Boot auto-configuration for Spock
+| Module | Description |
+|--------|-------------|
+| [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
+| [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
+| [`db-tester-spock`](../db-tester-spock/) | Spock Framework extension |
 
 ## Documentation
 
-For detailed usage documentation and examples, refer to the [main README](../README.md).
+For usage examples and configuration details, refer to the [main README](../README.md).

@@ -6,6 +6,8 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation;
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
+import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
@@ -73,7 +75,9 @@ public final class ConfigurationCustomizationTest {
             new ConventionSettings(
                 null, // use classpath-relative resolution
                 "/verify", // custom expectation suffix
-                "[TestCase]" // custom scenario marker
+                "[TestCase]", // custom scenario marker
+                DataFormat.CSV, // use CSV format (default)
+                TableMergeStrategy.UNION_ALL // use UNION_ALL merge strategy (default)
                 ));
     DatabaseTestExtension.setConfiguration(context, customConfig);
 

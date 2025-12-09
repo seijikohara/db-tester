@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
+import static io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants.LOAD_ORDER_FILE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,9 +33,6 @@ class TableOrderingResolverTest {
 
     /** Test instance of TableOrderingResolver. */
     private TableOrderingResolver resolver;
-
-    /** Table ordering file name. */
-    private static final String TABLE_ORDERING_FILE = "table-ordering.txt";
 
     /** Tests for the ensureTableOrdering method. */
     EnsureTableOrderingMethod() {}
@@ -226,7 +224,7 @@ class TableOrderingResolverTest {
      * @return the table ordering file path
      */
     private Path getTableOrderingPath(final Path tempDir) {
-      return tempDir.resolve(TABLE_ORDERING_FILE);
+      return tempDir.resolve(LOAD_ORDER_FILE);
     }
   }
 

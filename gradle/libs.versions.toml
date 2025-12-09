@@ -1,13 +1,13 @@
 [versions]
 axion-release = "1.21.1"
 checker-qual = "3.52.1"
-dbunit = "3.0.0"
 derby = "10.17.1.0"
 errorprone = "2.45.0"
 errorprone-plugin = "4.3.0"
 groovy = "5.0.3"
 h2 = "2.4.240"
 hsqldb = "2.7.4"
+jackson = "2.20.1"
 jspecify = "1.0.0"
 junit = "6.0.1"
 maven-publish = "0.35.0"
@@ -28,7 +28,6 @@ version-catalog-update = "1.0.1"
 
 [libraries]
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
-dbunit = { module = "org.dbunit:dbunit", version.ref = "dbunit" }
 derby-client = { module = "org.apache.derby:derbyclient", version.ref = "derby" }
 derby-embedded = { module = "org.apache.derby:derby", version.ref = "derby" }
 derby-tools = { module = "org.apache.derby:derbytools", version.ref = "derby" }
@@ -40,6 +39,8 @@ groovy-bom = { module = "org.apache.groovy:groovy-bom", version.ref = "groovy" }
 groovy-sql = { module = "org.apache.groovy:groovy-sql" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 hsqldb = { module = "org.hsqldb:hsqldb", version.ref = "hsqldb" }
+jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
+jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
@@ -75,35 +76,6 @@ testcontainers-mysql = { module = "org.testcontainers:testcontainers-mysql" }
 testcontainers-oracle-free = { module = "org.testcontainers:testcontainers-oracle-free" }
 testcontainers-postgresql = { module = "org.testcontainers:testcontainers-postgresql" }
 testcontainers-spock = { module = "org.testcontainers:testcontainers-spock" }
-
-[bundles]
-database-drivers-integration = [
-    "mssql-jdbc",
-    "mysql-connector-j",
-    "oracle-ojdbc17",
-    "postgresql",
-]
-database-drivers-test = [
-    "derby-client",
-    "derby-embedded",
-    "derby-tools",
-    "h2",
-    "hsqldb",
-]
-testcontainers-databases = [
-    "testcontainers-junit-jupiter",
-    "testcontainers-mssqlserver",
-    "testcontainers-mysql",
-    "testcontainers-oracle-free",
-    "testcontainers-postgresql",
-]
-testcontainers-databases-spock = [
-    "testcontainers-mssqlserver",
-    "testcontainers-mysql",
-    "testcontainers-oracle-free",
-    "testcontainers-postgresql",
-    "testcontainers-spock",
-]
 
 [plugins]
 axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axion-release" }

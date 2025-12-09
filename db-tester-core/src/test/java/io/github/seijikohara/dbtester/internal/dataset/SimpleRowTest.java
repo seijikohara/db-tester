@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.seijikohara.dbtester.internal.domain.ColumnName;
-import io.github.seijikohara.dbtester.internal.domain.DataValue;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +38,8 @@ class SimpleRowTest {
       // Given
       final var column1 = new ColumnName("COL1");
       final var column2 = new ColumnName("COL2");
-      final var value1 = new DataValue("value1");
-      final var value2 = new DataValue("value2");
+      final var value1 = new CellValue("value1");
+      final var value2 = new CellValue("value2");
       final var values = Map.of(column1, value1, column2, value2);
 
       // When
@@ -61,13 +61,13 @@ class SimpleRowTest {
     void shouldCreateDefensiveCopy_whenMapIsModifiedAfterConstruction() {
       // Given
       final var column1 = new ColumnName("COL1");
-      final var value1 = new DataValue("value1");
-      final var mutableMap = new HashMap<ColumnName, DataValue>();
+      final var value1 = new CellValue("value1");
+      final var mutableMap = new HashMap<ColumnName, CellValue>();
       mutableMap.put(column1, value1);
 
       // When
       final var row = new SimpleRow(mutableMap);
-      mutableMap.put(new ColumnName("COL2"), new DataValue("value2"));
+      mutableMap.put(new ColumnName("COL2"), new CellValue("value2"));
 
       // Then
       final var result = row.getValues();
@@ -83,7 +83,7 @@ class SimpleRowTest {
     @DisplayName("should create empty row when empty map provided")
     void shouldCreateEmptyRow_whenEmptyMapProvided() {
       // Given
-      final Map<ColumnName, DataValue> emptyMap = Map.of();
+      final Map<ColumnName, CellValue> emptyMap = Map.of();
 
       // When
       final var row = new SimpleRow(emptyMap);
@@ -110,9 +110,9 @@ class SimpleRowTest {
       final var column1 = new ColumnName("COL1");
       final var column2 = new ColumnName("COL2");
       final var column3 = new ColumnName("COL3");
-      final var value1 = new DataValue("value1");
-      final var value2 = new DataValue("value2");
-      final var value3 = new DataValue(null);
+      final var value1 = new CellValue("value1");
+      final var value2 = new CellValue("value2");
+      final var value3 = new CellValue(null);
       final var values = Map.of(column1, value1, column2, value2, column3, value3);
       final var row = new SimpleRow(values);
 
@@ -135,7 +135,7 @@ class SimpleRowTest {
     void shouldReturnUnmodifiableMap_whenCalled() {
       // Given
       final var column1 = new ColumnName("COL1");
-      final var value1 = new DataValue("value1");
+      final var value1 = new CellValue("value1");
       final var values = Map.of(column1, value1);
       final var row = new SimpleRow(values);
 
@@ -145,7 +145,7 @@ class SimpleRowTest {
       // Then
       assertThrows(
           UnsupportedOperationException.class,
-          () -> result.put(new ColumnName("COL2"), new DataValue("value2")),
+          () -> result.put(new ColumnName("COL2"), new CellValue("value2")),
           "returned map should be unmodifiable");
     }
   }
@@ -166,8 +166,8 @@ class SimpleRowTest {
       // Given
       final var column1 = new ColumnName("COL1");
       final var column2 = new ColumnName("COL2");
-      final var value1 = new DataValue("value1");
-      final var value2 = new DataValue(123);
+      final var value1 = new CellValue("value1");
+      final var value2 = new CellValue(123);
       final var values = Map.of(column1, value1, column2, value2);
       final var row = new SimpleRow(values);
 
@@ -182,14 +182,14 @@ class SimpleRowTest {
           () -> assertEquals(value2, result2, "should return value2 for column2"));
     }
 
-    /** Verifies that getValue returns null DataValue when column does not exist. */
+    /** Verifies that getValue returns null CellValue when column does not exist. */
     @Test
     @Tag("edge-case")
-    @DisplayName("should return null DataValue when column does not exist")
-    void shouldReturnNullDataValue_whenColumnDoesNotExist() {
+    @DisplayName("should return null CellValue when column does not exist")
+    void shouldReturnNullCellValue_whenColumnDoesNotExist() {
       // Given
       final var column1 = new ColumnName("COL1");
-      final var value1 = new DataValue("value1");
+      final var value1 = new CellValue("value1");
       final var values = Map.of(column1, value1);
       final var row = new SimpleRow(values);
       final var nonExistentColumn = new ColumnName("NON_EXISTENT");
@@ -199,7 +199,7 @@ class SimpleRowTest {
 
       // Then
       assertAll(
-          "should return DataValue wrapping null for non-existent column",
+          "should return CellValue wrapping null for non-existent column",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertTrue(result.isNull(), "result should wrap null value"));
     }

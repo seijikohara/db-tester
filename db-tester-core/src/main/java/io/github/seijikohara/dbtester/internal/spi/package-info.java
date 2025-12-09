@@ -1,19 +1,13 @@
 /**
- * Service Provider Interface (SPI) package for database tester.
+ * Internal Service Provider Interface (SPI) implementations for database tester.
  *
- * <p>This package contains interfaces that define extension points for the database testing
- * framework. Implementations are loaded via {@link java.util.ServiceLoader} to allow the API module
- * to remain independent of specific implementations.
+ * <p>This package contains internal implementations of the SPI interfaces defined in the API
+ * module. Implementations are loaded via {@link java.util.ServiceLoader}.
  *
- * <p>Key SPIs in this package:
+ * <p><strong>Note:</strong> This is an internal package and is not part of the public API. Classes
+ * in this package may change without notice.
  *
- * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.spi.DatabaseBridgeProvider} - Provides
- *       database assertion operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.spi.DataSetLoaderProvider} - Provides the
- *       default dataset loader
- * </ul>
- *
+ * @see io.github.seijikohara.dbtester.api.spi
  * @see java.util.ServiceLoader
  */
 @NullMarked
