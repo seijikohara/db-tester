@@ -4,6 +4,7 @@ import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -30,6 +31,7 @@ import spock.lang.Specification
  * <p><strong>Important:</strong> Empty cells in CSV files are interpreted as SQL NULL
  * for all column types.
  */
+@DatabaseTest
 class NullAndEmptyValuesSpec extends Specification {
 
 	@Shared

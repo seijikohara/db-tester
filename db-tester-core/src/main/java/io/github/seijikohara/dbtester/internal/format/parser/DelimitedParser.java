@@ -17,12 +17,18 @@ import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,10 +139,6 @@ public final class DelimitedParser {
   /**
    * Parses a single file into a Table.
    *
-   * <p>This method uses an imperative loop for iterator processing because the Jackson
-   * MappingIterator API is cursor-based and requires sequential access. Converting to streams would
-   * not provide meaningful benefits.
-   *
    * @param file the file to parse
    * @return the parsed table
    */
@@ -156,15 +158,12 @@ public final class DelimitedParser {
       final var headerRow = iterator.next();
       final var columnNames = parseColumnNames(headerRow);
 
-      // Remaining rows are data
-      final var rows = new ArrayList<Row>();
-      while (iterator.hasNext()) {
-        final var values = iterator.next();
-        if (!isEmptyRow(values)) {
-          final var row = createRow(columnNames, values);
-          rows.add(row);
-        }
-      }
+      // Remaining rows are data - convert iterator to stream
+      final var rows =
+          toStream(iterator)
+              .filter(Predicate.not(this::isEmptyRow))
+              .map(values -> createRow(columnNames, values))
+              .toList();
 
       logger.debug(
           "Parsed table {} with {} columns and {} rows",
@@ -180,13 +179,26 @@ public final class DelimitedParser {
   }
 
   /**
+   * Converts an iterator to a sequential stream.
+   *
+   * @param <T> the type of elements
+   * @param iterator the iterator to convert
+   * @return a sequential stream over the iterator elements
+   */
+  private static <T> Stream<T> toStream(final MappingIterator<T> iterator) {
+    final var spliterator =
+        Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED | Spliterator.NONNULL);
+    return StreamSupport.stream(spliterator, false);
+  }
+
+  /**
    * Parses column names from the header row.
    *
    * @param headerRow the header row array
    * @return list of column names
    */
   private List<ColumnName> parseColumnNames(final String[] headerRow) {
-    return java.util.Arrays.stream(headerRow).map(String::trim).map(ColumnName::new).toList();
+    return Arrays.stream(headerRow).map(String::trim).map(ColumnName::new).toList();
   }
 
   /**
@@ -196,8 +208,7 @@ public final class DelimitedParser {
    * @return true if the row is empty
    */
   private boolean isEmptyRow(final String[] values) {
-    return java.util.Arrays.stream(values)
-        .allMatch(value -> value == null || value.trim().isEmpty());
+    return Arrays.stream(values).allMatch(value -> value.trim().isEmpty());
   }
 
   /**
@@ -220,16 +231,15 @@ public final class DelimitedParser {
    * @return the created row
    */
   private Row createRow(final List<ColumnName> columnNames, final String[] values) {
-    final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
-
-    java.util.stream.IntStream.range(0, columnNames.size())
-        .forEach(
-            i -> {
-              final var columnName = columnNames.get(i);
-              final var rawValue = i < values.length ? values[i] : null;
-              final var dataValue = toCellValue(rawValue);
-              rowValues.put(columnName, dataValue);
-            });
+    final var rowValues =
+        IntStream.range(0, columnNames.size())
+            .boxed()
+            .collect(
+                Collectors.toMap(
+                    columnNames::get,
+                    i -> toCellValue(i < values.length ? values[i] : null),
+                    (existing, replacement) -> existing,
+                    LinkedHashMap::new));
 
     return new SimpleRow(rowValues);
   }
@@ -243,9 +253,9 @@ public final class DelimitedParser {
    * @return the CellValue
    */
   private CellValue toCellValue(final @Nullable String rawValue) {
-    if (rawValue == null || rawValue.isEmpty()) {
-      return CellValue.NULL;
-    }
-    return new CellValue(rawValue);
+    return Optional.ofNullable(rawValue)
+        .filter(Predicate.not(String::isEmpty))
+        .map(CellValue::new)
+        .orElse(CellValue.NULL);
   }
 }

@@ -10,6 +10,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -27,6 +28,7 @@ import spock.lang.Specification
  *
  * <p>CSV files use comma (,) as delimiter, TSV files use tab character as delimiter.
  */
+@DatabaseTest
 class DataFormatSpec extends Specification {
 
 	/**

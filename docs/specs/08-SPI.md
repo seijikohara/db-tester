@@ -256,7 +256,7 @@ public interface FormatProvider {
 
 ```
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
-io.github.seijikohara.dbtester.internal.spi.DefaultDataSetLoaderProvider
+io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.OperationProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
@@ -305,7 +305,7 @@ module io.github.seijikohara.dbtester.api {
 ```java
 module io.github.seijikohara.dbtester.core {
     provides io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
-        with io.github.seijikohara.dbtester.internal.spi.DefaultDataSetLoaderProvider;
+        with io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider;
     provides io.github.seijikohara.dbtester.api.spi.OperationProvider
         with io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
     // ... other providers

@@ -1,10 +1,10 @@
 # DB Tester - Spock Module
 
-This module provides [Spock Framework](https://spockframework.org/) integration for the DB Tester framework through a global extension.
+This module provides [Spock Framework](https://spockframework.org/) integration for the DB Tester framework through an annotation-driven extension.
 
 ## Overview
 
-- **Global Extension** - `DatabaseTestExtension` registers via Spock extension mechanism
+- **Annotation-Driven Extension** - `DatabaseTestExtension` activates via `@DatabaseTest` annotation
 - **Method Interceptor** - `DatabaseTestInterceptor` manages test lifecycle
 - **Lifecycle Management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` execute preparation and expectation phases
 
@@ -54,6 +54,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 ### Basic Example
 
 ```groovy
+@DatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Shared
@@ -79,7 +80,7 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-The extension is registered via Spock Global Extension mechanism (`META-INF/services`). No manual registration is required.
+Add `@DatabaseTest` annotation to enable the extension. The extension activates when the annotation is present on the spec class.
 
 ### DataSource Registration
 
@@ -101,6 +102,7 @@ def setupSpec() {
 Apply annotations at the class level for all feature methods:
 
 ```groovy
+@DatabaseTest
 @Preparation
 @Expectation
 class UserRepositorySpec extends Specification {
@@ -164,7 +166,8 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 
 | Class | Description |
 |-------|-------------|
-| [`DatabaseTestExtension`](src/main/groovy/io/github/seijikohara/dbtester/spock/extension/DatabaseTestExtension.groovy) | Global extension for automatic registration |
+| [`DatabaseTest`](src/main/groovy/io/github/seijikohara/dbtester/spock/extension/DatabaseTest.groovy) | Annotation to enable database testing support |
+| [`DatabaseTestExtension`](src/main/groovy/io/github/seijikohara/dbtester/spock/extension/DatabaseTestExtension.groovy) | Annotation-driven extension activated by `@DatabaseTest` |
 | [`DatabaseTestInterceptor`](src/main/groovy/io/github/seijikohara/dbtester/spock/extension/DatabaseTestInterceptor.groovy) | Method interceptor for test lifecycle management |
 | [`SpockPreparationExecutor`](src/main/groovy/io/github/seijikohara/dbtester/spock/lifecycle/SpockPreparationExecutor.groovy) | Executes data preparation phase |
 | [`SpockExpectationVerifier`](src/main/groovy/io/github/seijikohara/dbtester/spock/lifecycle/SpockExpectationVerifier.groovy) | Verifies database state after test execution |

@@ -4,7 +4,7 @@ import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.OperationProvider;
-import io.github.seijikohara.dbtester.internal.jdbc.OperationExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor;
 import javax.sql.DataSource;
 
 /**

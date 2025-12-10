@@ -32,15 +32,29 @@ void shouldCreateUser() {
 
 ## Installation
 
-### Module Selection
+Select a module based on the test framework:
 
-| Use Case | Module | Maven Central |
-|----------|--------|---------------|
-| BOM (Version Management) | `db-tester-bom` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom) |
-| JUnit | `db-tester-junit` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit) |
-| JUnit with Spring Boot | `db-tester-junit-spring-boot-starter` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit-spring-boot-starter) |
-| Spock | `db-tester-spock` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock) |
-| Spock with Spring Boot | `db-tester-spock-spring-boot-starter` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter) |
+| Use Case | Module |
+|----------|--------|
+| JUnit | [`db-tester-junit`](db-tester-junit/) |
+| JUnit with Spring Boot | [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) |
+| Spock | [`db-tester-spock`](db-tester-spock/) |
+| Spock with Spring Boot | [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) |
+
+<details>
+<summary>All Modules</summary>
+
+| Module | Description | Maven Central |
+|--------|-------------|---------------|
+| [`db-tester-bom`](db-tester-bom/) | Bill of Materials for version management | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom) |
+| [`db-tester-api`](db-tester-api/) | Public API (annotations, configuration, SPI) | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-api.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-api) |
+| [`db-tester-core`](db-tester-core/) | Internal implementation (runtime dependency) | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-core.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-core) |
+| [`db-tester-junit`](db-tester-junit/) | JUnit extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit) |
+| [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit-spring-boot-starter) |
+| [`db-tester-spock`](db-tester-spock/) | Spock extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock) |
+| [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter) |
+
+</details>
 
 ### Gradle
 
@@ -154,9 +168,10 @@ class UserRepositoryTest {
 
 ### Spock
 
-No explicit extension annotation required. The extension is automatically registered via Spock's global extension mechanism (`IGlobalExtension`). You only need to provide a `getDbTesterRegistry()` property accessor.
+Add `@DatabaseTest` annotation to enable the extension. Provide a `getDbTesterRegistry()` property accessor for DataSource registration.
 
 ```groovy
+@DatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Shared
@@ -300,18 +315,6 @@ The output is **valid YAML** and can be parsed by standard YAML libraries for CI
 |----------|-------------|
 | [Technical Specifications](docs/specs/) | Architecture, API, configuration details |
 | [Examples](examples/) | Working test examples |
-
-## Modules
-
-| Module | Description |
-|--------|-------------|
-| [db-tester-api](db-tester-api/) | Public API |
-| [db-tester-core](db-tester-core/) | Internal implementation |
-| [db-tester-junit](db-tester-junit/) | JUnit extension |
-| [db-tester-spock](db-tester-spock/) | Spock extension |
-| [db-tester-junit-spring-boot-starter](db-tester-junit-spring-boot-starter/) | Spring Boot for JUnit |
-| [db-tester-spock-spring-boot-starter](db-tester-spock-spring-boot-starter/) | Spring Boot for Spock |
-| [db-tester-bom](db-tester-bom/) | Bill of Materials |
 
 ## License
 

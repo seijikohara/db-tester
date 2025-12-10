@@ -8,6 +8,7 @@ import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -34,6 +35,7 @@ import spock.lang.Specification
  * <p>This test class uses custom conventions while keeping default database operations
  * (CLEAN_INSERT for preparation, NONE for expectation).
  */
+@DatabaseTest
 class ConfigurationCustomizationSpec extends Specification {
 
 	/** Shared DataSource for all feature methods. */

@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -39,6 +40,7 @@ resourceLocation = 'classpath:example/feature/AnnotationConfigurationSpec/',
 scenarioNames = 'classLevel'
 )
 )
+@DatabaseTest
 class AnnotationConfigurationSpec extends Specification {
 
 	@Shared

@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Specification
@@ -28,6 +29,7 @@ import spock.lang.Specification
  * <p><strong>Note:</strong> These tests do not use database operations.
  * They test programmatic assertions directly.
  */
+@DatabaseTest
 class ErrorHandlingSpec extends Specification {
 
 	private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingSpec)

@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.postgresql.ds.PGSimpleDataSource
 import org.slf4j.Logger
@@ -27,6 +28,7 @@ import spock.lang.Specification
  * @see <a href="https://java.testcontainers.org/test_framework_integration/spock/">Testcontainers Spock Integration</a>
  */
 @Testcontainers
+@DatabaseTest
 class PostgreSQLIntegrationSpec extends Specification {
 
 	private static final Logger logger = LoggerFactory.getLogger(PostgreSQLIntegrationSpec)

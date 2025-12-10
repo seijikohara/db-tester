@@ -164,31 +164,38 @@ public final class ComparisonResult {
    * @return the column info or null
    */
   private @Nullable ColumnInfo createColumnInfo(final @Nullable ColumnMetadata metadata) {
-    return Optional.ofNullable(metadata)
-        .map(
-            m -> {
-              final var typeStr = formatJdbcType(m);
-              return new ColumnInfo(typeStr, m.nullable(), m.primaryKey());
-            })
-        .orElse(null);
+    return Optional.ofNullable(metadata).map(this::toColumnInfo).orElse(null);
+  }
+
+  /**
+   * Converts column metadata to column info.
+   *
+   * @param columnMetadata the column metadata
+   * @return the column info
+   */
+  private ColumnInfo toColumnInfo(final ColumnMetadata columnMetadata) {
+    return new ColumnInfo(
+        formatJdbcType(columnMetadata), columnMetadata.nullable(), columnMetadata.primaryKey());
   }
 
   /**
    * Formats JDBC type with precision/scale.
    *
-   * @param metadata the column metadata
+   * @param columnMetadata the column metadata
    * @return the formatted type string
    */
-  private String formatJdbcType(final ColumnMetadata metadata) {
-    final var type =
-        Optional.ofNullable(metadata.jdbcType()).map(JDBCType::getName).orElse("UNKNOWN");
-    if (metadata.precision() > 0) {
-      if (metadata.scale() > 0) {
-        return String.format("%s(%d,%d)", type, metadata.precision(), metadata.scale());
-      }
-      return String.format("%s(%d)", type, metadata.precision());
+  private String formatJdbcType(final ColumnMetadata columnMetadata) {
+    final var typeName =
+        Optional.ofNullable(columnMetadata.jdbcType()).map(JDBCType::getName).orElse("UNKNOWN");
+    final int precision = columnMetadata.precision();
+    final int scale = columnMetadata.scale();
+
+    if (precision <= 0) {
+      return typeName;
     }
-    return type;
+    return scale > 0
+        ? String.format("%s(%d,%d)", typeName, precision, scale)
+        : String.format("%s(%d)", typeName, precision);
   }
 
   /**
@@ -211,7 +218,10 @@ public final class ComparisonResult {
    * @param difference the difference to add
    */
   private void addDifference(final String tableName, final Difference difference) {
-    tableResults.computeIfAbsent(tableName, k -> new TableResult()).differences().add(difference);
+    tableResults
+        .computeIfAbsent(tableName, unused -> new TableResult())
+        .differences()
+        .add(difference);
     totalDifferences++;
   }
 
@@ -263,9 +273,8 @@ public final class ComparisonResult {
 
     try {
       builder.append(YAML_MAPPER.writeValueAsString(output));
-    } catch (final JsonProcessingException e) {
-      // Fallback to simple format if YAML serialization fails
-      builder.append(formatFallbackYaml());
+    } catch (final JsonProcessingException exception) {
+      throw new IllegalStateException("Failed to serialize comparison result to YAML", exception);
     }
 
     return builder.toString().trim();
@@ -281,35 +290,6 @@ public final class ComparisonResult {
     return String.format(
         "Assertion failed: %d %s in %s",
         totalDifferences, totalDifferences == 1 ? "difference" : "differences", tableNames);
-  }
-
-  /**
-   * Formats a fallback YAML-like message when Jackson serialization fails.
-   *
-   * @return the fallback YAML content
-   */
-  private String formatFallbackYaml() {
-    final var builder = new StringBuilder();
-    builder.append(String.format("summary:%n"));
-    builder.append(String.format("  status: FAILED%n"));
-    builder.append(String.format("  total_differences: %d%n", totalDifferences));
-    builder.append(String.format("tables:%n"));
-
-    tableResults.forEach(
-        (tableName, result) -> {
-          builder.append(String.format("  %s:%n", tableName));
-          builder.append(String.format("    differences:%n"));
-          result
-              .differences()
-              .forEach(
-                  diff -> {
-                    builder.append(String.format("      - path: %s%n", diff.path()));
-                    builder.append(String.format("        expected: %s%n", diff.expected()));
-                    builder.append(String.format("        actual: %s%n", diff.actual()));
-                  });
-        });
-
-    return builder.toString();
   }
 
   /**
@@ -333,10 +313,7 @@ public final class ComparisonResult {
    * @return the formatted string representation
    */
   private String formatValue(final @Nullable Object value) {
-    if (value == null) {
-      return "null";
-    }
-    return value.toString();
+    return Optional.ofNullable(value).map(Object::toString).orElse("null");
   }
 
   /**

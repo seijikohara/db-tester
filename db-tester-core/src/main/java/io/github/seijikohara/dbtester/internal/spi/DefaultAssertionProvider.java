@@ -6,7 +6,7 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
-import io.github.seijikohara.dbtester.internal.jdbc.TableReader;
+import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;

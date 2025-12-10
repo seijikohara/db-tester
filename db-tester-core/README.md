@@ -70,10 +70,13 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | `internal.format.tsv` | TSV format provider implementation |
 | `internal.format.parser` | Delimited text parsing utilities |
 | `internal.format.spi` | Format provider SPI (`FormatProvider`, `FormatRegistry`) |
-| `internal.jdbc` | Pure JDBC database operations |
+| `internal.jdbc` | JDBC utilities and connection handling |
+| `internal.jdbc.read` | Database read operations (table data retrieval, type conversion) |
+| `internal.jdbc.write` | Database write operations (INSERT, UPDATE, DELETE, TRUNCATE) |
 | `internal.loader` | Data loading and merging implementations |
 | `internal.scenario` | Scenario filtering logic |
 | `internal.spi` | Default SPI implementations |
+| `internal.util` | Utility classes (topological sorting) |
 
 ## SPI Providers
 

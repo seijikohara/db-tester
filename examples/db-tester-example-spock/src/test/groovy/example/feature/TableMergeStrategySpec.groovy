@@ -10,6 +10,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -30,6 +31,7 @@ import spock.lang.Specification
  * in the JUnit TableMergeStrategyTest. This Spock specification demonstrates
  * single dataset loading with different merge strategy configurations.
  */
+@DatabaseTest
 class TableMergeStrategySpec extends Specification {
 
 	/**

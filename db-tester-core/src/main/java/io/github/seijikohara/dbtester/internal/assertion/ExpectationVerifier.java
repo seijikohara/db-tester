@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
-import io.github.seijikohara.dbtester.internal.jdbc.TableReader;
+import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

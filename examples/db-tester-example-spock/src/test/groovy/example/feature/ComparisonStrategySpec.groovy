@@ -11,6 +11,7 @@ import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
 import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -30,6 +31,7 @@ import spock.lang.Specification
  *   <li>{@link ComparisonStrategy#regex(String)} - Match against a regular expression
  * </ul>
  */
+@DatabaseTest
 class ComparisonStrategySpec extends Specification {
 
 	@Shared

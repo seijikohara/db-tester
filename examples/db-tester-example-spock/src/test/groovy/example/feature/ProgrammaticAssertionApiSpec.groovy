@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -31,6 +32,7 @@ import spock.lang.Specification
  * <p>Programmatic assertions are useful for custom SQL queries, dynamic column filtering, mid-test
  * state verification, or comparing multiple dataset sources.
  */
+@DatabaseTest
 class ProgrammaticAssertionApiSpec extends Specification {
 
 	/** Shared DataSource for all feature methods. */

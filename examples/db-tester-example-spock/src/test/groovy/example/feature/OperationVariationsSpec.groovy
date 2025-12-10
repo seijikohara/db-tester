@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -29,6 +30,7 @@ import spock.lang.Specification
  * omit COLUMN3 (TIMESTAMP) to demonstrate that specifying all table columns in CSV files is not
  * required.
  */
+@DatabaseTest
 class OperationVariationsSpec extends Specification {
 
 	@Shared

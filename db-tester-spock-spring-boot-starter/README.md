@@ -59,6 +59,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ```groovy
 @SpringBootTest
+@SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Autowired
@@ -76,17 +77,22 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-DataSource is auto-registered from Spring context via auto-configuration.
+Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is auto-registered from Spring context via auto-configuration.
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names:
+For multiple DataSource beans, use bean names in `@DataSet`:
 
 ```groovy
-@Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-@Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-def "should test primary database"() {
-    // Test with primary DataSource
+@SpringBootTest
+@SpringBootDatabaseTest
+class MultiDataSourceSpec extends Specification {
+
+    @Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+    @Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+    def "should test primary database"() {
+        // Test with primary DataSource
+    }
 }
 ```
 
@@ -159,7 +165,8 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 
 | Class | Description |
 |-------|-------------|
-| [`SpringBootDatabaseTestExtension`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTestExtension.groovy) | Spock extension with Spring Boot integration |
+| [`SpringBootDatabaseTest`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTest.groovy) | Annotation to enable database testing with Spring Boot |
+| [`SpringBootDatabaseTestExtension`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTestExtension.groovy) | Annotation-driven extension activated by `@SpringBootDatabaseTest` |
 | [`SpringBootDatabaseTestInterceptor`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTestInterceptor.groovy) | Method interceptor for test lifecycle management |
 | [`DbTesterSpockAutoConfiguration`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/DbTesterSpockAutoConfiguration.groovy) | Spring Boot auto-configuration class |
 

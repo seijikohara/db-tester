@@ -120,7 +120,7 @@ The framework uses JSpecify annotations for null safety:
 | Java | 21 or later | JPMS module-info.java support |
 | Groovy | 5 or later | For Spock modules |
 | JUnit | 6 or later | JUnit Jupiter extension model |
-| Spock Framework | 2 or later | Global extension model |
+| Spock Framework | 2 or later | Annotation-driven extension model |
 | Spring Boot | 4 or later | For Spring Boot Starter modules |
 
 ### Database Compatibility

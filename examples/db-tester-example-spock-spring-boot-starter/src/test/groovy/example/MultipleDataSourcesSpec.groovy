@@ -1,6 +1,7 @@
 package example
 
 import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure.SpringBootDatabaseTest
 import javax.sql.DataSource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -32,6 +33,7 @@ import spock.lang.Specification
  * </ul>
  */
 @SpringBootTest(classes = [ExampleApplication, MultipleDataSourcesSpec.MultiDataSourceConfig])
+@SpringBootDatabaseTest
 class MultipleDataSourcesSpec extends Specification {
 
 	private static final Logger logger = LoggerFactory.getLogger(MultipleDataSourcesSpec)

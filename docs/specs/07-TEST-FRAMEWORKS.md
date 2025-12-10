@@ -144,24 +144,14 @@ class UserRepositoryTest {
 
 **Location**: `io.github.seijikohara.dbtester.spock.extension.DatabaseTestExtension`
 
-**Type**: Global extension (`IGlobalExtension`)
+**Type**: Annotation-driven extension (`IAnnotationDrivenExtension<DatabaseTest>`)
 
-### Automatic Registration
+### Registration
 
-The extension is automatically registered via `META-INF/services`:
-
-```
-# META-INF/services/org.spockframework.runtime.extension.IGlobalExtension
-io.github.seijikohara.dbtester.spock.extension.DatabaseTestExtension
-```
-
-No explicit extension registration required in test classes.
-
-### DataSource Registration
-
-Use a `@Shared` field named `dbTesterRegistry`:
+The extension is activated by adding `@DatabaseTest` to the specification class:
 
 ```groovy
+@DatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Shared
@@ -185,6 +175,7 @@ class UserRepositorySpec extends Specification {
 Use a `@Shared` field named `dbTesterConfiguration`:
 
 ```groovy
+@DatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Shared
@@ -344,11 +335,13 @@ db-tester.operation.expectation=NONE
 
 **Extension**: `SpringBootDatabaseTestExtension` (Groovy)
 
+**Type**: Annotation-driven extension (`IAnnotationDrivenExtension<SpringBootDatabaseTest>`)
+
 ```groovy
 @SpringBootTest
+@SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
-    @Test
     @Preparation
     @Expectation
     def 'should create user'() {

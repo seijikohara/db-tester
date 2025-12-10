@@ -2,6 +2,7 @@ package example
 
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure.SpringBootDatabaseTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
@@ -31,6 +32,7 @@ import spock.lang.Specification
  * Spring-managed DataSources.
  */
 @SpringBootTest(classes = ExampleApplication)
+@SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
 	@Autowired

@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure.SpringBootDatabaseTest
 import java.sql.Date
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -55,6 +56,7 @@ import spock.lang.Specification
  * </ul>
  */
 @SpringBootTest(classes = ExampleApplication)
+@SpringBootDatabaseTest
 @ActiveProfiles("custom-config")
 class PropertiesConfigurationSpec extends Specification {
 

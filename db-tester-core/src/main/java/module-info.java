@@ -27,6 +27,8 @@ module io.github.seijikohara.dbtester.core {
   exports io.github.seijikohara.dbtester.internal.format.spi;
   exports io.github.seijikohara.dbtester.internal.format.tsv;
   exports io.github.seijikohara.dbtester.internal.jdbc;
+  exports io.github.seijikohara.dbtester.internal.jdbc.read;
+  exports io.github.seijikohara.dbtester.internal.jdbc.write;
   exports io.github.seijikohara.dbtester.internal.loader;
   exports io.github.seijikohara.dbtester.internal.scenario;
   exports io.github.seijikohara.dbtester.internal.spi;

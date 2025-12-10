@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.hsqldb.jdbc.JDBCDataSource
 import org.slf4j.Logger
@@ -18,6 +19,7 @@ import spock.lang.Specification
  * <p>This test validates that the framework works correctly with HSQLDB (HyperSQL Database).
  * This is a smoke test to ensure HSQLDB compatibility with Spock.
  */
+@DatabaseTest
 class HSQLDBIntegrationSpec extends Specification {
 
 	/** Logger instance for test execution logging. */

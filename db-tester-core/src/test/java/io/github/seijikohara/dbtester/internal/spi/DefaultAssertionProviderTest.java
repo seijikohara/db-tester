@@ -13,7 +13,7 @@ import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
-import io.github.seijikohara.dbtester.internal.jdbc.TableReader;
+import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

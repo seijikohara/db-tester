@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
-import io.github.seijikohara.dbtester.internal.jdbc.OperationExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

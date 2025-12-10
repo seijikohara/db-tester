@@ -9,8 +9,11 @@ import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
 import io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry;
 import io.github.seijikohara.dbtester.internal.scenario.FilteredDataSet;
 import io.github.seijikohara.dbtester.internal.scenario.ScenarioFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Locale;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -83,32 +86,8 @@ public final class DataSetFactory {
 
     logger.debug("Creating dataset from directory: {} with format: {}", directory, dataFormat);
 
-    // Check if directory exists
-    if (!java.nio.file.Files.isDirectory(directory)) {
-      throw new DataSetLoadException(
-          String.format("Directory does not exist: %s", directory.toAbsolutePath()));
-    }
-
-    // Check if there are any data files with the specified format
-    final var extension = dataFormat.getExtension();
-    final boolean hasDataFiles;
-    try (final var paths = java.nio.file.Files.list(directory)) {
-      hasDataFiles =
-          paths
-              .filter(java.nio.file.Files::isRegularFile)
-              .anyMatch(
-                  path -> path.toString().toLowerCase(java.util.Locale.ROOT).endsWith(extension));
-    } catch (final java.io.IOException e) {
-      throw new DataSetLoadException(
-          String.format("Failed to list files in directory: %s", directory), e);
-    }
-
-    if (!hasDataFiles) {
-      throw new DataSetLoadException(
-          String.format(
-              "No data files with extension '%s' found in directory: %s",
-              extension, directory.toAbsolutePath()));
-    }
+    validateDirectory(directory);
+    validateDataFilesExist(directory, dataFormat.getExtension());
 
     final var fileExtension = new FileExtension(dataFormat.getExtension());
     final var provider = FormatRegistry.getProvider(fileExtension);
@@ -124,5 +103,54 @@ public final class DataSetFactory {
     logger.debug("Applied scenario filter with {} scenario names", scenarioNames.size());
 
     return new FilteredDataSet(rawDataSet, filter, dataSource);
+  }
+
+  /**
+   * Validates that the specified path is an existing directory.
+   *
+   * @param directory the directory path to validate
+   * @throws DataSetLoadException if the directory does not exist
+   */
+  private void validateDirectory(final Path directory) {
+    if (!Files.isDirectory(directory)) {
+      throw new DataSetLoadException(
+          String.format("Directory does not exist: %s", directory.toAbsolutePath()));
+    }
+  }
+
+  /**
+   * Validates that the directory contains at least one data file with the specified extension.
+   *
+   * @param directory the directory to check
+   * @param extension the file extension to look for
+   * @throws DataSetLoadException if no matching files exist or if an I/O error occurs
+   */
+  private void validateDataFilesExist(final Path directory, final String extension) {
+    final boolean hasDataFiles;
+    try (final var paths = Files.list(directory)) {
+      hasDataFiles =
+          paths.filter(Files::isRegularFile).anyMatch(path -> hasExtension(path, extension));
+    } catch (final IOException exception) {
+      throw new DataSetLoadException(
+          String.format("Failed to list files in directory: %s", directory), exception);
+    }
+
+    if (!hasDataFiles) {
+      throw new DataSetLoadException(
+          String.format(
+              "No data files with extension '%s' found in directory: %s",
+              extension, directory.toAbsolutePath()));
+    }
+  }
+
+  /**
+   * Checks if a path has the specified file extension (case-insensitive).
+   *
+   * @param path the path to check
+   * @param extension the extension to match
+   * @return true if the path ends with the extension
+   */
+  private boolean hasExtension(final Path path, final String extension) {
+    return path.toString().toLowerCase(Locale.ROOT).endsWith(extension);
   }
 }

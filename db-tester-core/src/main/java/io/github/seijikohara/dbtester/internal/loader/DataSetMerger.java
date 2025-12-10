@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.sql.DataSource;
@@ -61,7 +62,7 @@ public final class DataSetMerger {
 
     if (dataSets.size() == 1) {
       logger.debug("Single dataset, no merging needed");
-      return dataSets.get(0);
+      return dataSets.getFirst();
     }
 
     logger.debug("Merging {} datasets with strategy: {}", dataSets.size(), strategy);
@@ -81,7 +82,9 @@ public final class DataSetMerger {
         .flatMap(dataSet -> dataSet.getTables().stream())
         .forEach(
             table ->
-                tablesByName.computeIfAbsent(table.getName(), k -> new ArrayList<>()).add(table));
+                tablesByName
+                    .computeIfAbsent(table.getName(), unused -> new ArrayList<>())
+                    .add(table));
 
     // Merge tables according to strategy
     final List<Table> mergedTables =
@@ -106,17 +109,17 @@ public final class DataSetMerger {
       final TableName tableName, final List<Table> tables, final TableMergeStrategy strategy) {
 
     if (tables.size() == 1) {
-      return tables.get(0);
+      return tables.getFirst();
     }
 
     return switch (strategy) {
       case FIRST -> {
         logger.debug("Table '{}': using first occurrence", tableName.value());
-        yield tables.get(0);
+        yield tables.getFirst();
       }
       case LAST -> {
         logger.debug("Table '{}': using last occurrence", tableName.value());
-        yield tables.get(tables.size() - 1);
+        yield tables.getLast();
       }
       case UNION -> {
         logger.debug("Table '{}': merging with UNION (removing duplicates)", tableName.value());
@@ -184,23 +187,22 @@ public final class DataSetMerger {
   private record RowKey(Row row, List<ColumnName> columns) {
 
     @Override
-    public boolean equals(final Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!(obj instanceof RowKey other)) {
-        return false;
-      }
-      // Compare all column values
-      return columns.stream()
-          .allMatch(column -> row.getValue(column).equals(other.row.getValue(column)));
+    public boolean equals(final Object object) {
+      return switch (object) {
+        case RowKey other when this == other -> true;
+        case RowKey other ->
+            columns.stream()
+                .allMatch(
+                    column -> Objects.equals(row.getValue(column), other.row.getValue(column)));
+        case null, default -> false;
+      };
     }
 
     @Override
     public int hashCode() {
       return columns.stream()
-          .map(column -> row.getValue(column).hashCode())
-          .reduce(1, (result, hash) -> 31 * result + hash);
+          .map(column -> Objects.hashCode(row.getValue(column)))
+          .reduce(1, (accumulated, hash) -> 31 * accumulated + hash);
     }
   }
 
@@ -233,7 +235,7 @@ public final class DataSetMerger {
 
     @Override
     public Optional<Table> getTable(final TableName tableName) {
-      return tables.stream().filter(t -> t.getName().equals(tableName)).findFirst();
+      return tables.stream().filter(table -> table.getName().equals(tableName)).findFirst();
     }
 
     @Override

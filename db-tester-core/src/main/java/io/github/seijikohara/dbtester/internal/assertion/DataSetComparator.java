@@ -8,17 +8,21 @@ import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -31,6 +35,19 @@ import org.jspecify.annotations.Nullable;
  * by table and provides clear expected/actual values.
  */
 public class DataSetComparator {
+
+  /** Set of string representations for boolean true values. */
+  private static final Set<String> TRUE_VALUES = Set.of("1", "true", "yes", "y");
+
+  /** Set of string representations for boolean false values. */
+  private static final Set<String> FALSE_VALUES = Set.of("0", "false", "no", "n");
+
+  /** Pattern for matching timestamps with optional trailing zeros. */
+  private static final Pattern TIMESTAMP_PATTERN =
+      Pattern.compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}(\\.0+)?");
+
+  /** Pattern for matching trailing zeros in timestamps. */
+  private static final Pattern TRAILING_ZEROS_PATTERN = Pattern.compile("\\.0+$");
 
   /** Creates a new dataset comparator. */
   public DataSetComparator() {
@@ -111,14 +128,8 @@ public class DataSetComparator {
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
-    if (expectedRows.size() != actualRows.size()) {
-      result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
-    }
-
-    // Compare rows up to the minimum count
-    final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
-    IntStream.range(0, rowsToCompare)
-        .forEach(i -> compareRows(tableName, i, expectedRows.get(i), actualRows.get(i), result));
+    checkRowCountMismatch(tableName, expectedRows, actualRows, result);
+    compareRowPairs(tableName, expectedRows, actualRows, result, this::compareRows);
   }
 
   /**
@@ -147,26 +158,21 @@ public class DataSetComparator {
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
-    if (expectedRows.size() != actualRows.size()) {
-      result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
-    }
+    checkRowCountMismatch(tableName, expectedRows, actualRows, result);
 
     // Combine expected columns with additional columns
-    final Set<ColumnName> columnsToCompare = new HashSet<>(expected.getColumns());
-    additionalColumnNames.stream().map(ColumnName::new).forEach(columnsToCompare::add);
+    final var columnsToCompare =
+        Stream.concat(
+                expected.getColumns().stream(), additionalColumnNames.stream().map(ColumnName::new))
+            .collect(Collectors.toSet());
 
-    // Compare rows up to the minimum count
-    final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
-    IntStream.range(0, rowsToCompare)
-        .forEach(
-            i ->
-                compareRowsWithColumns(
-                    tableName,
-                    i,
-                    expectedRows.get(i),
-                    actualRows.get(i),
-                    columnsToCompare,
-                    result));
+    compareRowPairs(
+        tableName,
+        expectedRows,
+        actualRows,
+        result,
+        (table, rowIndex, expectedRow, actualRow, res) ->
+            compareRowsWithColumns(table, rowIndex, expectedRow, actualRow, columnsToCompare, res));
 
     result.assertNoDifferences();
   }
@@ -188,20 +194,7 @@ public class DataSetComparator {
       final Row actual,
       final Set<ColumnName> columnsToCompare,
       final ComparisonResult result) {
-    columnsToCompare.forEach(
-        columnName -> {
-          final var expectedValue = expected.getValue(columnName);
-          final var actualValue = actual.getValue(columnName);
-
-          if (!valuesAreEqual(expectedValue, actualValue)) {
-            result.addValueMismatch(
-                tableName,
-                rowIndex,
-                columnName.value(),
-                extractValueOrNull(expectedValue),
-                extractValueOrNull(actualValue));
-          }
-        });
+    compareRowColumns(tableName, rowIndex, expected, actual, columnsToCompare, result);
   }
 
   /**
@@ -254,19 +247,77 @@ public class DataSetComparator {
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
+    checkRowCountMismatch(tableName, expectedRows, actualRows, result);
+
+    compareRowPairs(
+        tableName,
+        expectedRows,
+        actualRows,
+        result,
+        (table, rowIndex, expectedRow, actualRow, res) ->
+            compareRowsIgnoreColumns(table, rowIndex, expectedRow, actualRow, ignoreSet, res));
+
+    result.assertNoDifferences();
+  }
+
+  /**
+   * Checks if expected and actual row lists have different sizes and records the mismatch.
+   *
+   * @param tableName the table name for error reporting
+   * @param expectedRows the expected rows
+   * @param actualRows the actual rows
+   * @param result the result collector
+   */
+  private void checkRowCountMismatch(
+      final String tableName,
+      final List<Row> expectedRows,
+      final List<Row> actualRows,
+      final ComparisonResult result) {
     if (expectedRows.size() != actualRows.size()) {
       result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
     }
+  }
 
-    // Compare rows up to the minimum count
+  /**
+   * Compares row pairs up to the minimum count using the provided comparator.
+   *
+   * @param tableName the table name for error reporting
+   * @param expectedRows the expected rows
+   * @param actualRows the actual rows
+   * @param result the result collector
+   * @param rowComparator the function to compare individual row pairs
+   */
+  private void compareRowPairs(
+      final String tableName,
+      final List<Row> expectedRows,
+      final List<Row> actualRows,
+      final ComparisonResult result,
+      final RowComparator rowComparator) {
     final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
     IntStream.range(0, rowsToCompare)
         .forEach(
-            i ->
-                compareRowsIgnoreColumns(
-                    tableName, i, expectedRows.get(i), actualRows.get(i), ignoreSet, result));
+            rowIndex ->
+                rowComparator.compare(
+                    tableName,
+                    rowIndex,
+                    expectedRows.get(rowIndex),
+                    actualRows.get(rowIndex),
+                    result));
+  }
 
-    result.assertNoDifferences();
+  /** Functional interface for row comparison operations. */
+  @FunctionalInterface
+  private interface RowComparator {
+    /**
+     * Compares two rows and collects mismatches into the result.
+     *
+     * @param tableName the table name for error reporting
+     * @param rowIndex the row index for error reporting
+     * @param expected the expected row
+     * @param actual the actual row
+     * @param result the result collector
+     */
+    void compare(String tableName, int rowIndex, Row expected, Row actual, ComparisonResult result);
   }
 
   /**
@@ -284,24 +335,7 @@ public class DataSetComparator {
       final Row expected,
       final Row actual,
       final ComparisonResult result) {
-    // Compare all columns from expected row
-    expected
-        .getValues()
-        .keySet()
-        .forEach(
-            columnName -> {
-              final var expectedValue = expected.getValue(columnName);
-              final var actualValue = actual.getValue(columnName);
-
-              if (!valuesAreEqual(expectedValue, actualValue)) {
-                result.addValueMismatch(
-                    tableName,
-                    rowIndex,
-                    columnName.value(),
-                    extractValueOrNull(expectedValue),
-                    extractValueOrNull(actualValue));
-              }
-            });
+    compareRowColumns(tableName, rowIndex, expected, actual, expected.getValues().keySet(), result);
   }
 
   /**
@@ -321,22 +355,42 @@ public class DataSetComparator {
       final Row actual,
       final Set<String> ignoreSet,
       final ComparisonResult result) {
-    expected.getValues().keySet().stream()
-        .filter(columnName -> !ignoreSet.contains(columnName.value()))
-        .forEach(
-            columnName -> {
-              final var expectedValue = expected.getValue(columnName);
-              final var actualValue = actual.getValue(columnName);
+    final var columnsToCompare =
+        expected.getValues().keySet().stream()
+            .filter(columnName -> !ignoreSet.contains(columnName.value()))
+            .collect(Collectors.toSet());
+    compareRowColumns(tableName, rowIndex, expected, actual, columnsToCompare, result);
+  }
 
-              if (!valuesAreEqual(expectedValue, actualValue)) {
+  /**
+   * Compares specified columns between two rows and collects mismatches.
+   *
+   * @param tableName the table name for error reporting
+   * @param rowIndex the row index for error reporting
+   * @param expected the expected row
+   * @param actual the actual row
+   * @param columnsToCompare the set of columns to compare
+   * @param result the result collector
+   */
+  private void compareRowColumns(
+      final String tableName,
+      final int rowIndex,
+      final Row expected,
+      final Row actual,
+      final Set<ColumnName> columnsToCompare,
+      final ComparisonResult result) {
+    columnsToCompare.stream()
+        .filter(
+            columnName ->
+                !valuesAreEqual(expected.getValue(columnName), actual.getValue(columnName)))
+        .forEach(
+            columnName ->
                 result.addValueMismatch(
                     tableName,
                     rowIndex,
                     columnName.value(),
-                    extractValueOrNull(expectedValue),
-                    extractValueOrNull(actualValue));
-              }
-            });
+                    extractValueOrNull(expected.getValue(columnName)),
+                    extractValueOrNull(actual.getValue(columnName))));
   }
 
   /**
@@ -370,7 +424,9 @@ public class DataSetComparator {
   private boolean valuesAreEqual(
       final @Nullable CellValue expected, final @Nullable CellValue actual) {
     return compareNullable(
-        expected, actual, (exp, act) -> compareInnerValues(exp.value(), act.value()));
+        expected,
+        actual,
+        (expectedCell, actualCell) -> compareInnerValues(expectedCell.value(), actualCell.value()));
   }
 
   /**
@@ -388,44 +444,35 @@ public class DataSetComparator {
   /**
    * Compares two non-null values using various comparison strategies.
    *
-   * @param exp the expected value (non-null)
-   * @param act the actual value (non-null)
+   * <p>Uses pattern matching to handle type-specific comparisons including: CLOB, numeric types,
+   * boolean values, and string representations.
+   *
+   * @param expected the expected value (non-null)
+   * @param actual the actual value (non-null)
    * @return true if the values are considered equal
    */
-  private boolean compareNonNullValues(final Object exp, final Object act) {
+  private boolean compareNonNullValues(final Object expected, final Object actual) {
     // Direct equality check
-    if (Objects.equals(exp, act)) {
+    if (Objects.equals(expected, actual)) {
       return true;
     }
 
-    // Handle CLOB comparison (actual is CLOB, expected is String)
-    if (act instanceof Clob actualClob) {
-      return compareWithClob(exp, actualClob);
-    }
-
-    // Try numeric comparison for CSV string vs database number comparison
-    if (exp instanceof String expectedStr && act instanceof Number actualNum) {
-      return compareStringToNumber(expectedStr, actualNum);
-    }
-    if (exp instanceof Number expectedNum && act instanceof String actualStr) {
-      return compareStringToNumber(actualStr, expectedNum);
-    }
-
-    // Both are numbers but different types (e.g., Integer vs Long)
-    if (exp instanceof Number expectedNum && act instanceof Number actualNum) {
-      return compareNumbers(expectedNum, actualNum);
-    }
-
-    // Boolean comparison (CSV "1"/"0" vs database true/false)
-    if (act instanceof Boolean actualBool) {
-      return compareToBooleanString(exp, actualBool);
-    }
-    if (exp instanceof Boolean expectedBool && act instanceof String actualStr) {
-      return compareToBooleanString(actualStr, expectedBool);
-    }
-
-    // Fall back to normalized string comparison (handles timestamp precision differences)
-    return normalizeForComparison(exp.toString()).equals(normalizeForComparison(act.toString()));
+    // Pattern matching with switch for type-specific comparison
+    return switch (actual) {
+      case Clob actualClob -> compareWithClob(expected, actualClob);
+      case Number actualNumber when expected instanceof String expectedString ->
+          compareStringToNumber(expectedString, actualNumber);
+      case Number actualNumber when expected instanceof Number expectedNumber ->
+          compareNumbers(expectedNumber, actualNumber);
+      case String actualString when expected instanceof Number expectedNumber ->
+          compareStringToNumber(actualString, expectedNumber);
+      case Boolean actualBoolean -> compareToBooleanString(expected, actualBoolean);
+      case String actualString when expected instanceof Boolean expectedBoolean ->
+          compareToBooleanString(actualString, expectedBoolean);
+      default ->
+          normalizeForComparison(expected.toString())
+              .equals(normalizeForComparison(actual.toString()));
+    };
   }
 
   /**
@@ -447,7 +494,10 @@ public class DataSetComparator {
       final java.util.function.BiFunction<T, T, Boolean> comparator) {
     return Optional.ofNullable(expected)
         .map(
-            exp -> Optional.ofNullable(actual).map(act -> comparator.apply(exp, act)).orElse(false))
+            expectedValue ->
+                Optional.ofNullable(actual)
+                    .map(actualValue -> comparator.apply(expectedValue, actualValue))
+                    .orElse(false))
         .orElseGet(() -> actual == null);
   }
 
@@ -471,24 +521,16 @@ public class DataSetComparator {
   /**
    * Reads the content of a CLOB as a string.
    *
-   * <p>This method uses an imperative loop because I/O operations require sequential buffered
-   * reading. Stream-based alternatives would not improve readability or correctness for this
-   * character stream processing pattern.
-   *
    * @param clob the CLOB to read
    * @return the CLOB content as a string
    * @throws SQLException if a database error occurs
    * @throws IOException if an I/O error occurs
    */
   private String readClob(final Clob clob) throws SQLException, IOException {
-    try (final Reader reader = clob.getCharacterStream()) {
-      final var stringBuilder = new StringBuilder();
-      final var buffer = new char[1024];
-      int length;
-      while ((length = reader.read(buffer)) != -1) {
-        stringBuilder.append(buffer, 0, length);
-      }
-      return stringBuilder.toString();
+    try (final var reader = clob.getCharacterStream();
+        final var writer = new StringWriter()) {
+      reader.transferTo(writer);
+      return writer.toString();
     }
   }
 
@@ -496,22 +538,12 @@ public class DataSetComparator {
    * Compares a value to a boolean.
    *
    * @param value the value to compare
-   * @param bool the boolean to compare against
+   * @param booleanValue the boolean to compare against
    * @return true if they represent the same boolean value
    */
-  private boolean compareToBooleanString(final Object value, final Boolean bool) {
-    final var stringValue = value.toString().trim().toLowerCase(java.util.Locale.ROOT);
-    if (bool) {
-      return "1".equals(stringValue)
-          || "true".equals(stringValue)
-          || "yes".equals(stringValue)
-          || "y".equals(stringValue);
-    } else {
-      return "0".equals(stringValue)
-          || "false".equals(stringValue)
-          || "no".equals(stringValue)
-          || "n".equals(stringValue);
-    }
+  private boolean compareToBooleanString(final Object value, final Boolean booleanValue) {
+    final var stringValue = value.toString().trim().toLowerCase(Locale.ROOT);
+    return booleanValue ? TRUE_VALUES.contains(stringValue) : FALSE_VALUES.contains(stringValue);
   }
 
   /**
@@ -523,8 +555,8 @@ public class DataSetComparator {
   private String normalizeForComparison(final String value) {
     // Handle timestamp precision differences (e.g., "2024-01-01 10:00:00" vs "2024-01-01
     // 10:00:00.0")
-    if (value.matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}(\\.0+)?")) {
-      return value.replaceAll("\\.0+$", "");
+    if (TIMESTAMP_PATTERN.matcher(value).matches()) {
+      return TRAILING_ZEROS_PATTERN.matcher(value).replaceAll("");
     }
     return value;
   }
@@ -544,40 +576,76 @@ public class DataSetComparator {
       final var trimmedString = stringValue.trim();
 
       // For floating-point types, use epsilon comparison
-      if (numberValue instanceof Float || numberValue instanceof Double) {
-        final var expected = Double.parseDouble(trimmedString);
-        return compareFloatingPoint(expected, numberValue.doubleValue());
-      }
-
-      // Try integer comparison first
-      if (!trimmedString.contains(".")) {
-        final var expected = new BigInteger(trimmedString);
-        final BigInteger actual;
-        if (numberValue instanceof BigInteger bigIntValue) {
-          actual = bigIntValue;
-        } else if (numberValue instanceof BigDecimal bigDecimalValue) {
-          try {
-            actual = bigDecimalValue.toBigIntegerExact();
-          } catch (final ArithmeticException e) {
-            // Has decimal part, compare as decimal
-            return new BigDecimal(trimmedString).compareTo(bigDecimalValue) == 0;
-          }
-        } else {
-          actual = BigInteger.valueOf(numberValue.longValue());
-        }
-        return expected.equals(actual);
-      }
-
-      // Decimal comparison
-      final var expected = new BigDecimal(trimmedString);
-      final var actual =
-          numberValue instanceof BigDecimal bigDecimalValue
-              ? bigDecimalValue
-              : new BigDecimal(numberValue.toString());
-      return expected.compareTo(actual) == 0;
-    } catch (final NumberFormatException e) {
+      return switch (numberValue) {
+        case Float floatValue ->
+            compareFloatingPoint(Double.parseDouble(trimmedString), floatValue.doubleValue());
+        case Double doubleValue ->
+            compareFloatingPoint(Double.parseDouble(trimmedString), doubleValue);
+        default -> compareStringToIntegerOrDecimal(trimmedString, numberValue);
+      };
+    } catch (final NumberFormatException exception) {
       // String is not a valid number, fall back to string comparison
       return stringValue.equals(numberValue.toString());
+    }
+  }
+
+  /**
+   * Compares a string to an integer or decimal number.
+   *
+   * @param trimmedString the trimmed string value
+   * @param numberValue the number value to compare against
+   * @return true if the values are considered equal
+   */
+  private boolean compareStringToIntegerOrDecimal(
+      final String trimmedString, final Number numberValue) {
+    // Integer comparison when string has no decimal point
+    if (!trimmedString.contains(".")) {
+      return compareStringToInteger(trimmedString, numberValue);
+    }
+
+    // Decimal comparison
+    final var expectedDecimal = new BigDecimal(trimmedString);
+    final var actualDecimal = toBigDecimal(numberValue);
+    return expectedDecimal.compareTo(actualDecimal) == 0;
+  }
+
+  /**
+   * Compares a string representation of an integer to a number.
+   *
+   * @param trimmedString the trimmed string value (no decimal point)
+   * @param numberValue the number value to compare against
+   * @return true if the values are considered equal
+   */
+  private boolean compareStringToInteger(final String trimmedString, final Number numberValue) {
+    final var expectedInteger = new BigInteger(trimmedString);
+    return switch (numberValue) {
+      case BigInteger bigIntegerValue -> expectedInteger.equals(bigIntegerValue);
+      case BigDecimal bigDecimalValue ->
+          compareIntegerStringWithBigDecimal(expectedInteger, trimmedString, bigDecimalValue);
+      default -> expectedInteger.equals(BigInteger.valueOf(numberValue.longValue()));
+    };
+  }
+
+  /**
+   * Compares an integer string with a BigDecimal value.
+   *
+   * <p>First attempts exact BigInteger conversion; if the BigDecimal has a fractional part, falls
+   * back to decimal comparison.
+   *
+   * @param expectedInteger the expected integer value
+   * @param trimmedString the original string for decimal fallback comparison
+   * @param bigDecimalValue the BigDecimal value to compare
+   * @return true if the values are considered equal
+   */
+  private boolean compareIntegerStringWithBigDecimal(
+      final BigInteger expectedInteger,
+      final String trimmedString,
+      final BigDecimal bigDecimalValue) {
+    try {
+      return expectedInteger.equals(bigDecimalValue.toBigIntegerExact());
+    } catch (final ArithmeticException exception) {
+      // Has decimal part, compare as decimal
+      return new BigDecimal(trimmedString).compareTo(bigDecimalValue) == 0;
     }
   }
 
@@ -593,19 +661,36 @@ public class DataSetComparator {
    */
   private boolean compareNumbers(final Number expected, final Number actual) {
     // For floating-point types, use epsilon comparison
-    if (expected instanceof Float
-        || expected instanceof Double
-        || actual instanceof Float
-        || actual instanceof Double) {
+    if (isFloatingPoint(expected) || isFloatingPoint(actual)) {
       return compareFloatingPoint(expected.doubleValue(), actual.doubleValue());
     }
 
     // Convert both to BigDecimal for precise comparison
-    final var expectedDecimal =
-        expected instanceof BigDecimal bd ? bd : new BigDecimal(expected.toString());
-    final var actualDecimal =
-        actual instanceof BigDecimal bd ? bd : new BigDecimal(actual.toString());
+    final var expectedDecimal = toBigDecimal(expected);
+    final var actualDecimal = toBigDecimal(actual);
     return expectedDecimal.compareTo(actualDecimal) == 0;
+  }
+
+  /**
+   * Checks if a number is a floating-point type (Float or Double).
+   *
+   * @param number the number to check
+   * @return true if the number is Float or Double
+   */
+  private boolean isFloatingPoint(final Number number) {
+    return number instanceof Float || number instanceof Double;
+  }
+
+  /**
+   * Converts a Number to BigDecimal.
+   *
+   * @param number the number to convert
+   * @return the BigDecimal representation
+   */
+  private BigDecimal toBigDecimal(final Number number) {
+    return number instanceof BigDecimal bigDecimalValue
+        ? bigDecimalValue
+        : new BigDecimal(number.toString());
   }
 
   /**

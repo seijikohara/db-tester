@@ -43,7 +43,7 @@ db-tester-bom
 | `db-tester-api` | Public annotations, configuration, SPI interfaces |
 | `db-tester-core` | JDBC operations, format parsing, SPI implementations |
 | `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEach callbacks |
-| `db-tester-spock` | Spock global extension and interceptors |
+| `db-tester-spock` | Spock annotation-driven extension and interceptors |
 | `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
 | `db-tester-spock-spring-boot-starter` | Spring Boot auto-configuration for Spock |
 
@@ -147,6 +147,7 @@ io.github.seijikohara.dbtester.api
 ```
 io.github.seijikohara.dbtester.internal
 ├── assertion/
+│   ├── ComparisonResult.java
 │   ├── DataSetComparator.java
 │   └── ExpectationVerifier.java
 ├── dataset/
@@ -161,31 +162,34 @@ io.github.seijikohara.dbtester.internal
 │   ├── FileExtension.java
 │   └── StringIdentifier.java
 ├── format/
+│   ├── TableOrdering.java
 │   ├── csv/CsvFormatProvider.java
 │   ├── tsv/TsvFormatProvider.java
-│   ├── parser/DelimitedParser.java
-│   └── spi/FormatProvider.java
+│   ├── parser/
+│   │   ├── DelimitedParser.java
+│   │   └── DelimiterConfig.java
+│   └── spi/
+│       ├── FormatProvider.java
+│       └── FormatRegistry.java
 ├── jdbc/
-│   ├── OperationExecutor.java
-│   ├── SqlBuilder.java
-│   ├── ParameterBinder.java
-│   ├── ValueParser.java
-│   ├── TableReader.java
-│   ├── LobConverter.java
-│   ├── ForeignKeyResolver.java
-│   ├── ForeignKeyDependencyExtractor.java
-│   ├── ResultSetIterator.java
-│   ├── executor/
-│   │   ├── TableExecutor.java
-│   │   ├── InsertExecutor.java
-│   │   ├── UpdateExecutor.java
-│   │   ├── DeleteExecutor.java
-│   │   ├── RefreshExecutor.java
-│   │   └── TruncateExecutor.java
-│   └── wrapper/
-│       └── Jdbc.java
+│   ├── Jdbc.java
+│   ├── read/
+│   │   ├── TableReader.java
+│   │   ├── TableOrderResolver.java
+│   │   └── TypeConverter.java
+│   └── write/
+│       ├── OperationExecutor.java
+│       ├── SqlBuilder.java
+│       ├── ParameterBinder.java
+│       ├── TableExecutor.java
+│       ├── InsertExecutor.java
+│       ├── UpdateExecutor.java
+│       ├── DeleteExecutor.java
+│       ├── RefreshExecutor.java
+│       └── TruncateExecutor.java
 ├── loader/
 │   ├── TestClassNameBasedDataSetLoader.java
+│   ├── DefaultDataSetLoaderProvider.java
 │   ├── AnnotationResolver.java
 │   ├── DataSetFactory.java
 │   ├── DataSetMerger.java
@@ -194,12 +198,13 @@ io.github.seijikohara.dbtester.internal
 │   ├── ScenarioFilter.java
 │   ├── FilteredDataSet.java
 │   └── FilteredTable.java
-└── spi/
-    ├── DefaultAssertionProvider.java
-    ├── DefaultDataSetLoaderProvider.java
-    ├── DefaultExpectationProvider.java
-    ├── DefaultOperationProvider.java
-    └── ScenarioNameResolverRegistry.java
+├── spi/
+│   ├── DefaultAssertionProvider.java
+│   ├── DefaultExpectationProvider.java
+│   ├── DefaultOperationProvider.java
+│   └── ScenarioNameResolverRegistry.java
+└── util/
+    └── TopologicalSorter.java
 ```
 
 ---

@@ -1,16 +1,13 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
-import org.spockframework.runtime.extension.IGlobalExtension
+import org.spockframework.runtime.extension.IAnnotationDrivenExtension
 import spock.lang.Specification
 
 /**
  * Unit tests for {@link SpringBootDatabaseTestExtension}.
  *
- * <p>This specification verifies the Spring Boot-aware Spock extension
- * for database testing.
- *
- * <p>Note: Due to Spock's limitation on mocking final classes like Class, Method,
- * SpecInfo, and FeatureInfo, these tests focus on basic functionality verification.
+ * <p>This specification verifies the annotation-driven Spock extension
+ * for Spring Boot database testing.
  */
 class SpringBootDatabaseTestExtensionSpec extends Specification {
 
@@ -29,52 +26,9 @@ class SpringBootDatabaseTestExtensionSpec extends Specification {
 		instance != null
 	}
 
-	def 'should implement IGlobalExtension interface'() {
-		expect: 'extension implements IGlobalExtension'
-		extension instanceof IGlobalExtension
-	}
-
-	def 'should not throw exception on start'() {
-		when: 'calling start'
-		extension.start()
-
-		then: 'no exception is thrown'
-		noExceptionThrown()
-	}
-
-	def 'should not throw exception on stop'() {
-		when: 'calling stop'
-		extension.stop()
-
-		then: 'no exception is thrown'
-		noExceptionThrown()
-	}
-
-	def 'should allow multiple start calls'() {
-		when: 'calling start multiple times'
-		extension.start()
-		extension.start()
-
-		then: 'no exception is thrown'
-		noExceptionThrown()
-	}
-
-	def 'should allow multiple stop calls'() {
-		when: 'calling stop multiple times'
-		extension.stop()
-		extension.stop()
-
-		then: 'no exception is thrown'
-		noExceptionThrown()
-	}
-
-	def 'should allow start and stop sequence'() {
-		when: 'calling start then stop'
-		extension.start()
-		extension.stop()
-
-		then: 'no exception is thrown'
-		noExceptionThrown()
+	def 'should implement IAnnotationDrivenExtension interface'() {
+		expect: 'extension implements IAnnotationDrivenExtension'
+		extension instanceof IAnnotationDrivenExtension
 	}
 
 	def 'should create multiple independent extensions'() {
@@ -84,7 +38,7 @@ class SpringBootDatabaseTestExtensionSpec extends Specification {
 
 		then: 'extensions are independent'
 		!extension1.is(extension2)
-		extension1 instanceof IGlobalExtension
-		extension2 instanceof IGlobalExtension
+		extension1 instanceof IAnnotationDrivenExtension
+		extension2 instanceof IAnnotationDrivenExtension
 	}
 }
