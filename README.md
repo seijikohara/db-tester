@@ -122,12 +122,18 @@ ID,NAME,EMAIL
 ### 3. Run Test
 
 ```bash
+# Gradle
 ./gradlew test
+
+# Maven
+./mvnw test
 ```
 
 ## Usage Examples
 
 ### JUnit with Spring Boot
+
+Requires `@ExtendWith(SpringBootDatabaseTestExtension.class)` to enable the extension. The DataSource is automatically discovered from the Spring ApplicationContext.
 
 ```java
 @SpringBootTest
@@ -148,15 +154,26 @@ class UserRepositoryTest {
 
 ### Spock
 
+No explicit extension annotation required. The extension is automatically registered via Spock's global extension mechanism (`IGlobalExtension`). You only need to provide a `getDbTesterRegistry()` property accessor.
+
 ```groovy
 class UserRepositorySpec extends Specification {
 
     @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSource dataSource
+
+    @Shared
+    DataSourceRegistry registry
+
+    // Property accessor required by the framework
+    DataSourceRegistry getDbTesterRegistry() {
+        return registry
+    }
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
-        dbTesterRegistry.registerDefault(createDataSource())
+        dataSource = createDataSource()
+        registry = new DataSourceRegistry()
+        registry.registerDefault(dataSource)
     }
 
     @Preparation
