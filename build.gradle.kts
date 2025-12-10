@@ -100,7 +100,7 @@ subprojects {
             signAllPublications()
             pom {
                 url = "https://github.com/seijikohara/db-tester"
-                inceptionYear = "2024"
+                inceptionYear = "2025"
                 licenses {
                     license {
                         name = "MIT License"

@@ -1,0 +1,20 @@
+{
+  "name": "db-tester-docs",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "deps:update": "npx npm-check-updates -u && npm install",
+    "deps:check": "npx npm-check-updates"
+  },
+  "devDependencies": {
+    "mermaid": "^11.12.2",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
+  },
+  "dependencies": {
+    "@catppuccin/vitepress": "^0.1.2"
+  }
+}

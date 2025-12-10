@@ -2,16 +2,6 @@
 
 This document describes the integration with JUnit and Spock test frameworks.
 
----
-
-## Table of Contents
-
-1. [JUnit Integration](#junit-integration)
-2. [Spock Integration](#spock-integration)
-3. [Spring Boot Integration](#spring-boot-integration)
-4. [Lifecycle Hooks](#lifecycle-hooks)
-
----
 
 ## JUnit Integration
 
@@ -132,7 +122,6 @@ class UserRepositoryTest {
 }
 ```
 
----
 
 ## Spock Integration
 
@@ -234,7 +223,6 @@ def 'should process #status order'() {
 
 Scenario names: `"should process PENDING order"`, `"should process COMPLETED order"`
 
----
 
 ## Spring Boot Integration
 
@@ -359,68 +347,59 @@ Auto-configuration classes:
 | JUnit Starter | `DbTesterJUnitAutoConfiguration` |
 | Spock Starter | `DbTesterSpockAutoConfiguration` |
 
----
 
 ## Lifecycle Hooks
 
 ### JUnit Lifecycle
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Test Execution                        │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  @BeforeAll                                              │
-│    └─► Register DataSource                               │
-│    └─► Set Configuration (optional)                      │
-│                                                          │
-│  For each @Test method:                                  │
-│    │                                                     │
-│    ├─► beforeEach() [DatabaseTestExtension]              │
-│    │     └─► Find @Preparation                           │
-│    │     └─► Load datasets                               │
-│    │     └─► Execute operation                           │
-│    │                                                     │
-│    ├─► Test method execution                             │
-│    │                                                     │
-│    └─► afterEach() [DatabaseTestExtension]               │
-│          └─► Find @Expectation                           │
-│          └─► Load expected datasets                      │
-│          └─► Compare with database                       │
-│          └─► Report mismatches                           │
-│                                                          │
-│  @AfterAll                                               │
-│    └─► Cleanup (optional)                                │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Test Execution
+        BA["@BeforeAll"]
+        BA --> BA1[Register DataSource]
+        BA1 --> BA2[Set Configuration]
+
+        subgraph each["For each Test method"]
+            BE["beforeEach()"]
+            BE --> BE1["Find Preparation"]
+            BE1 --> BE2[Load datasets]
+            BE2 --> BE3[Execute operation]
+            BE3 --> TM[Test method execution]
+            TM --> AE["afterEach()"]
+            AE --> AE1["Find Expectation"]
+            AE1 --> AE2[Load expected datasets]
+            AE2 --> AE3[Compare with database]
+            AE3 --> AE4[Report mismatches]
+        end
+
+        BA2 --> each
+        each --> AA["@AfterAll"]
+        AA --> AA1[Cleanup]
+    end
 ```
 
 ### Spock Lifecycle
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  Specification Execution                 │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  setupSpec()                                             │
-│    └─► Initialize dbTesterRegistry                       │
-│    └─► Register DataSource                               │
-│    └─► Set dbTesterConfiguration (optional)              │
-│                                                          │
-│  For each feature method:                                │
-│    │                                                     │
-│    ├─► Interceptor.interceptFeatureExecution()           │
-│    │     └─► Before: Execute @Preparation                │
-│    │                                                     │
-│    ├─► Feature method execution                          │
-│    │                                                     │
-│    └─► Interceptor.interceptFeatureExecution()           │
-│          └─► After: Execute @Expectation                 │
-│                                                          │
-│  cleanupSpec()                                           │
-│    └─► Cleanup (optional)                                │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Specification Execution
+        SS["setupSpec()"]
+        SS --> SS1[Initialize dbTesterRegistry]
+        SS1 --> SS2[Register DataSource]
+        SS2 --> SS3[Set dbTesterConfiguration]
+
+        subgraph each["For each feature method"]
+            INT1["Interceptor (Before)"]
+            INT1 --> INT1A["Execute Preparation"]
+            INT1A --> FM[Feature method execution]
+            FM --> INT2["Interceptor (After)"]
+            INT2 --> INT2A["Execute Expectation"]
+        end
+
+        SS3 --> each
+        each --> CS["cleanupSpec()"]
+        CS --> CS1[Cleanup]
+    end
 ```
 
 ### Lifecycle Executor Classes
@@ -438,12 +417,11 @@ Auto-configuration classes:
 | Test | Any exception | Expectation still runs |
 | Expectation | `ValidationException` | Test fails with comparison details |
 
----
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API.md) - Annotation details
-- [Configuration](04-CONFIGURATION.md) - Configuration options
-- [SPI](08-SPI.md) - Service Provider Interface extension points
-- [Error Handling](09-ERROR-HANDLING.md) - Lifecycle error handling
+- [Overview](01-OVERVIEW) - Framework purpose and key concepts
+- [Public API](03-PUBLIC-API) - Annotation details
+- [Configuration](04-CONFIGURATION) - Configuration options
+- [SPI](08-SPI) - Service Provider Interface extension points
+- [Error Handling](09-ERROR-HANDLING) - Lifecycle error handling

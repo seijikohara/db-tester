@@ -2,19 +2,6 @@
 
 This document describes the file formats supported by the DB Tester framework and their parsing rules.
 
----
-
-## Table of Contents
-
-1. [Supported Formats](#supported-formats)
-2. [File Structure](#file-structure)
-3. [Scenario Filtering](#scenario-filtering)
-4. [Special Values](#special-values)
-5. [Directory Convention](#directory-convention)
-6. [Load Order](#load-order)
-7. [Parsing Rules](#parsing-rules)
-
----
 
 ## Supported Formats
 
@@ -36,7 +23,6 @@ var conventions = ConventionSettings.standard()
 
 When loading datasets from a directory, only files matching the configured extension are processed.
 
----
 
 ## File Structure
 
@@ -77,7 +63,6 @@ order_id	user_id	amount	status
 1002	2	149.50	COMPLETED
 ```
 
----
 
 ## Scenario Filtering
 
@@ -134,7 +119,6 @@ void testMultipleScenarios() { }
 
 Rows matching any of the specified scenarios are included.
 
----
 
 ## Special Values
 
@@ -179,7 +163,6 @@ Values containing delimiters or special characters must be quoted:
 | Contains newline | `"line1\nline2"` |
 | Starts with whitespace | `" leading space"` |
 
----
 
 ## Directory Convention
 
@@ -225,7 +208,6 @@ Table names are derived from filenames:
 
 Case sensitivity depends on the database configuration.
 
----
 
 ## Load Order
 
@@ -302,7 +284,7 @@ The table ordering interacts with database operations as follows:
 
 ### Relationship with TableOrderingStrategy
 
-The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-DATABASE-OPERATIONS.md#table-ordering-strategy) for full details.
+The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-DATABASE-OPERATIONS#table-ordering-strategy) for full details.
 
 | Strategy | Behavior |
 |----------|----------|
@@ -325,7 +307,6 @@ The `TableOrderingStrategy` enum controls how table ordering is determined. See 
 | Cannot read ordering file | `DataSetLoadException` |
 | File required but not found (`LOAD_ORDER_FILE` strategy) | `DataSetLoadException` |
 
----
 
 ## Parsing Rules
 
@@ -386,11 +367,10 @@ All values are parsed as strings and converted during database operations:
 | Mismatched column count | `DataSetLoadException` |
 | Parse error | `DataSetLoadException` with details |
 
----
 
 ## Related Specifications
 
-- [Configuration](04-CONFIGURATION.md) - DataFormat and ConventionSettings
-- [Database Operations](06-DATABASE-OPERATIONS.md) - Table ordering and operations
-- [Public API](03-PUBLIC-API.md) - Annotation attributes
-- [Error Handling](09-ERROR-HANDLING.md) - Dataset load errors
+- [Configuration](04-CONFIGURATION) - DataFormat and ConventionSettings
+- [Database Operations](06-DATABASE-OPERATIONS) - Table ordering and operations
+- [Public API](03-PUBLIC-API) - Annotation attributes
+- [Error Handling](09-ERROR-HANDLING) - Dataset load errors

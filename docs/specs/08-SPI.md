@@ -2,39 +2,29 @@
 
 This document describes the SPI extension points in the DB Tester framework.
 
----
-
-## Table of Contents
-
-1. [SPI Overview](#spi-overview)
-2. [API Module SPIs](#api-module-spis)
-3. [Core Module SPIs](#core-module-spis)
-4. [ServiceLoader Registration](#serviceloader-registration)
-5. [Custom Implementations](#custom-implementations)
-
----
 
 ## SPI Overview
 
 The framework uses Java ServiceLoader for loose coupling between modules:
 
-```
-┌─────────────────┐          ServiceLoader          ┌─────────────────┐
-│                 │ ◄────────────────────────────── │                 │
-│  db-tester-api  │    Defines SPI interfaces       │  db-tester-core │
-│                 │ ──────────────────────────────► │                 │
-│                 │    Provides implementations     │                 │
-└─────────────────┘                                 └─────────────────┘
-         ▲                                                   │
-         │                                                   │
-         │ Compile-time dependency                           │
-         │                                                   │
-┌─────────────────┐                                          │
-│                 │      Runtime via ServiceLoader           │
-│ db-tester-junit │ ◄────────────────────────────────────────┘
-│ db-tester-spock │
-│                 │
-└─────────────────┘
+```mermaid
+flowchart TB
+    subgraph API[db-tester-api]
+        SPI[SPI Interfaces]
+    end
+
+    subgraph CORE[db-tester-core]
+        IMPL[Implementations]
+    end
+
+    subgraph Frameworks[Test Frameworks]
+        JUNIT[db-tester-junit]
+        SPOCK[db-tester-spock]
+    end
+
+    API <-->|ServiceLoader| CORE
+    Frameworks -->|Compile-time| API
+    CORE -.->|Runtime via ServiceLoader| Frameworks
 ```
 
 ### Design Principles
@@ -43,7 +33,6 @@ The framework uses Java ServiceLoader for loose coupling between modules:
 2. **Runtime Discovery**: Core implementations loaded via ServiceLoader
 3. **Extensibility**: Custom implementations can replace defaults
 
----
 
 ## API Module SPIs
 
@@ -65,7 +54,6 @@ public interface DataSetLoaderProvider {
 
 **Usage**: Called by `Configuration.defaults()` to obtain the loader
 
----
 
 ### OperationProvider
 
@@ -107,7 +95,6 @@ public interface OperationProvider {
 - `CLEAN_INSERT` - Delete all then insert
 - `TRUNCATE_INSERT` - Truncate then insert
 
----
 
 ### AssertionProvider
 
@@ -157,9 +144,8 @@ public interface AssertionProvider {
 3. Collect all differences (not fail-fast)
 4. Output human-readable summary + YAML details on mismatch
 
-See [Error Handling - Validation Errors](09-ERROR-HANDLING.md#validation-errors) for output format details.
+See [Error Handling - Validation Errors](09-ERROR-HANDLING#validation-errors) for output format details.
 
----
 
 ### ExpectationProvider
 
@@ -182,7 +168,6 @@ public interface ExpectationProvider {
 2. Filter by scenario
 3. Delegate to `AssertionProvider` for comparison
 
----
 
 ### ScenarioNameResolver
 
@@ -211,7 +196,6 @@ public interface ScenarioNameResolver {
 2. Use first resolver that returns `true`
 3. Call `resolve()` to obtain scenario name
 
----
 
 ## Core Module SPIs
 
@@ -246,7 +230,6 @@ public interface FormatProvider {
 
 **Note**: This is an internal SPI not intended for external implementation.
 
----
 
 ## ServiceLoader Registration
 
@@ -312,7 +295,6 @@ module io.github.seijikohara.dbtester.core {
 }
 ```
 
----
 
 ## Custom Implementations
 
@@ -410,10 +392,9 @@ When multiple providers are registered:
 | `ScenarioNameResolver` | First that `supports()` returns true |
 | `FormatProvider` | First that `canHandle()` returns true |
 
----
 
 ## Related Specifications
 
-- [Architecture](02-ARCHITECTURE.md) - Module structure
-- [Configuration](04-CONFIGURATION.md) - Configuration classes
-- [Test Frameworks](07-TEST-FRAMEWORKS.md) - Framework integration
+- [Architecture](02-ARCHITECTURE) - Module structure
+- [Configuration](04-CONFIGURATION) - Configuration classes
+- [Test Frameworks](07-TEST-FRAMEWORKS) - Framework integration

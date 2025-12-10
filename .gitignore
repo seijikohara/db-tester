@@ -112,6 +112,13 @@ logs/
 # .env.local
 
 # =========================================
+# Node.js / VitePress
+# =========================================
+node_modules/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# =========================================
 # Claude Code
 # =========================================
 # Version control: .claude/agents/, .claude/commands/, .claude/settings.json

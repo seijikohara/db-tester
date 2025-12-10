@@ -2,19 +2,6 @@
 
 This document describes the database operations supported by the DB Tester framework.
 
----
-
-## Table of Contents
-
-1. [Operation Enum](#operation-enum)
-2. [Operation Descriptions](#operation-descriptions)
-3. [Execution Flow](#execution-flow)
-4. [Table Ordering Strategy](#table-ordering-strategy)
-5. [Table Ordering](#table-ordering)
-6. [Transaction Handling](#transaction-handling)
-7. [Type Conversion](#type-conversion)
-
----
 
 ## Operation Enum
 
@@ -34,7 +21,6 @@ This document describes the database operations supported by the DB Tester frame
 | `CLEAN_INSERT` | Delete all then insert (default) | Fresh test data |
 | `TRUNCATE_INSERT` | Truncate then insert | Fresh data with sequence reset |
 
----
 
 ## Operation Descriptions
 
@@ -50,7 +36,6 @@ Performs no database operation.
 - Expectation-only tests where preparation data exists from previous tests
 - Manual setup scenarios
 
----
 
 ### INSERT
 
@@ -70,7 +55,6 @@ Inserts new rows without modifying existing data.
 **Constraints**:
 - Requires empty target rows or unique keys
 
----
 
 ### UPDATE
 
@@ -91,7 +75,6 @@ Updates existing rows identified by primary key.
 - Tables must have primary keys defined
 - Dataset must include primary key columns
 
----
 
 ### REFRESH
 
@@ -109,7 +92,6 @@ Performs upsert operations (insert or update).
 **Requirements**:
 - Tables must have primary keys defined
 
----
 
 ### DELETE
 
@@ -129,7 +111,6 @@ Deletes specific rows identified by primary key.
 **Requirements**:
 - Dataset must include primary key columns
 
----
 
 ### DELETE_ALL
 
@@ -149,7 +130,6 @@ Deletes all rows from referenced tables.
 **Table Processing Order**:
 - Tables processed in reverse foreign key order
 
----
 
 ### TRUNCATE_TABLE
 
@@ -176,7 +156,6 @@ Truncates tables, resetting identity columns where supported.
 | SQL Server | Yes | Requires no FK references |
 | Oracle | Yes | Requires CASCADE |
 
----
 
 ### CLEAN_INSERT
 
@@ -196,7 +175,6 @@ Deletes all rows then inserts dataset rows.
 - DELETE phase: Child tables first
 - INSERT phase: Parent tables first
 
----
 
 ### TRUNCATE_INSERT
 
@@ -212,7 +190,6 @@ Truncates tables then inserts dataset rows.
 - Test preparation with sequence reset
 - Performance-optimized setup
 
----
 
 ## Execution Flow
 
@@ -234,25 +211,24 @@ Truncates tables then inserts dataset rows.
 
 ### Operation Execution
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                   OperationExecutor                      │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  1. Get Connection from DataSource                       │
-│  2. Set AutoCommit = false                               │
-│  3. Resolve table ordering                               │
-│  4. For each table:                                      │
-│     - Build SQL statement                                │
-│     - Bind parameters                                    │
-│     - Execute statement                                  │
-│  5. Commit (or rollback on error)                        │
-│  6. Close connection                                     │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph OperationExecutor
+        A[Get Connection from DataSource] --> B[Set AutoCommit = false]
+        B --> C[Resolve table ordering]
+        C --> D{For each table}
+        D --> E[Build SQL statement]
+        E --> F[Bind parameters]
+        F --> G[Execute statement]
+        G --> D
+        D --> H{Success?}
+        H -->|Yes| I[Commit]
+        H -->|No| J[Rollback]
+        I --> K[Close connection]
+        J --> K
+    end
 ```
 
----
 
 ## Table Ordering Strategy
 
@@ -342,7 +318,6 @@ void testExpectationOrder() { }
 void testBothPhases() { }
 ```
 
----
 
 ## Table Ordering
 
@@ -350,7 +325,7 @@ void testBothPhases() { }
 
 The preferred method for controlling table processing order is the `load-order.txt` file. This file specifies the exact order in which tables should be processed.
 
-For detailed information about the file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS.md#load-order).
+For detailed information about the file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS#load-order).
 
 ### Foreign Key Awareness
 
@@ -388,7 +363,6 @@ For tables with circular foreign key references:
 2. Log warning
 3. Process in dataset declaration order
 
----
 
 ## Transaction Handling
 
@@ -423,7 +397,6 @@ On exception:
 3. Wrap exception in `DatabaseOperationException`
 4. Propagate to test framework
 
----
 
 ## Type Conversion
 
@@ -466,11 +439,10 @@ The framework converts string values from CSV/TSV to appropriate SQL types:
 | BLOB | Base64 string → byte[] |
 | CLOB | String → Reader |
 
----
 
 ## Related Specifications
 
-- [Public API](03-PUBLIC-API.md) - Operation enum reference
-- [Data Formats](05-DATA-FORMATS.md) - Source file structure
-- [Configuration](04-CONFIGURATION.md) - OperationDefaults
-- [Error Handling](09-ERROR-HANDLING.md) - Database operation errors
+- [Public API](03-PUBLIC-API) - Operation enum reference
+- [Data Formats](05-DATA-FORMATS) - Source file structure
+- [Configuration](04-CONFIGURATION) - OperationDefaults
+- [Error Handling](09-ERROR-HANDLING) - Database operation errors

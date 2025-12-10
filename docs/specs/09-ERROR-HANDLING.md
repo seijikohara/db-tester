@@ -2,31 +2,19 @@
 
 This document describes the error handling and error output in the DB Tester framework.
 
----
-
-## Table of Contents
-
-1. [Exception Hierarchy](#exception-hierarchy)
-2. [Validation Errors](#validation-errors)
-3. [Dataset Load Errors](#dataset-load-errors)
-4. [DataSource Errors](#datasource-errors)
-5. [Database Operation Errors](#database-operation-errors)
-6. [Configuration Errors](#configuration-errors)
-
----
 
 ## Exception Hierarchy
 
 All framework exceptions extend `DatabaseTesterException`:
 
-```
-RuntimeException
-└── DatabaseTesterException
-    ├── ValidationException
-    ├── DataSetLoadException
-    ├── DataSourceNotFoundException
-    ├── DatabaseOperationException
-    └── ConfigurationException
+```mermaid
+classDiagram
+    RuntimeException <|-- DatabaseTesterException
+    DatabaseTesterException <|-- ValidationException
+    DatabaseTesterException <|-- DataSetLoadException
+    DatabaseTesterException <|-- DataSourceNotFoundException
+    DatabaseTesterException <|-- DatabaseOperationException
+    DatabaseTesterException <|-- ConfigurationException
 ```
 
 **Location**: `io.github.seijikohara.dbtester.api.exception`
@@ -39,7 +27,6 @@ RuntimeException
 | `DatabaseOperationException` | SQL execution failure |
 | `ConfigurationException` | Framework initialization failure |
 
----
 
 ## Validation Errors
 
@@ -110,7 +97,6 @@ The comparator applies the following rules before reporting mismatches:
 | Timestamp precision | "2024-01-01 10:00:00" matches "2024-01-01 10:00:00.0" |
 | CLOB | Compared as string |
 
----
 
 ## Dataset Load Errors
 
@@ -182,9 +168,8 @@ Failed to read load order file: /path/to/load-order.txt
 Failed to write load order file: /path/to/load-order.txt
 ```
 
-For details about the load order file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS.md#load-order).
+For details about the load order file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS#load-order).
 
----
 
 ## DataSource Errors
 
@@ -218,7 +203,6 @@ No data source registered for name: secondary_db
 registry.register("secondary_db", dataSource);
 ```
 
----
 
 ## Database Operation Errors
 
@@ -242,7 +226,6 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 | Column not found | CSV column name typo | Verify column names match schema |
 | Data truncation | Value exceeds column size | Check data fits column definition |
 
----
 
 ## Configuration Errors
 
@@ -264,7 +247,6 @@ When a required setting is missing:
 ConfigurationException: Convention settings cannot be null
 ```
 
----
 
 ## Error Context in Test Output
 
@@ -319,7 +301,6 @@ Errors include the test method name for context:
 Failed to verify expectation dataset for testUserCreation
 ```
 
----
 
 ## Debugging Tips
 
@@ -339,10 +320,9 @@ Enable DEBUG logging for detailed operation output:
 logging.level.io.github.seijikohara.dbtester=DEBUG
 ```
 
----
 
 ## Related Specifications
 
-- [Public API](03-PUBLIC-API.md) - Exception classes
-- [Database Operations](06-DATABASE-OPERATIONS.md) - Operation failures
-- [Test Frameworks](07-TEST-FRAMEWORKS.md) - Test lifecycle and error handling
+- [Public API](03-PUBLIC-API) - Exception classes
+- [Database Operations](06-DATABASE-OPERATIONS) - Operation failures
+- [Test Frameworks](07-TEST-FRAMEWORKS) - Test lifecycle and error handling

@@ -2,19 +2,6 @@
 
 This document describes the configuration classes and options available in the DB Tester framework.
 
----
-
-## Table of Contents
-
-1. [Configuration Class](#configuration-class)
-2. [ConventionSettings](#conventionsettings)
-3. [DataSourceRegistry](#datasourceregistry)
-4. [OperationDefaults](#operationdefaults)
-5. [DataFormat](#dataformat)
-6. [TableMergeStrategy](#tablemergestrategy)
-7. [TestContext](#testcontext)
-
----
 
 ## Configuration Class
 
@@ -62,7 +49,6 @@ static void setup(ExtensionContext context) {
 }
 ```
 
----
 
 ## ConventionSettings
 
@@ -125,7 +111,6 @@ The `expectationSuffix` is appended to the preparation path:
 | `/data/test` | `/expected` | `/data/test/expected` |
 | `custom/path` | `/verify` | `custom/path/verify` |
 
----
 
 ## DataSourceRegistry
 
@@ -191,7 +176,6 @@ static void setup(ExtensionContext context) {
 }
 ```
 
----
 
 ## OperationDefaults
 
@@ -213,7 +197,6 @@ Defines default database operations for preparation and expectation phases.
 |--------|-------------|
 | `standard()` | Creates defaults with `CLEAN_INSERT` |
 
----
 
 ## DataFormat
 
@@ -244,7 +227,6 @@ When loading datasets from a directory:
 2. Parse each file as a table (filename without extension = table name)
 3. Ignore files with other extensions
 
----
 
 ## TableMergeStrategy
 
@@ -283,7 +265,6 @@ When both datasets contain the same table:
 | `UNION` | Combine rows, remove exact duplicates |
 | `UNION_ALL` | Combine all rows, keep duplicates |
 
----
 
 ## TestContext
 
@@ -321,12 +302,11 @@ TestContext context = new TestContext(
 List<DataSet> datasets = loader.loadPreparationDataSets(context);
 ```
 
----
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API.md) - Annotations and interfaces
-- [Data Formats](05-DATA-FORMATS.md) - CSV/TSV file structure
-- [Database Operations](06-DATABASE-OPERATIONS.md) - Supported operations
-- [Error Handling](09-ERROR-HANDLING.md) - Error messages and exception types
+- [Overview](01-OVERVIEW) - Framework purpose and key concepts
+- [Public API](03-PUBLIC-API) - Annotations and interfaces
+- [Data Formats](05-DATA-FORMATS) - CSV/TSV file structure
+- [Database Operations](06-DATABASE-OPERATIONS) - Supported operations
+- [Error Handling](09-ERROR-HANDLING) - Error messages and exception types

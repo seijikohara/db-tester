@@ -2,37 +2,43 @@
 
 This document describes the module structure, dependencies, and architectural patterns of the DB Tester framework.
 
----
-
-## Table of Contents
-
-1. [Module Structure](#module-structure)
-2. [Module Dependencies](#module-dependencies)
-3. [Package Organization](#package-organization)
-4. [Architectural Patterns](#architectural-patterns)
-5. [JPMS Support](#jpms-support)
-
----
-
 ## Module Structure
 
 The framework consists of seven modules organized in a layered architecture:
 
-```
-db-tester-bom
-├── db-tester-api
-├── db-tester-core
-│   └── db-tester-api
-├── db-tester-junit
-│   ├── db-tester-api (compile)
-│   └── db-tester-core (runtime via ServiceLoader)
-├── db-tester-spock
-│   ├── db-tester-api (compile)
-│   └── db-tester-core (runtime via ServiceLoader)
-├── db-tester-junit-spring-boot-starter
-│   └── db-tester-junit
-└── db-tester-spock-spring-boot-starter
-    └── db-tester-spock
+```mermaid
+graph TD
+    BOM[db-tester-bom]
+
+    subgraph Core
+        API[db-tester-api]
+        CORE[db-tester-core]
+    end
+
+    subgraph "Test Frameworks"
+        JUNIT[db-tester-junit]
+        SPOCK[db-tester-spock]
+    end
+
+    subgraph "Spring Boot Starters"
+        JUNIT_STARTER[db-tester-junit-spring-boot-starter]
+        SPOCK_STARTER[db-tester-spock-spring-boot-starter]
+    end
+
+    BOM --> API
+    BOM --> CORE
+    BOM --> JUNIT
+    BOM --> SPOCK
+    BOM --> JUNIT_STARTER
+    BOM --> SPOCK_STARTER
+
+    CORE --> API
+    JUNIT -->|compile| API
+    JUNIT -.->|runtime| CORE
+    SPOCK -->|compile| API
+    SPOCK -.->|runtime| CORE
+    JUNIT_STARTER --> JUNIT
+    SPOCK_STARTER --> SPOCK
 ```
 
 ### Module Responsibilities
@@ -46,8 +52,6 @@ db-tester-bom
 | `db-tester-spock` | Spock annotation-driven extension and interceptors |
 | `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
 | `db-tester-spock-spring-boot-starter` | Spring Boot auto-configuration for Spock |
-
----
 
 ## Module Dependencies
 
@@ -83,8 +87,6 @@ JUnit and Spock modules depend on `db-tester-api` at compile time. The `db-teste
 |--------|--------------|
 | `db-tester-junit-spring-boot-starter` | `db-tester-junit`, `db-tester-core`, `spring-boot-autoconfigure` |
 | `db-tester-spock-spring-boot-starter` | `db-tester-spock`, `db-tester-core`, `spring-boot-autoconfigure` |
-
----
 
 ## Package Organization
 
@@ -207,8 +209,6 @@ io.github.seijikohara.dbtester.internal
     └── TopologicalSorter.java
 ```
 
----
-
 ## Architectural Patterns
 
 ### Layered Architecture
@@ -235,15 +235,21 @@ io.github.seijikohara.dbtester.internal
 
 The framework uses SPI for loose coupling between modules:
 
-```
-┌─────────────────────┐     ServiceLoader     ┌─────────────────────────┐
-│  db-tester-junit    │ ──────────────────────►  db-tester-core        │
-│                     │                        │                         │
-│  Uses:              │                        │  Provides:              │
-│  - DataSetLoader    │                        │  - DataSetLoaderProvider│
-│  - OperationProvider│                        │  - OperationProvider    │
-│  - ScenarioResolver │                        │  - ScenarioResolver     │
-└─────────────────────┘                        └─────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph JUNIT[db-tester-junit]
+        U1[DataSetLoader]
+        U2[OperationProvider]
+        U3[ScenarioResolver]
+    end
+
+    subgraph CORE[db-tester-core]
+        P1[DataSetLoaderProvider]
+        P2[OperationProvider]
+        P3[ScenarioResolver]
+    end
+
+    JUNIT -->|ServiceLoader| CORE
 ```
 
 ### Strategy Pattern
@@ -256,8 +262,6 @@ Operations and comparison strategies use the strategy pattern:
 | `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
 | `FormatProvider` | CsvFormatProvider, TsvFormatProvider |
-
----
 
 ## JPMS Support
 
@@ -309,13 +313,11 @@ module io.github.seijikohara.dbtester.api {
 }
 ```
 
----
-
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API.md) - Annotations and configuration classes
-- [Configuration](04-CONFIGURATION.md) - Configuration options
-- [Test Frameworks](07-TEST-FRAMEWORKS.md) - JUnit and Spock integration
-- [SPI](08-SPI.md) - Service Provider Interface extension points
-- [Error Handling](09-ERROR-HANDLING.md) - Error messages and exception types
+- [Overview](01-OVERVIEW) - Framework purpose and key concepts
+- [Public API](03-PUBLIC-API) - Annotations and configuration classes
+- [Configuration](04-CONFIGURATION) - Configuration options
+- [Test Frameworks](07-TEST-FRAMEWORKS) - JUnit and Spock integration
+- [SPI](08-SPI) - Service Provider Interface extension points
+- [Error Handling](09-ERROR-HANDLING) - Error messages and exception types

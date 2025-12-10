@@ -8,15 +8,15 @@ This directory contains technical specifications for the DB Tester framework.
 
 | Document | Description |
 |----------|-------------|
-| [01-OVERVIEW.md](01-OVERVIEW.md) | Framework purpose and key concepts |
-| [02-ARCHITECTURE.md](02-ARCHITECTURE.md) | Module structure and dependencies |
-| [03-PUBLIC-API.md](03-PUBLIC-API.md) | Annotations and configuration classes |
-| [04-CONFIGURATION.md](04-CONFIGURATION.md) | Configuration options and conventions |
-| [05-DATA-FORMATS.md](05-DATA-FORMATS.md) | CSV/TSV file structure and parsing |
-| [06-DATABASE-OPERATIONS.md](06-DATABASE-OPERATIONS.md) | Supported operations and execution flow |
-| [07-TEST-FRAMEWORKS.md](07-TEST-FRAMEWORKS.md) | JUnit and Spock integration |
-| [08-SPI.md](08-SPI.md) | Service Provider Interface extension points |
-| [09-ERROR-HANDLING.md](09-ERROR-HANDLING.md) | Error messages and exception types |
+| [01-OVERVIEW.md](01-OVERVIEW) | Framework purpose and key concepts |
+| [02-ARCHITECTURE.md](02-ARCHITECTURE) | Module structure and dependencies |
+| [03-PUBLIC-API.md](03-PUBLIC-API) | Annotations and configuration classes |
+| [04-CONFIGURATION.md](04-CONFIGURATION) | Configuration options and conventions |
+| [05-DATA-FORMATS.md](05-DATA-FORMATS) | CSV/TSV file structure and parsing |
+| [06-DATABASE-OPERATIONS.md](06-DATABASE-OPERATIONS) | Supported operations and execution flow |
+| [07-TEST-FRAMEWORKS.md](07-TEST-FRAMEWORKS) | JUnit and Spock integration |
+| [08-SPI.md](08-SPI) | Service Provider Interface extension points |
+| [09-ERROR-HANDLING.md](09-ERROR-HANDLING) | Error messages and exception types |
 
 ---
 

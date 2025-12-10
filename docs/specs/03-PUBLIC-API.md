@@ -2,16 +2,6 @@
 
 This document describes the public API provided by the `db-tester-api` module.
 
----
-
-## Table of Contents
-
-1. [Annotations](#annotations)
-2. [DataSet Interfaces](#dataset-interfaces)
-3. [Domain Value Objects](#domain-value-objects)
-4. [Exceptions](#exceptions)
-
----
 
 ## Annotations
 
@@ -53,7 +43,6 @@ void testWithForeignKeyOrdering() { }
 void testWithCustomPath() { }
 ```
 
----
 
 ### @Expectation
 
@@ -90,7 +79,6 @@ void testWithCustomExpectation() { }
 void testWithAlphabeticalOrdering() { }
 ```
 
----
 
 ### @DataSet
 
@@ -130,7 +118,6 @@ void testMultipleDataSources() { }
 void testMultipleScenarios() { }
 ```
 
----
 
 ## DataSet Interfaces
 
@@ -154,7 +141,6 @@ Represents a logical collection of database tables.
 - All returned collections are immutable
 - Table names are unique within a dataset
 
----
 
 ### Table
 
@@ -177,7 +163,6 @@ Represents the structure and data of a database table.
 - All returned collections are immutable
 - Row count equals `getRows().size()`
 
----
 
 ### Row
 
@@ -192,7 +177,6 @@ Represents a single database record.
 | `getValues()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
 | `getValue(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
 
----
 
 ## Domain Value Objects
 
@@ -222,7 +206,6 @@ Wraps a cell value with explicit null handling.
 |--------|-------------|-------------|
 | `isNull()` | `boolean` | Returns `true` if value is null |
 
----
 
 ### TableName
 
@@ -238,7 +221,6 @@ Immutable identifier for a database table.
 |-------|------|-------------|
 | `value` | `String` | Table name string |
 
----
 
 ### ColumnName
 
@@ -254,7 +236,6 @@ Immutable identifier for a table column.
 |-------|------|-------------|
 | `value` | `String` | Column name string |
 
----
 
 ### DataSourceName
 
@@ -270,7 +251,6 @@ Immutable identifier for a registered DataSource.
 |-------|------|-------------|
 | `value` | `String` | DataSource name string |
 
----
 
 ### ComparisonStrategy
 
@@ -307,7 +287,6 @@ Defines value comparison behavior during assertion.
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
 
----
 
 ## Exceptions
 
@@ -315,13 +294,13 @@ All exceptions extend `DatabaseTesterException`.
 
 ### Exception Hierarchy
 
-```
-DatabaseTesterException (base)
-├── ConfigurationException
-├── DataSetLoadException
-├── DataSourceNotFoundException
-├── DatabaseOperationException
-└── ValidationException
+```mermaid
+classDiagram
+    DatabaseTesterException <|-- ConfigurationException
+    DatabaseTesterException <|-- DataSetLoadException
+    DatabaseTesterException <|-- DataSourceNotFoundException
+    DatabaseTesterException <|-- DatabaseOperationException
+    DatabaseTesterException <|-- ValidationException
 ```
 
 ### DatabaseTesterException
@@ -337,7 +316,6 @@ Base exception for all framework errors.
 | `DatabaseTesterException(String)` | Message only |
 | `DatabaseTesterException(String, Throwable)` | Message with cause |
 
----
 
 ### ConfigurationException
 
@@ -349,7 +327,6 @@ Indicates invalid framework configuration.
 - Invalid file paths
 - Incompatible settings combination
 
----
 
 ### DataSetLoadException
 
@@ -361,7 +338,6 @@ Indicates failure to load dataset files.
 - Invalid file format
 - Parse errors in CSV/TSV content
 
----
 
 ### DataSourceNotFoundException
 
@@ -372,7 +348,6 @@ Indicates requested DataSource is not registered.
 - Named DataSource not registered in `DataSourceRegistry`
 - Default DataSource not set when required
 
----
 
 ### DatabaseOperationException
 
@@ -384,7 +359,6 @@ Indicates database operation failure.
 - Constraint violations
 - Connection failures
 
----
 
 ### ValidationException
 
@@ -396,12 +370,11 @@ Indicates assertion or validation failure.
 - Row count differences
 - Column value mismatches
 
-**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-ERROR-HANDLING.md#validation-errors) for format details.
+**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-ERROR-HANDLING#validation-errors) for format details.
 
----
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework introduction
-- [Configuration](04-CONFIGURATION.md) - Configuration classes
-- [Database Operations](06-DATABASE-OPERATIONS.md) - Operation enum details
+- [Overview](01-OVERVIEW) - Framework introduction
+- [Configuration](04-CONFIGURATION) - Configuration classes
+- [Database Operations](06-DATABASE-OPERATIONS) - Operation enum details

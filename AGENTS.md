@@ -84,8 +84,8 @@ Detailed specifications are available in `docs/specs/`:
 
 | Document | Description |
 |----------|-------------|
-| [PUBLISHING.md](docs/PUBLISHING.md) | Maven Central publishing process |
-| [RELEASE.md](docs/RELEASE.md) | Release procedures |
+| [PUBLISHING.md](docs/release/PUBLISHING.md) | Maven Central publishing process |
+| [RELEASE.md](docs/release/RELEASE.md) | Release procedures |
 
 ---
 

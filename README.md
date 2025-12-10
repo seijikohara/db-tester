@@ -3,6 +3,11 @@
 [![Test](https://github.com/seijikohara/db-tester/actions/workflows/test.yml/badge.svg)](https://github.com/seijikohara/db-tester/actions/workflows/test.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/Docs-VitePress-646cff.svg)](https://seijikohara.github.io/db-tester/)
+
+<p style="text-align: center;">
+  <img src="docs/public/favicon.svg" width="240" alt="DB Tester Logo">
+</p>
 
 A database testing framework for JUnit and Spock. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
 
@@ -313,7 +318,7 @@ The output is **valid YAML** and can be parsed by standard YAML libraries for CI
 
 | Document | Description |
 |----------|-------------|
-| [Technical Specifications](docs/specs/) | Architecture, API, configuration details |
+| [Technical Specifications](https://seijikohara.github.io/db-tester/) | Architecture, API, configuration details |
 | [Examples](examples/) | Working test examples |
 
 ## License
