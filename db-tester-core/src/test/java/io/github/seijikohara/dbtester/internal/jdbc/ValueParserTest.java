@@ -328,7 +328,7 @@ class ValueParserTest {
       // Given
       final var originalBytes = "Hello, World!".getBytes(StandardCharsets.UTF_8);
       final var base64Content = Base64.getEncoder().encodeToString(originalBytes);
-      final var input = "[BASE64]" + base64Content;
+      final var input = String.format("[BASE64]%s", base64Content);
 
       // When
       final var result = parser.parseBlob(input);
@@ -361,7 +361,7 @@ class ValueParserTest {
       // Given
       final var originalBytes = "test".getBytes(StandardCharsets.UTF_8);
       final var base64Content = Base64.getEncoder().encodeToString(originalBytes);
-      final var input = "  [BASE64]" + base64Content + "  ";
+      final var input = String.format("  [BASE64]%s  ", base64Content);
 
       // When
       final var result = parser.parseBlob(input);

@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.internal.jdbc;
+package io.github.seijikohara.dbtester.internal.jdbc.executor;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -14,6 +14,8 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.internal.jdbc.ParameterBinder;
+import io.github.seijikohara.dbtester.internal.jdbc.SqlBuilder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -88,7 +90,7 @@ class UpdateExecutorTest {
     void shouldUpdateRows_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
 
       final var table = mock(Table.class);
       final var row = mock(Row.class);
@@ -103,27 +105,27 @@ class UpdateExecutorTest {
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
 
       // When
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(stmt).addBatch();
-      verify(stmt).executeBatch();
+      verify(statement).addBatch();
+      verify(statement).executeBatch();
     }
   }
 
-  /** Tests for the updateTable() method. */
+  /** Tests for edge cases in execute method. */
   @Nested
-  @DisplayName("updateTable(Table, Connection) method")
-  class UpdateTableMethod {
+  @DisplayName("execute with edge cases")
+  class ExecuteEdgeCases {
 
-    /** Tests for the updateTable method. */
-    UpdateTableMethod() {}
+    /** Tests for edge cases. */
+    ExecuteEdgeCases() {}
 
     /**
-     * Verifies that updateTable skips tables with no rows.
+     * Verifies that execute skips tables with no rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -137,14 +139,14 @@ class UpdateExecutorTest {
       when(table.getRows()).thenReturn(List.of());
 
       // When
-      executor.updateTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(connection, never()).prepareStatement(anyString());
     }
 
     /**
-     * Verifies that updateTable skips tables with only primary key column.
+     * Verifies that execute skips tables with only primary key column.
      *
      * @throws SQLException if a database error occurs
      */
@@ -162,7 +164,7 @@ class UpdateExecutorTest {
       when(table.getColumns()).thenReturn(List.of(pkColumn));
 
       // When
-      executor.updateTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(connection, never()).prepareStatement(anyString());
@@ -188,7 +190,7 @@ class UpdateExecutorTest {
     void shouldReturnTrue_whenUpdateAffectsRows() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
@@ -198,8 +200,8 @@ class UpdateExecutorTest {
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
-      when(stmt.executeUpdate()).thenReturn(1);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeUpdate()).thenReturn(1);
 
       // When
       final var result =
@@ -220,7 +222,7 @@ class UpdateExecutorTest {
     void shouldReturnFalse_whenUpdateAffectsNoRows() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
@@ -230,8 +232,8 @@ class UpdateExecutorTest {
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
-      when(stmt.executeUpdate()).thenReturn(0);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeUpdate()).thenReturn(0);
 
       // When
       final var result =

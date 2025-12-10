@@ -48,7 +48,18 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `ConfigurationCustomizationSpec` | Framework convention customization |
 | `DataFormatSpec` | CSV and TSV format support |
 | `TableMergeStrategySpec` | FIRST, LAST, UNION, UNION_ALL strategies |
+| `TableOrderingStrategiesSpec` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
 | `ComparisonStrategySpec` | STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE comparisons |
+| `ComprehensiveDataTypesSpec` | Various SQL data types support |
+| `CustomExpectationPathsSpec` | Custom resource path configuration |
+| `CustomQueryValidationSpec` | Custom SQL query validation |
+| `InheritedAnnotationSpec` | Annotation inheritance from base classes |
+| `MultipleDataSourceSpec` | Multiple DataSource support |
+| `NullAndEmptyValuesSpec` | NULL and empty value handling |
+| `OperationVariationsSpec` | All database operations (INSERT, UPDATE, DELETE, etc.) |
+| `PartialColumnValidationSpec` | Partial column comparison |
+| `ProgrammaticAssertionApiSpec` | Programmatic `DatabaseAssertion` API usage |
+| `ErrorHandlingSpec` | Assertion failure scenarios and error messages |
 
 ### Database Integration Tests
 

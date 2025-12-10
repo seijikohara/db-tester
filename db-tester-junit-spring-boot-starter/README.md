@@ -134,11 +134,12 @@ Override properties via Configuration API:
 static void setup(ExtensionContext context) {
     Configuration config = Configuration.withConventions(
         new ConventionSettings(
-            null,
-            "/expected",
-            "[TestCase]",
-            DataFormat.CSV,
-            TableMergeStrategy.UNION_ALL
+            null,                        // baseDirectory (null for classpath)
+            "/expected",                 // expectationSuffix
+            "[TestCase]",                // scenarioMarker
+            DataFormat.CSV,              // dataFormat
+            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
+            "load-order.txt"             // loadOrderFileName
         )
     );
     SpringBootDatabaseTestExtension.setConfiguration(context, config);

@@ -1,12 +1,12 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import static io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants.LOAD_ORDER_FILE;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -224,7 +224,7 @@ class TableOrderingResolverTest {
      * @return the table ordering file path
      */
     private Path getTableOrderingPath(final Path tempDir) {
-      return tempDir.resolve(LOAD_ORDER_FILE);
+      return tempDir.resolve(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
     }
   }
 

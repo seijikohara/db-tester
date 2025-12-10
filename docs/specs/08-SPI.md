@@ -77,11 +77,24 @@ Executes database operations on datasets.
 
 ```java
 public interface OperationProvider {
-    void execute(Operation operation, DataSet dataSet, DataSource dataSource);
+    void execute(
+        Operation operation,
+        DataSet dataSet,
+        DataSource dataSource,
+        TableOrderingStrategy tableOrderingStrategy);
 }
 ```
 
 **Default Implementation**: `DefaultOperationProvider` in `db-tester-core`
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `operation` | `Operation` | The database operation to execute |
+| `dataSet` | `DataSet` | The dataset containing tables and rows |
+| `dataSource` | `DataSource` | The JDBC data source for connections |
+| `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
 
 **Operations**:
 - `NONE` - No operation
@@ -106,16 +119,45 @@ Performs database assertions for expectation verification.
 
 ```java
 public interface AssertionProvider {
-    void assertEquals(DataSet expected, DataSource dataSource);
+    // Core comparison methods
+    void assertEquals(DataSet expected, DataSet actual);
+    void assertEquals(DataSet expected, DataSet actual, AssertionFailureHandler failureHandler);
+    void assertEquals(Table expected, Table actual);
+    void assertEquals(Table expected, Table actual, AssertionFailureHandler failureHandler);
+    void assertEquals(Table expected, Table actual, Collection<String> additionalColumnNames);
+
+    // Comparison with column exclusion
+    void assertEqualsIgnoreColumns(DataSet expected, DataSet actual, String tableName,
+                                   Collection<String> ignoreColumnNames);
+    void assertEqualsIgnoreColumns(Table expected, Table actual,
+                                   Collection<String> ignoreColumnNames);
+
+    // SQL query-based comparison
+    void assertEqualsByQuery(DataSet expected, DataSource dataSource, String sqlQuery,
+                             String tableName, Collection<String> ignoreColumnNames);
+    void assertEqualsByQuery(Table expected, DataSource dataSource, String tableName,
+                             String sqlQuery, Collection<String> ignoreColumnNames);
 }
 ```
 
 **Default Implementation**: `DefaultAssertionProvider` in `db-tester-core`
 
+**Key Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `assertEquals(DataSet, DataSet)` | Compare two datasets |
+| `assertEquals(Table, Table)` | Compare two tables |
+| `assertEqualsIgnoreColumns(...)` | Compare while ignoring specific columns |
+| `assertEqualsByQuery(...)` | Compare query results against expected data |
+
 **Behavior**:
-1. Read actual data from database
-2. Compare expected vs actual datasets
-3. Throw `ValidationException` on mismatch
+1. Compare expected vs actual datasets/tables
+2. Apply comparison strategies per column (STRICT, IGNORE, NUMERIC, etc.)
+3. Collect all differences (not fail-fast)
+4. Output human-readable summary + YAML details on mismatch
+
+See [Error Handling - Validation Errors](09-ERROR-HANDLING.md#validation-errors) for output format details.
 
 ---
 
@@ -183,10 +225,17 @@ Parses dataset files in specific formats.
 
 ```java
 public interface FormatProvider {
-    boolean canHandle(String fileExtension);
-    DataSet parseDataSet(Path filePath, ConventionSettings conventions);
+    FileExtension supportedFileExtension();
+    DataSet parse(Path directory);
 }
 ```
+
+**Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `supportedFileExtension()` | `FileExtension` | Returns the file extension without leading dot (e.g., "csv") |
+| `parse(Path)` | `DataSet` | Parses all files in directory into a DataSet |
 
 **Implementations**:
 

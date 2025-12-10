@@ -46,8 +46,7 @@ public record Configuration(
           .orElseThrow(
               () ->
                   new IllegalStateException(
-                      "No DataSetLoaderProvider implementation found. "
-                          + "Add db-tester-core to your classpath."));
+                      "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath."));
     }
   }
 

@@ -84,13 +84,13 @@ public final class LobConverter {
    */
   public String convertClob(final Clob clob) {
     try (final Reader reader = clob.getCharacterStream()) {
-      final var sb = new StringBuilder();
+      final var stringBuilder = new StringBuilder();
       final var buffer = new char[1024];
       int length;
       while ((length = reader.read(buffer)) != -1) {
-        sb.append(buffer, 0, length);
+        stringBuilder.append(buffer, 0, length);
       }
-      return sb.toString();
+      return stringBuilder.toString();
     } catch (final SQLException | IOException e) {
       throw new DatabaseTesterException("Failed to read CLOB content", e);
     }

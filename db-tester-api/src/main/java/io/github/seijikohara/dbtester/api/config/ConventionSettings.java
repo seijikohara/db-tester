@@ -13,13 +13,15 @@ import org.jspecify.annotations.Nullable;
  * @param dataFormat the file format to use when loading dataset files (CSV or TSV)
  * @param tableMergeStrategy the strategy for merging tables when multiple DataSets contain the same
  *     table
+ * @param loadOrderFileName the file name used to specify table loading order in dataset directories
  */
 public record ConventionSettings(
     @Nullable String baseDirectory,
     String expectationSuffix,
     String scenarioMarker,
     DataFormat dataFormat,
-    TableMergeStrategy tableMergeStrategy) {
+    TableMergeStrategy tableMergeStrategy,
+    String loadOrderFileName) {
 
   /**
    * Default base directory for dataset resolution.
@@ -35,7 +37,7 @@ public record ConventionSettings(
    * <p>This suffix is typically a subdirectory name that separates expected outcome data from
    * preparation data.
    */
-  private static final String DEFAULT_EXPECTATION_SUFFIX = "/expected";
+  public static final String DEFAULT_EXPECTATION_SUFFIX = "/expected";
 
   /**
    * Default column name that identifies scenario markers in scenario-aware dataset formats.
@@ -43,7 +45,7 @@ public record ConventionSettings(
    * <p>Rows containing this column are filtered based on scenario names specified in test
    * annotations or derived from test method names.
    */
-  private static final String DEFAULT_SCENARIO_MARKER = "[Scenario]";
+  public static final String DEFAULT_SCENARIO_MARKER = "[Scenario]";
 
   /** Default file format for dataset files. */
   private static final DataFormat DEFAULT_DATA_FORMAT = DataFormat.CSV;
@@ -53,10 +55,19 @@ public record ConventionSettings(
       TableMergeStrategy.UNION_ALL;
 
   /**
+   * Default file name for specifying table loading order in dataset directories.
+   *
+   * <p>This file contains one table name per line, specifying the order in which tables should be
+   * loaded during database operations.
+   */
+  public static final String DEFAULT_LOAD_ORDER_FILE_NAME = "load-order.txt";
+
+  /**
    * Creates a convention instance populated with the framework defaults.
    *
-   * @return conventions using classpath-relative discovery, "/expected" suffix, "[Scenario]"
-   *     marker, CSV format, and UNION_ALL merge strategy
+   * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
+   *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy, and
+   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file
    */
   public static ConventionSettings standard() {
     return new ConventionSettings(
@@ -64,7 +75,8 @@ public record ConventionSettings(
         DEFAULT_EXPECTATION_SUFFIX,
         DEFAULT_SCENARIO_MARKER,
         DEFAULT_DATA_FORMAT,
-        DEFAULT_TABLE_MERGE_STRATEGY);
+        DEFAULT_TABLE_MERGE_STRATEGY,
+        DEFAULT_LOAD_ORDER_FILE_NAME);
   }
 
   /**
@@ -79,7 +91,8 @@ public record ConventionSettings(
         this.expectationSuffix,
         this.scenarioMarker,
         dataFormat,
-        this.tableMergeStrategy);
+        this.tableMergeStrategy,
+        this.loadOrderFileName);
   }
 
   /**
@@ -94,6 +107,23 @@ public record ConventionSettings(
         this.expectationSuffix,
         this.scenarioMarker,
         this.dataFormat,
-        tableMergeStrategy);
+        tableMergeStrategy,
+        this.loadOrderFileName);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified load order file name.
+   *
+   * @param loadOrderFileName the load order file name to use
+   * @return a new ConventionSettings with the specified load order file name
+   */
+  public ConventionSettings withLoadOrderFileName(final String loadOrderFileName) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        loadOrderFileName);
   }
 }

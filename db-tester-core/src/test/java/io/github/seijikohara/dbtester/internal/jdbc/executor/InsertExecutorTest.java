@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.internal.jdbc;
+package io.github.seijikohara.dbtester.internal.jdbc.executor;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,6 +14,8 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.internal.jdbc.ParameterBinder;
+import io.github.seijikohara.dbtester.internal.jdbc.SqlBuilder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,8 +93,8 @@ class InsertExecutorTest {
     void shouldInsertRows_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
-      final var rs = mock(ResultSet.class);
+      final var statement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
       final var metaData = mock(ResultSetMetaData.class);
 
       final var table = mock(Table.class);
@@ -107,9 +109,9 @@ class InsertExecutorTest {
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
 
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
-      when(stmt.executeQuery()).thenReturn(rs);
-      when(rs.getMetaData()).thenReturn(metaData);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
       when(metaData.getColumnCount()).thenReturn(0);
       when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
 
@@ -117,8 +119,8 @@ class InsertExecutorTest {
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(stmt).addBatch();
-      verify(stmt).executeBatch();
+      verify(statement).addBatch();
+      verify(statement).executeBatch();
     }
 
     /**
@@ -141,16 +143,16 @@ class InsertExecutorTest {
     }
   }
 
-  /** Tests for the insertTable() method. */
+  /** Tests for tables with no rows. */
   @Nested
-  @DisplayName("insertTable(Table, Connection) method")
-  class InsertTableMethod {
+  @DisplayName("execute with empty tables")
+  class ExecuteWithEmptyTables {
 
-    /** Tests for the insertTable method. */
-    InsertTableMethod() {}
+    /** Tests for empty table handling. */
+    ExecuteWithEmptyTables() {}
 
     /**
-     * Verifies that insertTable skips tables with no rows.
+     * Verifies that execute skips tables with no rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -164,7 +166,7 @@ class InsertExecutorTest {
       when(table.getRows()).thenReturn(List.of());
 
       // When
-      executor.insertTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(connection, never()).prepareStatement(anyString());
@@ -190,21 +192,21 @@ class InsertExecutorTest {
     void shouldInsertRow_whenRowProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var table = mock(Table.class);
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
       when(table.getColumns()).thenReturn(List.of(columnName));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
 
       // When
       executor.insertRow(table, row, connection);
 
       // Then
-      verify(parameterBinder).bindRow(eq(stmt), eq(row), any());
-      verify(stmt).executeUpdate();
+      verify(parameterBinder).bindRow(eq(statement), eq(row), any());
+      verify(statement).executeUpdate();
     }
   }
 }

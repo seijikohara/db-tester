@@ -132,7 +132,8 @@ public final class DataFormatTest {
                   "/expected", // default expectation suffix
                   "[Scenario]", // default scenario marker
                   DataFormat.CSV, // CSV format
-                  TableMergeStrategy.UNION_ALL));
+                  TableMergeStrategy.UNION_ALL,
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, csvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -230,7 +231,8 @@ public final class DataFormatTest {
                   "/expected", // default expectation suffix
                   "[Scenario]", // default scenario marker
                   DataFormat.TSV, // TSV format
-                  TableMergeStrategy.UNION_ALL));
+                  TableMergeStrategy.UNION_ALL,
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, tsvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

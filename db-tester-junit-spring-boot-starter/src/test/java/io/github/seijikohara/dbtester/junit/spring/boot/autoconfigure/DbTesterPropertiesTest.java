@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
@@ -187,14 +188,15 @@ class DbTesterPropertiesTest {
           () -> assertNull(convention.getBaseDirectory(), "baseDirectory should default to null"),
           () ->
               assertEquals(
-                  "/expected",
+                  ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
                   convention.getExpectationSuffix(),
-                  "expectationSuffix should default to /expected"),
+                  "expectationSuffix should default to "
+                      + ConventionSettings.DEFAULT_EXPECTATION_SUFFIX),
           () ->
               assertEquals(
-                  "[Scenario]",
+                  ConventionSettings.DEFAULT_SCENARIO_MARKER,
                   convention.getScenarioMarker(),
-                  "scenarioMarker should default to [Scenario]"),
+                  "scenarioMarker should default to " + ConventionSettings.DEFAULT_SCENARIO_MARKER),
           () ->
               assertEquals(
                   DataFormat.CSV, convention.getDataFormat(), "dataFormat should default to CSV"),
@@ -202,7 +204,13 @@ class DbTesterPropertiesTest {
               assertEquals(
                   TableMergeStrategy.UNION_ALL,
                   convention.getTableMergeStrategy(),
-                  "tableMergeStrategy should default to UNION_ALL"));
+                  "tableMergeStrategy should default to UNION_ALL"),
+          () ->
+              assertEquals(
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  convention.getLoadOrderFileName(),
+                  "loadOrderFileName should default to "
+                      + ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
     }
 
     /** Verifies that convention properties can be modified. */
@@ -219,6 +227,7 @@ class DbTesterPropertiesTest {
       convention.setScenarioMarker("[TestCase]");
       convention.setDataFormat(DataFormat.TSV);
       convention.setTableMergeStrategy(TableMergeStrategy.FIRST);
+      convention.setLoadOrderFileName("custom-order.txt");
 
       // Then
       assertAll(
@@ -235,7 +244,12 @@ class DbTesterPropertiesTest {
               assertEquals(
                   TableMergeStrategy.FIRST,
                   convention.getTableMergeStrategy(),
-                  "tableMergeStrategy mismatch"));
+                  "tableMergeStrategy mismatch"),
+          () ->
+              assertEquals(
+                  "custom-order.txt",
+                  convention.getLoadOrderFileName(),
+                  "loadOrderFileName mismatch"));
     }
 
     /** Verifies that convention can be replaced. */

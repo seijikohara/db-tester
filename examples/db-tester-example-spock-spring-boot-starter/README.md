@@ -29,6 +29,7 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 | Specification | Description |
 |---------------|-------------|
 | `UserRepositorySpec` | Spring Data JPA integration with DataSource registration |
+| `MultipleDataSourcesSpec` | Multiple DataSource support with `@Primary` detection |
 | `PropertiesConfigurationSpec` | Property-based configuration demonstration |
 
 ## Basic Example

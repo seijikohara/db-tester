@@ -228,13 +228,46 @@ registry.register("secondary", secondaryDataSource);
 
 ## Assertion Messages
 
-When expectation verification fails, the framework reports the difference between expected and actual database state.
+When expectation verification fails, the framework collects **all differences** and reports them with a human-readable summary followed by YAML details:
 
-| Message | Meaning |
-|---------|---------|
-| `Row count mismatch in table 'X': expected N rows, but got M` | The number of rows in table differs from the expected CSV |
-| `Value mismatch in table 'X', row N, column 'Y': expected 'A', but got 'B'` | A cell value differs from the expected value |
-| `Table not found: X` | The expected table does not exist in the database |
+```
+Assertion failed: 3 differences in USERS, ORDERS
+summary:
+  status: FAILED
+  total_differences: 3
+tables:
+  USERS:
+    differences:
+      - path: row_count
+        expected: 3
+        actual: 2
+  ORDERS:
+    differences:
+      - path: "row[0].STATUS"
+        expected: COMPLETED
+        actual: PENDING
+        column:
+          type: VARCHAR(50)
+          nullable: true
+      - path: "row[1].AMOUNT"
+        expected: 100.00
+        actual: 99.99
+        column:
+          type: "DECIMAL(10,2)"
+```
+
+### Output Structure
+
+| Field | Description |
+|-------|-------------|
+| `summary.status` | `FAILED` when differences exist |
+| `summary.total_differences` | Total count of all differences |
+| `tables.<name>.differences` | List of differences for each table |
+| `path` | Location of mismatch: `table_count`, `row_count`, or `row[N].COLUMN` |
+| `expected` / `actual` | The expected and actual values |
+| `column` | JDBC metadata (type, nullable, primary_key) when available |
+
+The output is **valid YAML** and can be parsed by standard YAML libraries for CI/CD integration.
 
 ## Troubleshooting
 

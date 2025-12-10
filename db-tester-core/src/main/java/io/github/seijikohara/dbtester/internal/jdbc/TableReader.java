@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.sql.DataSource;
 
@@ -55,7 +56,7 @@ public final class TableReader {
    * @throws DatabaseTesterException if fetching fails
    */
   public Table fetchTable(final DataSource dataSource, final String tableName) {
-    return executeQuery(dataSource, "SELECT * FROM " + tableName, tableName);
+    return executeQuery(dataSource, String.format("SELECT * FROM %s", tableName), tableName);
   }
 
   /**
@@ -74,7 +75,7 @@ public final class TableReader {
     }
 
     final var columnList =
-        columns.stream().map(ColumnName::value).reduce((a, b) -> a + ", " + b).orElse("*");
+        columns.stream().map(ColumnName::value).collect(Collectors.joining(", "));
     final var sql = String.format("SELECT %s FROM %s", columnList, tableName);
     return executeQuery(dataSource, sql, tableName);
   }
@@ -104,10 +105,10 @@ public final class TableReader {
   public Table executeQuery(
       final DataSource dataSource, final String sqlQuery, final String tableName) {
     try (final var connection = dataSource.getConnection();
-        final var stmt = connection.prepareStatement(sqlQuery);
-        final var rs = stmt.executeQuery()) {
+        final var statement = connection.prepareStatement(sqlQuery);
+        final var resultSet = statement.executeQuery()) {
 
-      final var metaData = rs.getMetaData();
+      final var metaData = resultSet.getMetaData();
       final var columnCount = metaData.getColumnCount();
 
       final var columnNames =
@@ -118,16 +119,16 @@ public final class TableReader {
                       return new ColumnName(metaData.getColumnName(i));
                     } catch (final SQLException e) {
                       throw new DatabaseTesterException(
-                          "Failed to retrieve column name at index: " + i, e);
+                          String.format("Failed to retrieve column name at index: %d", i), e);
                     }
                   })
               .toList();
 
-      final var rows = readAllRows(rs, columnNames, columnCount);
+      final var rows = readAllRows(resultSet, columnNames, columnCount);
 
       return new SimpleTable(new TableName(tableName), columnNames, rows);
     } catch (final SQLException e) {
-      throw new DatabaseTesterException("Failed to execute query: " + sqlQuery, e);
+      throw new DatabaseTesterException(String.format("Failed to execute query: %s", sqlQuery), e);
     }
   }
 
@@ -140,30 +141,31 @@ public final class TableReader {
    *
    * <p>CLOB and BLOB values are converted immediately to avoid issues with closed connections.
    *
-   * @param rs the result set to read
+   * @param resultSet the result set to read
    * @param columnNames the column names
    * @param columnCount the number of columns
    * @return list of rows
    * @throws SQLException if reading fails
    */
   private List<Row> readAllRows(
-      final ResultSet rs, final List<ColumnName> columnNames, final int columnCount)
+      final ResultSet resultSet, final List<ColumnName> columnNames, final int columnCount)
       throws SQLException {
     final var rows = new ArrayList<Row>();
-    while (rs.next()) {
+    while (resultSet.next()) {
       final var values = new LinkedHashMap<ColumnName, CellValue>();
       IntStream.rangeClosed(1, columnCount)
           .forEach(
               i -> {
                 try {
                   final var columnName = columnNames.get(i - 1);
-                  final var rawValue = rs.getObject(i);
+                  final var rawValue = resultSet.getObject(i);
                   // Convert LOB types immediately to avoid issues with closed connections
                   final var value = lobConverter.convert(rawValue);
                   // Use CellValue.NULL for null database values
                   values.put(columnName, value != null ? new CellValue(value) : CellValue.NULL);
                 } catch (final SQLException e) {
-                  throw new DatabaseTesterException("Failed to read column at index: " + i, e);
+                  throw new DatabaseTesterException(
+                      String.format("Failed to read column at index: %d", i), e);
                 }
               });
       rows.add(new SimpleRow(values));

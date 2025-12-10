@@ -311,21 +311,32 @@ class MultiDatabaseTest {
 Configure via `application.properties` or `application.yml`:
 
 ```properties
+# Enable/disable DB Tester (default: true)
+db-tester.enabled=true
+
+# Auto-register DataSource beans (default: true)
+db-tester.auto-register-data-sources=true
+
 # Data format (CSV or TSV)
-db-tester.conventions.data-format=CSV
+db-tester.convention.data-format=CSV
 
 # Expectation directory suffix
-db-tester.conventions.expectation-suffix=/expected
+db-tester.convention.expectation-suffix=/expected
 
 # Scenario marker column name
-db-tester.conventions.scenario-marker=[Scenario]
+db-tester.convention.scenario-marker=[Scenario]
 
 # Table merge strategy (FIRST, LAST, UNION, UNION_ALL)
-db-tester.conventions.table-merge-strategy=UNION_ALL
+db-tester.convention.table-merge-strategy=UNION_ALL
 
 # Default preparation operation
-db-tester.operations.preparation-operation=CLEAN_INSERT
+db-tester.operation.preparation=CLEAN_INSERT
+
+# Default expectation operation (typically NONE for verification only)
+db-tester.operation.expectation=NONE
 ```
+
+**Note**: Property names use singular form (`convention`, `operation`) not plural.
 
 ### Spock Spring Boot Starter
 
@@ -438,6 +449,8 @@ Auto-configuration classes:
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework introduction
+- [Overview](01-OVERVIEW.md) - Framework purpose and key concepts
 - [Public API](03-PUBLIC-API.md) - Annotation details
 - [Configuration](04-CONFIGURATION.md) - Configuration options
+- [SPI](08-SPI.md) - Service Provider Interface extension points
+- [Error Handling](09-ERROR-HANDLING.md) - Lifecycle error handling

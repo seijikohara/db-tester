@@ -161,8 +161,8 @@ public final class DataSourceRegistrar implements ApplicationContextAware {
       final Map<String, DataSource> dataSources) {
 
     return Optional.of(dataSources)
-        .filter(ds -> ds.size() == 1)
-        .map(ds -> ds.entrySet().iterator().next())
+        .filter(sources -> sources.size() == 1)
+        .map(sources -> sources.entrySet().iterator().next())
         .or(() -> findPrimaryDataSource(dataSources))
         .or(() -> findDataSourceByName(dataSources, DEFAULT_DATASOURCE_BEAN_NAME));
   }
@@ -238,7 +238,6 @@ public final class DataSourceRegistrar implements ApplicationContextAware {
         .orElseThrow(
             () ->
                 new IllegalStateException(
-                    "ApplicationContext not set. "
-                        + "Ensure this bean is managed by Spring and properly initialized."));
+                    "ApplicationContext not set. Ensure this bean is managed by Spring and properly initialized."));
   }
 }

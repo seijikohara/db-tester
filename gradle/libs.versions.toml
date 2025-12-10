@@ -41,6 +41,7 @@ h2 = { module = "com.h2database:h2", version.ref = "h2" }
 hsqldb = { module = "org.hsqldb:hsqldb", version.ref = "hsqldb" }
 jackson-bom = { module = "com.fasterxml.jackson:jackson-bom", version.ref = "jackson" }
 jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }

@@ -147,7 +147,8 @@ def setupSpec() {
             '/expected',                 // expectationSuffix
             '[TestCase]',                // scenarioMarker
             DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL // tableMergeStrategy
+            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
+            'load-order.txt'             // loadOrderFileName
         )
     )
 }

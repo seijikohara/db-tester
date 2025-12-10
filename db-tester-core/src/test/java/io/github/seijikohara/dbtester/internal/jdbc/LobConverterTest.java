@@ -139,7 +139,7 @@ class LobConverterTest {
       final var result = converter.convert(blob);
 
       // Then
-      final var expected = "[BASE64]" + Base64.getEncoder().encodeToString(bytes);
+      final var expected = String.format("[BASE64]%s", Base64.getEncoder().encodeToString(bytes));
       assertEquals(expected, result, "should convert BLOB to Base64 String with prefix");
     }
 
@@ -155,7 +155,7 @@ class LobConverterTest {
       final var result = converter.convert(bytes);
 
       // Then
-      final var expected = "[BASE64]" + Base64.getEncoder().encodeToString(bytes);
+      final var expected = String.format("[BASE64]%s", Base64.getEncoder().encodeToString(bytes));
       assertEquals(expected, result, "should convert byte array to Base64 String with prefix");
     }
   }

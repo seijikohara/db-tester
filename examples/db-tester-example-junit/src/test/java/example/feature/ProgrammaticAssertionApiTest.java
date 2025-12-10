@@ -5,9 +5,17 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import io.github.seijikohara.dbtester.api.annotation.Expectation;
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
@@ -193,42 +201,301 @@ public final class ProgrammaticAssertionApiTest {
         final var statement = connection.createStatement()) {
 
       // Verify total row count
-      try (final var rs = statement.executeQuery("SELECT COUNT(*) FROM TABLE1")) {
-        rs.next();
-        final var count = rs.getInt(1);
+      try (final var resultSet = statement.executeQuery("SELECT COUNT(*) FROM TABLE1")) {
+        resultSet.next();
+        final var count = resultSet.getInt(1);
         if (count != 4) {
           throw new AssertionError(String.format("Expected 4 rows in TABLE1 but found %d", count));
         }
       }
 
       // Verify newly inserted records exist with correct values
-      try (final var rs =
+      try (final var resultSet =
           statement.executeQuery(
               "SELECT COLUMN1, COLUMN2 FROM TABLE1 WHERE ID IN (3, 4) ORDER BY ID")) {
         // Verify row 3
-        if (!rs.next()) {
+        if (!resultSet.next()) {
           throw new AssertionError("Expected row with ID=3 but not found");
         }
-        if (!"Value3".equals(rs.getString("COLUMN1")) || rs.getInt("COLUMN2") != 300) {
+        if (!"Value3".equals(resultSet.getString("COLUMN1"))
+            || resultSet.getInt("COLUMN2") != 300) {
           throw new AssertionError(
               String.format(
                   "Expected row 3 (Value3, 300) but found (%s, %d)",
-                  rs.getString("COLUMN1"), rs.getInt("COLUMN2")));
+                  resultSet.getString("COLUMN1"), resultSet.getInt("COLUMN2")));
         }
 
         // Verify row 4
-        if (!rs.next()) {
+        if (!resultSet.next()) {
           throw new AssertionError("Expected row with ID=4 but not found");
         }
-        if (!"Value4".equals(rs.getString("COLUMN1")) || rs.getInt("COLUMN2") != 400) {
+        if (!"Value4".equals(resultSet.getString("COLUMN1"))
+            || resultSet.getInt("COLUMN2") != 400) {
           throw new AssertionError(
               String.format(
                   "Expected row 4 (Value4, 400) but found (%s, %d)",
-                  rs.getString("COLUMN1"), rs.getInt("COLUMN2")));
+                  resultSet.getString("COLUMN1"), resultSet.getInt("COLUMN2")));
         }
       }
     }
 
     logger.info("Multiple query validation completed");
+  }
+
+  /**
+   * Demonstrates {@link DatabaseAssertion#assertEqualsByQuery} for comparing SQL query results
+   * against expected data.
+   *
+   * <p>This test shows how to use the programmatic API to validate query results against
+   * programmatically constructed expected data. This is useful when:
+   *
+   * <ul>
+   *   <li>Validating complex queries with joins, aggregations, or filters
+   *   <li>Comparing subset of data returned by specific queries
+   *   <li>Testing views or stored procedure results
+   * </ul>
+   *
+   * @throws Exception if test fails
+   */
+  @Test
+  @Preparation
+  void shouldValidateQueryResultsUsingAssertEqualsByQuery() throws Exception {
+    logger.info("Running assertEqualsByQuery demonstration");
+
+    // Build expected table programmatically
+    final var columnId = new ColumnName("ID");
+    final var columnValue = new ColumnName("COLUMN1");
+    final var columnNumber = new ColumnName("COLUMN2");
+
+    final var row1 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(1),
+                columnValue, new CellValue("Value1"),
+                columnNumber, new CellValue(100)));
+    final var row2 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(2),
+                columnValue, new CellValue("Value2"),
+                columnNumber, new CellValue(200)));
+
+    final var expectedTable =
+        new SimpleTable(
+            new TableName("QUERY_RESULT"),
+            List.of(columnId, columnValue, columnNumber),
+            List.of(row1, row2));
+
+    // Use DatabaseAssertion.assertEqualsByQuery to validate query results
+    DatabaseAssertion.assertEqualsByQuery(
+        expectedTable,
+        dataSource,
+        "QUERY_RESULT",
+        "SELECT ID, COLUMN1, COLUMN2 FROM TABLE1 WHERE ID IN (1, 2) ORDER BY ID");
+
+    logger.info("assertEqualsByQuery validation completed");
+  }
+
+  /**
+   * Demonstrates {@link DatabaseAssertion#assertEqualsIgnoreColumns} for comparing tables while
+   * excluding specific columns.
+   *
+   * <p>This is useful when certain columns contain auto-generated or non-deterministic values that
+   * should be excluded from comparison, such as:
+   *
+   * <ul>
+   *   <li>Auto-generated primary keys
+   *   <li>Timestamp columns (created_at, updated_at)
+   *   <li>Version or sequence numbers
+   * </ul>
+   *
+   * @throws Exception if test fails
+   */
+  @Test
+  @Preparation
+  void shouldIgnoreSpecificColumnsUsingAssertEqualsIgnoreColumns() throws Exception {
+    logger.info("Running assertEqualsIgnoreColumns demonstration");
+
+    // Insert a row where COLUMN3 has a non-deterministic value
+    executeSql(
+        "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, 'RandomExtra')");
+
+    // Build expected data ignoring COLUMN3 (which might be auto-generated or volatile)
+    final var columnId = new ColumnName("ID");
+    final var columnValue = new ColumnName("COLUMN1");
+    final var columnNumber = new ColumnName("COLUMN2");
+    final var columnExtra = new ColumnName("COLUMN3");
+
+    final var row1 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(1),
+                columnValue, new CellValue("Value1"),
+                columnNumber, new CellValue(100),
+                columnExtra, new CellValue("Extra1")));
+    final var row2 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(2),
+                columnValue, new CellValue("Value2"),
+                columnNumber, new CellValue(200),
+                columnExtra, new CellValue("Extra2")));
+    final var row3 =
+        new SimpleRow(
+            Map.of(
+                columnId,
+                new CellValue(3),
+                columnValue,
+                new CellValue("Value3"),
+                columnNumber,
+                new CellValue(300),
+                columnExtra,
+                new CellValue("IGNORED"))); // This value won't be compared
+
+    final var expectedTable =
+        new SimpleTable(
+            new TableName("TABLE1"),
+            List.of(columnId, columnValue, columnNumber, columnExtra),
+            List.of(row1, row2, row3));
+
+    // Build actual table from query
+    final var actualRow1 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(1),
+                columnValue, new CellValue("Value1"),
+                columnNumber, new CellValue(100),
+                columnExtra, new CellValue("Extra1")));
+    final var actualRow2 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(2),
+                columnValue, new CellValue("Value2"),
+                columnNumber, new CellValue(200),
+                columnExtra, new CellValue("Extra2")));
+    final var actualRow3 =
+        new SimpleRow(
+            Map.of(
+                columnId,
+                new CellValue(3),
+                columnValue,
+                new CellValue("Value3"),
+                columnNumber,
+                new CellValue(300),
+                columnExtra,
+                new CellValue("RandomExtra"))); // Different value but will be ignored
+
+    final var actualTable =
+        new SimpleTable(
+            new TableName("TABLE1"),
+            List.of(columnId, columnValue, columnNumber, columnExtra),
+            List.of(actualRow1, actualRow2, actualRow3));
+
+    // Compare tables while ignoring COLUMN3
+    DatabaseAssertion.assertEqualsIgnoreColumns(expectedTable, actualTable, "COLUMN3");
+
+    logger.info("assertEqualsIgnoreColumns validation completed - COLUMN3 was ignored");
+  }
+
+  /**
+   * Demonstrates {@link DatabaseAssertion#assertEquals} for direct dataset comparison.
+   *
+   * <p>This test shows how to compare two complete datasets directly. This is useful for:
+   *
+   * <ul>
+   *   <li>Comparing entire table snapshots before and after operations
+   *   <li>Validating data migration results
+   *   <li>Testing data transformation logic
+   * </ul>
+   *
+   * @throws Exception if test fails
+   */
+  @Test
+  @Preparation
+  void shouldCompareTablesDirectlyUsingAssertEquals() throws Exception {
+    logger.info("Running assertEquals demonstration");
+
+    // Build expected table
+    final var columnId = new ColumnName("ID");
+    final var columnValue = new ColumnName("COLUMN1");
+    final var columnNumber = new ColumnName("COLUMN2");
+    final var columnExtra = new ColumnName("COLUMN3");
+
+    final var row1 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(1),
+                columnValue, new CellValue("Value1"),
+                columnNumber, new CellValue(100),
+                columnExtra, new CellValue("Extra1")));
+    final var row2 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(2),
+                columnValue, new CellValue("Value2"),
+                columnNumber, new CellValue(200),
+                columnExtra, new CellValue("Extra2")));
+
+    final var expectedTable =
+        new SimpleTable(
+            new TableName("TABLE1"),
+            List.of(columnId, columnValue, columnNumber, columnExtra),
+            List.of(row1, row2));
+
+    // Build actual table (simulating what would be read from the database)
+    final var actualTable =
+        new SimpleTable(
+            new TableName("TABLE1"),
+            List.of(columnId, columnValue, columnNumber, columnExtra),
+            List.of(row1, row2)); // Same data as expected
+
+    // Direct table comparison
+    DatabaseAssertion.assertEquals(expectedTable, actualTable);
+
+    logger.info("assertEquals validation completed - tables match exactly");
+  }
+
+  /**
+   * Demonstrates using {@link DatabaseAssertion#assertEqualsByQuery} with DataSet for multi-table
+   * scenarios.
+   *
+   * <p>This test shows how to use DataSet-based assertions when working with expected data that
+   * contains multiple tables. The query results are compared against a specific table within the
+   * expected dataset.
+   *
+   * @throws Exception if test fails
+   */
+  @Test
+  @Preparation
+  void shouldValidateUsingDataSetBasedAssertEqualsByQuery() throws Exception {
+    logger.info("Running DataSet-based assertEqualsByQuery demonstration");
+
+    // Build expected table
+    final var columnId = new ColumnName("ID");
+    final var columnValue = new ColumnName("COLUMN1");
+
+    final var row1 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(1),
+                columnValue, new CellValue("Value1")));
+    final var row2 =
+        new SimpleRow(
+            Map.of(
+                columnId, new CellValue(2),
+                columnValue, new CellValue("Value2")));
+
+    final var expectedTable =
+        new SimpleTable(
+            new TableName("TABLE1"), List.of(columnId, columnValue), List.of(row1, row2));
+
+    // Wrap table in a DataSet
+    final var expectedDataSet = new SimpleDataSet(List.of(expectedTable));
+
+    // Use DataSet-based assertEqualsByQuery
+    DatabaseAssertion.assertEqualsByQuery(
+        expectedDataSet, dataSource, "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID", "TABLE1");
+
+    logger.info("DataSet-based assertEqualsByQuery validation completed");
   }
 }

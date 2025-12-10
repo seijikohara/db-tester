@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.annotation;
 
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -43,4 +44,15 @@ public @interface Preparation {
    * @return the preparation operation, defaulting to {@link Operation#CLEAN_INSERT}
    */
   Operation operation() default Operation.CLEAN_INSERT;
+
+  /**
+   * Specifies the strategy for determining the table processing order.
+   *
+   * <p>This affects the order in which tables are inserted, updated, or deleted to ensure foreign
+   * key constraints are satisfied.
+   *
+   * @return the table ordering strategy, defaulting to {@link TableOrderingStrategy#AUTO}
+   * @see TableOrderingStrategy
+   */
+  TableOrderingStrategy tableOrdering() default TableOrderingStrategy.AUTO;
 }

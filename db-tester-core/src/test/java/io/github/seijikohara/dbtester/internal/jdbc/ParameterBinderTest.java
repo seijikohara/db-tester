@@ -92,14 +92,14 @@ class ParameterBinderTest {
     @DisplayName("should set null when value is null")
     void shouldSetNull_whenValueIsNull() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue(null);
 
       // When
-      binder.bind(stmt, 1, dataValue);
+      binder.bind(statement, 1, dataValue);
 
       // Then
-      verify(stmt).setNull(eq(1), eq(Types.NULL));
+      verify(statement).setNull(eq(1), eq(Types.NULL));
     }
 
     /**
@@ -112,14 +112,14 @@ class ParameterBinderTest {
     @DisplayName("should set object when value is not null")
     void shouldSetObject_whenValueIsNotNull() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue("test value");
 
       // When
-      binder.bind(stmt, 1, dataValue);
+      binder.bind(statement, 1, dataValue);
 
       // Then
-      verify(stmt).setObject(eq(1), eq("test value"));
+      verify(statement).setObject(eq(1), eq("test value"));
     }
 
     /**
@@ -132,14 +132,14 @@ class ParameterBinderTest {
     @DisplayName("should set integer value correctly")
     void shouldSetInteger_whenValueIsInteger() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue(42);
 
       // When
-      binder.bind(stmt, 1, dataValue);
+      binder.bind(statement, 1, dataValue);
 
       // Then
-      verify(stmt).setObject(eq(1), eq(42));
+      verify(statement).setObject(eq(1), eq(42));
     }
   }
 
@@ -161,21 +161,21 @@ class ParameterBinderTest {
     @DisplayName("should set all column values in order")
     void shouldSetAllColumnValues_whenColumnsProvided() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
-      final var col1 = new ColumnName("ID");
-      final var col2 = new ColumnName("NAME");
-      final var columns = List.of(col1, col2);
+      final var column1 = new ColumnName("ID");
+      final var column2 = new ColumnName("NAME");
+      final var columns = List.of(column1, column2);
 
-      when(row.getValue(col1)).thenReturn(new CellValue(1));
-      when(row.getValue(col2)).thenReturn(new CellValue("John"));
+      when(row.getValue(column1)).thenReturn(new CellValue(1));
+      when(row.getValue(column2)).thenReturn(new CellValue("John"));
 
       // When
-      binder.bindRow(stmt, row, columns);
+      binder.bindRow(statement, row, columns);
 
       // Then
-      verify(stmt).setObject(eq(1), eq(1));
-      verify(stmt).setObject(eq(2), eq("John"));
+      verify(statement).setObject(eq(1), eq(1));
+      verify(statement).setObject(eq(2), eq("John"));
     }
 
     /**
@@ -188,12 +188,12 @@ class ParameterBinderTest {
     @DisplayName("should handle empty columns")
     void shouldHandleEmptyColumns_whenNoColumnsProvided() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
       final var columns = List.<ColumnName>of();
 
       // When
-      binder.bindRow(stmt, row, columns);
+      binder.bindRow(statement, row, columns);
 
       // Then - no interactions with statement expected
     }
@@ -217,22 +217,22 @@ class ParameterBinderTest {
     @DisplayName("should convert types based on column type map")
     void shouldConvertTypes_whenColumnTypesProvided() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
-      final var col1 = new ColumnName("ID");
-      final var col2 = new ColumnName("NAME");
-      final var columns = List.of(col1, col2);
+      final var column1 = new ColumnName("ID");
+      final var column2 = new ColumnName("NAME");
+      final var columns = List.of(column1, column2);
       final var columnTypes = Map.of("ID", Types.INTEGER, "NAME", Types.VARCHAR);
 
-      when(row.getValue(col1)).thenReturn(new CellValue("42"));
-      when(row.getValue(col2)).thenReturn(new CellValue("John"));
+      when(row.getValue(column1)).thenReturn(new CellValue("42"));
+      when(row.getValue(column2)).thenReturn(new CellValue("John"));
 
       // When
-      binder.bindRowWithTypes(stmt, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes);
 
       // Then
-      verify(stmt).setInt(eq(1), eq(42));
-      verify(stmt).setObject(eq(2), eq("John"));
+      verify(statement).setInt(eq(1), eq(42));
+      verify(statement).setObject(eq(2), eq("John"));
     }
 
     /**
@@ -245,19 +245,19 @@ class ParameterBinderTest {
     @DisplayName("should handle case-insensitive column names")
     void shouldHandleCaseInsensitiveColumnNames_whenMixedCase() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
-      final var col1 = new ColumnName("id");
-      final var columns = List.of(col1);
+      final var column1 = new ColumnName("id");
+      final var columns = List.of(column1);
       final var columnTypes = Map.of("ID", Types.BIGINT);
 
-      when(row.getValue(col1)).thenReturn(new CellValue("12345"));
+      when(row.getValue(column1)).thenReturn(new CellValue("12345"));
 
       // When
-      binder.bindRowWithTypes(stmt, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes);
 
       // Then
-      verify(stmt).setLong(eq(1), eq(12345L));
+      verify(statement).setLong(eq(1), eq(12345L));
     }
 
     /**
@@ -270,19 +270,19 @@ class ParameterBinderTest {
     @DisplayName("should default to VARCHAR for unknown columns")
     void shouldDefaultToVarchar_whenColumnTypeNotFound() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var row = mock(Row.class);
-      final var col1 = new ColumnName("UNKNOWN");
-      final var columns = List.of(col1);
+      final var column1 = new ColumnName("UNKNOWN");
+      final var columns = List.of(column1);
       final var columnTypes = Map.<String, Integer>of();
 
-      when(row.getValue(col1)).thenReturn(new CellValue("value"));
+      when(row.getValue(column1)).thenReturn(new CellValue("value"));
 
       // When
-      binder.bindRowWithTypes(stmt, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes);
 
       // Then
-      verify(stmt).setObject(eq(1), eq("value"));
+      verify(statement).setObject(eq(1), eq("value"));
     }
   }
 
@@ -304,14 +304,14 @@ class ParameterBinderTest {
     @DisplayName("should set null with correct SQL type when value is null")
     void shouldSetNullWithType_whenValueIsNull() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue(null);
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
 
       // Then
-      verify(stmt).setNull(eq(1), eq(Types.INTEGER));
+      verify(statement).setNull(eq(1), eq(Types.INTEGER));
     }
 
     /**
@@ -324,14 +324,14 @@ class ParameterBinderTest {
     @DisplayName("should set object directly for non-string values")
     void shouldSetObject_whenValueIsNotString() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue(42);
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
 
       // Then
-      verify(stmt).setObject(eq(1), eq(42));
+      verify(statement).setObject(eq(1), eq(42));
     }
 
     /**
@@ -344,14 +344,14 @@ class ParameterBinderTest {
     @DisplayName("should convert string to integer when SQL type is INTEGER")
     void shouldConvertToInteger_whenSqlTypeIsInteger() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue("42");
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
 
       // Then
-      verify(stmt).setInt(eq(1), eq(42));
+      verify(statement).setInt(eq(1), eq(42));
     }
 
     /**
@@ -364,14 +364,14 @@ class ParameterBinderTest {
     @DisplayName("should convert string to long when SQL type is BIGINT")
     void shouldConvertToLong_whenSqlTypeIsBigint() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue("9223372036854775807");
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.BIGINT);
+      binder.bindWithType(statement, 1, dataValue, Types.BIGINT);
 
       // Then
-      verify(stmt).setLong(eq(1), eq(Long.MAX_VALUE));
+      verify(statement).setLong(eq(1), eq(Long.MAX_VALUE));
     }
 
     /**
@@ -384,14 +384,14 @@ class ParameterBinderTest {
     @DisplayName("should convert string to boolean when SQL type is BOOLEAN")
     void shouldConvertToBoolean_whenSqlTypeIsBoolean() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue("true");
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.BOOLEAN);
+      binder.bindWithType(statement, 1, dataValue, Types.BOOLEAN);
 
       // Then
-      verify(stmt).setBoolean(eq(1), eq(true));
+      verify(statement).setBoolean(eq(1), eq(true));
     }
 
     /**
@@ -404,14 +404,14 @@ class ParameterBinderTest {
     @DisplayName("should fall back to setObject when parsing fails")
     void shouldFallbackToSetObject_whenParsingFails() throws SQLException {
       // Given
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
       final var dataValue = new CellValue("not-a-number");
 
       // When
-      binder.bindWithType(stmt, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
 
       // Then
-      verify(stmt).setObject(eq(1), eq("not-a-number"));
+      verify(statement).setObject(eq(1), eq("not-a-number"));
     }
   }
 

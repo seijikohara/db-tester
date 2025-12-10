@@ -132,7 +132,8 @@ public abstract class InheritanceTestBase {
   protected int getRecordCount(final String tableName) throws Exception {
     try (final var connection = dataSource.getConnection();
         final var statement = connection.createStatement();
-        final var resultSet = statement.executeQuery("SELECT COUNT(*) FROM " + tableName)) {
+        final var resultSet =
+            statement.executeQuery(String.format("SELECT COUNT(*) FROM %s", tableName))) {
       resultSet.next();
       return resultSet.getInt(1);
     }

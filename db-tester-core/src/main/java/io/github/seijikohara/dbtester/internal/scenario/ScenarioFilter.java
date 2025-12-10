@@ -110,7 +110,7 @@ public final class ScenarioFilter {
   public List<ColumnName> deriveDataColumns(
       final List<ColumnName> columns, final @Nullable ColumnName scenarioColumn) {
     return Optional.ofNullable(scenarioColumn)
-        .map(col -> columns.stream().skip(1).toList())
+        .map(column -> columns.stream().skip(1).toList())
         .orElse(columns);
   }
 
@@ -123,8 +123,8 @@ public final class ScenarioFilter {
    */
   public List<Row> filterRows(final List<Row> rows, final @Nullable ColumnName scenarioColumn) {
     return Optional.ofNullable(scenarioColumn)
-        .filter(col -> isActive())
-        .map(col -> rows.stream().filter(row -> shouldIncludeRow(row, col)).toList())
+        .filter(column -> isActive())
+        .map(column -> rows.stream().filter(row -> shouldIncludeRow(row, column)).toList())
         .orElse(rows);
   }
 

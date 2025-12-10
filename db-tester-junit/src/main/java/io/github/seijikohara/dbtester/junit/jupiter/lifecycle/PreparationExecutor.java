@@ -4,6 +4,7 @@ import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.OperationProvider;
 import java.util.ServiceLoader;
 import org.slf4j.Logger;
@@ -51,7 +52,8 @@ public final class PreparationExecutor {
     }
 
     final var operation = preparation.operation();
-    dataSets.forEach(dataSet -> executeDataSet(context, dataSet, operation));
+    final var tableOrderingStrategy = preparation.tableOrdering();
+    dataSets.forEach(dataSet -> executeDataSet(context, dataSet, operation, tableOrderingStrategy));
   }
 
   /**
@@ -64,13 +66,20 @@ public final class PreparationExecutor {
    * @param context the test context providing access to the data source registry
    * @param dataSet the dataset to execute containing tables and optional data source
    * @param operation the database operation to perform (CLEAN_INSERT, INSERT, etc.)
+   * @param tableOrderingStrategy the strategy for determining table processing order
    */
   private void executeDataSet(
-      final TestContext context, final DataSet dataSet, final Operation operation) {
+      final TestContext context,
+      final DataSet dataSet,
+      final Operation operation,
+      final TableOrderingStrategy tableOrderingStrategy) {
     final var dataSource = dataSet.getDataSource().orElseGet(() -> context.registry().get(""));
 
-    logger.debug("Applying {} operation with dataset", operation);
+    logger.debug(
+        "Applying {} operation with dataset using {} table ordering",
+        operation,
+        tableOrderingStrategy);
 
-    operationProvider.execute(operation, dataSet, dataSource);
+    operationProvider.execute(operation, dataSet, dataSource, tableOrderingStrategy);
   }
 }

@@ -163,15 +163,16 @@ class TsvFormatProviderTest {
     }
 
     /**
-     * Verifies that parse creates load-order.txt when not present.
+     * Verifies that parse does not create load-order.txt when not present.
      *
      * @param tempDir temporary directory for test files
      * @throws IOException if file operations fail
      */
     @Test
     @Tag("normal")
-    @DisplayName("should create load-order.txt when not present")
-    void shouldCreateLoadOrderFile_whenNotPresent(final @TempDir Path tempDir) throws IOException {
+    @DisplayName("should not create load-order.txt when not present")
+    void shouldNotCreateLoadOrderFile_whenNotPresent(final @TempDir Path tempDir)
+        throws IOException {
       // Given
       createTsvFile(tempDir, "users.tsv", "ID\tNAME", "1\tJohn");
 
@@ -180,7 +181,7 @@ class TsvFormatProviderTest {
 
       // Then
       final var loadOrderFile = tempDir.resolve("load-order.txt");
-      assertTrue(Files.exists(loadOrderFile), "load-order.txt should be created");
+      assertTrue(!Files.exists(loadOrderFile), "load-order.txt should not be created");
     }
   }
 

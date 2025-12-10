@@ -293,8 +293,8 @@ public final class ComparisonStrategy {
   public String toString() {
     return Optional.ofNullable(pattern)
         .filter(p -> type == Type.REGEX)
-        .map(p -> "ComparisonStrategy[REGEX:" + p.pattern() + "]")
-        .orElseGet(() -> "ComparisonStrategy[" + type + "]");
+        .map(p -> String.format("ComparisonStrategy[REGEX:%s]", p.pattern()))
+        .orElseGet(() -> String.format("ComparisonStrategy[%s]", type));
   }
 
   /** Enum defining the available comparison strategy types. */

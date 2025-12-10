@@ -46,7 +46,9 @@ public final class SqlBuilder {
   public String buildUpdate(
       final String tableName, final ColumnName pkColumn, final List<ColumnName> updateColumns) {
     final var setClause =
-        updateColumns.stream().map(c -> c.value() + " = ?").collect(Collectors.joining(", "));
+        updateColumns.stream()
+            .map(c -> String.format("%s = ?", c.value()))
+            .collect(Collectors.joining(", "));
     return String.format("UPDATE %s SET %s WHERE %s = ?", tableName, setClause, pkColumn.value());
   }
 

@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.internal.format.tsv;
 
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
-import io.github.seijikohara.dbtester.internal.format.TableOrdering;
 import io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser;
 import io.github.seijikohara.dbtester.internal.format.parser.DelimiterConfig;
 import io.github.seijikohara.dbtester.internal.format.spi.FormatProvider;
@@ -16,8 +16,9 @@ import java.nio.file.Path;
  * table name. The TSV format uses tab as the delimiter, with the first row containing column
  * headers, empty cells representing NULL values, and support for double-quoted values.
  *
- * <p>If a {@code load-order.txt} file does not exist in the directory, one is automatically created
- * with tables sorted alphabetically.
+ * <p>Table ordering is determined by the load order file (default: {@value
+ * ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}) if present, otherwise tables are loaded in
+ * alphabetical order by filename.
  *
  * <p>This class is stateless and thread-safe.
  *
@@ -33,9 +34,6 @@ public final class TsvFormatProvider implements FormatProvider {
   /** The parser for TSV files. */
   private final DelimitedParser parser;
 
-  /** The table ordering manager. */
-  private final TableOrdering tableOrdering;
-
   /**
    * Creates a new TSV format provider.
    *
@@ -43,7 +41,6 @@ public final class TsvFormatProvider implements FormatProvider {
    */
   public TsvFormatProvider() {
     this.parser = new DelimitedParser(DelimiterConfig.TSV);
-    this.tableOrdering = new TableOrdering(DelimiterConfig.TSV.extension());
   }
 
   /**
@@ -64,7 +61,6 @@ public final class TsvFormatProvider implements FormatProvider {
    */
   @Override
   public DataSet parse(final Path directory) {
-    tableOrdering.ensureTableOrdering(directory);
     return parser.parse(directory);
   }
 }

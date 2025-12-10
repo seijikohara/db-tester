@@ -45,39 +45,57 @@ RuntimeException
 
 Thrown when expectation verification fails (`@Expectation` phase).
 
-### Table Count Mismatch
+### Output Format
 
-When expected and actual table counts differ:
-
-```
-Table count mismatch: expected 2 tables, but got 1
-```
-
-### Table Not Found
-
-When an expected table does not exist in actual data:
+Validation errors collect **all differences** and report them with a human-readable summary followed by YAML details:
 
 ```
-Table not found: USERS
+Assertion failed: 3 differences in USERS, ORDERS
+summary:
+  status: FAILED
+  total_differences: 3
+tables:
+  USERS:
+    differences:
+      - path: row_count
+        expected: 3
+        actual: 2
+  ORDERS:
+    differences:
+      - path: "row[0].STATUS"
+        expected: COMPLETED
+        actual: PENDING
+        column:
+          type: VARCHAR(50)
+          nullable: true
+      - path: "row[1].AMOUNT"
+        expected: 100.00
+        actual: 99.99
+        column:
+          type: "DECIMAL(10,2)"
 ```
 
-### Row Count Mismatch
+The output is **valid YAML** (after the first summary line) and can be parsed by standard YAML libraries for CI/CD integration.
 
-When a table has different row counts:
+### Output Structure
 
-```
-Row count mismatch in table 'USERS': expected 3 rows, but got 2
-```
+| Field | Description |
+|-------|-------------|
+| `summary.status` | `FAILED` when differences exist |
+| `summary.total_differences` | Total count of all differences |
+| `tables.<name>.differences` | List of differences for each table |
+| `path` | Location: `table_count`, `row_count`, or `row[N].COLUMN` |
+| `expected` / `actual` | The expected and actual values |
+| `column` | JDBC metadata (type, nullable, primary_key) when available |
 
-### Value Mismatch
+### Difference Types
 
-When a cell value differs (most detailed error):
-
-```
-Value mismatch in table 'USERS', row 0, column 'NAME': expected 'Alice', but got 'Bob'
-```
-
-**Format**: `Value mismatch in table '{table}', row {index}, column '{column}': expected '{expected}', but got '{actual}'`
+| Path | Description |
+|------|-------------|
+| `table_count` | Expected and actual table counts differ |
+| `table` | Expected table does not exist (`expected: exists`, `actual: not found`) |
+| `row_count` | Table has different row counts |
+| `row[N].COLUMN` | Cell value at row index N differs |
 
 ### Value Comparison Rules
 
@@ -254,11 +272,22 @@ ConfigurationException: Convention settings cannot be null
 
 ```
 org.example.UserRepositoryTest > shouldCreateUser FAILED
-    io.github.seijikohara.dbtester.api.exception.ValidationException:
-        Value mismatch in table 'USERS', row 0, column 'EMAIL':
-        expected 'john@example.com', but got 'jane@example.com'
+    java.lang.AssertionError:
+        Assertion failed: 1 difference in USERS
+        summary:
+          status: FAILED
+          total_differences: 1
+        tables:
+          USERS:
+            differences:
+              - path: "row[0].EMAIL"
+                expected: john@example.com
+                actual: jane@example.com
+                column:
+                  type: VARCHAR(255)
+                  nullable: false
 
-        at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.compare(DataSetComparator.java:85)
+        at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.assertEquals(DataSetComparator.java:85)
         at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier.verify(ExpectationVerifier.java:42)
 ```
 
@@ -266,8 +295,17 @@ org.example.UserRepositoryTest > shouldCreateUser FAILED
 
 ```
 example.UserRepositorySpec > should create user FAILED
-    io.github.seijikohara.dbtester.api.exception.ValidationException:
-        Row count mismatch in table 'USERS': expected 2 rows, but got 1
+    java.lang.AssertionError:
+        Assertion failed: 1 difference in USERS
+        summary:
+          status: FAILED
+          total_differences: 1
+        tables:
+          USERS:
+            differences:
+              - path: row_count
+                expected: 2
+                actual: 1
 
 Condition not satisfied:
     Expectation verification failed

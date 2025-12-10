@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.annotation;
 
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -34,4 +35,15 @@ public @interface Expectation {
    * @return ordered collection of datasets for verification
    */
   DataSet[] dataSets() default {};
+
+  /**
+   * Specifies the strategy for determining the table processing order during verification.
+   *
+   * <p>This affects the order in which tables are compared to ensure consistent validation
+   * behavior.
+   *
+   * @return the table ordering strategy, defaulting to {@link TableOrderingStrategy#AUTO}
+   * @see TableOrderingStrategy
+   */
+  TableOrderingStrategy tableOrdering() default TableOrderingStrategy.AUTO;
 }

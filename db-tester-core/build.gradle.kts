@@ -13,9 +13,10 @@ dependencies {
     api(platform(libs.slf4j.bom))
     api(libs.slf4j.api)
 
-    // CSV/TSV parsing
+    // CSV/TSV parsing and YAML output
     api(platform(libs.jackson.bom))
     implementation(libs.jackson.dataformat.csv)
+    implementation(libs.jackson.dataformat.yaml)
 }
 
 testing {

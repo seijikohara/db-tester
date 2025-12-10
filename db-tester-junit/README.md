@@ -136,7 +136,8 @@ static void setup(ExtensionContext context) {
             "/expected",                 // expectationSuffix
             "[TestCase]",                // scenarioMarker
             DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL // tableMergeStrategy
+            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
+            "load-order.txt"             // loadOrderFileName
         )
     );
     DatabaseTestExtension.setConfiguration(context, config);

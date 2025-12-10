@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.internal.jdbc;
+package io.github.seijikohara.dbtester.internal.jdbc.executor;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.internal.jdbc.SqlBuilder;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -77,19 +78,19 @@ class TruncateExecutorTest {
     void shouldTruncateTables_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(Statement.class);
+      final var statement = mock(Statement.class);
 
       final var table = mock(Table.class);
       when(table.getName()).thenReturn(new TableName("USERS"));
 
       when(sqlBuilder.buildTruncate("USERS")).thenReturn("TRUNCATE TABLE USERS");
-      when(connection.createStatement()).thenReturn(stmt);
+      when(connection.createStatement()).thenReturn(statement);
 
       // When
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(stmt).executeUpdate("TRUNCATE TABLE USERS");
+      verify(statement).executeUpdate("TRUNCATE TABLE USERS");
     }
   }
 
@@ -112,16 +113,16 @@ class TruncateExecutorTest {
     void shouldTruncateTable_whenTableNameProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(Statement.class);
+      final var statement = mock(Statement.class);
 
       when(sqlBuilder.buildTruncate("USERS")).thenReturn("TRUNCATE TABLE USERS");
-      when(connection.createStatement()).thenReturn(stmt);
+      when(connection.createStatement()).thenReturn(statement);
 
       // When
       executor.truncateTable("USERS", connection);
 
       // Then
-      verify(stmt).executeUpdate("TRUNCATE TABLE USERS");
+      verify(statement).executeUpdate("TRUNCATE TABLE USERS");
     }
 
     /**

@@ -83,7 +83,7 @@ class DataSetComparatorTest {
 
       assertNotNull(exception.getMessage(), "exception message should not be null");
       assertTrue(
-          exception.getMessage().contains("Table count mismatch"),
+          exception.getMessage().contains("table_count"),
           "exception message should mention table count mismatch");
     }
 
@@ -102,7 +102,7 @@ class DataSetComparatorTest {
 
       assertNotNull(exception.getMessage(), "exception message should not be null");
       assertTrue(
-          exception.getMessage().contains("Table not found"),
+          exception.getMessage().contains("not found"),
           "exception message should mention table not found");
     }
 
@@ -119,12 +119,12 @@ class DataSetComparatorTest {
       // When
       comparator.assertEquals(expected, actual, mockHandler);
 
-      // Then
+      // Then - now passes structured message with null expected/actual (values are in message)
       verify(mockHandler)
           .handleFailure(
-              org.mockito.ArgumentMatchers.contains("Value mismatch"),
-              org.mockito.ArgumentMatchers.eq("1"),
-              org.mockito.ArgumentMatchers.eq("2"));
+              org.mockito.ArgumentMatchers.contains("row[0].ID"),
+              org.mockito.ArgumentMatchers.isNull(),
+              org.mockito.ArgumentMatchers.isNull());
     }
   }
 
@@ -166,7 +166,7 @@ class DataSetComparatorTest {
 
       assertNotNull(exception.getMessage(), "exception message should not be null");
       assertTrue(
-          exception.getMessage().contains("Row count mismatch"),
+          exception.getMessage().contains("row_count"),
           "exception message should mention row count mismatch");
     }
 
@@ -187,10 +187,32 @@ class DataSetComparatorTest {
       final var message = exception.getMessage();
       assertAll(
           "exception message should describe the value mismatch",
-          () -> assertTrue(message.contains("Value mismatch"), "should mention value mismatch"),
-          () -> assertTrue(message.contains("NAME"), "should mention column name"),
+          () -> assertTrue(message.contains("row[0].NAME"), "should mention row and column"),
           () -> assertTrue(message.contains("Alice"), "should mention expected value"),
           () -> assertTrue(message.contains("Bob"), "should mention actual value"));
+    }
+
+    /** Verifies that assertEquals collects all differences. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should collect all differences instead of failing on first")
+    void shouldCollectAllDifferences() {
+      // Given - multiple differences in the same table
+      final var expectedColumns = List.of("ID", "NAME", "STATUS");
+      final var actualColumns = List.of("ID", "NAME", "STATUS");
+      final var expected = createTable("USERS", expectedColumns, List.of("1", "Alice", "ACTIVE"));
+      final var actual = createTable("USERS", actualColumns, List.of("2", "Bob", "INACTIVE"));
+
+      // When & Then
+      final var exception =
+          assertThrows(AssertionError.class, () -> comparator.assertEquals(expected, actual, null));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      final String message = exception.getMessage();
+      assertTrue(message.contains("total_differences: 3"), "should count all differences");
+      assertTrue(message.contains("row[0].ID"), "should include ID mismatch");
+      assertTrue(message.contains("row[0].NAME"), "should include NAME mismatch");
+      assertTrue(message.contains("row[0].STATUS"), "should include STATUS mismatch");
     }
   }
 
@@ -340,8 +362,8 @@ class DataSetComparatorTest {
         columns.stream()
             .collect(
                 java.util.stream.Collectors.toMap(
-                    col -> col,
-                    col -> new CellValue(values.get(columns.indexOf(col))),
+                    column -> column,
+                    column -> new CellValue(values.get(columns.indexOf(column))),
                     (v1, v2) -> v1,
                     java.util.LinkedHashMap::new));
     final var row = new SimpleRow(rowValues);

@@ -78,7 +78,7 @@ public final class DataSetMerger {
             .orElse(null);
 
     dataSets.stream()
-        .flatMap(ds -> ds.getTables().stream())
+        .flatMap(dataSet -> dataSet.getTables().stream())
         .forEach(
             table ->
                 tablesByName.computeIfAbsent(table.getName(), k -> new ArrayList<>()).add(table));
