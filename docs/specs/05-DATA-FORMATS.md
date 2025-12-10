@@ -275,11 +275,18 @@ ORDER_ITEMS
 
 When `load-order.txt` does not exist in the dataset directory:
 
-1. The framework automatically generates the file
-2. Tables are sorted **alphabetically** by filename
-3. The generated file is written to the dataset directory
+1. Tables are sorted **alphabetically** by filename
+2. The framework does **not** automatically generate the file
 
-This means the first test execution will create the ordering file, which can then be manually edited if needed.
+**Note**: Unlike some other database testing frameworks, db-tester does not auto-create the `load-order.txt` file. This is intentional for DbUnit compatibility and to avoid modifying test resources.
+
+To explicitly require the load order file, use:
+
+```java
+@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+```
+
+This will throw a `DataSetLoadException` if `load-order.txt` is not found.
 
 ### Processing Order by Operation
 
@@ -293,29 +300,30 @@ The table ordering interacts with database operations as follows:
 | CLEAN_INSERT | DELETE in reverse order, then INSERT in forward order |
 | TRUNCATE_INSERT | TRUNCATE in reverse order, then INSERT in forward order |
 
-### Relationship with Foreign Key Resolution
+### Relationship with TableOrderingStrategy
 
-The framework also supports automatic foreign key resolution (see [Database Operations](06-DATABASE-OPERATIONS.md#table-ordering)). The relationship between manual ordering and FK resolution:
+The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-DATABASE-OPERATIONS.md#table-ordering-strategy) for full details.
 
-| Scenario | Behavior |
+| Strategy | Behavior |
 |----------|----------|
-| `load-order.txt` exists | Manual order is used |
-| No ordering file, FK metadata available | FK-based order is computed |
-| No ordering file, no FK metadata | Alphabetical order (file generated) |
+| `AUTO` (default) | Use `load-order.txt` if exists, then FK metadata, then alphabetical |
+| `LOAD_ORDER_FILE` | Require `load-order.txt` (error if not found) |
+| `FOREIGN_KEY` | Use JDBC metadata for FK-based ordering |
+| `ALPHABETICAL` | Sort tables alphabetically by name |
 
 ### Best Practices
 
 1. **Commit the ordering file**: Include `load-order.txt` in version control for reproducible tests
 2. **Parent tables first**: List parent tables before child tables to satisfy foreign key constraints
 3. **Use comments**: Document the reasoning for non-obvious ordering decisions
-4. **Review generated files**: When the framework generates an ordering file, review and adjust if needed
+4. **Consider FK strategy**: For databases with proper FK constraints, `TableOrderingStrategy.FOREIGN_KEY` provides automatic ordering without manual file maintenance
 
 ### Error Handling
 
 | Error | Exception |
 |-------|-----------|
 | Cannot read ordering file | `DataSetLoadException` |
-| Cannot write ordering file | `DataSetLoadException` |
+| File required but not found (`LOAD_ORDER_FILE` strategy) | `DataSetLoadException` |
 
 ---
 
@@ -383,5 +391,6 @@ All values are parsed as strings and converted during database operations:
 ## Related Specifications
 
 - [Configuration](04-CONFIGURATION.md) - DataFormat and ConventionSettings
-- [Database Operations](06-DATABASE-OPERATIONS.md) - How data is applied
+- [Database Operations](06-DATABASE-OPERATIONS.md) - Table ordering and operations
 - [Public API](03-PUBLIC-API.md) - Annotation attributes
+- [Error Handling](09-ERROR-HANDLING.md) - Dataset load errors

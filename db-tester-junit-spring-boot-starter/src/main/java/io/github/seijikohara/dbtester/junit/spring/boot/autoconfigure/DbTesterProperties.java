@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
@@ -128,12 +129,14 @@ public class DbTesterProperties {
    *   <li>{@code db-tester.convention.base-directory} - Base directory for datasets (default: null,
    *       uses classpath)
    *   <li>{@code db-tester.convention.expectation-suffix} - Suffix for expectation directories
-   *       (default: /expected)
+   *       (default: {@value ConventionSettings#DEFAULT_EXPECTATION_SUFFIX})
    *   <li>{@code db-tester.convention.scenario-marker} - Column name for scenario filtering
-   *       (default: [Scenario])
+   *       (default: {@value ConventionSettings#DEFAULT_SCENARIO_MARKER})
    *   <li>{@code db-tester.convention.data-format} - Dataset file format (default: CSV)
    *   <li>{@code db-tester.convention.table-merge-strategy} - Strategy for merging tables (default:
    *       UNION_ALL)
+   *   <li>{@code db-tester.convention.load-order-file-name} - File name for table loading order
+   *       (default: {@value ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME})
    * </ul>
    */
   public static class ConventionProperties {
@@ -149,17 +152,29 @@ public class DbTesterProperties {
      */
     private @Nullable String baseDirectory;
 
-    /** Suffix appended to preparation path for expectation datasets. Defaults to "/expected". */
-    private String expectationSuffix = "/expected";
+    /**
+     * Suffix appended to preparation path for expectation datasets. Defaults to {@value
+     * ConventionSettings#DEFAULT_EXPECTATION_SUFFIX}.
+     */
+    private String expectationSuffix = ConventionSettings.DEFAULT_EXPECTATION_SUFFIX;
 
-    /** Column name that identifies scenario markers in dataset files. Defaults to "[Scenario]". */
-    private String scenarioMarker = "[Scenario]";
+    /**
+     * Column name that identifies scenario markers in dataset files. Defaults to {@value
+     * ConventionSettings#DEFAULT_SCENARIO_MARKER}.
+     */
+    private String scenarioMarker = ConventionSettings.DEFAULT_SCENARIO_MARKER;
 
     /** File format for dataset files. Defaults to CSV. */
     private DataFormat dataFormat = DataFormat.CSV;
 
     /** Strategy for merging tables from multiple datasets. Defaults to UNION_ALL. */
     private TableMergeStrategy tableMergeStrategy = TableMergeStrategy.UNION_ALL;
+
+    /**
+     * File name for specifying table loading order in dataset directories. Defaults to {@value
+     * ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}.
+     */
+    private String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME;
 
     /**
      * Returns the base directory for dataset resolution.
@@ -249,6 +264,24 @@ public class DbTesterProperties {
      */
     public void setTableMergeStrategy(final TableMergeStrategy tableMergeStrategy) {
       this.tableMergeStrategy = tableMergeStrategy;
+    }
+
+    /**
+     * Returns the load order file name.
+     *
+     * @return the load order file name
+     */
+    public String getLoadOrderFileName() {
+      return loadOrderFileName;
+    }
+
+    /**
+     * Sets the load order file name.
+     *
+     * @param loadOrderFileName the load order file name
+     */
+    public void setLoadOrderFileName(final String loadOrderFileName) {
+      this.loadOrderFileName = loadOrderFileName;
     }
   }
 

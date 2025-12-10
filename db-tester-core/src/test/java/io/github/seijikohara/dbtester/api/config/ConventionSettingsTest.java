@@ -38,10 +38,14 @@ class ConventionSettingsTest {
           () -> assertNull(settings.baseDirectory(), "baseDirectory should be null"),
           () ->
               assertEquals(
-                  "/expected", settings.expectationSuffix(), "expectationSuffix should be default"),
+                  ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+                  settings.expectationSuffix(),
+                  "expectationSuffix should be default"),
           () ->
               assertEquals(
-                  "[Scenario]", settings.scenarioMarker(), "scenarioMarker should be default"),
+                  ConventionSettings.DEFAULT_SCENARIO_MARKER,
+                  settings.scenarioMarker(),
+                  "scenarioMarker should be default"),
           () ->
               assertEquals(
                   DataFormat.CSV, settings.dataFormat(), "dataFormat should be CSV by default"),
@@ -49,7 +53,12 @@ class ConventionSettingsTest {
               assertEquals(
                   TableMergeStrategy.UNION_ALL,
                   settings.tableMergeStrategy(),
-                  "tableMergeStrategy should be UNION_ALL by default"));
+                  "tableMergeStrategy should be UNION_ALL by default"),
+          () ->
+              assertEquals(
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  settings.loadOrderFileName(),
+                  "loadOrderFileName should be default"));
     }
 
     /** Verifies that standard returns consistent instances. */
@@ -85,9 +94,11 @@ class ConventionSettingsTest {
       final var marker = "[TestCase]";
       final var format = DataFormat.TSV;
       final var strategy = TableMergeStrategy.FIRST;
+      final var loadOrderFileName = "custom-load-order.txt";
 
       // When
-      final var settings = new ConventionSettings(baseDir, suffix, marker, format, strategy);
+      final var settings =
+          new ConventionSettings(baseDir, suffix, marker, format, strategy, loadOrderFileName);
 
       // Then
       assertAll(
@@ -99,7 +110,12 @@ class ConventionSettingsTest {
           () -> assertEquals(format, settings.dataFormat(), "dataFormat should match"),
           () ->
               assertEquals(
-                  strategy, settings.tableMergeStrategy(), "tableMergeStrategy should match"));
+                  strategy, settings.tableMergeStrategy(), "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  loadOrderFileName,
+                  settings.loadOrderFileName(),
+                  "loadOrderFileName should match"));
     }
 
     /** Verifies that constructor accepts null base directory. */
@@ -110,7 +126,12 @@ class ConventionSettingsTest {
       // Given & When
       final var settings =
           new ConventionSettings(
-              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+              null,
+              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+              ConventionSettings.DEFAULT_SCENARIO_MARKER,
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -123,13 +144,15 @@ class ConventionSettingsTest {
     void should_accept_empty_strings_for_suffix_and_marker() {
       // Given & When
       final var settings =
-          new ConventionSettings(null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+          new ConventionSettings(null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "");
 
       // Then
       assertAll(
           "should accept empty strings",
           () -> assertEquals("", settings.expectationSuffix(), "expectationSuffix should be empty"),
-          () -> assertEquals("", settings.scenarioMarker(), "scenarioMarker should be empty"));
+          () -> assertEquals("", settings.scenarioMarker(), "scenarioMarker should be empty"),
+          () ->
+              assertEquals("", settings.loadOrderFileName(), "loadOrderFileName should be empty"));
     }
   }
 
@@ -149,10 +172,20 @@ class ConventionSettingsTest {
       // Given
       final var settings1 =
           new ConventionSettings(
-              "/base", "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+              "/base",
+              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+              ConventionSettings.DEFAULT_SCENARIO_MARKER,
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
       final var settings2 =
           new ConventionSettings(
-              "/base", "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+              "/base",
+              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+              ConventionSettings.DEFAULT_SCENARIO_MARKER,
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
 
       // When & Then
       assertAll(
@@ -169,10 +202,20 @@ class ConventionSettingsTest {
       // Given
       final var settings1 =
           new ConventionSettings(
-              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+              null,
+              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+              ConventionSettings.DEFAULT_SCENARIO_MARKER,
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
       final var settings2 =
           new ConventionSettings(
-              null, "/expected", "[Scenario]", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+              null,
+              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
+              ConventionSettings.DEFAULT_SCENARIO_MARKER,
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");
@@ -219,7 +262,12 @@ class ConventionSettingsTest {
               assertEquals(
                   original.tableMergeStrategy(),
                   modified.tableMergeStrategy(),
-                  "tableMergeStrategy should match"));
+                  "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  original.loadOrderFileName(),
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should match"));
     }
   }
 
@@ -264,8 +312,63 @@ class ConventionSettingsTest {
                   modified.scenarioMarker(),
                   "scenarioMarker should match"),
           () ->
+              assertEquals(original.dataFormat(), modified.dataFormat(), "dataFormat should match"),
+          () ->
               assertEquals(
-                  original.dataFormat(), modified.dataFormat(), "dataFormat should match"));
+                  original.loadOrderFileName(),
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should match"));
+    }
+  }
+
+  /** Tests for the withLoadOrderFileName method. */
+  @Nested
+  @DisplayName("withLoadOrderFileName() method")
+  class WithLoadOrderFileNameMethod {
+
+    /** Tests for the withLoadOrderFileName method. */
+    WithLoadOrderFileNameMethod() {}
+
+    /** Verifies that withLoadOrderFileName returns a new instance with the specified file name. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified load order file name")
+    void should_return_new_instance_with_specified_load_order_file_name() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var customFileName = "custom-order.txt";
+
+      // When
+      final var modified = original.withLoadOrderFileName(customFileName);
+
+      // Then
+      assertAll(
+          "should have new load order file name while preserving other values",
+          () ->
+              assertEquals(
+                  customFileName,
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should be custom"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.expectationSuffix(),
+                  modified.expectationSuffix(),
+                  "expectationSuffix should match"),
+          () ->
+              assertEquals(
+                  original.scenarioMarker(),
+                  modified.scenarioMarker(),
+                  "scenarioMarker should match"),
+          () ->
+              assertEquals(original.dataFormat(), modified.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  original.tableMergeStrategy(),
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should match"));
     }
   }
 }

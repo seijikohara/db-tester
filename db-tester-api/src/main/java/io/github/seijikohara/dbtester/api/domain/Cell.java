@@ -168,8 +168,8 @@ public final class Cell {
    * @return the string representation or null
    */
   public @Nullable String getValueAsString() {
-    final var v = value.value();
-    return v != null ? v.toString() : null;
+    final var rawValue = value.value();
+    return rawValue != null ? rawValue.toString() : null;
   }
 
   /**
@@ -178,14 +178,14 @@ public final class Cell {
    * @return the value as Number, or null
    */
   public @Nullable Number getValueAsNumber() {
-    final var v = value.value();
-    if (v instanceof Number num) {
-      return num;
+    final var rawValue = value.value();
+    if (rawValue instanceof Number number) {
+      return number;
     }
-    if (v instanceof String str) {
+    if (rawValue instanceof String string) {
       try {
-        return new BigDecimal(str.trim());
-      } catch (final NumberFormatException e) {
+        return new BigDecimal(string.trim());
+      } catch (final NumberFormatException exception) {
         return null;
       }
     }
@@ -210,6 +210,6 @@ public final class Cell {
 
   @Override
   public String toString() {
-    return "Cell[" + column.getNameValue() + "=" + (isNull() ? "NULL" : value.value()) + "]";
+    return String.format("Cell[%s=%s]", column.getNameValue(), isNull() ? "NULL" : value.value());
   }
 }

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.internal.jdbc.OperationExecutor;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ class DefaultOperationProviderTest {
 
   /** Tests for the execute() method. */
   @Nested
-  @DisplayName("execute(Operation, DataSet, DataSource) method")
+  @DisplayName("execute(Operation, DataSet, DataSource, TableOrderingStrategy) method")
   class ExecuteMethod {
 
     /** Tests for the execute method. */
@@ -86,15 +87,20 @@ class DefaultOperationProviderTest {
       final var operation = Operation.CLEAN_INSERT;
       final var dataSet = mock(DataSet.class);
       final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
-          .execute(any(Operation.class), any(DataSet.class), any(DataSource.class));
+          .execute(
+              any(Operation.class),
+              any(DataSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class));
 
       // When
-      provider.execute(operation, dataSet, dataSource);
+      provider.execute(operation, dataSet, dataSource, strategy);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource);
+      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
     }
 
     /** Verifies that execute handles INSERT operation. */
@@ -106,15 +112,20 @@ class DefaultOperationProviderTest {
       final var operation = Operation.INSERT;
       final var dataSet = mock(DataSet.class);
       final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
-          .execute(any(Operation.class), any(DataSet.class), any(DataSource.class));
+          .execute(
+              any(Operation.class),
+              any(DataSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class));
 
       // When
-      provider.execute(operation, dataSet, dataSource);
+      provider.execute(operation, dataSet, dataSource, strategy);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource);
+      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
     }
 
     /** Verifies that execute handles DELETE_ALL operation. */
@@ -126,15 +137,20 @@ class DefaultOperationProviderTest {
       final var operation = Operation.DELETE_ALL;
       final var dataSet = mock(DataSet.class);
       final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
-          .execute(any(Operation.class), any(DataSet.class), any(DataSource.class));
+          .execute(
+              any(Operation.class),
+              any(DataSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class));
 
       // When
-      provider.execute(operation, dataSet, dataSource);
+      provider.execute(operation, dataSet, dataSource, strategy);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource);
+      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
     }
 
     /** Verifies that execute handles TRUNCATE_TABLE operation. */
@@ -146,15 +162,20 @@ class DefaultOperationProviderTest {
       final var operation = Operation.TRUNCATE_TABLE;
       final var dataSet = mock(DataSet.class);
       final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
-          .execute(any(Operation.class), any(DataSet.class), any(DataSource.class));
+          .execute(
+              any(Operation.class),
+              any(DataSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class));
 
       // When
-      provider.execute(operation, dataSet, dataSource);
+      provider.execute(operation, dataSet, dataSource, strategy);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource);
+      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
     }
   }
 }

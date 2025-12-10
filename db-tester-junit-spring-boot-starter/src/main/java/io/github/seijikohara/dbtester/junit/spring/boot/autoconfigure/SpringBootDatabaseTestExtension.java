@@ -90,8 +90,8 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
       final ExtensionContext context, final ApplicationContext applicationContext) {
 
     Optional.of(applicationContext)
-        .filter(ctx -> ctx.containsBean("dbTesterConfiguration"))
-        .map(ctx -> ctx.getBean("dbTesterConfiguration", Configuration.class))
+        .filter(appContext -> appContext.containsBean("dbTesterConfiguration"))
+        .map(appContext -> appContext.getBean("dbTesterConfiguration", Configuration.class))
         .ifPresentOrElse(
             configuration -> {
               setConfiguration(context, configuration);
@@ -100,8 +100,7 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
             },
             () ->
                 logger.debug(
-                    "Configuration bean not found in ApplicationContext, "
-                        + "using default configuration"));
+                    "Configuration bean not found in ApplicationContext, using default configuration"));
   }
 
   /**
@@ -114,13 +113,12 @@ public class SpringBootDatabaseTestExtension extends DatabaseTestExtension
       final ExtensionContext context, final ApplicationContext applicationContext) {
 
     Optional.of(applicationContext)
-        .filter(ctx -> ctx.containsBean("dataSourceRegistrar"))
+        .filter(appContext -> appContext.containsBean("dataSourceRegistrar"))
         .ifPresentOrElse(
-            ctx -> registerDataSources(context, ctx),
+            appContext -> registerDataSources(context, appContext),
             () ->
                 logger.debug(
-                    "DataSourceRegistrar bean not found in ApplicationContext, "
-                        + "skipping automatic DataSource registration"));
+                    "DataSourceRegistrar bean not found in ApplicationContext, skipping automatic DataSource registration"));
   }
 
   /**

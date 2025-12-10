@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.internal.jdbc;
+package io.github.seijikohara.dbtester.internal.jdbc.executor;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -13,6 +13,8 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.internal.jdbc.ParameterBinder;
+import io.github.seijikohara.dbtester.internal.jdbc.SqlBuilder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -88,7 +90,7 @@ class DeleteExecutorTest {
     void shouldDeleteRows_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(PreparedStatement.class);
+      final var statement = mock(PreparedStatement.class);
 
       final var table = mock(Table.class);
       final var row = mock(Row.class);
@@ -101,28 +103,28 @@ class DeleteExecutorTest {
 
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
-      when(connection.prepareStatement(anyString())).thenReturn(stmt);
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
 
       // When
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(parameterBinder).bind(eq(stmt), eq(1), eq(new CellValue(1)));
-      verify(stmt).addBatch();
-      verify(stmt).executeBatch();
+      verify(parameterBinder).bind(eq(statement), eq(1), eq(new CellValue(1)));
+      verify(statement).addBatch();
+      verify(statement).executeBatch();
     }
   }
 
-  /** Tests for the deleteRows() method. */
+  /** Tests for edge cases in execute method. */
   @Nested
-  @DisplayName("deleteRows(Table, Connection) method")
-  class DeleteRowsMethod {
+  @DisplayName("execute with edge cases")
+  class ExecuteEdgeCases {
 
-    /** Tests for the deleteRows method. */
-    DeleteRowsMethod() {}
+    /** Tests for edge cases. */
+    ExecuteEdgeCases() {}
 
     /**
-     * Verifies that deleteRows skips tables with no rows.
+     * Verifies that execute skips tables with no rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -136,14 +138,14 @@ class DeleteExecutorTest {
       when(table.getRows()).thenReturn(List.of());
 
       // When
-      executor.deleteRows(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(connection, never()).prepareStatement(anyString());
     }
 
     /**
-     * Verifies that deleteRows skips tables with no columns.
+     * Verifies that execute skips tables with no columns.
      *
      * @throws SQLException if a database error occurs
      */
@@ -159,7 +161,7 @@ class DeleteExecutorTest {
       when(table.getColumns()).thenReturn(List.of());
 
       // When
-      executor.deleteRows(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(connection, never()).prepareStatement(anyString());
@@ -185,19 +187,19 @@ class DeleteExecutorTest {
     void shouldDeleteAllRows_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(Statement.class);
+      final var statement = mock(Statement.class);
 
       final var table = mock(Table.class);
       when(table.getName()).thenReturn(new TableName("USERS"));
 
       when(sqlBuilder.buildDeleteAll("USERS")).thenReturn("DELETE FROM USERS");
-      when(connection.createStatement()).thenReturn(stmt);
+      when(connection.createStatement()).thenReturn(statement);
 
       // When
       executor.executeDeleteAll(List.of(table), connection);
 
       // Then
-      verify(stmt).executeUpdate("DELETE FROM USERS");
+      verify(statement).executeUpdate("DELETE FROM USERS");
     }
   }
 
@@ -220,16 +222,16 @@ class DeleteExecutorTest {
     void shouldDeleteAllRows_whenTableNameProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var stmt = mock(Statement.class);
+      final var statement = mock(Statement.class);
 
       when(sqlBuilder.buildDeleteAll("USERS")).thenReturn("DELETE FROM USERS");
-      when(connection.createStatement()).thenReturn(stmt);
+      when(connection.createStatement()).thenReturn(statement);
 
       // When
       executor.deleteAllRows("USERS", connection);
 
       // Then
-      verify(stmt).executeUpdate("DELETE FROM USERS");
+      verify(statement).executeUpdate("DELETE FROM USERS");
     }
   }
 }

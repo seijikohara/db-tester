@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
+import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
@@ -58,6 +59,8 @@ class DbTesterProperties {
 	 *   <li>{@code db-tester.convention.data-format} - Dataset file format (default: CSV)
 	 *   <li>{@code db-tester.convention.table-merge-strategy} - Strategy for merging tables (default:
 	 *       UNION_ALL)
+	 *   <li>{@code db-tester.convention.load-order-file-name} - File name for table loading order
+	 *       (default: load-order.txt)
 	 * </ul>
 	 */
 	static class ConventionProperties {
@@ -69,16 +72,19 @@ class DbTesterProperties {
 		String baseDirectory
 
 		/** Suffix appended to preparation path for expectation datasets. Defaults to "/expected". */
-		String expectationSuffix = "/expected"
+		String expectationSuffix = ConventionSettings.DEFAULT_EXPECTATION_SUFFIX
 
 		/** Column name that identifies scenario markers in dataset files. Defaults to "[Scenario]". */
-		String scenarioMarker = "[Scenario]"
+		String scenarioMarker = ConventionSettings.DEFAULT_SCENARIO_MARKER
 
 		/** File format for dataset files. Defaults to CSV. */
 		DataFormat dataFormat = DataFormat.CSV
 
 		/** Strategy for merging tables from multiple datasets. Defaults to UNION_ALL. */
 		TableMergeStrategy tableMergeStrategy = TableMergeStrategy.UNION_ALL
+
+		/** File name for specifying table loading order in dataset directories. Defaults to "load-order.txt". */
+		String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
 	}
 
 	/**

@@ -190,7 +190,7 @@ public final class Column implements Comparable<Column> {
 
   @Override
   public String toString() {
-    return "Column[" + name.value() + "]";
+    return String.format("Column[%s]", name.value());
   }
 
   /** Builder for constructing Column instances with custom properties. */

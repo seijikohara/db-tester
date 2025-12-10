@@ -48,7 +48,12 @@ class TestClassNameBasedDataSetLoaderTest {
 
     final var conventions =
         new ConventionSettings(
-            null, "/expected", "SCENARIO", DataFormat.CSV, TableMergeStrategy.UNION_ALL);
+            null,
+            "/expected",
+            "SCENARIO",
+            DataFormat.CSV,
+            TableMergeStrategy.UNION_ALL,
+            ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
     final var operationDefaults = new OperationDefaults(Operation.CLEAN_INSERT, Operation.NONE);
     final var loader = new TestClassNameBasedDataSetLoader();
     configuration = new Configuration(conventions, operationDefaults, loader);

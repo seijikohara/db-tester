@@ -1,16 +1,15 @@
 package io.github.seijikohara.dbtester.internal.format;
 
-import static io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants.LOAD_ORDER_FILE;
-
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +17,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Manages table ordering files for dataset directories.
  *
- * <p>This class handles the creation and reading of table ordering files. When a dataset directory
- * does not contain a table ordering file, one is automatically generated with tables sorted
- * alphabetically by filename.
- *
- * <p>The load order file ({@value
- * io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants#LOAD_ORDER_FILE}) contains one
- * table name per line. Empty lines are ignored, lines starting with {@code #} are treated as
- * comments, and table names are case-insensitive for matching.
+ * <p>This class handles reading of table ordering files. The load order file (default: {@value
+ * ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}) contains one table name per line. Empty lines
+ * are ignored, lines starting with {@code #} are treated as comments, and table names are
+ * case-insensitive for matching.
  *
  * <p>This class is thread-safe and immutable.
  *
@@ -39,80 +34,112 @@ public final class TableOrdering {
   /** The file extension for data files. */
   private final String fileExtension;
 
+  /** The file name for load order specification. */
+  private final String loadOrderFileName;
+
   /**
-   * Creates a table ordering manager for the specified file extension.
+   * Creates a table ordering manager for the specified file extension with default load order file
+   * name.
    *
    * @param fileExtension the file extension without leading dot (e.g., "csv", "tsv")
    */
   public TableOrdering(final String fileExtension) {
-    this.fileExtension = fileExtension;
+    this(fileExtension, ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
   }
 
   /**
-   * Ensures the table ordering file exists in the directory.
+   * Creates a table ordering manager for the specified file extension and load order file name.
    *
-   * <p>If the table ordering file exists, this method does nothing. If the file does not exist, a
-   * default ordering file is created with tables sorted alphabetically.
-   *
-   * @param directory the directory path containing data files
-   * @return the directory path (possibly with a generated table ordering file)
-   * @throws DataSetLoadException if file operations fail
+   * @param fileExtension the file extension without leading dot (e.g., "csv", "tsv")
+   * @param loadOrderFileName the file name for load order specification
    */
-  public Path ensureTableOrdering(final Path directory) {
-    final var orderingFile = directory.resolve(LOAD_ORDER_FILE);
-    if (!Files.exists(orderingFile)) {
-      logger.debug("Creating table ordering file: {}", orderingFile);
-      createDefaultTableOrdering(directory, orderingFile);
-    }
-    return directory;
+  public TableOrdering(final String fileExtension, final String loadOrderFileName) {
+    this.fileExtension = fileExtension;
+    this.loadOrderFileName = loadOrderFileName;
   }
 
   /**
-   * Reads the table order from the ordering file.
+   * Checks if the load order file exists in the directory.
+   *
+   * @param directory the directory path to check
+   * @return true if the load order file exists
+   */
+  public boolean hasLoadOrderFile(final Path directory) {
+    final var orderingFile = directory.resolve(loadOrderFileName);
+    return Files.exists(orderingFile);
+  }
+
+  /**
+   * Reads the table order from the ordering file if it exists.
    *
    * @param directory the directory containing the ordering file
-   * @return list of table names in order, or empty list if no ordering file exists
+   * @return optional list of table names in order, or empty if no ordering file exists
    * @throws DataSetLoadException if reading fails
    */
-  public List<String> readTableOrder(final Path directory) {
-    final var orderingFile = directory.resolve(LOAD_ORDER_FILE);
+  public Optional<List<String>> readTableOrder(final Path directory) {
+    final var orderingFile = directory.resolve(loadOrderFileName);
     if (!Files.exists(orderingFile)) {
-      return List.of();
+      return Optional.empty();
     }
 
     try {
-      return Files.readAllLines(orderingFile, StandardCharsets.UTF_8).stream()
-          .map(String::trim)
-          .filter(line -> !line.isEmpty())
-          .filter(line -> !line.startsWith("#"))
-          .toList();
-    } catch (final IOException e) {
+      final var tableNames =
+          Files.readAllLines(orderingFile, StandardCharsets.UTF_8).stream()
+              .map(String::trim)
+              .filter(line -> !line.isEmpty())
+              .filter(line -> !line.startsWith("#"))
+              .toList();
+      logger.debug("Read {} table names from {}", tableNames.size(), loadOrderFileName);
+      return Optional.of(tableNames);
+    } catch (final IOException exception) {
       throw new DataSetLoadException(
-          String.format("Failed to read table ordering file: %s", orderingFile), e);
+          String.format("Failed to read table ordering file: %s", orderingFile), exception);
     }
   }
 
   /**
-   * Creates a default table ordering file with alphabetically sorted table names.
+   * Reads the table order from the ordering file, throwing an error if not found.
    *
-   * @param directory the directory path containing data files
-   * @param orderingFile the table ordering file path to create
-   * @throws DataSetLoadException if file operations fail
+   * <p>Use this method when {@link
+   * io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy#LOAD_ORDER_FILE} is
+   * explicitly specified and the file must exist.
+   *
+   * @param directory the directory containing the ordering file
+   * @return list of table names in order
+   * @throws DataSetLoadException if the file does not exist or reading fails
    */
-  private void createDefaultTableOrdering(final Path directory, final Path orderingFile) {
-    final var tableNames = extractTableNames(directory);
-    writeTableOrdering(orderingFile, tableNames);
-    logger.debug("Created table ordering file with {} tables", tableNames.size());
+  public List<String> readTableOrderRequired(final Path directory) {
+    final var orderingFile = directory.resolve(loadOrderFileName);
+    if (!Files.exists(orderingFile)) {
+      throw new DataSetLoadException(
+          String.format(
+              "%s not found in directory: %s. When TableOrderingStrategy.LOAD_ORDER_FILE is specified, the file must exist.",
+              loadOrderFileName, directory));
+    }
+
+    try {
+      final var tableNames =
+          Files.readAllLines(orderingFile, StandardCharsets.UTF_8).stream()
+              .map(String::trim)
+              .filter(line -> !line.isEmpty())
+              .filter(line -> !line.startsWith("#"))
+              .toList();
+      logger.debug("Read {} table names from {}", tableNames.size(), loadOrderFileName);
+      return tableNames;
+    } catch (final IOException exception) {
+      throw new DataSetLoadException(
+          String.format("Failed to read table ordering file: %s", orderingFile), exception);
+    }
   }
 
   /**
-   * Extracts table names from data files in a directory.
+   * Extracts table names alphabetically sorted from data files in a directory.
    *
    * @param directory the directory path containing data files
    * @return list of table names sorted alphabetically
    * @throws DataSetLoadException if directory listing fails
    */
-  private List<TableName> extractTableNames(final Path directory) {
+  public List<TableName> extractTableNamesAlphabetically(final Path directory) {
     final var extensionSuffix = String.format(".%s", fileExtension);
     return getDataFileStream(directory, extensionSuffix)
         .map(Path::getFileName)
@@ -122,23 +149,6 @@ public final class TableOrdering {
         .map(TableName::new)
         .sorted()
         .toList();
-  }
-
-  /**
-   * Writes table names to the table ordering file.
-   *
-   * @param orderingFile the table ordering file path to write
-   * @param tableNames the list of table names
-   * @throws DataSetLoadException if writing to the file fails
-   */
-  private void writeTableOrdering(final Path orderingFile, final Collection<TableName> tableNames) {
-    try {
-      final var tableNameStrings = tableNames.stream().map(TableName::value).toList();
-      Files.write(orderingFile, tableNameStrings);
-    } catch (final IOException e) {
-      throw new DataSetLoadException(
-          String.format("Failed to write table ordering file: %s", orderingFile), e);
-    }
   }
 
   /**

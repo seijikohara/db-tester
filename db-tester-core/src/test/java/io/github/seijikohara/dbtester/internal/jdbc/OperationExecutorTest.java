@@ -11,8 +11,15 @@ import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
+import io.github.seijikohara.dbtester.internal.jdbc.executor.DeleteExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.executor.InsertExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.executor.RefreshExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.executor.TruncateExecutor;
+import io.github.seijikohara.dbtester.internal.jdbc.executor.UpdateExecutor;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -45,6 +52,9 @@ class OperationExecutorTest {
   /** Mock refresh executor. */
   private RefreshExecutor refreshExecutor;
 
+  /** Mock foreign key resolver. */
+  private ForeignKeyResolver foreignKeyResolver;
+
   /** The executor instance under test. */
   private OperationExecutor executor;
 
@@ -56,9 +66,15 @@ class OperationExecutorTest {
     deleteExecutor = mock(DeleteExecutor.class);
     truncateExecutor = mock(TruncateExecutor.class);
     refreshExecutor = mock(RefreshExecutor.class);
+    foreignKeyResolver = mock(ForeignKeyResolver.class);
     executor =
         new OperationExecutor(
-            insertExecutor, updateExecutor, deleteExecutor, truncateExecutor, refreshExecutor);
+            insertExecutor,
+            updateExecutor,
+            deleteExecutor,
+            truncateExecutor,
+            refreshExecutor,
+            foreignKeyResolver);
   }
 
   /** Tests for the constructor. */
@@ -89,7 +105,12 @@ class OperationExecutorTest {
       // When
       final var instance =
           new OperationExecutor(
-              insertExecutor, updateExecutor, deleteExecutor, truncateExecutor, refreshExecutor);
+              insertExecutor,
+              updateExecutor,
+              deleteExecutor,
+              truncateExecutor,
+              refreshExecutor,
+              foreignKeyResolver);
 
       // Then
       assertNotNull(instance, "instance should not be null");
@@ -98,7 +119,7 @@ class OperationExecutorTest {
 
   /** Tests for the execute() method. */
   @Nested
-  @DisplayName("execute(Operation, DataSet, DataSource) method")
+  @DisplayName("execute(Operation, DataSet, DataSource, TableOrderingStrategy) method")
   class ExecuteMethod {
 
     /** Tests for the execute method. */
@@ -122,7 +143,7 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(List.of());
 
       // When
-      executor.execute(Operation.NONE, dataSet, dataSource);
+      executor.execute(Operation.NONE, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(connection).setAutoCommit(false);
@@ -147,12 +168,16 @@ class OperationExecutorTest {
 
       when(dataSource.getConnection()).thenReturn(connection);
       when(dataSet.getTables()).thenReturn(List.of(table));
-      doThrow(new SQLException("Insert failed")).when(insertExecutor).execute(any(), any());
+      doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
+          .when(insertExecutor)
+          .execute(any(), any());
 
       // When & Then
       assertThrows(
           DatabaseTesterException.class,
-          () -> executor.execute(Operation.INSERT, dataSet, dataSource));
+          () ->
+              executor.execute(
+                  Operation.INSERT, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL));
       verify(connection).rollback();
       verify(connection, never()).commit();
     }
@@ -160,7 +185,7 @@ class OperationExecutorTest {
 
   /** Tests for the executeOperation() method. */
   @Nested
-  @DisplayName("executeOperation(Operation, DataSet, Connection) method")
+  @DisplayName("executeOperation(Operation, DataSet, Connection, TableOrderingStrategy) method")
   class ExecuteOperationMethod {
 
     /** Tests for the executeOperation method. */
@@ -178,9 +203,11 @@ class OperationExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var dataSet = mock(DataSet.class);
+      when(dataSet.getTables()).thenReturn(List.of());
 
       // When
-      executor.executeOperation(Operation.NONE, dataSet, connection);
+      executor.executeOperation(
+          Operation.NONE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(insertExecutor, never()).execute(any(), any());
@@ -206,7 +233,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.INSERT, dataSet, connection);
+      executor.executeOperation(
+          Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(insertExecutor).execute(tables, connection);
@@ -228,7 +256,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.UPDATE, dataSet, connection);
+      executor.executeOperation(
+          Operation.UPDATE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(updateExecutor).execute(tables, connection);
@@ -250,7 +279,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.DELETE, dataSet, connection);
+      executor.executeOperation(
+          Operation.DELETE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(deleteExecutor).execute(tables, connection);
@@ -272,7 +302,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.DELETE_ALL, dataSet, connection);
+      executor.executeOperation(
+          Operation.DELETE_ALL, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(deleteExecutor).executeDeleteAll(tables, connection);
@@ -294,7 +325,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.REFRESH, dataSet, connection);
+      executor.executeOperation(
+          Operation.REFRESH, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(refreshExecutor).execute(tables, connection);
@@ -316,7 +348,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.TRUNCATE_TABLE, dataSet, connection);
+      executor.executeOperation(
+          Operation.TRUNCATE_TABLE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(truncateExecutor).execute(tables, connection);
@@ -339,7 +372,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.CLEAN_INSERT, dataSet, connection);
+      executor.executeOperation(
+          Operation.CLEAN_INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(deleteExecutor).executeDeleteAll(tables.reversed(), connection);
@@ -363,7 +397,8 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(tables);
 
       // When
-      executor.executeOperation(Operation.TRUNCATE_INSERT, dataSet, connection);
+      executor.executeOperation(
+          Operation.TRUNCATE_INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
       verify(truncateExecutor).execute(tables.reversed(), connection);

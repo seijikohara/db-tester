@@ -87,27 +87,28 @@ public final class ComparisonStrategyTest {
    * @return configured DataSource
    */
   private static DataSource createDataSource() {
-    final var ds = new JdbcDataSource();
-    ds.setURL("jdbc:h2:mem:ComparisonStrategyTest;DB_CLOSE_DELAY=-1");
-    ds.setUser("sa");
-    ds.setPassword("");
-    return ds;
+    final var dataSource = new JdbcDataSource();
+    dataSource.setURL("jdbc:h2:mem:ComparisonStrategyTest;DB_CLOSE_DELAY=-1");
+    dataSource.setUser("sa");
+    dataSource.setPassword("");
+    return dataSource;
   }
 
   /**
    * Executes SQL script from classpath.
    *
-   * @param ds target DataSource
+   * @param dataSource target DataSource
    * @param scriptPath classpath resource path
    * @throws Exception if execution fails
    */
-  private static void executeScript(final DataSource ds, final String scriptPath) throws Exception {
+  private static void executeScript(final DataSource dataSource, final String scriptPath)
+      throws Exception {
     final var resource =
         Optional.ofNullable(ComparisonStrategyTest.class.getClassLoader().getResource(scriptPath))
             .orElseThrow(
                 () -> new IllegalStateException(String.format("Script not found: %s", scriptPath)));
 
-    try (final var connection = ds.getConnection();
+    try (final var connection = dataSource.getConnection();
         final var statement = connection.createStatement();
         final var inputStream = resource.openStream()) {
       final var sql = new String(inputStream.readAllBytes(), UTF_8);

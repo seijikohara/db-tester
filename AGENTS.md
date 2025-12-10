@@ -60,15 +60,15 @@ Detailed specifications are available in `docs/specs/`:
 
 | Document | Description |
 |----------|-------------|
-| [Overview](docs/specs/01-OVERVIEW.md) | Framework purpose, key concepts, design philosophy |
-| [Architecture](docs/specs/02-ARCHITECTURE.md) | Module structure, dependencies, package organization, DDD patterns, JPMS |
-| [Public API](docs/specs/03-PUBLIC-API.md) | Annotations, interfaces, domain value objects, exceptions |
-| [Configuration](docs/specs/04-CONFIGURATION.md) | Configuration classes, ConventionSettings, DataSourceRegistry |
-| [Data Formats](docs/specs/05-DATA-FORMATS.md) | CSV/TSV file structure, scenario filtering, parsing rules |
-| [Database Operations](docs/specs/06-DATABASE-OPERATIONS.md) | Supported operations, execution flow, transaction handling |
-| [Test Frameworks](docs/specs/07-TEST-FRAMEWORKS.md) | JUnit and Spock integration, Spring Boot starters |
+| [Overview](docs/specs/01-OVERVIEW.md) | Framework purpose and key concepts |
+| [Architecture](docs/specs/02-ARCHITECTURE.md) | Module structure and dependencies |
+| [Public API](docs/specs/03-PUBLIC-API.md) | Annotations and configuration classes |
+| [Configuration](docs/specs/04-CONFIGURATION.md) | Configuration options and conventions |
+| [Data Formats](docs/specs/05-DATA-FORMATS.md) | CSV/TSV file structure and parsing |
+| [Database Operations](docs/specs/06-DATABASE-OPERATIONS.md) | Supported operations and execution flow |
+| [Test Frameworks](docs/specs/07-TEST-FRAMEWORKS.md) | JUnit and Spock integration |
 | [SPI](docs/specs/08-SPI.md) | Service Provider Interface extension points |
-| [Error Handling](docs/specs/09-ERROR-HANDLING.md) | Error messages, exception types, debugging |
+| [Error Handling](docs/specs/09-ERROR-HANDLING.md) | Error messages and exception types |
 
 ### Code Style Guides
 

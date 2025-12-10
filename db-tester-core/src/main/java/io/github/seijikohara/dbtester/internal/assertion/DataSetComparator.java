@@ -18,15 +18,17 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import org.jspecify.annotations.Nullable;
 
 /**
  * Comparator for DataSet and Table objects.
  *
- * <p>This class provides methods to compare datasets and tables, optionally ignoring specific
- * columns or using custom failure handlers.
+ * <p>This class provides methods to compare datasets and tables, collecting all differences rather
+ * than failing on the first mismatch. This enables users to see all issues at once.
+ *
+ * <p>The comparison results are formatted in a structured, human-readable format that groups errors
+ * by table and provides clear expected/actual values.
  */
 public class DataSetComparator {
 
@@ -38,7 +40,8 @@ public class DataSetComparator {
   /**
    * Asserts that two datasets are equal.
    *
-   * <p>Compares table counts and individual tables between expected and actual datasets.
+   * <p>Compares table counts and individual tables between expected and actual datasets. Collects
+   * all differences and reports them in a single structured error message.
    *
    * @param expected the expected dataset
    * @param actual the actual dataset
@@ -48,40 +51,36 @@ public class DataSetComparator {
       final DataSet expected,
       final DataSet actual,
       final @Nullable AssertionFailureHandler failureHandler) {
+    final var result = new ComparisonResult();
     final var expectedTables = expected.getTables();
     final var actualTables = actual.getTables();
 
     if (expectedTables.size() != actualTables.size()) {
-      fail(
-          String.format(
-              "Table count mismatch: expected %d tables, but got %d",
-              expectedTables.size(), actualTables.size()),
-          expectedTables.size(),
-          actualTables.size(),
-          failureHandler);
-      return;
+      result.addTableCountMismatch(expectedTables.size(), actualTables.size());
     }
 
+    // Compare each expected table with actual
     expectedTables.forEach(
         expectedTable -> {
           final var tableName = expectedTable.getName();
           actual
               .getTable(tableName)
               .ifPresentOrElse(
-                  actualTable -> assertEquals(expectedTable, actualTable, failureHandler),
-                  () ->
-                      fail(
-                          "Table not found: " + tableName.value(),
-                          tableName.value(),
-                          null,
-                          failureHandler));
+                  actualTable -> compareTable(expectedTable, actualTable, result),
+                  () -> result.addMissingTable(tableName.value()));
         });
+
+    // Report all differences
+    if (result.hasDifferences()) {
+      handleFailure(result, failureHandler);
+    }
   }
 
   /**
    * Asserts that two tables are equal.
    *
-   * <p>Compares row counts and individual rows between expected and actual tables.
+   * <p>Compares row counts and individual rows between expected and actual tables. Collects all
+   * differences and reports them in a single structured error message.
    *
    * @param expected the expected table
    * @param actual the actual table
@@ -91,24 +90,35 @@ public class DataSetComparator {
       final Table expected,
       final Table actual,
       final @Nullable AssertionFailureHandler failureHandler) {
+    final var result = new ComparisonResult();
+    compareTable(expected, actual, result);
+
+    if (result.hasDifferences()) {
+      handleFailure(result, failureHandler);
+    }
+  }
+
+  /**
+   * Compares two tables and collects differences into the result.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @param result the result collector
+   */
+  private void compareTable(
+      final Table expected, final Table actual, final ComparisonResult result) {
+    final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
     if (expectedRows.size() != actualRows.size()) {
-      fail(
-          String.format(
-              "Row count mismatch in table '%s': expected %d rows, but got %d",
-              expected.getName().value(), expectedRows.size(), actualRows.size()),
-          expectedRows.size(),
-          actualRows.size(),
-          failureHandler);
-      return;
+      result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
     }
 
-    final var tableName = expected.getName();
-    IntStream.range(0, expectedRows.size())
-        .forEach(
-            i -> compareRows(tableName, i, expectedRows.get(i), actualRows.get(i), failureHandler));
+    // Compare rows up to the minimum count
+    final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
+    IntStream.range(0, rowsToCompare)
+        .forEach(i -> compareRows(tableName, i, expectedRows.get(i), actualRows.get(i), result));
   }
 
   /**
@@ -132,26 +142,33 @@ public class DataSetComparator {
    */
   public void assertEqualsWithAdditionalColumns(
       final Table expected, final Table actual, final Collection<String> additionalColumnNames) {
+    final var result = new ComparisonResult();
+    final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
     if (expectedRows.size() != actualRows.size()) {
-      throw new AssertionError(
-          String.format(
-              "Row count mismatch in table '%s': expected %d rows, but got %d",
-              expected.getName().value(), expectedRows.size(), actualRows.size()));
+      result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
     }
 
     // Combine expected columns with additional columns
     final Set<ColumnName> columnsToCompare = new HashSet<>(expected.getColumns());
     additionalColumnNames.stream().map(ColumnName::new).forEach(columnsToCompare::add);
 
-    final var tableName = expected.getName();
-    IntStream.range(0, expectedRows.size())
+    // Compare rows up to the minimum count
+    final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
+    IntStream.range(0, rowsToCompare)
         .forEach(
             i ->
                 compareRowsWithColumns(
-                    tableName, i, expectedRows.get(i), actualRows.get(i), columnsToCompare));
+                    tableName,
+                    i,
+                    expectedRows.get(i),
+                    actualRows.get(i),
+                    columnsToCompare,
+                    result));
+
+    result.assertNoDifferences();
   }
 
   /**
@@ -162,28 +179,27 @@ public class DataSetComparator {
    * @param expected the expected row
    * @param actual the actual row
    * @param columnsToCompare the set of columns to compare
-   * @throws AssertionError if any column values differ
+   * @param result the result collector
    */
   private void compareRowsWithColumns(
-      final TableName tableName,
+      final String tableName,
       final int rowIndex,
       final Row expected,
       final Row actual,
-      final Set<ColumnName> columnsToCompare) {
+      final Set<ColumnName> columnsToCompare,
+      final ComparisonResult result) {
     columnsToCompare.forEach(
         columnName -> {
           final var expectedValue = expected.getValue(columnName);
           final var actualValue = actual.getValue(columnName);
 
           if (!valuesAreEqual(expectedValue, actualValue)) {
-            throw new AssertionError(
-                String.format(
-                    "Value mismatch in table '%s', row %d, column '%s': expected '%s', but got '%s'",
-                    tableName.value(),
-                    rowIndex,
-                    columnName.value(),
-                    extractValueString(expectedValue),
-                    extractValueString(actualValue)));
+            result.addValueMismatch(
+                tableName,
+                rowIndex,
+                columnName.value(),
+                extractValueOrNull(expectedValue),
+                extractValueOrNull(actualValue));
           }
         });
   }
@@ -209,11 +225,13 @@ public class DataSetComparator {
     final var expectedTable =
         expected
             .getTable(tableNameObj)
-            .orElseThrow(() -> new AssertionError("Expected table not found: " + tableName));
+            .orElseThrow(
+                () -> new AssertionError(String.format("Expected table not found: %s", tableName)));
     final var actualTable =
         actual
             .getTable(tableNameObj)
-            .orElseThrow(() -> new AssertionError("Actual table not found: " + tableName));
+            .orElseThrow(
+                () -> new AssertionError(String.format("Actual table not found: %s", tableName)));
 
     assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumnNames);
   }
@@ -230,40 +248,43 @@ public class DataSetComparator {
    */
   public void assertEqualsIgnoreColumns(
       final Table expected, final Table actual, final Collection<String> ignoreColumnNames) {
+    final var result = new ComparisonResult();
     final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
     if (expectedRows.size() != actualRows.size()) {
-      throw new AssertionError(
-          String.format(
-              "Row count mismatch in table '%s': expected %d rows, but got %d",
-              expected.getName().value(), expectedRows.size(), actualRows.size()));
+      result.addRowCountMismatch(tableName, expectedRows.size(), actualRows.size());
     }
 
-    final var tableName = expected.getName();
-    IntStream.range(0, expectedRows.size())
+    // Compare rows up to the minimum count
+    final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
+    IntStream.range(0, rowsToCompare)
         .forEach(
             i ->
                 compareRowsIgnoreColumns(
-                    tableName, i, expectedRows.get(i), actualRows.get(i), ignoreSet));
+                    tableName, i, expectedRows.get(i), actualRows.get(i), ignoreSet, result));
+
+    result.assertNoDifferences();
   }
 
   /**
-   * Compares two rows and reports mismatches via failure handler.
+   * Compares two rows and collects mismatches into the result.
    *
    * @param tableName the table name for error reporting
    * @param rowIndex the row index for error reporting
    * @param expected the expected row
    * @param actual the actual row
-   * @param failureHandler optional custom failure handler
+   * @param result the result collector
    */
   private void compareRows(
-      final TableName tableName,
+      final String tableName,
       final int rowIndex,
       final Row expected,
       final Row actual,
-      final @Nullable AssertionFailureHandler failureHandler) {
+      final ComparisonResult result) {
+    // Compare all columns from expected row
     expected
         .getValues()
         .keySet()
@@ -273,17 +294,12 @@ public class DataSetComparator {
               final var actualValue = actual.getValue(columnName);
 
               if (!valuesAreEqual(expectedValue, actualValue)) {
-                fail(
-                    String.format(
-                        "Value mismatch in table '%s', row %d, column '%s': expected '%s', but got '%s'",
-                        tableName.value(),
-                        rowIndex,
-                        columnName.value(),
-                        extractValueString(expectedValue),
-                        extractValueString(actualValue)),
+                result.addValueMismatch(
+                    tableName,
+                    rowIndex,
+                    columnName.value(),
                     extractValueOrNull(expectedValue),
-                    extractValueOrNull(actualValue),
-                    failureHandler);
+                    extractValueOrNull(actualValue));
               }
             });
   }
@@ -296,14 +312,15 @@ public class DataSetComparator {
    * @param expected the expected row
    * @param actual the actual row
    * @param ignoreSet set of column names to ignore
-   * @throws AssertionError if any non-ignored column values differ
+   * @param result the result collector
    */
   private void compareRowsIgnoreColumns(
-      final TableName tableName,
+      final String tableName,
       final int rowIndex,
       final Row expected,
       final Row actual,
-      final Set<String> ignoreSet) {
+      final Set<String> ignoreSet,
+      final ComparisonResult result) {
     expected.getValues().keySet().stream()
         .filter(columnName -> !ignoreSet.contains(columnName.value()))
         .forEach(
@@ -312,15 +329,30 @@ public class DataSetComparator {
               final var actualValue = actual.getValue(columnName);
 
               if (!valuesAreEqual(expectedValue, actualValue)) {
-                throw new AssertionError(
-                    String.format(
-                        "Value mismatch in table '%s', row %d, column '%s': expected '%s', but got '%s'",
-                        tableName.value(),
-                        rowIndex,
-                        columnName.value(),
-                        extractValueString(expectedValue),
-                        extractValueString(actualValue)));
+                result.addValueMismatch(
+                    tableName,
+                    rowIndex,
+                    columnName.value(),
+                    extractValueOrNull(expectedValue),
+                    extractValueOrNull(actualValue));
               }
+            });
+  }
+
+  /**
+   * Handles comparison failures by invoking the handler or throwing an error.
+   *
+   * @param result the comparison result with all differences
+   * @param failureHandler optional custom failure handler
+   */
+  private void handleFailure(
+      final ComparisonResult result, final @Nullable AssertionFailureHandler failureHandler) {
+    final var message = result.formatMessage();
+    Optional.ofNullable(failureHandler)
+        .ifPresentOrElse(
+            handler -> handler.handleFailure(message, null, null),
+            () -> {
+              throw new AssertionError(message);
             });
   }
 
@@ -412,7 +444,7 @@ public class DataSetComparator {
   private <T> boolean compareNullable(
       final @Nullable T expected,
       final @Nullable T actual,
-      final BiFunction<T, T, Boolean> comparator) {
+      final java.util.function.BiFunction<T, T, Boolean> comparator) {
     return Optional.ofNullable(expected)
         .map(
             exp -> Optional.ofNullable(actual).map(act -> comparator.apply(exp, act)).orElse(false))
@@ -450,13 +482,13 @@ public class DataSetComparator {
    */
   private String readClob(final Clob clob) throws SQLException, IOException {
     try (final Reader reader = clob.getCharacterStream()) {
-      final var sb = new StringBuilder();
+      final var stringBuilder = new StringBuilder();
       final var buffer = new char[1024];
       int length;
       while ((length = reader.read(buffer)) != -1) {
-        sb.append(buffer, 0, length);
+        stringBuilder.append(buffer, 0, length);
       }
-      return sb.toString();
+      return stringBuilder.toString();
     }
   }
 
@@ -468,11 +500,17 @@ public class DataSetComparator {
    * @return true if they represent the same boolean value
    */
   private boolean compareToBooleanString(final Object value, final Boolean bool) {
-    final var str = value.toString().trim().toLowerCase(java.util.Locale.ROOT);
+    final var stringValue = value.toString().trim().toLowerCase(java.util.Locale.ROOT);
     if (bool) {
-      return "1".equals(str) || "true".equals(str) || "yes".equals(str) || "y".equals(str);
+      return "1".equals(stringValue)
+          || "true".equals(stringValue)
+          || "yes".equals(stringValue)
+          || "y".equals(stringValue);
     } else {
-      return "0".equals(str) || "false".equals(str) || "no".equals(str) || "n".equals(str);
+      return "0".equals(stringValue)
+          || "false".equals(stringValue)
+          || "no".equals(stringValue)
+          || "n".equals(stringValue);
     }
   }
 
@@ -497,46 +535,49 @@ public class DataSetComparator {
    * <p>For floating-point numbers (Float, Double), uses epsilon comparison to handle precision
    * differences.
    *
-   * @param str the string value
-   * @param num the number value
+   * @param stringValue the string value
+   * @param numberValue the number value
    * @return true if they represent the same numeric value
    */
-  private boolean compareStringToNumber(final String str, final Number num) {
+  private boolean compareStringToNumber(final String stringValue, final Number numberValue) {
     try {
-      final var strTrimmed = str.trim();
+      final var trimmedString = stringValue.trim();
 
       // For floating-point types, use epsilon comparison
-      if (num instanceof Float || num instanceof Double) {
-        final var expected = Double.parseDouble(strTrimmed);
-        return compareFloatingPoint(expected, num.doubleValue());
+      if (numberValue instanceof Float || numberValue instanceof Double) {
+        final var expected = Double.parseDouble(trimmedString);
+        return compareFloatingPoint(expected, numberValue.doubleValue());
       }
 
       // Try integer comparison first
-      if (!strTrimmed.contains(".")) {
-        final var expected = new BigInteger(strTrimmed);
+      if (!trimmedString.contains(".")) {
+        final var expected = new BigInteger(trimmedString);
         final BigInteger actual;
-        if (num instanceof BigInteger bi) {
-          actual = bi;
-        } else if (num instanceof BigDecimal bd) {
+        if (numberValue instanceof BigInteger bigIntValue) {
+          actual = bigIntValue;
+        } else if (numberValue instanceof BigDecimal bigDecimalValue) {
           try {
-            actual = bd.toBigIntegerExact();
+            actual = bigDecimalValue.toBigIntegerExact();
           } catch (final ArithmeticException e) {
             // Has decimal part, compare as decimal
-            return new BigDecimal(strTrimmed).compareTo(bd) == 0;
+            return new BigDecimal(trimmedString).compareTo(bigDecimalValue) == 0;
           }
         } else {
-          actual = BigInteger.valueOf(num.longValue());
+          actual = BigInteger.valueOf(numberValue.longValue());
         }
         return expected.equals(actual);
       }
 
       // Decimal comparison
-      final var expected = new BigDecimal(strTrimmed);
-      final var actual = num instanceof BigDecimal bd ? bd : new BigDecimal(num.toString());
+      final var expected = new BigDecimal(trimmedString);
+      final var actual =
+          numberValue instanceof BigDecimal bigDecimalValue
+              ? bigDecimalValue
+              : new BigDecimal(numberValue.toString());
       return expected.compareTo(actual) == 0;
     } catch (final NumberFormatException e) {
       // String is not a valid number, fall back to string comparison
-      return str.equals(num.toString());
+      return stringValue.equals(numberValue.toString());
     }
   }
 
@@ -601,19 +642,6 @@ public class DataSetComparator {
   }
 
   /**
-   * Extracts the string representation of a data value, or "null" if null.
-   *
-   * @param dataValue the data value to extract
-   * @return the value string or "null"
-   */
-  private String extractValueString(final @Nullable CellValue dataValue) {
-    return Optional.ofNullable(dataValue)
-        .map(CellValue::value)
-        .map(Object::toString)
-        .orElse("null");
-  }
-
-  /**
    * Extracts the underlying value from a data value, or null if the data value is null.
    *
    * @param dataValue the data value to extract
@@ -621,27 +649,5 @@ public class DataSetComparator {
    */
   private @Nullable Object extractValueOrNull(final @Nullable CellValue dataValue) {
     return Optional.ofNullable(dataValue).map(CellValue::value).orElse(null);
-  }
-
-  /**
-   * Reports an assertion failure via the handler or throws an AssertionError.
-   *
-   * @param message the failure message
-   * @param expected the expected value
-   * @param actual the actual value
-   * @param failureHandler optional custom failure handler
-   * @throws AssertionError if no failure handler is provided
-   */
-  private void fail(
-      final String message,
-      final @Nullable Object expected,
-      final @Nullable Object actual,
-      final @Nullable AssertionFailureHandler failureHandler) {
-    Optional.ofNullable(failureHandler)
-        .ifPresentOrElse(
-            handler -> handler.handleFailure(message, expected, actual),
-            () -> {
-              throw new AssertionError(message);
-            });
   }
 }

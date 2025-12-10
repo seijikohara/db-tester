@@ -9,9 +9,10 @@ This document describes the database operations supported by the DB Tester frame
 1. [Operation Enum](#operation-enum)
 2. [Operation Descriptions](#operation-descriptions)
 3. [Execution Flow](#execution-flow)
-4. [Table Ordering](#table-ordering)
-5. [Transaction Handling](#transaction-handling)
-6. [Type Conversion](#type-conversion)
+4. [Table Ordering Strategy](#table-ordering-strategy)
+5. [Table Ordering](#table-ordering)
+6. [Transaction Handling](#transaction-handling)
+7. [Type Conversion](#type-conversion)
 
 ---
 
@@ -253,6 +254,96 @@ Truncates tables then inserts dataset rows.
 
 ---
 
+## Table Ordering Strategy
+
+### TableOrderingStrategy Enum
+
+**Location**: `io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy`
+
+The `TableOrderingStrategy` enum controls how the framework determines the order in which tables are processed during database operations.
+
+### Available Strategies
+
+| Strategy | Description |
+|----------|-------------|
+| `AUTO` | Automatically determine best ordering (default) |
+| `LOAD_ORDER_FILE` | Use `load-order.txt` file (error if not found) |
+| `FOREIGN_KEY` | Use JDBC metadata for FK-based ordering |
+| `ALPHABETICAL` | Sort tables alphabetically by name |
+
+### Strategy Details
+
+#### AUTO (Default)
+
+The framework attempts strategies in the following order:
+
+1. **LOAD_ORDER_FILE** - If `load-order.txt` exists in the dataset directory, use it
+2. **FOREIGN_KEY** - Query JDBC metadata to resolve foreign key dependencies
+3. **ALPHABETICAL** - Fall back to case-insensitive alphabetical ordering
+
+This strategy provides the most flexible behavior and is suitable for most use cases.
+
+#### LOAD_ORDER_FILE
+
+Requires a `load-order.txt` file in the dataset directory. If the file does not exist, a `DataSetLoadException` is thrown.
+
+**Use Case**: When you need explicit control over table ordering and want to guarantee the order is always specified.
+
+```java
+@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+void testWithExplicitOrder() { }
+```
+
+#### FOREIGN_KEY
+
+Uses JDBC database metadata (`DatabaseMetaData.getExportedKeys()`) to analyze foreign key dependencies and performs a topological sort.
+
+**Behavior**:
+- Parent tables (those referenced by foreign keys) are processed before child tables
+- If foreign key metadata cannot be retrieved, falls back to original table order
+- If circular dependencies are detected, logs a warning and uses declaration order
+
+**Use Case**: Databases with well-defined foreign key constraints where automatic ordering is desired.
+
+```java
+@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+void testWithFkOrdering() { }
+```
+
+#### ALPHABETICAL
+
+Tables are sorted in ascending alphabetical order (case-insensitive).
+
+**Use Case**: When table ordering doesn't matter (no FK constraints) or for deterministic ordering in simple scenarios.
+
+```java
+@Preparation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+void testWithAlphabeticalOrder() { }
+```
+
+### Usage in Annotations
+
+```java
+// Default AUTO strategy
+@Preparation
+void testDefault() { }
+
+// Explicit strategy on @Preparation
+@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+void testWithFkOrder() { }
+
+// Strategy on @Expectation (affects verification order)
+@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+void testExpectationOrder() { }
+
+// Combined usage
+@Preparation(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+void testBothPhases() { }
+```
+
+---
+
 ## Table Ordering
 
 ### Manual Ordering with `load-order.txt`
@@ -281,11 +372,13 @@ When no `load-order.txt` file exists, the framework can resolve table dependenci
 
 ### Order Resolution Priority
 
-The table order is determined by the following priority:
+The table order is determined by the `TableOrderingStrategy`. When using `AUTO` (the default), the priority is:
 
 1. **Manual ordering**: `load-order.txt` file in dataset directory
 2. **FK-based ordering**: Automatic resolution using database metadata
-3. **Alphabetical ordering**: Fallback when no other ordering is available (generates `load-order.txt`)
+3. **Alphabetical ordering**: Fallback when no other ordering is available
+
+**Note**: Unlike some other frameworks, db-tester does **not** auto-generate the `load-order.txt` file. See [TableOrderingStrategy](#table-ordering-strategy) for details.
 
 ### Circular Dependencies
 
@@ -380,3 +473,4 @@ The framework converts string values from CSV/TSV to appropriate SQL types:
 - [Public API](03-PUBLIC-API.md) - Operation enum reference
 - [Data Formats](05-DATA-FORMATS.md) - Source file structure
 - [Configuration](04-CONFIGURATION.md) - OperationDefaults
+- [Error Handling](09-ERROR-HANDLING.md) - Database operation errors

@@ -43,8 +43,7 @@ public final class DatabaseAssertion {
           .orElseThrow(
               () ->
                   new IllegalStateException(
-                      "No AssertionProvider implementation found. "
-                          + "Add db-tester-core to your classpath."));
+                      "No AssertionProvider implementation found. Add db-tester-core to your classpath."));
     }
   }
 

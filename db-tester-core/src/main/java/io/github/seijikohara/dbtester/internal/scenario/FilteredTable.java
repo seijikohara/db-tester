@@ -123,7 +123,7 @@ public final class FilteredTable implements Table {
       final Collection<ColumnName> dataColumns,
       final @Nullable ColumnName scenarioColumn) {
     return Optional.ofNullable(scenarioColumn)
-        .map(col -> sourceRows.stream().map(row -> extractRow(row, dataColumns)).toList())
+        .map(column -> sourceRows.stream().map(row -> extractRow(row, dataColumns)).toList())
         .orElseGet(() -> sourceRows.stream().map(row -> normalizeRow(row, dataColumns)).toList());
   }
 

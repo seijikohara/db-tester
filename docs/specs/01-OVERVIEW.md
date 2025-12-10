@@ -158,5 +158,6 @@ The framework uses standard JDBC operations and supports any JDBC-compliant data
 - [Configuration](04-CONFIGURATION.md) - Configuration options and conventions
 - [Data Formats](05-DATA-FORMATS.md) - CSV/TSV file structure and parsing
 - [Database Operations](06-DATABASE-OPERATIONS.md) - Supported CRUD operations
-- [Test Framework Integration](07-TEST-FRAMEWORKS.md) - JUnit and Spock integration
+- [Test Frameworks](07-TEST-FRAMEWORKS.md) - JUnit and Spock integration
 - [SPI](08-SPI.md) - Service Provider Interface extension points
+- [Error Handling](09-ERROR-HANDLING.md) - Error messages and exception types

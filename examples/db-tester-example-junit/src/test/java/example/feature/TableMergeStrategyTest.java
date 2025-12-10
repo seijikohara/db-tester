@@ -133,8 +133,8 @@ public final class TableMergeStrategyTest {
                   "/expected",
                   "[Scenario]",
                   DataFormat.CSV,
-                  TableMergeStrategy.FIRST // FIRST strategy
-                  ));
+                  TableMergeStrategy.FIRST, // FIRST strategy
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -219,8 +219,8 @@ public final class TableMergeStrategyTest {
                   "/expected",
                   "[Scenario]",
                   DataFormat.CSV,
-                  TableMergeStrategy.LAST // LAST strategy
-                  ));
+                  TableMergeStrategy.LAST, // LAST strategy
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -305,8 +305,8 @@ public final class TableMergeStrategyTest {
                   "/expected",
                   "[Scenario]",
                   DataFormat.CSV,
-                  TableMergeStrategy.UNION // UNION strategy
-                  ));
+                  TableMergeStrategy.UNION, // UNION strategy
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -391,8 +391,8 @@ public final class TableMergeStrategyTest {
                   "/expected",
                   "[Scenario]",
                   DataFormat.CSV,
-                  TableMergeStrategy.UNION_ALL // UNION_ALL strategy (default)
-                  ));
+                  TableMergeStrategy.UNION_ALL, // UNION_ALL strategy (default)
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

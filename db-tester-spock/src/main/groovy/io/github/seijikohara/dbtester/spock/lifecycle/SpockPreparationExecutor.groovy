@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.dataset.DataSet
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
 import io.github.seijikohara.dbtester.api.spi.OperationProvider
 
 /**
@@ -40,9 +41,10 @@ class SpockPreparationExecutor {
 		}
 
 		def operation = preparation.operation()
+		def tableOrderingStrategy = preparation.tableOrdering()
 
 		dataSets.each { dataSet ->
-			executeDataSet(context, dataSet, operation)
+			executeDataSet(context, dataSet, operation, tableOrderingStrategy)
 		}
 	}
 
@@ -56,13 +58,14 @@ class SpockPreparationExecutor {
 	 * @param context the test context providing access to the data source registry
 	 * @param dataSet the dataset to execute containing tables and optional data source
 	 * @param operation the database operation to perform
+	 * @param tableOrderingStrategy the strategy for determining table processing order
 	 */
-	private void executeDataSet(TestContext context, DataSet dataSet, Operation operation) {
+	private void executeDataSet(TestContext context, DataSet dataSet, Operation operation, TableOrderingStrategy tableOrderingStrategy) {
 		def dataSource = dataSet.dataSource
 				.orElseGet { -> context.registry().get('') }
 
-		log.debug('Applying {} operation with dataset', operation)
+		log.debug('Applying {} operation with dataset using {} table ordering', operation, tableOrderingStrategy)
 
-		operationProvider.execute(operation, dataSet, dataSource)
+		operationProvider.execute(operation, dataSet, dataSource, tableOrderingStrategy)
 	}
 }

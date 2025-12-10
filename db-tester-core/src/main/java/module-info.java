@@ -15,6 +15,7 @@ module io.github.seijikohara.dbtester.core {
   requires com.fasterxml.jackson.core;
   requires com.fasterxml.jackson.databind;
   requires com.fasterxml.jackson.dataformat.csv;
+  requires com.fasterxml.jackson.dataformat.yaml;
 
   // Internal packages exported for framework integration
   exports io.github.seijikohara.dbtester.internal.assertion;

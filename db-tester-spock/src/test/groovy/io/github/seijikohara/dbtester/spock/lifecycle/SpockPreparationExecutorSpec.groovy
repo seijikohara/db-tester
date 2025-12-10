@@ -8,6 +8,7 @@ import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
 import spock.lang.Specification
 
 /**
@@ -116,6 +117,7 @@ class SpockPreparationExecutorSpec extends Specification {
 	private Preparation createMockPreparation(Operation operation) {
 		def preparation = Mock(Preparation)
 		preparation.operation() >> operation
+		preparation.tableOrdering() >> TableOrderingStrategy.AUTO
 		preparation.paths() >> ([] as String[])
 		return preparation
 	}

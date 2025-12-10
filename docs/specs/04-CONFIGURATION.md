@@ -81,6 +81,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `scenarioMarker` | `String` | `"[Scenario]"` | Column name for scenario filtering |
 | `dataFormat` | `DataFormat` | `CSV` | File format for dataset files |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
+| `loadOrderFileName` | `String` | `"load-order.txt"` | File name for table loading order specification |
 
 ### Factory Methods
 
@@ -89,6 +90,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `standard()` | Creates settings with all defaults |
 | `withDataFormat(DataFormat)` | Creates copy with specified format |
 | `withTableMergeStrategy(TableMergeStrategy)` | Creates copy with specified merge strategy |
+| `withLoadOrderFileName(String)` | Creates copy with specified load order file name |
 
 ### Directory Resolution
 
@@ -323,6 +325,8 @@ List<DataSet> datasets = loader.loadPreparationDataSets(context);
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW.md) - Framework introduction
+- [Overview](01-OVERVIEW.md) - Framework purpose and key concepts
 - [Public API](03-PUBLIC-API.md) - Annotations and interfaces
 - [Data Formats](05-DATA-FORMATS.md) - CSV/TSV file structure
+- [Database Operations](06-DATABASE-OPERATIONS.md) - Supported operations
+- [Error Handling](09-ERROR-HANDLING.md) - Error messages and exception types

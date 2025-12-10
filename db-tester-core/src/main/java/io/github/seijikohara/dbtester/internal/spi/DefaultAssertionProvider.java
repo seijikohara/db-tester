@@ -101,7 +101,8 @@ public final class DefaultAssertionProvider implements AssertionProvider {
     final var expectedTable =
         expected
             .getTable(new TableName(tableName))
-            .orElseThrow(() -> new AssertionError("Expected table not found: " + tableName));
+            .orElseThrow(
+                () -> new AssertionError(String.format("Expected table not found: %s", tableName)));
 
     comparator.assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumnNames);
   }

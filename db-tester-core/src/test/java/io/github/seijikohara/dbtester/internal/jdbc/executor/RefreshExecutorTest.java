@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.internal.jdbc;
+package io.github.seijikohara.dbtester.internal.jdbc.executor;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +78,7 @@ class RefreshExecutorTest {
     ExecuteMethod() {}
 
     /**
-     * Verifies that execute calls refreshTable for each table.
+     * Verifies that execute refreshes each table.
      *
      * @throws SQLException if a database error occurs
      */
@@ -113,16 +113,16 @@ class RefreshExecutorTest {
     }
   }
 
-  /** Tests for the refreshTable() method. */
+  /** Tests for edge cases and specific behaviors in execute method. */
   @Nested
-  @DisplayName("refreshTable(Table, Connection) method")
-  class RefreshTableMethod {
+  @DisplayName("execute edge cases and behaviors")
+  class ExecuteEdgeCasesAndBehaviors {
 
-    /** Tests for the refreshTable method. */
-    RefreshTableMethod() {}
+    /** Tests for edge cases. */
+    ExecuteEdgeCasesAndBehaviors() {}
 
     /**
-     * Verifies that refreshTable skips tables with no rows.
+     * Verifies that execute skips tables with no rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -136,7 +136,7 @@ class RefreshExecutorTest {
       when(table.getRows()).thenReturn(List.of());
 
       // When
-      executor.refreshTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(updateExecutor, never()).tryUpdateRow(anyString(), any(), anyList(), any(), any());
@@ -144,7 +144,7 @@ class RefreshExecutorTest {
     }
 
     /**
-     * Verifies that refreshTable skips tables with no columns.
+     * Verifies that execute skips tables with no columns.
      *
      * @throws SQLException if a database error occurs
      */
@@ -160,7 +160,7 @@ class RefreshExecutorTest {
       when(table.getColumns()).thenReturn(List.of());
 
       // When
-      executor.refreshTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(updateExecutor, never()).tryUpdateRow(anyString(), any(), anyList(), any(), any());
@@ -168,7 +168,7 @@ class RefreshExecutorTest {
     }
 
     /**
-     * Verifies that refreshTable only updates when update affects rows.
+     * Verifies that execute only updates when update affects rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -191,7 +191,7 @@ class RefreshExecutorTest {
           .thenReturn(true);
 
       // When
-      executor.refreshTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(updateExecutor)
@@ -201,7 +201,7 @@ class RefreshExecutorTest {
     }
 
     /**
-     * Verifies that refreshTable inserts when update affects no rows.
+     * Verifies that execute inserts when update affects no rows.
      *
      * @throws SQLException if a database error occurs
      */
@@ -224,7 +224,7 @@ class RefreshExecutorTest {
           .thenReturn(false);
 
       // When
-      executor.refreshTable(table, connection);
+      executor.execute(List.of(table), connection);
 
       // Then
       verify(updateExecutor)

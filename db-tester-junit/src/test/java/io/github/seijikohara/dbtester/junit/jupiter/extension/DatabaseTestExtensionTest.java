@@ -142,7 +142,12 @@ class DatabaseTestExtensionTest {
       final var customConfig =
           Configuration.withConventions(
               new ConventionSettings(
-                  "/custom", "/verify", "[Test]", DataFormat.CSV, TableMergeStrategy.UNION_ALL));
+                  "/custom",
+                  "/verify",
+                  "[Test]",
+                  DataFormat.CSV,
+                  TableMergeStrategy.UNION_ALL,
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
       final var rootContext = mock(ExtensionContext.class);
 
       when(mockContext.getTestClass()).thenReturn(Optional.of(TestClass.class));

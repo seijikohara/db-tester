@@ -92,12 +92,8 @@ val automaticModuleNames =
         "db-tester-spock-spring-boot-starter" to "io.github.seijikohara.dbtester.spock.spring.autoconfigure",
     )
 
-// Common configuration for all subprojects (excluding java-platform projects)
+// Common maven-publish configuration for all subprojects (including BOM)
 subprojects {
-    // Skip configuration for java-platform projects (e.g., BOM)
-    // to avoid unsafe configuration resolution in Gradle 9+
-    if (name == "db-tester-bom") return@subprojects
-
     pluginManager.withPlugin("com.vanniktech.maven.publish") {
         extensions.configure<MavenPublishBaseExtension> {
             publishToMavenCentral()
@@ -126,6 +122,9 @@ subprojects {
             }
         }
     }
+
+    // Skip JaCoCo configuration for java-platform projects (e.g., BOM)
+    if (name == "db-tester-bom") return@subprojects
 
     pluginManager.withPlugin("jacoco") {
         extensions.configure<JacocoPluginExtension> {

@@ -29,6 +29,7 @@ Declares datasets to be applied before a test method executes.
 |-----------|------|---------|-------------|
 | `dataSets` | `DataSet[]` | `{}` | Datasets to execute; empty triggers convention-based discovery |
 | `operation` | `Operation` | `CLEAN_INSERT` | Database operation to apply |
+| `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
 
 **Annotation Inheritance**:
 
@@ -44,6 +45,9 @@ void testMethod() { }
 
 @Preparation(operation = Operation.INSERT)
 void testWithInsertOnly() { }
+
+@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+void testWithForeignKeyOrdering() { }
 
 @Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
 void testWithCustomPath() { }
@@ -64,6 +68,7 @@ Declares datasets that define the expected database state after test execution.
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `dataSets` | `DataSet[]` | `{}` | Datasets for verification; empty triggers convention-based discovery |
+| `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order during verification |
 
 **Verification Behavior**:
 
@@ -80,6 +85,9 @@ void testWithVerification() { }
 
 @Expectation(dataSets = @DataSet(resourceLocation = "expected/custom"))
 void testWithCustomExpectation() { }
+
+@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+void testWithAlphabeticalOrdering() { }
 ```
 
 ---
@@ -387,6 +395,8 @@ Indicates assertion or validation failure.
 - Expected/actual data mismatch
 - Row count differences
 - Column value mismatches
+
+**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-ERROR-HANDLING.md#validation-errors) for format details.
 
 ---
 

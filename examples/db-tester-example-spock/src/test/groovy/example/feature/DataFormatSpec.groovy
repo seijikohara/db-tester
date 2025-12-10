@@ -81,7 +81,8 @@ class DataFormatSpec extends Specification {
 					'/expected', // default expectation suffix
 					'[Scenario]', // default scenario marker
 					DataFormat.CSV, // CSV format
-					TableMergeStrategy.UNION_ALL
+					TableMergeStrategy.UNION_ALL,
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
 					)
 					)
 		}
@@ -200,7 +201,8 @@ class DataFormatSpec extends Specification {
 					'/expected', // default expectation suffix
 					'[Scenario]', // default scenario marker
 					DataFormat.TSV, // TSV format
-					TableMergeStrategy.UNION_ALL
+					TableMergeStrategy.UNION_ALL,
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
 					)
 					)
 		}

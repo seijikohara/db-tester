@@ -1,7 +1,6 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import static io.github.seijikohara.dbtester.internal.dataset.LoadOrderConstants.LOAD_ORDER_FILE;
-
+import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
@@ -15,12 +14,26 @@ import java.util.stream.Stream;
 /**
  * Handles creation and reuse of table ordering files for dataset directories.
  *
- * <p>The load order file name is {@value LoadOrderConstants#LOAD_ORDER_FILE}.
+ * <p>The default load order file name is {@value ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}.
  */
 public abstract class TableOrderingResolver {
 
-  /** Creates a table ordering resolver. */
-  protected TableOrderingResolver() {}
+  /** The file name for load order specification. */
+  private final String loadOrderFileName;
+
+  /** Creates a table ordering resolver with default load order file name. */
+  protected TableOrderingResolver() {
+    this(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+  }
+
+  /**
+   * Creates a table ordering resolver with a custom load order file name.
+   *
+   * @param loadOrderFileName the file name for load order specification
+   */
+  protected TableOrderingResolver(final String loadOrderFileName) {
+    this.loadOrderFileName = loadOrderFileName;
+  }
 
   /**
    * Returns the file extension supported by this dataset format.
@@ -43,7 +56,7 @@ public abstract class TableOrderingResolver {
    * @throws DataSetLoadException if file operations fail
    */
   public final Path ensureTableOrdering(final Path directory) {
-    final var orderingFile = directory.resolve(LOAD_ORDER_FILE);
+    final var orderingFile = directory.resolve(loadOrderFileName);
     if (!Files.exists(orderingFile)) {
       createDefaultTableOrdering(directory, orderingFile);
     }
