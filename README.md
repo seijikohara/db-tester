@@ -1,7 +1,7 @@
 # DB Tester
 
 [![Test](https://github.com/seijikohara/db-tester/actions/workflows/test.yml/badge.svg)](https://github.com/seijikohara/db-tester/actions/workflows/test.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/search?q=g:io.github.seijikohara%20AND%20a:db-tester-*)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 A database testing framework for JUnit and Spock. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
@@ -34,12 +34,13 @@ void shouldCreateUser() {
 
 ### Module Selection
 
-| Use Case | Module |
-|----------|--------|
-| JUnit | `db-tester-junit` |
-| JUnit with Spring Boot | `db-tester-junit-spring-boot-starter` |
-| Spock | `db-tester-spock` |
-| Spock with Spring Boot | `db-tester-spock-spring-boot-starter` |
+| Use Case | Module | Maven Central |
+|----------|--------|---------------|
+| BOM (Version Management) | `db-tester-bom` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom) |
+| JUnit | `db-tester-junit` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit) |
+| JUnit with Spring Boot | `db-tester-junit-spring-boot-starter` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit-spring-boot-starter) |
+| Spock | `db-tester-spock` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock) |
+| Spock with Spring Boot | `db-tester-spock-spring-boot-starter` | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter) |
 
 ### Gradle
 
