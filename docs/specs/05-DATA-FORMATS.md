@@ -284,7 +284,7 @@ The table ordering interacts with database operations as follows:
 
 ### Relationship with TableOrderingStrategy
 
-The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-DATABASE-OPERATIONS#table-ordering-strategy) for full details.
+The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-database-operations#table-ordering-strategy) for full details.
 
 | Strategy | Behavior |
 |----------|----------|
@@ -370,7 +370,7 @@ All values are parsed as strings and converted during database operations:
 
 ## Related Specifications
 
-- [Configuration](04-CONFIGURATION) - DataFormat and ConventionSettings
-- [Database Operations](06-DATABASE-OPERATIONS) - Table ordering and operations
-- [Public API](03-PUBLIC-API) - Annotation attributes
-- [Error Handling](09-ERROR-HANDLING) - Dataset load errors
+- [Configuration](04-configuration) - DataFormat and ConventionSettings
+- [Database Operations](06-database-operations) - Table ordering and operations
+- [Public API](03-public-api) - Annotation attributes
+- [Error Handling](09-error-handling) - Dataset load errors

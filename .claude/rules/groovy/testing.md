@@ -1,3 +1,7 @@
+---
+paths: "**/*Spec.groovy"
+---
+
 # Groovy Testing Code Style Rules (Spock Framework)
 
 **All rules in this document are mandatory unless explicitly marked as Optional.**
@@ -768,4 +772,3 @@ class MinimalExampleSpec extends Specification {
     }
 }
 ```
-

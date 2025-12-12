@@ -110,8 +110,8 @@ public interface AssertionProvider {
     void assertEquals(DataSet expected, DataSet actual);
     void assertEquals(DataSet expected, DataSet actual, AssertionFailureHandler failureHandler);
     void assertEquals(Table expected, Table actual);
-    void assertEquals(Table expected, Table actual, AssertionFailureHandler failureHandler);
     void assertEquals(Table expected, Table actual, Collection<String> additionalColumnNames);
+    void assertEquals(Table expected, Table actual, AssertionFailureHandler failureHandler);
 
     // Comparison with column exclusion
     void assertEqualsIgnoreColumns(DataSet expected, DataSet actual, String tableName,
@@ -144,12 +144,12 @@ public interface AssertionProvider {
 3. Collect all differences (not fail-fast)
 4. Output human-readable summary + YAML details on mismatch
 
-See [Error Handling - Validation Errors](09-ERROR-HANDLING#validation-errors) for output format details.
+See [Error Handling - Validation Errors](09-error-handling#validation-errors) for output format details.
 
 
 ### ExpectationProvider
 
-Orchestrates the expectation verification phase.
+Verifies database state against expected datasets.
 
 **Location**: `io.github.seijikohara.dbtester.api.spi.ExpectationProvider`
 
@@ -157,16 +157,24 @@ Orchestrates the expectation verification phase.
 
 ```java
 public interface ExpectationProvider {
-    void verify(TestContext context, Expectation expectation);
+    void verifyExpectation(DataSet expectedDataSet, DataSource dataSource);
 }
 ```
 
 **Default Implementation**: `DefaultExpectationProvider` in `db-tester-core`
 
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `expectedDataSet` | `DataSet` | The expected dataset containing expected table data |
+| `dataSource` | `DataSource` | The database connection source for retrieving actual data |
+
 **Process**:
-1. Load expected datasets from configuration
-2. Filter by scenario
-3. Delegate to `AssertionProvider` for comparison
+1. For each table in the expected dataset, fetch actual data from the database
+2. Filter actual data to only include columns present in expected table
+3. Compare filtered actual data against expected data
+4. Throw `AssertionError` if verification fails
 
 
 ### ScenarioNameResolver
@@ -179,10 +187,27 @@ Resolves scenario names from test method context.
 
 ```java
 public interface ScenarioNameResolver {
-    boolean supports(Method testMethod);
+    int DEFAULT_PRIORITY = 0;
+
     ScenarioName resolve(Method testMethod);
+
+    default boolean canResolve(Method testMethod) {
+        return true;
+    }
+
+    default int priority() {
+        return DEFAULT_PRIORITY;
+    }
 }
 ```
+
+**Methods**:
+
+| Method | Return Type | Default | Description |
+|--------|-------------|---------|-------------|
+| `resolve(Method)` | `ScenarioName` | - | Resolves scenario name from test method |
+| `canResolve(Method)` | `boolean` | `true` | Returns whether this resolver can handle the method |
+| `priority()` | `int` | `0` | Returns priority for resolver selection (higher = preferred) |
 
 **Implementations**:
 
@@ -192,9 +217,10 @@ public interface ScenarioNameResolver {
 | `SpockScenarioNameResolver` | `db-tester-spock` | Resolves from Spock feature name |
 
 **Resolution Logic**:
-1. Query all registered resolvers via `supports()`
-2. Use first resolver that returns `true`
-3. Call `resolve()` to obtain scenario name
+1. Sort all registered resolvers by `priority()` (descending)
+2. Query each resolver via `canResolve()`
+3. Use first resolver that returns `true`
+4. Call `resolve()` to obtain scenario name
 
 
 ## Core Module SPIs
@@ -333,14 +359,21 @@ To provide a custom scenario resolver:
 
 ```java
 public class CustomScenarioNameResolver implements ScenarioNameResolver {
-    @Override
-    public boolean supports(Method testMethod) {
-        // Return true for supported methods
-    }
+    private static final int HIGH_PRIORITY = 100;
 
     @Override
     public ScenarioName resolve(Method testMethod) {
         // Extract scenario name from method
+    }
+
+    @Override
+    public boolean canResolve(Method testMethod) {
+        // Return true for supported methods
+    }
+
+    @Override
+    public int priority() {
+        return HIGH_PRIORITY;  // Higher priority than default resolvers
     }
 }
 ```
@@ -389,12 +422,12 @@ When multiple providers are registered:
 | `OperationProvider` | First found |
 | `AssertionProvider` | First found |
 | `ExpectationProvider` | First found |
-| `ScenarioNameResolver` | First that `supports()` returns true |
+| `ScenarioNameResolver` | Sorted by `priority()`, first that `canResolve()` returns true |
 | `FormatProvider` | First that `canHandle()` returns true |
 
 
 ## Related Specifications
 
-- [Architecture](02-ARCHITECTURE) - Module structure
-- [Configuration](04-CONFIGURATION) - Configuration classes
-- [Test Frameworks](07-TEST-FRAMEWORKS) - Framework integration
+- [Architecture](02-architecture) - Module structure
+- [Configuration](04-configuration) - Configuration classes
+- [Test Frameworks](07-test-frameworks) - Framework integration

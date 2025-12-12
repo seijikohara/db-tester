@@ -2,7 +2,7 @@
 
 This document describes the release workflow for DB Tester modules.
 
-For detailed publishing setup (credentials, GPG keys, Maven Central configuration), see [PUBLISHING.md](PUBLISHING.md).
+For detailed publishing setup (credentials, GPG keys, Maven Central configuration), see [publishing.md](publishing.md).
 
 ## Overview
 
@@ -13,7 +13,7 @@ The project supports two release methods:
 
 ### Released Modules
 
-All modules share the same version and are released together. See [PUBLISHING.md](PUBLISHING.md#published-modules) for the complete list.
+All modules share the same version and are released together. See [publishing.md](publishing.md#published-modules) for the complete list.
 
 ### Version Management
 
@@ -40,7 +40,7 @@ The GitHub Actions workflow provides:
 
 ### Prerequisites
 
-See [PUBLISHING.md](PUBLISHING.md#option-1-github-actions-release-recommended) for one-time setup:
+See [publishing.md](publishing.md#option-1-github-actions-release-recommended) for one-time setup:
 - GitHub Environment (`maven-central`) with required reviewers
 - GitHub Secrets (`GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`, `GPG_KEY_ID`, `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_TOKEN`)
 
@@ -75,7 +75,7 @@ The workflow automatically:
 ### Verify Release
 
 - **GitHub Release**: https://github.com/seijikohara/db-tester/releases
-- **Maven Central** (available in 10-30 minutes): See [PUBLISHING.md](PUBLISHING.md#step-6-verify-publication) for verification URLs
+- **Maven Central** (available in 10-30 minutes): See [publishing.md](publishing.md#step-6-verify-publication) for verification URLs
 
 ---
 
@@ -85,7 +85,7 @@ For local releases from your development machine.
 
 ### Prerequisites
 
-See [PUBLISHING.md](PUBLISHING.md) for detailed setup instructions:
+See [publishing.md](publishing.md) for detailed setup instructions:
 - Central Portal account and namespace verification
 - API token generation
 - GPG key setup
@@ -139,7 +139,7 @@ gh release create v1.2.0 --title "Release 1.2.0" --generate-notes
 
 **Step 7: Verify Release**
 
-See [PUBLISHING.md](PUBLISHING.md#step-6-verify-publication) for verification URLs and test instructions.
+See [publishing.md](publishing.md#step-6-verify-publication) for verification URLs and test instructions.
 
 ---
 
@@ -187,7 +187,7 @@ Version is determined manually following [Semantic Versioning](https://semver.or
 
 ## Troubleshooting
 
-For troubleshooting GPG signing errors, credential issues, and Maven Central deployment failures, see [PUBLISHING.md](PUBLISHING.md#troubleshooting).
+For troubleshooting GPG signing errors, credential issues, and Maven Central deployment failures, see [publishing.md](publishing.md#troubleshooting).
 
 ## Best Practices
 

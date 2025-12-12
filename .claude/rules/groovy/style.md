@@ -1,3 +1,7 @@
+---
+paths: "**/*.groovy"
+---
+
 # Groovy Code Style Rules
 
 **All rules in this document are mandatory.**
@@ -556,4 +560,3 @@ logger.debug('Processing {} items', list.size())
 | `info` | Important business/lifecycle events |
 | `debug` | Detailed diagnostic information |
 | `trace` | Detailed diagnostics for troubleshooting |
-

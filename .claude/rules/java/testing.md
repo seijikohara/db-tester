@@ -1,3 +1,7 @@
+---
+paths: "**/src/test/**/*.java"
+---
+
 # Java Testing Code Style Rules
 
 **All rules in this document are mandatory unless explicitly marked as Optional.**

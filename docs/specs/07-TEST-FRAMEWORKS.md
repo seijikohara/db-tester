@@ -420,8 +420,8 @@ flowchart TD
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API) - Annotation details
-- [Configuration](04-CONFIGURATION) - Configuration options
-- [SPI](08-SPI) - Service Provider Interface extension points
-- [Error Handling](09-ERROR-HANDLING) - Lifecycle error handling
+- [Overview](01-overview) - Framework purpose and key concepts
+- [Public API](03-public-api) - Annotation details
+- [Configuration](04-configuration) - Configuration options
+- [SPI](08-spi) - Service Provider Interface extension points
+- [Error Handling](09-error-handling) - Lifecycle error handling

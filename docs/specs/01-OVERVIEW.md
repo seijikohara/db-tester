@@ -121,21 +121,21 @@ The framework uses standard JDBC operations and supports any JDBC-compliant data
 
 | Module | Description | Documentation |
 |--------|-------------|---------------|
-| `db-tester-api` | Public API module | [Architecture](02-ARCHITECTURE) |
-| `db-tester-core` | Internal implementation | [Architecture](02-ARCHITECTURE) |
-| `db-tester-junit` | JUnit Jupiter extension | [Test Frameworks](07-TEST-FRAMEWORKS) |
-| `db-tester-spock` | Spock Framework extension | [Test Frameworks](07-TEST-FRAMEWORKS) |
-| `db-tester-junit-spring-boot-starter` | Spring Boot integration for JUnit | [Test Frameworks](07-TEST-FRAMEWORKS) |
-| `db-tester-spock-spring-boot-starter` | Spring Boot integration for Spock | [Test Frameworks](07-TEST-FRAMEWORKS) |
+| `db-tester-api` | Public API module | [Architecture](02-architecture) |
+| `db-tester-core` | Internal implementation | [Architecture](02-architecture) |
+| `db-tester-junit` | JUnit Jupiter extension | [Test Frameworks](07-test-frameworks) |
+| `db-tester-spock` | Spock Framework extension | [Test Frameworks](07-test-frameworks) |
+| `db-tester-junit-spring-boot-starter` | Spring Boot integration for JUnit | [Test Frameworks](07-test-frameworks) |
+| `db-tester-spock-spring-boot-starter` | Spring Boot integration for Spock | [Test Frameworks](07-test-frameworks) |
 | `db-tester-bom` | Bill of Materials for dependency management | - |
 
 ## Related Specifications
 
-- [Architecture](02-ARCHITECTURE) - Module structure and dependencies
-- [Public API](03-PUBLIC-API) - Annotations and configuration classes
-- [Configuration](04-CONFIGURATION) - Configuration options and conventions
-- [Data Formats](05-DATA-FORMATS) - CSV/TSV file structure and parsing
-- [Database Operations](06-DATABASE-OPERATIONS) - Supported CRUD operations
-- [Test Frameworks](07-TEST-FRAMEWORKS) - JUnit and Spock integration
-- [SPI](08-SPI) - Service Provider Interface extension points
-- [Error Handling](09-ERROR-HANDLING) - Error messages and exception types
+- [Architecture](02-architecture) - Module structure and dependencies
+- [Public API](03-public-api) - Annotations and configuration classes
+- [Configuration](04-configuration) - Configuration options and conventions
+- [Data Formats](05-data-formats) - CSV/TSV file structure and parsing
+- [Database Operations](06-database-operations) - Supported CRUD operations
+- [Test Frameworks](07-test-frameworks) - JUnit and Spock integration
+- [SPI](08-spi) - Service Provider Interface extension points
+- [Error Handling](09-error-handling) - Error messages and exception types

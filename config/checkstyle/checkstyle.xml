@@ -5,7 +5,7 @@
 
 <!--
   Checkstyle configuration for db-tester project.
-  Enforces coding standards from docs/code-styles/JAVA.md.
+  Enforces coding standards from .claude/rules/java/style.md.
 -->
 <module name="Checker">
   <property name="severity" value="error"/>
@@ -23,7 +23,7 @@
   <module name="TreeWalker">
     <!-- =================================================================== -->
     <!-- Variables and Parameters: All must be final                         -->
-    <!-- Ref: docs/code-styles/JAVA.md - Variables and Parameters           -->
+    <!-- Ref: .claude/rules/java/style.md - Variables and Parameters           -->
     <!-- =================================================================== -->
 
     <!--
@@ -45,7 +45,7 @@
 
     <!-- =================================================================== -->
     <!-- Import Statements: No star imports                                  -->
-    <!-- Ref: docs/code-styles/JAVA.md - Import Statements                  -->
+    <!-- Ref: .claude/rules/java/style.md - Import Statements                  -->
     <!-- =================================================================== -->
 
     <!--
@@ -56,18 +56,18 @@
 
     <!-- =================================================================== -->
     <!-- Class Design: Enforce immutability patterns                         -->
-    <!-- Ref: docs/code-styles/JAVA.md - Records and Immutability           -->
+    <!-- Ref: .claude/rules/java/style.md - Records and Immutability           -->
     <!-- =================================================================== -->
 
     <!--
       HideUtilityClassConstructor: Utility classes should have private constructor.
-      Note: Not strictly required by JAVA.md but supports immutability principles.
+      Note: Not strictly required by java-style.md but supports immutability principles.
     -->
     <module name="HideUtilityClassConstructor"/>
 
     <!-- =================================================================== -->
     <!-- Coding Style: Naming conventions and modifiers                      -->
-    <!-- Ref: docs/code-styles/JAVA.md - Naming Conventions                 -->
+    <!-- Ref: .claude/rules/java/style.md - Naming Conventions                 -->
     <!-- =================================================================== -->
 
     <!--
@@ -79,7 +79,7 @@
     <!--
       Note: RedundantModifier is disabled because the project style requires final on all parameters,
       even in interfaces where it is technically redundant. This is consistent with the
-      "All parameters and local variables must be final" rule in docs/code-styles/JAVA.md.
+      "All parameters and local variables must be final" rule in .claude/rules/java/style.md.
     -->
 
     <!-- =================================================================== -->

@@ -239,12 +239,12 @@ subprojects.filter { it.name in javaModules }.forEach { subproject ->
                 option("NullAway:HandleTestAssertionLibraries", "true")
 
                 // Optional usage checks
-                // Ref: docs/code-styles/JAVA.md - Optional Patterns
+                // Ref: .claude/rules/java/style.md - Optional Patterns
                 check("OptionalNotPresent", CheckSeverity.ERROR)
                 check("OptionalOfRedundantMethod", CheckSeverity.ERROR)
 
                 // Stream API checks
-                // Ref: docs/code-styles/JAVA.md - Stream API
+                // Ref: .claude/rules/java/style.md - Stream API
                 check("StreamResourceLeak", CheckSeverity.ERROR)
                 check("StreamToIterable", CheckSeverity.ERROR)
                 check("UnnecessaryMethodReference", CheckSeverity.ERROR)

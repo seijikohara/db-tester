@@ -325,7 +325,7 @@ void testBothPhases() { }
 
 The preferred method for controlling table processing order is the `load-order.txt` file. This file specifies the exact order in which tables should be processed.
 
-For detailed information about the file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS#load-order).
+For detailed information about the file format and usage, see [Data Formats - Load Order](05-data-formats#load-order).
 
 ### Foreign Key Awareness
 
@@ -442,7 +442,7 @@ The framework converts string values from CSV/TSV to appropriate SQL types:
 
 ## Related Specifications
 
-- [Public API](03-PUBLIC-API) - Operation enum reference
-- [Data Formats](05-DATA-FORMATS) - Source file structure
-- [Configuration](04-CONFIGURATION) - OperationDefaults
-- [Error Handling](09-ERROR-HANDLING) - Database operation errors
+- [Public API](03-public-api) - Operation enum reference
+- [Data Formats](05-data-formats) - Source file structure
+- [Configuration](04-configuration) - OperationDefaults
+- [Error Handling](09-error-handling) - Database operation errors

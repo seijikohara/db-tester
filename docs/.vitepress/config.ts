@@ -27,22 +27,22 @@ export default withMermaid({
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Overview', link: '/01-OVERVIEW' },
+      { text: 'Overview', link: '/01-overview' },
     ],
 
     sidebar: [
       {
         text: 'Specifications',
         items: [
-          { text: 'Overview', link: '/01-OVERVIEW' },
-          { text: 'Architecture', link: '/02-ARCHITECTURE' },
-          { text: 'Public API', link: '/03-PUBLIC-API' },
-          { text: 'Configuration', link: '/04-CONFIGURATION' },
-          { text: 'Data Formats', link: '/05-DATA-FORMATS' },
-          { text: 'Database Operations', link: '/06-DATABASE-OPERATIONS' },
-          { text: 'Test Frameworks', link: '/07-TEST-FRAMEWORKS' },
-          { text: 'SPI', link: '/08-SPI' },
-          { text: 'Error Handling', link: '/09-ERROR-HANDLING' },
+          { text: 'Overview', link: '/01-overview' },
+          { text: 'Architecture', link: '/02-architecture' },
+          { text: 'Public API', link: '/03-public-api' },
+          { text: 'Configuration', link: '/04-configuration' },
+          { text: 'Data Formats', link: '/05-data-formats' },
+          { text: 'Database Operations', link: '/06-database-operations' },
+          { text: 'Test Frameworks', link: '/07-test-frameworks' },
+          { text: 'SPI', link: '/08-spi' },
+          { text: 'Error Handling', link: '/09-error-handling' },
         ],
       },
     ],
