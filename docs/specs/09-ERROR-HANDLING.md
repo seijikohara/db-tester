@@ -168,7 +168,7 @@ Failed to read load order file: /path/to/load-order.txt
 Failed to write load order file: /path/to/load-order.txt
 ```
 
-For details about the load order file format and usage, see [Data Formats - Load Order](05-DATA-FORMATS#load-order).
+For details about the load order file format and usage, see [Data Formats - Load Order](05-data-formats#load-order).
 
 
 ## DataSource Errors
@@ -323,6 +323,6 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 
 ## Related Specifications
 
-- [Public API](03-PUBLIC-API) - Exception classes
-- [Database Operations](06-DATABASE-OPERATIONS) - Operation failures
-- [Test Frameworks](07-TEST-FRAMEWORKS) - Test lifecycle and error handling
+- [Public API](03-public-api) - Exception classes
+- [Database Operations](06-database-operations) - Operation failures
+- [Test Frameworks](07-test-frameworks) - Test lifecycle and error handling

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
   CodeNarc configuration for db-tester project.
-  Enforces coding standards from docs/code-styles/GROOVY.md.
+  Enforces coding standards from .claude/rules/groovy/style.md.
 -->
 <ruleset xmlns="http://codenarc.org/ruleset/1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -12,7 +12,7 @@
 
   <!-- =================================================================== -->
   <!-- Import Rules                                                        -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Import Statements                -->
+  <!-- Ref: .claude/rules/groovy/style.md - Import Statements                -->
   <!-- =================================================================== -->
 
   <!-- Star imports are prohibited -->
@@ -26,7 +26,7 @@
 
   <!-- =================================================================== -->
   <!-- Syntax Conventions                                                  -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Syntax Conventions               -->
+  <!-- Ref: .claude/rules/groovy/style.md - Syntax Conventions               -->
   <!-- =================================================================== -->
 
   <!-- Omit unnecessary semicolons -->
@@ -57,7 +57,7 @@
 
   <!-- =================================================================== -->
   <!-- Type Declarations                                                   -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Type Declarations                -->
+  <!-- Ref: .claude/rules/groovy/style.md - Type Declarations                -->
   <!-- =================================================================== -->
 
   <!-- Never mix def with type (def String name) -->
@@ -68,7 +68,7 @@
 
   <!-- =================================================================== -->
   <!-- String Handling                                                     -->
-  <!-- Ref: docs/code-styles/GROOVY.md - String Handling                  -->
+  <!-- Ref: .claude/rules/groovy/style.md - String Handling                  -->
   <!-- =================================================================== -->
 
   <!--
@@ -81,7 +81,7 @@
 
   <!-- =================================================================== -->
   <!-- Collections                                                         -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Collections                      -->
+  <!-- Ref: .claude/rules/groovy/style.md - Collections                      -->
   <!-- =================================================================== -->
 
   <!-- Use native list syntax [] instead of new ArrayList() -->
@@ -104,7 +104,7 @@
 
   <!-- =================================================================== -->
   <!-- Closures                                                            -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Closures                         -->
+  <!-- Ref: .claude/rules/groovy/style.md - Closures                         -->
   <!-- =================================================================== -->
 
   <!-- Use implicit 'it' for single-parameter closures when appropriate -->
@@ -112,7 +112,7 @@
 
   <!-- =================================================================== -->
   <!-- Null Safety                                                         -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Safe Navigation                  -->
+  <!-- Ref: .claude/rules/groovy/style.md - Safe Navigation                  -->
   <!-- =================================================================== -->
 
   <!-- Encourage safe navigation operator -->
@@ -151,7 +151,7 @@
 
   <!-- =================================================================== -->
   <!-- Naming Conventions                                                  -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Naming Conventions               -->
+  <!-- Ref: .claude/rules/groovy/style.md - Naming Conventions               -->
   <!-- =================================================================== -->
 
   <!--
@@ -197,7 +197,7 @@
 
   <!-- =================================================================== -->
   <!-- Logging                                                             -->
-  <!-- Ref: docs/code-styles/GROOVY.md - Logging                          -->
+  <!-- Ref: .claude/rules/groovy/style.md - Logging                          -->
   <!-- =================================================================== -->
 
   <!-- Avoid println in production code -->

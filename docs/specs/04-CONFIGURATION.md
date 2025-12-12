@@ -129,7 +129,7 @@ Mutable registry for `javax.sql.DataSource` instances.
 | Method | Description |
 |--------|-------------|
 | `registerDefault(DataSource)` | Registers the default data source |
-| `register(String, DataSource)` | Registers a named data source |
+| `register(String, DataSource)` | Registers a named data source; if name is empty, delegates to `registerDefault()` |
 
 ### Retrieval Methods
 
@@ -189,13 +189,14 @@ Defines default database operations for preparation and expectation phases.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `preparationOperation` | `Operation` | `CLEAN_INSERT` | Default operation for preparation |
+| `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before a test runs |
+| `expectation` | `Operation` | `NONE` | Default operation executed after a test finishes |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
-| `standard()` | Creates defaults with `CLEAN_INSERT` |
+| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation and `NONE` for expectation |
 
 
 ## DataFormat
@@ -305,8 +306,8 @@ List<DataSet> datasets = loader.loadPreparationDataSets(context);
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API) - Annotations and interfaces
-- [Data Formats](05-DATA-FORMATS) - CSV/TSV file structure
-- [Database Operations](06-DATABASE-OPERATIONS) - Supported operations
-- [Error Handling](09-ERROR-HANDLING) - Error messages and exception types
+- [Overview](01-overview) - Framework purpose and key concepts
+- [Public API](03-public-api) - Annotations and interfaces
+- [Data Formats](05-data-formats) - CSV/TSV file structure
+- [Database Operations](06-database-operations) - Supported operations
+- [Error Handling](09-error-handling) - Error messages and exception types

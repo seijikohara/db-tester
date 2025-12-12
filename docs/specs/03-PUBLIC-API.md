@@ -315,6 +315,7 @@ Base exception for all framework errors.
 |-------------|-------------|
 | `DatabaseTesterException(String)` | Message only |
 | `DatabaseTesterException(String, Throwable)` | Message with cause |
+| `DatabaseTesterException(Throwable)` | Cause only |
 
 
 ### ConfigurationException
@@ -370,11 +371,11 @@ Indicates assertion or validation failure.
 - Row count differences
 - Column value mismatches
 
-**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-ERROR-HANDLING#validation-errors) for format details.
+**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-error-handling#validation-errors) for format details.
 
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW) - Framework introduction
-- [Configuration](04-CONFIGURATION) - Configuration classes
-- [Database Operations](06-DATABASE-OPERATIONS) - Operation enum details
+- [Overview](01-overview) - Framework introduction
+- [Configuration](04-configuration) - Configuration classes
+- [Database Operations](06-database-operations) - Operation enum details

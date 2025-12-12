@@ -1,3 +1,7 @@
+---
+paths: "**/*.java"
+---
+
 # Java Code Style Rules
 
 **All rules in this document are mandatory.**

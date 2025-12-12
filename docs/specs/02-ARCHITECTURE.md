@@ -133,7 +133,8 @@ io.github.seijikohara.dbtester.api
 ├── loader/
 │   └── DataSetLoader.java
 ├── operation/
-│   └── Operation.java
+│   ├── Operation.java
+│   └── TableOrderingStrategy.java
 ├── scenario/
 │   ├── ScenarioName.java
 │   └── ScenarioNameResolver.java
@@ -291,10 +292,11 @@ Example `module-info.java` for the API module:
 
 ```java
 module io.github.seijikohara.dbtester.api {
-    requires java.sql;
+    requires transitive java.sql;
     requires transitive org.jspecify;
 
     exports io.github.seijikohara.dbtester.api.annotation;
+    exports io.github.seijikohara.dbtester.api.assertion;
     exports io.github.seijikohara.dbtester.api.config;
     exports io.github.seijikohara.dbtester.api.context;
     exports io.github.seijikohara.dbtester.api.dataset;
@@ -305,9 +307,9 @@ module io.github.seijikohara.dbtester.api {
     exports io.github.seijikohara.dbtester.api.scenario;
     exports io.github.seijikohara.dbtester.api.spi;
 
+    uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
     uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
     uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
-    uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
     uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
     uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 }
@@ -315,9 +317,9 @@ module io.github.seijikohara.dbtester.api {
 
 ## Related Specifications
 
-- [Overview](01-OVERVIEW) - Framework purpose and key concepts
-- [Public API](03-PUBLIC-API) - Annotations and configuration classes
-- [Configuration](04-CONFIGURATION) - Configuration options
-- [Test Frameworks](07-TEST-FRAMEWORKS) - JUnit and Spock integration
-- [SPI](08-SPI) - Service Provider Interface extension points
-- [Error Handling](09-ERROR-HANDLING) - Error messages and exception types
+- [Overview](01-overview) - Framework purpose and key concepts
+- [Public API](03-public-api) - Annotations and configuration classes
+- [Configuration](04-configuration) - Configuration options
+- [Test Frameworks](07-test-frameworks) - JUnit and Spock integration
+- [SPI](08-spi) - Service Provider Interface extension points
+- [Error Handling](09-error-handling) - Error messages and exception types

@@ -1,3 +1,7 @@
+---
+paths: "**/*.md"
+---
+
 # Documentation Style Rules
 
 **All rules in this document are mandatory.**
