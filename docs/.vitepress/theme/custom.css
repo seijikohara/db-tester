@@ -1,0 +1,114 @@
+/**
+ * Custom styles for VitePress home layout.
+ *
+ * The home layout does not apply the `.vp-doc` class to markdown content,
+ * so code blocks lack syntax highlighting styles. This file extends the
+ * default VitePress styles to the home layout content.
+ */
+
+/* Apply vp-doc styles to home layout markdown content */
+.VPHome .vp-doc,
+.VPHomeContent > div {
+  max-width: 784px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Ensure code blocks in home layout have proper styling */
+.VPHomeContent div[class*="language-"],
+.VPHomeContent .vp-code-group {
+  margin: 16px 0;
+  border-radius: 8px;
+}
+
+/* Code group tabs in home layout */
+.VPHomeContent .vp-code-group .tabs {
+  background-color: var(--vp-code-tab-bg);
+}
+
+/* Apply syntax highlighting styles to home layout code blocks */
+.VPHomeContent pre {
+  background-color: var(--vp-code-block-bg);
+  border-radius: 8px;
+  padding: 20px 24px;
+  overflow-x: auto;
+}
+
+.VPHomeContent code {
+  font-family: var(--vp-font-family-mono);
+  font-size: var(--vp-code-font-size);
+}
+
+/* Inline code styling for home layout */
+.VPHomeContent :not(pre) > code {
+  background-color: var(--vp-code-bg);
+  border-radius: 4px;
+  padding: 3px 6px;
+}
+
+/* Custom container styles for home layout */
+.VPHomeContent .custom-block {
+  margin: 16px 0;
+  padding: 16px 16px 8px;
+  border-radius: 8px;
+}
+
+.VPHomeContent .custom-block.tip {
+  background-color: var(--vp-custom-block-tip-bg);
+  border-color: var(--vp-custom-block-tip-border);
+}
+
+.VPHomeContent .custom-block.info {
+  background-color: var(--vp-custom-block-info-bg);
+  border-color: var(--vp-custom-block-info-border);
+}
+
+.VPHomeContent .custom-block.warning {
+  background-color: var(--vp-custom-block-warning-bg);
+  border-color: var(--vp-custom-block-warning-border);
+}
+
+.VPHomeContent .custom-block.danger {
+  background-color: var(--vp-custom-block-danger-bg);
+  border-color: var(--vp-custom-block-danger-border);
+}
+
+/* Heading styles for home layout markdown content */
+.VPHomeContent h2 {
+  margin-top: 48px;
+  margin-bottom: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--vp-c-divider);
+  letter-spacing: -0.02em;
+  line-height: 32px;
+  font-size: 24px;
+}
+
+.VPHomeContent h2:first-child {
+  margin-top: 24px;
+  border-top: none;
+  padding-top: 0;
+}
+
+.VPHomeContent h3 {
+  margin-top: 32px;
+  margin-bottom: 16px;
+  font-size: 20px;
+  line-height: 28px;
+}
+
+/* Paragraph and list styles */
+.VPHomeContent p {
+  margin: 16px 0;
+  line-height: 28px;
+}
+
+.VPHomeContent ul,
+.VPHomeContent ol {
+  margin: 16px 0;
+  padding-left: 1.25rem;
+}
+
+.VPHomeContent li {
+  margin: 8px 0;
+}
