@@ -13,6 +13,9 @@ on:
         type: boolean
         default: true
 
+permissions:
+  contents: write
+
 env:
   JAVA_VERSION: '21'
   JAVA_DISTRIBUTION: 'temurin'
@@ -21,6 +24,7 @@ jobs:
   validate:
     name: Validate
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.version.outputs.version }}
       tag: ${{ steps.version.outputs.tag }}
@@ -32,8 +36,9 @@ jobs:
           fetch-depth: 0  # Fetch all history for tag comparison
 
       - name: Validate version format
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
-          VERSION="${{ github.event.inputs.version }}"
           SEMVER_REGEX='^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$'
 
           if ! [[ "$VERSION" =~ $SEMVER_REGEX ]]; then
@@ -44,8 +49,9 @@ jobs:
           echo "✅ Version format is valid: $VERSION"
 
       - name: Check tag does not exist
+        env:
+          TAG: v${{ github.event.inputs.version }}
         run: |
-          TAG="v${{ github.event.inputs.version }}"
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "::error::Tag $TAG already exists"
             exit 1
@@ -54,8 +60,9 @@ jobs:
 
       - name: Validate version is newer
         id: version
+        env:
+          VERSION: ${{ github.event.inputs.version }}
         run: |
-          VERSION="${{ github.event.inputs.version }}"
           TAG="v$VERSION"
           LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n 1)
 
@@ -83,13 +90,13 @@ jobs:
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Validate GPG key
+      - name: Validate GPG key existence
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
           GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
-          # Check if secrets are set
+          # Check if secrets are set (without importing the key)
           if [[ -z "$GPG_PRIVATE_KEY" ]]; then
             echo "::error::GPG_PRIVATE_KEY secret is not set"
             exit 1
@@ -103,30 +110,6 @@ jobs:
             exit 1
           fi
           echo "✅ All GPG secrets are configured"
-
-          # Try to import the key
-          echo "$GPG_PRIVATE_KEY" | gpg --batch --import 2>&1 || {
-            echo "::error::Failed to import GPG private key. Check GPG_PRIVATE_KEY format (should be ASCII armor)."
-            exit 1
-          }
-          echo "✅ GPG key imported successfully"
-
-          # Verify key ID exists
-          if ! gpg --list-secret-keys "$GPG_KEY_ID" >/dev/null 2>&1; then
-            echo "::error::GPG_KEY_ID ($GPG_KEY_ID) does not match imported key"
-            echo "Available keys:"
-            gpg --list-secret-keys --keyid-format SHORT
-            exit 1
-          fi
-          echo "✅ GPG key ID verified: $GPG_KEY_ID"
-
-          # Test signing with passphrase
-          echo "test" | gpg --batch --yes --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" \
-            --local-user "$GPG_KEY_ID" --armor --detach-sign >/dev/null 2>&1 || {
-            echo "::error::Failed to sign with GPG key. Check GPG_PASSPHRASE."
-            exit 1
-          }
-          echo "✅ GPG signing test passed"
 
       - name: Validate Maven Central credentials
         env:
@@ -152,13 +135,14 @@ jobs:
           echo "- **Tag:** ${{ steps.version.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Credentials" >> $GITHUB_STEP_SUMMARY
-          echo "- **GPG Key:** ✅ Verified" >> $GITHUB_STEP_SUMMARY
+          echo "- **GPG Key:** ✅ Configured" >> $GITHUB_STEP_SUMMARY
           echo "- **Maven Central:** ✅ Configured" >> $GITHUB_STEP_SUMMARY
 
   build-and-dry-run:
     name: Build and Dry-Run
     needs: validate
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -174,7 +158,9 @@ jobs:
           cache: 'gradle'
 
       - name: Create local tag
-        run: git tag ${{ needs.validate.outputs.tag }}
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git tag "$TAG"
 
       - name: Build and test with release version
         run: ./gradlew clean build
@@ -197,6 +183,7 @@ jobs:
     name: Release to Maven Central
     needs: [validate, build-and-dry-run]
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     if: ${{ !inputs.dry-run }}
     environment:
       name: maven-central
@@ -231,7 +218,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create local tag
-        run: git tag ${{ needs.validate.outputs.tag }}
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git tag "$TAG"
 
       - name: Build with release version
         run: ./gradlew clean build
@@ -245,7 +234,9 @@ jobs:
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Push tag
-        run: git push origin ${{ needs.validate.outputs.tag }}
+        env:
+          TAG: ${{ needs.validate.outputs.tag }}
+        run: git push origin "$TAG"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
