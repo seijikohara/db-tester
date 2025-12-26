@@ -26,6 +26,26 @@ import javax.sql.DataSource;
 public interface DataSet {
 
   /**
+   * Creates a new dataset with the given tables.
+   *
+   * @param tables the tables in this dataset
+   * @return a new immutable dataset instance
+   */
+  static DataSet of(final List<Table> tables) {
+    return new SimpleDataSet(List.copyOf(tables));
+  }
+
+  /**
+   * Creates a new dataset with the given tables.
+   *
+   * @param tables the tables in this dataset
+   * @return a new immutable dataset instance
+   */
+  static DataSet of(final Table... tables) {
+    return new SimpleDataSet(List.of(tables));
+  }
+
+  /**
    * Returns the tables that belong to this dataset in declaration order.
    *
    * @return immutable list of tables composing the dataset
@@ -47,4 +67,43 @@ public interface DataSet {
    * @return an Optional containing the bound data source, or empty if not specified
    */
   Optional<DataSource> getDataSource();
+
+  /**
+   * Simple immutable implementation of {@link DataSet}.
+   *
+   * @param tables the tables in this dataset
+   */
+  record SimpleDataSet(List<Table> tables) implements DataSet {
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return immutable list of tables in this dataset
+     */
+    @Override
+    public List<Table> getTables() {
+      return tables;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param tableName the name of the table to retrieve
+     * @return an Optional containing the table if found, or empty if not found
+     */
+    @Override
+    public Optional<Table> getTable(final TableName tableName) {
+      return tables.stream().filter(t -> t.getName().equals(tableName)).findFirst();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return an Optional that is always empty since this dataset has no associated data source
+     */
+    @Override
+    public Optional<DataSource> getDataSource() {
+      return Optional.empty();
+    }
+  }
 }

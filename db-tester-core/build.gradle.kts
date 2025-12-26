@@ -9,12 +9,12 @@ dependencies {
     // API module (exposed to consumers)
     api(project(":db-tester-api"))
 
-    // Logging
-    api(platform(libs.slf4j.bom))
-    api(libs.slf4j.api)
+    // Logging (compile-time only - users provide their own SLF4J binding)
+    compileOnly(platform(libs.slf4j.bom))
+    compileOnly(libs.slf4j.api)
 
-    // CSV/TSV parsing and YAML output
-    api(platform(libs.jackson.bom))
+    // CSV/TSV parsing and YAML output (internal implementation only)
+    implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.dataformat.csv)
     implementation(libs.jackson.dataformat.yaml)
 }
@@ -26,6 +26,8 @@ testing {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.junit.jupiter)
+                runtimeOnly(platform(libs.slf4j.bom))
+                runtimeOnly(libs.slf4j.simple)
             }
         }
     }

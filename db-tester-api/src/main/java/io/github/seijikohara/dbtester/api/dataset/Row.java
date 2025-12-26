@@ -20,6 +20,16 @@ import java.util.Map;
 public interface Row {
 
   /**
+   * Creates a new row with the given column-value pairs.
+   *
+   * @param values the column-value pairs for this row
+   * @return a new immutable row instance
+   */
+  static Row of(final Map<ColumnName, CellValue> values) {
+    return new SimpleRow(Map.copyOf(values));
+  }
+
+  /**
    * Returns the column/value pairs that compose this row.
    *
    * @return immutable mapping of columns to their values
@@ -35,4 +45,33 @@ public interface Row {
    * @return the data value for the requested column, wrapping {@code null} when absent
    */
   CellValue getValue(ColumnName column);
+
+  /**
+   * Simple immutable implementation of {@link Row}.
+   *
+   * @param values the column-value pairs for this row
+   */
+  record SimpleRow(Map<ColumnName, CellValue> values) implements Row {
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return immutable mapping of columns to their values
+     */
+    @Override
+    public Map<ColumnName, CellValue> getValues() {
+      return values;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @param column the identifier of the column to look up
+     * @return the data value for the requested column, or {@link CellValue#NULL} when absent
+     */
+    @Override
+    public CellValue getValue(final ColumnName column) {
+      return values.getOrDefault(column, CellValue.NULL);
+    }
+  }
 }

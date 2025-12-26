@@ -127,7 +127,14 @@ void testMultipleScenarios() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.dataset.DataSet`
 
-**メソッド**:
+**ファクトリメソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `of(List<Table>)` | `DataSet` | 指定されたテーブルでデータセットを作成します |
+| `of(Table...)` | `DataSet` | 指定されたテーブルでデータセットを作成します（可変長引数） |
+
+**インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
@@ -148,7 +155,14 @@ void testMultipleScenarios() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.dataset.Table`
 
-**メソッド**:
+**ファクトリメソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `of(TableName, List<ColumnName>, List<Row>)` | `Table` | 型安全な名前でテーブルを作成します |
+| `of(String, List<String>, List<Row>)` | `Table` | 文字列名でテーブルを作成します（簡易版） |
+
+**インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
@@ -170,7 +184,13 @@ void testMultipleScenarios() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.dataset.Row`
 
-**メソッド**:
+**ファクトリメソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `of(Map<ColumnName, CellValue>)` | `Row` | 指定されたカラム値ペアで行を作成します |
+
+**インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|

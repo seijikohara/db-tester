@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -58,21 +58,18 @@ public final class ErrorHandlingTest {
     final var columnValue = new ColumnName("NAME");
 
     // Expected: 3 rows
-    final var row1 =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
-    final var row2 =
-        new SimpleRow(Map.of(columnId, new CellValue(2), columnValue, new CellValue("Two")));
+    final var row1 = Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
+    final var row2 = Row.of(Map.of(columnId, new CellValue(2), columnValue, new CellValue("Two")));
     final var row3 =
-        new SimpleRow(Map.of(columnId, new CellValue(3), columnValue, new CellValue("Three")));
+        Row.of(Map.of(columnId, new CellValue(3), columnValue, new CellValue("Three")));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2, row3));
 
     // Actual: 2 rows
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
 
     final var exception =
         assertThrows(
@@ -101,19 +98,16 @@ public final class ErrorHandlingTest {
     final var columnValue = new ColumnName("NAME");
 
     // Expected: 1 row
-    final var row1 =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
+    final var row1 = Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
 
     final var expectedTable =
-        new SimpleTable(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1));
 
     // Actual: 2 rows
-    final var row2 =
-        new SimpleRow(Map.of(columnId, new CellValue(2), columnValue, new CellValue("Two")));
+    final var row2 = Row.of(Map.of(columnId, new CellValue(2), columnValue, new CellValue("Two")));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
 
     final var exception =
         assertThrows(
@@ -139,20 +133,16 @@ public final class ErrorHandlingTest {
     final var columnValue = new ColumnName("NAME");
 
     final var expectedRow =
-        new SimpleRow(
-            Map.of(columnId, new CellValue(1), columnValue, new CellValue("ExpectedValue")));
+        Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("ExpectedValue")));
 
     final var actualRow =
-        new SimpleRow(
-            Map.of(columnId, new CellValue(1), columnValue, new CellValue("ActualValue")));
+        Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("ActualValue")));
 
     final var expectedTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
     final var exception =
         assertThrows(
@@ -177,18 +167,16 @@ public final class ErrorHandlingTest {
     final var columnValue = new ColumnName("NAME");
 
     final var expectedRow =
-        new SimpleRow(Map.of(columnId, new CellValue(100), columnValue, new CellValue("Test")));
+        Row.of(Map.of(columnId, new CellValue(100), columnValue, new CellValue("Test")));
 
     final var actualRow =
-        new SimpleRow(Map.of(columnId, new CellValue(999), columnValue, new CellValue("Test")));
+        Row.of(Map.of(columnId, new CellValue(999), columnValue, new CellValue("Test")));
 
     final var expectedTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
     final var exception =
         assertThrows(
@@ -212,19 +200,16 @@ public final class ErrorHandlingTest {
     final var columnId = new ColumnName("ID");
     final var columnValue = new ColumnName("NAME");
 
-    final var expectedRow =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, CellValue.NULL));
+    final var expectedRow = Row.of(Map.of(columnId, new CellValue(1), columnValue, CellValue.NULL));
 
     final var actualRow =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, new CellValue("NotNull")));
+        Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("NotNull")));
 
     final var expectedTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(expectedRow));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
     final var exception =
         assertThrows(
@@ -251,7 +236,7 @@ public final class ErrorHandlingTest {
     final var columnExtra = new ColumnName("EXTRA");
 
     final var expectedRow =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(1),
@@ -261,17 +246,16 @@ public final class ErrorHandlingTest {
                 new CellValue("ExtraData")));
 
     final var actualRow =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
+        Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("One")));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TEST_TABLE"),
             List.of(columnId, columnValue, columnExtra),
             List.of(expectedRow));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
     final var exception =
         assertThrows(
@@ -298,20 +282,19 @@ public final class ErrorHandlingTest {
     final var columnDescription = new ColumnName("DESCRIPTION");
 
     final var expectedRow =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnDescription, new CellValue("Desc")));
+        Row.of(Map.of(columnId, new CellValue(1), columnDescription, new CellValue("Desc")));
 
     final var actualRow =
-        new SimpleRow(Map.of(columnId, new CellValue(1), columnValue, new CellValue("Desc")));
+        Row.of(Map.of(columnId, new CellValue(1), columnValue, new CellValue("Desc")));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TEST_TABLE"),
             List.of(columnId, columnDescription),
             List.of(expectedRow));
 
     final var actualTable =
-        new SimpleTable(
-            new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
+        Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
     final var exception =
         assertThrows(
@@ -339,7 +322,7 @@ public final class ErrorHandlingTest {
 
     // Create multiple rows where only the third row differs
     final var row1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(1),
@@ -348,7 +331,7 @@ public final class ErrorHandlingTest {
                 columnStatus,
                 new CellValue("ACTIVE")));
     final var row2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(2),
@@ -357,7 +340,7 @@ public final class ErrorHandlingTest {
                 columnStatus,
                 new CellValue("ACTIVE")));
     final var expectedRow3 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(3),
@@ -366,7 +349,7 @@ public final class ErrorHandlingTest {
                 columnStatus,
                 new CellValue("INACTIVE")));
     final var actualRow3 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(3),
@@ -376,13 +359,13 @@ public final class ErrorHandlingTest {
                 new CellValue("ACTIVE")));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("USER_STATUS_TABLE"),
             List.of(columnId, columnName, columnStatus),
             List.of(row1, row2, expectedRow3));
 
     final var actualTable =
-        new SimpleTable(
+        Table.of(
             new TableName("USER_STATUS_TABLE"),
             List.of(columnId, columnName, columnStatus),
             List.of(row1, row2, actualRow3));

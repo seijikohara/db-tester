@@ -22,6 +22,31 @@ import java.util.List;
 public interface Table {
 
   /**
+   * Creates a new table with the given name, columns, and rows.
+   *
+   * @param name the table name
+   * @param columns the column names in declaration order
+   * @param rows the rows in this table
+   * @return a new immutable table instance
+   */
+  static Table of(final TableName name, final List<ColumnName> columns, final List<Row> rows) {
+    return new SimpleTable(name, List.copyOf(columns), List.copyOf(rows));
+  }
+
+  /**
+   * Creates a new table with the given name (as string), columns (as strings), and rows.
+   *
+   * @param name the table name
+   * @param columns the column names in declaration order
+   * @param rows the rows in this table
+   * @return a new immutable table instance
+   */
+  static Table of(final String name, final List<String> columns, final List<Row> rows) {
+    return new SimpleTable(
+        new TableName(name), columns.stream().map(ColumnName::new).toList(), List.copyOf(rows));
+  }
+
+  /**
    * Returns the logical name of this table.
    *
    * @return the table identifier
@@ -55,4 +80,54 @@ public interface Table {
    * @return number of rows contained in the table (zero or positive)
    */
   int getRowCount();
+
+  /**
+   * Simple immutable implementation of {@link Table}.
+   *
+   * @param name the table name
+   * @param columns the column names
+   * @param rows the rows in this table
+   */
+  record SimpleTable(TableName name, List<ColumnName> columns, List<Row> rows) implements Table {
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return the table name
+     */
+    @Override
+    public TableName getName() {
+      return name;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return immutable list of column names
+     */
+    @Override
+    public List<ColumnName> getColumns() {
+      return columns;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return immutable list of rows
+     */
+    @Override
+    public List<Row> getRows() {
+      return rows;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return the number of rows in this table
+     */
+    @Override
+    public int getRowCount() {
+      return rows.size();
+    }
+  }
 }

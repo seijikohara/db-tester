@@ -127,7 +127,14 @@ Represents a logical collection of database tables.
 
 **Location**: `io.github.seijikohara.dbtester.api.dataset.DataSet`
 
-**Methods**:
+**Factory Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `of(List<Table>)` | `DataSet` | Creates a dataset with the specified tables |
+| `of(Table...)` | `DataSet` | Creates a dataset with the specified tables (varargs) |
+
+**Instance Methods**:
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
@@ -148,7 +155,14 @@ Represents the structure and data of a database table.
 
 **Location**: `io.github.seijikohara.dbtester.api.dataset.Table`
 
-**Methods**:
+**Factory Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `of(TableName, List<ColumnName>, List<Row>)` | `Table` | Creates a table with type-safe names |
+| `of(String, List<String>, List<Row>)` | `Table` | Creates a table with string names (convenience) |
+
+**Instance Methods**:
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
@@ -170,7 +184,13 @@ Represents a single database record.
 
 **Location**: `io.github.seijikohara.dbtester.api.dataset.Row`
 
-**Methods**:
+**Factory Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `of(Map<ColumnName, CellValue>)` | `Row` | Creates a row with the specified column-value pairs |
+
+**Instance Methods**:
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|

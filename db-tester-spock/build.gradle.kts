@@ -7,12 +7,14 @@ plugins {
 description = "DB Tester Spock - Spock Framework Extension for database testing"
 
 dependencies {
-    // Public API dependencies (only db-tester-api)
+    // Public API dependencies (only db-tester-api and Spock API)
     api(project(":db-tester-api"))
-    api(platform(libs.groovy.bom))
-    api(libs.groovy)
-    api(platform(libs.spock.bom))
     api(libs.spock.core)
+
+    // Groovy and Spock BOM for version management (internal only)
+    implementation(platform(libs.groovy.bom))
+    implementation(libs.groovy)
+    implementation(platform(libs.spock.bom))
 
     // Compile-time dependency for logging
     compileOnly(platform(libs.slf4j.bom))
@@ -24,6 +26,7 @@ testing {
         val test by getting(JvmTestSuite::class) {
             dependencies {
                 runtimeOnly(project(":db-tester-core"))
+                runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
                 runtimeOnly(libs.junit.platform.launcher)
             }

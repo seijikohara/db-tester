@@ -11,8 +11,6 @@ import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -142,8 +140,8 @@ public final class ComparisonStrategyTest {
     for (int i = 0; i < columns.size() && i < values.length; i++) {
       rowValues.put(columns.get(i), new CellValue(values[i]));
     }
-    final Row row = new SimpleRow(rowValues);
-    return new SimpleTable(new TableName(tableName), columns, List.of(row));
+    final var row = Row.of(rowValues);
+    return Table.of(new TableName(tableName), columns, List.of(row));
   }
 
   /**
@@ -162,8 +160,8 @@ public final class ComparisonStrategyTest {
     for (int i = 0; i < columns.size() && i < values.length; i++) {
       rowValues.put(columns.get(i), new CellValue(values[i]));
     }
-    final Row row = new SimpleRow(rowValues);
-    return new SimpleTable(new TableName(tableName), columns, List.of(row));
+    final var row = Row.of(rowValues);
+    return Table.of(new TableName(tableName), columns, List.of(row));
   }
 
   /** Tests for STRICT comparison strategy (default). */

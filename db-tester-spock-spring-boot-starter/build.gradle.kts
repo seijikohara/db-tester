@@ -41,6 +41,7 @@ testing {
                 implementation(libs.mockito.core)
                 implementation(libs.spring.test)
                 implementation(libs.spring.boot.test)
+                runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
             }
         }

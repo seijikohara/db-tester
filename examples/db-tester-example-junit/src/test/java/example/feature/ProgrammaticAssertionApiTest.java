@@ -5,12 +5,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import io.github.seijikohara.dbtester.api.annotation.Expectation;
 import io.github.seijikohara.dbtester.api.annotation.Preparation;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
+import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -268,20 +268,20 @@ public final class ProgrammaticAssertionApiTest {
     final var columnNumber = new ColumnName("COLUMN2");
 
     final var row1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(1),
                 columnValue, new CellValue("Value1"),
                 columnNumber, new CellValue(100)));
     final var row2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(2),
                 columnValue, new CellValue("Value2"),
                 columnNumber, new CellValue(200)));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("QUERY_RESULT"),
             List.of(columnId, columnValue, columnNumber),
             List.of(row1, row2));
@@ -327,21 +327,21 @@ public final class ProgrammaticAssertionApiTest {
     final var columnExtra = new ColumnName("COLUMN3");
 
     final var row1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(1),
                 columnValue, new CellValue("Value1"),
                 columnNumber, new CellValue(100),
                 columnExtra, new CellValue("Extra1")));
     final var row2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(2),
                 columnValue, new CellValue("Value2"),
                 columnNumber, new CellValue(200),
                 columnExtra, new CellValue("Extra2")));
     final var row3 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(3),
@@ -353,28 +353,28 @@ public final class ProgrammaticAssertionApiTest {
                 new CellValue("IGNORED"))); // This value won't be compared
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TABLE1"),
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(row1, row2, row3));
 
     // Build actual table from query
     final var actualRow1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(1),
                 columnValue, new CellValue("Value1"),
                 columnNumber, new CellValue(100),
                 columnExtra, new CellValue("Extra1")));
     final var actualRow2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(2),
                 columnValue, new CellValue("Value2"),
                 columnNumber, new CellValue(200),
                 columnExtra, new CellValue("Extra2")));
     final var actualRow3 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId,
                 new CellValue(3),
@@ -386,7 +386,7 @@ public final class ProgrammaticAssertionApiTest {
                 new CellValue("RandomExtra"))); // Different value but will be ignored
 
     final var actualTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TABLE1"),
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(actualRow1, actualRow2, actualRow3));
@@ -422,14 +422,14 @@ public final class ProgrammaticAssertionApiTest {
     final var columnExtra = new ColumnName("COLUMN3");
 
     final var row1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(1),
                 columnValue, new CellValue("Value1"),
                 columnNumber, new CellValue(100),
                 columnExtra, new CellValue("Extra1")));
     final var row2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(2),
                 columnValue, new CellValue("Value2"),
@@ -437,14 +437,14 @@ public final class ProgrammaticAssertionApiTest {
                 columnExtra, new CellValue("Extra2")));
 
     final var expectedTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TABLE1"),
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(row1, row2));
 
     // Build actual table (simulating what would be read from the database)
     final var actualTable =
-        new SimpleTable(
+        Table.of(
             new TableName("TABLE1"),
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(row1, row2)); // Same data as expected
@@ -475,22 +475,21 @@ public final class ProgrammaticAssertionApiTest {
     final var columnValue = new ColumnName("COLUMN1");
 
     final var row1 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(1),
                 columnValue, new CellValue("Value1")));
     final var row2 =
-        new SimpleRow(
+        Row.of(
             Map.of(
                 columnId, new CellValue(2),
                 columnValue, new CellValue("Value2")));
 
     final var expectedTable =
-        new SimpleTable(
-            new TableName("TABLE1"), List.of(columnId, columnValue), List.of(row1, row2));
+        Table.of(new TableName("TABLE1"), List.of(columnId, columnValue), List.of(row1, row2));
 
     // Wrap table in a DataSet
-    final var expectedDataSet = new SimpleDataSet(List.of(expectedTable));
+    final var expectedDataSet = DataSet.of(expectedTable);
 
     // Use DataSet-based assertEqualsByQuery
     DatabaseAssertion.assertEqualsByQuery(
