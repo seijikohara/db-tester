@@ -7,7 +7,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 - **Convention-Based Testing** - CSV file resolution based on specification class and feature method names
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
 - **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, REFRESH, DELETE)
-- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server
+- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j, Cassandra
 
 ## Prerequisites
 
@@ -65,12 +65,14 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 | Specification | Description |
 |---------------|-------------|
+| `CassandraIntegrationSpec` | Apache Cassandra integration (Testcontainers) |
 | `DerbyIntegrationSpec` | Apache Derby integration |
 | `HSQLDBIntegrationSpec` | HSQLDB (HyperSQL) integration |
-| `MySQLIntegrationSpec` | MySQL integration (Testcontainers) |
-| `PostgreSQLIntegrationSpec` | PostgreSQL integration (Testcontainers) |
-| `OracleIntegrationSpec` | Oracle Database integration (Testcontainers) |
 | `MSSQLServerIntegrationSpec` | SQL Server integration (Testcontainers) |
+| `MySQLIntegrationSpec` | MySQL integration (Testcontainers) |
+| `Neo4jIntegrationSpec` | Neo4j Graph Database integration (Testcontainers) |
+| `OracleIntegrationSpec` | Oracle Database integration (Testcontainers) |
+| `PostgreSQLIntegrationSpec` | PostgreSQL integration (Testcontainers) |
 
 ### Spock-Specific Features
 

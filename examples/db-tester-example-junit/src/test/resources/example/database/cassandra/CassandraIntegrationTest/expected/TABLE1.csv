@@ -1,0 +1,3 @@
+[Scenario],id,column1,column2,column3
+smokeTest,1,Cassandra Test 1,2024-01-01 10:00:00,true
+smokeTest,2,Cassandra Test 2,2024-01-01 11:00:00,false
