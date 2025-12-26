@@ -1,6 +1,5 @@
 [versions]
 axion-release = "1.21.1"
-cassandra-jdbc-wrapper = "4.16.1"
 checker-qual = "3.52.1"
 derby = "10.17.1.0"
 errorprone = "2.45.0"
@@ -29,7 +28,6 @@ testcontainers = "2.0.3"
 version-catalog-update = "1.0.1"
 
 [libraries]
-cassandra-jdbc-wrapper = { module = "com.ing.data:cassandra-jdbc-wrapper", version.ref = "cassandra-jdbc-wrapper" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
 derby-client = { module = "org.apache.derby:derbyclient", version.ref = "derby" }
 derby-embedded = { module = "org.apache.derby:derby", version.ref = "derby" }
@@ -56,7 +54,7 @@ mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
 mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version.ref = "mssql-jdbc" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector" }
-neo4j-jdbc = { module = "org.neo4j:neo4j-jdbc", version.ref = "neo4j-jdbc" }
+neo4j-jdbc-full-bundle = { module = "org.neo4j:neo4j-jdbc-full-bundle", version.ref = "neo4j-jdbc" }
 nullaway = { module = "com.uber.nullaway:nullaway", version.ref = "nullaway" }
 oracle-ojdbc17 = { module = "com.oracle.database.jdbc:ojdbc17", version.ref = "oracle-ojdbc" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
@@ -75,7 +73,6 @@ spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-star
 spring-boot-test = { module = "org.springframework.boot:spring-boot-test", version.ref = "spring-boot" }
 spring-test = { module = "org.springframework:spring-test", version.ref = "spring-framework" }
 testcontainers-bom = { module = "org.testcontainers:testcontainers-bom", version.ref = "testcontainers" }
-testcontainers-cassandra = { module = "org.testcontainers:testcontainers-cassandra" }
 testcontainers-junit-jupiter = { module = "org.testcontainers:testcontainers-junit-jupiter" }
 testcontainers-mssqlserver = { module = "org.testcontainers:testcontainers-mssqlserver" }
 testcontainers-mysql = { module = "org.testcontainers:testcontainers-mysql" }

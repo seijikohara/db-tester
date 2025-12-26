@@ -99,7 +99,10 @@ class Neo4jIntegrationSpec extends Specification {
 	 */
 	private static DataSource createDataSource(Neo4jContainer container) {
 		def dataSource = new Neo4jDataSource()
-		dataSource.setUrl(container.boltUrl)
+		// Neo4j JDBC driver 6.x URL format: jdbc:neo4j://<host>:<port>
+		// enableSQLTranslation: Automatically translate SQL to Cypher
+		def jdbcUrl = container.boltUrl.replace('bolt://', 'jdbc:neo4j://') + '?enableSQLTranslation=true'
+		dataSource.setUrl(jdbcUrl)
 		return dataSource
 	}
 

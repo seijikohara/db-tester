@@ -33,7 +33,7 @@ import org.testcontainers.neo4j.Neo4jContainer;
  * <p>Key characteristics:
  *
  * <ul>
- *   <li>Uses official Neo4j JDBC Driver (org.neo4j:neo4j-jdbc)
+ *   <li>Uses official Neo4j JDBC Driver with SQL translation (org.neo4j:neo4j-jdbc-full-bundle)
  *   <li>Queries use Cypher language instead of SQL
  *   <li>Results are returned as JDBC ResultSets in tabular format
  *   <li>Nodes with properties map to table-like structures for testing
@@ -80,7 +80,11 @@ public final class Neo4jIntegrationTest {
    */
   private static DataSource createDataSource(final Neo4jContainer container) {
     final var dataSource = new Neo4jDataSource();
-    dataSource.setUrl(container.getBoltUrl());
+    // Neo4j JDBC driver 6.x URL format: jdbc:neo4j://<host>:<port>
+    // enableSQLTranslation: Automatically translate SQL to Cypher
+    final var jdbcUrl =
+        container.getBoltUrl().replace("bolt://", "jdbc:neo4j://") + "?enableSQLTranslation=true";
+    dataSource.setUrl(jdbcUrl);
     return dataSource;
   }
 
@@ -98,7 +102,9 @@ public final class Neo4jIntegrationTest {
             .orElseThrow(
                 () -> new IllegalStateException(String.format("Script not found: %s", scriptPath)));
 
-    try (final var connection = DriverManager.getConnection(container.getBoltUrl());
+    // Use Cypher natively without SQL translation for DDL script
+    final var jdbcUrl = container.getBoltUrl().replace("bolt://", "jdbc:neo4j://");
+    try (final var connection = DriverManager.getConnection(jdbcUrl);
         final var statement = connection.createStatement();
         final var inputStream = resource.openStream()) {
       final var cypher = new String(inputStream.readAllBytes(), UTF_8);

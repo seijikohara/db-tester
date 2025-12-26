@@ -26,7 +26,6 @@ testing {
 
                 // Testcontainers for database integration tests
                 implementation(platform(libs.testcontainers.bom))
-                implementation(libs.testcontainers.cassandra)
                 implementation(libs.testcontainers.mssqlserver)
                 implementation(libs.testcontainers.mysql)
                 implementation(libs.testcontainers.neo4j)
@@ -35,10 +34,9 @@ testing {
                 implementation(libs.testcontainers.spock)
 
                 // Database drivers for integration tests
-                implementation(libs.cassandra.jdbc.wrapper)
                 implementation(libs.mssql.jdbc)
                 implementation(libs.mysql.connector.j)
-                implementation(libs.neo4j.jdbc)
+                implementation(libs.neo4j.jdbc.full.bundle)
                 implementation(libs.oracle.ojdbc17)
                 implementation(libs.postgresql)
 
