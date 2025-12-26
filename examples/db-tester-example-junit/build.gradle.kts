@@ -28,12 +28,14 @@ testing {
                 implementation(libs.testcontainers.junit.jupiter)
                 implementation(libs.testcontainers.mssqlserver)
                 implementation(libs.testcontainers.mysql)
+                implementation(libs.testcontainers.neo4j)
                 implementation(libs.testcontainers.oracle.free)
                 implementation(libs.testcontainers.postgresql)
 
                 // Database drivers for integration tests
                 implementation(libs.mssql.jdbc)
                 implementation(libs.mysql.connector.j)
+                implementation(libs.neo4j.jdbc.full.bundle)
                 implementation(libs.oracle.ojdbc17)
                 implementation(libs.postgresql)
 

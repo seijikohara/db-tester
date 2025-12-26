@@ -7,7 +7,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 - **Convention-Based Testing** - CSV file resolution based on test class and method names
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
 - **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, REFRESH, DELETE)
-- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server
+- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j, Cassandra
 
 ## Prerequisites
 
@@ -65,12 +65,14 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 | Test Class | Description |
 |------------|-------------|
+| `CassandraIntegrationTest` | Apache Cassandra integration (Testcontainers) |
 | `DerbyIntegrationTest` | Apache Derby integration |
 | `HSQLDBIntegrationTest` | HSQLDB (HyperSQL) integration |
-| `MySQLIntegrationTest` | MySQL integration (Testcontainers) |
-| `PostgreSQLIntegrationTest` | PostgreSQL integration (Testcontainers) |
-| `OracleIntegrationTest` | Oracle Database integration (Testcontainers) |
 | `MSSQLServerIntegrationTest` | SQL Server integration (Testcontainers) |
+| `MySQLIntegrationTest` | MySQL integration (Testcontainers) |
+| `Neo4jIntegrationTest` | Neo4j Graph Database integration (Testcontainers) |
+| `OracleIntegrationTest` | Oracle Database integration (Testcontainers) |
+| `PostgreSQLIntegrationTest` | PostgreSQL integration (Testcontainers) |
 
 ## Related Modules
 
