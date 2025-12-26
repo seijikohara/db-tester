@@ -86,7 +86,7 @@ Configures individual dataset parameters within `@Preparation` or `@Expectation`
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**Target**: Used within annotation arrays only
+**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. It is used exclusively within `@Preparation#dataSets()` and `@Expectation#dataSets()` arrays. Attempting to apply it directly results in a compile-time error.
 
 **Attributes**:
 

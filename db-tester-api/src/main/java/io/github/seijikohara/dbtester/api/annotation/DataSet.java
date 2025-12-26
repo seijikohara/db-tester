@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.api.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Declares a dataset to be consumed by the database testing extension.
@@ -25,6 +26,7 @@ import java.lang.annotation.RetentionPolicy;
  * {@link Preparation#dataSets()} and {@link Expectation#dataSets()} containers that describe the
  * per-phase datasets.
  */
+@Target({})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataSet {
 

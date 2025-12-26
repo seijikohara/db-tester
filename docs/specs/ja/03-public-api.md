@@ -86,7 +86,7 @@ void testWithAlphabeticalOrdering() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**ターゲット**: アノテーション配列内でのみ使用
+**ターゲット**: なし (`@Target({})`) - このアノテーションはクラスやメソッドに直接適用できません。`@Preparation#dataSets()`と`@Expectation#dataSets()`配列内でのみ使用されます。直接適用しようとするとコンパイルエラーになります。
 
 **属性**:
 
