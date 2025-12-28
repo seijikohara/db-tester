@@ -1,0 +1,4 @@
+[Scenario],ID,COLUMN1,COLUMN2
+default,1,Alice Smith,alice@example.com
+default,2,Bob Johnson,bob@example.com
+default,3,Charlie Brown,charlie@example.com

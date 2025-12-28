@@ -1,0 +1,8 @@
+-- DDL for DataFormatSpec
+-- Tests CSV and TSV data format loading
+
+CREATE TABLE IF NOT EXISTS DATA_FORMAT (
+    ID INTEGER PRIMARY KEY,
+    NAME VARCHAR(100) NOT NULL,
+    DATA_VALUE INTEGER NOT NULL
+);

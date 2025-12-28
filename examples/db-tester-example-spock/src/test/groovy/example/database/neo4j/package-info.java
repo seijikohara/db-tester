@@ -1,5 +1,5 @@
 /**
- * Neo4j Graph Database integration tests for Spock Framework.
+ * Neo4j Graph Database integration tests for Spock.
  *
  * <p>This package demonstrates that DB Tester works with Neo4j, a graph database, using the
  * official Neo4j JDBC driver. Neo4j stores data as nodes and relationships, but the JDBC driver

@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.maven.publish)
 }
 
-description = "DB Tester Spock - Spock Framework Extension for database testing"
+description = "DB Tester Spock - Spock Extension for database testing"
 
 dependencies {
     // Public API dependencies (only db-tester-api and Spock API)
@@ -37,6 +37,6 @@ testing {
 mavenPublishing {
     pom {
         name = "DB Tester Spock"
-        description = "Spock Framework extension for DB Tester framework"
+        description = "Spock extension for DB Tester framework"
     }
 }

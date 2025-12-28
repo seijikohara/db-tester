@@ -1,6 +1,6 @@
 # DB Tester仕様 - テストフレームワーク統合
 
-JUnitおよびSpockテストフレームワークとの統合について説明します。
+JUnit、Spock、およびKotestテストフレームワークとの統合について説明します。
 
 
 ## JUnit統合
@@ -224,6 +224,124 @@ def 'should process #status order'() {
 シナリオ名: `"should process PENDING order"`, `"should process COMPLETED order"`
 
 
+## Kotest統合
+
+### モジュール
+
+`db-tester-kotest`
+
+### 拡張クラス
+
+**パッケージ**: `io.github.seijikohara.dbtester.kotest.DatabaseTestExtension`
+
+**タイプ**: `TestCaseExtension` - 準備フェーズと期待フェーズのためにテストケース実行をインターセプトします。
+
+### 登録
+
+`init`ブロックで拡張機能を登録します。Kotest 6では`extensions()`メソッドがfinalになり、オーバーライドできません:
+
+```kotlin
+class UserRepositorySpec : AnnotationSpec() {
+
+    private val registry = DataSourceRegistry()
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { registry }))
+    }
+
+    @BeforeAll
+    fun setupSpec() {
+        registry.registerDefault(dataSource)
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        // テスト実装
+    }
+}
+```
+
+### DataSource登録
+
+拡張機能は遅延バインドされたDataSource登録のために`registryProvider`ラムダを受け取ります:
+
+```kotlin
+class UserRepositorySpec : AnnotationSpec() {
+
+    companion object {
+        private var sharedRegistry: DataSourceRegistry? = null
+        private var sharedDataSource: DataSource? = null
+
+        private fun initializeSharedResources() {
+            sharedDataSource = createDataSource()
+            sharedRegistry = DataSourceRegistry().apply {
+                registerDefault(sharedDataSource!!)
+            }
+        }
+
+        fun getDbTesterRegistry(): DataSourceRegistry {
+            if (sharedRegistry == null) {
+                initializeSharedResources()
+            }
+            return sharedRegistry!!
+        }
+    }
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { getDbTesterRegistry() }))
+    }
+
+    @BeforeAll
+    fun setupSpec() {
+        if (sharedDataSource == null) {
+            initializeSharedResources()
+        }
+    }
+}
+```
+
+### 設定のカスタマイズ
+
+拡張機能にカスタム`Configuration`を渡します:
+
+```kotlin
+class UserRepositorySpec : AnnotationSpec() {
+
+    init {
+        val conventions = ConventionSettings.standard()
+            .withDataFormat(DataFormat.TSV)
+        val config = Configuration.withConventions(conventions)
+
+        extensions(DatabaseTestExtension(
+            registryProvider = { registry },
+            configuration = config
+        ))
+    }
+}
+```
+
+### テストメソッド命名
+
+説明的なテスト名にはバッククォートメソッド名を使用します:
+
+```kotlin
+@Test
+@Preparation
+fun `should create user with email`() {
+    // シナリオ名: "should create user with email"
+}
+```
+
+### AnnotationSpec要件
+
+DB TesterはKotest統合に`AnnotationSpec`スタイルを必要とします:
+1. アノテーション（`@Preparation`、`@Expectation`）をテストメソッドに適用可能
+2. リフレクションによるメソッド解決が信頼性が高い
+3. Java開発者にとって馴染みのあるJUnit風の構造
+
+
 ## Spring Boot統合
 
 ### JUnit Spring Boot Starter
@@ -338,6 +456,34 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
+### Kotest Spring Boot Starter
+
+**モジュール**: `db-tester-kotest-spring-boot-starter`
+
+**拡張機能**: `SpringBootDatabaseTestExtension`（Kotlin）
+
+**タイプ**: 自動Spring ApplicationContext統合を持つ`TestCaseExtension`。
+
+```kotlin
+@SpringBootTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
+    init {
+        extensions(SpringBootDatabaseTestExtension())
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        // DataSourceはSpringコンテキストから自動登録
+    }
+}
+```
+
 ### 自動設定
 
 自動設定クラス:
@@ -346,6 +492,7 @@ class UserRepositorySpec extends Specification {
 |------------|---------------|
 | JUnit Starter | `DbTesterJUnitAutoConfiguration` |
 | Spock Starter | `DbTesterSpockAutoConfiguration` |
+| Kotest Starter | `DbTesterKotestAutoConfiguration` |
 
 
 ## ライフサイクルフック
@@ -402,12 +549,44 @@ flowchart TD
     end
 ```
 
+### Kotestライフサイクル
+
+```mermaid
+flowchart TD
+    subgraph Specification実行
+        INIT["initブロック"]
+        INIT --> INIT1[拡張機能を登録]
+
+        BA["@BeforeAll"]
+        BA --> BA1[Registryを初期化]
+        BA1 --> BA2[DataSourceを登録]
+
+        subgraph each["各@Testメソッドに対して"]
+            INT["intercept()"]
+            INT --> INT1["Preparationを検索"]
+            INT1 --> INT2[データセットを読み込み]
+            INT2 --> INT3[操作を実行]
+            INT3 --> TM[テストメソッド実行]
+            TM --> INT4["Expectationを検索"]
+            INT4 --> INT5[期待データセットを読み込み]
+            INT5 --> INT6[データベースと比較]
+            INT6 --> INT7[不一致を報告]
+        end
+
+        INIT1 --> BA
+        BA2 --> each
+        each --> AA["@AfterAll"]
+        AA --> AA1[クリーンアップ]
+    end
+```
+
 ### ライフサイクル実行クラス
 
 | フレームワーク | 準備 | 期待 |
 |---------------|------|------|
 | JUnit | `PreparationExecutor` | `ExpectationVerifier` |
 | Spock | `SpockPreparationExecutor` | `SpockExpectationVerifier` |
+| Kotest | `KotestPreparationExecutor` | `KotestExpectationVerifier` |
 
 ### エラーハンドリング
 

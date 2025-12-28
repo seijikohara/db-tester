@@ -1,13 +1,13 @@
 # DB Tester - Spock Spring Boot Starter Module
 
-This module provides Spring Boot auto-configuration for the DB Tester framework with Spock Framework integration.
+This module provides Spring Boot auto-configuration for the DB Tester framework with Spock integration.
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are registered with DB Tester
-- **Property-Based Configuration** - Configure conventions via `application.properties`
+- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
+- **Property-Based Configuration** - Configure conventions via `application.properties` or `application.yml`
 - **Multiple DataSource Support** - Handles multiple DataSource beans with `@Primary` annotation support
-- **Spock Integration** - Integrates with Spock Framework specification syntax
+- **Spock Integration** - Extends `DatabaseTestExtension` with Spring Boot auto-configuration
 
 ## Architecture
 
@@ -27,7 +27,7 @@ This module extends `db-tester-spock` with Spring Boot auto-configuration.
 
 - Java 21 or later
 - Groovy 5 or later
-- Spock Framework 2 or later
+- Spock 2 or later
 - Spring Boot 4 or later
 
 ## Installation
@@ -77,22 +77,17 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is auto-registered from Spring context via auto-configuration.
+Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is auto-registered from Spring context.
 
 ### Multiple DataSources
 
 For multiple DataSource beans, use bean names in `@DataSet`:
 
 ```groovy
-@SpringBootTest
-@SpringBootDatabaseTest
-class MultiDataSourceSpec extends Specification {
-
-    @Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-    @Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-    def "should test primary database"() {
-        // Test with primary DataSource
-    }
+@Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+@Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+def "should test primary database"() {
+    // Test with primary DataSource
 }
 ```
 
@@ -142,16 +137,10 @@ Override properties via Configuration API:
 Configuration dbTesterConfiguration
 
 def setupSpec() {
-    dbTesterConfiguration = Configuration.withConventions(
-        new ConventionSettings(
-            null,                        // baseDirectory (null for classpath)
-            '/expected',                 // expectationSuffix
-            '[TestCase]',                // scenarioMarker
-            DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
-            'load-order.txt'             // loadOrderFileName
-        )
-    )
+    def conventions = ConventionSettings.standard()
+        .withScenarioMarker('[TestCase]')
+        .withDataFormat(DataFormat.TSV)
+    dbTesterConfiguration = Configuration.withConventions(conventions)
 }
 ```
 
@@ -169,6 +158,8 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 | [`SpringBootDatabaseTestExtension`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTestExtension.groovy) | Annotation-driven extension activated by `@SpringBootDatabaseTest` |
 | [`SpringBootDatabaseTestInterceptor`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/SpringBootDatabaseTestInterceptor.groovy) | Method interceptor for test lifecycle management |
 | [`DbTesterSpockAutoConfiguration`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/DbTesterSpockAutoConfiguration.groovy) | Spring Boot auto-configuration class |
+| [`DbTesterProperties`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/DbTesterProperties.groovy) | Configuration properties binding |
+| [`DataSourceRegistrar`](src/main/groovy/io/github/seijikohara/dbtester/spock/spring/boot/autoconfigure/DataSourceRegistrar.groovy) | Registers Spring-managed DataSources |
 
 ## Related Modules
 
@@ -176,7 +167,7 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 |--------|-------------|
 | [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
 | [`db-tester-core`](../db-tester-core/) | Internal implementation (loaded at runtime) |
-| [`db-tester-spock`](../db-tester-spock/) | Spock Framework integration (base module) |
+| [`db-tester-spock`](../db-tester-spock/) | Spock integration (base module) |
 
 ## Documentation
 

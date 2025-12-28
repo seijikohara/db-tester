@@ -1,0 +1,7 @@
+[TestCase],ID,COLUMN1,COLUMN2,COLUMN3
+should use custom scenario marker,1,Alice,ACTIVE,2024-01-01
+should use custom scenario marker,2,Bob,ACTIVE,2024-01-15
+should use custom expectation suffix,1,Alice,SUSPENDED,2024-01-01
+should use custom operation defaults,1,Alice,ACTIVE,2024-01-01
+should use custom operation defaults,2,Bob,ACTIVE,2024-01-10
+should use custom operation defaults,3,Charlie,INACTIVE,2024-02-01

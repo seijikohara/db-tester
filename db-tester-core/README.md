@@ -16,11 +16,11 @@ db-tester-api (public API)
         ↑
 db-tester-core (SPI implementations)
         ↑
-db-tester-junit / db-tester-spock (test framework integration)
+db-tester-junit / db-tester-spock / db-tester-kotest (test framework integration)
 ```
 
 - **Depends on**: `db-tester-api`
-- **Is loaded at runtime** by `db-tester-junit` and `db-tester-spock` via ServiceLoader
+- **Is loaded at runtime** by `db-tester-junit`, `db-tester-spock`, and `db-tester-kotest` via ServiceLoader
 
 ## Requirements
 
@@ -33,9 +33,11 @@ This module is loaded automatically at runtime by the integration modules. Direc
 Use the integration modules instead:
 
 - [db-tester-junit](../db-tester-junit/) for JUnit
-- [db-tester-spock](../db-tester-spock/) for Spock Framework
+- [db-tester-spock](../db-tester-spock/) for Spock
+- [db-tester-kotest](../db-tester-kotest/) for Kotest
 - [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) for Spring Boot with JUnit
 - [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) for Spring Boot with Spock
+- [db-tester-kotest-spring-boot-starter](../db-tester-kotest-spring-boot-starter/) for Spring Boot with Kotest
 
 ### Gradle
 
@@ -127,7 +129,8 @@ requires io.github.seijikohara.dbtester.core;
 |--------|-------------|
 | [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
 | [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
-| [`db-tester-spock`](../db-tester-spock/) | Spock Framework extension |
+| [`db-tester-spock`](../db-tester-spock/) | Spock extension |
+| [`db-tester-kotest`](../db-tester-kotest/) | Kotest extension |
 
 ## Documentation
 

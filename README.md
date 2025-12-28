@@ -9,7 +9,7 @@
   <img src="docs/public/favicon.svg" width="240" alt="DB Tester Logo">
 </p>
 
-A database testing framework for JUnit and Spock. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
+A database testing framework for JUnit, Spock, and Kotest. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
 
 ```java
 @Test
@@ -25,7 +25,7 @@ void shouldCreateUser() {
 - **Annotation-Driven** - `@Preparation` and `@Expectation` annotations for declarative test data management
 - **Convention-Based** - Dataset discovery based on test class package and name
 - **Multiple Formats** - CSV and TSV with scenario filtering via `[Scenario]` column
-- **Framework Support** - JUnit, Spock, and Spring Boot integration
+- **Framework Support** - JUnit, Spock, Kotest, and Spring Boot integration
 - **Pure JDBC** - No external testing framework dependencies
 
 ## Requirements
@@ -33,6 +33,7 @@ void shouldCreateUser() {
 - Java 21 or later
 - JUnit 6 (for JUnit integration)
 - Spock 2 with Groovy 5 (for Spock integration)
+- Kotest 6 with Kotlin 2 (for Kotest integration)
 - Spring Boot 4 (for Spring Boot integration)
 
 ## Installation
@@ -45,6 +46,8 @@ Select a module based on the test framework:
 | JUnit with Spring Boot | [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) |
 | Spock | [`db-tester-spock`](db-tester-spock/) |
 | Spock with Spring Boot | [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) |
+| Kotest | [`db-tester-kotest`](db-tester-kotest/) |
+| Kotest with Spring Boot | [`db-tester-kotest-spring-boot-starter`](db-tester-kotest-spring-boot-starter/) |
 
 <details>
 <summary>All Modules</summary>
@@ -58,6 +61,8 @@ Select a module based on the test framework:
 | [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit-spring-boot-starter) |
 | [`db-tester-spock`](db-tester-spock/) | Spock extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock) |
 | [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter) |
+| [`db-tester-kotest`](db-tester-kotest/) | Kotest extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-kotest.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-kotest) |
+| [`db-tester-kotest-spring-boot-starter`](db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-kotest-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-kotest-spring-boot-starter) |
 
 </details>
 
@@ -204,6 +209,59 @@ class UserRepositorySpec extends Specification {
 
         then:
         noExceptionThrown()
+    }
+}
+```
+
+### Kotest
+
+Register `DatabaseTestExtension` in the `init` block. Provide a `registryProvider` lambda for DataSource registration.
+
+```kotlin
+class UserRepositorySpec : AnnotationSpec() {
+
+    private val registry = DataSourceRegistry()
+    private lateinit var dataSource: DataSource
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { registry }))
+    }
+
+    @BeforeAll
+    fun setupSpec() {
+        dataSource = createDataSource()
+        registry.registerDefault(dataSource)
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        userRepository.create(User("john", "john@example.com"))
+    }
+}
+```
+
+### Kotest with Spring Boot
+
+Register `SpringBootDatabaseTestExtension` in the `init` block. The DataSource is automatically discovered from the Spring ApplicationContext.
+
+```kotlin
+@SpringBootTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
+    init {
+        extensions(SpringBootDatabaseTestExtension())
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        userRepository.save(User("john", "john@example.com"))
     }
 }
 ```

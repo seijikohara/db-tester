@@ -1,0 +1,6 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+scenario1,1,Alice Johnson,1,75000.00
+scenario2,2,Bob Smith,2,60000.00
+classLevel,1,Charlie Brown,1,55000.00
+multiDataSet1,1,Alice Johnson,1,75000.00
+multiDataSet1,2,Bob Smith,2,60000.00

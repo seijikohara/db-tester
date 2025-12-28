@@ -4,39 +4,9 @@ paths: "**/*.java"
 
 # Java Code Style Rules
 
-**All rules in this document are mandatory.**
+**All rules in this document are mandatory unless explicitly marked as Optional.**
 
----
-
-## Table of Contents
-
-1. [Quick Reference](#quick-reference)
-2. [Code Organization](#code-organization)
-   - [Class Structure](#class-structure)
-   - [Import Statements](#import-statements)
-   - [Naming Conventions](#naming-conventions)
-3. [Language Fundamentals](#language-fundamentals)
-   - [Variables and Parameters](#variables-and-parameters)
-   - [Text Blocks and String Formatting](#text-blocks-and-string-formatting)
-   - [Pattern Matching and Switch](#pattern-matching-and-switch)
-   - [Constructors](#constructors)
-4. [Type Design](#type-design)
-   - [Records and Immutability](#records-and-immutability)
-   - [Collections and Arrays](#collections-and-arrays)
-5. [Null Safety](#null-safety)
-   - [JSpecify Configuration](#jspecify-configuration)
-   - [Package Structure](#package-structure)
-   - [Null Handling Patterns](#null-handling-patterns)
-6. [Functional Programming](#functional-programming)
-   - [Core Principles](#core-principles)
-   - [Stream API](#stream-api)
-   - [Optional Patterns](#optional-patterns)
-7. [Error Handling](#error-handling)
-8. [Documentation](#documentation)
-   - [Documentation Style](#documentation-style)
-   - [Javadoc](#javadoc)
-9. [Logging](#logging)
-10. [Thread Safety](#thread-safety)
+**Reference**: [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html)
 
 ---
 

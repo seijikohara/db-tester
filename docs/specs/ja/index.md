@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "DB Tester"
   text: "データベーステストフレームワーク"
-  tagline: アノテーションによるテストデータの準備と検証 - JUnit・Spock対応
+  tagline: アノテーションによるテストデータの準備と検証 - JUnit・Spock・Kotest対応
   image:
     src: /favicon.svg
     alt: DB Tester
@@ -32,7 +32,7 @@ features:
     linkText: 規約を学ぶ
   - icon: 🔧
     title: 複数フレームワーク対応
-    details: JUnit JupiterとSpock Frameworkを完全サポート。Spring Boot統合も利用可能です。
+    details: JUnit Jupiter、Spock、Kotestを完全サポート。Spring Boot統合も利用可能です。
     link: /ja/07-test-frameworks
     linkText: フレームワーク統合
   - icon: 📊
@@ -68,6 +68,9 @@ dependencies {
 
     // または Spock
     testImplementation("io.github.seijikohara:db-tester-spock")
+
+    // または Kotest
+    testImplementation("io.github.seijikohara:db-tester-kotest")
 }
 ```
 
@@ -81,6 +84,9 @@ dependencies {
 
     // または Spock
     testImplementation 'io.github.seijikohara:db-tester-spock'
+
+    // または Kotest
+    testImplementation 'io.github.seijikohara:db-tester-kotest'
 }
 ```
 
@@ -109,6 +115,13 @@ dependencies {
     <dependency>
         <groupId>io.github.seijikohara</groupId>
         <artifactId>db-tester-spock</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- または Kotest -->
+    <dependency>
+        <groupId>io.github.seijikohara</groupId>
+        <artifactId>db-tester-kotest</artifactId>
         <scope>test</scope>
     </dependency>
 </dependencies>

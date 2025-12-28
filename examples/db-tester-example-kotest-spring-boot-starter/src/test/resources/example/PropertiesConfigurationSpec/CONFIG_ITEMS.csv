@@ -1,0 +1,3 @@
+[TestCase],ID,NAME,STATUS,CREATED_DATE
+should use custom scenario marker from properties,1,Alpha Feature,ACTIVE,2024-01-15
+should use custom expectation suffix from properties,1,Config Item Alpha,ACTIVE,2024-01-01

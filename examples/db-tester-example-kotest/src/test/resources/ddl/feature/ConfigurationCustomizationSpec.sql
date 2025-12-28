@@ -1,0 +1,8 @@
+-- DDL for ConfigurationCustomizationTest (H2 Database)
+
+CREATE TABLE TABLE1 (
+    ID INTEGER PRIMARY KEY,
+    COLUMN1 VARCHAR(50) NOT NULL,
+    COLUMN2 VARCHAR(20) NOT NULL,
+    COLUMN3 DATE NOT NULL
+);

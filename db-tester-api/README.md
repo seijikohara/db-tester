@@ -16,7 +16,8 @@ db-tester-api (public API)
     ↑
     ├── db-tester-core (implements SPI)
     ├── db-tester-junit (compile-time dependency)
-    └── db-tester-spock (compile-time dependency)
+    ├── db-tester-spock (compile-time dependency)
+    └── db-tester-kotest (compile-time dependency)
 ```
 
 The API module is the stable public contract of the DB Tester framework. All other modules depend on this module.
@@ -32,9 +33,11 @@ This module is transitively included by integration modules. Direct dependency i
 Use the integration modules instead:
 
 - [db-tester-junit](../db-tester-junit/) for JUnit
-- [db-tester-spock](../db-tester-spock/) for Spock Framework
+- [db-tester-spock](../db-tester-spock/) for Spock
+- [db-tester-kotest](../db-tester-kotest/) for Kotest
 - [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) for Spring Boot with JUnit
 - [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) for Spring Boot with Spock
+- [db-tester-kotest-spring-boot-starter](../db-tester-kotest-spring-boot-starter/) for Spring Boot with Kotest
 
 ### Gradle
 
@@ -105,7 +108,8 @@ module your.module {
 |--------|-------------|
 | [`db-tester-core`](../db-tester-core/) | Internal implementation (SPI providers) |
 | [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
-| [`db-tester-spock`](../db-tester-spock/) | Spock Framework extension |
+| [`db-tester-spock`](../db-tester-spock/) | Spock extension |
+| [`db-tester-kotest`](../db-tester-kotest/) | Kotest extension |
 | [`db-tester-bom`](../db-tester-bom/) | Bill of Materials |
 
 ## Documentation

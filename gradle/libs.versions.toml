@@ -2,6 +2,7 @@
 axion-release = "1.21.1"
 checker-qual = "3.52.1"
 derby = "10.17.1.0"
+dokka = "2.1.0"
 errorprone = "2.45.0"
 errorprone-plugin = "4.3.0"
 groovy = "5.0.3"
@@ -10,8 +11,11 @@ hsqldb = "2.7.4"
 jackson = "2.20.1"
 jspecify = "1.0.0"
 junit = "6.0.1"
+kotest = "6.0.7"
+kotlin = "2.3.0"
 maven-publish = "0.35.0"
 mockito = "5.21.0"
+mockk = "1.14.7"
 mssql-jdbc = "13.3.0.jre11-preview"
 mysql-connector = "9.5.0"
 neo4j-jdbc = "6.10.3"
@@ -49,9 +53,17 @@ junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core" }
+kotest-bom = { module = "io.kotest:kotest-bom", version.ref = "kotest" }
+kotest-framework-engine = { module = "io.kotest:kotest-framework-engine" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5" }
+kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib" }
 mockito-bom = { module = "org.mockito:mockito-bom", version.ref = "mockito" }
 mockito-core = { module = "org.mockito:mockito-core" }
 mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 mssql-jdbc = { module = "com.microsoft.sqlserver:mssql-jdbc", version.ref = "mssql-jdbc" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector" }
 neo4j-jdbc-full-bundle = { module = "org.neo4j:neo4j-jdbc-full-bundle", version.ref = "neo4j-jdbc" }
@@ -83,7 +95,11 @@ testcontainers-spock = { module = "org.testcontainers:testcontainers-spock" }
 
 [plugins]
 axion-release = { id = "pl.allegro.tech.build.axion-release", version.ref = "axion-release" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 errorprone = { id = "net.ltgt.errorprone", version.ref = "errorprone-plugin" }
+kotlin-jpa = { id = "org.jetbrains.kotlin.plugin.jpa", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-spring = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }

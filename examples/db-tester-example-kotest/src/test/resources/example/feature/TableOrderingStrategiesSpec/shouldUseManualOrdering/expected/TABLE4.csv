@@ -1,0 +1,4 @@
+[Scenario],COLUMN1,COLUMN2
+should use manual ordering,1,1
+should use manual ordering,1,4
+should use manual ordering,2,3

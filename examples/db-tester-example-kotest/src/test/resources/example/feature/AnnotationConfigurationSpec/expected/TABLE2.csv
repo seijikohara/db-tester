@@ -1,0 +1,13 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+should use custom resource location,1,David Lee,1,80000.00
+should use custom resource location,2,Emma Wilson,2,70000.00
+should handle multiple scenarios,1,Alice Johnson,1,75000.00
+should handle multiple scenarios,2,Bob Smith,2,65000.00
+scenario1,1,Alice Johnson,1,75000.00
+scenario2,2,Bob Smith,2,65000.00
+should use class level annotation,1,Charlie Brown,1,55000.00
+should use class level annotation,100,New Employee,1,45000.00
+multiDataSet,1,Alice Johnson,1,75000.00
+multiDataSet,2,Bob Smith,2,60000.00
+should merge multiple data sets,1,Alice Johnson,1,75000.00
+should merge multiple data sets,2,Bob Smith,2,65000.00

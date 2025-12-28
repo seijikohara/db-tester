@@ -4,7 +4,7 @@ DB Testerフレームワークのモジュール構造、依存関係、およ�
 
 ## モジュール構造
 
-本フレームワークは、階層化されたアーキテクチャで構成された7つのモジュールから構成されています。
+本フレームワークは、階層化されたアーキテクチャで構成された10のモジュールから構成されています。
 
 ```mermaid
 graph TD
@@ -18,27 +18,34 @@ graph TD
     subgraph "Test Frameworks"
         JUNIT[db-tester-junit]
         SPOCK[db-tester-spock]
+        KOTEST[db-tester-kotest]
     end
 
     subgraph "Spring Boot Starters"
         JUNIT_STARTER[db-tester-junit-spring-boot-starter]
         SPOCK_STARTER[db-tester-spock-spring-boot-starter]
+        KOTEST_STARTER[db-tester-kotest-spring-boot-starter]
     end
 
     BOM --> API
     BOM --> CORE
     BOM --> JUNIT
     BOM --> SPOCK
+    BOM --> KOTEST
     BOM --> JUNIT_STARTER
     BOM --> SPOCK_STARTER
+    BOM --> KOTEST_STARTER
 
     CORE --> API
     JUNIT -->|compile| API
     JUNIT -.->|runtime| CORE
     SPOCK -->|compile| API
     SPOCK -.->|runtime| CORE
+    KOTEST -->|compile| API
+    KOTEST -.->|runtime| CORE
     JUNIT_STARTER --> JUNIT
     SPOCK_STARTER --> SPOCK
+    KOTEST_STARTER --> KOTEST
 ```
 
 ### モジュールの責務
@@ -50,8 +57,10 @@ graph TD
 | `db-tester-core` | JDBC操作、フォーマット解析、SPI実装 |
 | `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEachコールバック |
 | `db-tester-spock` | Spockアノテーション駆動型拡張とインターセプター |
+| `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
 | `db-tester-junit-spring-boot-starter` | JUnit用Spring Boot自動設定 |
 | `db-tester-spock-spring-boot-starter` | Spock用Spring Boot自動設定 |
+| `db-tester-kotest-spring-boot-starter` | Kotest用Spring Boot自動設定 |
 
 ## モジュール依存関係
 
@@ -74,12 +83,13 @@ APIモジュールは内部依存関係を持ちません。外部依存関係�
 
 ### テストフレームワークモジュール
 
-JUnitおよびSpockモジュールは、コンパイル時に`db-tester-api`に依存します。`db-tester-core`モジュールはServiceLoader経由でランタイム時に検出されます。
+JUnit、Spock、およびKotestモジュールは、コンパイル時に`db-tester-api`に依存します。`db-tester-core`モジュールはServiceLoader経由でランタイム時に検出されます。
 
 | モジュール | コンパイル依存関係 | ランタイム依存関係 |
 |------------|-------------------|-------------------|
 | `db-tester-junit` | `db-tester-api`, `junit-jupiter-api` | `db-tester-core` |
 | `db-tester-spock` | `db-tester-api`, `spock-core` | `db-tester-core` |
+| `db-tester-kotest` | `db-tester-api`, `kotest-framework-api` | `db-tester-core` |
 
 ### Spring Boot Starterモジュール
 
@@ -87,6 +97,7 @@ JUnitおよびSpockモジュールは、コンパイル時に`db-tester-api`に�
 |------------|----------|
 | `db-tester-junit-spring-boot-starter` | `db-tester-junit`, `db-tester-core`, `spring-boot-autoconfigure` |
 | `db-tester-spock-spring-boot-starter` | `db-tester-spock`, `db-tester-core`, `spring-boot-autoconfigure` |
+| `db-tester-kotest-spring-boot-starter` | `db-tester-kotest`, `db-tester-core`, `spring-boot-autoconfigure` |
 
 ## パッケージ構成
 
@@ -216,7 +227,7 @@ io.github.seijikohara.dbtester.internal
 
 | レイヤー | モジュール | 責務 |
 |----------|----------|------|
-| プレゼンテーション | junit, spock, starters | テストフレームワーク統合 |
+| プレゼンテーション | junit, spock, kotest, starters | テストフレームワーク統合 |
 | アプリケーション | api | パブリックインターフェースと契約 |
 | ドメイン | core (dataset, domain) | ビジネスロジックとエンティティ |
 | インフラストラクチャ | core (jdbc, format) | データベースおよびファイルシステムアクセス |
@@ -283,8 +294,10 @@ flowchart LR
 | モジュール | Automatic-Module-Name |
 |------------|----------------------|
 | `db-tester-spock` | `io.github.seijikohara.dbtester.spock` |
+| `db-tester-kotest` | `io.github.seijikohara.dbtester.kotest` |
 | `db-tester-junit-spring-boot-starter` | `io.github.seijikohara.dbtester.junit.spring.autoconfigure` |
 | `db-tester-spock-spring-boot-starter` | `io.github.seijikohara.dbtester.spock.spring.autoconfigure` |
+| `db-tester-kotest-spring-boot-starter` | `io.github.seijikohara.dbtester.kotest.spring.autoconfigure` |
 
 ### モジュール依存関係
 
@@ -320,6 +333,6 @@ module io.github.seijikohara.dbtester.api {
 - [概要](01-overview) - フレームワークの目的と主要概念
 - [パブリックAPI](03-public-api) - アノテーションと設定クラス
 - [設定](04-configuration) - 設定オプション
-- [テストフレームワーク](07-test-frameworks) - JUnitとSpockの統合
+- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
 - [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
 - [エラーハンドリング](09-error-handling) - エラーメッセージと例外型

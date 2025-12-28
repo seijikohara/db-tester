@@ -6,9 +6,9 @@ import java.lang.reflect.Method
 import org.spockframework.runtime.model.FeatureMetadata
 
 /**
- * Spock Framework implementation of {@link ScenarioNameResolver}.
+ * Spock implementation of {@link ScenarioNameResolver}.
  *
- * <p>This resolver provides scenario name resolution for Spock Framework tests. In Spock, test
+ * <p>This resolver provides scenario name resolution for Spock tests. In Spock, test
  * methods (features) have descriptive names with spaces that are stored in the {@link
  * FeatureMetadata} annotation, while the actual Java method name is an internal identifier like
  * {@code $spock_feature_0_0}.

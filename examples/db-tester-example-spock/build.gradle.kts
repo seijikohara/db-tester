@@ -2,7 +2,7 @@ plugins {
     groovy
 }
 
-description = "DB Tester Example - Spock Framework examples and integration tests"
+description = "DB Tester Example - Spock examples and integration tests"
 
 // Example projects are not published to Maven Central
 

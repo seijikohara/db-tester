@@ -1,13 +1,13 @@
 # DB Tester - Spock Examples
 
-This module contains example tests demonstrating the features of the DB Tester framework with Spock Framework.
+This module contains example tests demonstrating the features of the DB Tester framework with Spock.
 
 ## Overview
 
 - **Convention-Based Testing** - CSV file resolution based on specification class and feature method names
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
 - **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, REFRESH, DELETE)
-- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j, Cassandra
+- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j
 
 ## Prerequisites
 
@@ -65,7 +65,6 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 | Specification | Description |
 |---------------|-------------|
-| `CassandraIntegrationSpec` | Apache Cassandra integration (Testcontainers) |
 | `DerbyIntegrationSpec` | Apache Derby integration |
 | `HSQLDBIntegrationSpec` | HSQLDB (HyperSQL) integration |
 | `MSSQLServerIntegrationSpec` | SQL Server integration (Testcontainers) |
@@ -74,7 +73,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `OracleIntegrationSpec` | Oracle Database integration (Testcontainers) |
 | `PostgreSQLIntegrationSpec` | PostgreSQL integration (Testcontainers) |
 
-### Spock-Specific Features
+## Spock-Specific Features
 
 Feature method names with spaces map directly to `[Scenario]` column values:
 
@@ -85,7 +84,7 @@ def 'should create inactive user'() { ... } // Matches: should create inactive u
 
 ## Related Modules
 
-- [db-tester-spock](../../db-tester-spock/) - Spock Framework extension
+- [db-tester-spock](../../db-tester-spock/) - Spock extension
 
 ## Documentation
 

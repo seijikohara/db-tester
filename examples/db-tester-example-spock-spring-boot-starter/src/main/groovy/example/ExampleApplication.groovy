@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
  * Spring Boot application for demonstrating db-tester-spock-spring-boot-starter.
  *
  * <p>This application provides a minimal Spring Boot setup with H2 database for testing the
- * integration between Spring Boot, Spock Framework, and the database testing framework.
+ * integration between Spring Boot, Spock, and the database testing framework.
  */
 @SpringBootApplication
 class ExampleApplication {

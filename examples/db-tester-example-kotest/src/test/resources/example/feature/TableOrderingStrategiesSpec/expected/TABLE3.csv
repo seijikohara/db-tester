@@ -1,0 +1,11 @@
+[Scenario],ID,COLUMN1
+should use alphabetical ordering,1,Popular
+should use alphabetical ordering,2,Sale
+should use alphabetical ordering,3,New
+should use manual ordering,1,Popular
+should use manual ordering,2,Sale
+should use manual ordering,3,New
+should use manual ordering,4,Featured
+should handle many to many relationships,1,Popular
+should handle many to many relationships,2,Sale
+should handle many to many relationships,5,Essential

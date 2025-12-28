@@ -14,6 +14,8 @@ This directory contains example tests demonstrating the features of the DB Teste
 ## Prerequisites
 
 - Java 21 or later
+- Groovy 5 or later (for Spock examples)
+- Kotlin 2 or later (for Kotest examples)
 - H2 Database (included as test dependency)
 - Docker (optional, for Testcontainers-based integration tests)
 
@@ -22,9 +24,11 @@ This directory contains example tests demonstrating the features of the DB Teste
 | Module | Description |
 |--------|-------------|
 | [db-tester-example-junit](db-tester-example-junit/) | JUnit examples with feature tests and database integration tests |
-| [db-tester-example-spock](db-tester-example-spock/) | Spock Framework examples |
+| [db-tester-example-spock](db-tester-example-spock/) | Spock examples with feature tests and database integration tests |
+| [db-tester-example-kotest](db-tester-example-kotest/) | Kotest examples with feature tests and database integration tests |
 | [db-tester-example-junit-spring-boot-starter](db-tester-example-junit-spring-boot-starter/) | Spring Boot examples with JUnit |
 | [db-tester-example-spock-spring-boot-starter](db-tester-example-spock-spring-boot-starter/) | Spring Boot examples with Spock |
+| [db-tester-example-kotest-spring-boot-starter](db-tester-example-kotest-spring-boot-starter/) | Spring Boot examples with Kotest |
 
 ## Usage
 
@@ -33,8 +37,10 @@ This directory contains example tests demonstrating the features of the DB Teste
 ```bash
 ./gradlew :examples:db-tester-example-junit:test
 ./gradlew :examples:db-tester-example-spock:test
+./gradlew :examples:db-tester-example-kotest:test
 ./gradlew :examples:db-tester-example-junit-spring-boot-starter:test
 ./gradlew :examples:db-tester-example-spock-spring-boot-starter:test
+./gradlew :examples:db-tester-example-kotest-spring-boot-starter:test
 ```
 
 ### Running with Verbose Output
@@ -48,9 +54,11 @@ This directory contains example tests demonstrating the features of the DB Teste
 | Module | Description |
 |--------|-------------|
 | [db-tester-junit](../db-tester-junit/) | JUnit extension |
-| [db-tester-spock](../db-tester-spock/) | Spock Framework extension |
+| [db-tester-spock](../db-tester-spock/) | Spock extension |
+| [db-tester-kotest](../db-tester-kotest/) | Kotest extension |
 | [db-tester-junit-spring-boot-starter](../db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit |
 | [db-tester-spock-spring-boot-starter](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock |
+| [db-tester-kotest-spring-boot-starter](../db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest |
 
 ## Documentation
 

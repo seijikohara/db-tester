@@ -1,0 +1,3 @@
+[Scenario],ID,COLUMN1,COLUMN2
+should handle many to many relationships,1,1,Laptop
+should handle many to many relationships,2,2,Novel

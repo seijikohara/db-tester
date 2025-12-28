@@ -4,38 +4,7 @@ paths: "**/*.md"
 
 # Documentation Style Rules
 
-**All rules in this document are mandatory.**
-
----
-
-## Table of Contents
-
-1. [Quick Reference](#quick-reference)
-2. [Core Principles](#core-principles)
-   - [Writing Style](#writing-style)
-   - [Language Requirements](#language-requirements)
-   - [Prohibited Elements](#prohibited-elements)
-3. [Javadoc](#javadoc)
-   - [DocLint Configuration](#doclint-configuration)
-   - [Class Documentation](#class-documentation)
-   - [Method Documentation](#method-documentation)
-   - [Field Documentation](#field-documentation)
-   - [Deprecation Tags](#deprecation-tags)
-   - [Package Documentation](#package-documentation)
-4. [Markdown Documentation](#markdown-documentation)
-   - [File Structure](#file-structure)
-   - [README Files](#readme-files)
-   - [Code Examples](#code-examples)
-   - [Tables and Lists](#tables-and-lists)
-   - [Accessibility and Structure](#accessibility-and-structure)
-5. [Code Comments](#code-comments)
-   - [Inline Comments](#inline-comments)
-   - [Block Comments](#block-comments)
-6. [Commit Messages](#commit-messages)
-   - [Conventional Commits](#conventional-commits)
-   - [Message Structure](#message-structure)
-7. [Version References](#version-references)
-8. [Links and References](#links-and-references)
+**All rules in this document are mandatory unless explicitly marked as Optional.**
 
 ---
 

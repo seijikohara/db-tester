@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "DB Tester"
   text: "Database Testing Framework"
-  tagline: Annotation-driven data preparation and state verification for JUnit and Spock
+  tagline: Annotation-driven data preparation and state verification for JUnit, Spock, and Kotest
   image:
     src: /favicon.svg
     alt: DB Tester
@@ -32,7 +32,7 @@ features:
     linkText: Learn Conventions
   - icon: 🔧
     title: Multiple Frameworks
-    details: Full support for JUnit Jupiter and Spock Framework with Spring Boot integration.
+    details: Full support for JUnit Jupiter, Spock, and Kotest with Spring Boot integration.
     link: /07-test-frameworks
     linkText: Framework Integration
   - icon: 📊
@@ -68,6 +68,9 @@ dependencies {
 
     // Or Spock
     testImplementation("io.github.seijikohara:db-tester-spock")
+
+    // Or Kotest
+    testImplementation("io.github.seijikohara:db-tester-kotest")
 }
 ```
 
@@ -81,6 +84,9 @@ dependencies {
 
     // Or Spock
     testImplementation 'io.github.seijikohara:db-tester-spock'
+
+    // Or Kotest
+    testImplementation 'io.github.seijikohara:db-tester-kotest'
 }
 ```
 
@@ -109,6 +115,13 @@ dependencies {
     <dependency>
         <groupId>io.github.seijikohara</groupId>
         <artifactId>db-tester-spock</artifactId>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- Or Kotest -->
+    <dependency>
+        <groupId>io.github.seijikohara</groupId>
+        <artifactId>db-tester-kotest</artifactId>
         <scope>test</scope>
     </dependency>
 </dependencies>

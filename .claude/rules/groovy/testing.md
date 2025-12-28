@@ -2,28 +2,11 @@
 paths: "**/*Spec.groovy"
 ---
 
-# Groovy Testing Code Style Rules (Spock Framework)
+# Groovy Testing Code Style Rules (Spock)
 
 **All rules in this document are mandatory unless explicitly marked as Optional.**
 
-**Reference**: [Spock Framework Documentation](https://spockframework.org/spock/docs/2.3/all_in_one.html)
-
----
-
-## Table of Contents
-
-- [Testing Framework](#testing-framework)
-- [Specification Structure](#specification-structure)
-- [Feature Method Naming](#feature-method-naming)
-- [Block Structure](#block-structure)
-- [Conditions and Assertions](#conditions-and-assertions)
-- [Data-Driven Testing](#data-driven-testing)
-- [Mocking and Stubbing](#mocking-and-stubbing)
-- [Lifecycle Methods](#lifecycle-methods)
-- [Field Management](#field-management)
-- [Extensions and Annotations](#extensions-and-annotations)
-- [Documentation](#documentation)
-- [Testcontainers Integration](#testcontainers-integration)
+**Reference**: [Spock Documentation](https://spockframework.org/spock/docs/2.3/all_in_one.html)
 
 ---
 
@@ -31,7 +14,7 @@ paths: "**/*Spec.groovy"
 
 ### Required Dependencies
 
-- **Spock Framework 2.x**: Primary testing framework for Groovy
+- **Spock 2.x**: Primary testing framework for Groovy
 - **Groovy 5**: Language runtime
 - **Testcontainers** (Optional): For database integration tests
 

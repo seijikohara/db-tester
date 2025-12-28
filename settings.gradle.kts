@@ -36,11 +36,15 @@ include(
     "db-tester-core",
     "db-tester-junit",
     "db-tester-spock",
+    "db-tester-kotest",
     "db-tester-junit-spring-boot-starter",
     "db-tester-spock-spring-boot-starter",
+    "db-tester-kotest-spring-boot-starter",
     // Example modules (not published)
     "examples:db-tester-example-junit",
     "examples:db-tester-example-spock",
+    "examples:db-tester-example-kotest",
     "examples:db-tester-example-junit-spring-boot-starter",
     "examples:db-tester-example-spock-spring-boot-starter",
+    "examples:db-tester-example-kotest-spring-boot-starter",
 )
