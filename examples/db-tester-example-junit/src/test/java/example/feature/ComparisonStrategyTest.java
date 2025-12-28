@@ -126,7 +126,7 @@ public final class ComparisonStrategyTest {
   }
 
   /**
-   * Creates a simple table with one row.
+   * Creates a table with one row.
    *
    * @param tableName the table name
    * @param columnNames the column names
@@ -145,7 +145,7 @@ public final class ComparisonStrategyTest {
   }
 
   /**
-   * Creates a simple table with one row, allowing nullable values.
+   * Creates a table with one row, allowing nullable values.
    *
    * @param tableName the table name
    * @param columnNames the column names

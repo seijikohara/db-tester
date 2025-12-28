@@ -6,22 +6,7 @@ paths: "**/src/test/**/*.java"
 
 **All rules in this document are mandatory unless explicitly marked as Optional.**
 
----
-
-## Table of Contents
-
-- [Testing Framework](#testing-framework)
-- [Test Class Structure](#test-class-structure)
-- [Nested Test Classes](#nested-test-classes)
-- [Test Method Naming](#test-method-naming)
-- [Test Method Annotations](#test-method-annotations)
-- [Test Method Structure (AAA Pattern)](#test-method-structure-aaa-pattern)
-- [Assertions](#assertions)
-- [Mocking](#mocking)
-- [Test Fixtures and Helpers](#test-fixtures-and-helpers)
-- [Documentation](#documentation)
-- [Import Statements](#import-statements)
-- [Null Safety in Tests](#null-safety-in-tests)
+**Reference**: [JUnit 6 User Guide](https://docs.junit.org/current/user-guide/)
 
 ---
 

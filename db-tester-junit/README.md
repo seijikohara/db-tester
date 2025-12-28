@@ -1,12 +1,12 @@
 # DB Tester - JUnit Module
 
-This module provides JUnit integration for the DB Tester framework through `DatabaseTestExtension`.
+This module provides [JUnit](https://junit.org/) integration for the DB Tester framework through `DatabaseTestExtension`.
 
 ## Overview
 
-- **JUnit Extension** - `DatabaseTestExtension` for test lifecycle integration
+- **JUnit Extension** - `DatabaseTestExtension` implements `BeforeEachCallback` and `AfterEachCallback` for test lifecycle integration
 - **Lifecycle Management** - `PreparationExecutor` and `ExpectationVerifier` execute preparation and expectation phases
-- **ExtensionContext Integration** - Integrates with JUnit extension model
+- **ExtensionContext Integration** - Stores `DataSourceRegistry` and `Configuration` in JUnit `ExtensionContext`
 
 ## Architecture
 
@@ -71,6 +71,8 @@ class UserRepositoryTest {
 }
 ```
 
+Register `DatabaseTestExtension` using `@ExtendWith`. DataSource registration is required in `@BeforeAll`.
+
 ### DataSource Registration
 
 Register data sources in `@BeforeAll`:
@@ -130,25 +132,17 @@ Each test loads only rows matching its method name.
 ```java
 @BeforeAll
 static void setup(ExtensionContext context) {
-    Configuration config = Configuration.withConventions(
-        new ConventionSettings(
-            null,                        // baseDirectory (null for classpath)
-            "/expected",                 // expectationSuffix
-            "[TestCase]",                // scenarioMarker
-            DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
-            "load-order.txt"             // loadOrderFileName
-        )
-    );
+    ConventionSettings conventions = ConventionSettings.standard()
+        .withScenarioMarker("[TestCase]")
+        .withDataFormat(DataFormat.TSV);
+    Configuration config = Configuration.withConventions(conventions);
     DatabaseTestExtension.setConfiguration(context, config);
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Module name**: `io.github.seijikohara.dbtester.junit`
-
-This module provides full JPMS support with a `module-info.java` descriptor.
 
 ```java
 requires io.github.seijikohara.dbtester.junit;
@@ -161,7 +155,7 @@ requires io.github.seijikohara.dbtester.junit;
 | [`DatabaseTestExtension`](src/main/java/io/github/seijikohara/dbtester/junit/jupiter/extension/DatabaseTestExtension.java) | JUnit extension for test lifecycle integration |
 | [`PreparationExecutor`](src/main/java/io/github/seijikohara/dbtester/junit/jupiter/lifecycle/PreparationExecutor.java) | Executes data preparation phase |
 | [`ExpectationVerifier`](src/main/java/io/github/seijikohara/dbtester/junit/jupiter/lifecycle/ExpectationVerifier.java) | Verifies database state after test execution |
-| `JUnitScenarioNameResolver` | Resolves scenario names from JUnit test methods |
+| [`JUnitScenarioNameResolver`](src/main/java/io/github/seijikohara/dbtester/junit/jupiter/spi/JUnitScenarioNameResolver.java) | Resolves scenario names from JUnit test methods |
 
 ## Related Modules
 

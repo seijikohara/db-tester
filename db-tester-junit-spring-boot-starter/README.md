@@ -4,10 +4,10 @@ This module provides Spring Boot auto-configuration for the DB Tester framework 
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are registered with DB Tester
-- **Property-Based Configuration** - Configure conventions via `application.properties`
+- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
+- **Property-Based Configuration** - Configure conventions via `application.properties` or `application.yml`
 - **Multiple DataSource Support** - Handles multiple DataSource beans with `@Primary` annotation support
-- **JUnit Integration** - Extends `DatabaseTestExtension` for JUnit compatibility
+- **JUnit Integration** - Extends `DatabaseTestExtension` with Spring Boot auto-configuration
 
 ## Architecture
 
@@ -26,8 +26,8 @@ This module extends `db-tester-junit` with Spring Boot auto-configuration.
 ## Requirements
 
 - Java 21 or later
-- Spring Boot 4 or later
 - JUnit 6 or later
+- Spring Boot 4 or later
 
 ## Installation
 
@@ -73,11 +73,11 @@ class UserRepositoryTest {
 }
 ```
 
-No `@BeforeAll` setup is required. DataSource is auto-registered from Spring context.
+Register `SpringBootDatabaseTestExtension` using `@ExtendWith`. DataSource is auto-registered from Spring context.
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names:
+For multiple DataSource beans, use bean names in `@DataSet`:
 
 ```java
 @Test
@@ -132,25 +132,17 @@ Override properties via Configuration API:
 ```java
 @BeforeAll
 static void setup(ExtensionContext context) {
-    Configuration config = Configuration.withConventions(
-        new ConventionSettings(
-            null,                        // baseDirectory (null for classpath)
-            "/expected",                 // expectationSuffix
-            "[TestCase]",                // scenarioMarker
-            DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
-            "load-order.txt"             // loadOrderFileName
-        )
-    );
+    ConventionSettings conventions = ConventionSettings.standard()
+        .withScenarioMarker("[TestCase]")
+        .withDataFormat(DataFormat.TSV);
+    Configuration config = Configuration.withConventions(conventions);
     SpringBootDatabaseTestExtension.setConfiguration(context, config);
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.junit.spring.autoconfigure`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
 
 ## Key Classes
 
@@ -159,6 +151,7 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 | [`SpringBootDatabaseTestExtension`](src/main/java/io/github/seijikohara/dbtester/junit/spring/boot/autoconfigure/SpringBootDatabaseTestExtension.java) | JUnit extension with Spring Boot integration |
 | [`DbTesterJUnitAutoConfiguration`](src/main/java/io/github/seijikohara/dbtester/junit/spring/boot/autoconfigure/DbTesterJUnitAutoConfiguration.java) | Spring Boot auto-configuration class |
 | [`DbTesterProperties`](src/main/java/io/github/seijikohara/dbtester/junit/spring/boot/autoconfigure/DbTesterProperties.java) | Configuration properties binding |
+| [`DataSourceRegistrar`](src/main/java/io/github/seijikohara/dbtester/junit/spring/boot/autoconfigure/DataSourceRegistrar.java) | Registers Spring-managed DataSources |
 
 ## Related Modules
 

@@ -14,7 +14,7 @@ This directory contains technical specifications for the DB Tester framework.
 | [04-configuration.md](04-configuration) | Configuration options and conventions |
 | [05-data-formats.md](05-data-formats) | CSV/TSV file structure and parsing |
 | [06-database-operations.md](06-database-operations) | Supported operations and execution flow |
-| [07-test-frameworks.md](07-test-frameworks) | JUnit and Spock integration |
+| [07-test-frameworks.md](07-test-frameworks) | JUnit, Spock, and Kotest integration |
 | [08-spi.md](08-spi) | Service Provider Interface extension points |
 | [09-error-handling.md](09-error-handling) | Error messages and exception types |
 
@@ -33,6 +33,22 @@ For comprehensive understanding, read the specifications in this order:
 7. **Test Frameworks** - Learn framework-specific integration
 8. **SPI** - Explore extension points
 9. **Error Handling** - Understand error messages and debugging
+
+---
+
+## Modules
+
+| Module | Description |
+|--------|-------------|
+| `db-tester-bom` | Bill of Materials for version management |
+| `db-tester-api` | Public API (annotations, configuration, SPI interfaces) |
+| `db-tester-core` | Core implementation (JDBC operations, format parsing) |
+| `db-tester-junit` | JUnit Jupiter extension |
+| `db-tester-spock` | Spock extension |
+| `db-tester-kotest` | Kotest AnnotationSpec extension |
+| `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
+| `db-tester-spock-spring-boot-starter` | Spring Boot auto-configuration for Spock |
+| `db-tester-kotest-spring-boot-starter` | Spring Boot auto-configuration for Kotest |
 
 ---
 

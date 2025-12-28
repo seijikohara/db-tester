@@ -20,6 +20,7 @@ flowchart TB
     subgraph Frameworks[Test Frameworks]
         JUNIT[db-tester-junit]
         SPOCK[db-tester-spock]
+        KOTEST[db-tester-kotest]
     end
 
     API <-->|ServiceLoader| CORE
@@ -215,6 +216,7 @@ public interface ScenarioNameResolver {
 |----------------|--------|-------------|
 | `JUnitScenarioNameResolver` | `db-tester-junit` | Resolves from JUnit method name |
 | `SpockScenarioNameResolver` | `db-tester-spock` | Resolves from Spock feature name |
+| `KotestScenarioNameResolver` | `db-tester-kotest` | Resolves from Kotest test case name |
 
 **Resolution Logic**:
 1. Sort all registered resolvers by `priority()` (descending)
@@ -293,6 +295,13 @@ io.github.seijikohara.dbtester.junit.jupiter.spi.JUnitScenarioNameResolver
 ```
 # META-INF/services/io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
 io.github.seijikohara.dbtester.spock.spi.SpockScenarioNameResolver
+```
+
+**db-tester-kotest**:
+
+```
+# META-INF/services/io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
+io.github.seijikohara.dbtester.kotest.spi.KotestScenarioNameResolver
 ```
 
 ### JPMS Module Declarations

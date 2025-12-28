@@ -1,10 +1,10 @@
 # DB Tester - Spock Spring Boot Starter Examples
 
-This module contains example tests demonstrating the DB Tester framework with Spring Boot and Spock Framework.
+This module contains example tests demonstrating the DB Tester framework with Spring Boot and Spock.
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are registered via auto-configuration
+- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
 - **Convention-Based Loading** - CSV dataset resolution based on specification class and feature method names
 - **Property-Based Configuration** - Configure DB Tester via `application.properties`
 - **Spring Data JPA Integration** - Testing Spring Data repositories
@@ -28,28 +28,25 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 
 | Specification | Description |
 |---------------|-------------|
-| `UserRepositorySpec` | Spring Data JPA integration with DataSource registration |
+| `UserRepositorySpec` | Spring Data JPA integration with automatic DataSource registration |
 | `MultipleDataSourcesSpec` | Multiple DataSource support with `@Primary` detection |
 | `PropertiesConfigurationSpec` | Property-based configuration demonstration |
 
 ## Basic Example
 
 ```groovy
-@SpringBootTest(classes = ExampleApplication)
+@SpringBootTest
+@SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
     @Autowired
-    DataSourceRegistry dbTesterRegistry
-
-    DataSourceRegistry getDbTesterRegistry() {
-        dbTesterRegistry
-    }
+    UserRepository userRepository
 
     @Preparation
     @Expectation
-    def "should save new user"() {
+    def "should save user"() {
         when:
-        userRepository.save(new User(3L, "Charlie", "charlie@example.com"))
+        userRepository.save(new User("Alice", "alice@example.com"))
 
         then:
         noExceptionThrown()

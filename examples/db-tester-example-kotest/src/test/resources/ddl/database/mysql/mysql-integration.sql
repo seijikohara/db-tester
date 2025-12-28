@@ -1,0 +1,13 @@
+-- MySQL Integration Test DDL
+
+DROP TABLE IF EXISTS TABLE1;
+CREATE TABLE TABLE1 (
+    ID INT PRIMARY KEY,
+    COLUMN1 VARCHAR(100) NOT NULL,
+    COLUMN2 TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- MySQL-specific types
+    COLUMN3 ENUM('active', 'inactive', 'pending') NOT NULL,
+    COLUMN4 SET('read', 'write', 'execute'),
+    COLUMN5 MEDIUMTEXT,
+    COLUMN6 DECIMAL(10, 2)
+);

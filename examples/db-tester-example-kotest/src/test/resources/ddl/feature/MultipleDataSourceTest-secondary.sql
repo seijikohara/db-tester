@@ -1,0 +1,8 @@
+-- DDL for MultipleDataSourceTest - Secondary Database (Inventory)
+
+DROP TABLE IF EXISTS TABLE1;
+CREATE TABLE TABLE1 (
+    ID INT PRIMARY KEY,
+    COLUMN1 VARCHAR(100) NOT NULL,
+    COLUMN2 INT NOT NULL
+);

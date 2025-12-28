@@ -1,191 +1,92 @@
----
-paths: "**/*.md"
----
+# Technical Writing Standards
 
-# Documentation Style Rules
+This document defines the technical writing standards for the DB Tester project.
 
-**All rules in this document are mandatory.**
+## Scope
 
----
+These standards apply to:
 
-## Table of Contents
+- Javadoc, KDoc, and Groovydoc comments
+- Markdown documentation (README, specifications)
+- Code comments
+- Commit messages
 
-1. [Quick Reference](#quick-reference)
-2. [Core Principles](#core-principles)
-   - [Writing Style](#writing-style)
-   - [Language Requirements](#language-requirements)
-   - [Prohibited Elements](#prohibited-elements)
-3. [Javadoc](#javadoc)
-   - [DocLint Configuration](#doclint-configuration)
-   - [Class Documentation](#class-documentation)
-   - [Method Documentation](#method-documentation)
-   - [Field Documentation](#field-documentation)
-   - [Deprecation Tags](#deprecation-tags)
-   - [Package Documentation](#package-documentation)
-4. [Markdown Documentation](#markdown-documentation)
-   - [File Structure](#file-structure)
-   - [README Files](#readme-files)
-   - [Code Examples](#code-examples)
-   - [Tables and Lists](#tables-and-lists)
-   - [Accessibility and Structure](#accessibility-and-structure)
-5. [Code Comments](#code-comments)
-   - [Inline Comments](#inline-comments)
-   - [Block Comments](#block-comments)
-6. [Commit Messages](#commit-messages)
-   - [Conventional Commits](#conventional-commits)
-   - [Message Structure](#message-structure)
-7. [Version References](#version-references)
-8. [Links and References](#links-and-references)
+## Language and Style
 
----
+### Language
 
-## Quick Reference
+Use English for all documentation.
 
-| Category | Rule |
-|----------|------|
-| Language | English only; formal and technical |
-| Tone | Objective; no subjective adjectives |
-| Style | Direct statements; imperative mood for instructions |
-| Javadoc | Required for all public and private elements; DocLint enforced |
-| Markdown | Consistent structure; no trailing whitespace |
-| Comments | Explain the reasoning, not the operation; avoid redundant comments |
-| Commits | Conventional Commits format; present tense |
+### Voice
 
----
-
-## Core Principles
-
-### Writing Style
-
-All documentation must be **objective, technical, and formal**. Subjective expressions and casual language are prohibited.
-
-**Target audience**: Software developers with Java/Groovy experience.
-
-**Requirements**:
-- Use concise, direct statements
-- Use precise technical terminology
-- Maintain professional tone throughout
-- Express one concept per sentence
-- Prefer active voice
-- Limit sentences to 25 words maximum
-- Limit paragraphs to 3-5 sentences
-
-**Voice Guidelines**:
+Use active voice. Passive voice is acceptable only when the actor is unknown or irrelevant.
 
 | Context | Voice | Example |
 |---------|-------|---------|
-| Instructions | Imperative | "Configure the data source" |
-| Descriptions | Active | "The method returns a list" |
-| Explanations | Active | "This class manages connections" |
-| State/Results | Passive (acceptable) | "The connection is closed automatically" |
+| Procedures | Imperative | "Register the DataSource." |
+| Descriptions | Active | "The method returns a list." |
+| Results | Passive (acceptable) | "The connection is closed automatically." |
 
-### Language Requirements
+### Sentence Structure
 
-**English only**: All documentation, comments, and commit messages must be in English.
+- Write one idea per sentence.
+- Limit sentences to 25 words.
+- Limit paragraphs to 5 sentences.
 
-**Technical precision**:
-- Use exact technical terms
-- Define acronyms on first use
-- Maintain consistent terminology throughout
+### Word Choice
 
-| Term | Usage |
-|------|-------|
-| DataSource | Java interface (capitalized) |
-| data source | Generic database connection concept |
-| CSV | Comma-Separated Values (define once) |
+Use precise technical terms. Avoid vague or subjective language.
 
-### Prohibited Elements
+**Prohibited**:
 
-The following elements are prohibited in technical documentation:
+| Category | Examples |
+|----------|----------|
+| Subjective adjectives | modern, powerful, elegant, simple, easy |
+| Filler words | very, really, quite, actually, basically |
+| Informal contractions | don't, won't, can't, it's, let's |
+| Vague quantifiers | some, many, few, several |
+| Unnecessary politeness | please, kindly |
 
-**Subjective adjectives**:
-- "modern", "powerful", "elegant", "beautiful"
-- "simple", "easy", "straightforward" (when describing complexity)
-- "great", "best", "amazing", "perfect"
+**Replace**:
 
-**Casual contractions**:
-- "don't", "won't", "can't", "shouldn't"
-- "let's", "you'll", "we'll", "it's"
+| Avoid | Use |
+|-------|-----|
+| utilize, leverage | use |
+| in order to | to |
+| due to the fact that | because |
+| at the present time | now |
+| a number of | several, specific number |
+| etc., and so on | list items or use "such as" |
 
-**Conversational phrases**:
-- "you should", "we recommend", "you might want to"
-- "as you can see", "note that you"
-- "simply", "just", "basically"
+### Terminology
 
-**Redundant modifiers**:
-- "very", "really", "quite", "extremely"
-- "actually", "obviously", "clearly"
+Define acronyms on first use. Maintain consistent terminology.
 
-**Exclamation marks**: Prohibited in technical documentation.
+| Term | Context |
+|------|---------|
+| `DataSource` | Java interface (capitalized) |
+| data source | Generic concept |
 
-**Verbose phrases**:
-- "in order to" → "to"
-- "due to the fact that" → "because"
-- "at the present time" → "now"
-- "in the event that" → "if"
+### Punctuation
 
-**Vague enumerations**:
-- "etc.", "and so on", "and more" (specify items or use "such as")
+- Do not use exclamation marks.
+- Use serial commas (Oxford comma).
+- Use straight quotes, not curly quotes.
 
-**Overly formal words**:
-- "utilize" → "use"
-- "leverage" → "use"
-- "facilitate" → "enable" or "help"
+## API Documentation
 
-**Polite phrases** (unnecessary in technical documentation):
-- "please", "kindly"
+### Javadoc
 
-**Correction Examples**:
+DocLint enforces Javadoc with `-Xdoclint:all` and `-Werror`.
 
-| Prohibited | Correct |
-|------------|---------|
-| "A modern, powerful framework" | "An annotation-driven framework" |
-| "You should configure the DataSource" | "Configure the DataSource" |
-| "Simply call the method" | "Call the method" |
-| "This makes it easy to test" | "This enables testing" |
-| "Don't use null values" | "Null values are prohibited" |
-| "It's important to note" | (omit; state the fact directly) |
-
----
-
-## Javadoc
-
-### DocLint Configuration
-
-Javadoc is **strictly enforced** by DocLint with the following configuration:
-
-```kotlin
-tasks.withType<Javadoc> {
-    (options as StandardJavadocDocletOptions).apply {
-        addStringOption("Xdoclint:all", "-quiet")
-        addBooleanOption("Werror", true)
-    }
-}
-```
-
-**DocLint checks**:
-- Missing Javadoc for public or protected elements
-- Missing `@param` tags for parameters
-- Missing `@return` tags for non-void methods
-- Missing `@throws` tags for declared exceptions
-- HTML syntax errors in Javadoc comments
-
-### Class Documentation
-
-**Required elements**:
-1. Summary sentence (first sentence ending with period)
-2. Purpose and responsibility
-3. `@see` references to related classes
-
-**Structure**:
+#### Class Documentation
 
 ```java
 /**
  * Manages DataSource instances for database testing.
  *
- * <p>This class provides registration and retrieval of {@link DataSource} instances
- * used during test preparation and expectation phases. Each instance is identified
- * by a unique name or registered as the default.
+ * <p>This class provides registration and retrieval of DataSource instances
+ * used during test preparation and expectation phases.
  *
  * @see DataSource
  * @see DatabaseTestExtension
@@ -193,152 +94,83 @@ tasks.withType<Javadoc> {
 public final class DataSourceRegistry {
 ```
 
-**Summary sentence rules**:
-- Starts with a verb in third person singular ("Manages", "Provides", "Represents")
-- Describes what the class does, not how
-- Ends with a period
-- Must be a complete sentence
-
-### Method Documentation
-
-**Required elements**:
-1. Summary sentence
-2. Additional explanation (if behavior is complex)
-3. `@param` for each parameter
-4. `@return` for non-void methods (omit for void)
-5. `@throws` for each declared exception
-
 **Structure**:
+
+1. Summary sentence (verb in third person singular)
+2. Description paragraphs (wrapped in `<p>` tags)
+3. `@see` references
+
+**Summary sentence verbs**:
+
+| Verb | Usage |
+|------|-------|
+| Manages | Classes that control lifecycle |
+| Provides | Classes that supply functionality |
+| Represents | Value objects and data classes |
+| Executes | Classes that perform operations |
+| Validates | Classes that check correctness |
+
+#### Method Documentation
 
 ```java
 /**
  * Registers a DataSource with the specified name.
  *
- * <p>If a DataSource with the same name already exists, it is replaced.
- * The name must be unique within this registry.
+ * <p>If a DataSource with the same name exists, it is replaced.
  *
  * @param name the unique identifier for the DataSource
  * @param dataSource the DataSource instance to register
  * @throws IllegalArgumentException if name is blank
  */
-public void register(final String name, final DataSource dataSource) {
+public void register(String name, DataSource dataSource) {
 ```
-
-**Void methods**: Omit `@return` tag entirely.
-
-```java
-/**
- * Clears all registered DataSources.
- *
- * <p>After calling this method, the registry contains no DataSources.
- */
-public void clear() {
-```
-
-**Private methods**: Require complete Javadoc (DocLint enforced).
-
-```java
-/**
- * Validates the DataSource name.
- *
- * @param name the name to validate
- * @throws IllegalArgumentException if name is blank
- */
-private void validateName(final String name) {
-```
-
-### Field Documentation
-
-**Instance fields**: Single-line Javadoc comment.
-
-```java
-/** The registered DataSources indexed by name. */
-private final ConcurrentHashMap<String, DataSource> dataSources;
-
-/** The default DataSource, or {@code null} if not set. */
-private @Nullable DataSource defaultDataSource;
-```
-
-**Constants**: Document the purpose and any constraints.
-
-```java
-/** Maximum number of retry attempts for database connections. */
-private static final int MAX_RETRY_COUNT = 3;
-
-/** Default timeout in milliseconds for database operations. */
-private static final long DEFAULT_TIMEOUT_MS = 30_000L;
-```
-
-### Tag Format Standards
-
-**Null documentation policy**: This project uses `@NullMarked` packages with NullAway for compile-time null safety. Non-null is the default and does not require documentation. Only document nullable cases.
-
-**@param format**: `@param paramName the [noun]`
-
-| Pattern | Example |
-|---------|---------|
-| Non-null parameter | `@param context the test context` |
-| Nullable parameter | `@param handler the failure handler, or {@code null} for default` |
-| Collection | `@param columns the column names (may be empty)` |
-
-**@return format by type**:
-
-| Return Type | Format | Example |
-|-------------|--------|---------|
-| Simple value | `the [noun]` | `@return the configuration` |
-| Collection | `immutable list of [noun]` | `@return immutable list of tables` |
-| Optional | `an Optional containing [noun], or empty if [condition]` | `@return an Optional containing the table, or empty if not found` |
-| boolean | `{@code true} if [condition], {@code false} otherwise` | `@return {@code true} if registered, {@code false} otherwise` |
-| Nullable | `the [noun], or {@code null} if [condition]` | `@return the entry, or {@code null} if not found` |
-
-**HTML tags in Javadoc**:
-
-| Tag | Status |
-|-----|--------|
-| `<p>` | Allowed for paragraphs |
-| `<ul>`, `<ol>`, `<li>` | Allowed for lists |
-| `<h2>`, `<h3>`, etc. | Prohibited - use `<p>` with description instead |
-| `<pre>{@code ...}</pre>` | Prohibited for usage examples in class documentation |
-
-### Deprecation Tags
-
-**`@deprecated` tag**: Document deprecated elements with replacement guidance.
-
-```java
-/**
- * Loads data from the specified file.
- *
- * @param file the file to load
- * @deprecated Use {@link #load(Path)} instead. This method will be removed in version 2.0.
- */
-@Deprecated(since = "1.5.0", forRemoval = true)
-public void load(File file) {
-```
-
-**Deprecation requirements**:
-- Include `@deprecated` Javadoc tag with migration instructions
-- Include `@Deprecated` annotation with `since` attribute
-- Set `forRemoval = true` if planned for removal
-
-### Package Documentation
-
-Every package requires a `package-info.java` file.
 
 **Structure**:
 
+1. Summary sentence
+2. Description paragraphs (if needed)
+3. `@param` for each parameter
+4. `@return` for non-void methods
+5. `@throws` for declared exceptions
+
+**Tag formats**:
+
+| Tag | Format |
+|-----|--------|
+| `@param` | `@param name the [noun phrase]` |
+| `@return` | `@return the [noun phrase]` |
+| `@throws` | `@throws ExceptionType if [condition]` |
+
+**Return value patterns**:
+
+| Type | Format |
+|------|--------|
+| Object | `@return the configuration` |
+| Collection | `@return list of table names` |
+| Optional | `@return an Optional containing the value, or empty if not found` |
+| boolean | `@return true if registered, false otherwise` |
+| Nullable | `@return the value, or null if not found` |
+
+#### Field Documentation
+
+```java
+/** The registered DataSources indexed by name. */
+private final Map<String, DataSource> dataSources;
+
+/** Maximum retry attempts for database connections. */
+private static final int MAX_RETRIES = 3;
+```
+
+#### Package Documentation
+
+Every package requires `package-info.java`.
+
 ```java
 /**
- * Database assertion and validation utilities.
+ * Database assertion utilities.
  *
- * <p>This package provides classes for comparing expected datasets with actual
- * database state. The primary entry point is {@link DatabaseAssertion}.
- *
- * <p>Key classes:
- *
- * <ul>
- *   <li>{@link DatabaseAssertion} - Main assertion interface
- *   <li>{@link AssertionFailureHandler} - Custom failure handling
- * </ul>
+ * <p>This package provides classes for comparing expected datasets
+ * with actual database state.
  *
  * @see io.github.seijikohara.dbtester.api.annotation
  */
@@ -348,341 +180,290 @@ package io.github.seijikohara.dbtester.api.assertion;
 import org.jspecify.annotations.NullMarked;
 ```
 
----
+#### Deprecation
 
-## Markdown Documentation
+```java
+/**
+ * Loads data from the file.
+ *
+ * @param file the file to load
+ * @deprecated Use {@link #load(Path)} instead. Removed in 2.0.
+ */
+@Deprecated(since = "1.5", forRemoval = true)
+public void load(File file) {
+```
 
-### File Structure
+#### HTML in Javadoc
 
-**Standard sections for README files**:
+| Tag | Usage |
+|-----|-------|
+| `<p>` | Paragraph separator |
+| `<ul>`, `<li>` | Unordered lists |
+| `<ol>`, `<li>` | Ordered lists |
+| `{@code text}` | Inline code |
+| `{@link Class}` | Class reference |
+| `<pre>{@code ...}</pre>` | Code blocks |
+
+### KDoc
+
+Follow Javadoc conventions with Kotlin syntax.
+
+```kotlin
+/**
+ * Manages DataSource instances for database testing.
+ *
+ * This class provides registration and retrieval of DataSource instances
+ * used during test preparation and expectation phases.
+ *
+ * @see DataSource
+ * @see DatabaseTestExtension
+ */
+class DataSourceRegistry {
+```
+
+**Differences from Javadoc**:
+
+- Omit `<p>` tags; use blank lines for paragraphs.
+- Use `[ClassName]` for links instead of `{@link ClassName}`.
+- Use backticks for inline code instead of `{@code}`.
+
+```kotlin
+/**
+ * Registers a DataSource with the specified name.
+ *
+ * If a DataSource with the same name exists, it is replaced.
+ *
+ * @param name the unique identifier for the DataSource
+ * @param dataSource the DataSource instance to register
+ * @throws IllegalArgumentException if name is blank
+ * @see [DataSourceRegistry]
+ */
+fun register(name: String, dataSource: DataSource) {
+```
+
+### Groovydoc
+
+Follow Javadoc conventions. Groovydoc uses the same syntax as Javadoc.
+
+```groovy
+/**
+ * Manages DataSource instances for database testing.
+ *
+ * <p>This class provides registration and retrieval of DataSource instances
+ * used during test preparation and expectation phases.
+ *
+ * @see DataSource
+ * @see DatabaseTestExtension
+ */
+class DataSourceRegistry {
+```
+
+## Markdown
+
+### Document Structure
+
+README files follow this structure:
 
 1. Title (H1)
-2. Brief description (1-2 sentences)
-3. Features or Overview
-4. Requirements/Prerequisites
+2. Overview (1-2 sentences)
+3. Features or Architecture
+4. Requirements
 5. Installation
 6. Usage
-7. Configuration (if applicable)
-8. API Reference or Key Classes
+7. Configuration
+8. API Reference
 9. Related Modules
 10. Documentation links
 
-### README Files
+### Headings
 
-**Title format**: `# Project Name - Module Name`
-
-```markdown
-# DB Tester - JUnit Module
-
-This module provides JUnit integration for the DB Tester framework.
-```
-
-**Section headers**: Use H2 (`##`) for main sections, H3 (`###`) for subsections.
+Use heading levels in sequence. Do not skip levels.
 
 ```markdown
-## Installation
-
-### Gradle
-
-```kotlin
-dependencies {
-    testImplementation("io.github.seijikohara:db-tester-junit:VERSION")
-}
+# Title
+## Section
+### Subsection
 ```
 
-### Maven
-```
+### Code Blocks
 
-**Feature lists**: Use bold for feature names, followed by description.
+Specify the language for syntax highlighting.
 
-```markdown
-## Features
-
-- **Annotation-Driven Testing** - Configure test data using `@Preparation` and `@Expectation`
-- **Convention-Based Loading** - Automatic data file resolution based on test class structure
-- **Multiple DataSource Support** - Register and use multiple database connections
-```
-
-### Code Examples
-
-**Fenced code blocks**: Always specify language.
-
-```markdown
+````markdown
 ```java
 @ExtendWith(DatabaseTestExtension.class)
 class UserRepositoryTest {
     // ...
 }
 ```
-```
+````
 
-**Inline code**: Use backticks for class names, method names, and file paths.
+Use backticks for inline code: `@Preparation`, `DataSource`.
 
-```markdown
-Use `@Preparation` to load test data before each test method.
-The configuration file is located at `src/test/resources/application.properties`.
-```
+### Tables
 
-**Code block guidelines**:
-- Include only relevant code
-- Use `// ...` for omitted sections
-- Add comments for non-obvious behavior
-
-### Tables and Lists
-
-**Tables**: Use for structured comparisons or reference data.
+Use tables for structured data.
 
 ```markdown
 | Annotation | Purpose |
 |------------|---------|
-| `@Preparation` | Load test data before test execution |
-| `@Expectation` | Verify database state after test execution |
+| `@Preparation` | Load test data before execution |
+| `@Expectation` | Verify database state after execution |
 ```
 
-**Lists**: Use for sequential steps or related items.
+### Lists
+
+Use numbered lists for sequential steps. Use bullet lists for unordered items.
 
 ```markdown
-1. Add the dependency to your build file
-2. Register the JUnit extension
-3. Create test data files
-4. Annotate test methods
+1. Add the dependency.
+2. Register the extension.
+3. Create test data files.
+
+- Annotation-driven configuration
+- Convention-based loading
+- Multiple DataSource support
 ```
 
-### Accessibility and Structure
+### Links
 
-**Heading hierarchy**: Do not skip heading levels. Use H1 → H2 → H3 in sequence.
+Use descriptive link text.
 
 ```markdown
-<!-- Correct -->
-# Title
-## Section
-### Subsection
-
-<!-- Incorrect - skips H2 -->
-# Title
-### Subsection
+See the [installation guide](docs/INSTALL.md) for setup.
 ```
 
-**Line length**: Limit lines to 120 characters for readability in code editors.
+Do not use "click here" or raw URLs as link text.
 
-**Blank lines**:
-- One blank line between paragraphs
-- One blank line before and after code blocks
-- One blank line before headings (except at document start)
+### Line Length
 
-**Link text**: Use descriptive text that indicates the destination.
+Limit lines to 120 characters.
 
-```markdown
-<!-- Correct -->
-See the [installation guide](docs/INSTALL.md) for setup instructions.
+### Spacing
 
-<!-- Incorrect -->
-Click [here](docs/INSTALL.md) for setup instructions.
-```
-
----
+- One blank line between paragraphs.
+- One blank line before and after code blocks.
+- One blank line before headings.
 
 ## Code Comments
 
-### Inline Comments
+### When to Comment
 
-**When to use**:
-- Explain complex algorithms
-- Document non-obvious design decisions
-- Reference external requirements or specifications
+Comment to explain:
 
-**When to avoid**:
-- Restating what the code does
-- Obvious operations
-- Temporary notes (use TODO instead)
+- Complex algorithms
+- Non-obvious design decisions
+- External requirements or constraints
+- Workarounds for known issues
 
-**Format**:
+Do not comment:
 
-```java
-// Use parallel stream for large datasets (>10000 rows) based on profiling results
-return rows.parallelStream()
-    .filter(this::matchesScenario)
-    .toList();
-```
+- Obvious code behavior
+- What the code does (the code shows this)
 
-### Block Comments
+### Comment Markers
 
-**Comment markers**: Use standardized prefixes for actionable comments.
+| Marker | Purpose |
+|--------|---------|
+| `TODO` | Planned work |
+| `FIXME` | Known bug requiring fix |
+| `HACK` | Temporary workaround |
+| `NOTE` | Important context |
 
-| Marker | Purpose | Example |
-|--------|---------|---------|
-| `TODO` | Planned enhancement or missing feature | `// TODO: Add XML format support` |
-| `FIXME` | Known bug or broken code requiring fix | `// FIXME: Race condition on concurrent access` |
-| `HACK` | Temporary workaround (document why) | `// HACK: Workaround for library bug #456` |
-| `NOTE` | Important information for maintainers | `// NOTE: Order matters due to dependency` |
-
-**TODO comments**: Include issue reference when available.
+Include issue references when available.
 
 ```java
-// TODO(#123): Implement batch processing for large datasets
-// TODO: Add support for XML format (requires schema validation)
+// TODO(#123): Implement batch processing
+// FIXME: Race condition on concurrent access
+// HACK: Workaround for library bug; remove after upgrade
+// NOTE: Order matters due to foreign key constraints
 ```
-
-**FIXME comments**: Describe the problem and impact.
-
-```java
-// FIXME: Memory leak when processing large files - causes OOM after ~1000 iterations
-```
-
-**Section markers**: Prohibited. Use proper class structure instead.
-
-```java
-// INCORRECT: Section markers
-// ================== GETTERS ==================
-
-// CORRECT: Organize by access modifier in class structure
-```
-
----
 
 ## Commit Messages
 
-### Conventional Commits
-
 Use [Conventional Commits](https://www.conventionalcommits.org/) format.
 
-**Structure**:
+### Format
 
 ```
 <type>(<scope>): <description>
 
-[optional body]
+[body]
 
-[optional footer]
+[footer]
 ```
 
-**Types**:
+### Types
 
 | Type | Purpose |
 |------|---------|
 | `feat` | New feature |
 | `fix` | Bug fix |
-| `docs` | Documentation changes |
-| `style` | Code style (formatting, no logic change) |
-| `refactor` | Code refactoring (no feature or fix) |
-| `test` | Test additions or modifications |
-| `chore` | Build, CI, or tooling changes |
+| `docs` | Documentation |
+| `style` | Formatting |
+| `refactor` | Code restructuring |
+| `test` | Test changes |
+| `chore` | Build and tooling |
 
-**Scope**: Module or component name (optional but recommended).
+### Subject Line
 
-### Message Structure
-
-**Subject line**:
-- Present tense imperative ("add", "fix", "update")
-- Lowercase first letter
+- Use imperative mood: "add", "fix", "update"
+- Use lowercase
 - No period at end
 - Maximum 72 characters
 
 ```
-feat(junit): add support for nested test class data loading
-fix(core): resolve CSV parsing error with quoted commas
-docs(api): update Javadoc for Operation enum
+feat(kotest): add Kotest framework support
+fix(core): resolve CSV parsing with quoted commas
+docs(api): update Operation enum documentation
 ```
 
-**Body** (optional):
-- Explain what and why, not how
-- Wrap at 72 characters
-- Separate from subject with blank line
+### Body
+
+Explain what and why, not how. Wrap at 72 characters.
 
 ```
 feat(spring): add automatic DataSource registration
 
-Add SpringBootDatabaseTestExtension that automatically registers
-Spring-managed DataSource beans with the testing framework.
+Add SpringBootDatabaseTestExtension that registers Spring-managed
+DataSource beans with the testing framework.
 
-This eliminates the need for manual DataSource registration in
-@BeforeAll methods when using Spring Boot.
+This eliminates manual DataSource registration in @BeforeAll methods.
 ```
 
-**Footer** (optional):
-- Breaking changes: `BREAKING CHANGE: <description>`
-- Issue references: `Closes #123`
+### Footer
 
----
+```
+BREAKING CHANGE: rename Configuration.create() to Configuration.of()
 
-## Version References
+Closes #123
+```
 
-**Major versions only**: Use major version numbers without minor or patch versions.
+## Version Numbers
 
-| Incorrect         | Correct       |
-|-------------------|---------------|
-| Java 21.0.1       | Java 21       |
+Use major versions in documentation.
+
+| Avoid | Use |
+|-------|-----|
+| Java 21.0.1 | Java 21 |
 | Spring Boot 4.0.1 | Spring Boot 4 |
-| JUnit 6.0.1       | JUnit 6       |
-| Groovy 5.0.1      | Groovy 5      |
+| Kotest 6.0.7 | Kotest 6 |
 
-**Exception**: Pre-release or milestone versions when specifically relevant.
+Use `VERSION` as placeholder in dependency examples.
 
-```markdown
-## Requirements
-
-- Java 21 or later
-- Spring Boot 4 or later
-- JUnit 6 or later
-```
-
-**Placeholder for current version**:
-
-```markdown
+```kotlin
 testImplementation("io.github.seijikohara:db-tester-junit:VERSION")
 ```
 
-Replace `VERSION` with actual version number in release documentation.
+## Null Safety Documentation
 
----
+This project uses `@NullMarked` packages with NullAway. Non-null is the default.
 
-## Links and References
-
-### Internal Links
-
-**Relative paths**: Use relative paths for links within the repository.
-
-```markdown
-See the [core module documentation](../db-tester-core/README.md) for details.
-Related: [JUnit examples](../examples/db-tester-example-junit/)
-```
-
-**Source code links**: Link to specific files with relative paths.
-
-```markdown
-[`DatabaseTestExtension`](src/main/java/io/github/seijikohara/dbtester/junit/jupiter/extension/DatabaseTestExtension.java)
-```
-
-### External Links
-
-**Format**: Use descriptive link text, not raw URLs.
-
-```markdown
-<!-- Correct -->
-See [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit) for available versions.
-
-<!-- Incorrect -->
-See https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit for available versions.
-```
-
-### Javadoc References
-
-**`{@link}` usage**: Reference classes and methods within Javadoc.
+Document only nullable cases:
 
 ```java
 /**
- * Registers with {@link DataSourceRegistry} for test execution.
- *
- * @see DatabaseTestExtension#getRegistry(ExtensionContext)
+ * @param handler the failure handler, or null for default behavior
+ * @return the result, or null if not found
  */
 ```
-
-**`{@code}` usage**: Format inline code in Javadoc.
-
-```java
-/**
- * Returns {@code true} if the DataSource is registered.
- * Use {@code registry.contains("name")} to check registration.
- */
-```
-

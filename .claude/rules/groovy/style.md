@@ -4,37 +4,9 @@ paths: "**/*.groovy"
 
 # Groovy Code Style Rules
 
-**All rules in this document are mandatory.**
+**All rules in this document are mandatory unless explicitly marked as Optional.**
 
 **Reference**: [Apache Groovy Style Guide](https://groovy-lang.org/style-guide.html)
-
----
-
-## Table of Contents
-
-1. [Quick Reference](#quick-reference)
-2. [Code Organization](#code-organization)
-   - [Class Structure](#class-structure)
-   - [Import Statements](#import-statements)
-   - [Naming Conventions](#naming-conventions)
-3. [Language Fundamentals](#language-fundamentals)
-   - [Syntax Conventions](#syntax-conventions)
-   - [Type Declarations](#type-declarations)
-   - [Variables](#variables)
-4. [Idiomatic Groovy Patterns](#idiomatic-groovy-patterns)
-   - [Property Access](#property-access)
-   - [Safe Navigation](#safe-navigation)
-   - [Object Initialization](#object-initialization)
-5. [String Handling](#string-handling)
-   - [GStrings and Interpolation](#gstrings-and-interpolation)
-   - [Multiline Strings](#multiline-strings)
-6. [Collections](#collections)
-   - [Native Syntax](#native-syntax)
-   - [GDK Methods](#gdk-methods)
-7. [Closures](#closures)
-8. [Error Handling](#error-handling)
-9. [Documentation](#documentation)
-10. [Logging](#logging)
 
 ---
 

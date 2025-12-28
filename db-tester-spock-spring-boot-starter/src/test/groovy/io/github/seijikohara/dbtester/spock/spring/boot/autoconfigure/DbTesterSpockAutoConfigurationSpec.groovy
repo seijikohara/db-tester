@@ -8,7 +8,7 @@ import spock.lang.Specification
  * Unit tests for {@link DbTesterSpockAutoConfiguration}.
  *
  * <p>This specification verifies the Spring Boot auto-configuration
- * for DB Tester with Spock Framework.
+ * for DB Tester with Spock.
  */
 class DbTesterSpockAutoConfigurationSpec extends Specification {
 

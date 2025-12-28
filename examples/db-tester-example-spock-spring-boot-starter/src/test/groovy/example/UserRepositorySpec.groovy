@@ -11,7 +11,7 @@ import spock.lang.Specification
  * Integration tests for UserRepository demonstrating db-tester-spock-spring-boot-starter.
  *
  * <p>This test class demonstrates how the database testing framework integrates with Spring Boot
- * using Spock Framework for automatic DataSource registration:
+ * using Spock for automatic DataSource registration:
  *
  * <ul>
  *   <li>Automatic DataSource registration via Spring auto-configuration

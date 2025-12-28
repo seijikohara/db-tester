@@ -20,6 +20,7 @@ flowchart TB
     subgraph Frameworks[テストフレームワーク]
         JUNIT[db-tester-junit]
         SPOCK[db-tester-spock]
+        KOTEST[db-tester-kotest]
     end
 
     API <-->|ServiceLoader| CORE
@@ -215,6 +216,7 @@ public interface ScenarioNameResolver {
 |------|----------|------|
 | `JUnitScenarioNameResolver` | `db-tester-junit` | JUnitメソッド名から解決 |
 | `SpockScenarioNameResolver` | `db-tester-spock` | Spockフィーチャー名から解決 |
+| `KotestScenarioNameResolver` | `db-tester-kotest` | Kotestテストケース名から解決 |
 
 **解決ロジック**:
 1. 登録されたすべてのリゾルバを`priority()`で降順ソート
@@ -293,6 +295,13 @@ io.github.seijikohara.dbtester.junit.jupiter.spi.JUnitScenarioNameResolver
 ```
 # META-INF/services/io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
 io.github.seijikohara.dbtester.spock.spi.SpockScenarioNameResolver
+```
+
+**db-tester-kotest**:
+
+```
+# META-INF/services/io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
+io.github.seijikohara.dbtester.kotest.spi.KotestScenarioNameResolver
 ```
 
 ### JPMSモジュール宣言

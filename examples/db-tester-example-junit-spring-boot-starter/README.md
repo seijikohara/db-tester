@@ -4,7 +4,7 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are registered via `SpringBootDatabaseTestExtension`
+- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
 - **Convention-Based Loading** - CSV dataset resolution based on test class and method names
 - **Property-Based Configuration** - Configure DB Tester via `application.properties`
 - **Spring Data JPA Integration** - Testing Spring Data repositories

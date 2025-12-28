@@ -16,8 +16,10 @@ db-tester-bom (manages versions)
     ├── db-tester-core
     ├── db-tester-junit
     ├── db-tester-spock
+    ├── db-tester-kotest
     ├── db-tester-junit-spring-boot-starter
-    └── db-tester-spock-spring-boot-starter
+    ├── db-tester-spock-spring-boot-starter
+    └── db-tester-kotest-spring-boot-starter
 ```
 
 The BOM does not contain code. It provides dependency management only.
@@ -70,18 +72,11 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
 | [`db-tester-core`](../db-tester-core/) | Internal implementation (SPI providers) |
 | [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
-| [`db-tester-spock`](../db-tester-spock/) | Spock Framework extension |
+| [`db-tester-spock`](../db-tester-spock/) | Spock extension |
+| [`db-tester-kotest`](../db-tester-kotest/) | Kotest extension |
 | [`db-tester-junit-spring-boot-starter`](../db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit |
 | [`db-tester-spock-spring-boot-starter`](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock |
-
-## Related Modules
-
-| Module | Description |
-|--------|-------------|
-| [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
-| [`db-tester-spock`](../db-tester-spock/) | Spock Framework extension |
-| [`db-tester-junit-spring-boot-starter`](../db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit |
-| [`db-tester-spock-spring-boot-starter`](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock |
+| [`db-tester-kotest-spring-boot-starter`](../db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest |
 
 ## Documentation
 

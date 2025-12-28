@@ -1,4 +1,5 @@
 import com.diffplug.gradle.spotless.SpotlessExtension
+import com.diffplug.gradle.spotless.SpotlessTask
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import net.ltgt.gradle.errorprone.CheckSeverity
@@ -9,12 +10,18 @@ import org.gradle.api.plugins.quality.CodeNarc
 import org.gradle.api.plugins.quality.CodeNarcExtension
 import org.gradle.testing.jacoco.plugins.JacocoPluginExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
+import org.jetbrains.dokka.gradle.DokkaExtension
+import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // Plugins with `apply false` are available for subprojects but not applied to root
     // This is required because plugins {} block cannot be used within subprojects/allprojects blocks
     alias(libs.plugins.axion.release)
+    alias(libs.plugins.dokka) apply false
     alias(libs.plugins.errorprone) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.maven.publish) apply false
     alias(libs.plugins.spotless)
     alias(libs.plugins.version.catalog.update)
@@ -83,13 +90,23 @@ val groovyModules =
         "db-tester-example-spock-spring-boot-starter",
     )
 
+val kotlinModules =
+    setOf(
+        "db-tester-kotest",
+        "db-tester-kotest-spring-boot-starter",
+        "db-tester-example-kotest",
+        "db-tester-example-kotest-spring-boot-starter",
+    )
+
 // JPMS Automatic-Module-Name mapping
-// Only for modules without module-info.java (Spring Boot Starters and Groovy modules)
+// Only for modules without module-info.java (Spring Boot Starters, Groovy, and Kotlin modules)
 val automaticModuleNames =
     mapOf(
         "db-tester-spock" to "io.github.seijikohara.dbtester.spock",
+        "db-tester-kotest" to "io.github.seijikohara.dbtester.kotest",
         "db-tester-junit-spring-boot-starter" to "io.github.seijikohara.dbtester.junit.spring.autoconfigure",
         "db-tester-spock-spring-boot-starter" to "io.github.seijikohara.dbtester.spock.spring.autoconfigure",
+        "db-tester-kotest-spring-boot-starter" to "io.github.seijikohara.dbtester.kotest.spring.autoconfigure",
     )
 
 // Common maven-publish configuration for all subprojects (including BOM)
@@ -365,12 +382,134 @@ subprojects.filter { it.name in groovyModules }.forEach { subproject ->
             options.encoding = "UTF-8"
         }
 
+        // Verify Groovydoc comments exist on all classes
+        // Ref: .claude/rules/groovy/style.md - Javadoc Requirements
+        val groovySourceDirs =
+            provider {
+                extensions
+                    .getByType<JavaPluginExtension>()
+                    .sourceSets
+                    .flatMap { sourceSet ->
+                        sourceSet.extensions.getByType<org.gradle.api.tasks.GroovySourceDirectorySet>().srcDirs
+                    }.filter { it.exists() }
+                    .toSet()
+            }
+
+        tasks.register("verifyGroovydoc") {
+            group = "verification"
+            description = "Verifies all Groovy classes have Javadoc comments"
+            inputs.files(groovySourceDirs)
+
+            doLast {
+                val classPattern = Regex("""^\s*(class|interface|trait|enum)\s+\w+""", RegexOption.MULTILINE)
+                // Pattern allows annotations between Javadoc and class declaration
+                val javadocPattern = Regex("""/\*\*[\s\S]*?\*/\s*(\n\s*@\w+[\s\S]*?)*\n\s*(class|interface|trait|enum)\s+\w+""")
+
+                groovySourceDirs
+                    .get()
+                    .asSequence()
+                    .flatMap { srcDir: File ->
+                        srcDir
+                            .walkTopDown()
+                            .filter { file: File ->
+                                file.isFile &&
+                                    file.extension == "groovy" &&
+                                    file.name != "package-info.groovy"
+                            }.map { file: File -> file to file.relativeTo(srcDir).path }
+                    }.mapNotNull { (file: File, relativePath: String) ->
+                        val content = file.readText()
+                        when {
+                            !classPattern.containsMatchIn(content) -> null // No class definition
+                            !javadocPattern.containsMatchIn(content) -> "Missing class-level Javadoc: $relativePath"
+                            else -> null
+                        }
+                    }.sorted()
+                    .toList()
+                    .takeIf { list: List<String> -> list.isNotEmpty() }
+                    ?.joinToString(prefix = "Groovydoc violations found:\n", separator = "\n") { msg: String -> "  - $msg" }
+                    ?.let { throw GradleException(it) }
+            }
+        }
+
+        tasks.named("check") {
+            dependsOn("verifyGroovydoc")
+        }
+
         // Configure maven-publish to use groovydoc instead of javadoc
         pluginManager.withPlugin("com.vanniktech.maven.publish") {
             extensions.configure<MavenPublishBaseExtension> {
                 configure(
                     com.vanniktech.maven.publish.JavaLibrary(
                         javadocJar = JavadocJar.Dokka("groovydoc"),
+                        sourcesJar = true,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+// Kotlin subprojects configuration
+subprojects.filter { it.name in kotlinModules }.forEach { subproject ->
+    subproject.run {
+        apply(plugin = "org.jetbrains.kotlin.jvm")
+        apply(plugin = "org.jetbrains.dokka")
+        apply(plugin = "jvm-test-suite")
+        apply(plugin = "jacoco")
+        apply(plugin = "com.diffplug.spotless")
+
+        extensions.configure<SpotlessExtension> {
+            kotlin {
+                ktlint()
+            }
+        }
+
+        tasks.withType<SpotlessTask>().configureEach {
+            notCompatibleWithConfigurationCache("Spotless tasks are not compatible with configuration cache")
+        }
+
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_21)
+                freeCompilerArgs.addAll(
+                    "-Xjsr305=strict",
+                )
+            }
+        }
+
+        // Configure Dokka for KDoc validation
+        // Ref: .claude/rules/kotlin/style.md - KDoc Requirements
+        extensions.configure<DokkaExtension> {
+            dokkaSourceSets.configureEach {
+                // Report warnings for undocumented public declarations
+                reportUndocumented.set(true)
+                // Only check public and protected visibility
+                documentedVisibilities.set(
+                    setOf(
+                        VisibilityModifier.Public,
+                        VisibilityModifier.Protected,
+                    ),
+                )
+            }
+            dokkaPublications.configureEach {
+                // Fail build on KDoc warnings (similar to Java's -Xdoclint:all -Werror)
+                failOnWarning.set(true)
+            }
+        }
+
+        // Run Dokka validation as part of check task
+        // Dokka V2 uses dokkaGenerateHtml instead of dokkaHtml
+        tasks.named("check") {
+            dependsOn(tasks.named("dokkaGenerateHtml"))
+        }
+
+        // Configure maven-publish to use Dokka for javadoc
+        // Dokka V2 uses dokkaGenerateHtml instead of dokkaHtml
+        pluginManager.withPlugin("com.vanniktech.maven.publish") {
+            extensions.configure<MavenPublishBaseExtension> {
+                configure(
+                    com.vanniktech.maven.publish.JavaLibrary(
+                        javadocJar = JavadocJar.Dokka("dokkaGenerateHtml"),
                         sourcesJar = true,
                     ),
                 )

@@ -4,7 +4,7 @@ This document describes the module structure, dependencies, and architectural pa
 
 ## Module Structure
 
-The framework consists of seven modules organized in a layered architecture:
+The framework consists of ten modules organized in a layered architecture:
 
 ```mermaid
 graph TD
@@ -18,27 +18,34 @@ graph TD
     subgraph "Test Frameworks"
         JUNIT[db-tester-junit]
         SPOCK[db-tester-spock]
+        KOTEST[db-tester-kotest]
     end
 
     subgraph "Spring Boot Starters"
         JUNIT_STARTER[db-tester-junit-spring-boot-starter]
         SPOCK_STARTER[db-tester-spock-spring-boot-starter]
+        KOTEST_STARTER[db-tester-kotest-spring-boot-starter]
     end
 
     BOM --> API
     BOM --> CORE
     BOM --> JUNIT
     BOM --> SPOCK
+    BOM --> KOTEST
     BOM --> JUNIT_STARTER
     BOM --> SPOCK_STARTER
+    BOM --> KOTEST_STARTER
 
     CORE --> API
     JUNIT -->|compile| API
     JUNIT -.->|runtime| CORE
     SPOCK -->|compile| API
     SPOCK -.->|runtime| CORE
+    KOTEST -->|compile| API
+    KOTEST -.->|runtime| CORE
     JUNIT_STARTER --> JUNIT
     SPOCK_STARTER --> SPOCK
+    KOTEST_STARTER --> KOTEST
 ```
 
 ### Module Responsibilities
@@ -50,8 +57,10 @@ graph TD
 | `db-tester-core` | JDBC operations, format parsing, SPI implementations |
 | `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEach callbacks |
 | `db-tester-spock` | Spock annotation-driven extension and interceptors |
+| `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
 | `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
 | `db-tester-spock-spring-boot-starter` | Spring Boot auto-configuration for Spock |
+| `db-tester-kotest-spring-boot-starter` | Spring Boot auto-configuration for Kotest |
 
 ## Module Dependencies
 
@@ -74,12 +83,13 @@ The API module has no internal dependencies. External dependencies:
 
 ### Test Framework Modules
 
-JUnit and Spock modules depend on `db-tester-api` at compile time. The `db-tester-core` module is discovered at runtime via ServiceLoader.
+JUnit, Spock, and Kotest modules depend on `db-tester-api` at compile time. The `db-tester-core` module is discovered at runtime via ServiceLoader.
 
 | Module | Compile Dependencies | Runtime Dependencies |
 |--------|---------------------|----------------------|
 | `db-tester-junit` | `db-tester-api`, `junit-jupiter-api` | `db-tester-core` |
 | `db-tester-spock` | `db-tester-api`, `spock-core` | `db-tester-core` |
+| `db-tester-kotest` | `db-tester-api`, `kotest-framework-api` | `db-tester-core` |
 
 ### Spring Boot Starter Modules
 
@@ -87,6 +97,7 @@ JUnit and Spock modules depend on `db-tester-api` at compile time. The `db-teste
 |--------|--------------|
 | `db-tester-junit-spring-boot-starter` | `db-tester-junit`, `db-tester-core`, `spring-boot-autoconfigure` |
 | `db-tester-spock-spring-boot-starter` | `db-tester-spock`, `db-tester-core`, `spring-boot-autoconfigure` |
+| `db-tester-kotest-spring-boot-starter` | `db-tester-kotest`, `db-tester-core`, `spring-boot-autoconfigure` |
 
 ## Package Organization
 
@@ -283,8 +294,10 @@ The following modules use `Automatic-Module-Name` in `MANIFEST.MF`:
 | Module | Automatic-Module-Name |
 |--------|----------------------|
 | `db-tester-spock` | `io.github.seijikohara.dbtester.spock` |
+| `db-tester-kotest` | `io.github.seijikohara.dbtester.kotest` |
 | `db-tester-junit-spring-boot-starter` | `io.github.seijikohara.dbtester.junit.spring.autoconfigure` |
 | `db-tester-spock-spring-boot-starter` | `io.github.seijikohara.dbtester.spock.spring.autoconfigure` |
+| `db-tester-kotest-spring-boot-starter` | `io.github.seijikohara.dbtester.kotest.spring.autoconfigure` |
 
 ### Module Dependencies
 
@@ -320,6 +333,6 @@ module io.github.seijikohara.dbtester.api {
 - [Overview](01-overview) - Framework purpose and key concepts
 - [Public API](03-public-api) - Annotations and configuration classes
 - [Configuration](04-configuration) - Configuration options
-- [Test Frameworks](07-test-frameworks) - JUnit and Spock integration
+- [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
 - [SPI](08-spi) - Service Provider Interface extension points
 - [Error Handling](09-error-handling) - Error messages and exception types

@@ -17,8 +17,10 @@ dependencies {
         api(project(":db-tester-core"))
         api(project(":db-tester-junit"))
         api(project(":db-tester-spock"))
+        api(project(":db-tester-kotest"))
         api(project(":db-tester-junit-spring-boot-starter"))
         api(project(":db-tester-spock-spring-boot-starter"))
+        api(project(":db-tester-kotest-spring-boot-starter"))
     }
 }
 

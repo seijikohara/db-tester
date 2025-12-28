@@ -1,0 +1,15 @@
+[Scenario],ID,COLUMN1,COLUMN2
+should use custom resource location,1,Product,Seattle
+should use custom resource location,2,Finance,Chicago
+should use custom resource location,3,Marketing,Tokyo
+should handle multiple scenarios,1,Engineering,San Francisco
+should handle multiple scenarios,2,Sales,New York
+scenario1,1,Engineering,San Francisco
+scenario2,2,Sales,New York
+should use class level annotation,1,HR,Boston
+multiDataSet,1,Engineering,San Francisco
+multiDataSet,2,Sales,New York
+multiDataSet,3,Product,Seattle
+multiDataSet,4,Research,Osaka
+should merge multiple data sets,1,Engineering,San Francisco
+should merge multiple data sets,2,Sales,New York

@@ -15,6 +15,7 @@ import javax.sql.DataSource;
 import oracle.jdbc.pool.OracleDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -28,7 +29,11 @@ import org.testcontainers.oracle.OracleContainer;
  *
  * <p>This test validates that the framework works correctly with Oracle Database using
  * Testcontainers. This is a smoke test to ensure Oracle compatibility.
+ *
+ * <p>This test is skipped in CI environments because Oracle containers require extended startup
+ * time that often exceeds CI timeout limits.
  */
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
 public final class OracleIntegrationTest {

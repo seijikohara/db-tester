@@ -15,7 +15,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 
 /**
- * Auto-configuration for DB Tester Spring Boot integration with Spock Framework.
+ * Auto-configuration for DB Tester Spring Boot integration with Spock.
  *
  * <p>This auto-configuration is activated when:
  *

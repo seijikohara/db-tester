@@ -50,7 +50,7 @@ public final class Cell {
   }
 
   /**
-   * Creates a cell with a simple column name and value.
+   * Creates a cell with a column name and value.
    *
    * @param columnName the column name
    * @param value the value
@@ -61,7 +61,7 @@ public final class Cell {
   }
 
   /**
-   * Creates a cell with a simple column name and raw value.
+   * Creates a cell with a column name and raw value.
    *
    * @param columnName the column name
    * @param rawValue the raw value, or {@code null} for NULL cell

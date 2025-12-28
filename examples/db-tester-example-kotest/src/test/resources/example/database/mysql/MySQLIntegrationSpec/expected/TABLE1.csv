@@ -1,0 +1,3 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3,COLUMN4,COLUMN5,COLUMN6
+smokeTest,1,MySQL Test 1,2024-01-01 10:00:00,active,"read,write",This is a test description for MySQL,99.99
+smokeTest,2,MySQL Test 2,2024-01-01 11:00:00,inactive,"read,write,execute",Another description with ENUM and SET types,149.50

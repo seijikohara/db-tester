@@ -9,7 +9,7 @@
   <img src="docs/public/favicon.svg" width="240" alt="DB Tester Logo">
 </p>
 
-A database testing framework for JUnit and Spock. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
+A database testing framework for JUnit, Spock, and Kotest. The framework uses `@Preparation` and `@Expectation` annotations to load CSV data before tests and verify database state after tests.
 
 ```java
 @Test
@@ -22,10 +22,10 @@ void shouldCreateUser() {
 
 ## Features
 
-- **Annotation-Driven** - `@Preparation` and `@Expectation` annotations for declarative test data management
-- **Convention-Based** - Dataset discovery based on test class package and name
-- **Multiple Formats** - CSV and TSV with scenario filtering via `[Scenario]` column
-- **Framework Support** - JUnit, Spock, and Spring Boot integration
+- **Annotation-Driven** - Declarative test data management with `@Preparation` and `@Expectation`
+- **Convention-Based** - Automatic dataset discovery based on test class package and name
+- **Multiple Formats** - CSV and TSV support with scenario filtering via `[Scenario]` column
+- **Framework Support** - JUnit, Spock, Kotest, and Spring Boot integration
 - **Pure JDBC** - No external testing framework dependencies
 
 ## Requirements
@@ -33,11 +33,12 @@ void shouldCreateUser() {
 - Java 21 or later
 - JUnit 6 (for JUnit integration)
 - Spock 2 with Groovy 5 (for Spock integration)
+- Kotest 6 with Kotlin 2 (for Kotest integration)
 - Spring Boot 4 (for Spring Boot integration)
 
 ## Installation
 
-Select a module based on the test framework:
+Select a module based on your test framework:
 
 | Use Case | Module |
 |----------|--------|
@@ -45,6 +46,8 @@ Select a module based on the test framework:
 | JUnit with Spring Boot | [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) |
 | Spock | [`db-tester-spock`](db-tester-spock/) |
 | Spock with Spring Boot | [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) |
+| Kotest | [`db-tester-kotest`](db-tester-kotest/) |
+| Kotest with Spring Boot | [`db-tester-kotest-spring-boot-starter`](db-tester-kotest-spring-boot-starter/) |
 
 <details>
 <summary>All Modules</summary>
@@ -58,6 +61,8 @@ Select a module based on the test framework:
 | [`db-tester-junit-spring-boot-starter`](db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-junit-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-junit-spring-boot-starter) |
 | [`db-tester-spock`](db-tester-spock/) | Spock extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock) |
 | [`db-tester-spock-spring-boot-starter`](db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-spock-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter) |
+| [`db-tester-kotest`](db-tester-kotest/) | Kotest extension | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-kotest.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-kotest) |
+| [`db-tester-kotest-spring-boot-starter`](db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest | [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-kotest-spring-boot-starter.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-kotest-spring-boot-starter) |
 
 </details>
 
@@ -152,7 +157,7 @@ ID,NAME,EMAIL
 
 ### JUnit with Spring Boot
 
-Requires `@ExtendWith(SpringBootDatabaseTestExtension.class)` to enable the extension. The DataSource is automatically discovered from the Spring ApplicationContext.
+Use `@ExtendWith(SpringBootDatabaseTestExtension.class)` to enable the extension. The DataSource is discovered from the Spring ApplicationContext.
 
 ```java
 @SpringBootTest
@@ -173,7 +178,7 @@ class UserRepositoryTest {
 
 ### Spock
 
-Add `@DatabaseTest` annotation to enable the extension. Provide a `getDbTesterRegistry()` property accessor for DataSource registration.
+Use `@DatabaseTest` to enable the extension. Provide a `getDbTesterRegistry()` property accessor for DataSource registration.
 
 ```groovy
 @DatabaseTest
@@ -208,6 +213,59 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
+### Kotest
+
+Register `DatabaseTestExtension` in the `init` block. Provide a `registryProvider` lambda for DataSource registration.
+
+```kotlin
+class UserRepositorySpec : AnnotationSpec() {
+
+    private val registry = DataSourceRegistry()
+    private lateinit var dataSource: DataSource
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { registry }))
+    }
+
+    @BeforeAll
+    fun setupSpec() {
+        dataSource = createDataSource()
+        registry.registerDefault(dataSource)
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        userRepository.create(User("john", "john@example.com"))
+    }
+}
+```
+
+### Kotest with Spring Boot
+
+Register `SpringBootDatabaseTestExtension` in the `init` block. The DataSource is discovered from the Spring ApplicationContext.
+
+```kotlin
+@SpringBootTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
+    init {
+        extensions(SpringBootDatabaseTestExtension())
+    }
+
+    @Test
+    @Preparation
+    @Expectation
+    fun `should create user`() {
+        userRepository.save(User("john", "john@example.com"))
+    }
+}
+```
+
 ### Scenario Filtering
 
 Share CSV files across multiple tests using the `[Scenario]` column:
@@ -227,14 +285,14 @@ Each test method loads only rows matching its name.
 
 | Operation | Description |
 |-----------|-------------|
-| `CLEAN_INSERT` | Delete all then insert (default) |
+| `CLEAN_INSERT` | Delete all rows, then insert (default) |
 | `INSERT` | Insert rows |
 | `UPDATE` | Update existing rows |
 | `REFRESH` | Upsert (insert or update) |
 | `DELETE` | Delete specified rows |
 | `DELETE_ALL` | Delete all rows |
 | `TRUNCATE_TABLE` | Truncate tables |
-| `TRUNCATE_INSERT` | Truncate then insert |
+| `TRUNCATE_INSERT` | Truncate, then insert |
 
 ```java
 @Preparation(operation = Operation.INSERT)
@@ -266,7 +324,7 @@ registry.register("secondary", secondaryDataSource);
 
 ## Assertion Messages
 
-When expectation verification fails, the framework collects **all differences** and reports them with a human-readable summary followed by YAML details:
+When expectation verification fails, the framework collects all differences and reports them with a summary followed by YAML details:
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -302,10 +360,10 @@ tables:
 | `summary.total_differences` | Total count of all differences |
 | `tables.<name>.differences` | List of differences for each table |
 | `path` | Location of mismatch: `table_count`, `row_count`, or `row[N].COLUMN` |
-| `expected` / `actual` | The expected and actual values |
+| `expected` / `actual` | Expected and actual values |
 | `column` | JDBC metadata (type, nullable, primary_key) when available |
 
-The output is **valid YAML** and can be parsed by standard YAML libraries for CI/CD integration.
+The output is valid YAML and can be parsed by standard YAML libraries for CI/CD integration.
 
 ## Troubleshooting
 
@@ -318,9 +376,9 @@ The output is **valid YAML** and can be parsed by standard YAML libraries for CI
 
 | Document | Description |
 |----------|-------------|
-| [Technical Specifications](https://seijikohara.github.io/db-tester/) | Architecture, API, configuration details |
+| [Technical Specifications](https://seijikohara.github.io/db-tester/) | Architecture, API, and configuration details |
 | [Examples](examples/) | Working test examples |
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.

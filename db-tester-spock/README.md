@@ -1,12 +1,12 @@
 # DB Tester - Spock Module
 
-This module provides [Spock Framework](https://spockframework.org/) integration for the DB Tester framework through an annotation-driven extension.
+This module provides [Spock](https://spockframework.org/) integration for the DB Tester framework through `DatabaseTestExtension`.
 
 ## Overview
 
-- **Annotation-Driven Extension** - `DatabaseTestExtension` activates via `@DatabaseTest` annotation
-- **Method Interceptor** - `DatabaseTestInterceptor` manages test lifecycle
+- **Annotation-Driven Extension** - `DatabaseTestExtension` activates via `@DatabaseTest` annotation on spec class
 - **Lifecycle Management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` execute preparation and expectation phases
+- **Method Interceptor** - `DatabaseTestInterceptor` intercepts feature method execution for database operations
 
 ## Architecture
 
@@ -24,7 +24,7 @@ This module depends **only on `db-tester-api`** at compile time. The `db-tester-
 
 - Java 21 or later
 - Groovy 5 or later
-- Spock Framework 2 or later
+- Spock 2 or later
 
 ## Installation
 
@@ -80,7 +80,7 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-Add `@DatabaseTest` annotation to enable the extension. The extension activates when the annotation is present on the spec class.
+Add `@DatabaseTest` annotation to enable the extension. DataSource registration is required in `setupSpec()`.
 
 ### DataSource Registration
 
@@ -143,24 +143,16 @@ Feature method names with spaces map directly to `[Scenario]` column values.
 Configuration dbTesterConfiguration
 
 def setupSpec() {
-    dbTesterConfiguration = Configuration.withConventions(
-        new ConventionSettings(
-            null,                        // baseDirectory (null for classpath)
-            '/expected',                 // expectationSuffix
-            '[TestCase]',                // scenarioMarker
-            DataFormat.CSV,              // dataFormat
-            TableMergeStrategy.UNION_ALL, // tableMergeStrategy
-            'load-order.txt'             // loadOrderFileName
-        )
-    )
+    def conventions = ConventionSettings.standard()
+        .withScenarioMarker('[TestCase]')
+        .withDataFormat(DataFormat.TSV)
+    dbTesterConfiguration = Configuration.withConventions(conventions)
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.spock`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
 
 ## Key Classes
 
@@ -171,7 +163,7 @@ This module provides JPMS compatibility via the `Automatic-Module-Name` manifest
 | [`DatabaseTestInterceptor`](src/main/groovy/io/github/seijikohara/dbtester/spock/extension/DatabaseTestInterceptor.groovy) | Method interceptor for test lifecycle management |
 | [`SpockPreparationExecutor`](src/main/groovy/io/github/seijikohara/dbtester/spock/lifecycle/SpockPreparationExecutor.groovy) | Executes data preparation phase |
 | [`SpockExpectationVerifier`](src/main/groovy/io/github/seijikohara/dbtester/spock/lifecycle/SpockExpectationVerifier.groovy) | Verifies database state after test execution |
-| `SpockScenarioNameResolver` | Resolves scenario names from Spock feature methods |
+| [`SpockScenarioNameResolver`](src/main/groovy/io/github/seijikohara/dbtester/spock/spi/SpockScenarioNameResolver.groovy) | Resolves scenario names from Spock feature methods |
 
 ## Related Modules
 

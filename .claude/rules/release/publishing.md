@@ -10,9 +10,11 @@ The following modules are published to Maven Central:
 |--------|-------------|-------------|
 | `db-tester-core` | `db-tester-core` | Public API and pure JDBC implementation |
 | `db-tester-junit` | `db-tester-junit` | JUnit extension |
-| `db-tester-spock` | `db-tester-spock` | Spock Framework extension |
+| `db-tester-spock` | `db-tester-spock` | Spock extension |
+| `db-tester-kotest` | `db-tester-kotest` | Kotest AnnotationSpec extension |
 | `db-tester-junit-spring-boot-starter` | `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
 | `db-tester-spock-spring-boot-starter` | `db-tester-spock-spring-boot-starter` | Spring Boot auto-configuration for Spock |
+| `db-tester-kotest-spring-boot-starter` | `db-tester-kotest-spring-boot-starter` | Spring Boot auto-configuration for Kotest |
 | `db-tester-bom` | `db-tester-bom` | Bill of Materials |
 
 All modules share the same version and are released together.

@@ -4,7 +4,7 @@ DB Testerフレームワークの概要を説明します。
 
 ## 目的
 
-DB Testerは、JUnitおよびSpock Framework向けのデータベーステストフレームワークです。CSV/TSVベースのテストデータファイルを使用し、アノテーション駆動型のデータ準備と状態検証を提供します。
+DB Testerは、JUnit、Spock、およびKotest向けのデータベーステストフレームワークです。CSV/TSVベースのテストデータファイルを使用し、アノテーション駆動型のデータ準備と状態検証を提供します。
 
 本フレームワークは、データベーステストにおける以下の課題を解決します。
 
@@ -77,7 +77,7 @@ src/test/resources/
 | `db-tester-api` | パブリック | アノテーション、設定、SPIインターフェース |
 | `db-tester-core` | 内部 | JDBC操作、フォーマット解析、SPI実装 |
 
-テストフレームワークモジュール（`db-tester-junit`、`db-tester-spock`）は、コンパイル時にAPIモジュールのみに依存します。coreモジュールはJava ServiceLoader経由でランタイム時に読み込まれます。
+テストフレームワークモジュール（`db-tester-junit`、`db-tester-spock`、`db-tester-kotest`）は、コンパイル時にAPIモジュールのみに依存します。coreモジュールはJava ServiceLoader経由でランタイム時に読み込まれます。
 
 ### イミュータビリティ
 
@@ -101,8 +101,10 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 |----------------|------------|------|
 | Java | 21以降 | JPMS module-info.javaサポート |
 | Groovy | 5以降 | Spockモジュール用 |
+| Kotlin | 2以降 | Kotestモジュール用 |
 | JUnit | 6以降 | JUnit Jupiter拡張モデル |
-| Spock Framework | 2以降 | アノテーション駆動型拡張モデル |
+| Spock | 2以降 | アノテーション駆動型拡張モデル |
+| Kotest | 6以降 | AnnotationSpecとTestCaseExtension |
 | Spring Boot | 4以降 | Spring Boot Starterモジュール用 |
 
 ### データベース互換性
@@ -124,9 +126,11 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 | `db-tester-api` | パブリックAPIモジュール | [アーキテクチャ](02-architecture) |
 | `db-tester-core` | 内部実装 | [アーキテクチャ](02-architecture) |
 | `db-tester-junit` | JUnit Jupiter拡張 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-spock` | Spock Framework拡張 | [テストフレームワーク](07-test-frameworks) |
+| `db-tester-spock` | Spock拡張 | [テストフレームワーク](07-test-frameworks) |
+| `db-tester-kotest` | Kotest AnnotationSpec拡張 | [テストフレームワーク](07-test-frameworks) |
 | `db-tester-junit-spring-boot-starter` | JUnit用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
 | `db-tester-spock-spring-boot-starter` | Spock用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
+| `db-tester-kotest-spring-boot-starter` | Kotest用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
 | `db-tester-bom` | 依存関係管理のためのBill of Materials | - |
 
 ## 関連仕様
@@ -136,6 +140,6 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 - [設定](04-configuration) - 設定オプションと規約
 - [データフォーマット](05-data-formats) - CSV/TSVファイル構造と解析
 - [データベース操作](06-database-operations) - サポートされるCRUD操作
-- [テストフレームワーク](07-test-frameworks) - JUnitとSpockの統合
+- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
 - [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
 - [エラーハンドリング](09-error-handling) - エラーメッセージと例外型

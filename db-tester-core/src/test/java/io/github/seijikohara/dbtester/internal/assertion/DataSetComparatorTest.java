@@ -335,7 +335,7 @@ class DataSetComparatorTest {
   }
 
   /**
-   * Creates a simple DataSet with one table.
+   * Creates a DataSet with one table.
    *
    * @param tableName the table name
    * @param columnNames the column names
@@ -348,7 +348,7 @@ class DataSetComparatorTest {
   }
 
   /**
-   * Creates a simple Table.
+   * Creates a Table.
    *
    * @param tableName the table name
    * @param columnNames the column names

@@ -1,5 +1,5 @@
 /**
- * Feature demonstration examples for db-tester using Spock Framework.
+ * Feature demonstration examples for db-tester using Spock.
  *
  * <p>This package contains comprehensive examples demonstrating various db-tester features with
  * Spock:
@@ -18,6 +18,6 @@
  * </ul>
  *
  * <p>Each specification demonstrates specific capabilities and best practices for database testing
- * using db-tester with Spock Framework and Groovy.
+ * using db-tester with Spock and Groovy.
  */
 package example.feature;

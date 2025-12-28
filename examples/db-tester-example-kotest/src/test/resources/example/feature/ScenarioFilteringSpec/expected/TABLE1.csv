@@ -1,0 +1,7 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+should create active user,1,alice,alice@example.com,ACTIVE
+should create active user,2,charlie,charlie@example.com,ACTIVE
+should create inactive user,1,bob,bob@example.com,INACTIVE
+should create inactive user,2,david,david@example.com,INACTIVE
+should handle multiple users,1,eve,eve@example.com,ACTIVE
+should handle multiple users,2,frank,frank@example.com,SUSPENDED
