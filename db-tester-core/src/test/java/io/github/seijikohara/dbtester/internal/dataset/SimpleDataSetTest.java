@@ -241,7 +241,7 @@ class SimpleDataSetTest {
   }
 
   /**
-   * Creates a simple table with the specified name and columns.
+   * Creates a table with the specified name and columns.
    *
    * @param tableName the table name
    * @param columnNames the column names

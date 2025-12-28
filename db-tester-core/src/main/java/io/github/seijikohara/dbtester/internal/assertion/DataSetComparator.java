@@ -513,7 +513,7 @@ public class DataSetComparator {
       final String clobString = readClob(clob);
       return expected.toString().equals(clobString);
     } catch (final SQLException | IOException e) {
-      // If we can't read the CLOB, fall back to string comparison
+      // When CLOB reading fails, fall back to string comparison
       return expected.toString().equals(clob.toString());
     }
   }
@@ -717,7 +717,7 @@ public class DataSetComparator {
     final double diff = Math.abs(expected - actual);
     final double maxVal = Math.max(Math.abs(expected), Math.abs(actual));
 
-    // For very small numbers, use absolute comparison
+    // For small numbers, use absolute comparison
     if (maxVal < epsilon) {
       return diff < epsilon;
     }

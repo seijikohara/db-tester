@@ -9,7 +9,7 @@ import java.util.Objects;
 /**
  * User entity for database testing demonstration.
  *
- * <p>This is a simple JPA entity representing a user record in the USERS table.
+ * <p>This is a JPA entity representing a user record in the USERS table.
  */
 @Entity
 @Table(name = "users")

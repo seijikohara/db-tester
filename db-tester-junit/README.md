@@ -140,11 +140,9 @@ static void setup(ExtensionContext context) {
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Module name**: `io.github.seijikohara.dbtester.junit`
-
-This module provides full JPMS support with a `module-info.java` descriptor.
 
 ```java
 requires io.github.seijikohara.dbtester.junit;

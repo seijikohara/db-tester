@@ -324,7 +324,7 @@ class DataSetMergerTest {
   }
 
   /**
-   * Creates a simple DataSet for testing.
+   * Creates a DataSet for testing.
    *
    * @param tableName the table name
    * @param columnNames the column names

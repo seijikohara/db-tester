@@ -9,7 +9,7 @@
   <img src="docs/public/favicon.svg" width="240" alt="DB Tester Logo">
 </p>
 
-A database testing framework for JUnit, Spock, and Kotest. Add `@Preparation` and `@Expectation` annotations to test methods. The framework loads CSV data before tests and verifies database state after tests.
+A database testing framework for JUnit, Spock, and Kotest. The framework uses `@Preparation` and `@Expectation` annotations to load CSV data before tests and verify database state after tests.
 
 ```java
 @Test
@@ -22,9 +22,9 @@ void shouldCreateUser() {
 
 ## Features
 
-- **Annotation-Driven** - `@Preparation` and `@Expectation` annotations for declarative test data management
-- **Convention-Based** - Dataset discovery based on test class package and name
-- **Multiple Formats** - CSV and TSV with scenario filtering via `[Scenario]` column
+- **Annotation-Driven** - Declarative test data management with `@Preparation` and `@Expectation`
+- **Convention-Based** - Automatic dataset discovery based on test class package and name
+- **Multiple Formats** - CSV and TSV support with scenario filtering via `[Scenario]` column
 - **Framework Support** - JUnit, Spock, Kotest, and Spring Boot integration
 - **Pure JDBC** - No external testing framework dependencies
 
@@ -38,7 +38,7 @@ void shouldCreateUser() {
 
 ## Installation
 
-Select a module based on the test framework:
+Select a module based on your test framework:
 
 | Use Case | Module |
 |----------|--------|
@@ -157,7 +157,7 @@ ID,NAME,EMAIL
 
 ### JUnit with Spring Boot
 
-Requires `@ExtendWith(SpringBootDatabaseTestExtension.class)` to enable the extension. The DataSource is automatically discovered from the Spring ApplicationContext.
+Use `@ExtendWith(SpringBootDatabaseTestExtension.class)` to enable the extension. The DataSource is discovered from the Spring ApplicationContext.
 
 ```java
 @SpringBootTest
@@ -178,7 +178,7 @@ class UserRepositoryTest {
 
 ### Spock
 
-Add `@DatabaseTest` annotation to enable the extension. Provide a `getDbTesterRegistry()` property accessor for DataSource registration.
+Use `@DatabaseTest` to enable the extension. Provide a `getDbTesterRegistry()` property accessor for DataSource registration.
 
 ```groovy
 @DatabaseTest
@@ -244,7 +244,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ### Kotest with Spring Boot
 
-Register `SpringBootDatabaseTestExtension` in the `init` block. The DataSource is automatically discovered from the Spring ApplicationContext.
+Register `SpringBootDatabaseTestExtension` in the `init` block. The DataSource is discovered from the Spring ApplicationContext.
 
 ```kotlin
 @SpringBootTest
@@ -285,14 +285,14 @@ Each test method loads only rows matching its name.
 
 | Operation | Description |
 |-----------|-------------|
-| `CLEAN_INSERT` | Delete all then insert (default) |
+| `CLEAN_INSERT` | Delete all rows, then insert (default) |
 | `INSERT` | Insert rows |
 | `UPDATE` | Update existing rows |
 | `REFRESH` | Upsert (insert or update) |
 | `DELETE` | Delete specified rows |
 | `DELETE_ALL` | Delete all rows |
 | `TRUNCATE_TABLE` | Truncate tables |
-| `TRUNCATE_INSERT` | Truncate then insert |
+| `TRUNCATE_INSERT` | Truncate, then insert |
 
 ```java
 @Preparation(operation = Operation.INSERT)
@@ -324,7 +324,7 @@ registry.register("secondary", secondaryDataSource);
 
 ## Assertion Messages
 
-When expectation verification fails, the framework collects **all differences** and reports them with a human-readable summary followed by YAML details:
+When expectation verification fails, the framework collects all differences and reports them with a summary followed by YAML details:
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -360,10 +360,10 @@ tables:
 | `summary.total_differences` | Total count of all differences |
 | `tables.<name>.differences` | List of differences for each table |
 | `path` | Location of mismatch: `table_count`, `row_count`, or `row[N].COLUMN` |
-| `expected` / `actual` | The expected and actual values |
+| `expected` / `actual` | Expected and actual values |
 | `column` | JDBC metadata (type, nullable, primary_key) when available |
 
-The output is **valid YAML** and can be parsed by standard YAML libraries for CI/CD integration.
+The output is valid YAML and can be parsed by standard YAML libraries for CI/CD integration.
 
 ## Troubleshooting
 
@@ -376,9 +376,9 @@ The output is **valid YAML** and can be parsed by standard YAML libraries for CI
 
 | Document | Description |
 |----------|-------------|
-| [Technical Specifications](https://seijikohara.github.io/db-tester/) | Architecture, API, configuration details |
+| [Technical Specifications](https://seijikohara.github.io/db-tester/) | Architecture, API, and configuration details |
 | [Examples](examples/) | Working test examples |
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License. See [LICENSE](LICENSE) for details.

@@ -144,11 +144,9 @@ def setupSpec() {
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.spock.spring.autoconfigure`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
 
 ## Key Classes
 

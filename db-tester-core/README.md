@@ -99,11 +99,9 @@ Internal format providers:
 
 These are registered via `META-INF/services/` and loaded via ServiceLoader.
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Module name**: `io.github.seijikohara.dbtester.core`
-
-This module provides full JPMS support with a `module-info.java` descriptor.
 
 ```java
 requires io.github.seijikohara.dbtester.core;

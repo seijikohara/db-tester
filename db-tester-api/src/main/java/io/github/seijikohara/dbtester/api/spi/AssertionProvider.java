@@ -136,7 +136,7 @@ public interface AssertionProvider {
    * Asserts that the results of a SQL query match the expected dataset.
    *
    * <p>Executes the provided SQL query and compares the result set with the expected dataset.
-   * Useful for validating complex queries or views that cannot be represented as simple tables.
+   * Useful for validating queries or views that require custom SQL statements.
    *
    * @param expected the expected dataset containing reference data
    * @param dataSource the data source for executing the SQL query
@@ -156,7 +156,7 @@ public interface AssertionProvider {
    * Asserts that the results of a SQL query match the expected table.
    *
    * <p>Executes the provided SQL query and compares the result set with the expected table. Useful
-   * for validating complex queries or views that cannot be represented as simple tables.
+   * for validating queries or views that require custom SQL statements.
    *
    * @param expected the expected table containing reference data
    * @param dataSource the data source for executing the SQL query

@@ -154,11 +154,9 @@ init {
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.kotest`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
 
 ## Key Classes
 

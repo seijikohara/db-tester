@@ -66,7 +66,7 @@ class ComparisonStrategySpec : AnnotationSpec() {
                 }
 
         /**
-         * Creates a simple table with one row.
+         * Creates a table with one row.
          *
          * @param tableName the table name
          * @param columnNames the column names

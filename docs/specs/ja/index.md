@@ -22,7 +22,7 @@ hero:
 features:
   - icon: 📝
     title: 宣言的なテスト
-    details: "@Preparationと@Expectationアノテーションを使用して、ボイラープレートコードなしでテストデータのセットアップと検証を定義できます。"
+    details: "@Preparationと@Expectationアノテーションを使用して、テストデータのセットアップと検証を定義できます。"
     link: /ja/03-public-api
     linkText: APIリファレンスを見る
   - icon: 📁

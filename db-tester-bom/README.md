@@ -78,17 +78,6 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | [`db-tester-spock-spring-boot-starter`](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock |
 | [`db-tester-kotest-spring-boot-starter`](../db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest |
 
-## Related Modules
-
-| Module | Description |
-|--------|-------------|
-| [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
-| [`db-tester-spock`](../db-tester-spock/) | Spock extension |
-| [`db-tester-kotest`](../db-tester-kotest/) | Kotest extension |
-| [`db-tester-junit-spring-boot-starter`](../db-tester-junit-spring-boot-starter/) | Spring Boot auto-configuration for JUnit |
-| [`db-tester-spock-spring-boot-starter`](../db-tester-spock-spring-boot-starter/) | Spring Boot auto-configuration for Spock |
-| [`db-tester-kotest-spring-boot-starter`](../db-tester-kotest-spring-boot-starter/) | Spring Boot auto-configuration for Kotest |
-
 ## Documentation
 
 For usage examples and configuration details, refer to the [main README](../README.md).

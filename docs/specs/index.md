@@ -22,7 +22,7 @@ hero:
 features:
   - icon: 📝
     title: Declarative Testing
-    details: Use @Preparation and @Expectation annotations to define test data setup and verification without boilerplate code.
+    details: Use @Preparation and @Expectation annotations to define test data setup and verification.
     link: /03-public-api
     linkText: View API Reference
   - icon: 📁

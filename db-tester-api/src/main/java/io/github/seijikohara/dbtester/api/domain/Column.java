@@ -49,7 +49,7 @@ public final class Column implements Comparable<Column> {
   }
 
   /**
-   * Creates a simple column with just a name.
+   * Creates a column with just a name.
    *
    * <p>This factory method creates a column with default comparison strategy (STRICT) and no
    * metadata. Use {@link #builder(String)} for more control.
@@ -62,7 +62,7 @@ public final class Column implements Comparable<Column> {
   }
 
   /**
-   * Creates a simple column from an existing ColumnName.
+   * Creates a column from an existing ColumnName.
    *
    * @param name the column name
    * @return a new Column instance

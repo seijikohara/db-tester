@@ -563,7 +563,7 @@ logger.error("Failed to connect: {}", dbUrl, exception);
 | `warn` | Potential issues without execution interruption |
 | `info` | Important business/lifecycle events |
 | `debug` | Detailed diagnostic information |
-| `trace` | Very detailed diagnostics (rarely used) |
+| `trace` | Detailed diagnostics (rarely used) |
 
 ---
 

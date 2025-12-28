@@ -8,7 +8,7 @@ import jakarta.persistence.Table
 /**
  * User entity for database testing demonstration.
  *
- * This is a simple JPA entity representing a user record in the USERS table.
+ * This is a JPA entity representing a user record in the USERS table.
  *
  * @property id the user identifier
  * @property name the user name

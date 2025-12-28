@@ -140,11 +140,9 @@ static void setup(ExtensionContext context) {
 }
 ```
 
-## Java Platform Module System (JPMS)
+## JPMS Support
 
 **Automatic-Module-Name**: `io.github.seijikohara.dbtester.junit.spring.autoconfigure`
-
-This module provides JPMS compatibility via the `Automatic-Module-Name` manifest attribute.
 
 ## Key Classes
 

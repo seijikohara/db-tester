@@ -4,8 +4,8 @@ package io.github.seijikohara.dbtester.api.operation;
  * Standard database operations supported by the framework.
  *
  * <p>These operations define how datasets are applied to the database during test preparation. Each
- * operation corresponds to a specific database manipulation strategy, from simple inserts to
- * complex upserts and truncations.
+ * operation corresponds to a specific database manipulation strategy, from inserts to upserts and
+ * truncations.
  *
  * @see io.github.seijikohara.dbtester.api.dataset.DataSet
  */

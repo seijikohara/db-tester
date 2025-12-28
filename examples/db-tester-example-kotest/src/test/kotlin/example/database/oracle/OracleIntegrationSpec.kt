@@ -5,12 +5,21 @@ import io.github.seijikohara.dbtester.api.annotation.Expectation
 import io.github.seijikohara.dbtester.api.annotation.Preparation
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.kotest.core.annotation.EnabledIf
 import io.kotest.core.spec.style.AnnotationSpec
 import oracle.jdbc.pool.OracleDataSource
 import org.slf4j.LoggerFactory
 import org.testcontainers.oracle.OracleContainer
 import java.sql.SQLException
 import javax.sql.DataSource
+
+/**
+ * Condition to check if the test is not running in CI environment.
+ */
+class NotInCiCondition : io.kotest.core.annotation.EnabledCondition {
+    override fun evaluate(kclass: kotlin.reflect.KClass<out io.kotest.core.spec.Spec>): Boolean =
+        System.getenv("CI") != "true"
+}
 
 /**
  * Oracle Database integration test using Testcontainers.
@@ -21,8 +30,12 @@ import javax.sql.DataSource
  * The container is manually started in [setupDatabase] and stopped in [cleanupDatabase]
  * since Kotest does not support the JUnit-specific @Testcontainers/@Container annotations.
  *
+ * This test is skipped in CI environments because Oracle containers require extended
+ * startup time that often exceeds CI timeout limits.
+ *
  * @see <a href="https://java.testcontainers.org/modules/databases/oraclefree/">Testcontainers Oracle Module</a>
  */
+@EnabledIf(NotInCiCondition::class)
 class OracleIntegrationSpec : AnnotationSpec() {
     companion object {
         private val logger = LoggerFactory.getLogger(OracleIntegrationSpec::class.java)

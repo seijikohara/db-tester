@@ -35,9 +35,9 @@ class CellTest {
       assertEquals("name", cell.getColumnName().value());
     }
 
-    /** Verifies that of(String, CellValue) creates a cell with simple column. */
+    /** Verifies that of(String, CellValue) creates a cell with a column. */
     @Test
-    @DisplayName("of(String, CellValue) creates cell with simple column")
+    @DisplayName("of(String, CellValue) creates cell with a column")
     void ofStringAndCellValueCreatesCell() {
       final var cell = Cell.of("email", new CellValue("test@example.com"));
 

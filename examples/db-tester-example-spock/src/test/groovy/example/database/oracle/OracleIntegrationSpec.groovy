@@ -13,6 +13,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.testcontainers.oracle.OracleContainer
 import org.testcontainers.spock.Testcontainers
+import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -26,8 +27,14 @@ import spock.lang.Specification
  * to automatically manage the container lifecycle. The {@code @Shared} annotation ensures
  * the container is not restarted between feature methods.
  *
+ * <p>This test is skipped in CI environments because Oracle containers require extended
+ * startup time that often exceeds CI timeout limits.
+ *
  * @see <a href="https://java.testcontainers.org/test_framework_integration/spock/">Testcontainers Spock Integration</a>
  */
+@IgnoreIf({
+	System.getenv('CI') == 'true'
+})
 @Testcontainers
 @DatabaseTest
 class OracleIntegrationSpec extends Specification {

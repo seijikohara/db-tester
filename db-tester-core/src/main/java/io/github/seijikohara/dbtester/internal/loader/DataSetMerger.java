@@ -209,7 +209,7 @@ public final class DataSetMerger {
   /**
    * A dataset implementation that holds merged tables with an optional data source.
    *
-   * <p>This is a simple implementation used internally by the merger.
+   * <p>This is an internal implementation used by the merger.
    *
    * @param tables the tables in this dataset
    * @param dataSource the data source for this dataset, or null
