@@ -17,8 +17,7 @@ import javax.sql.DataSource
  * Condition to check if the test is not running in CI environment.
  */
 class NotInCiCondition : io.kotest.core.annotation.EnabledCondition {
-    override fun evaluate(kclass: kotlin.reflect.KClass<out io.kotest.core.spec.Spec>): Boolean =
-        System.getenv("CI") != "true"
+    override fun evaluate(kclass: kotlin.reflect.KClass<out io.kotest.core.spec.Spec>): Boolean = System.getenv("CI") != "true"
 }
 
 /**
