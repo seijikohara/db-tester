@@ -39,6 +39,20 @@
   font-size: var(--vp-code-font-size);
 }
 
+/* Ensure Shiki syntax highlighting is visible in home layout */
+.VPHomeContent .shiki,
+.VPHomeContent .shiki code {
+  background-color: transparent;
+}
+
+.VPHomeContent .shiki span {
+  color: var(--shiki-light);
+}
+
+.dark .VPHomeContent .shiki span {
+  color: var(--shiki-dark);
+}
+
 /* Inline code styling for home layout */
 .VPHomeContent :not(pre) > code {
   background-color: var(--vp-code-bg);

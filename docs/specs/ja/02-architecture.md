@@ -53,7 +53,7 @@ graph TD
 | モジュール | 責務 |
 |------------|------|
 | `db-tester-bom` | バージョン管理と依存関係の整合 |
-| `db-tester-api` | パブリックアノテーション、設定、SPIインターフェース |
+| `db-tester-api` | パブリックアノテーション、設定、ドメインモデル、SPIインターフェース |
 | `db-tester-core` | JDBC操作、フォーマット解析、SPI実装 |
 | `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEachコールバック |
 | `db-tester-spock` | Spockアノテーション駆動型拡張とインターセプター |
@@ -64,162 +64,55 @@ graph TD
 
 ## モジュール依存関係
 
-### APIモジュール（`db-tester-api`）
+依存関係は各モジュールの`build.gradle.kts`で定義されています。現在の依存関係についてはソースファイルを参照してください。
 
-APIモジュールは内部依存関係を持ちません。外部依存関係は以下の通りです。
+| モジュール | ビルド設定 |
+|------------|-----------|
+| `db-tester-api` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-api/build.gradle.kts) |
+| `db-tester-core` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-core/build.gradle.kts) |
+| `db-tester-junit` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit/build.gradle.kts) |
+| `db-tester-spock` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock/build.gradle.kts) |
+| `db-tester-kotest` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest/build.gradle.kts) |
+| `db-tester-junit-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit-spring-boot-starter/build.gradle.kts) |
+| `db-tester-spock-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock-spring-boot-starter/build.gradle.kts) |
+| `db-tester-kotest-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest-spring-boot-starter/build.gradle.kts) |
 
-| 依存関係 | 目的 |
-|----------|------|
-| `org.jspecify:jspecify` | Nullセーフティアノテーション |
-| `java.sql` | `DataSource`インターフェース |
-
-### Coreモジュール（`db-tester-core`）
-
-| 依存関係 | スコープ | 目的 |
-|----------|----------|------|
-| `db-tester-api` | Compile | パブリックAPIクラス |
-| `org.jspecify:jspecify` | Compile | Nullセーフティアノテーション |
-| `org.slf4j:slf4j-api` | Compile | ロギング抽象化 |
-
-### テストフレームワークモジュール
-
-JUnit、Spock、およびKotestモジュールは、コンパイル時に`db-tester-api`に依存します。`db-tester-core`モジュールはServiceLoader経由でランタイム時に検出されます。
-
-| モジュール | コンパイル依存関係 | ランタイム依存関係 |
-|------------|-------------------|-------------------|
-| `db-tester-junit` | `db-tester-api`, `junit-jupiter-api` | `db-tester-core` |
-| `db-tester-spock` | `db-tester-api`, `spock-core` | `db-tester-core` |
-| `db-tester-kotest` | `db-tester-api`, `kotest-framework-api` | `db-tester-core` |
-
-### Spring Boot Starterモジュール
-
-| モジュール | 依存関係 |
-|------------|----------|
-| `db-tester-junit-spring-boot-starter` | `db-tester-junit`, `db-tester-core`, `spring-boot-autoconfigure` |
-| `db-tester-spock-spring-boot-starter` | `db-tester-spock`, `db-tester-core`, `spring-boot-autoconfigure` |
-| `db-tester-kotest-spring-boot-starter` | `db-tester-kotest`, `db-tester-core`, `spring-boot-autoconfigure` |
+テストフレームワークモジュールはコンパイル時に`db-tester-api`に依存します。`db-tester-core`モジュールはServiceLoader経由でランタイム時に検出されます。
 
 ## パッケージ構成
 
-### APIモジュールパッケージ
+### APIモジュール
 
-```
-io.github.seijikohara.dbtester.api
-├── annotation/
-│   ├── Preparation.java
-│   ├── Expectation.java
-│   └── DataSet.java
-├── assertion/
-│   ├── DatabaseAssertion.java
-│   └── AssertionFailureHandler.java
-├── config/
-│   ├── Configuration.java
-│   ├── ConventionSettings.java
-│   ├── DataFormat.java
-│   ├── DataSourceRegistry.java
-│   ├── OperationDefaults.java
-│   └── TableMergeStrategy.java
-├── context/
-│   └── TestContext.java
-├── dataset/
-│   ├── DataSet.java
-│   ├── Table.java
-│   └── Row.java
-├── domain/
-│   ├── CellValue.java
-│   ├── ColumnName.java
-│   ├── TableName.java
-│   ├── DataSourceName.java
-│   ├── Column.java
-│   ├── Cell.java
-│   ├── ColumnMetadata.java
-│   └── ComparisonStrategy.java
-├── exception/
-│   ├── DatabaseTesterException.java
-│   ├── ConfigurationException.java
-│   ├── DataSetLoadException.java
-│   ├── DataSourceNotFoundException.java
-│   ├── DatabaseOperationException.java
-│   └── ValidationException.java
-├── loader/
-│   └── DataSetLoader.java
-├── operation/
-│   ├── Operation.java
-│   └── TableOrderingStrategy.java
-├── scenario/
-│   ├── ScenarioName.java
-│   └── ScenarioNameResolver.java
-└── spi/
-    ├── AssertionProvider.java
-    ├── DataSetLoaderProvider.java
-    ├── ExpectationProvider.java
-    └── OperationProvider.java
-```
+| パッケージ | 責務 |
+|-----------|------|
+| `annotation` | `@Preparation`, `@Expectation`, `@DataSet`アノテーション |
+| `assertion` | プログラマティックアサーションAPI |
+| `config` | 設定クラスとレジストリ |
+| `context` | テスト実行コンテキスト |
+| `dataset` | DataSet, Table, Rowインターフェース |
+| `domain` | 値オブジェクト（`TableName`, `ColumnName`, `CellValue`） |
+| `exception` | 例外階層 |
+| `loader` | データセットローダーインターフェース |
+| `operation` | Operationenumと戦略 |
+| `scenario` | シナリオフィルタリングインターフェース |
+| `spi` | サービスプロバイダーインターフェース |
 
-### Coreモジュールパッケージ
+ソース: [db-tester-api/src/main/java](https://github.com/seijikohara/db-tester/tree/main/db-tester-api/src/main/java/io/github/seijikohara/dbtester/api)
 
-```
-io.github.seijikohara.dbtester.internal
-├── assertion/
-│   ├── ComparisonResult.java
-│   ├── DataSetComparator.java
-│   └── ExpectationVerifier.java
-├── dataset/
-│   ├── SimpleDataSet.java
-│   ├── SimpleTable.java
-│   ├── SimpleRow.java
-│   ├── ScenarioTable.java
-│   └── TableOrderingResolver.java
-├── domain/
-│   ├── ScenarioMarker.java
-│   ├── SchemaName.java
-│   ├── FileExtension.java
-│   └── StringIdentifier.java
-├── format/
-│   ├── TableOrdering.java
-│   ├── csv/CsvFormatProvider.java
-│   ├── tsv/TsvFormatProvider.java
-│   ├── parser/
-│   │   ├── DelimitedParser.java
-│   │   └── DelimiterConfig.java
-│   └── spi/
-│       ├── FormatProvider.java
-│       └── FormatRegistry.java
-├── jdbc/
-│   ├── Jdbc.java
-│   ├── read/
-│   │   ├── TableReader.java
-│   │   ├── TableOrderResolver.java
-│   │   └── TypeConverter.java
-│   └── write/
-│       ├── OperationExecutor.java
-│       ├── SqlBuilder.java
-│       ├── ParameterBinder.java
-│       ├── TableExecutor.java
-│       ├── InsertExecutor.java
-│       ├── UpdateExecutor.java
-│       ├── DeleteExecutor.java
-│       ├── RefreshExecutor.java
-│       └── TruncateExecutor.java
-├── loader/
-│   ├── TestClassNameBasedDataSetLoader.java
-│   ├── DefaultDataSetLoaderProvider.java
-│   ├── AnnotationResolver.java
-│   ├── DataSetFactory.java
-│   ├── DataSetMerger.java
-│   └── DirectoryResolver.java
-├── scenario/
-│   ├── ScenarioFilter.java
-│   ├── FilteredDataSet.java
-│   └── FilteredTable.java
-├── spi/
-│   ├── DefaultAssertionProvider.java
-│   ├── DefaultExpectationProvider.java
-│   ├── DefaultOperationProvider.java
-│   └── ScenarioNameResolverRegistry.java
-└── util/
-    └── TopologicalSorter.java
-```
+### Coreモジュール
+
+| パッケージ | 責務 |
+|-----------|------|
+| `assertion` | データセット比較と検証 |
+| `dataset` | DataSet, Table, Row実装 |
+| `domain` | 内部値オブジェクト |
+| `format` | CSV/TSV解析とフォーマットプロバイダー |
+| `jdbc` | JDBC読み取り/書き込み操作 |
+| `loader` | 規約ベースのデータセット読み込み |
+| `scenario` | シナリオフィルタリング実装 |
+| `spi` | SPI実装 |
+
+ソース: [db-tester-core/src/main/java](https://github.com/seijikohara/db-tester/tree/main/db-tester-core/src/main/java/io/github/seijikohara/dbtester/internal)
 
 ## アーキテクチャパターン
 
@@ -270,9 +163,10 @@ flowchart LR
 
 | 戦略インターフェース | 実装 |
 |---------------------|------|
-| `Operation` enum | NONE, INSERT, UPDATE, DELETE, REFRESH, CLEAN_INSERTなど |
+| `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, REFRESH, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
 | `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
+| `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |
 | `FormatProvider` | CsvFormatProvider, TsvFormatProvider |
 
 ## JPMSサポート

@@ -2,7 +2,6 @@
 
 This document describes the database operations supported by the DB Tester framework.
 
-
 ## Operation Enum
 
 **Location**: `io.github.seijikohara.dbtester.api.operation.Operation`
@@ -14,13 +13,12 @@ This document describes the database operations supported by the DB Tester frame
 | `NONE` | No database operation | Read-only verification |
 | `INSERT` | Insert new rows | Empty tables or append |
 | `UPDATE` | Update existing rows by primary key | Modify existing data |
-| `REFRESH` | Upsert (insert or update) | Mixed insert/update |
+| `REFRESH` | Upsert (insert or update) | Mixed insert and update |
 | `DELETE` | Delete specific rows by primary key | Selective removal |
 | `DELETE_ALL` | Delete all rows from tables | Clear without sequence reset |
 | `TRUNCATE_TABLE` | Truncate tables | Clear with sequence reset |
 | `CLEAN_INSERT` | Delete all then insert (default) | Fresh test data |
 | `TRUNCATE_INSERT` | Truncate then insert | Fresh data with sequence reset |
-
 
 ## Operation Descriptions
 
@@ -35,7 +33,6 @@ Performs no database operation.
 **Use Case**:
 - Expectation-only tests where preparation data exists from previous tests
 - Manual setup scenarios
-
 
 ### INSERT
 
@@ -54,7 +51,6 @@ Inserts new rows without modifying existing data.
 
 **Constraints**:
 - Requires empty target rows or unique keys
-
 
 ### UPDATE
 
@@ -75,7 +71,6 @@ Updates existing rows identified by primary key.
 - Tables must have primary keys defined
 - Dataset must include primary key columns
 
-
 ### REFRESH
 
 Performs upsert operations (insert or update).
@@ -91,7 +86,6 @@ Performs upsert operations (insert or update).
 
 **Requirements**:
 - Tables must have primary keys defined
-
 
 ### DELETE
 
@@ -111,7 +105,6 @@ Deletes specific rows identified by primary key.
 **Requirements**:
 - Dataset must include primary key columns
 
-
 ### DELETE_ALL
 
 Deletes all rows from referenced tables.
@@ -120,7 +113,7 @@ Deletes all rows from referenced tables.
 
 **Behavior**:
 - Deletes all rows from each table in dataset
-- Does not reset identity/sequence columns
+- Does not reset identity or sequence columns
 - Respects foreign key constraints (may fail)
 
 **Use Case**:
@@ -130,7 +123,6 @@ Deletes all rows from referenced tables.
 **Table Processing Order**:
 - Tables processed in reverse foreign key order
 
-
 ### TRUNCATE_TABLE
 
 Truncates tables, resetting identity columns where supported.
@@ -139,7 +131,7 @@ Truncates tables, resetting identity columns where supported.
 
 **Behavior**:
 - Removes all rows from tables
-- Resets identity/auto-increment columns
+- Resets identity and auto-increment columns
 - Database-dependent behavior for foreign keys
 
 **Use Case**:
@@ -155,7 +147,6 @@ Truncates tables, resetting identity columns where supported.
 | PostgreSQL | Yes | Requires CASCADE |
 | SQL Server | Yes | Requires no FK references |
 | Oracle | Yes | Requires CASCADE |
-
 
 ### CLEAN_INSERT
 
@@ -175,7 +166,6 @@ Deletes all rows then inserts dataset rows.
 - DELETE phase: Child tables first
 - INSERT phase: Parent tables first
 
-
 ### TRUNCATE_INSERT
 
 Truncates tables then inserts dataset rows.
@@ -190,14 +180,13 @@ Truncates tables then inserts dataset rows.
 - Test preparation with sequence reset
 - Performance-optimized setup
 
-
 ## Execution Flow
 
 ### Preparation Phase
 
 1. Load dataset files from configured location
 2. Filter rows by scenario marker
-3. Resolve table ordering based on foreign keys
+3. Resolve table ordering based on configured strategy
 4. Execute configured operation
 5. Commit transaction
 
@@ -228,7 +217,6 @@ flowchart TD
         J --> K
     end
 ```
-
 
 ## Table Ordering Strategy
 
@@ -290,7 +278,7 @@ void testWithFkOrdering() { }
 
 Tables are sorted in ascending alphabetical order (case-insensitive).
 
-**Use Case**: When table ordering doesn't matter (no FK constraints) or for deterministic ordering in simple scenarios.
+**Use Case**: When table ordering does not matter (no FK constraints) or for deterministic ordering in simple scenarios.
 
 ```java
 @Preparation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
@@ -318,10 +306,9 @@ void testExpectationOrder() { }
 void testBothPhases() { }
 ```
 
-
 ## Table Ordering
 
-### Manual Ordering with `load-order.txt`
+### Manual Ordering with load-order.txt
 
 The preferred method for controlling table processing order is the `load-order.txt` file. This file specifies the exact order in which tables should be processed.
 
@@ -353,8 +340,6 @@ The table order is determined by the `TableOrderingStrategy`. When using `AUTO` 
 2. **FK-based ordering**: Automatic resolution using database metadata
 3. **Alphabetical ordering**: Fallback when no other ordering is available
 
-**Note**: Unlike some other frameworks, db-tester does **not** auto-generate the `load-order.txt` file. See [TableOrderingStrategy](#table-ordering-strategy) for details.
-
 ### Circular Dependencies
 
 For tables with circular foreign key references:
@@ -362,7 +347,6 @@ For tables with circular foreign key references:
 1. Detect cycles in dependency graph
 2. Log warning
 3. Process in dataset declaration order
-
 
 ## Transaction Handling
 
@@ -392,17 +376,17 @@ For tables with circular foreign key references:
 ### Error Recovery
 
 On exception:
+
 1. Rollback transaction
 2. Close connection
 3. Wrap exception in `DatabaseOperationException`
 4. Propagate to test framework
 
-
 ## Type Conversion
 
 ### String to SQL Type
 
-The framework converts string values from CSV/TSV to appropriate SQL types:
+The framework converts string values from CSV or TSV to appropriate SQL types:
 
 | Target SQL Type | Conversion Method |
 |-----------------|-------------------|
@@ -424,7 +408,7 @@ The framework converts string values from CSV/TSV to appropriate SQL types:
 - Empty CSV field = SQL NULL
 - `PreparedStatement.setNull()` with appropriate SQL type
 
-### Date/Time Formats
+### Date and Time Formats
 
 | Type | Accepted Formats |
 |------|------------------|
@@ -439,9 +423,9 @@ The framework converts string values from CSV/TSV to appropriate SQL types:
 | BLOB | Base64 string → byte[] |
 | CLOB | String → Reader |
 
-
 ## Related Specifications
 
+- [Overview](01-overview) - Framework purpose and key concepts
 - [Public API](03-public-api) - Operation enum reference
 - [Data Formats](05-data-formats) - Source file structure
 - [Configuration](04-configuration) - OperationDefaults

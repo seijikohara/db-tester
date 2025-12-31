@@ -232,7 +232,7 @@ def 'should process #status order'() {
 
 ### 拡張クラス
 
-**パッケージ**: `io.github.seijikohara.dbtester.kotest.DatabaseTestExtension`
+**パッケージ**: `io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension`
 
 **タイプ**: `TestCaseExtension` - 準備フェーズと期待フェーズのためにテストケース実行をインターセプトします。
 

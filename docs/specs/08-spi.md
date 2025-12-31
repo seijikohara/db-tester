@@ -31,7 +31,7 @@ flowchart TB
 ### Design Principles
 
 1. **API Independence**: Test framework modules depend only on `db-tester-api`
-2. **Runtime Discovery**: Core implementations loaded via ServiceLoader
+2. **Runtime Discovery**: Core implementations load via ServiceLoader
 3. **Extensibility**: Custom implementations can replace defaults
 
 
@@ -86,15 +86,18 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
 
 **Operations**:
-- `NONE` - No operation
-- `INSERT` - Insert rows
-- `UPDATE` - Update by primary key
-- `DELETE` - Delete by primary key
-- `DELETE_ALL` - Delete all rows
-- `REFRESH` - Upsert (insert or update)
-- `TRUNCATE_TABLE` - Truncate tables
-- `CLEAN_INSERT` - Delete all then insert
-- `TRUNCATE_INSERT` - Truncate then insert
+
+| Operation | Description |
+|-----------|-------------|
+| `NONE` | No operation |
+| `INSERT` | Insert rows |
+| `UPDATE` | Update by primary key |
+| `DELETE` | Delete by primary key |
+| `DELETE_ALL` | Delete all rows |
+| `REFRESH` | Upsert (insert or update) |
+| `TRUNCATE_TABLE` | Truncate tables |
+| `CLEAN_INSERT` | Delete all then insert |
+| `TRUNCATE_INSERT` | Truncate then insert |
 
 
 ### AssertionProvider
@@ -140,10 +143,10 @@ public interface AssertionProvider {
 | `assertEqualsByQuery(...)` | Compare query results against expected data |
 
 **Behavior**:
-1. Compare expected vs actual datasets/tables
-2. Apply comparison strategies per column (STRICT, IGNORE, NUMERIC, etc.)
+1. Compare expected vs actual datasets or tables
+2. Apply comparison strategies per column (STRICT, IGNORE, NUMERIC, and others)
 3. Collect all differences (not fail-fast)
-4. Output human-readable summary + YAML details on mismatch
+4. Output human-readable summary with YAML details on mismatch
 
 See [Error Handling - Validation Errors](09-error-handling#validation-errors) for output format details.
 
@@ -173,7 +176,7 @@ public interface ExpectationProvider {
 
 **Process**:
 1. For each table in the expected dataset, fetch actual data from the database
-2. Filter actual data to only include columns present in expected table
+2. Filter actual data to include only columns present in expected table
 3. Compare filtered actual data against expected data
 4. Throw `AssertionError` if verification fails
 
@@ -246,7 +249,7 @@ public interface FormatProvider {
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `supportedFileExtension()` | `FileExtension` | Returns the file extension without leading dot (e.g., "csv") |
+| `supportedFileExtension()` | `FileExtension` | Returns the file extension without leading dot (for example, "csv") |
 | `parse(Path)` | `DataSet` | Parses all files in directory into a DataSet |
 
 **Implementations**:
@@ -256,7 +259,7 @@ public interface FormatProvider {
 | `CsvFormatProvider` | `.csv` | Comma |
 | `TsvFormatProvider` | `.tsv` | Tab |
 
-**Note**: This is an internal SPI not intended for external implementation.
+This is an internal SPI not intended for external implementation.
 
 
 ## ServiceLoader Registration
@@ -337,7 +340,7 @@ module io.github.seijikohara.dbtester.core {
 
 To provide a custom dataset loader:
 
-1. Implement `DataSetLoader` interface:
+1. Implement the `DataSetLoader` interface:
 
 ```java
 public class CustomDataSetLoader implements DataSetLoader {
@@ -403,13 +406,13 @@ To support additional file formats (internal SPI):
 ```java
 public class XmlFormatProvider implements FormatProvider {
     @Override
-    public boolean canHandle(String fileExtension) {
-        return ".xml".equals(fileExtension);
+    public FileExtension supportedFileExtension() {
+        return new FileExtension("xml");
     }
 
     @Override
-    public DataSet parseDataSet(Path filePath, ConventionSettings conventions) {
-        // Parse XML file
+    public DataSet parse(Path directory) {
+        // Parse all XML files in directory
     }
 }
 ```
@@ -432,11 +435,12 @@ When multiple providers are registered:
 | `AssertionProvider` | First found |
 | `ExpectationProvider` | First found |
 | `ScenarioNameResolver` | Sorted by `priority()`, first that `canResolve()` returns true |
-| `FormatProvider` | First that `canHandle()` returns true |
+| `FormatProvider` | First matching `supportedFileExtension()` |
 
 
 ## Related Specifications
 
+- [Overview](01-overview) - Framework purpose and key concepts
 - [Architecture](02-architecture) - Module structure
 - [Configuration](04-configuration) - Configuration classes
 - [Test Frameworks](07-test-frameworks) - Framework integration

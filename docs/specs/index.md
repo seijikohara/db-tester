@@ -20,36 +20,30 @@ hero:
       link: https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit
 
 features:
-  - icon: 📝
+  - icon:
+      src: /icons/declarative.svg
     title: Declarative Testing
     details: Use @Preparation and @Expectation annotations to define test data setup and verification.
-    link: /03-public-api
-    linkText: View API Reference
-  - icon: 📁
+  - icon:
+      src: /icons/convention.svg
     title: Convention over Configuration
-    details: Automatic dataset discovery based on test class and method names. Just follow the conventions.
-    link: /04-configuration
-    linkText: Learn Conventions
-  - icon: 🔧
+    details: Automatic dataset discovery based on test class and method names. Follow the conventions.
+  - icon:
+      src: /icons/frameworks.svg
     title: Multiple Frameworks
     details: Full support for JUnit Jupiter, Spock, and Kotest with Spring Boot integration.
-    link: /07-test-frameworks
-    linkText: Framework Integration
-  - icon: 📊
+  - icon:
+      src: /icons/data-formats.svg
     title: Flexible Data Formats
     details: CSV and TSV support with scenario filtering for sharing datasets across multiple tests.
-    link: /05-data-formats
-    linkText: Data Format Guide
-  - icon: 🗄️
+  - icon:
+      src: /icons/database.svg
     title: Database Operations
     details: Support for CLEAN_INSERT, INSERT, UPDATE, DELETE, TRUNCATE and more with customizable table ordering.
-    link: /06-database-operations
-    linkText: Operation Reference
-  - icon: 🔌
+  - icon:
+      src: /icons/extensible.svg
     title: Extensible Architecture
     details: Service Provider Interface (SPI) for custom data loaders, comparators, and operation handlers.
-    link: /08-spi
-    linkText: Extension Points
 ---
 
 ## Quick Start
@@ -131,31 +125,108 @@ dependencies {
 
 ### Basic Usage
 
-```java
+::: code-group
+
+```java [JUnit]
+package com.example;
+
 @ExtendWith(DatabaseTestExtension.class)
+@Preparation  // Loads test data from CSV
+@Expectation  // Verifies database state
 class UserRepositoryTest {
 
-    @Preparation  // Loads test data from CSV
-    @Expectation  // Verifies database state
     @Test
     void shouldCreateUser() {
-        // Your test logic here
         userRepository.create(new User("john", "john@example.com"));
+    }
+
+    @Test
+    void shouldUpdateUser() {
+        userRepository.update(1L, new User("john", "john.doe@example.com"));
     }
 }
 ```
 
+```groovy [Spock]
+package com.example
+
+@DatabaseTest
+@Preparation  // Loads test data from CSV
+@Expectation  // Verifies database state
+class UserRepositorySpec extends Specification {
+
+    def "should create user"() {
+        when:
+        userRepository.create(new User("john", "john@example.com"))
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "should update user"() {
+        when:
+        userRepository.update(1L, new User("john", "john.doe@example.com"))
+
+        then:
+        noExceptionThrown()
+    }
+}
+```
+
+```kotlin [Kotest]
+package com.example
+
+@Preparation  // Loads test data from CSV
+@Expectation  // Verifies database state
+class UserRepositorySpec : AnnotationSpec() {
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { registry }))
+    }
+
+    @Test
+    fun shouldCreateUser() {
+        userRepository.create(User("john", "john@example.com"))
+    }
+
+    @Test
+    fun shouldUpdateUser() {
+        userRepository.update(1L, User("john", "john.doe@example.com"))
+    }
+}
+```
+
+:::
+
 ### Directory Structure
 
-```
+::: code-group
+
+```text [JUnit]
 src/test/resources/
 └── com/example/UserRepositoryTest/
-    ├── shouldCreateUser/
-    │   └── users.csv           # Preparation data
-    └── shouldCreateUser/
-        └── expected/
-            └── users.csv       # Expected state
+    ├── users.csv              # Preparation data with [Scenario] column
+    └── expected/
+        └── users.csv          # Expected state with [Scenario] column
 ```
+
+```text [Spock]
+src/test/resources/
+└── com/example/UserRepositorySpec/
+    ├── users.csv              # Preparation data with [Scenario] column
+    └── expected/
+        └── users.csv          # Expected state with [Scenario] column
+```
+
+```text [Kotest]
+src/test/resources/
+└── com/example/UserRepositorySpec/
+    ├── users.csv              # Preparation data with [Scenario] column
+    └── expected/
+        └── users.csv          # Expected state with [Scenario] column
+```
+
+:::
 
 ### Validation Output
 

@@ -12,7 +12,7 @@ This directory contains technical specifications for the DB Tester framework.
 | [02-architecture.md](02-architecture) | Module structure and dependencies |
 | [03-public-api.md](03-public-api) | Annotations and configuration classes |
 | [04-configuration.md](04-configuration) | Configuration options and conventions |
-| [05-data-formats.md](05-data-formats) | CSV/TSV file structure and parsing |
+| [05-data-formats.md](05-data-formats) | CSV and TSV file structure and parsing |
 | [06-database-operations.md](06-database-operations) | Supported operations and execution flow |
 | [07-test-frameworks.md](07-test-frameworks) | JUnit, Spock, and Kotest integration |
 | [08-spi.md](08-spi) | Service Provider Interface extension points |

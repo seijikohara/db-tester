@@ -4,7 +4,7 @@ This document provides a high-level overview of the DB Tester framework.
 
 ## Purpose
 
-DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification using CSV/TSV-based test data files.
+DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification using CSV or TSV test data files.
 
 The framework addresses the following challenges in database testing:
 
@@ -13,42 +13,50 @@ The framework addresses the following challenges in database testing:
 | Test data management | File-based datasets in structured directories |
 | Repetitive setup code | Declarative `@Preparation` and `@Expectation` annotations |
 | Multi-database testing | Named `DataSource` registry with explicit binding |
-| Test isolation | Automatic cleanup via `CLEAN_INSERT` operation |
+| Test isolation | Automatic cleanup via configurable database operations |
 | Data format flexibility | Support for CSV and TSV formats |
+| Validation flexibility | Column-level comparison strategies |
 
 ## Key Concepts
 
 ### Preparation Phase
 
-The preparation phase executes before each test method. The framework:
+The preparation phase executes before each test method. The framework performs the following steps:
 
 1. Resolves dataset files based on test class and method names
 2. Filters rows by scenario markers when applicable
-3. Applies the configured database operation (default: `CLEAN_INSERT`)
+3. Orders tables using the configured strategy (default: `AUTO`)
+4. Applies the configured database operation (default: `CLEAN_INSERT`)
+
+Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `REFRESH`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
 
 ### Expectation Phase
 
-The expectation phase executes after each test method. The framework:
+The expectation phase executes after each test method. The framework performs the following steps:
 
 1. Loads expected datasets from the designated directory (default: `expected/` subdirectory)
 2. Reads actual data from the database
 3. Compares expected and actual states using configurable comparison strategies
+4. Reports differences with structured error messages
+
+Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `NOT_NULL`, `REGEX`.
 
 ### Convention-Based Discovery
 
-The framework resolves dataset locations automatically:
+The framework resolves dataset locations automatically based on test class package and name:
 
 ```
 src/test/resources/
 └── {package}/{TestClassName}/
     ├── TABLE_NAME.csv           # Preparation data
+    ├── load-order.txt           # Table ordering (optional)
     └── expected/
         └── TABLE_NAME.csv       # Expectation data
 ```
 
 ### Scenario Filtering
 
-Multiple test methods can share dataset files using scenario markers:
+Multiple test methods share dataset files using scenario markers in a `[Scenario]` column:
 
 | [Scenario] | id | name |
 |------------|----|------|
@@ -67,6 +75,8 @@ The framework minimizes explicit configuration by establishing sensible defaults
 - Expectation suffix defaults to `/expected`
 - Scenario marker column defaults to `[Scenario]`
 - Data format defaults to CSV
+- Table ordering strategy defaults to `AUTO`
+- Preparation operation defaults to `CLEAN_INSERT`
 
 ### Separation of API and Implementation
 
@@ -74,18 +84,18 @@ The framework separates public API from internal implementation:
 
 | Layer | Visibility | Purpose |
 |-------|------------|---------|
-| `db-tester-api` | Public | Annotations, configuration, SPI interfaces |
+| `db-tester-api` | Public | Annotations, configuration, domain models, SPI interfaces |
 | `db-tester-core` | Internal | JDBC operations, format parsing, SPI implementations |
 
-Test framework modules (`db-tester-junit`, `db-tester-spock`, `db-tester-kotest`) depend only on the API module at compile time. The core module is loaded at runtime via Java ServiceLoader.
+Test framework modules depend only on the API module at compile time. The core module loads at runtime via Java ServiceLoader.
 
 ### Immutability
 
 All public API classes are immutable:
 
-- Configuration records use Java `record` types
-- Value objects (TableName, ColumnName, CellValue) are final and immutable
-- Returned collections are unmodifiable
+- Configuration uses Java `record` types
+- Value objects (`TableName`, `ColumnName`, `CellValue`) are final and immutable
+- Returned collections are unmodifiable copies
 
 ### Null Safety
 
@@ -99,7 +109,7 @@ The framework uses JSpecify annotations for null safety:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| Java | 21 or later | JPMS module-info.java support |
+| Java | 21 or later | JPMS module support |
 | Groovy | 5 or later | For Spock modules |
 | Kotlin | 2 or later | For Kotest modules |
 | JUnit | 6 or later | JUnit Jupiter extension model |
@@ -109,13 +119,13 @@ The framework uses JSpecify annotations for null safety:
 
 ### Database Compatibility
 
-The framework uses standard JDBC operations and supports any JDBC-compliant database:
+The framework uses standard JDBC operations. It supports any JDBC-compliant database, including:
 
 - H2
-- MySQL
-- PostgreSQL
-- Derby
 - HSQLDB
+- Derby
+- PostgreSQL
+- MySQL
 - MS SQL Server
 - Oracle
 
@@ -138,7 +148,7 @@ The framework uses standard JDBC operations and supports any JDBC-compliant data
 - [Architecture](02-architecture) - Module structure and dependencies
 - [Public API](03-public-api) - Annotations and configuration classes
 - [Configuration](04-configuration) - Configuration options and conventions
-- [Data Formats](05-data-formats) - CSV/TSV file structure and parsing
+- [Data Formats](05-data-formats) - CSV and TSV file structure and parsing
 - [Database Operations](06-database-operations) - Supported CRUD operations
 - [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
 - [SPI](08-spi) - Service Provider Interface extension points

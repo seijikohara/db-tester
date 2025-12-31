@@ -13,8 +13,9 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 | テストデータ管理 | 構造化されたディレクトリ内のファイルベースのデータセット |
 | 反復的なセットアップコード | 宣言的な`@Preparation`および`@Expectation`アノテーション |
 | 複数データベースのテスト | 明示的なバインディングを持つ名前付き`DataSource`レジストリ |
-| テストの分離 | `CLEAN_INSERT`操作による自動クリーンアップ |
+| テストの分離 | 設定可能なデータベース操作による自動クリーンアップ |
 | データフォーマットの柔軟性 | CSVおよびTSVフォーマットのサポート |
+| 検証の柔軟性 | カラムレベルの比較戦略 |
 
 ## 主要概念
 
@@ -24,7 +25,10 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 
 1. テストクラスとメソッド名に基づいてデータセットファイルを解決
 2. 必要に応じてシナリオマーカーで行をフィルタリング
-3. 設定されたデータベース操作を適用（デフォルト: `CLEAN_INSERT`）
+3. 設定された戦略を使用してテーブルを順序付け（デフォルト: `AUTO`）
+4. 設定されたデータベース操作を適用（デフォルト: `CLEAN_INSERT`）
+
+利用可能な操作: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `REFRESH`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`
 
 ### 検証フェーズ
 
@@ -33,6 +37,9 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 1. 指定されたディレクトリ（デフォルト: `expected/`サブディレクトリ）から期待データセットを読み込み
 2. データベースから実際のデータを読み取り
 3. 設定可能な比較戦略を使用して期待値と実際の状態を比較
+4. 構造化されたエラーメッセージで差異を報告
+
+利用可能な比較戦略: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `NOT_NULL`, `REGEX`
 
 ### 規約ベースの検出
 
@@ -42,6 +49,7 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 src/test/resources/
 └── {package}/{TestClassName}/
     ├── TABLE_NAME.csv           # 準備データ
+    ├── load-order.txt           # テーブル読み込み順序（オプション）
     └── expected/
         └── TABLE_NAME.csv       # 検証データ
 ```
@@ -67,6 +75,8 @@ src/test/resources/
 - 検証サフィックスはデフォルトで`/expected`
 - シナリオマーカーカラムはデフォルトで`[Scenario]`
 - データフォーマットはデフォルトでCSV
+- テーブル順序戦略はデフォルトで`AUTO`
+- 準備操作はデフォルトで`CLEAN_INSERT`
 
 ### APIと実装の分離
 
@@ -74,7 +84,7 @@ src/test/resources/
 
 | レイヤー | 可視性 | 目的 |
 |----------|--------|------|
-| `db-tester-api` | パブリック | アノテーション、設定、SPIインターフェース |
+| `db-tester-api` | パブリック | アノテーション、設定、ドメインモデル、SPIインターフェース |
 | `db-tester-core` | 内部 | JDBC操作、フォーマット解析、SPI実装 |
 
 テストフレームワークモジュール（`db-tester-junit`、`db-tester-spock`、`db-tester-kotest`）は、コンパイル時にAPIモジュールのみに依存します。coreモジュールはJava ServiceLoader経由でランタイム時に読み込まれます。
@@ -138,7 +148,7 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 - [アーキテクチャ](02-architecture) - モジュール構造と依存関係
 - [パブリックAPI](03-public-api) - アノテーションと設定クラス
 - [設定](04-configuration) - 設定オプションと規約
-- [データフォーマット](05-data-formats) - CSV/TSVファイル構造と解析
+- [データフォーマット](05-data-formats) - CSVおよびTSVファイル構造と解析
 - [データベース操作](06-database-operations) - サポートされるCRUD操作
 - [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
 - [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント

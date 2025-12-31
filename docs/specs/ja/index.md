@@ -20,36 +20,30 @@ hero:
       link: https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit
 
 features:
-  - icon: 📝
+  - icon:
+      src: /icons/declarative.svg
     title: 宣言的なテスト
     details: "@Preparationと@Expectationアノテーションを使用して、テストデータのセットアップと検証を定義できます。"
-    link: /ja/03-public-api
-    linkText: APIリファレンスを見る
-  - icon: 📁
+  - icon:
+      src: /icons/convention.svg
     title: 設定より規約
-    details: テストクラスとメソッド名に基づいた自動データセット検出。規約に従うだけで動作します。
-    link: /ja/04-configuration
-    linkText: 規約を学ぶ
-  - icon: 🔧
+    details: テストクラスとメソッド名に基づいた自動データセット検出。規約に従えば動作します。
+  - icon:
+      src: /icons/frameworks.svg
     title: 複数フレームワーク対応
     details: JUnit Jupiter、Spock、Kotestを完全サポート。Spring Boot統合も利用可能です。
-    link: /ja/07-test-frameworks
-    linkText: フレームワーク統合
-  - icon: 📊
+  - icon:
+      src: /icons/data-formats.svg
     title: 柔軟なデータフォーマット
     details: CSVとTSVをサポート。シナリオフィルタリングにより複数のテストでデータセットを共有できます。
-    link: /ja/05-data-formats
-    linkText: データフォーマットガイド
-  - icon: 🗄️
+  - icon:
+      src: /icons/database.svg
     title: データベース操作
     details: CLEAN_INSERT、INSERT、UPDATE、DELETE、TRUNCATEなどをサポート。テーブル順序のカスタマイズも可能です。
-    link: /ja/06-database-operations
-    linkText: 操作リファレンス
-  - icon: 🔌
+  - icon:
+      src: /icons/extensible.svg
     title: 拡張可能なアーキテクチャ
     details: カスタムデータローダー、コンパレータ、操作ハンドラー用のサービスプロバイダーインターフェース（SPI）を提供します。
-    link: /ja/08-spi
-    linkText: 拡張ポイント
 ---
 
 ## クイックスタート
@@ -131,31 +125,108 @@ dependencies {
 
 ### 基本的な使い方
 
-```java
+::: code-group
+
+```java [JUnit]
+package com.example;
+
 @ExtendWith(DatabaseTestExtension.class)
+@Preparation  // CSVからテストデータを読み込む
+@Expectation  // データベースの状態を検証
 class UserRepositoryTest {
 
-    @Preparation  // CSVからテストデータを読み込む
-    @Expectation  // データベースの状態を検証
     @Test
     void shouldCreateUser() {
-        // テストロジックをここに記述
         userRepository.create(new User("john", "john@example.com"));
+    }
+
+    @Test
+    void shouldUpdateUser() {
+        userRepository.update(1L, new User("john", "john.doe@example.com"));
     }
 }
 ```
 
+```groovy [Spock]
+package com.example
+
+@DatabaseTest
+@Preparation  // CSVからテストデータを読み込む
+@Expectation  // データベースの状態を検証
+class UserRepositorySpec extends Specification {
+
+    def "should create user"() {
+        when:
+        userRepository.create(new User("john", "john@example.com"))
+
+        then:
+        noExceptionThrown()
+    }
+
+    def "should update user"() {
+        when:
+        userRepository.update(1L, new User("john", "john.doe@example.com"))
+
+        then:
+        noExceptionThrown()
+    }
+}
+```
+
+```kotlin [Kotest]
+package com.example
+
+@Preparation  // CSVからテストデータを読み込む
+@Expectation  // データベースの状態を検証
+class UserRepositorySpec : AnnotationSpec() {
+
+    init {
+        extensions(DatabaseTestExtension(registryProvider = { registry }))
+    }
+
+    @Test
+    fun shouldCreateUser() {
+        userRepository.create(User("john", "john@example.com"))
+    }
+
+    @Test
+    fun shouldUpdateUser() {
+        userRepository.update(1L, User("john", "john.doe@example.com"))
+    }
+}
+```
+
+:::
+
 ### ディレクトリ構造
 
-```
+::: code-group
+
+```text [JUnit]
 src/test/resources/
 └── com/example/UserRepositoryTest/
-    ├── shouldCreateUser/
-    │   └── users.csv           # 準備データ
-    └── shouldCreateUser/
-        └── expected/
-            └── users.csv       # 期待される状態
+    ├── users.csv              # 準備データ（[Scenario]列でフィルタリング）
+    └── expected/
+        └── users.csv          # 期待される状態（[Scenario]列でフィルタリング）
 ```
+
+```text [Spock]
+src/test/resources/
+└── com/example/UserRepositorySpec/
+    ├── users.csv              # 準備データ（[Scenario]列でフィルタリング）
+    └── expected/
+        └── users.csv          # 期待される状態（[Scenario]列でフィルタリング）
+```
+
+```text [Kotest]
+src/test/resources/
+└── com/example/UserRepositorySpec/
+    ├── users.csv              # 準備データ（[Scenario]列でフィルタリング）
+    └── expected/
+        └── users.csv          # 期待される状態（[Scenario]列でフィルタリング）
+```
+
+:::
 
 ### 検証出力
 

@@ -12,8 +12,8 @@ export default withMermaid({
 
   markdown: {
     theme: {
-      light: 'catppuccin-latte',
-      dark: 'catppuccin-mocha',
+      light: 'github-light',
+      dark: 'github-dark',
     },
   },
 
@@ -43,6 +43,7 @@ export default withMermaid({
               { text: 'Test Frameworks', link: '/07-test-frameworks' },
               { text: 'SPI', link: '/08-spi' },
               { text: 'Error Handling', link: '/09-error-handling' },
+              { text: 'Framework Comparison', link: '/10-comparison' },
             ],
           },
         ],
@@ -73,6 +74,7 @@ export default withMermaid({
               { text: 'テストフレームワーク', link: '/ja/07-test-frameworks' },
               { text: 'SPI', link: '/ja/08-spi' },
               { text: 'エラーハンドリング', link: '/ja/09-error-handling' },
+              { text: 'フレームワーク比較', link: '/ja/10-comparison' },
             ],
           },
         ],
@@ -143,6 +145,6 @@ export default withMermaid({
   },
 
   mermaid: {
-    theme: 'default',
+    theme: 'neutral',
   },
 })

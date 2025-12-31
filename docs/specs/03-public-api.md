@@ -2,12 +2,11 @@
 
 This document describes the public API provided by the `db-tester-api` module.
 
-
 ## Annotations
 
 ### @Preparation
 
-Declares datasets to be applied before a test method executes.
+Declares datasets to apply before a test method executes.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.Preparation`
 
@@ -43,7 +42,6 @@ void testWithForeignKeyOrdering() { }
 void testWithCustomPath() { }
 ```
 
-
 ### @Expectation
 
 Declares datasets that define the expected database state after test execution.
@@ -63,7 +61,7 @@ Declares datasets that define the expected database state after test execution.
 
 - Read-only comparison (no data modification)
 - Validates actual database state against expected datasets
-- Assertion failures reported via test framework
+- Reports assertion failures via test framework
 
 **Example**:
 
@@ -79,14 +77,13 @@ void testWithCustomExpectation() { }
 void testWithAlphabeticalOrdering() { }
 ```
 
-
 ### @DataSet
 
 Configures individual dataset parameters within `@Preparation` or `@Expectation`.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. It is used exclusively within `@Preparation#dataSets()` and `@Expectation#dataSets()` arrays. Attempting to apply it directly results in a compile-time error.
+**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. Use it exclusively within `@Preparation#dataSets()` and `@Expectation#dataSets()` arrays.
 
 **Attributes**:
 
@@ -118,7 +115,6 @@ void testMultipleDataSources() { }
 void testMultipleScenarios() { }
 ```
 
-
 ## DataSet Interfaces
 
 ### DataSet
@@ -148,7 +144,6 @@ Represents a logical collection of database tables.
 - All returned collections are immutable
 - Table names are unique within a dataset
 
-
 ### Table
 
 Represents the structure and data of a database table.
@@ -177,7 +172,6 @@ Represents the structure and data of a database table.
 - All returned collections are immutable
 - Row count equals `getRows().size()`
 
-
 ### Row
 
 Represents a single database record.
@@ -196,7 +190,6 @@ Represents a single database record.
 |--------|-------------|-------------|
 | `getValues()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
 | `getValue(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
-
 
 ## Domain Value Objects
 
@@ -226,7 +219,6 @@ Wraps a cell value with explicit null handling.
 |--------|-------------|-------------|
 | `isNull()` | `boolean` | Returns `true` if value is null |
 
-
 ### TableName
 
 Immutable identifier for a database table.
@@ -240,7 +232,6 @@ Immutable identifier for a database table.
 | Field | Type | Description |
 |-------|------|-------------|
 | `value` | `String` | Table name string |
-
 
 ### ColumnName
 
@@ -256,7 +247,6 @@ Immutable identifier for a table column.
 |-------|------|-------------|
 | `value` | `String` | Column name string |
 
-
 ### DataSourceName
 
 Immutable identifier for a registered DataSource.
@@ -271,6 +261,52 @@ Immutable identifier for a registered DataSource.
 |-------|------|-------------|
 | `value` | `String` | DataSource name string |
 
+### Column
+
+Represents a column with its name and comparison strategy.
+
+**Location**: `io.github.seijikohara.dbtester.api.domain.Column`
+
+**Type**: `record`
+
+**Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `ColumnName` | Column identifier |
+| `comparisonStrategy` | `ComparisonStrategy` | Comparison strategy for this column |
+
+### Cell
+
+Represents a cell containing column metadata and value.
+
+**Location**: `io.github.seijikohara.dbtester.api.domain.Cell`
+
+**Type**: `record`
+
+**Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `column` | `Column` | Column definition |
+| `value` | `CellValue` | Cell value |
+
+### ColumnMetadata
+
+Represents database column metadata retrieved from JDBC.
+
+**Location**: `io.github.seijikohara.dbtester.api.domain.ColumnMetadata`
+
+**Type**: `record`
+
+**Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | `ColumnName` | Column name |
+| `jdbcType` | `int` | JDBC type code from `java.sql.Types` |
+| `typeName` | `String` | Database-specific type name |
+| `nullable` | `boolean` | Whether column allows null values |
 
 ### ComparisonStrategy
 
@@ -288,12 +324,13 @@ Defines value comparison behavior during assertion.
 | `CASE_INSENSITIVE` | Case-insensitive string comparison |
 | `TIMESTAMP_FLEXIBLE` | Ignores sub-second precision and timezone |
 | `NOT_NULL` | Verifies value is not null |
+| `REGEX` | Pattern matching using regular expressions |
 
 **Factory Methods**:
 
 | Method | Description |
 |--------|-------------|
-| `regex(String)` | Creates regex pattern matcher |
+| `regex(String)` | Creates regex pattern matcher with the specified pattern |
 
 **Comparison Behavior**:
 
@@ -307,6 +344,91 @@ Defines value comparison behavior during assertion.
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
 
+## Assertion API
+
+### DatabaseAssertion
+
+Static facade for programmatic database assertions. This utility class delegates to the underlying assertion provider loaded via SPI.
+
+**Location**: `io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion`
+
+**Type**: Utility class (non-instantiable, static methods only)
+
+**Static Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `assertEquals(DataSet, DataSet)` | Asserts two datasets are equal |
+| `assertEquals(DataSet, DataSet, AssertionFailureHandler)` | Asserts with custom failure handler |
+| `assertEquals(Table, Table)` | Asserts two tables are equal |
+| `assertEquals(Table, Table, Collection<String>)` | Asserts tables with additional columns to include |
+| `assertEquals(Table, Table, AssertionFailureHandler)` | Asserts tables with custom failure handler |
+| `assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection<String>)` | Asserts table in datasets, ignoring specified columns |
+| `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
+| `assertEqualsByQuery(DataSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected dataset |
+| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
+
+**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
+
+**Example**:
+
+```java
+// Basic dataset comparison
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet);
+
+// With custom failure handler
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, (message, expected, actual) -> {
+    // Custom failure handling
+});
+
+// Ignoring specific columns
+DatabaseAssertion.assertEqualsIgnoreColumns(expectedDataSet, actualDataSet, "USERS", "CREATED_AT", "UPDATED_AT");
+
+// Comparing SQL query results
+DatabaseAssertion.assertEqualsByQuery(expectedDataSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
+```
+
+### AssertionFailureHandler
+
+Strategy interface for reacting to assertion mismatches. Implementations can translate individual failures into domain-specific actions such as raising custom exceptions, logging diagnostics, or aggregating differences.
+
+**Location**: `io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler`
+
+**Type**: `@FunctionalInterface`
+
+**Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `handleFailure(String, @Nullable Object, @Nullable Object)` | Handles a comparison failure between expected and actual values |
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `message` | `String` | Descriptive failure message including context (table name, row number, column name) |
+| `expected` | `@Nullable Object` | Expected value; may be null |
+| `actual` | `@Nullable Object` | Actual value found in database; may be null |
+
+**Example**:
+
+```java
+// Fail-fast strategy (default behavior)
+AssertionFailureHandler failFast = (message, expected, actual) -> {
+    throw new AssertionError(message);
+};
+
+// Collect all failures
+List<String> failures = new ArrayList<>();
+AssertionFailureHandler collector = (message, expected, actual) -> {
+    failures.add(String.format("%s: expected=%s, actual=%s", message, expected, actual));
+};
+
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, collector);
+if (!failures.isEmpty()) {
+    throw new AssertionError("Multiple failures:\n" + String.join("\n", failures));
+}
+```
 
 ## Exceptions
 
@@ -337,7 +459,6 @@ Base exception for all framework errors.
 | `DatabaseTesterException(String, Throwable)` | Message with cause |
 | `DatabaseTesterException(Throwable)` | Cause only |
 
-
 ### ConfigurationException
 
 Indicates invalid framework configuration.
@@ -348,7 +469,6 @@ Indicates invalid framework configuration.
 - Invalid file paths
 - Incompatible settings combination
 
-
 ### DataSetLoadException
 
 Indicates failure to load dataset files.
@@ -357,8 +477,7 @@ Indicates failure to load dataset files.
 
 - File not found
 - Invalid file format
-- Parse errors in CSV/TSV content
-
+- Parse errors in CSV or TSV content
 
 ### DataSourceNotFoundException
 
@@ -368,7 +487,6 @@ Indicates requested DataSource is not registered.
 
 - Named DataSource not registered in `DataSourceRegistry`
 - Default DataSource not set when required
-
 
 ### DatabaseOperationException
 
@@ -380,22 +498,22 @@ Indicates database operation failure.
 - Constraint violations
 - Connection failures
 
-
 ### ValidationException
 
 Indicates assertion or validation failure.
 
 **Typical Causes**:
 
-- Expected/actual data mismatch
+- Expected and actual data mismatch
 - Row count differences
 - Column value mismatches
 
 **Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-error-handling#validation-errors) for format details.
-
 
 ## Related Specifications
 
 - [Overview](01-overview) - Framework introduction
 - [Configuration](04-configuration) - Configuration classes
 - [Database Operations](06-database-operations) - Operation enum details
+- [SPI](08-spi) - Service Provider Interface extension points
+- [Error Handling](09-error-handling) - Error messages and exception types

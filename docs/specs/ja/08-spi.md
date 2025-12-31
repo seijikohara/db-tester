@@ -403,13 +403,13 @@ com.example.CustomScenarioNameResolver
 ```java
 public class XmlFormatProvider implements FormatProvider {
     @Override
-    public boolean canHandle(String fileExtension) {
-        return ".xml".equals(fileExtension);
+    public FileExtension supportedFileExtension() {
+        return new FileExtension("xml");
     }
 
     @Override
-    public DataSet parseDataSet(Path filePath, ConventionSettings conventions) {
-        // XMLファイルを解析
+    public DataSet parse(Path directory) {
+        // ディレクトリ内のすべてのXMLファイルを解析
     }
 }
 ```
@@ -432,11 +432,12 @@ com.example.XmlFormatProvider
 | `AssertionProvider` | 最初に見つかったもの |
 | `ExpectationProvider` | 最初に見つかったもの |
 | `ScenarioNameResolver` | `priority()`でソート、`canResolve()`がtrueを返す最初のもの |
-| `FormatProvider` | `canHandle()`がtrueを返す最初のもの |
+| `FormatProvider` | 一致する`supportedFileExtension()`を持つ最初のもの |
 
 
 ## 関連仕様
 
+- [概要](01-overview) - フレームワークの目的と主要概念
 - [アーキテクチャ](02-architecture) - モジュール構造
 - [設定](04-configuration) - 設定クラス
 - [テストフレームワーク](07-test-frameworks) - フレームワーク統合

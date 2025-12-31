@@ -2,7 +2,6 @@
 
 This document describes the file formats supported by the DB Tester framework and their parsing rules.
 
-
 ## Supported Formats
 
 The framework supports two delimited text formats:
@@ -22,7 +21,6 @@ var conventions = ConventionSettings.standard()
 ```
 
 When loading datasets from a directory, only files matching the configured extension are processed.
-
 
 ## File Structure
 
@@ -62,7 +60,6 @@ order_id	user_id	amount	status
 1001	1	99.99	PENDING
 1002	2	149.50	COMPLETED
 ```
-
 
 ## Scenario Filtering
 
@@ -119,7 +116,6 @@ void testMultipleScenarios() { }
 
 Rows matching any of the specified scenarios are included.
 
-
 ## Special Values
 
 ### NULL Values
@@ -163,7 +159,6 @@ Values containing delimiters or special characters must be quoted:
 | Contains newline | `"line1\nline2"` |
 | Starts with whitespace | `" leading space"` |
 
-
 ## Directory Convention
 
 ### Standard Directory Structure
@@ -174,6 +169,7 @@ src/test/resources/
     └── {TestClassName}/
         ├── TABLE1.csv          # Preparation data
         ├── TABLE2.csv
+        ├── load-order.txt      # Table ordering (optional)
         └── expected/           # Expectation data
             ├── TABLE1.csv
             └── TABLE2.csv
@@ -208,7 +204,6 @@ Table names are derived from filenames:
 
 Case sensitivity depends on the database configuration.
 
-
 ## Load Order
 
 ### Overview
@@ -230,7 +225,7 @@ src/test/resources/
 
 ### File Format
 
-The `load-order.txt` file uses a simple line-based format:
+The `load-order.txt` file uses a line-based format:
 
 | Element | Description |
 |---------|-------------|
@@ -257,10 +252,8 @@ ORDER_ITEMS
 
 When `load-order.txt` does not exist in the dataset directory:
 
-1. Tables are sorted **alphabetically** by filename
-2. The framework does **not** automatically generate the file
-
-**Note**: Unlike some other database testing frameworks, db-tester does not auto-create the `load-order.txt` file. This is intentional for DbUnit compatibility and to avoid modifying test resources.
+1. Tables are sorted alphabetically by filename
+2. The framework does not automatically generate the file
 
 To explicitly require the load order file, use:
 
@@ -268,7 +261,7 @@ To explicitly require the load order file, use:
 @Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 ```
 
-This will throw a `DataSetLoadException` if `load-order.txt` is not found.
+This throws a `DataSetLoadException` if `load-order.txt` is not found.
 
 ### Processing Order by Operation
 
@@ -306,7 +299,6 @@ The `TableOrderingStrategy` enum controls how table ordering is determined. See 
 |-------|-----------|
 | Cannot read ordering file | `DataSetLoadException` |
 | File required but not found (`LOAD_ORDER_FILE` strategy) | `DataSetLoadException` |
-
 
 ## Parsing Rules
 
@@ -349,7 +341,7 @@ All values are parsed as strings and converted during database operations:
 | VARCHAR, TEXT | Use as-is |
 | DATE | Parse ISO format (YYYY-MM-DD) |
 | TIMESTAMP | Parse ISO format (YYYY-MM-DD HH:MM:SS) |
-| BOOLEAN | Parse "true"/"false" (case-insensitive) |
+| BOOLEAN | Parse "true" or "false" (case-insensitive) |
 | BLOB | Base64 decode |
 | CLOB | Use as-is |
 
@@ -367,9 +359,9 @@ All values are parsed as strings and converted during database operations:
 | Mismatched column count | `DataSetLoadException` |
 | Parse error | `DataSetLoadException` with details |
 
-
 ## Related Specifications
 
+- [Overview](01-overview) - Framework purpose and key concepts
 - [Configuration](04-configuration) - DataFormat and ConventionSettings
 - [Database Operations](06-database-operations) - Table ordering and operations
 - [Public API](03-public-api) - Annotation attributes

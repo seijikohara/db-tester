@@ -272,6 +272,56 @@ void testMultipleScenarios() { }
 | `value` | `String` | DataSource名文字列 |
 
 
+### Column
+
+カラム名と比較戦略を持つカラムを表します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.domain.Column`
+
+**型**: `record`
+
+**フィールド**:
+
+| フィールド | 型 | 説明 |
+|------------|-----|------|
+| `name` | `ColumnName` | カラム識別子 |
+| `comparisonStrategy` | `ComparisonStrategy` | このカラムの比較戦略 |
+
+
+### Cell
+
+カラムメタデータと値を含むセルを表します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.domain.Cell`
+
+**型**: `record`
+
+**フィールド**:
+
+| フィールド | 型 | 説明 |
+|------------|-----|------|
+| `column` | `Column` | カラム定義 |
+| `value` | `CellValue` | セル値 |
+
+
+### ColumnMetadata
+
+JDBCから取得したデータベースカラムメタデータを表します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.domain.ColumnMetadata`
+
+**型**: `record`
+
+**フィールド**:
+
+| フィールド | 型 | 説明 |
+|------------|-----|------|
+| `name` | `ColumnName` | カラム名 |
+| `jdbcType` | `int` | `java.sql.Types`からのJDBC型コード |
+| `typeName` | `String` | データベース固有の型名 |
+| `nullable` | `boolean` | カラムがnull値を許可するかどうか |
+
+
 ### ComparisonStrategy
 
 アサーション時の値比較動作を定義します。
@@ -288,6 +338,7 @@ void testMultipleScenarios() { }
 | `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 |
 | `TIMESTAMP_FLEXIBLE` | サブ秒精度とタイムゾーンを無視 |
 | `NOT_NULL` | 値がnullでないことを検証 |
+| `REGEX` | 正規表現を使用したパターンマッチング |
 
 **ファクトリメソッド**:
 
@@ -306,6 +357,93 @@ void testMultipleScenarios() { }
 | `TIMESTAMP_FLEXIBLE` | true | false | false | 正規化比較 |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
+
+
+## アサーションAPI
+
+### DatabaseAssertion
+
+プログラマティックなデータベースアサーションのための静的ファサードです。このユーティリティクラスはSPI経由でロードされたアサーションプロバイダーに処理を委譲します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion`
+
+**型**: ユーティリティクラス（インスタンス化不可、静的メソッドのみ）
+
+**静的メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `assertEquals(DataSet, DataSet)` | 2つのデータセットが等しいことを検証 |
+| `assertEquals(DataSet, DataSet, AssertionFailureHandler)` | カスタム失敗ハンドラーで検証 |
+| `assertEquals(Table, Table)` | 2つのテーブルが等しいことを検証 |
+| `assertEquals(Table, Table, Collection<String>)` | 追加カラムを含めてテーブルを検証 |
+| `assertEquals(Table, Table, AssertionFailureHandler)` | カスタム失敗ハンドラーでテーブルを検証 |
+| `assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection<String>)` | 指定カラムを除外してデータセット内のテーブルを検証 |
+| `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
+| `assertEqualsByQuery(DataSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待データセットと検証 |
+| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
+
+**可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
+
+**例**:
+
+```java
+// 基本的なデータセット比較
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet);
+
+// カスタム失敗ハンドラー付き
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, (message, expected, actual) -> {
+    // カスタム失敗処理
+});
+
+// 特定カラムを除外
+DatabaseAssertion.assertEqualsIgnoreColumns(expectedDataSet, actualDataSet, "USERS", "CREATED_AT", "UPDATED_AT");
+
+// SQLクエリ結果の比較
+DatabaseAssertion.assertEqualsByQuery(expectedDataSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
+```
+
+### AssertionFailureHandler
+
+アサーション不一致に対応するための戦略インターフェースです。実装はカスタム例外のスロー、診断ログの出力、差分の蓄積など、ドメイン固有のアクションに変換できます。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler`
+
+**型**: `@FunctionalInterface`
+
+**メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `handleFailure(String, @Nullable Object, @Nullable Object)` | 期待値と実際値の比較失敗を処理 |
+
+**パラメータ**:
+
+| パラメータ | 型 | 説明 |
+|-----------|-----|------|
+| `message` | `String` | コンテキスト（テーブル名、行番号、カラム名）を含む説明的な失敗メッセージ |
+| `expected` | `@Nullable Object` | 期待値。nullの場合あり |
+| `actual` | `@Nullable Object` | データベースで見つかった実際の値。nullの場合あり |
+
+**例**:
+
+```java
+// フェイルファスト戦略（デフォルト動作）
+AssertionFailureHandler failFast = (message, expected, actual) -> {
+    throw new AssertionError(message);
+};
+
+// 全失敗を収集
+List<String> failures = new ArrayList<>();
+AssertionFailureHandler collector = (message, expected, actual) -> {
+    failures.add(String.format("%s: expected=%s, actual=%s", message, expected, actual));
+};
+
+DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, collector);
+if (!failures.isEmpty()) {
+    throw new AssertionError("Multiple failures:\n" + String.join("\n", failures));
+}
+```
 
 
 ## 例外
@@ -399,3 +537,5 @@ classDiagram
 - [概要](01-overview) - フレームワークの紹介
 - [設定](04-configuration) - 設定クラス
 - [データベース操作](06-database-operations) - Operation enumの詳細
+- [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
+- [エラーハンドリング](09-error-handling) - エラーメッセージと例外型

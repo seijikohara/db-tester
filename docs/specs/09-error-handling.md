@@ -22,7 +22,7 @@ classDiagram
 | Exception | Cause |
 |-----------|-------|
 | `ValidationException` | Expected vs actual data mismatch |
-| `DataSetLoadException` | Dataset file read/parse failure |
+| `DataSetLoadException` | Dataset file read or parse failure |
 | `DataSourceNotFoundException` | DataSource not registered |
 | `DatabaseOperationException` | SQL execution failure |
 | `ConfigurationException` | Framework initialization failure |
@@ -62,7 +62,7 @@ tables:
           type: "DECIMAL(10,2)"
 ```
 
-The output is **valid YAML** (after the first summary line) and can be parsed by standard YAML libraries for CI/CD integration.
+The output is **valid YAML** (after the first summary line). Standard YAML libraries can parse it for CI/CD integration.
 
 ### Output Structure
 
@@ -72,7 +72,7 @@ The output is **valid YAML** (after the first summary line) and can be parsed by
 | `summary.total_differences` | Total count of all differences |
 | `tables.<name>.differences` | List of differences for each table |
 | `path` | Location: `table_count`, `row_count`, or `row[N].COLUMN` |
-| `expected` / `actual` | The expected and actual values |
+| `expected` and `actual` | The expected and actual values |
 | `column` | JDBC metadata (type, nullable, primary_key) when available |
 
 ### Difference Types
@@ -93,7 +93,7 @@ The comparator applies the following rules before reporting mismatches:
 | NULL handling | Both NULL = match, one NULL = mismatch |
 | Numeric comparison | String "123" matches Integer 123 |
 | Floating point | Epsilon comparison (precision 1e-6) |
-| Boolean | "1"/"0"/"true"/"false"/"yes"/"no"/"y"/"n" supported |
+| Boolean | "1", "0", "true", "false", "yes", "no", "y", and "n" supported |
 | Timestamp precision | "2024-01-01 10:00:00" matches "2024-01-01 10:00:00.0" |
 | CLOB | Compared as string |
 
@@ -323,6 +323,7 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 
 ## Related Specifications
 
+- [Overview](01-overview) - Framework purpose and key concepts
 - [Public API](03-public-api) - Exception classes
 - [Database Operations](06-database-operations) - Operation failures
 - [Test Frameworks](07-test-frameworks) - Test lifecycle and error handling

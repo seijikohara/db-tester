@@ -2,7 +2,6 @@
 
 This document describes the configuration classes and options available in the DB Tester framework.
 
-
 ## Configuration Class
 
 Aggregates runtime configuration for the database testing extension.
@@ -49,7 +48,6 @@ static void setup(ExtensionContext context) {
 }
 ```
 
-
 ## ConventionSettings
 
 Defines naming conventions for dataset discovery and scenario filtering.
@@ -87,6 +85,7 @@ src/test/resources/
 └── {test.class.package}/{TestClassName}/
     ├── TABLE1.csv           # Preparation dataset
     ├── TABLE2.csv
+    ├── load-order.txt       # Table ordering (optional)
     └── expected/            # Expectation datasets (suffix configurable)
         ├── TABLE1.csv
         └── TABLE2.csv
@@ -97,6 +96,7 @@ When `baseDirectory` is specified:
 ```
 {baseDirectory}/
 ├── TABLE1.csv
+├── load-order.txt
 └── expected/
     └── TABLE1.csv
 ```
@@ -111,10 +111,9 @@ The `expectationSuffix` is appended to the preparation path:
 | `/data/test` | `/expected` | `/data/test/expected` |
 | `custom/path` | `/verify` | `custom/path/verify` |
 
-
 ## DataSourceRegistry
 
-Mutable registry for `javax.sql.DataSource` instances.
+Thread-safe registry for `javax.sql.DataSource` instances.
 
 **Location**: `io.github.seijikohara.dbtester.api.config.DataSourceRegistry`
 
@@ -176,7 +175,6 @@ static void setup(ExtensionContext context) {
 }
 ```
 
-
 ## OperationDefaults
 
 Defines default database operations for preparation and expectation phases.
@@ -189,15 +187,14 @@ Defines default database operations for preparation and expectation phases.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before a test runs |
-| `expectation` | `Operation` | `NONE` | Default operation executed after a test finishes |
+| `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before test runs |
+| `expectation` | `Operation` | `NONE` | Default operation executed after test completes |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
 | `standard()` | Creates defaults with `CLEAN_INSERT` for preparation and `NONE` for expectation |
-
 
 ## DataFormat
 
@@ -228,10 +225,9 @@ When loading datasets from a directory:
 2. Parse each file as a table (filename without extension = table name)
 3. Ignore files with other extensions
 
-
 ## TableMergeStrategy
 
-Defines how tables from multiple datasets are merged.
+Defines how tables from multiple datasets merge.
 
 **Location**: `io.github.seijikohara.dbtester.api.config.TableMergeStrategy`
 
@@ -266,7 +262,6 @@ When both datasets contain the same table:
 | `UNION` | Combine rows, remove exact duplicates |
 | `UNION_ALL` | Combine all rows, keep duplicates |
 
-
 ## TestContext
 
 Immutable snapshot of test execution context.
@@ -286,7 +281,7 @@ Immutable snapshot of test execution context.
 
 ### Purpose
 
-`TestContext` provides a framework-agnostic representation of test execution state. Test framework extensions (JUnit, Spock) create `TestContext` instances from their native context objects.
+`TestContext` provides a framework-agnostic representation of test execution state. Test framework extensions (JUnit, Spock, and Kotest) create `TestContext` instances from their native context objects.
 
 ### Usage
 
@@ -303,11 +298,11 @@ TestContext context = new TestContext(
 List<DataSet> datasets = loader.loadPreparationDataSets(context);
 ```
 
-
 ## Related Specifications
 
 - [Overview](01-overview) - Framework purpose and key concepts
 - [Public API](03-public-api) - Annotations and interfaces
-- [Data Formats](05-data-formats) - CSV/TSV file structure
+- [Data Formats](05-data-formats) - CSV and TSV file structure
 - [Database Operations](06-database-operations) - Supported operations
+- [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
 - [Error Handling](09-error-handling) - Error messages and exception types

@@ -2,7 +2,6 @@
 
 This document describes the integration with JUnit, Spock, and Kotest test frameworks.
 
-
 ## JUnit Integration
 
 ### Module
@@ -122,7 +121,6 @@ class UserRepositoryTest {
 }
 ```
 
-
 ## Spock Integration
 
 ### Module
@@ -223,7 +221,6 @@ def 'should process #status order'() {
 
 Scenario names: `"should process PENDING order"`, `"should process COMPLETED order"`
 
-
 ## Kotest Integration
 
 ### Module
@@ -232,7 +229,7 @@ Scenario names: `"should process PENDING order"`, `"should process COMPLETED ord
 
 ### Extension Class
 
-**Location**: `io.github.seijikohara.dbtester.kotest.DatabaseTestExtension`
+**Location**: `io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension`
 
 **Type**: `TestCaseExtension` - Intercepts test case execution for preparation and expectation phases.
 
@@ -341,7 +338,6 @@ DB Tester requires `AnnotationSpec` style for Kotest integration because:
 2. Method resolution via reflection is reliable
 3. Familiar JUnit-like structure for Java developers
 
-
 ## Spring Boot Integration
 
 ### JUnit Spring Boot Starter
@@ -408,7 +404,7 @@ class MultiDatabaseTest {
 Configure via `application.properties` or `application.yml`:
 
 ```properties
-# Enable/disable DB Tester (default: true)
+# Enable or disable DB Tester (default: true)
 db-tester.enabled=true
 
 # Auto-register DataSource beans (default: true)
@@ -433,7 +429,7 @@ db-tester.operation.preparation=CLEAN_INSERT
 db-tester.operation.expectation=NONE
 ```
 
-**Note**: Property names use singular form (`convention`, `operation`) not plural.
+Property names use singular form (`convention`, `operation`) not plural.
 
 ### Spock Spring Boot Starter
 
@@ -493,7 +489,6 @@ Auto-configuration classes:
 | JUnit Starter | `DbTesterJUnitAutoConfiguration` |
 | Spock Starter | `DbTesterSpockAutoConfiguration` |
 | Kotest Starter | `DbTesterKotestAutoConfiguration` |
-
 
 ## Lifecycle Hooks
 
@@ -595,7 +590,6 @@ flowchart TD
 | Preparation | `DatabaseOperationException` | Test fails before execution |
 | Test | Any exception | Expectation still runs |
 | Expectation | `ValidationException` | Test fails with comparison details |
-
 
 ## Related Specifications
 

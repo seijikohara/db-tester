@@ -87,6 +87,7 @@ src/test/resources/
 └── {test.class.package}/{TestClassName}/
     ├── TABLE1.csv           # 準備データセット
     ├── TABLE2.csv
+    ├── load-order.txt       # テーブル順序（オプション）
     └── expected/            # 期待データセット（サフィックスは設定可能）
         ├── TABLE1.csv
         └── TABLE2.csv
@@ -97,6 +98,7 @@ src/test/resources/
 ```
 {baseDirectory}/
 ├── TABLE1.csv
+├── load-order.txt
 └── expected/
     └── TABLE1.csv
 ```
@@ -286,7 +288,7 @@ static void setup(ExtensionContext context) {
 
 ### 目的
 
-`TestContext`は、テスト実行状態のフレームワーク非依存の表現を提供します。テストフレームワーク拡張（JUnit、Spock）は、ネイティブコンテキストオブジェクトから`TestContext`インスタンスを作成します。
+`TestContext`は、テスト実行状態のフレームワーク非依存の表現を提供します。テストフレームワーク拡張（JUnit、Spock、およびKotest）は、ネイティブコンテキストオブジェクトから`TestContext`インスタンスを作成します。
 
 ### 使用法
 
@@ -308,6 +310,7 @@ List<DataSet> datasets = loader.loadPreparationDataSets(context);
 
 - [概要](01-overview) - フレームワークの目的と主要概念
 - [パブリックAPI](03-public-api) - アノテーションとインターフェース
-- [データフォーマット](05-data-formats) - CSV/TSVファイル構造
+- [データフォーマット](05-data-formats) - CSVおよびTSVファイル構造
 - [データベース操作](06-database-operations) - サポートされる操作
+- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
 - [エラーハンドリング](09-error-handling) - エラーメッセージと例外型

@@ -53,9 +53,9 @@ graph TD
 | Module | Responsibility |
 |--------|----------------|
 | `db-tester-bom` | Version management and dependency alignment |
-| `db-tester-api` | Public annotations, configuration, SPI interfaces |
+| `db-tester-api` | Public annotations, configuration, domain models, SPI interfaces |
 | `db-tester-core` | JDBC operations, format parsing, SPI implementations |
-| `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEach callbacks |
+| `db-tester-junit` | JUnit Jupiter BeforeEach and AfterEach callbacks |
 | `db-tester-spock` | Spock annotation-driven extension and interceptors |
 | `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
 | `db-tester-junit-spring-boot-starter` | Spring Boot auto-configuration for JUnit |
@@ -64,162 +64,55 @@ graph TD
 
 ## Module Dependencies
 
-### API Module (`db-tester-api`)
+Dependencies are defined in each module's `build.gradle.kts`. See the source files for current dependencies:
 
-The API module has no internal dependencies. External dependencies:
+| Module | Build Configuration |
+|--------|---------------------|
+| `db-tester-api` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-api/build.gradle.kts) |
+| `db-tester-core` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-core/build.gradle.kts) |
+| `db-tester-junit` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit/build.gradle.kts) |
+| `db-tester-spock` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock/build.gradle.kts) |
+| `db-tester-kotest` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest/build.gradle.kts) |
+| `db-tester-junit-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit-spring-boot-starter/build.gradle.kts) |
+| `db-tester-spock-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock-spring-boot-starter/build.gradle.kts) |
+| `db-tester-kotest-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest-spring-boot-starter/build.gradle.kts) |
 
-| Dependency | Purpose |
-|------------|---------|
-| `org.jspecify:jspecify` | Null safety annotations |
-| `java.sql` | `DataSource` interface |
-
-### Core Module (`db-tester-core`)
-
-| Dependency | Scope | Purpose |
-|------------|-------|---------|
-| `db-tester-api` | Compile | Public API classes |
-| `org.jspecify:jspecify` | Compile | Null safety annotations |
-| `org.slf4j:slf4j-api` | Compile | Logging abstraction |
-
-### Test Framework Modules
-
-JUnit, Spock, and Kotest modules depend on `db-tester-api` at compile time. The `db-tester-core` module is discovered at runtime via ServiceLoader.
-
-| Module | Compile Dependencies | Runtime Dependencies |
-|--------|---------------------|----------------------|
-| `db-tester-junit` | `db-tester-api`, `junit-jupiter-api` | `db-tester-core` |
-| `db-tester-spock` | `db-tester-api`, `spock-core` | `db-tester-core` |
-| `db-tester-kotest` | `db-tester-api`, `kotest-framework-api` | `db-tester-core` |
-
-### Spring Boot Starter Modules
-
-| Module | Dependencies |
-|--------|--------------|
-| `db-tester-junit-spring-boot-starter` | `db-tester-junit`, `db-tester-core`, `spring-boot-autoconfigure` |
-| `db-tester-spock-spring-boot-starter` | `db-tester-spock`, `db-tester-core`, `spring-boot-autoconfigure` |
-| `db-tester-kotest-spring-boot-starter` | `db-tester-kotest`, `db-tester-core`, `spring-boot-autoconfigure` |
+Test framework modules depend on `db-tester-api` at compile time. The `db-tester-core` module loads at runtime via ServiceLoader.
 
 ## Package Organization
 
-### API Module Packages
+### API Module
 
-```
-io.github.seijikohara.dbtester.api
-├── annotation/
-│   ├── Preparation.java
-│   ├── Expectation.java
-│   └── DataSet.java
-├── assertion/
-│   ├── DatabaseAssertion.java
-│   └── AssertionFailureHandler.java
-├── config/
-│   ├── Configuration.java
-│   ├── ConventionSettings.java
-│   ├── DataFormat.java
-│   ├── DataSourceRegistry.java
-│   ├── OperationDefaults.java
-│   └── TableMergeStrategy.java
-├── context/
-│   └── TestContext.java
-├── dataset/
-│   ├── DataSet.java
-│   ├── Table.java
-│   └── Row.java
-├── domain/
-│   ├── CellValue.java
-│   ├── ColumnName.java
-│   ├── TableName.java
-│   ├── DataSourceName.java
-│   ├── Column.java
-│   ├── Cell.java
-│   ├── ColumnMetadata.java
-│   └── ComparisonStrategy.java
-├── exception/
-│   ├── DatabaseTesterException.java
-│   ├── ConfigurationException.java
-│   ├── DataSetLoadException.java
-│   ├── DataSourceNotFoundException.java
-│   ├── DatabaseOperationException.java
-│   └── ValidationException.java
-├── loader/
-│   └── DataSetLoader.java
-├── operation/
-│   ├── Operation.java
-│   └── TableOrderingStrategy.java
-├── scenario/
-│   ├── ScenarioName.java
-│   └── ScenarioNameResolver.java
-└── spi/
-    ├── AssertionProvider.java
-    ├── DataSetLoaderProvider.java
-    ├── ExpectationProvider.java
-    └── OperationProvider.java
-```
+| Package | Responsibility |
+|---------|----------------|
+| `annotation` | `@Preparation`, `@Expectation`, `@DataSet` annotations |
+| `assertion` | Programmatic assertion API |
+| `config` | Configuration classes and registries |
+| `context` | Test execution context |
+| `dataset` | Dataset, Table, Row interfaces |
+| `domain` | Value objects (`TableName`, `ColumnName`, `CellValue`) |
+| `exception` | Exception hierarchy |
+| `loader` | Dataset loader interface |
+| `operation` | Operation enum and strategies |
+| `scenario` | Scenario filtering interfaces |
+| `spi` | Service provider interfaces |
 
-### Core Module Packages
+Source: [db-tester-api/src/main/java](https://github.com/seijikohara/db-tester/tree/main/db-tester-api/src/main/java/io/github/seijikohara/dbtester/api)
 
-```
-io.github.seijikohara.dbtester.internal
-├── assertion/
-│   ├── ComparisonResult.java
-│   ├── DataSetComparator.java
-│   └── ExpectationVerifier.java
-├── dataset/
-│   ├── SimpleDataSet.java
-│   ├── SimpleTable.java
-│   ├── SimpleRow.java
-│   ├── ScenarioTable.java
-│   └── TableOrderingResolver.java
-├── domain/
-│   ├── ScenarioMarker.java
-│   ├── SchemaName.java
-│   ├── FileExtension.java
-│   └── StringIdentifier.java
-├── format/
-│   ├── TableOrdering.java
-│   ├── csv/CsvFormatProvider.java
-│   ├── tsv/TsvFormatProvider.java
-│   ├── parser/
-│   │   ├── DelimitedParser.java
-│   │   └── DelimiterConfig.java
-│   └── spi/
-│       ├── FormatProvider.java
-│       └── FormatRegistry.java
-├── jdbc/
-│   ├── Jdbc.java
-│   ├── read/
-│   │   ├── TableReader.java
-│   │   ├── TableOrderResolver.java
-│   │   └── TypeConverter.java
-│   └── write/
-│       ├── OperationExecutor.java
-│       ├── SqlBuilder.java
-│       ├── ParameterBinder.java
-│       ├── TableExecutor.java
-│       ├── InsertExecutor.java
-│       ├── UpdateExecutor.java
-│       ├── DeleteExecutor.java
-│       ├── RefreshExecutor.java
-│       └── TruncateExecutor.java
-├── loader/
-│   ├── TestClassNameBasedDataSetLoader.java
-│   ├── DefaultDataSetLoaderProvider.java
-│   ├── AnnotationResolver.java
-│   ├── DataSetFactory.java
-│   ├── DataSetMerger.java
-│   └── DirectoryResolver.java
-├── scenario/
-│   ├── ScenarioFilter.java
-│   ├── FilteredDataSet.java
-│   └── FilteredTable.java
-├── spi/
-│   ├── DefaultAssertionProvider.java
-│   ├── DefaultExpectationProvider.java
-│   ├── DefaultOperationProvider.java
-│   └── ScenarioNameResolverRegistry.java
-└── util/
-    └── TopologicalSorter.java
-```
+### Core Module
+
+| Package | Responsibility |
+|---------|----------------|
+| `assertion` | Dataset comparison and verification |
+| `dataset` | Dataset, Table, Row implementations |
+| `domain` | Internal value objects |
+| `format` | CSV/TSV parsing and format providers |
+| `jdbc` | JDBC read/write operations |
+| `loader` | Convention-based dataset loading |
+| `scenario` | Scenario filtering implementation |
+| `spi` | SPI implementations |
+
+Source: [db-tester-core/src/main/java](https://github.com/seijikohara/db-tester/tree/main/db-tester-core/src/main/java/io/github/seijikohara/dbtester/internal)
 
 ## Architectural Patterns
 
@@ -227,7 +120,7 @@ io.github.seijikohara.dbtester.internal
 
 | Layer | Modules | Responsibility |
 |-------|---------|----------------|
-| Presentation | junit, spock, starters | Test framework integration |
+| Presentation | junit, spock, kotest, starters | Test framework integration |
 | Application | api | Public interfaces and contracts |
 | Domain | core (dataset, domain) | Business logic and entities |
 | Infrastructure | core (jdbc, format) | Database and file system access |
@@ -270,9 +163,10 @@ Operations and comparison strategies use the strategy pattern:
 
 | Strategy Interface | Implementations |
 |-------------------|-----------------|
-| `Operation` enum | NONE, INSERT, UPDATE, DELETE, REFRESH, CLEAN_INSERT, etc. |
+| `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, REFRESH, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
 | `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
+| `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |
 | `FormatProvider` | CsvFormatProvider, TsvFormatProvider |
 
 ## JPMS Support
