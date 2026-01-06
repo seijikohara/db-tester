@@ -299,23 +299,32 @@ shouldDeleteUser,1,delete_me,delete@example.com
 
 Each test method loads only rows matching its name.
 
-### Custom Paths
+### Custom Resource Location
 
-Specify explicit paths instead of convention-based discovery:
+Specify explicit resource locations instead of convention-based discovery:
 
 ```java
-@DataSet(paths = "custom/data/users.csv")
-@ExpectedDataSet(paths = "custom/expected/users.csv")
-void testWithCustomPaths() { }
+@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/data"))
+@ExpectedDataSet(dataSets = @DataSetSource(resourceLocation = "custom/expected"))
+void testWithCustomLocation() { }
 ```
 
 ### Column Exclusion
 
-Exclude columns from verification (timestamps, auto-generated IDs):
+Exclude columns from verification using the programmatic API:
 
 ```java
-@ExpectedDataSet(excludeColumns = {"CREATED_AT", "UPDATED_AT"})
-void testWithExcludedColumns() { }
+@Test
+@DataSet
+void testWithExcludedColumns() {
+    // Execute test logic...
+
+    // Verify with column exclusion
+    TableSet expected = loadExpectedDataSet();
+    TableSet actual = readFromDatabase();
+    DatabaseAssertion.assertEqualsIgnoreColumns(
+        expected, actual, "USERS", "CREATED_AT", "UPDATED_AT");
+}
 ```
 
 ---
