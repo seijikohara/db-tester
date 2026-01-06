@@ -13,6 +13,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtens
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -78,7 +79,8 @@ public final class ConfigurationCustomizationTest {
                 "[TestCase]", // custom scenario marker
                 DataFormat.CSV, // use CSV format (default)
                 TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
-                ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                Set.of()));
     DatabaseTestExtension.setConfiguration(context, customConfig);
 
     final var testRegistry = DatabaseTestExtension.getRegistry(context);

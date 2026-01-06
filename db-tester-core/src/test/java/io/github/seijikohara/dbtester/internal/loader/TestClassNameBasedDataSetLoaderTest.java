@@ -16,6 +16,7 @@ import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,7 +54,8 @@ class TestClassNameBasedDataSetLoaderTest {
             "SCENARIO",
             DataFormat.CSV,
             TableMergeStrategy.UNION_ALL,
-            ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+            ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+            Set.of());
     final var operationDefaults = new OperationDefaults(Operation.CLEAN_INSERT, Operation.NONE);
     final var loader = new TestClassNameBasedDataSetLoader();
     configuration = new Configuration(conventions, operationDefaults, loader);

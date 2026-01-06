@@ -92,6 +92,7 @@ Configures individual dataset parameters within `@DataSet` or `@ExpectedDataSet`
 | `resourceLocation` | `String` | `""` | Dataset directory path; empty uses convention-based discovery |
 | `dataSourceName` | `String` | `""` | Named DataSource identifier; empty uses default |
 | `scenarioNames` | `String[]` | `{}` | Scenario filters; empty uses test method name |
+| `excludeColumns` | `String[]` | `{}` | Column names to exclude from verification (case-insensitive); only effective in `@ExpectedDataSet` |
 
 **Resource Location Formats**:
 
@@ -113,7 +114,18 @@ void testMultipleDataSources() { }
 
 @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
+
+@ExpectedDataSet(sources = @DataSetSource(
+    excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
+))
+void testWithExcludedColumns() { }
 ```
+
+**Column Exclusion Behavior**:
+
+- Column names are normalized to uppercase for comparison
+- Per-dataset exclusions are combined with global exclusions from `ConventionSettings`
+- Exclusions apply only to `@ExpectedDataSet` verification, not `@DataSet` preparation
 
 ## TableSet Interfaces
 

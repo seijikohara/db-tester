@@ -84,7 +84,8 @@ class DataFormatSpec extends Specification {
 					'[Scenario]', // default scenario marker
 					DataFormat.CSV, // CSV format
 					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+					Set.of()
 					)
 					)
 		}
@@ -204,7 +205,8 @@ class DataFormatSpec extends Specification {
 					'[Scenario]', // default scenario marker
 					DataFormat.TSV, // TSV format
 					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+					Set.of()
 					)
 					)
 		}

@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.config;
 
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -14,6 +15,7 @@ import org.jspecify.annotations.Nullable;
  * @param tableMergeStrategy the strategy for merging tables when multiple DataSets contain the same
  *     table
  * @param loadOrderFileName the file name used to specify table loading order in dataset directories
+ * @param globalExcludeColumns column names to exclude from all expectation verifications globally
  */
 public record ConventionSettings(
     @Nullable String baseDirectory,
@@ -21,7 +23,8 @@ public record ConventionSettings(
     String scenarioMarker,
     DataFormat dataFormat,
     TableMergeStrategy tableMergeStrategy,
-    String loadOrderFileName) {
+    String loadOrderFileName,
+    Set<String> globalExcludeColumns) {
 
   /**
    * Default base directory for dataset resolution.
@@ -62,12 +65,15 @@ public record ConventionSettings(
    */
   public static final String DEFAULT_LOAD_ORDER_FILE_NAME = "load-order.txt";
 
+  /** Default global exclude columns (empty set). */
+  private static final Set<String> DEFAULT_GLOBAL_EXCLUDE_COLUMNS = Set.of();
+
   /**
    * Creates a convention instance populated with the framework defaults.
    *
    * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
-   *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy, and
-   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file
+   *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy,
+   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, and no global exclude columns
    */
   public static ConventionSettings standard() {
     return new ConventionSettings(
@@ -76,7 +82,8 @@ public record ConventionSettings(
         DEFAULT_SCENARIO_MARKER,
         DEFAULT_DATA_FORMAT,
         DEFAULT_TABLE_MERGE_STRATEGY,
-        DEFAULT_LOAD_ORDER_FILE_NAME);
+        DEFAULT_LOAD_ORDER_FILE_NAME,
+        DEFAULT_GLOBAL_EXCLUDE_COLUMNS);
   }
 
   /**
@@ -92,7 +99,8 @@ public record ConventionSettings(
         this.scenarioMarker,
         dataFormat,
         this.tableMergeStrategy,
-        this.loadOrderFileName);
+        this.loadOrderFileName,
+        this.globalExcludeColumns);
   }
 
   /**
@@ -108,7 +116,8 @@ public record ConventionSettings(
         this.scenarioMarker,
         this.dataFormat,
         tableMergeStrategy,
-        this.loadOrderFileName);
+        this.loadOrderFileName,
+        this.globalExcludeColumns);
   }
 
   /**
@@ -124,6 +133,30 @@ public record ConventionSettings(
         this.scenarioMarker,
         this.dataFormat,
         this.tableMergeStrategy,
-        loadOrderFileName);
+        loadOrderFileName,
+        this.globalExcludeColumns);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified global exclude columns.
+   *
+   * <p>Columns listed here are excluded from all expectation verifications. This is useful for
+   * excluding auto-generated columns (timestamps, version numbers) across all tests without
+   * repeating the exclusion in each annotation.
+   *
+   * <p>Column name matching is case-insensitive.
+   *
+   * @param globalExcludeColumns the column names to exclude globally
+   * @return a new ConventionSettings with the specified global exclude columns
+   */
+  public ConventionSettings withGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        globalExcludeColumns);
   }
 }

@@ -62,7 +62,8 @@ class ConfigurationCustomizationSpec extends Specification {
 	'[TestCase]',               // custom scenario marker
 	DataFormat.CSV,             // use CSV format (default)
 	TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
-	ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+	ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+	Set.of()
 	)
 	)
 

@@ -77,7 +77,8 @@ class ExpectationVerifierTest {
       final var mockRegistry = mock(DataSourceRegistry.class);
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
-      when(mockLoader.loadExpectationDataSets(org.mockito.ArgumentMatchers.any(TestContext.class)))
+      when(mockLoader.loadExpectationDataSetsWithExclusions(
+              org.mockito.ArgumentMatchers.any(TestContext.class)))
           .thenReturn(Collections.emptyList());
 
       final var testClass = TestClass.class;

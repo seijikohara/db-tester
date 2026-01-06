@@ -10,7 +10,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -114,6 +116,24 @@ public final class AnnotationResolver {
     return Optional.of(annotation.dataSourceName())
         .filter(Predicate.not(String::isEmpty))
         .map(DataSourceName::new);
+  }
+
+  /**
+   * Resolves exclude columns from a {@link DataSetSource} annotation.
+   *
+   * <p>This method extracts column names to exclude from expectation verification. Column names are
+   * normalized by trimming whitespace and filtering empty strings. The returned set uses
+   * case-insensitive matching by converting column names to uppercase.
+   *
+   * @param annotation the dataset source annotation
+   * @return set of column names to exclude (uppercase for case-insensitive matching)
+   */
+  Set<String> resolveExcludeColumns(final DataSetSource annotation) {
+    return Stream.of(annotation.excludeColumns())
+        .map(String::trim)
+        .filter(Predicate.not(String::isEmpty))
+        .map(String::toUpperCase)
+        .collect(Collectors.toUnmodifiableSet());
   }
 
   /**

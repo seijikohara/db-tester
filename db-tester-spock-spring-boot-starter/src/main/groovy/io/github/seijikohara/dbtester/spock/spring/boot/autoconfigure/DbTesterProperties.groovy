@@ -85,6 +85,9 @@ class DbTesterProperties {
 
 		/** File name for specifying table loading order in dataset directories. Defaults to "load-order.txt". */
 		String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+
+		/** Column names to exclude globally from all expectation verifications. Defaults to empty set. */
+		Set<String> globalExcludeColumns = Set.of()
 	}
 
 	/**

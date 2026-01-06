@@ -311,21 +311,41 @@ void testWithCustomLocation() { }
 
 ### Column Exclusion
 
-Exclude columns from verification using the programmatic API:
+Exclude columns (such as timestamps or auto-generated IDs) from verification:
+
+**Per-dataset exclusion** via `@DataSetSource.excludeColumns`:
 
 ```java
 @Test
 @DataSet
+@ExpectedDataSet(dataSets = @DataSetSource(
+    excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
+))
 void testWithExcludedColumns() {
-    // Execute test logic...
-
-    // Verify with column exclusion
-    TableSet expected = loadExpectedDataSet();
-    TableSet actual = readFromDatabase();
-    DatabaseAssertion.assertEqualsIgnoreColumns(
-        expected, actual, "USERS", "CREATED_AT", "UPDATED_AT");
+    userRepository.create(new User("john", "john@example.com"));
 }
 ```
+
+**Global exclusion** via `ConventionSettings.globalExcludeColumns`:
+
+```java
+@BeforeAll
+static void setUp(ExtensionContext context) {
+    var conventions = ConventionSettings.standard()
+        .withGlobalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"));
+    DatabaseTestExtension.setConfiguration(context,
+        Configuration.withConventions(conventions));
+    DatabaseTestExtension.getRegistry(context).registerDefault(dataSource);
+}
+```
+
+**Spring Boot configuration**:
+
+```properties
+db-tester.convention.global-exclude-columns=CREATED_AT,UPDATED_AT,VERSION
+```
+
+Column names are case-insensitive. Per-dataset exclusions are combined with global exclusions.
 
 ---
 

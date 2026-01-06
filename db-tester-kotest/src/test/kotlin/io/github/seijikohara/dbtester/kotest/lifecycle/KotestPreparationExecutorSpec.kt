@@ -65,6 +65,7 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
                     .also { loader ->
                         every { loader.loadPreparationDataSets(any()) } returns emptyList()
                         every { loader.loadExpectationDataSets(any()) } returns emptyList()
+                        every { loader.loadExpectationDataSetsWithExclusions(any()) } returns emptyList()
                     }.let { loader ->
                         Configuration(
                             ConventionSettings.standard(),
