@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.junit.jupiter.extension;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.context.TestContext;
@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 /**
  * JUnit Jupiter extension for database testing.
  *
- * <p>This extension processes {@link Preparation} and {@link Expectation} annotations to set up
+ * <p>This extension processes {@link DataSet} and {@link ExpectedDataSet} annotations to set up
  * test data before each test and verify database state after each test.
  *
  * <p>The extension performs three responsibilities:
@@ -30,14 +30,14 @@ import org.slf4j.LoggerFactory;
  * <ol>
  *   <li>Manages per-class state (configuration, {@link DataSourceRegistry}, lifecycle coordinator)
  *       using the {@link ExtensionContext} store.
- *   <li>Before each test, resolves {@link Preparation} declarations and executes the resulting
+ *   <li>Before each test, resolves {@link DataSet} declarations and executes the resulting
  *       datasets.
- *   <li>After each test, resolves {@link Expectation} declarations and validates the database
+ *   <li>After each test, resolves {@link ExpectedDataSet} declarations and validates the database
  *       contents.
  * </ol>
  *
- * @see Preparation
- * @see Expectation
+ * @see DataSet
+ * @see ExpectedDataSet
  */
 public class DatabaseTestExtension
     implements BeforeEachCallback, AfterEachCallback, ParameterResolver {
@@ -103,45 +103,45 @@ public class DatabaseTestExtension
   /**
    * Called before each test method.
    *
-   * <p>If the test method or class is annotated with {@link Preparation}, this callback executes
-   * the preparation phase by loading and applying datasets to the database.
+   * <p>If the test method or class is annotated with {@link DataSet}, this callback executes the
+   * preparation phase by loading and applying datasets to the database.
    *
    * @param context the current extension context
    */
   @Override
   public void beforeEach(final ExtensionContext context) {
-    Optional.ofNullable(findPreparation(context))
+    Optional.ofNullable(findDataSet(context))
         .ifPresent(
-            preparation -> {
+            dataSet -> {
               final var testContext = createTestContext(context);
               logger.debug(
                   "Executing beforeEach for {}.{}()",
                   testContext.testClass().getSimpleName(),
                   testContext.testMethod().getName());
-              preparationExecutor.execute(testContext, preparation);
+              preparationExecutor.execute(testContext, dataSet);
             });
   }
 
   /**
    * Called after each test method.
    *
-   * <p>If the test method or class is annotated with {@link Expectation}, this callback executes
-   * the expectation phase by loading expected datasets and comparing them with the actual database
-   * state.
+   * <p>If the test method or class is annotated with {@link ExpectedDataSet}, this callback
+   * executes the expectation phase by loading expected datasets and comparing them with the actual
+   * database state.
    *
    * @param context the current extension context
    */
   @Override
   public void afterEach(final ExtensionContext context) {
-    Optional.ofNullable(findExpectation(context))
+    Optional.ofNullable(findExpectedDataSet(context))
         .ifPresent(
-            expectation -> {
+            expectedDataSet -> {
               final var testContext = createTestContext(context);
               logger.debug(
                   "Executing afterEach for {}.{}()",
                   testContext.testClass().getSimpleName(),
                   testContext.testMethod().getName());
-              expectationVerifier.verify(testContext, expectation);
+              expectationVerifier.verify(testContext, expectedDataSet);
             });
   }
 
@@ -196,35 +196,36 @@ public class DatabaseTestExtension
   }
 
   /**
-   * Finds the effective {@link Preparation} annotation for the current test.
+   * Finds the effective {@link DataSet} annotation for the current test.
    *
    * <p>Method-level annotations take precedence over class-level annotations. This method searches
    * first at the test method level, then falls back to the test class level if not found at the
    * method level.
    *
    * @param context the extension context providing access to test metadata
-   * @return the preparation annotation if found at method or class level, or null if not present
+   * @return the DataSet annotation if found at method or class level, or null if not present
    */
-  private Preparation findPreparation(final ExtensionContext context) {
+  private DataSet findDataSet(final ExtensionContext context) {
     final var method = context.getRequiredTestMethod();
-    return Optional.ofNullable(method.getAnnotation(Preparation.class))
-        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(Preparation.class));
+    return Optional.ofNullable(method.getAnnotation(DataSet.class))
+        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(DataSet.class));
   }
 
   /**
-   * Finds the effective {@link Expectation} annotation for the current test.
+   * Finds the effective {@link ExpectedDataSet} annotation for the current test.
    *
    * <p>Method-level annotations take precedence over class-level annotations. This method searches
    * first at the test method level, then falls back to the test class level if not found at the
    * method level.
    *
    * @param context the extension context providing access to test metadata
-   * @return the expectation annotation if found at method or class level, or null if not present
+   * @return the ExpectedDataSet annotation if found at method or class level, or null if not
+   *     present
    */
-  private Expectation findExpectation(final ExtensionContext context) {
+  private ExpectedDataSet findExpectedDataSet(final ExtensionContext context) {
     final var method = context.getRequiredTestMethod();
-    return Optional.ofNullable(method.getAnnotation(Expectation.class))
-        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(Expectation.class));
+    return Optional.ofNullable(method.getAnnotation(ExpectedDataSet.class))
+        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(ExpectedDataSet.class));
   }
 
   /**

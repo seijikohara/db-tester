@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.kotest.lifecycle
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
@@ -38,9 +38,9 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
     @Test
     fun `should handle empty datasets gracefully`(): Unit =
         createTestContextWithEmptyDatasets().let { context ->
-            createMockPreparation(Operation.CLEAN_INSERT).let { preparation ->
+            createMockDataSet(Operation.CLEAN_INSERT).let { dataSet ->
                 shouldNotThrowAny {
-                    executor.execute(context, preparation)
+                    executor.execute(context, dataSet)
                 }
             }
         }
@@ -80,16 +80,16 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
         }
 
     /**
-     * Creates a mock Preparation annotation with the specified operation.
+     * Creates a mock DataSet annotation with the specified operation.
      *
      * @param operation the operation to use
      * @return the mocked annotation
      */
-    private fun createMockPreparation(operation: Operation): Preparation =
-        mockk<Preparation>().also { preparation ->
-            every { preparation.operation } returns operation
-            every { preparation.tableOrdering } returns TableOrderingStrategy.AUTO
-            every { preparation.dataSets } returns emptyArray()
+    private fun createMockDataSet(operation: Operation): DataSet =
+        mockk<DataSet>().also { dataSet ->
+            every { dataSet.operation } returns operation
+            every { dataSet.tableOrdering } returns TableOrderingStrategy.AUTO
+            every { dataSet.dataSets } returns emptyArray()
         }
 
     /**

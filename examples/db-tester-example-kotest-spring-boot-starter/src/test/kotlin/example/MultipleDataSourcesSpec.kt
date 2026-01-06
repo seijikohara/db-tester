@@ -1,6 +1,6 @@
 package example
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure.SpringBootDatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -24,7 +24,7 @@ import javax.sql.DataSource
  * - Multiple DataSources can be defined and injected via Spring
  * - The `@Primary` DataSource is used for default operations
  * - Named DataSources are accessible via their bean names
- * - The `@Preparation` annotation works with the primary DataSource
+ * - The `@DataSet` annotation works with the primary DataSource
  *
  * CSV files are located at:
  * - `src/test/resources/example/MultipleDataSourcesSpec/USERS.csv`
@@ -65,7 +65,7 @@ class MultipleDataSourcesSpec : AnnotationSpec() {
      * Verifies that preparation works with the default (primary) DataSource.
      */
     @Test
-    @Preparation
+    @DataSet
     fun `should prepare default DataSource`(): Unit =
         logger
             .info("Testing preparation with default (primary) DataSource")

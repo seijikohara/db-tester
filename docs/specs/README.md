@@ -58,9 +58,9 @@ For comprehensive understanding, read the specifications in this order:
 
 | Annotation | Purpose |
 |------------|---------|
-| `@Preparation` | Execute datasets before test |
-| `@Expectation` | Verify database state after test |
-| `@DataSet` | Configure individual dataset parameters |
+| `@DataSet` | Execute datasets before test |
+| `@ExpectedDataSet` | Verify database state after test |
+| `@DataSetSource` | Configure individual dataset parameters |
 
 ### Database Operations
 
@@ -85,14 +85,14 @@ For comprehensive understanding, read the specifications in this order:
 | Scenario marker | `[Scenario]` |
 | Data format | CSV |
 | Table merge strategy | UNION_ALL |
-| Preparation operation | CLEAN_INSERT |
+| DataSet operation | CLEAN_INSERT |
 
 ### Directory Convention
 
 ```
 src/test/resources/
 └── {package}/{TestClassName}/
-    ├── TABLE.csv           # Preparation data
+    ├── TABLE.csv           # DataSet data
     └── expected/
-        └── TABLE.csv       # Expectation data
+        └── TABLE.csv       # ExpectedDataSet data
 ```

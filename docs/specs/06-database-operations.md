@@ -31,7 +31,7 @@ Performs no database operation.
 - Does not modify database state
 
 **Use Case**:
-- Expectation-only tests where preparation data exists from previous tests
+- ExpectedDataSet-only tests where data set data exists from previous tests
 - Manual setup scenarios
 
 ### INSERT
@@ -159,7 +159,7 @@ Deletes all rows then inserts dataset rows.
 2. Insert all rows from dataset (FK order)
 
 **Use Case**:
-- Standard test preparation (default operation)
+- Standard test data set setup (default operation)
 - Deterministic starting state
 
 **Execution Order**:
@@ -177,12 +177,12 @@ Truncates tables then inserts dataset rows.
 2. Insert all rows from dataset
 
 **Use Case**:
-- Test preparation with sequence reset
+- Test data set setup with sequence reset
 - Performance-optimized setup
 
 ## Execution Flow
 
-### Preparation Phase
+### DataSet Phase
 
 1. Load dataset files from configured location
 2. Filter rows by scenario marker
@@ -190,7 +190,7 @@ Truncates tables then inserts dataset rows.
 4. Execute configured operation
 5. Commit transaction
 
-### Expectation Phase
+### ExpectedDataSet Phase
 
 1. Load expected dataset files
 2. Filter rows by scenario marker
@@ -254,7 +254,7 @@ Requires a `load-order.txt` file in the dataset directory. If the file does not 
 **Use Case**: When you need explicit control over table ordering and want to guarantee the order is always specified.
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 void testWithExplicitOrder() { }
 ```
 
@@ -270,7 +270,7 @@ Uses JDBC database metadata (`DatabaseMetaData.getExportedKeys()`) to analyze fo
 **Use Case**: Databases with well-defined foreign key constraints where automatic ordering is desired.
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithFkOrdering() { }
 ```
 
@@ -281,7 +281,7 @@ Tables are sorted in ascending alphabetical order (case-insensitive).
 **Use Case**: When table ordering does not matter (no FK constraints) or for deterministic ordering in simple scenarios.
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@DataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrder() { }
 ```
 
@@ -289,20 +289,20 @@ void testWithAlphabeticalOrder() { }
 
 ```java
 // Default AUTO strategy
-@Preparation
+@DataSet
 void testDefault() { }
 
-// Explicit strategy on @Preparation
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+// Explicit strategy on @DataSet
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithFkOrder() { }
 
-// Strategy on @Expectation (affects verification order)
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
-void testExpectationOrder() { }
+// Strategy on @ExpectedDataSet (affects verification order)
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+void testExpectedDataSetOrder() { }
 
 // Combined usage
-@Preparation(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@DataSet(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testBothPhases() { }
 ```
 
@@ -360,8 +360,8 @@ For tables with circular foreign key references:
 
 | Phase | Transaction Scope |
 |-------|-------------------|
-| Preparation | All tables in single transaction |
-| Expectation | Read-only (no transaction) |
+| DataSet | All tables in single transaction |
+| ExpectedDataSet | Read-only (no transaction) |
 
 ### Connection Management
 

@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
 import spock.lang.Specification
@@ -16,33 +16,33 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create instance with both annotations'() {
 		given: 'mock annotations'
-		def preparation = Mock(Preparation)
-		def expectation = Mock(Expectation)
+		def dataSet = Mock(DataSet)
+		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(preparation, expectation)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
 	}
 
-	def 'should create instance with only Preparation annotation'() {
-		given: 'mock Preparation annotation'
-		def preparation = Mock(Preparation)
+	def 'should create instance with only DataSet annotation'() {
+		given: 'mock DataSet annotation'
+		def dataSet = Mock(DataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(preparation, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
 	}
 
-	def 'should create instance with only Expectation annotation'() {
-		given: 'mock Expectation annotation'
-		def expectation = Mock(Expectation)
+	def 'should create instance with only ExpectedDataSet annotation'() {
+		given: 'mock ExpectedDataSet annotation'
+		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectation)
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -64,29 +64,29 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		interceptor instanceof IMethodInterceptor
 	}
 
-	def 'should handle invocation with Preparation annotation'() {
-		given: 'an interceptor with Preparation annotation'
-		def preparation = createMockPreparation()
-		def interceptor = new SpringBootDatabaseTestInterceptor(preparation, null)
+	def 'should handle invocation with DataSet annotation'() {
+		given: 'an interceptor with DataSet annotation'
+		def dataSet = createMockDataSet()
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
 
-		expect: 'interceptor is created with Preparation'
+		expect: 'interceptor is created with DataSet'
 		interceptor != null
 	}
 
-	def 'should handle invocation with Expectation annotation'() {
-		given: 'an interceptor with Expectation annotation'
-		def expectation = createMockExpectation()
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectation)
+	def 'should handle invocation with ExpectedDataSet annotation'() {
+		given: 'an interceptor with ExpectedDataSet annotation'
+		def expectedDataSet = createMockExpectedDataSet()
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet)
 
-		expect: 'interceptor is created with Expectation'
+		expect: 'interceptor is created with ExpectedDataSet'
 		interceptor != null
 	}
 
 	def 'should handle invocation with both annotations'() {
 		given: 'an interceptor with both annotations'
-		def preparation = createMockPreparation()
-		def expectation = createMockExpectation()
-		def interceptor = new SpringBootDatabaseTestInterceptor(preparation, expectation)
+		def dataSet = createMockDataSet()
+		def expectedDataSet = createMockExpectedDataSet()
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet)
 
 		expect: 'interceptor is created with both annotations'
 		interceptor != null
@@ -94,23 +94,23 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create multiple independent interceptors'() {
 		given: 'different annotations'
-		def prep1 = createMockPreparation()
-		def prep2 = createMockPreparation()
-		def exp1 = createMockExpectation()
-		def exp2 = createMockExpectation()
+		def ds1 = createMockDataSet()
+		def ds2 = createMockDataSet()
+		def exp1 = createMockExpectedDataSet()
+		def exp2 = createMockExpectedDataSet()
 
 		when: 'creating multiple interceptors'
-		def interceptor1 = new SpringBootDatabaseTestInterceptor(prep1, exp1)
-		def interceptor2 = new SpringBootDatabaseTestInterceptor(prep2, exp2)
+		def interceptor1 = new SpringBootDatabaseTestInterceptor(ds1, exp1)
+		def interceptor2 = new SpringBootDatabaseTestInterceptor(ds2, exp2)
 
 		then: 'interceptors are independent'
 		!interceptor1.is(interceptor2)
 	}
 
 	def 'should handle different operation types'() {
-		given: 'preparations with different operations'
-		def preparation = createMockPreparation(operation)
-		def interceptor = new SpringBootDatabaseTestInterceptor(preparation, null)
+		given: 'dataSets with different operations'
+		def dataSet = createMockDataSet(operation)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
 
 		expect: 'interceptor is created successfully'
 		interceptor != null
@@ -125,36 +125,36 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	}
 
 	/**
-	 * Creates a mock Preparation annotation.
+	 * Creates a mock DataSet annotation.
 	 *
 	 * @return the mocked annotation
 	 */
-	private Preparation createMockPreparation() {
-		createMockPreparation(Operation.CLEAN_INSERT)
+	private DataSet createMockDataSet() {
+		createMockDataSet(Operation.CLEAN_INSERT)
 	}
 
 	/**
-	 * Creates a mock Preparation annotation with the specified operation.
+	 * Creates a mock DataSet annotation with the specified operation.
 	 *
 	 * @param operation the operation to use
 	 * @return the mocked annotation
 	 */
-	private Preparation createMockPreparation(Operation operation) {
-		def preparation = Mock(Preparation)
-		preparation.operation() >> operation
-		preparation.paths() >> ([] as String[])
-		return preparation
+	private DataSet createMockDataSet(Operation operation) {
+		def dataSet = Mock(DataSet)
+		dataSet.operation() >> operation
+		dataSet.paths() >> ([] as String[])
+		return dataSet
 	}
 
 	/**
-	 * Creates a mock Expectation annotation.
+	 * Creates a mock ExpectedDataSet annotation.
 	 *
 	 * @return the mocked annotation
 	 */
-	private Expectation createMockExpectation() {
-		def expectation = Mock(Expectation)
-		expectation.paths() >> ([] as String[])
-		expectation.columns() >> ([] as String[])
-		return expectation
+	private ExpectedDataSet createMockExpectedDataSet() {
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.paths() >> ([] as String[])
+		expectedDataSet.columns() >> ([] as String[])
+		return expectedDataSet
 	}
 }

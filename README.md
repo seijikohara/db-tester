@@ -9,7 +9,7 @@
   <img src="docs/public/favicon.svg" width="200" alt="DB Tester Logo">
 </div>
 
-A database testing framework for JUnit 6, Spock 2, and Kotest 6. Load CSV test data before tests and verify database state after tests using `@Preparation` and `@Expectation` annotations.
+A database testing framework for JUnit 6, Spock 2, and Kotest 6. Load CSV test data before tests and verify database state after tests using `@DataSet` and `@ExpectedDataSet` annotations.
 
 **[Documentation](https://seijikohara.github.io/db-tester/)** · **[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-bom)** · **[Examples](examples/)**
 
@@ -30,8 +30,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Preparation  // Loads USERS.csv before test
-    @Expectation  // Verifies expected/USERS.csv after test
+    @DataSet  // Loads USERS.csv before test
+    @ExpectedDataSet  // Verifies expected/USERS.csv after test
     void shouldCreateUser() {
         userRepository.create(new User("john", "john@example.com"));
     }
@@ -52,8 +52,8 @@ class UserRepositorySpec extends Specification {
         dbTesterRegistry.registerDefault(createDataSource())
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def "should create user"() {
         when:
         userRepository.create(new User("john", "john@example.com"))
@@ -81,8 +81,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         userRepository.create(User("john", "john@example.com"))
     }
@@ -120,7 +120,7 @@ ID,NAME,EMAIL
 
 | Feature | Description |
 |---------|-------------|
-| Annotation-driven | Declarative test data management with `@Preparation` and `@Expectation` |
+| Annotation-driven | Declarative test data management with `@DataSet` and `@ExpectedDataSet` |
 | Convention-based | Automatic dataset discovery based on test class package and name |
 | Scenario filtering | Share CSV files across tests using the `[Scenario]` column |
 | Spring Boot integration | Automatic DataSource registration from ApplicationContext |
@@ -216,8 +216,8 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void shouldCreateUser() {
         userRepository.save(new User("john", "john@example.com"));
     }
@@ -234,8 +234,8 @@ class UserRepositorySpec extends Specification {
     @Autowired
     UserRepository userRepository
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def "should create user"() {
         when:
         userRepository.save(new User("john", "john@example.com"))
@@ -260,8 +260,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         userRepository.save(User("john", "john@example.com"))
     }
@@ -304,8 +304,8 @@ Each test method loads only rows matching its name.
 Specify explicit paths instead of convention-based discovery:
 
 ```java
-@Preparation(paths = "custom/data/users.csv")
-@Expectation(paths = "custom/expected/users.csv")
+@DataSet(paths = "custom/data/users.csv")
+@ExpectedDataSet(paths = "custom/expected/users.csv")
 void testWithCustomPaths() { }
 ```
 
@@ -314,7 +314,7 @@ void testWithCustomPaths() { }
 Exclude columns from verification (timestamps, auto-generated IDs):
 
 ```java
-@Expectation(excludeColumns = {"CREATED_AT", "UPDATED_AT"})
+@ExpectedDataSet(excludeColumns = {"CREATED_AT", "UPDATED_AT"})
 void testWithExcludedColumns() { }
 ```
 
@@ -336,7 +336,7 @@ void testWithExcludedColumns() { }
 | `TRUNCATE_INSERT` | Truncate, then insert |
 
 ```java
-@Preparation(operation = Operation.INSERT)
+@DataSet(operation = Operation.INSERT)
 ```
 
 ### Data Formats
@@ -360,7 +360,7 @@ registry.register("secondary", secondaryDataSource);
 ```
 
 ```java
-@Preparation(dataSets = @DataSet(dataSourceName = "secondary"))
+@DataSet(dataSets = @DataSetSource(dataSourceName = "secondary"))
 ```
 
 ---

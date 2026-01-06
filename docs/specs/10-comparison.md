@@ -33,7 +33,7 @@ This page provides an in-depth comparison of DB Tester with other database testi
 | CDI/Jakarta EE | - | - | Yes | - | - | - |
 | Cucumber/BDD | - | - | Yes | - | - | - |
 
-*DSL: Annotations (`@DataSet`, `@ExpectedDataSet`) are not supported. Use [RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl) programmatic API.
+*DSL: Annotations (`@DataSet`, `@ExpectedDataSet`) are supported for Database Rider. DB Tester uses these same annotation names. For Spock with Database Rider, use [RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl) programmatic API.
 
 **Analysis:**
 - DB Tester is the only framework with native JUnit 6 and Kotest support
@@ -146,9 +146,9 @@ USER:
 ```
 
 **SPI Extensibility (DB Tester):**
-- Custom `DataSetLoaderProvider` implementations
+- Custom `TableSetLoaderProvider` implementations
 - Custom `OperationProvider` implementations
-- Custom `ExpectationProvider` implementations
+- Custom `ExpectedDataSetProvider` implementations
 
 ---
 
@@ -225,8 +225,8 @@ db-tester-kotest  → Kotest 6 extension
 **Example:**
 ```java
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation  // Loads com/example/UserTest/users.csv
-@Expectation  // Verifies against com/example/UserTest/expected/users.csv
+@DataSet  // Loads com/example/UserTest/users.csv
+@ExpectedDataSet  // Verifies against com/example/UserTest/expected/users.csv
 class UserTest {
     @Test
     void shouldCreateUser() {
@@ -464,8 +464,8 @@ public void testQueryDoesNotModify() {
 
 | Database Rider | DB Tester | Notes |
 |----------------|-----------|-------|
-| `@DataSet("users.yml")` | `@Preparation` | Convert YAML to CSV |
-| `@ExpectedDataSet("expected.yml")` | `@Expectation` | Convert YAML to CSV |
+| `@DataSet("users.yml")` | `@DataSet` | Convert YAML to CSV |
+| `@ExpectedDataSet("expected.yml")` | `@ExpectedDataSet` | Convert YAML to CSV |
 | `strategy = SeedStrategy.CLEAN_INSERT` | `operation = Operation.CLEAN_INSERT` | Same semantics |
 | `ignoreCols = {"id"}` | `excludeColumns = {"id"}` | Same functionality |
 | `cleanBefore = true` | Default behavior | CLEAN_INSERT is default |
@@ -475,8 +475,8 @@ public void testQueryDoesNotModify() {
 
 | Spring Test DBUnit | DB Tester | Notes |
 |--------------------|-----------|-------|
-| `@DatabaseSetup("/data.xml")` | `@Preparation` | Convert XML to CSV |
-| `@ExpectedDatabase("/expected.xml")` | `@Expectation` | Convert XML to CSV |
+| `@DatabaseSetup("/data.xml")` | `@DataSet` | Convert XML to CSV |
+| `@ExpectedDatabase("/expected.xml")` | `@ExpectedDataSet` | Convert XML to CSV |
 | `DbUnitTestExecutionListener` | `DatabaseTestExtension` | JUnit 6 extension |
 | `@DbUnitConfiguration` | `@DatabaseTestConfiguration` | Similar options |
 
@@ -487,7 +487,7 @@ public void testQueryDoesNotModify() {
 | `insertInto("users").columns(...).values(...)` | `users.csv` file | Externalize to file |
 | `deleteAllFrom("users")` | Implicit in CLEAN_INSERT | Default behavior |
 | `DbSetupTracker` | Not needed | Each test has own data |
-| No assertions | `@Expectation` | Add verification |
+| No assertions | `@ExpectedDataSet` | Add verification |
 
 ---
 

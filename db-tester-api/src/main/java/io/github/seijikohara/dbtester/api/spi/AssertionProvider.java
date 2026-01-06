@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.Collection;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
@@ -34,7 +34,7 @@ public interface AssertionProvider {
    * @throws AssertionError if the datasets do not match (row count, column values, or table
    *     structure)
    */
-  void assertEquals(final DataSet expected, final DataSet actual);
+  void assertEquals(final TableSet expected, final TableSet actual);
 
   /**
    * Asserts that two datasets are equal, using a custom failure handler.
@@ -50,8 +50,8 @@ public interface AssertionProvider {
    *     structure)
    */
   void assertEquals(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final @Nullable AssertionFailureHandler failureHandler);
 
   /**
@@ -113,8 +113,8 @@ public interface AssertionProvider {
    * @throws AssertionError if the tables do not match (excluding ignored columns)
    */
   void assertEqualsIgnoreColumns(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final String tableName,
       final Collection<String> ignoreColumnNames);
 
@@ -146,7 +146,7 @@ public interface AssertionProvider {
    * @throws AssertionError if the query results do not match the expected dataset
    */
   void assertEqualsByQuery(
-      final DataSet expected,
+      final TableSet expected,
       final DataSource dataSource,
       final String sqlQuery,
       final String tableName,

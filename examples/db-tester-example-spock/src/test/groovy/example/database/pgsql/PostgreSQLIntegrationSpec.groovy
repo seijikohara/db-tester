@@ -2,8 +2,8 @@ package example.database.pgsql
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -135,8 +135,8 @@ class PostgreSQLIntegrationSpec extends Specification {
 	 *   <li>Basic CRUD operations work correctly
 	 * </ul>
 	 */
-	@Preparation(dataSets = @DataSet(scenarioNames = 'smokeTest'))
-	@Expectation(dataSets = @DataSet(scenarioNames = 'smokeTest'))
+	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on PostgreSQL'() {
 		expect: 'smoke test passes'
 		logger.info('Running PostgreSQL integration smoke test')

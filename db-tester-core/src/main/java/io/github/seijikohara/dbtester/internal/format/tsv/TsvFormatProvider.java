@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.internal.format.tsv;
 
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
 import io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser;
 import io.github.seijikohara.dbtester.internal.format.parser.DelimiterConfig;
@@ -11,9 +11,9 @@ import java.nio.file.Path;
 /**
  * Format provider for TSV (Tab-Separated Values) files.
  *
- * <p>This provider parses TSV files from a directory and converts them into a {@link DataSet}. Each
- * TSV file represents a single database table, where the filename (without extension) becomes the
- * table name. The TSV format uses tab as the delimiter, with the first row containing column
+ * <p>This provider parses TSV files from a directory and converts them into a {@link TableSet}.
+ * Each TSV file represents a single database table, where the filename (without extension) becomes
+ * the table name. The TSV format uses tab as the delimiter, with the first row containing column
  * headers, empty cells representing NULL values, and support for double-quoted values.
  *
  * <p>Table ordering is determined by the load order file (default: {@value
@@ -60,7 +60,7 @@ public final class TsvFormatProvider implements FormatProvider {
    * @return the parsed dataset containing all tables
    */
   @Override
-  public DataSet parse(final Path directory) {
+  public TableSet parse(final Path directory) {
     return parser.parse(directory);
   }
 }

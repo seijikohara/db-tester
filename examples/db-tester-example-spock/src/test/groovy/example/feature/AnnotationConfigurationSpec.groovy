@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -34,8 +34,8 @@ import spock.lang.Specification
  *     TABLE2.csv
  * </pre>
  */
-@Preparation(
-dataSets = @DataSet(
+@DataSet(
+dataSets = @DataSetSource(
 resourceLocation = 'classpath:example/feature/AnnotationConfigurationSpec/',
 scenarioNames = 'classLevel'
 )
@@ -82,12 +82,12 @@ class AnnotationConfigurationSpec extends Specification {
 	 *   <li>Expectation: Verifies all three departments and two employees exist
 	 * </ul>
 	 */
-	@Preparation(
-	dataSets = @DataSet(
+	@DataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/AnnotationConfigurationSpec/custom-location/'
 	)
 	)
-	@Expectation
+	@ExpectedDataSet
 	def 'should use custom resource location'() {
 		when: 'inserting a new department'
 		sql.execute '''
@@ -111,8 +111,8 @@ class AnnotationConfigurationSpec extends Specification {
 	 *   <li>Expectation: Verifies both departments and updated employee salary
 	 * </ul>
 	 */
-	@Preparation(dataSets = @DataSet(scenarioNames = ['scenario1', 'scenario2']))
-	@Expectation
+	@DataSet(dataSets = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
+	@ExpectedDataSet
 	def 'should handle multiple scenarios'() {
 		when: 'updating employee salary'
 		sql.executeUpdate 'UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2'
@@ -124,8 +124,8 @@ class AnnotationConfigurationSpec extends Specification {
 	/**
 	 * Demonstrates multiple scenario names for preparation and expectation.
 	 */
-	@Preparation(dataSets = @DataSet(scenarioNames = ['scenario1', 'scenario2']))
-	@Expectation(dataSets = @DataSet(scenarioNames = 'should merge multiple data sets'))
+	@DataSet(dataSets = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
+	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'should merge multiple data sets'))
 	def 'should merge multiple data sets'() {
 		when: 'updating employee salary'
 		sql.executeUpdate 'UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2'
@@ -137,16 +137,16 @@ class AnnotationConfigurationSpec extends Specification {
 	/**
 	 * Demonstrates class-level annotation inheritance.
 	 *
-	 * <p>This test uses the class-level {@code @Preparation} annotation defined at the class level.
+	 * <p>This test uses the class-level {@code @DataSet} annotation defined at the class level.
 	 *
 	 * <p>Test flow:
 	 * <ul>
-	 *   <li>Preparation: Uses class-level @Preparation with scenario "classLevel"
+	 *   <li>Preparation: Uses class-level @DataSet with scenario "classLevel"
 	 *   <li>Execution: Inserts new employee (ID=100, New Employee, 45000.00) into TABLE2
 	 *   <li>Expectation: Verifies HR department and two employees
 	 * </ul>
 	 */
-	@Expectation
+	@ExpectedDataSet
 	def 'should use class level annotation'() {
 		when: 'inserting a new employee'
 		sql.execute '''
@@ -161,8 +161,8 @@ class AnnotationConfigurationSpec extends Specification {
 	/**
 	 * Demonstrates using different scenarios for preparation and expectation.
 	 */
-	@Preparation(dataSets = @DataSet(scenarioNames = 'multiDataSet1'))
-	@Expectation(dataSets = @DataSet(scenarioNames = 'multiDataSet'))
+	@DataSet(dataSets = @DataSetSource(scenarioNames = 'multiDataSet1'))
+	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'multiDataSet'))
 	def 'should handle multiple data sets'() {
 		when: 'inserting a new department'
 		sql.execute '''

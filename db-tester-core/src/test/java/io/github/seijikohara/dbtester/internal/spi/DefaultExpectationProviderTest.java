@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.assertion.ExpectationVerifier;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,7 +70,7 @@ class DefaultExpectationProviderTest {
 
   /** Tests for the verifyExpectation() method. */
   @Nested
-  @DisplayName("verifyExpectation(DataSet, DataSource) method")
+  @DisplayName("verifyExpectation(TableSet, DataSource) method")
   class VerifyExpectationMethod {
 
     /** Tests for the verifyExpectation method. */
@@ -82,11 +82,11 @@ class DefaultExpectationProviderTest {
     @DisplayName("should delegate to expectation verifier when called")
     void shouldDelegateToExpectationVerifier_whenCalled() {
       // Given
-      final var expectedDataSet = mock(DataSet.class);
+      final var expectedDataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       doNothing()
           .when(mockExpectationVerifier)
-          .verifyExpectation(any(DataSet.class), any(DataSource.class));
+          .verifyExpectation(any(TableSet.class), any(DataSource.class));
 
       // When
       provider.verifyExpectation(expectedDataSet, dataSource);

@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import io.github.seijikohara.dbtester.internal.assertion.ExpectationVerifier;
 import javax.sql.DataSource;
@@ -33,7 +33,7 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
   }
 
   @Override
-  public void verifyExpectation(final DataSet expectedDataSet, final DataSource dataSource) {
-    expectationVerifier.verifyExpectation(expectedDataSet, dataSource);
+  public void verifyExpectation(final TableSet expectedTableSet, final DataSource dataSource) {
+    expectationVerifier.verifyExpectation(expectedTableSet, dataSource);
   }
 }

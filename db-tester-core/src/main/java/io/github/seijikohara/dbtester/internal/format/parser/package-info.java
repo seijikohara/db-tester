@@ -2,7 +2,7 @@
  * Data file parsing implementations.
  *
  * <p>This package contains parsers for converting data files into {@link
- * io.github.seijikohara.dbtester.api.dataset.DataSet} objects.
+ * io.github.seijikohara.dbtester.api.dataset.TableSet} objects.
  *
  * @see io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser
  * @see io.github.seijikohara.dbtester.internal.format.parser.DelimiterConfig

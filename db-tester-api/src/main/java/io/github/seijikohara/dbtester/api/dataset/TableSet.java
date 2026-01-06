@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 /**
  * Represents a logical dataset comprised of one or more tables and an optional data source.
  *
- * <p>A DataSet is the primary abstraction for representing database data in the DB Tester
+ * <p>A TableSet is the primary abstraction for representing database data in the DB Tester
  * framework. It contains zero or more {@link Table} instances, each representing a single database
  * table with its columns and rows.
  *
@@ -23,7 +23,7 @@ import javax.sql.DataSource;
  * @see Table
  * @see Row
  */
-public interface DataSet {
+public interface TableSet {
 
   /**
    * Creates a new dataset with the given tables.
@@ -31,8 +31,8 @@ public interface DataSet {
    * @param tables the tables in this dataset
    * @return a new immutable dataset instance
    */
-  static DataSet of(final List<Table> tables) {
-    return new SimpleDataSet(List.copyOf(tables));
+  static TableSet of(final List<Table> tables) {
+    return new SimpleTableSet(List.copyOf(tables));
   }
 
   /**
@@ -41,8 +41,8 @@ public interface DataSet {
    * @param tables the tables in this dataset
    * @return a new immutable dataset instance
    */
-  static DataSet of(final Table... tables) {
-    return new SimpleDataSet(List.of(tables));
+  static TableSet of(final Table... tables) {
+    return new SimpleTableSet(List.of(tables));
   }
 
   /**
@@ -69,11 +69,11 @@ public interface DataSet {
   Optional<DataSource> getDataSource();
 
   /**
-   * Simple immutable implementation of {@link DataSet}.
+   * Simple immutable implementation of {@link TableSet}.
    *
    * @param tables the tables in this dataset
    */
-  record SimpleDataSet(List<Table> tables) implements DataSet {
+  record SimpleTableSet(List<Table> tables) implements TableSet {
 
     /**
      * {@inheritDoc}

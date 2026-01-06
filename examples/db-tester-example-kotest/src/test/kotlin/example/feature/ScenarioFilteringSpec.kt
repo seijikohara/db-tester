@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -22,7 +22,7 @@ import javax.sql.DataSource
  * - Sharing a single CSV file across multiple test methods
  * - Test method name as automatic scenario filter
  * - Reducing CSV file duplication
- * - Class-level [Preparation] and [Expectation] annotations
+ * - Class-level [DataSet] and [ExpectedDataSet] annotations
  *
  * CSV files contain scenario marker column that filters rows by test method name:
  * ```
@@ -31,8 +31,8 @@ import javax.sql.DataSource
  * should create inactive user,1,bob,bob@example.com,INACTIVE
  * ```
  */
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 class ScenarioFilteringSpec : AnnotationSpec() {
     companion object {
         private val logger = LoggerFactory.getLogger(ScenarioFilteringSpec::class.java)

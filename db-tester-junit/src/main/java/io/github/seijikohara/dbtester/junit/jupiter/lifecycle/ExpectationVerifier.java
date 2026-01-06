@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.context.TestContext;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import java.util.ServiceLoader;
@@ -42,52 +42,52 @@ public final class ExpectationVerifier {
   /**
    * Verifies the database state against expected datasets.
    *
-   * <p>Loads the datasets specified in the {@link Expectation} annotation (or resolved via
+   * <p>Loads the datasets specified in the {@link ExpectedDataSet} annotation (or resolved via
    * conventions) and compares them with the actual database state.
    *
    * @param context the test context containing configuration and registry
-   * @param expectation the expectation annotation (currently unused but reserved for future
+   * @param expectedDataSet the ExpectedDataSet annotation (currently unused but reserved for future
    *     options)
    * @throws AssertionError if the database state does not match the expected state
    */
-  public void verify(final TestContext context, final Expectation expectation) {
+  public void verify(final TestContext context, final ExpectedDataSet expectedDataSet) {
     logger.debug(
         "Verifying expectation for test: {}.{}",
         context.testClass().getSimpleName(),
         context.testMethod().getName());
 
-    final var dataSets = context.configuration().loader().loadExpectationDataSets(context);
+    final var tableSets = context.configuration().loader().loadExpectationDataSets(context);
 
-    if (dataSets.isEmpty()) {
+    if (tableSets.isEmpty()) {
       logger.debug("No expectation datasets found");
       return;
     }
 
-    dataSets.forEach(dataSet -> verifyDataSet(context, dataSet));
+    tableSets.forEach(tableSet -> verifyTableSet(context, tableSet));
   }
 
   /**
-   * Verifies a single dataset against the database.
+   * Verifies a single TableSet against the database.
    *
    * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison
    * including column filtering and detailed assertion messages. If verification fails, wraps the
    * exception with additional test context.
    *
    * @param context the test context providing access to the data source registry
-   * @param dataSet the expected dataset containing tables and optional data source
+   * @param tableSet the expected TableSet containing tables and optional data source
    * @throws ValidationException if verification fails with wrapped context information
    */
-  private void verifyDataSet(final TestContext context, final DataSet dataSet) {
-    final var dataSource = dataSet.getDataSource().orElseGet(() -> context.registry().get(""));
+  private void verifyTableSet(final TestContext context, final TableSet tableSet) {
+    final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
 
-    final var tableCount = dataSet.getTables().size();
+    final var tableCount = tableSet.getTables().size();
     logger.info(
-        "Validating expectation dataset for {}: {} tables",
+        "Validating expectation TableSet for {}: {} tables",
         context.testMethod().getName(),
         tableCount);
 
     try {
-      expectationProvider.verifyExpectation(dataSet, dataSource);
+      expectationProvider.verifyExpectation(tableSet, dataSource);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",
@@ -96,7 +96,7 @@ public final class ExpectationVerifier {
     } catch (final ValidationException e) {
       throw new ValidationException(
           String.format(
-              "Failed to verify expectation dataset for %s", context.testMethod().getName()),
+              "Failed to verify expectation TableSet for %s", context.testMethod().getName()),
           e);
     }
   }

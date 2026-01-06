@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -110,8 +110,8 @@ class PartialColumnValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies all three records exist with expected COLUMN1/2/3 values
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should validate partial columns via CSV'() {
 		when: 'inserting new record with business columns only'
 		sql.execute '''
@@ -135,8 +135,8 @@ class PartialColumnValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies three records with matching COLUMN1/2/3, ignoring ID differences
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/'
 	))
 	def 'should ignore auto generated columns'() {
@@ -162,8 +162,8 @@ class PartialColumnValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies COLUMN1/2/3/5 values including default COLUMN5='SYSTEM'
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-combined/'
 	))
 	def 'should validate with minimal columns'() {
@@ -192,8 +192,8 @@ class PartialColumnValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies (CREATE,User,555), (UPDATE,Product,456) with updated value
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-after-update/'
 	))
 	def 'should validate after update'() {

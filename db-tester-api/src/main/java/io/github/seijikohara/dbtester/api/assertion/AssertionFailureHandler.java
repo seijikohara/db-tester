@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
  * preserving these semantics.
  *
  * @see DatabaseAssertion
- * @see io.github.seijikohara.dbtester.api.annotation.Expectation
+ * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  */
 @FunctionalInterface
 public interface AssertionFailureHandler {

@@ -1,7 +1,7 @@
 package example
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure.SpringBootDatabaseTest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -16,7 +16,7 @@ import spock.lang.Specification
  * <ul>
  *   <li>Automatic DataSource registration via Spring auto-configuration
  *   <li>Convention-based CSV file resolution
- *   <li>{@code @Preparation} and {@code @Expectation} annotations for database state management
+ *   <li>{@code @DataSet} and {@code @ExpectedDataSet} annotations for database state management
  *   <li>Spring Data JPA integration with test framework
  * </ul>
  *
@@ -38,7 +38,7 @@ class UserRepositorySpec extends Specification {
 	@Autowired
 	UserRepository userRepository
 
-	@Preparation
+	@DataSet
 	def "should find all users"() {
 		when:
 		def users = userRepository.findAllByOrderByIdAsc()
@@ -49,7 +49,7 @@ class UserRepositorySpec extends Specification {
 		users[1].name == 'Bob'
 	}
 
-	@Preparation
+	@DataSet
 	def "should find user by id"() {
 		when:
 		def userOptional = userRepository.findById(1L)
@@ -60,8 +60,8 @@ class UserRepositorySpec extends Specification {
 		userOptional.get().email == 'alice@example.com'
 	}
 
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def "should save new user"() {
 		when:
 		userRepository.save(new User(3L, 'Charlie', 'charlie@example.com'))
@@ -70,7 +70,7 @@ class UserRepositorySpec extends Specification {
 		noExceptionThrown()
 	}
 
-	@Preparation
+	@DataSet
 	def "should delete user"() {
 		when:
 		userRepository.deleteById(2L)

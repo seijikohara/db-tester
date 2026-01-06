@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -79,8 +79,8 @@ class NullAndEmptyValuesSpec extends Specification {
 	 *   <li>Expectation: Verifies all three records including NULL values
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should handle null values'() {
 		when: 'inserting record with NULL values'
 		sql.execute '''

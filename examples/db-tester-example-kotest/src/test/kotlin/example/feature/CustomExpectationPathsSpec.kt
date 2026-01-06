@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -14,11 +14,11 @@ import javax.sql.DataSource
 /**
  * Demonstrates custom expectation paths for flexible test data organization using Kotest.
  *
- * This specification demonstrates using [DataSet.resourceLocation] to specify custom paths
+ * This specification demonstrates using [DataSetSource.resourceLocation] to specify custom paths
  * for expectation data, enabling flexible test data organization beyond convention-based defaults.
  *
  * Key features demonstrated:
- * - Custom expectation paths using [DataSet] annotation
+ * - Custom expectation paths using [DataSetSource] annotation
  * - Organizing multiple expectation scenarios in subdirectories
  * - Multi-stage testing with different expected states
  * - Complex business logic validation with database state changes
@@ -95,7 +95,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     /**
      * Demonstrates custom expectation paths with basic INSERT operation.
      *
-     * This test uses [DataSet.resourceLocation] to specify a custom path for expectation
+     * This test uses [DataSetSource.resourceLocation] to specify a custom path for expectation
      * data, demonstrating how to organize test data in non-default directories.
      *
      * Test flow:
@@ -104,10 +104,10 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
      * - Expectation: Verifies both records from `expected-basic/` directory
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-basic/",
             ),
         ],
@@ -136,10 +136,10 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
      * - Expectation: Validates selected columns from `expected-ignore-columns/` directory
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-ignore-columns/",
             ),
         ],
@@ -168,10 +168,10 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
      * - Expectation: Verifies order-item relationship from `expected-query/` directory
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-query/",
             ),
         ],
@@ -200,10 +200,10 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
      * - Expectation: Verifies PENDING status from `expected-stage1/` directory
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-stage1/",
             ),
         ],
@@ -232,10 +232,10 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
      * - Expectation: Verifies SHIPPED status from `expected-stage2/` directory
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-stage2/",
             ),
         ],

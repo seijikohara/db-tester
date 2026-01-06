@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
@@ -123,12 +123,16 @@ class FirstStrategySpec : AnnotationSpec() {
      * Verifies FIRST strategy configuration is applied.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/")],
+        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/")],
     )
-    @Expectation(
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/FirstStrategySpec/should use only first dataset/expected/")],
+    @ExpectedDataSet(
+        dataSets = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/FirstStrategySpec/should use only first dataset/expected/",
+            ),
+        ],
     )
     fun `should use only first dataset`(): Unit =
         logger.info("Running FIRST strategy test").also {
@@ -235,12 +239,12 @@ class LastStrategySpec : AnnotationSpec() {
      * Verifies LAST strategy configuration is applied.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/")],
+        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/")],
     )
-    @Expectation(
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/LastStrategySpec/should use only last dataset/expected/")],
+    @ExpectedDataSet(
+        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/should use only last dataset/expected/")],
     )
     fun `should use only last dataset`(): Unit =
         logger.info("Running LAST strategy test").also {
@@ -347,12 +351,16 @@ class UnionStrategySpec : AnnotationSpec() {
      * Verifies UNION strategy configuration is applied.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/")],
+        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/")],
     )
-    @Expectation(
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/UnionStrategySpec/should merge and remove duplicates/expected/")],
+    @ExpectedDataSet(
+        dataSets = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/UnionStrategySpec/should merge and remove duplicates/expected/",
+            ),
+        ],
     )
     fun `should merge and remove duplicates`(): Unit =
         logger.info("Running UNION strategy test").also {
@@ -459,12 +467,16 @@ class UnionAllStrategySpec : AnnotationSpec() {
      * Verifies UNION_ALL strategy configuration is applied.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/")],
+        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/")],
     )
-    @Expectation(
-        dataSets = [DataSet(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/should merge and keep all rows/expected/")],
+    @ExpectedDataSet(
+        dataSets = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/UnionAllStrategySpec/should merge and keep all rows/expected/",
+            ),
+        ],
     )
     fun `should merge and keep all rows`(): Unit =
         logger.info("Running UNION_ALL strategy test").also {

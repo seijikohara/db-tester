@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
@@ -137,8 +137,8 @@ class ConfigurationCustomizationSpec extends Specification {
 	 *   <li>Expectation: Verifies both records exist with correct values
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use custom scenario marker'() {
 		when: 'inserting a new record'
 		sql.execute '''
@@ -162,8 +162,8 @@ class ConfigurationCustomizationSpec extends Specification {
 	 *   <li>Expectation: Verifies status change from {@code verify/TABLE1.csv}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use custom expectation suffix'() {
 		when: 'updating record status'
 		sql.executeUpdate "UPDATE TABLE1 SET COLUMN2 = 'SUSPENDED' WHERE ID = 1"
@@ -185,8 +185,8 @@ class ConfigurationCustomizationSpec extends Specification {
 	 *   <li>Expectation: Verifies all three records exist
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use custom operation defaults'() {
 		when: 'inserting a new record'
 		sql.execute '''

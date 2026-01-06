@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>Automatic CSV file resolution based on test class and method names
- *   <li>Method-level {@code @Preparation} and {@code @Expectation} annotations
+ *   <li>Method-level {@code @DataSet} and {@code @ExpectedDataSet} annotations
  *   <li>Single table operations with minimal configuration
  *   <li>H2 in-memory database setup
  *   <li>No scenario filtering
@@ -143,8 +143,8 @@ public final class MinimalExampleTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldLoadAndVerifyProductData() {
     logger.info("Running minimal example test");
 

@@ -9,8 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
@@ -116,7 +116,7 @@ class OperationExecutorTest {
 
   /** Tests for the execute() method. */
   @Nested
-  @DisplayName("execute(Operation, DataSet, DataSource, TableOrderingStrategy) method")
+  @DisplayName("execute(Operation, TableSet, DataSource, TableOrderingStrategy) method")
   class ExecuteMethod {
 
     /** Tests for the execute method. */
@@ -134,7 +134,7 @@ class OperationExecutorTest {
       // Given
       final var dataSource = mock(DataSource.class);
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
 
       when(dataSource.getConnection()).thenReturn(connection);
       when(dataSet.getTables()).thenReturn(List.of());
@@ -160,7 +160,7 @@ class OperationExecutorTest {
       // Given
       final var dataSource = mock(DataSource.class);
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
 
       when(dataSource.getConnection()).thenReturn(connection);
@@ -182,7 +182,7 @@ class OperationExecutorTest {
 
   /** Tests for the executeOperation() method. */
   @Nested
-  @DisplayName("executeOperation(Operation, DataSet, Connection, TableOrderingStrategy) method")
+  @DisplayName("executeOperation(Operation, TableSet, Connection, TableOrderingStrategy) method")
   class ExecuteOperationMethod {
 
     /** Tests for the executeOperation method. */
@@ -199,7 +199,7 @@ class OperationExecutorTest {
     void shouldDoNothing_whenNoneOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       when(dataSet.getTables()).thenReturn(List.of());
 
       // When
@@ -225,7 +225,7 @@ class OperationExecutorTest {
     void shouldDelegateToInsertExecutor_whenInsertOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -248,7 +248,7 @@ class OperationExecutorTest {
     void shouldDelegateToUpdateExecutor_whenUpdateOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -271,7 +271,7 @@ class OperationExecutorTest {
     void shouldDelegateToDeleteExecutor_whenDeleteOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -294,7 +294,7 @@ class OperationExecutorTest {
     void shouldDelegateToDeleteExecutor_whenDeleteAllOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -317,7 +317,7 @@ class OperationExecutorTest {
     void shouldDelegateToRefreshExecutor_whenRefreshOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -340,7 +340,7 @@ class OperationExecutorTest {
     void shouldDelegateToTruncateExecutor_whenTruncateOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
       when(dataSet.getTables()).thenReturn(tables);
 
@@ -363,7 +363,7 @@ class OperationExecutorTest {
     void shouldDeleteAllThenInsert_whenCleanInsertOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
       when(dataSet.getTables()).thenReturn(tables);
@@ -388,7 +388,7 @@ class OperationExecutorTest {
     void shouldTruncateThenInsert_whenTruncateInsertOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
       when(dataSet.getTables()).thenReturn(tables);
@@ -422,7 +422,7 @@ class OperationExecutorTest {
     void shouldReturnSingleTableAsIs_whenOnlyOneTable() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
       when(dataSet.getTables()).thenReturn(tables);
@@ -447,7 +447,7 @@ class OperationExecutorTest {
     void shouldUseTablesAsIs_whenLoadOrderFileStrategy() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var table1 = mock(Table.class);
       final var table2 = mock(Table.class);
       final var tables = List.of(table1, table2);
@@ -473,7 +473,7 @@ class OperationExecutorTest {
     void shouldSortAlphabetically_whenAlphabeticalStrategy() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableC = mock(Table.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
@@ -501,7 +501,7 @@ class OperationExecutorTest {
     void shouldUseTableOrderResolver_whenForeignKeyStrategy() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
@@ -535,7 +535,7 @@ class OperationExecutorTest {
     void shouldUseOriginalOrder_whenNoForeignKeyDependencies() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
@@ -567,7 +567,7 @@ class OperationExecutorTest {
     void shouldFallbackToOriginalOrder_whenForeignKeyResolutionFails() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
@@ -600,7 +600,7 @@ class OperationExecutorTest {
     void shouldUseForeignKeyResolution_whenAutoStrategy() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
@@ -631,7 +631,7 @@ class OperationExecutorTest {
     void shouldFallbackToOriginalOrder_whenAutoStrategyAndForeignKeyFails() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
@@ -663,7 +663,7 @@ class OperationExecutorTest {
     void shouldReturnOriginalOrder_whenAutoStrategyAndNoReorderingNeeded() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");

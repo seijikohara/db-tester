@@ -105,7 +105,7 @@ testDelete,4,Diana,diana@example.com
 
 シナリオ名は以下の順序で解決されます:
 
-1. `@DataSet`アノテーションの明示的な`scenarioNames`
+1. `@DataSetSource`アノテーションの明示的な`scenarioNames`
 2. テストメソッド名（`ScenarioNameResolver` SPI経由）
 
 ### 複数シナリオ
@@ -113,7 +113,7 @@ testDelete,4,Diana,diana@example.com
 単一のテストで複数のシナリオを使用できます:
 
 ```java
-@Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
+@DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
 ```
 
@@ -265,7 +265,7 @@ ORDER_ITEMS
 読み込み順序ファイルを明示的に必須にするには、以下を使用します:
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 ```
 
 `load-order.txt`が見つからない場合、`DataSetLoadException`がスローされます。

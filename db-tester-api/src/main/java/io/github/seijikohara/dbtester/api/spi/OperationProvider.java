@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.api.spi;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
@@ -43,14 +43,14 @@ public interface OperationProvider {
    * on failure.
    *
    * @param operation the operation to execute
-   * @param dataSet the dataset to operate on
+   * @param tableSet the dataset to operate on
    * @param dataSource the data source for database connections
    * @param tableOrderingStrategy the strategy for determining table processing order
    * @throws DatabaseTesterException if the operation fails
    */
   void execute(
       Operation operation,
-      DataSet dataSet,
+      TableSet tableSet,
       DataSource dataSource,
       TableOrderingStrategy tableOrderingStrategy);
 }

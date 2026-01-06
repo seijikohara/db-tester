@@ -1,8 +1,8 @@
 package example.database.pgsql
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -113,7 +113,7 @@ class PostgreSQLIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["smokeTest"])])
-    @Expectation(dataSets = [DataSet(scenarioNames = ["smokeTest"])])
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on PostgreSQL`(): Unit = logger.info("Running PostgreSQL integration smoke test").let { }
 }

@@ -1,13 +1,13 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Merges multiple datasets into a single dataset according to a merge strategy.
  *
- * <p>This class handles the combination of tables when multiple {@code @DataSet} annotations
+ * <p>This class handles the combination of tables when multiple {@code @DataSetSource} annotations
  * reference the same table. The merge behavior is controlled by {@link TableMergeStrategy}: {@link
  * TableMergeStrategy#FIRST FIRST} keeps only the first occurrence, {@link TableMergeStrategy#LAST
  * LAST} keeps only the last occurrence, {@link TableMergeStrategy#UNION UNION} merges all tables
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * <p>This class is stateless and thread-safe.
  *
  * @see TableMergeStrategy
- * @see DataSet
+ * @see TableSet
  */
 public final class DataSetMerger {
 
@@ -50,36 +50,36 @@ public final class DataSetMerger {
    * <p>Tables with the same name are combined according to the specified merge strategy. Tables
    * that appear in only one dataset are included as-is.
    *
-   * @param dataSets the datasets to merge (in order)
+   * @param tableSets the datasets to merge (in order)
    * @param strategy the merge strategy to apply
    * @return a single merged dataset, or an empty dataset if the input list is empty
    */
-  public DataSet merge(final List<DataSet> dataSets, final TableMergeStrategy strategy) {
-    if (dataSets.isEmpty()) {
+  public TableSet merge(final List<TableSet> tableSets, final TableMergeStrategy strategy) {
+    if (tableSets.isEmpty()) {
       logger.debug("No datasets to merge, returning empty dataset");
-      return new SimpleDataSet(List.of());
+      return new SimpleTableSet(List.of());
     }
 
-    if (dataSets.size() == 1) {
+    if (tableSets.size() == 1) {
       logger.debug("Single dataset, no merging needed");
-      return dataSets.getFirst();
+      return tableSets.getFirst();
     }
 
-    logger.debug("Merging {} datasets with strategy: {}", dataSets.size(), strategy);
+    logger.debug("Merging {} datasets with strategy: {}", tableSets.size(), strategy);
 
     // Collect all tables by name, preserving order
     final Map<TableName, List<Table>> tablesByName = new LinkedHashMap<>();
 
     // Use the first non-null data source
     final @Nullable DataSource dataSource =
-        dataSets.stream()
-            .map(DataSet::getDataSource)
+        tableSets.stream()
+            .map(TableSet::getDataSource)
             .flatMap(Optional::stream)
             .findFirst()
             .orElse(null);
 
-    dataSets.stream()
-        .flatMap(dataSet -> dataSet.getTables().stream())
+    tableSets.stream()
+        .flatMap(tableSet -> tableSet.getTables().stream())
         .forEach(
             table ->
                 tablesByName
@@ -94,7 +94,7 @@ public final class DataSetMerger {
 
     logger.debug("Merged into {} tables", mergedTables.size());
 
-    return new MergedDataSet(mergedTables, dataSource);
+    return new MergedTableSet(mergedTables, dataSource);
   }
 
   /**
@@ -214,8 +214,8 @@ public final class DataSetMerger {
    * @param tables the tables in this dataset
    * @param dataSource the data source for this dataset, or null
    */
-  private record MergedDataSet(List<Table> tables, @Nullable DataSource dataSource)
-      implements DataSet {
+  private record MergedTableSet(List<Table> tables, @Nullable DataSource dataSource)
+      implements TableSet {
 
     /**
      * Creates a new merged dataset with immutable tables.
@@ -223,7 +223,7 @@ public final class DataSetMerger {
      * @param tables the tables to include
      * @param dataSource the data source, or null
      */
-    private MergedDataSet(final List<Table> tables, final @Nullable DataSource dataSource) {
+    private MergedTableSet(final List<Table> tables, final @Nullable DataSource dataSource) {
       this.tables = List.copyOf(tables);
       this.dataSource = dataSource;
     }

@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -107,8 +107,8 @@ class PartialColumnValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies all three records exist with expected COLUMN1/2/3 values
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should validate partial columns via CSV`(): Unit =
         logger.info("Inserting new record with business columns only").also {
             executeSql(
@@ -132,10 +132,10 @@ class PartialColumnValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies three records with matching COLUMN1/2/3, ignoring ID differences
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/",
             ),
         ],
@@ -163,10 +163,10 @@ class PartialColumnValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies COLUMN1/2/3/5 values including default COLUMN5='SYSTEM'
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-combined/",
             ),
         ],
@@ -198,10 +198,10 @@ class PartialColumnValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies (CREATE,User,555), (UPDATE,Product,456) with updated value
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-after-update/",
             ),
         ],

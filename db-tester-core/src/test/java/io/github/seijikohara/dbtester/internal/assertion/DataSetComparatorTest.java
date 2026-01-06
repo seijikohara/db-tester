@@ -9,15 +9,15 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,12 +43,12 @@ class DataSetComparatorTest {
     comparator = new DataSetComparator();
   }
 
-  /** Tests for the assertEquals(DataSet, DataSet, AssertionFailureHandler) method. */
+  /** Tests for the assertEquals(TableSet, TableSet, AssertionFailureHandler) method. */
   @Nested
-  @DisplayName("assertEquals(DataSet, DataSet, AssertionFailureHandler) method")
+  @DisplayName("assertEquals(TableSet, TableSet, AssertionFailureHandler) method")
   class AssertEqualsDataSetMethod {
 
-    /** Tests for the assertEquals method for DataSet. */
+    /** Tests for the assertEquals method for TableSet. */
     AssertEqualsDataSetMethod() {}
 
     /** Verifies that assertEquals passes when datasets are equal. */
@@ -57,8 +57,8 @@ class DataSetComparatorTest {
     @DisplayName("should pass when datasets are equal")
     void shouldPass_whenDataSetsAreEqual() {
       // Given
-      final var expected = createDataSet("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
-      final var actual = createDataSet("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+      final var expected = createTableSet("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+      final var actual = createTableSet("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
 
       // When & Then
       assertDoesNotThrow(
@@ -74,8 +74,8 @@ class DataSetComparatorTest {
       // Given
       final var table1 = createTable("USERS", List.of("ID"), List.of("1"));
       final var table2 = createTable("PRODUCTS", List.of("ID"), List.of("1"));
-      final var expected = new SimpleDataSet(List.of(table1, table2));
-      final var actual = new SimpleDataSet(List.of(table1));
+      final var expected = new SimpleTableSet(List.of(table1, table2));
+      final var actual = new SimpleTableSet(List.of(table1));
 
       // When & Then
       final var exception =
@@ -93,8 +93,8 @@ class DataSetComparatorTest {
     @DisplayName("should throw when table is missing")
     void shouldThrow_whenTableIsMissing() {
       // Given
-      final var expected = createDataSet("USERS", List.of("ID"), List.of("1"));
-      final var actual = createDataSet("PRODUCTS", List.of("ID"), List.of("1"));
+      final var expected = createTableSet("USERS", List.of("ID"), List.of("1"));
+      final var actual = createTableSet("PRODUCTS", List.of("ID"), List.of("1"));
 
       // When & Then
       final var exception =
@@ -112,8 +112,8 @@ class DataSetComparatorTest {
     @DisplayName("should call failure handler when provided and tables differ")
     void shouldCallFailureHandler_whenProvidedAndTablesDiffer() {
       // Given
-      final var expected = createDataSet("USERS", List.of("ID"), List.of("1"));
-      final var actual = createDataSet("USERS", List.of("ID"), List.of("2"));
+      final var expected = createTableSet("USERS", List.of("ID"), List.of("1"));
+      final var actual = createTableSet("USERS", List.of("ID"), List.of("2"));
       final var mockHandler = mock(AssertionFailureHandler.class);
 
       // When
@@ -216,12 +216,12 @@ class DataSetComparatorTest {
     }
   }
 
-  /** Tests for the assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection) method. */
+  /** Tests for the assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection) method. */
   @Nested
-  @DisplayName("assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection) method")
+  @DisplayName("assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection) method")
   class AssertEqualsIgnoreColumnsDataSetMethod {
 
-    /** Tests for the assertEqualsIgnoreColumns method for DataSet. */
+    /** Tests for the assertEqualsIgnoreColumns method for TableSet. */
     AssertEqualsIgnoreColumnsDataSetMethod() {}
 
     /** Verifies that assertEqualsIgnoreColumns passes when ignoring differing columns. */
@@ -231,9 +231,11 @@ class DataSetComparatorTest {
     void shouldPass_whenIgnoringDifferingColumns() {
       // Given
       final var expected =
-          createDataSet("USERS", List.of("ID", "NAME", "TIMESTAMP"), List.of("1", "Alice", "2024"));
+          createTableSet(
+              "USERS", List.of("ID", "NAME", "TIMESTAMP"), List.of("1", "Alice", "2024"));
       final var actual =
-          createDataSet("USERS", List.of("ID", "NAME", "TIMESTAMP"), List.of("1", "Alice", "2025"));
+          createTableSet(
+              "USERS", List.of("ID", "NAME", "TIMESTAMP"), List.of("1", "Alice", "2025"));
 
       // When & Then
       assertDoesNotThrow(
@@ -248,8 +250,8 @@ class DataSetComparatorTest {
     @DisplayName("should throw when expected table not found")
     void shouldThrow_whenExpectedTableNotFound() {
       // Given
-      final var expected = createDataSet("PRODUCTS", List.of("ID"), List.of("1"));
-      final var actual = createDataSet("USERS", List.of("ID"), List.of("1"));
+      final var expected = createTableSet("PRODUCTS", List.of("ID"), List.of("1"));
+      final var actual = createTableSet("USERS", List.of("ID"), List.of("1"));
 
       // When & Then
       final var exception =
@@ -269,8 +271,8 @@ class DataSetComparatorTest {
     @DisplayName("should throw when actual table not found")
     void shouldThrow_whenActualTableNotFound() {
       // Given
-      final var expected = createDataSet("USERS", List.of("ID"), List.of("1"));
-      final var actual = createDataSet("PRODUCTS", List.of("ID"), List.of("1"));
+      final var expected = createTableSet("USERS", List.of("ID"), List.of("1"));
+      final var actual = createTableSet("PRODUCTS", List.of("ID"), List.of("1"));
 
       // When & Then
       final var exception =
@@ -335,16 +337,16 @@ class DataSetComparatorTest {
   }
 
   /**
-   * Creates a DataSet with one table.
+   * Creates a TableSet with one table.
    *
    * @param tableName the table name
    * @param columnNames the column names
    * @param values the row values
-   * @return the created DataSet
+   * @return the created TableSet
    */
-  private static DataSet createDataSet(
+  private static TableSet createTableSet(
       final String tableName, final List<String> columnNames, final List<String> values) {
-    return new SimpleDataSet(List.of(createTable(tableName, columnNames, values)));
+    return new SimpleTableSet(List.of(createTable(tableName, columnNames, values)));
   }
 
   /**

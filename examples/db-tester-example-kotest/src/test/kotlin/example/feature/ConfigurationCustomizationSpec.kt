@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
@@ -131,8 +131,8 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
      * - Expectation: Verifies both records exist with correct values
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use custom scenario marker`(): Unit =
         logger.info("Running custom scenario marker test").also {
             executeSql(
@@ -153,8 +153,8 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
      * - Expectation: Verifies status change from `verify/TABLE1.csv`
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use custom expectation suffix`(): Unit =
         logger.info("Running custom expectation suffix test").also {
             executeSql(dataSource, "UPDATE TABLE1 SET COLUMN2 = 'SUSPENDED' WHERE ID = 1")
@@ -173,8 +173,8 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
      * - Expectation: Verifies all three records exist
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use custom operation defaults`(): Unit =
         logger.info("Running custom operation defaults test").also {
             executeSql(

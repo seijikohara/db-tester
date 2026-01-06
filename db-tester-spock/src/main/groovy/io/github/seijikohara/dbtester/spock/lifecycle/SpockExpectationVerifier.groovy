@@ -1,9 +1,9 @@
 package io.github.seijikohara.dbtester.spock.lifecycle
 
 import groovy.util.logging.Slf4j
-import io.github.seijikohara.dbtester.api.annotation.Expectation
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.DataSet
+import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.exception.ValidationException
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider
 
@@ -30,55 +30,55 @@ class SpockExpectationVerifier {
 	/**
 	 * Verifies the database state against expected datasets.
 	 *
-	 * <p>Loads the datasets specified in the {@link Expectation} annotation (or resolved via
+	 * <p>Loads the datasets specified in the {@link ExpectedDataSet} annotation (or resolved via
 	 * conventions) and compares them with the actual database state.
 	 *
 	 * @param context the test context containing configuration and registry
-	 * @param expectation the expectation annotation
+	 * @param expectedDataSet the expected data set annotation
 	 * @throws AssertionError if the database state does not match the expected state
 	 */
-	void verify(TestContext context, Expectation expectation) {
+	void verify(TestContext context, ExpectedDataSet expectedDataSet) {
 		Objects.requireNonNull(context, 'context must not be null')
-		Objects.requireNonNull(expectation, 'expectation must not be null')
+		Objects.requireNonNull(expectedDataSet, 'expectedDataSet must not be null')
 
 		log.debug('Verifying expectation for test: {}.{}',
 				context.testClass().simpleName,
 				context.testMethod().name)
 
-		def dataSets = context.configuration().loader().loadExpectationDataSets(context)
+		def tableSets = context.configuration().loader().loadExpectationDataSets(context)
 
-		if (dataSets.empty) {
+		if (tableSets.empty) {
 			log.debug('No expectation datasets found')
 			return
 		}
 
-		dataSets.each { dataSet ->
-			verifyDataSet(context, dataSet)
+		tableSets.each { tableSet ->
+			verifyTableSet(context, tableSet)
 		}
 	}
 
 	/**
-	 * Verifies a single dataset against the database.
+	 * Verifies a single table set against the database.
 	 *
-	 * <p>Delegates to {@link ExpectationVerifier#verifyExpectation} for full data comparison including
+	 * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison including
 	 * column filtering and detailed assertion messages. If verification fails, wraps the exception
 	 * with additional test context.
 	 *
 	 * @param context the test context providing access to the data source registry
-	 * @param dataSet the expected dataset containing tables and optional data source
+	 * @param tableSet the expected table set containing tables and optional data source
 	 * @throws ValidationException if verification fails with wrapped context information
 	 */
-	private void verifyDataSet(TestContext context, DataSet dataSet) {
-		def dataSource = dataSet.dataSource
+	private void verifyTableSet(TestContext context, TableSet tableSet) {
+		def dataSource = tableSet.dataSource
 				.orElseGet { -> context.registry().get('') }
 
-		def tableCount = dataSet.tables.size()
+		def tableCount = tableSet.tables.size()
 		log.info('Validating expectation dataset for {}: {} tables',
 				context.testMethod().name,
 				tableCount)
 
 		try {
-			expectationProvider.verifyExpectation(dataSet, dataSource)
+			expectationProvider.verifyExpectation(tableSet, dataSource)
 
 			log.info('Expectation validation completed successfully for {}: {} tables',
 					context.testMethod().name,

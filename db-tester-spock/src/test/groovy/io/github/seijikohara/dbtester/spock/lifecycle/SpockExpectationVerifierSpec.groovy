@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.spock.lifecycle
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
@@ -33,38 +33,38 @@ class SpockExpectationVerifierSpec extends Specification {
 	}
 
 	def 'should throw NullPointerException when context is null'() {
-		given: 'a mock Expectation annotation'
-		def expectation = Mock(Expectation)
+		given: 'a mock ExpectedDataSet annotation'
+		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'verifying with null context'
-		verifier.verify(null, expectation)
+		verifier.verify(null, expectedDataSet)
 
 		then: 'NullPointerException is thrown'
 		def e = thrown(NullPointerException)
 		e.message.contains('context must not be null')
 	}
 
-	def 'should throw NullPointerException when expectation is null'() {
+	def 'should throw NullPointerException when expectedDataSet is null'() {
 		given: 'a valid TestContext'
 		def context = createTestContext()
 
-		when: 'verifying with null expectation'
+		when: 'verifying with null expectedDataSet'
 		verifier.verify(context, null)
 
 		then: 'NullPointerException is thrown'
 		def e = thrown(NullPointerException)
-		e.message.contains('expectation must not be null')
+		e.message.contains('expectedDataSet must not be null')
 	}
 
 	def 'should handle empty datasets gracefully'() {
 		given: 'a context with empty datasets'
 		def context = createTestContextWithEmptyDatasets()
 
-		and: 'a mock Expectation annotation'
-		def expectation = createMockExpectation()
+		and: 'a mock ExpectedDataSet annotation'
+		def expectedDataSet = createMockExpectedDataSet()
 
 		when: 'verifying expectation'
-		verifier.verify(context, expectation)
+		verifier.verify(context, expectedDataSet)
 
 		then: 'no exception is thrown'
 		noExceptionThrown()
@@ -117,15 +117,15 @@ class SpockExpectationVerifierSpec extends Specification {
 	}
 
 	/**
-	 * Creates a mock Expectation annotation.
+	 * Creates a mock ExpectedDataSet annotation.
 	 *
 	 * @return the mocked annotation
 	 */
-	private Expectation createMockExpectation() {
-		def expectation = Mock(Expectation)
-		expectation.paths() >> ([] as String[])
-		expectation.columns() >> ([] as String[])
-		return expectation
+	private ExpectedDataSet createMockExpectedDataSet() {
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.paths() >> ([] as String[])
+		expectedDataSet.columns() >> ([] as String[])
+		return expectedDataSet
 	}
 
 	/**

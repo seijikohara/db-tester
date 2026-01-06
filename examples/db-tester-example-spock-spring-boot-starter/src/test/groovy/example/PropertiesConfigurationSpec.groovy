@@ -1,7 +1,7 @@
 package example
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
@@ -110,8 +110,8 @@ class PropertiesConfigurationSpec extends Specification {
 	 *   <li>Expectation: Verifies final state from {@code verify/CONFIG_ITEMS.csv}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def "should use custom scenario marker from properties"() {
 		when:
 		logger.info("Testing custom scenario marker [TestCase] configured via properties")
@@ -140,8 +140,8 @@ class PropertiesConfigurationSpec extends Specification {
 	 *   <li>Expectation: Verifies from {@code verify/CONFIG_ITEMS.csv} instead of {@code expected/}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def "should use custom expectation suffix from properties"() {
 		when:
 		logger.info("Testing custom expectation suffix /verify configured via properties")

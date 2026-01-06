@@ -1,19 +1,19 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 
 /**
  * Demonstrates annotation inheritance from a base specification with Spock.
  *
  * <p>This specification inherits:
  * <ul>
- *   <li>Class-level {@code @Preparation} annotation from {@link InheritanceSpecBase}
+ *   <li>Class-level {@code @DataSet} annotation from {@link InheritanceSpecBase}
  *   <li>Database setup and utility methods
  * </ul>
  *
- * <p>Each feature method automatically uses the base specification's {@code @Preparation} unless overridden
+ * <p>Each feature method automatically uses the base specification's {@code @DataSet} unless overridden
  * at the method level.
  *
  * <p>Directory structure:
@@ -30,18 +30,18 @@ import io.github.seijikohara.dbtester.api.annotation.Preparation
 class InheritedAnnotationSpec extends InheritanceSpecBase {
 
 	/**
-	 * Tests using inherited class-level @Preparation annotation.
+	 * Tests using inherited class-level @DataSet annotation.
 	 *
-	 * <p>This test uses the {@code @Preparation} from {@link InheritanceSpecBase} automatically.
+	 * <p>This test uses the {@code @DataSet} from {@link InheritanceSpecBase} automatically.
 	 *
 	 * <p>Test flow:
 	 * <ul>
-	 *   <li>Preparation: Uses inherited @Preparation (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
+	 *   <li>Preparation: Uses inherited @DataSet (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
 	 *   <li>Execution: Inserts ID=3 (Monitor, 20, Warehouse B)
 	 *   <li>Expectation: Verifies all three products exist (Laptop, Keyboard, Monitor)
 	 * </ul>
 	 */
-	@Expectation
+	@ExpectedDataSet
 	def 'should use inherited preparation'() {
 		when: 'inserting a new product using inherited preparation'
 		sql.execute '''
@@ -58,21 +58,21 @@ class InheritedAnnotationSpec extends InheritanceSpecBase {
 	}
 
 	/**
-	 * Tests overriding inherited @Preparation with method-level annotation.
+	 * Tests overriding inherited @DataSet with method-level annotation.
 	 *
-	 * <p>The method-level {@code @Preparation} takes precedence over the inherited class-level
+	 * <p>The method-level {@code @DataSet} takes precedence over the inherited class-level
 	 * annotation.
 	 *
 	 * <p>Test flow:
 	 * <ul>
-	 *   <li>Preparation: Uses method-level @Preparation (overrideSetup) - TABLE1(ID=1 Laptop,
+	 *   <li>Preparation: Uses method-level @DataSet (overrideSetup) - TABLE1(ID=1 Laptop,
 	 *       COLUMN2=30)
 	 *   <li>Execution: Updates ID=1 COLUMN2 from 30 to 50
 	 *   <li>Expectation: Verifies ID=1 has COLUMN2=50
 	 * </ul>
 	 */
-	@Preparation(dataSets = @DataSet(scenarioNames = 'overrideSetup'))
-	@Expectation(dataSets = @DataSet(scenarioNames = 'overrideSetup'))
+	@DataSet(dataSets = @DataSetSource(scenarioNames = 'overrideSetup'))
+	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'overrideSetup'))
 	def 'should override inherited preparation'() {
 		when: 'updating a record with overridden preparation'
 		sql.executeUpdate 'UPDATE TABLE1 SET COLUMN2 = 50 WHERE ID = 1'
@@ -84,16 +84,16 @@ class InheritedAnnotationSpec extends InheritanceSpecBase {
 	/**
 	 * Tests combining inherited and method-level expectations.
 	 *
-	 * <p>Uses inherited {@code @Preparation} but adds method-level {@code @Expectation}.
+	 * <p>Uses inherited {@code @DataSet} but adds method-level {@code @ExpectedDataSet}.
 	 *
 	 * <p>Test flow:
 	 * <ul>
-	 *   <li>Preparation: Uses inherited @Preparation (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
+	 *   <li>Preparation: Uses inherited @DataSet (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
 	 *   <li>Execution: Updates Laptop's COLUMN3 from 'Warehouse A' to 'Warehouse C'
 	 *   <li>Expectation: Verifies ID=1 has COLUMN3='Warehouse C', ID=2 unchanged
 	 * </ul>
 	 */
-	@Expectation(dataSets = @DataSet(scenarioNames = 'combinedTest'))
+	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'combinedTest'))
 	def 'should combine inherited and method level annotations'() {
 		when: 'updating a record with combined annotations'
 		sql.execute '''

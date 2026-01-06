@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -113,8 +113,8 @@ class ComprehensiveDataTypesSpec extends Specification {
 	 *   <li>Expectation: Verifies all three records including BLOB (Base64) and CHAR (space-padded)
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should handle all data types'() {
 		when: 'inserting a record with all data types'
 		sql.execute '''

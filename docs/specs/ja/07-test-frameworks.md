@@ -42,8 +42,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void testCreateUser() {
         // テスト実装
     }
@@ -89,16 +89,16 @@ class UserRepositoryTest {
     @Nested
     class CreateTests {
         @Test
-        @Preparation
-        @Expectation
+        @DataSet
+        @ExpectedDataSet
         void testCreateUser() { }  // 親のレジストリを使用
     }
 
     @Nested
     class UpdateTests {
         @Test
-        @Preparation
-        @Expectation
+        @DataSet
+        @ExpectedDataSet
         void testUpdateUser() { }  // 親のレジストリを使用
     }
 }
@@ -109,15 +109,15 @@ class UserRepositoryTest {
 メソッドレベルのアノテーションがクラスレベルをオーバーライドします:
 
 ```java
-@Preparation(operation = Operation.CLEAN_INSERT)  // クラスデフォルト
+@DataSet(operation = Operation.CLEAN_INSERT)  // クラスデフォルト
 class UserRepositoryTest {
 
     @Test
-    @Preparation(operation = Operation.INSERT)  // クラスをオーバーライド
+    @DataSet(operation = Operation.INSERT)  // クラスをオーバーライド
     void testWithInsert() { }
 
     @Test
-    @Preparation  // クラスデフォルトを使用
+    @DataSet  // クラスデフォルトを使用
     void testWithDefault() { }
 }
 ```
@@ -151,8 +151,8 @@ class UserRepositorySpec extends Specification {
         dbTesterRegistry.registerDefault(dataSource)
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() {
         // テスト実装
     }
@@ -182,8 +182,8 @@ class UserRepositorySpec extends Specification {
         dbTesterConfiguration = Configuration.withConventions(conventions)
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() { }
 }
 ```
@@ -200,7 +200,7 @@ class UserRepositorySpec extends Specification {
 シナリオ名はフィーチャーメソッドから導出されます:
 
 ```groovy
-@Preparation
+@DataSet
 def 'should create user with email'() {
     // シナリオ名: "should create user with email"
 }
@@ -211,7 +211,7 @@ def 'should create user with email'() {
 `where:`ブロックを使用したパラメータ化テストの場合、イテレーション名が使用されます:
 
 ```groovy
-@Preparation
+@DataSet
 def 'should process #status order'() {
     expect:
     // テスト実装
@@ -255,8 +255,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         // テスト実装
     }
@@ -328,7 +328,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ```kotlin
 @Test
-@Preparation
+@DataSet
 fun `should create user with email`() {
     // シナリオ名: "should create user with email"
 }
@@ -337,7 +337,7 @@ fun `should create user with email`() {
 ### AnnotationSpec要件
 
 DB TesterはKotest統合に`AnnotationSpec`スタイルを必要とします:
-1. アノテーション（`@Preparation`、`@Expectation`）をテストメソッドに適用可能
+1. アノテーション（`@DataSet`、`@ExpectedDataSet`）をテストメソッドに適用可能
 2. リフレクションによるメソッド解決が信頼性が高い
 3. Java開発者にとって馴染みのあるJUnit風の構造
 
@@ -363,8 +363,8 @@ Spring Boot拡張機能は自動的に以下を実行します:
 class UserRepositoryTest {
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void testCreateUser() {
         // DataSourceはSpringコンテキストから自動登録
     }
@@ -395,9 +395,9 @@ class DataSourceConfig {
 class MultiDatabaseTest {
 
     @Test
-    @Preparation(dataSets = {
-        @DataSet(dataSourceName = ""),          // Primary（デフォルト）
-        @DataSet(dataSourceName = "secondary")  // Secondary
+    @DataSet(sources = {
+        @DataSetSource(dataSourceName = ""),          // Primary（デフォルト）
+        @DataSetSource(dataSourceName = "secondary")  // Secondary
     })
     void testMultipleDatabases() { }
 }
@@ -448,8 +448,8 @@ db-tester.operation.expectation=NONE
 @SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() {
         // DataSourceはSpringコンテキストから自動登録
     }
@@ -476,8 +476,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         // DataSourceはSpringコンテキストから自動登録
     }
@@ -508,12 +508,12 @@ flowchart TD
 
         subgraph each["各テストメソッドに対して"]
             BE["beforeEach()"]
-            BE --> BE1["Preparationを検索"]
+            BE --> BE1["DataSetを検索"]
             BE1 --> BE2[データセットを読み込み]
             BE2 --> BE3[操作を実行]
             BE3 --> TM[テストメソッド実行]
             TM --> AE["afterEach()"]
-            AE --> AE1["Expectationを検索"]
+            AE --> AE1["ExpectedDataSetを検索"]
             AE1 --> AE2[期待データセットを読み込み]
             AE2 --> AE3[データベースと比較]
             AE3 --> AE4[不一致を報告]
@@ -537,10 +537,10 @@ flowchart TD
 
         subgraph each["各フィーチャーメソッドに対して"]
             INT1["インターセプター（前）"]
-            INT1 --> INT1A["Preparationを実行"]
+            INT1 --> INT1A["DataSetを実行"]
             INT1A --> FM[フィーチャーメソッド実行]
             FM --> INT2["インターセプター（後）"]
-            INT2 --> INT2A["Expectationを実行"]
+            INT2 --> INT2A["ExpectedDataSetを実行"]
         end
 
         SS3 --> each
@@ -563,11 +563,11 @@ flowchart TD
 
         subgraph each["各@Testメソッドに対して"]
             INT["intercept()"]
-            INT --> INT1["Preparationを検索"]
+            INT --> INT1["DataSetを検索"]
             INT1 --> INT2[データセットを読み込み]
             INT2 --> INT3[操作を実行]
             INT3 --> TM[テストメソッド実行]
-            TM --> INT4["Expectationを検索"]
+            TM --> INT4["ExpectedDataSetを検索"]
             INT4 --> INT5[期待データセットを読み込み]
             INT5 --> INT6[データベースと比較]
             INT6 --> INT7[不一致を報告]
@@ -584,16 +584,16 @@ flowchart TD
 
 | フレームワーク | 準備 | 期待 |
 |---------------|------|------|
-| JUnit | `PreparationExecutor` | `ExpectationVerifier` |
-| Spock | `SpockPreparationExecutor` | `SpockExpectationVerifier` |
-| Kotest | `KotestPreparationExecutor` | `KotestExpectationVerifier` |
+| JUnit | `DataSetExecutor` | `ExpectedDataSetVerifier` |
+| Spock | `SpockDataSetExecutor` | `SpockExpectedDataSetVerifier` |
+| Kotest | `KotestDataSetExecutor` | `KotestExpectedDataSetVerifier` |
 
 ### エラーハンドリング
 
 | フェーズ | エラー型 | 動作 |
 |---------|----------|------|
 | 準備 | `DatabaseOperationException` | 実行前にテスト失敗 |
-| テスト | 任意の例外 | Expectationは引き続き実行 |
+| テスト | 任意の例外 | ExpectedDataSetは引き続き実行 |
 | 期待 | `ValidationException` | 比較詳細付きでテスト失敗 |
 
 

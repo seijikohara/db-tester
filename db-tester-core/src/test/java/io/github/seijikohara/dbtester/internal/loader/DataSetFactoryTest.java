@@ -48,9 +48,9 @@ class DataSetFactoryTest {
     }
   }
 
-  /** Tests for the createDataSet() method. */
+  /** Tests for the createTableSet() method. */
   @Nested
-  @DisplayName("createDataSet() method")
+  @DisplayName("createTableSet() method")
   class CreateDataSetMethod {
 
     /** Tests for the createDataSet method. */
@@ -74,7 +74,7 @@ class DataSetFactoryTest {
 
       // When
       final var dataSet =
-          factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
+          factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
 
       // Then
       assertAll(
@@ -109,7 +109,7 @@ class DataSetFactoryTest {
 
       // When
       final var dataSet =
-          factory.createDataSet(tempDir, scenarioNames, scenarioMarker, DataFormat.CSV, null);
+          factory.createTableSet(tempDir, scenarioNames, scenarioMarker, DataFormat.CSV, null);
 
       // Then
       final var table = dataSet.getTables().get(0);
@@ -139,7 +139,7 @@ class DataSetFactoryTest {
 
       // When
       final var dataSet =
-          factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
+          factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null);
 
       // Then
       assertAll(
@@ -168,7 +168,7 @@ class DataSetFactoryTest {
           assertThrows(
               DataSetLoadException.class,
               () ->
-                  factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
+                  factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
 
       final var message = exception.getMessage();
       assertTrue(
@@ -197,7 +197,7 @@ class DataSetFactoryTest {
           assertThrows(
               DataSetLoadException.class,
               () ->
-                  factory.createDataSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
+                  factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.CSV, null));
 
       final var message = exception.getMessage();
       assertTrue(
@@ -223,7 +223,7 @@ class DataSetFactoryTest {
       assertThrows(
           DataSetLoadException.class,
           () ->
-              factory.createDataSet(
+              factory.createTableSet(
                   nonExistentDir, List.of(), scenarioMarker, DataFormat.CSV, null));
     }
   }

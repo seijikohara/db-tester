@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
@@ -27,7 +27,7 @@ import spock.lang.Specification
  *   <li>{@link TableMergeStrategy#UNION_ALL} - Merge tables, keeping all rows (default)
  * </ul>
  *
- * <p>Note: Multiple @DataSet annotations in a single @Preparation are demonstrated
+ * <p>Note: Multiple @DataSetSource annotations in a single @DataSet are demonstrated
  * in the JUnit TableMergeStrategyTest. This Spock specification demonstrates
  * single dataset loading with different merge strategy configurations.
  */
@@ -102,12 +102,12 @@ class TableMergeStrategySpec extends Specification {
 		/**
 		 * Verifies FIRST strategy configuration is applied.
 		 */
-		@Preparation(
+		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/')
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/')
 		)
-		@Expectation(
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/should use only first dataset/expected/')
+		@ExpectedDataSet(
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/should use only first dataset/expected/')
 		)
 		def 'should use only first dataset'() {
 			when: 'adding additional data'
@@ -201,12 +201,12 @@ class TableMergeStrategySpec extends Specification {
 		/**
 		 * Verifies LAST strategy configuration is applied.
 		 */
-		@Preparation(
+		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
 		)
-		@Expectation(
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/should use only last dataset/expected/')
+		@ExpectedDataSet(
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/should use only last dataset/expected/')
 		)
 		def 'should use only last dataset'() {
 			when: 'adding additional data'
@@ -300,12 +300,12 @@ class TableMergeStrategySpec extends Specification {
 		/**
 		 * Verifies UNION strategy configuration is applied.
 		 */
-		@Preparation(
+		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/')
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/')
 		)
-		@Expectation(
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/should merge and remove duplicates/expected/')
+		@ExpectedDataSet(
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/should merge and remove duplicates/expected/')
 		)
 		def 'should merge and remove duplicates'() {
 			when: 'adding additional unique data'
@@ -399,12 +399,12 @@ class TableMergeStrategySpec extends Specification {
 		/**
 		 * Verifies UNION_ALL strategy configuration is applied.
 		 */
-		@Preparation(
+		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/')
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/')
 		)
-		@Expectation(
-		dataSets = @DataSet(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/should merge and keep all rows/expected/')
+		@ExpectedDataSet(
+		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/should merge and keep all rows/expected/')
 		)
 		def 'should merge and keep all rows'() {
 			when: 'adding additional data'

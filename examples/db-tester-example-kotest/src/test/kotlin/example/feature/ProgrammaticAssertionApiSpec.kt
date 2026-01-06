@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -15,7 +15,7 @@ import javax.sql.DataSource
  * Demonstrates both annotation-based and programmatic database validation approaches with Kotest.
  *
  * This specification illustrates two complementary validation strategies:
- * - Annotation-based validation using [Expectation] - suitable for standard table comparisons
+ * - Annotation-based validation using [ExpectedDataSet] - suitable for standard table comparisons
  *   with convention-based expected data
  * - Programmatic validation using custom SQL queries - provides flexibility for complex scenarios
  *   where annotation-based testing is insufficient
@@ -106,8 +106,8 @@ class ProgrammaticAssertionApiSpec : AnnotationSpec() {
      * - Expectation: Verifies all three records including NULL COLUMN3
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should demonstrate basic programmatic API`(): Unit =
         logger.info("Running basic programmatic API test").also {
             executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)")
@@ -118,7 +118,7 @@ class ProgrammaticAssertionApiSpec : AnnotationSpec() {
      * Demonstrates programmatic custom SQL query validation.
      *
      * This test shows validation using direct SQL queries instead of relying on
-     * [Expectation] annotation. Programmatic assertions provide flexibility for custom
+     * [ExpectedDataSet] annotation. Programmatic assertions provide flexibility for custom
      * validation scenarios.
      *
      * Test flow:
@@ -127,7 +127,7 @@ class ProgrammaticAssertionApiSpec : AnnotationSpec() {
      * - Expectation: Validates using SQL queries to verify row count and specific records
      */
     @Test
-    @Preparation
+    @DataSet
     fun `should validate using multiple queries`(): Unit =
         logger.info("Running multiple queries validation test").also {
             executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Value3', 300)")

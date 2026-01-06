@@ -46,8 +46,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should save user`() {
         userRepository.save(User("Alice", "alice@example.com"))
     }

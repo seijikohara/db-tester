@@ -102,7 +102,7 @@ For test method `testCreate`, the framework filters to:
 
 The scenario name is resolved in the following order:
 
-1. Explicit `scenarioNames` in `@DataSet` annotation
+1. Explicit `scenarioNames` in `@DataSetSource` annotation
 2. Test method name (via `ScenarioNameResolver` SPI)
 
 ### Multiple Scenarios
@@ -110,7 +110,7 @@ The scenario name is resolved in the following order:
 A single test can use multiple scenarios:
 
 ```java
-@Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
+@DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
 ```
 
@@ -167,10 +167,10 @@ Values containing delimiters or special characters must be quoted:
 src/test/resources/
 └── {package}/
     └── {TestClassName}/
-        ├── TABLE1.csv          # Preparation data
+        ├── TABLE1.csv          # DataSet data
         ├── TABLE2.csv
         ├── load-order.txt      # Table ordering (optional)
-        └── expected/           # Expectation data
+        └── expected/           # ExpectedDataSet data
             ├── TABLE1.csv
             └── TABLE2.csv
 ```
@@ -258,7 +258,7 @@ When `load-order.txt` does not exist in the dataset directory:
 To explicitly require the load order file, use:
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 ```
 
 This throws a `DataSetLoadException` if `load-order.txt` is not found.

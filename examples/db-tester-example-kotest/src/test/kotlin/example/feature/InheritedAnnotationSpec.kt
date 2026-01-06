@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.kotest.matchers.shouldBe
 import org.slf4j.LoggerFactory
 
@@ -10,10 +10,10 @@ import org.slf4j.LoggerFactory
  * Demonstrates annotation inheritance from a base specification with Kotest.
  *
  * This specification inherits:
- * - Class-level [Preparation] annotation from [InheritanceSpecBase]
+ * - Class-level [DataSet] annotation from [InheritanceSpecBase]
  * - Database setup and utility methods
  *
- * Each test method automatically uses the base specification's [Preparation] unless overridden
+ * Each test method automatically uses the base specification's [DataSet] unless overridden
  * at the method level.
  *
  * Directory structure:
@@ -33,17 +33,17 @@ class InheritedAnnotationSpec : InheritanceSpecBase() {
     }
 
     /**
-     * Tests using inherited class-level @Preparation annotation.
+     * Tests using inherited class-level @DataSet annotation.
      *
-     * This test uses the [Preparation] from [InheritanceSpecBase] automatically.
+     * This test uses the [DataSet] from [InheritanceSpecBase] automatically.
      *
      * Test flow:
-     * - Preparation: Uses inherited @Preparation (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
+     * - DataSet: Uses inherited @DataSet (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
      * - Execution: Inserts ID=3 (Monitor, 20, Warehouse B)
-     * - Expectation: Verifies all three products exist (Laptop, Keyboard, Monitor)
+     * - ExpectedDataSet: Verifies all three products exist (Laptop, Keyboard, Monitor)
      */
     @Test
-    @Expectation
+    @ExpectedDataSet
     fun `should use inherited preparation`(): Unit =
         logger.info("Running inherited preparation test").also {
             executeSql(
@@ -58,19 +58,19 @@ class InheritedAnnotationSpec : InheritanceSpecBase() {
         }
 
     /**
-     * Tests overriding inherited @Preparation with method-level annotation.
+     * Tests overriding inherited @DataSet with method-level annotation.
      *
-     * The method-level [Preparation] takes precedence over the inherited class-level
+     * The method-level [DataSet] takes precedence over the inherited class-level
      * annotation.
      *
      * Test flow:
-     * - Preparation: Uses method-level @Preparation (overrideSetup) - TABLE1(ID=1 Laptop, COLUMN2=30)
+     * - DataSet: Uses method-level @DataSet (overrideSetup) - TABLE1(ID=1 Laptop, COLUMN2=30)
      * - Execution: Updates ID=1 COLUMN2 from 30 to 50
-     * - Expectation: Verifies ID=1 has COLUMN2=50
+     * - ExpectedDataSet: Verifies ID=1 has COLUMN2=50
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["overrideSetup"])])
-    @Expectation(dataSets = [DataSet(scenarioNames = ["overrideSetup"])])
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["overrideSetup"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["overrideSetup"])])
     fun `should override inherited preparation`(): Unit =
         logger.info("Running override inherited preparation test").also {
             executeSql("UPDATE TABLE1 SET COLUMN2 = 50 WHERE ID = 1")
@@ -80,15 +80,15 @@ class InheritedAnnotationSpec : InheritanceSpecBase() {
     /**
      * Tests combining inherited and method-level expectations.
      *
-     * Uses inherited [Preparation] but adds method-level [Expectation].
+     * Uses inherited [DataSet] but adds method-level [ExpectedDataSet].
      *
      * Test flow:
-     * - Preparation: Uses inherited @Preparation (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
+     * - DataSet: Uses inherited @DataSet (baseSetup) - TABLE1(ID=1 Laptop, ID=2 Keyboard)
      * - Execution: Updates Laptop's COLUMN3 from 'Warehouse A' to 'Warehouse C'
-     * - Expectation: Verifies ID=1 has COLUMN3='Warehouse C', ID=2 unchanged
+     * - ExpectedDataSet: Verifies ID=1 has COLUMN3='Warehouse C', ID=2 unchanged
      */
     @Test
-    @Expectation(dataSets = [DataSet(scenarioNames = ["combinedTest"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["combinedTest"])])
     fun `should combine inherited and method level annotations`(): Unit =
         logger.info("Running combined annotations test").also {
             executeSql(

@@ -4,16 +4,16 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser.Feature;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Parser for delimited text files (CSV, TSV, etc.) using Jackson Dataformat CSV.
  *
- * <p>This parser reads delimited files from a directory and converts them into a {@link DataSet}.
+ * <p>This parser reads delimited files from a directory and converts them into a {@link TableSet}.
  * Each file represents a single database table, where the filename (without extension) becomes the
  * table name. The first row contains column headers, subsequent rows contain data, empty cells
  * represent NULL values, and values can be quoted with double quotes. Tables are loaded in
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * <p>This class is stateless and thread-safe. Instances can be safely shared between threads.
  *
  * @see DelimiterConfig
- * @see DataSet
+ * @see TableSet
  */
 public final class DelimitedParser {
 
@@ -95,13 +95,13 @@ public final class DelimitedParser {
   }
 
   /**
-   * Parses all matching files in the specified directory into a DataSet.
+   * Parses all matching files in the specified directory into a TableSet.
    *
    * @param directory the directory containing data files
    * @return the parsed dataset containing all tables
    * @throws DataSetLoadException if parsing fails
    */
-  public DataSet parse(final Path directory) {
+  public TableSet parse(final Path directory) {
     if (!Files.isDirectory(directory)) {
       throw new DataSetLoadException(
           String.format("Not a directory: %s", directory.toAbsolutePath()));
@@ -114,7 +114,7 @@ public final class DelimitedParser {
 
     logger.debug("Parsed {} tables from directory: {}", tables.size(), directory);
 
-    return new SimpleDataSet(tables);
+    return new SimpleTableSet(tables);
   }
 
   /**

@@ -7,8 +7,8 @@ package io.github.seijikohara.dbtester.api.operation;
  * affects both data insertion and deletion operations to ensure foreign key constraints are
  * satisfied.
  *
- * @see io.github.seijikohara.dbtester.api.annotation.Preparation
- * @see io.github.seijikohara.dbtester.api.annotation.Expectation
+ * @see io.github.seijikohara.dbtester.api.annotation.DataSet
+ * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  */
 public enum TableOrderingStrategy {
 

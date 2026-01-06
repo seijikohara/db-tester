@@ -85,11 +85,11 @@ graph TD
 
 | パッケージ | 責務 |
 |-----------|------|
-| `annotation` | `@Preparation`, `@Expectation`, `@DataSet`アノテーション |
+| `annotation` | `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`アノテーション |
 | `assertion` | プログラマティックアサーションAPI |
 | `config` | 設定クラスとレジストリ |
 | `context` | テスト実行コンテキスト |
-| `dataset` | DataSet, Table, Rowインターフェース |
+| `dataset` | TableSet, Table, Rowインターフェース |
 | `domain` | 値オブジェクト（`TableName`, `ColumnName`, `CellValue`） |
 | `exception` | 例外階層 |
 | `loader` | データセットローダーインターフェース |
@@ -104,7 +104,7 @@ graph TD
 | パッケージ | 責務 |
 |-----------|------|
 | `assertion` | データセット比較と検証 |
-| `dataset` | DataSet, Table, Row実装 |
+| `dataset` | TableSet, Table, Row実装 |
 | `domain` | 内部値オブジェクト |
 | `format` | CSV/TSV解析とフォーマットプロバイダー |
 | `jdbc` | JDBC読み取り/書き込み操作 |
@@ -131,10 +131,10 @@ graph TD
 |----------|------|------|
 | 値オブジェクト | `TableName`, `ColumnName`, `CellValue` | 値による等価性を持つイミュータブルオブジェクト |
 | エンティティ | `Table`, `Row` | 集約内で識別子を持つオブジェクト |
-| 集約 | `DataSet` | 整合性境界を持つルートエンティティ |
-| ファクトリ | `DataSetFactory` | 複雑なオブジェクトの生成 |
+| 集約 | `TableSet` | 整合性境界を持つルートエンティティ |
+| ファクトリ | `TableSetFactory` | 複雑なオブジェクトの生成 |
 | リポジトリ | `DataSourceRegistry` | データソース管理 |
-| ドメインサービス | `DataSetComparator` | エンティティに対するステートレス操作 |
+| ドメインサービス | `TableSetComparator` | エンティティに対するステートレス操作 |
 
 ### サービスプロバイダーインターフェース（SPI）
 

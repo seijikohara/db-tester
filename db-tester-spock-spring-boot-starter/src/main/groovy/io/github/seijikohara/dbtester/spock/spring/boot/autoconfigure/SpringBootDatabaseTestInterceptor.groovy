@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.context.TestContext
@@ -33,23 +33,23 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SpringBootDatabaseTestInterceptor)
 
-	private final Preparation preparation
-	private final Expectation expectation
+	private final DataSet dataSet
+	private final ExpectedDataSet expectedDataSet
 	private final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
 	private final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
 
-	SpringBootDatabaseTestInterceptor(Preparation preparation, Expectation expectation) {
-		this.preparation = preparation
-		this.expectation = expectation
+	SpringBootDatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet) {
+		this.dataSet = dataSet
+		this.expectedDataSet = expectedDataSet
 	}
 
 	@Override
 	void intercept(IMethodInvocation invocation) throws Throwable {
 		def testContext = createTestContext(invocation)
 
-		preparation?.with { preparationExecutor.execute(testContext, it) }
+		dataSet?.with { preparationExecutor.execute(testContext, it) }
 		invocation.proceed()
-		expectation?.with { expectationVerifier.verify(testContext, it) }
+		expectedDataSet?.with { expectationVerifier.verify(testContext, it) }
 	}
 
 	private TestContext createTestContext(IMethodInvocation invocation) {

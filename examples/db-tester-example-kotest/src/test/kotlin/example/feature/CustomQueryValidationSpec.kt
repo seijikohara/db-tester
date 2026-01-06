@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -102,10 +102,10 @@ class CustomQueryValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies all four records from `expected-filtered/`
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-filtered/",
             ),
         ],
@@ -133,10 +133,10 @@ class CustomQueryValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies all four records from `expected-aggregation/`
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-aggregation/",
             ),
         ],
@@ -164,10 +164,10 @@ class CustomQueryValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies all four records including February data from `expected-join/`
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-join/",
             ),
         ],
@@ -196,10 +196,10 @@ class CustomQueryValidationSpec : AnnotationSpec() {
      * - Expectation: Verifies all four January records from `expected-daterange/`
      */
     @Test
-    @Preparation
-    @Expectation(
+    @DataSet
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-daterange/",
             ),
         ],

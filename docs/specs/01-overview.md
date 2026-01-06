@@ -11,7 +11,7 @@ The framework addresses the following challenges in database testing:
 | Challenge | Solution |
 |-----------|----------|
 | Test data management | File-based datasets in structured directories |
-| Repetitive setup code | Declarative `@Preparation` and `@Expectation` annotations |
+| Repetitive setup code | Declarative `@DataSet` and `@ExpectedDataSet` annotations |
 | Multi-database testing | Named `DataSource` registry with explicit binding |
 | Test isolation | Automatic cleanup via configurable database operations |
 | Data format flexibility | Support for CSV and TSV formats |
@@ -19,9 +19,9 @@ The framework addresses the following challenges in database testing:
 
 ## Key Concepts
 
-### Preparation Phase
+### DataSet Phase
 
-The preparation phase executes before each test method. The framework performs the following steps:
+The data set phase executes before each test method. The framework performs the following steps:
 
 1. Resolves dataset files based on test class and method names
 2. Filters rows by scenario markers when applicable
@@ -30,9 +30,9 @@ The preparation phase executes before each test method. The framework performs t
 
 Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `REFRESH`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
 
-### Expectation Phase
+### ExpectedDataSet Phase
 
-The expectation phase executes after each test method. The framework performs the following steps:
+The expected data set phase executes after each test method. The framework performs the following steps:
 
 1. Loads expected datasets from the designated directory (default: `expected/` subdirectory)
 2. Reads actual data from the database
@@ -48,10 +48,10 @@ The framework resolves dataset locations automatically based on test class packa
 ```
 src/test/resources/
 └── {package}/{TestClassName}/
-    ├── TABLE_NAME.csv           # Preparation data
+    ├── TABLE_NAME.csv           # DataSet data
     ├── load-order.txt           # Table ordering (optional)
     └── expected/
-        └── TABLE_NAME.csv       # Expectation data
+        └── TABLE_NAME.csv       # ExpectedDataSet data
 ```
 
 ### Scenario Filtering
@@ -72,11 +72,11 @@ The framework filters rows based on the current test method name.
 The framework minimizes explicit configuration by establishing sensible defaults:
 
 - Dataset location derived from test class package and name
-- Expectation suffix defaults to `/expected`
+- ExpectedDataSet suffix defaults to `/expected`
 - Scenario marker column defaults to `[Scenario]`
 - Data format defaults to CSV
 - Table ordering strategy defaults to `AUTO`
-- Preparation operation defaults to `CLEAN_INSERT`
+- DataSet operation defaults to `CLEAN_INSERT`
 
 ### Separation of API and Implementation
 

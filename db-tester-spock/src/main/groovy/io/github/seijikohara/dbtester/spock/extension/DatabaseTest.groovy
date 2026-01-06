@@ -11,8 +11,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * Enables database testing support for a Spock specification.
  *
  * <p>Apply this annotation to a specification class to enable automatic processing of
- * {@link io.github.seijikohara.dbtester.api.annotation.Preparation @Preparation} and
- * {@link io.github.seijikohara.dbtester.api.annotation.Expectation @Expectation} annotations
+ * {@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} and
+ * {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet} annotations
  * on feature methods.
  *
  * <p>Example usage:
@@ -23,8 +23,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  *     DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
  *             .register(dataSource)
  *
- *     @Preparation
- *     @Expectation
+ *     @DataSet
+ *     @ExpectedDataSet
  *     def "can insert and retrieve user"() {
  *         // test implementation
  *     }
@@ -38,8 +38,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * <p>Optionally, a {@code dbTesterConfiguration} property or field can be provided to
  * customize the {@link io.github.seijikohara.dbtester.api.config.Configuration Configuration}.
  *
- * @see io.github.seijikohara.dbtester.api.annotation.Preparation
- * @see io.github.seijikohara.dbtester.api.annotation.Expectation
+ * @see io.github.seijikohara.dbtester.api.annotation.DataSet
+ * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  * @see io.github.seijikohara.dbtester.api.config.DataSourceRegistry
  */
 @Inherited

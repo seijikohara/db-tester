@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -16,7 +16,7 @@ import spock.lang.Specification
  * <p>This specification illustrates:
  * <ul>
  *   <li>Automatic CSV file resolution based on specification class and feature method names
- *   <li>Method-level {@code @Preparation} and {@code @Expectation} annotations
+ *   <li>Method-level {@code @DataSet} and {@code @ExpectedDataSet} annotations
  *   <li>Single table operations with minimal configuration
  *   <li>H2 in-memory database setup using Groovy 5 features
  * </ul>
@@ -101,8 +101,8 @@ class MinimalExampleSpec extends Specification {
 	 *   <li>Expectation: Verifies all three products from {@code expected/TABLE1.csv}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should load and verify product data'() {
 		when: 'inserting a new product'
 		sql.execute '''

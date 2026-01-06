@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.kotest.lifecycle
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
@@ -37,9 +37,9 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
     @Test
     fun `should handle empty datasets gracefully`(): Unit =
         createTestContextWithEmptyDatasets().let { context ->
-            createMockExpectation().let { expectation ->
+            createMockExpectedDataSet().let { expectedDataSet ->
                 shouldNotThrowAny {
-                    verifier.verify(context, expectation)
+                    verifier.verify(context, expectedDataSet)
                 }
             }
         }
@@ -79,14 +79,14 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
         }
 
     /**
-     * Creates a mock Expectation annotation.
+     * Creates a mock ExpectedDataSet annotation.
      *
      * @return the mocked annotation
      */
-    private fun createMockExpectation(): Expectation =
-        mockk<Expectation>().also { expectation ->
-            every { expectation.dataSets } returns emptyArray()
-            every { expectation.tableOrdering } returns TableOrderingStrategy.AUTO
+    private fun createMockExpectedDataSet(): ExpectedDataSet =
+        mockk<ExpectedDataSet>().also { expectedDataSet ->
+            every { expectedDataSet.dataSets } returns emptyArray()
+            every { expectedDataSet.tableOrdering } returns TableOrderingStrategy.AUTO
         }
 
     /**

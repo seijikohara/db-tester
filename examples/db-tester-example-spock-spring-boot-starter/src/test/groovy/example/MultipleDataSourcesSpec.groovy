@@ -1,6 +1,6 @@
 package example
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure.SpringBootDatabaseTest
 import javax.sql.DataSource
 import org.slf4j.Logger
@@ -24,7 +24,7 @@ import spock.lang.Specification
  *   <li>Multiple DataSources can be defined and injected via Spring
  *   <li>The {@code @Primary} DataSource is used for default operations
  *   <li>Named DataSources are accessible via their bean names
- *   <li>The {@code @Preparation} annotation works with the primary DataSource
+ *   <li>The {@code @DataSet} annotation works with the primary DataSource
  * </ul>
  *
  * <p>CSV files are located at:
@@ -55,7 +55,7 @@ class MultipleDataSourcesSpec extends Specification {
 		logger.info("Successfully verified multiple DataSource injection")
 	}
 
-	@Preparation
+	@DataSet
 	def "should prepare default DataSource"() {
 		when: 'querying the primary DataSource after preparation'
 		logger.info("Testing preparation with default (primary) DataSource")

@@ -42,8 +42,8 @@ class UserRepositorySpec extends Specification {
     @Autowired
     UserRepository userRepository
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def "should save user"() {
         when:
         userRepository.save(new User("Alice", "alice@example.com"))

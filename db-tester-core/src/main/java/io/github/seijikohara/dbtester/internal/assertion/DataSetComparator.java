@@ -1,9 +1,9 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Comparator for DataSet and Table objects.
+ * Comparator for TableSet and Table objects.
  *
  * <p>This class provides methods to compare datasets and tables, collecting all differences rather
  * than failing on the first mismatch. This enables users to see all issues at once.
@@ -65,8 +65,8 @@ public class DataSetComparator {
    * @param failureHandler optional custom failure handler for assertion failures
    */
   public void assertEquals(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final @Nullable AssertionFailureHandler failureHandler) {
     final var result = new ComparisonResult();
     final var expectedTables = expected.getTables();
@@ -210,8 +210,8 @@ public class DataSetComparator {
    * @throws AssertionError if the table is not found in either dataset or if values differ
    */
   public void assertEqualsIgnoreColumns(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final String tableName,
       final Collection<String> ignoreColumnNames) {
     final var tableNameObj = new TableName(tableName);

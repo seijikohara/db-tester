@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import java.util.List;
@@ -32,9 +32,9 @@ class AnnotationResolverTest {
     resolver = new AnnotationResolver();
   }
 
-  /** Tests for the findPreparation() method. */
+  /** Tests for the findDataSet() method. */
   @Nested
-  @DisplayName("findPreparation(Method, Class<?>) method")
+  @DisplayName("findDataSet(Method, Class<?>) method")
   class FindPreparationMethod {
 
     /** Tests for the findPreparation method. */
@@ -54,7 +54,7 @@ class AnnotationResolverTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
       // When
-      final var result = resolver.findPreparation(testMethod, testClass);
+      final var result = resolver.findDataSet(testMethod, testClass);
 
       // Then
       assertTrue(result.isPresent(), "should find Preparation annotation on method");
@@ -74,7 +74,7 @@ class AnnotationResolverTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
       // When
-      final var result = resolver.findPreparation(testMethod, testClass);
+      final var result = resolver.findDataSet(testMethod, testClass);
 
       // Then
       assertTrue(result.isPresent(), "should find Preparation annotation on class");
@@ -96,7 +96,7 @@ class AnnotationResolverTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
       // When
-      final var result = resolver.findPreparation(testMethod, testClass);
+      final var result = resolver.findDataSet(testMethod, testClass);
 
       // Then
       assertTrue(result.isPresent(), "should find Preparation annotation on parent class");
@@ -116,7 +116,7 @@ class AnnotationResolverTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
       // When
-      final var result = resolver.findPreparation(testMethod, testClass);
+      final var result = resolver.findDataSet(testMethod, testClass);
 
       // Then
       assertFalse(result.isPresent(), "should return empty when no Preparation annotation found");
@@ -136,16 +136,16 @@ class AnnotationResolverTest {
       final var testMethod = testClass.getDeclaredMethod("testMethodWithPreparation");
 
       // When
-      final var result = resolver.findPreparation(testMethod, testClass);
+      final var result = resolver.findDataSet(testMethod, testClass);
 
       // Then
       assertTrue(result.isPresent(), "should find method annotation");
     }
   }
 
-  /** Tests for the findExpectation() method. */
+  /** Tests for the findExpectedDataSet() method. */
   @Nested
-  @DisplayName("findExpectation(Method, Class<?>) method")
+  @DisplayName("findExpectedDataSet(Method, Class<?>) method")
   class FindExpectationMethod {
 
     /** Tests for the findExpectation method. */
@@ -161,11 +161,11 @@ class AnnotationResolverTest {
     @DisplayName("should return annotation when method has Expectation annotation")
     void shouldReturnAnnotation_whenMethodHasExpectationAnnotation() throws NoSuchMethodException {
       // Given
-      final var testClass = TestClassWithExpectation.class;
+      final var testClass = TestClassWithExpectedDataSet.class;
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
       // When
-      final var result = resolver.findExpectation(testMethod, testClass);
+      final var result = resolver.findExpectedDataSet(testMethod, testClass);
 
       // Then
       assertTrue(result.isPresent(), "should find Expectation annotation on method");
@@ -174,7 +174,7 @@ class AnnotationResolverTest {
 
   /** Tests for the resolveScenarioNames() method. */
   @Nested
-  @DisplayName("resolveScenarioNames(DataSet, Method) method")
+  @DisplayName("resolveScenarioNames(TableSet, Method) method")
   class ResolveScenarioNamesMethod {
 
     /** Tests for the resolveScenarioNames method. */
@@ -191,7 +191,7 @@ class AnnotationResolverTest {
     void shouldReturnSpecifiedScenarioNames_whenProvided() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -214,7 +214,7 @@ class AnnotationResolverTest {
     void shouldReturnMethodName_whenScenarioNamesNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutScenarioNames.class.getDeclaredMethod("myTestMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -237,7 +237,7 @@ class AnnotationResolverTest {
     void shouldTrimAndFilterEmpty_scenarioNames() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithEmptyScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -261,7 +261,7 @@ class AnnotationResolverTest {
       // Given
       final var testMethod =
           TestClassWithWhitespaceScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -276,7 +276,7 @@ class AnnotationResolverTest {
 
   /** Tests for the extractResourceLocation() method. */
   @Nested
-  @DisplayName("extractResourceLocation(DataSet) method")
+  @DisplayName("extractResourceLocation(TableSet) method")
   class ExtractResourceLocationMethod {
 
     /** Tests for the extractResourceLocation method. */
@@ -293,7 +293,7 @@ class AnnotationResolverTest {
     void shouldReturnLocation_whenSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithResourceLocation.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.extractResourceLocation(annotation);
@@ -315,7 +315,7 @@ class AnnotationResolverTest {
     void shouldReturnEmpty_whenNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutResourceLocation.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.extractResourceLocation(annotation);
@@ -327,7 +327,7 @@ class AnnotationResolverTest {
 
   /** Tests for the resolveDataSourceName() method. */
   @Nested
-  @DisplayName("resolveDataSourceName(DataSet) method")
+  @DisplayName("resolveDataSourceName(TableSet) method")
   class ResolveDataSourceNameMethod {
 
     /** Tests for the resolveDataSourceName method. */
@@ -344,7 +344,7 @@ class AnnotationResolverTest {
     void shouldReturnName_whenSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithDataSourceName.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveDataSourceName(annotation);
@@ -367,7 +367,7 @@ class AnnotationResolverTest {
     void shouldReturnEmpty_whenNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutDataSourceName.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(Preparation.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
 
       // When
       final var result = resolver.resolveDataSourceName(annotation);
@@ -377,18 +377,18 @@ class AnnotationResolverTest {
     }
   }
 
-  /** Test class with method-level Preparation annotation. */
+  /** Test class with method-level DataSet annotation. */
   static class TestClassWithMethodAnnotation {
     /** Test constructor. */
     TestClassWithMethodAnnotation() {}
 
-    /** Test method with Preparation annotation. */
-    @Preparation
+    /** Test method with DataSet annotation. */
+    @DataSet
     void testMethod() {}
   }
 
-  /** Test class with class-level Preparation annotation. */
-  @Preparation
+  /** Test class with class-level DataSet annotation. */
+  @DataSet
   static class TestClassWithClassAnnotation {
     /** Test constructor. */
     TestClassWithClassAnnotation() {}
@@ -397,14 +397,14 @@ class AnnotationResolverTest {
     void testMethod() {}
   }
 
-  /** Parent class with Preparation annotation. */
-  @Preparation
+  /** Parent class with DataSet annotation. */
+  @DataSet
   static class ParentClassWithAnnotation {
     /** Test constructor. */
     ParentClassWithAnnotation() {}
   }
 
-  /** Test class that inherits Preparation annotation from parent. */
+  /** Test class that inherits DataSet annotation from parent. */
   static class TestClassInheritsAnnotation extends ParentClassWithAnnotation {
     /** Test constructor. */
     TestClassInheritsAnnotation() {}
@@ -423,23 +423,23 @@ class AnnotationResolverTest {
   }
 
   /** Test class with both class and method annotations. */
-  @Preparation
+  @DataSet
   static class TestClassWithBothAnnotations {
     /** Test constructor. */
     TestClassWithBothAnnotations() {}
 
-    /** Test method with Preparation annotation. */
-    @Preparation
+    /** Test method with DataSet annotation. */
+    @DataSet
     void testMethodWithPreparation() {}
   }
 
-  /** Test class with Expectation annotation. */
-  static class TestClassWithExpectation {
+  /** Test class with ExpectedDataSet annotation. */
+  static class TestClassWithExpectedDataSet {
     /** Test constructor. */
-    TestClassWithExpectation() {}
+    TestClassWithExpectedDataSet() {}
 
-    /** Test method with Expectation annotation. */
-    @Expectation
+    /** Test method with ExpectedDataSet annotation. */
+    @ExpectedDataSet
     void testMethod() {}
   }
 
@@ -449,7 +449,7 @@ class AnnotationResolverTest {
     TestClassWithScenarioNames() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
+    @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
     void testMethod() {}
   }
 
@@ -459,7 +459,7 @@ class AnnotationResolverTest {
     TestClassWithoutScenarioNames() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet)
+    @DataSet(dataSets = @DataSetSource)
     void myTestMethod() {}
   }
 
@@ -469,7 +469,7 @@ class AnnotationResolverTest {
     TestClassWithEmptyScenarioNames() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet(scenarioNames = {"", " "}))
+    @DataSet(dataSets = @DataSetSource(scenarioNames = {"", " "}))
     void testMethod() {}
   }
 
@@ -479,7 +479,7 @@ class AnnotationResolverTest {
     TestClassWithWhitespaceScenarioNames() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet(scenarioNames = {" scenario1 "}))
+    @DataSet(dataSets = @DataSetSource(scenarioNames = {" scenario1 "}))
     void testMethod() {}
   }
 
@@ -489,7 +489,7 @@ class AnnotationResolverTest {
     TestClassWithResourceLocation() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+    @DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
     void testMethod() {}
   }
 
@@ -499,7 +499,7 @@ class AnnotationResolverTest {
     TestClassWithoutResourceLocation() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet)
+    @DataSet(dataSets = @DataSetSource)
     void testMethod() {}
   }
 
@@ -509,7 +509,7 @@ class AnnotationResolverTest {
     TestClassWithDataSourceName() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet(dataSourceName = "customDataSource"))
+    @DataSet(dataSets = @DataSetSource(dataSourceName = "customDataSource"))
     void testMethod() {}
   }
 
@@ -519,7 +519,7 @@ class AnnotationResolverTest {
     TestClassWithoutDataSourceName() {}
 
     /** Test method. */
-    @Preparation(dataSets = @DataSet)
+    @DataSet(dataSets = @DataSetSource)
     void testMethod() {}
   }
 }

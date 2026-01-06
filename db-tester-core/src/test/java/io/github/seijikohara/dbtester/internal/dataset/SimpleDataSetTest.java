@@ -19,12 +19,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link SimpleDataSet}. */
-@DisplayName("SimpleDataSet")
-class SimpleDataSetTest {
+/** Unit tests for {@link SimpleTableSet}. */
+@DisplayName("SimpleTableSet")
+class SimpleTableSetTest {
 
-  /** Tests for the SimpleDataSet class. */
-  SimpleDataSetTest() {}
+  /** Tests for the SimpleTableSet class. */
+  SimpleTableSetTest() {}
 
   /** Tests for the constructor. */
   @Nested
@@ -45,7 +45,7 @@ class SimpleDataSetTest {
       final var tables = List.<Table>of(table1, table2);
 
       // When
-      final var dataSet = new SimpleDataSet(tables);
+      final var dataSet = new SimpleTableSet(tables);
 
       // Then
       assertEquals(2, dataSet.getTables().size(), "should have 2 tables");
@@ -61,7 +61,7 @@ class SimpleDataSetTest {
       mutableTables.add(createTable("USERS", List.of("ID")));
 
       // When
-      final var dataSet = new SimpleDataSet(mutableTables);
+      final var dataSet = new SimpleTableSet(mutableTables);
       mutableTables.add(createTable("PRODUCTS", List.of("ID")));
 
       // Then
@@ -77,7 +77,7 @@ class SimpleDataSetTest {
       final List<Table> emptyTables = List.of();
 
       // When
-      final var dataSet = new SimpleDataSet(emptyTables);
+      final var dataSet = new SimpleTableSet(emptyTables);
 
       // Then
       assertEquals(0, dataSet.getTables().size(), "should have no tables");
@@ -102,7 +102,7 @@ class SimpleDataSetTest {
       final var table2 = createTable("PRODUCTS", List.of("ID"));
       final var table3 = createTable("ORDERS", List.of("ID"));
       final var tables = List.<Table>of(table1, table2, table3);
-      final var dataSet = new SimpleDataSet(tables);
+      final var dataSet = new SimpleTableSet(tables);
 
       // When
       final var result = dataSet.getTables();
@@ -123,7 +123,7 @@ class SimpleDataSetTest {
     void shouldReturnUnmodifiableList_whenCalled() {
       // Given
       final var table1 = createTable("USERS", List.of("ID"));
-      final var dataSet = new SimpleDataSet(List.of(table1));
+      final var dataSet = new SimpleTableSet(List.of(table1));
 
       // When
       final var result = dataSet.getTables();
@@ -152,7 +152,7 @@ class SimpleDataSetTest {
       // Given
       final var usersTable = createTable("USERS", List.of("ID", "NAME"));
       final var productsTable = createTable("PRODUCTS", List.of("ID", "TITLE"));
-      final var dataSet = new SimpleDataSet(List.of(usersTable, productsTable));
+      final var dataSet = new SimpleTableSet(List.of(usersTable, productsTable));
 
       // When
       final var result = dataSet.getTable(new TableName("USERS"));
@@ -171,7 +171,7 @@ class SimpleDataSetTest {
     void shouldReturnEmpty_whenTableDoesNotExist() {
       // Given
       final var usersTable = createTable("USERS", List.of("ID"));
-      final var dataSet = new SimpleDataSet(List.of(usersTable));
+      final var dataSet = new SimpleTableSet(List.of(usersTable));
 
       // When
       final var result = dataSet.getTable(new TableName("NON_EXISTENT"));
@@ -186,7 +186,7 @@ class SimpleDataSetTest {
     @DisplayName("should return empty when dataset is empty")
     void shouldReturnEmpty_whenDataSetIsEmpty() {
       // Given
-      final var dataSet = new SimpleDataSet(List.of());
+      final var dataSet = new SimpleTableSet(List.of());
 
       // When
       final var result = dataSet.getTable(new TableName("USERS"));
@@ -203,7 +203,7 @@ class SimpleDataSetTest {
       // Given
       final var usersTable1 = createTableWithRows("USERS", List.of("ID"), 1);
       final var usersTable2 = createTableWithRows("USERS", List.of("ID"), 2);
-      final var dataSet = new SimpleDataSet(List.of(usersTable1, usersTable2));
+      final var dataSet = new SimpleTableSet(List.of(usersTable1, usersTable2));
 
       // When
       final var result = dataSet.getTable(new TableName("USERS"));
@@ -230,13 +230,13 @@ class SimpleDataSetTest {
     @DisplayName("should return empty when called")
     void shouldReturnEmpty_whenCalled() {
       // Given
-      final var dataSet = new SimpleDataSet(List.of());
+      final var dataSet = new SimpleTableSet(List.of());
 
       // When
       final var result = dataSet.getDataSource();
 
       // Then
-      assertFalse(result.isPresent(), "SimpleDataSet should always return empty DataSource");
+      assertFalse(result.isPresent(), "SimpleTableSet should always return empty DataSource");
     }
   }
 

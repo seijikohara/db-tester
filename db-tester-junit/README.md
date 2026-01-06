@@ -63,8 +63,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void testCreateUser() {
         // Test implementation
     }
@@ -92,8 +92,8 @@ Apply annotations at the class level for all test methods:
 
 ```java
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 class UserRepositoryTest {
 
     @Test
@@ -109,8 +109,8 @@ Override class-level annotations at the method level:
 
 ```java
 @Test
-@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
-void testWithCustomPreparation() {
+@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
+void testWithCustomDataSet() {
     // Uses custom data location
 }
 ```

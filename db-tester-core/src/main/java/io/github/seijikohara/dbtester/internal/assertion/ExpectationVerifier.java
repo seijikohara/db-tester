@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -63,14 +63,14 @@ public final class ExpectationVerifier {
    *
    * <p>Only columns present in expected dataset are compared, allowing partial column validation.
    *
-   * @param expectedDataSet the expected dataset containing expected table data
+   * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
    * @throws AssertionError if verification fails
    */
-  public void verifyExpectation(final DataSet expectedDataSet, final DataSource dataSource) {
-    logger.debug("Verifying expectation for {} tables", expectedDataSet.getTables().size());
+  public void verifyExpectation(final TableSet expectedTableSet, final DataSource dataSource) {
+    logger.debug("Verifying expectation for {} tables", expectedTableSet.getTables().size());
 
-    expectedDataSet
+    expectedTableSet
         .getTables()
         .forEach(
             expectedTable -> {
@@ -95,6 +95,6 @@ public final class ExpectationVerifier {
             });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedDataSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
   }
 }

@@ -310,13 +310,13 @@ class TestContextTest {
   private static DataSetLoader createMockLoader() {
     return new DataSetLoader() {
       @Override
-      public java.util.List<io.github.seijikohara.dbtester.api.dataset.DataSet>
+      public java.util.List<io.github.seijikohara.dbtester.api.dataset.TableSet>
           loadPreparationDataSets(final TestContext context) {
         return java.util.List.of();
       }
 
       @Override
-      public java.util.List<io.github.seijikohara.dbtester.api.dataset.DataSet>
+      public java.util.List<io.github.seijikohara.dbtester.api.dataset.TableSet>
           loadExpectationDataSets(final TestContext context) {
         return java.util.List.of();
       }

@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
@@ -44,14 +44,14 @@ public final class DefaultAssertionProvider implements AssertionProvider {
   }
 
   @Override
-  public void assertEquals(final DataSet expected, final DataSet actual) {
+  public void assertEquals(final TableSet expected, final TableSet actual) {
     comparator.assertEquals(expected, actual, null);
   }
 
   @Override
   public void assertEquals(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final @Nullable AssertionFailureHandler failureHandler) {
     comparator.assertEquals(expected, actual, failureHandler);
   }
@@ -77,8 +77,8 @@ public final class DefaultAssertionProvider implements AssertionProvider {
 
   @Override
   public void assertEqualsIgnoreColumns(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final String tableName,
       final Collection<String> ignoreColumnNames) {
     comparator.assertEqualsIgnoreColumns(expected, actual, tableName, ignoreColumnNames);
@@ -92,7 +92,7 @@ public final class DefaultAssertionProvider implements AssertionProvider {
 
   @Override
   public void assertEqualsByQuery(
-      final DataSet expected,
+      final TableSet expected,
       final DataSource dataSource,
       final String sqlQuery,
       final String tableName,

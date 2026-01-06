@@ -65,8 +65,8 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void shouldSaveUser() {
         userRepository.save(new User("Alice", "alice@example.com"));
     }
@@ -77,12 +77,12 @@ Register `SpringBootDatabaseTestExtension` using `@ExtendWith`. DataSource is au
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names in `@DataSet`:
+For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```java
 @Test
-@Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-@Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+@DataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
+@ExpectedDataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
 void testPrimaryDatabase() {
     // Test with primary DataSource
 }

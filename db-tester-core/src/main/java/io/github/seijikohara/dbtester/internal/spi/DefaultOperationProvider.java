@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.OperationProvider;
@@ -37,9 +37,9 @@ public final class DefaultOperationProvider implements OperationProvider {
   @Override
   public void execute(
       final Operation operation,
-      final DataSet dataSet,
+      final TableSet tableSet,
       final DataSource dataSource,
       final TableOrderingStrategy tableOrderingStrategy) {
-    operationExecutor.execute(operation, dataSet, dataSource, tableOrderingStrategy);
+    operationExecutor.execute(operation, tableSet, dataSource, tableOrderingStrategy);
   }
 }

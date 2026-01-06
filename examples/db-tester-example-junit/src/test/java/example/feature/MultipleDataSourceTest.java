@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>Registering multiple named data sources
- *   <li>Using {@code dataSourceName} in {@code @DataSet} annotations
+ *   <li>Using {@code dataSourceName} in {@code @DataSetSource} annotations
  *   <li>Working with different databases simultaneously
  * </ul>
  *
@@ -175,14 +175,14 @@ public final class MultipleDataSourceTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(
+  @DataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation = "classpath:example/feature/MultipleDataSourceTest/default/",
               scenarioNames = "default"))
-  @Expectation(
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/MultipleDataSourceTest/default/expected/",
               scenarioNames = "default"))
@@ -215,15 +215,15 @@ public final class MultipleDataSourceTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(
+  @DataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               dataSourceName = "inventory",
               resourceLocation = "classpath:example/feature/MultipleDataSourceTest/inventory/",
               scenarioNames = "inventory"))
-  @Expectation(
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               dataSourceName = "inventory",
               resourceLocation =
                   "classpath:example/feature/MultipleDataSourceTest/inventory/expected/",

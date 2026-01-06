@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
@@ -165,8 +165,8 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseCustomScenarioMarker() {
     logger.info("Running test with custom scenario marker [TestCase]");
 
@@ -193,8 +193,8 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseCustomExpectationSuffix() {
     logger.info("Running test with custom expectation suffix /verify");
 
@@ -218,8 +218,8 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseCustomOperationDefaults() {
     logger.info("Running test with default operation settings");
 

@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -22,13 +22,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Demonstrates custom expectation paths for flexible test data organization.
  *
- * <p>This test demonstrates using {@link DataSet#resourceLocation()} to specify custom paths for
- * expectation data, enabling flexible test data organization beyond convention-based defaults.
+ * <p>This test demonstrates using {@link DataSetSource#resourceLocation()} to specify custom paths
+ * for expectation data, enabling flexible test data organization beyond convention-based defaults.
  *
  * <p>Key features demonstrated:
  *
  * <ul>
- *   <li>Custom expectation paths using {@link DataSet} annotation
+ *   <li>Custom expectation paths using {@link DataSetSource} annotation
  *   <li>Organizing multiple expectation scenarios in subdirectories
  *   <li>Multi-stage testing with different expected states
  *   <li>Complex business logic validation with database state changes
@@ -131,8 +131,8 @@ public final class CustomExpectationPathsTest {
   /**
    * Demonstrates custom expectation paths with basic INSERT operation.
    *
-   * <p>This test uses {@link DataSet#resourceLocation()} to specify a custom path for expectation
-   * data, demonstrating how to organize test data in non-default directories.
+   * <p>This test uses {@link DataSetSource#resourceLocation()} to specify a custom path for
+   * expectation data, demonstrating how to organize test data in non-default directories.
    *
    * <p>Test flow:
    *
@@ -143,10 +143,10 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation(
+  @DataSet
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-basic/"))
   void shouldInsertNewOrder() {
@@ -176,10 +176,10 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation(
+  @DataSet
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-ignore-columns/"))
   void shouldValidateWithPartialColumns() {
@@ -209,10 +209,10 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation(
+  @DataSet
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-query/"))
   void shouldValidateOrderItems() {
@@ -242,10 +242,10 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation(
+  @DataSet
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage1/"))
   void shouldCreateOrder() {
@@ -275,10 +275,10 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation(
+  @DataSet
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage2/"))
   void shouldShipOrder() {

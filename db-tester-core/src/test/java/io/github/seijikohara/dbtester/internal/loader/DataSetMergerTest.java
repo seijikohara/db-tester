@@ -6,15 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +99,7 @@ class DataSetMergerTest {
     @DisplayName("should return same dataset when single input")
     void shouldReturnSameDataSet_whenSingleInput() {
       // Given
-      final var dataSet = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
 
       // When
       final var result = merger.merge(List.of(dataSet), TableMergeStrategy.UNION_ALL);
@@ -130,8 +130,8 @@ class DataSetMergerTest {
     @DisplayName("should use first table when same table name")
     void shouldUseFirstTable_whenSameTableName() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.FIRST);
@@ -165,8 +165,8 @@ class DataSetMergerTest {
     @DisplayName("should use last table when same table name")
     void shouldUseLastTable_whenSameTableName() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.LAST);
@@ -200,8 +200,8 @@ class DataSetMergerTest {
     @DisplayName("should remove duplicate rows when same data")
     void shouldRemoveDuplicateRows_whenSameData() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION);
@@ -220,8 +220,8 @@ class DataSetMergerTest {
     @DisplayName("should keep distinct rows when different data")
     void shouldKeepDistinctRows_whenDifferentData() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION);
@@ -249,8 +249,8 @@ class DataSetMergerTest {
     @DisplayName("should keep all rows including duplicates")
     void shouldKeepAllRows_includingDuplicates() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION_ALL);
@@ -271,8 +271,8 @@ class DataSetMergerTest {
     @DisplayName("should combine rows from different datasets")
     void shouldCombineRows_fromDifferentDataSets() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE1", List.of("id", "name"), List.of("2", "Bob"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION_ALL);
@@ -300,8 +300,8 @@ class DataSetMergerTest {
     @DisplayName("should preserve different tables")
     void shouldPreserveDifferentTables() {
       // Given
-      final var dataSet1 = createDataSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
-      final var dataSet2 = createDataSet("TABLE2", List.of("id", "value"), List.of("1", "100"));
+      final var dataSet1 = createTableSet("TABLE1", List.of("id", "name"), List.of("1", "Alice"));
+      final var dataSet2 = createTableSet("TABLE2", List.of("id", "value"), List.of("1", "100"));
 
       // When
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION_ALL);
@@ -324,14 +324,14 @@ class DataSetMergerTest {
   }
 
   /**
-   * Creates a DataSet for testing.
+   * Creates a TableSet for testing.
    *
    * @param tableName the table name
    * @param columnNames the column names
    * @param values the row values
-   * @return the created DataSet
+   * @return the created TableSet
    */
-  private DataSet createDataSet(
+  private TableSet createTableSet(
       final String tableName, final List<String> columnNames, final List<String> values) {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
@@ -340,6 +340,6 @@ class DataSetMergerTest {
     }
     final Row row = new SimpleRow(rowValues);
     final Table table = new SimpleTable(new TableName(tableName), columns, List.of(row));
-    return new SimpleDataSet(List.of(table));
+    return new SimpleTableSet(List.of(table));
   }
 }

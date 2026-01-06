@@ -30,7 +30,7 @@ classDiagram
 
 ## 検証エラー
 
-期待値検証が失敗した場合にスローされます（`@Expectation`フェーズ）。
+期待値検証が失敗した場合にスローされます（`@ExpectedDataSet`フェーズ）。
 
 ### 出力形式
 
@@ -269,8 +269,8 @@ org.example.UserRepositoryTest > shouldCreateUser FAILED
                   type: VARCHAR(255)
                   nullable: false
 
-        at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.assertEquals(DataSetComparator.java:85)
-        at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier.verify(ExpectationVerifier.java:42)
+        at io.github.seijikohara.dbtester.internal.assertion.TableSetComparator.assertEquals(TableSetComparator.java:85)
+        at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectedDataSetVerifier.verify(ExpectedDataSetVerifier.java:42)
 ```
 
 ### Spockエラー出力
@@ -290,7 +290,7 @@ example.UserRepositorySpec > should create user FAILED
                 actual: 1
 
 Condition not satisfied:
-    Expectation verification failed
+    ExpectedDataSet verification failed
 ```
 
 ### テストメソッドコンテキスト

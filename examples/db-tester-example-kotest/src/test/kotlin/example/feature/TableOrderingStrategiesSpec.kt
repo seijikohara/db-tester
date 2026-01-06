@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -116,8 +116,8 @@ class TableOrderingStrategiesSpec : AnnotationSpec() {
      * - Expectation: Verifies TABLE1 has 3 rows, TABLE2 has 4 rows
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use alphabetical ordering`(): Unit =
         logger.info("Running should use alphabetical ordering test").also {
             executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1) VALUES (3, 'Services')")
@@ -136,8 +136,8 @@ class TableOrderingStrategiesSpec : AnnotationSpec() {
      * - Expectation: Verifies TABLE3 has 4 rows, TABLE4 has 3 rows with new association
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use manual ordering`(): Unit =
         logger.info("Running should use manual ordering test").also {
             executeSql(dataSource, "INSERT INTO TABLE3 (ID, COLUMN1) VALUES (4, 'Featured')")
@@ -156,16 +156,16 @@ class TableOrderingStrategiesSpec : AnnotationSpec() {
      * - Expectation: Verifies TABLE2(1,1,'Updated Widget')
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/TableOrderingStrategiesSpec/programmatic/",
             ),
         ],
     )
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/TableOrderingStrategiesSpec/programmatic/expected/",
             ),
         ],
@@ -188,8 +188,8 @@ class TableOrderingStrategiesSpec : AnnotationSpec() {
      * - Expectation: Verifies all 4 tables have new records with proper foreign key relationships
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should handle many to many relationships`(): Unit =
         logger.info("Running should handle many to many relationships test").also {
             executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1) VALUES (4, 'Accessories')")

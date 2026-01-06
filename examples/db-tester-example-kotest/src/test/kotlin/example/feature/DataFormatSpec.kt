@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
@@ -130,17 +130,17 @@ class CsvFormatSpec : AnnotationSpec() {
      * - Expectation: Verifies data from expected CSV file
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/DataFormatSpec\$CsvFormatSpec/should load CSV format data/",
             ),
         ],
     )
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/DataFormatSpec\$CsvFormatSpec/should load CSV format data/expected/",
             ),
         ],
@@ -260,17 +260,17 @@ class TsvFormatSpec : AnnotationSpec() {
      * - Expectation: Verifies data from expected TSV file
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/DataFormatSpec\$TsvFormatSpec/should load TSV format data/",
             ),
         ],
     )
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/DataFormatSpec\$TsvFormatSpec/should load TSV format data/expected/",
             ),
         ],

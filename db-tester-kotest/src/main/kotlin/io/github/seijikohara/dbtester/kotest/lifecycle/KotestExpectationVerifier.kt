@@ -1,8 +1,8 @@
 package io.github.seijikohara.dbtester.kotest.lifecycle
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.DataSet
+import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.exception.ValidationException
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider
 import org.slf4j.LoggerFactory
@@ -35,16 +35,16 @@ class KotestExpectationVerifier {
     /**
      * Verifies the database state against expected datasets.
      *
-     * Loads the datasets specified in the [Expectation] annotation (or resolved via
+     * Loads the datasets specified in the [ExpectedDataSet] annotation (or resolved via
      * conventions) and compares them with the actual database state.
      *
      * @param context the test context containing configuration and registry
-     * @param expectation the expectation annotation (currently unused but reserved for future options)
+     * @param expectedDataSet the ExpectedDataSet annotation (currently unused but reserved for future options)
      * @throws AssertionError if the database state does not match the expected state
      */
     fun verify(
         context: TestContext,
-        expectation: Expectation,
+        expectedDataSet: ExpectedDataSet,
     ): Unit =
         context.testMethod().name.let { methodName ->
             logger.debug(
@@ -56,32 +56,32 @@ class KotestExpectationVerifier {
                 .configuration()
                 .loader()
                 .loadExpectationDataSets(context)
-                .takeIf { dataSets -> dataSets.isNotEmpty() }
-                ?.also { dataSets ->
-                    dataSets.forEach { dataSet -> verifyDataSet(context, dataSet, methodName) }
+                .takeIf { tableSets -> tableSets.isNotEmpty() }
+                ?.also { tableSets ->
+                    tableSets.forEach { tableSet -> verifyTableSet(context, tableSet, methodName) }
                 }
                 ?: logger.debug("No expectation datasets found")
         }
 
     /**
-     * Verifies a single dataset against the database.
+     * Verifies a single TableSet against the database.
      *
      * Delegates to [ExpectationProvider.verifyExpectation] for full data comparison
      * including column filtering and detailed assertion messages. If verification fails, wraps the
      * exception with additional test context.
      *
      * @param context the test context providing access to the data source registry
-     * @param dataSet the expected dataset containing tables and optional data source
+     * @param tableSet the expected TableSet containing tables and optional data source
      * @param methodName the test method name for logging
      * @throws ValidationException if verification fails with wrapped context information
      */
-    private fun verifyDataSet(
+    private fun verifyTableSet(
         context: TestContext,
-        dataSet: DataSet,
+        tableSet: TableSet,
         methodName: String,
     ): Unit =
-        dataSet.dataSource.orElseGet { context.registry().get("") }.let { dataSource ->
-            dataSet.tables.size
+        tableSet.dataSource.orElseGet { context.registry().get("") }.let { dataSource ->
+            tableSet.tables.size
                 .also { tableCount ->
                     logger.info(
                         "Validating expectation dataset for {}: {} tables",
@@ -89,7 +89,7 @@ class KotestExpectationVerifier {
                         tableCount,
                     )
                 }.let { tableCount ->
-                    runCatching { expectationProvider.verifyExpectation(dataSet, dataSource) }
+                    runCatching { expectationProvider.verifyExpectation(tableSet, dataSource) }
                         .onSuccess {
                             logger.info(
                                 "Expectation validation completed successfully for {}: {} tables",

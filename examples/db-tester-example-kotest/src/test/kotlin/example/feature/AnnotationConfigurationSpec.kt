@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -32,9 +32,9 @@ import javax.sql.DataSource
  *     TABLE2.csv
  * ```
  */
-@Preparation(
+@DataSet(
     dataSets = [
-        DataSet(
+        DataSetSource(
             resourceLocation = "classpath:example/feature/AnnotationConfigurationSpec/",
             scenarioNames = ["classLevel"],
         ),
@@ -117,14 +117,14 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * - Expectation: Verifies all three departments and two employees exist
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/AnnotationConfigurationSpec/custom-location/",
             ),
         ],
     )
-    @Expectation
+    @ExpectedDataSet
     fun `should use custom resource location`(): Unit =
         logger.info("Running custom resource location test").also {
             executeSql(
@@ -145,8 +145,8 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * - Expectation: Verifies both departments and updated employee salary
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["scenario1", "scenario2"])])
-    @Expectation
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
+    @ExpectedDataSet
     fun `should handle multiple scenarios`(): Unit =
         logger.info("Running multiple scenarios test").also {
             executeSql(dataSource, "UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2")
@@ -157,8 +157,8 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * Demonstrates multiple scenario names for preparation and expectation.
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["scenario1", "scenario2"])])
-    @Expectation(dataSets = [DataSet(scenarioNames = ["should merge multiple data sets"])])
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["should merge multiple data sets"])])
     fun `should merge multiple data sets`(): Unit =
         logger.info("Running merge multiple data sets test").also {
             executeSql(dataSource, "UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2")
@@ -168,7 +168,7 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
     /**
      * Demonstrates class-level annotation inheritance.
      *
-     * This test uses the class-level `@Preparation` annotation defined at the class level.
+     * This test uses the class-level `@DataSet` annotation defined at the class level.
      *
      * Test flow:
      * - Preparation: Uses class-level @Preparation with scenario "classLevel"
@@ -176,7 +176,7 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * - Expectation: Verifies HR department and two employees
      */
     @Test
-    @Expectation
+    @ExpectedDataSet
     fun `should use class level annotation`(): Unit =
         logger.info("Running class level annotation test").also {
             executeSql(
@@ -190,8 +190,8 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * Demonstrates using different scenarios for preparation and expectation.
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["multiDataSet1"])])
-    @Expectation(dataSets = [DataSet(scenarioNames = ["multiDataSet"])])
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["multiDataSet1"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["multiDataSet"])])
     fun `should handle multiple data sets`(): Unit =
         logger.info("Running multiple data sets test").also {
             executeSql(

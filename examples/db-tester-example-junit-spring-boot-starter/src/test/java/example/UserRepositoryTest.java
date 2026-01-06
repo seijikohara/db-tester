@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  *   <li>Automatic DataSource registration via {@link SpringBootDatabaseTestExtension} - no manual
  *       {@code @BeforeAll} setup required
  *   <li>Convention-based CSV file resolution
- *   <li>{@code @Preparation} and {@code @Expectation} annotations for database state management
+ *   <li>{@code @DataSet} and {@code @ExpectedDataSet} annotations for database state management
  *   <li>Spring Data JPA integration with test framework
  * </ul>
  *
@@ -68,7 +68,7 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldFindAllUsers() {
     logger.info("Testing findAllByOrderByIdAsc() operation");
 
@@ -95,7 +95,7 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldFindUserById() {
     logger.info("Testing findById() operation");
 
@@ -124,8 +124,8 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldSaveNewUser() {
     logger.info("Testing save() operation");
 
@@ -147,7 +147,7 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldDeleteUser() {
     logger.info("Testing deleteById() operation");
 

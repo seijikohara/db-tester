@@ -266,7 +266,7 @@ AUTO戦略は最も柔軟な動作を提供し、ほとんどのユースケー�
 **ユースケース**: テーブル順序を明示的に制御し、順序が常に指定されていることを保証したい場合。
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 void testWithExplicitOrder() { }
 ```
 
@@ -282,7 +282,7 @@ JDBCデータベースメタデータ（`DatabaseMetaData.getExportedKeys()`）�
 **ユースケース**: 外部キー制約が適切に定義されており、自動順序付けが望ましいデータベース。
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithFkOrdering() { }
 ```
 
@@ -293,7 +293,7 @@ void testWithFkOrdering() { }
 **ユースケース**: テーブル順序が重要でない場合（FK制約がない）、またはシンプルなシナリオでの決定論的な順序付け。
 
 ```java
-@Preparation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@DataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrder() { }
 ```
 
@@ -301,20 +301,20 @@ void testWithAlphabeticalOrder() { }
 
 ```java
 // デフォルトのAUTO戦略
-@Preparation
+@DataSet
 void testDefault() { }
 
-// @Preparationで明示的な戦略
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+// @DataSetで明示的な戦略
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithFkOrder() { }
 
-// @Expectationでの戦略（検証順序に影響）
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+// @ExpectedDataSetでの戦略（検証順序に影響）
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testExpectationOrder() { }
 
 // 組み合わせて使用
-@Preparation(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@DataSet(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testBothPhases() { }
 ```
 

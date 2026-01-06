@@ -1,11 +1,11 @@
 package io.github.seijikohara.dbtester.api.config;
 
 /**
- * Defines the strategy for merging tables when multiple {@code @DataSet} annotations reference the
- * same table.
+ * Defines the strategy for merging tables when multiple {@code @DataSetSource} annotations
+ * reference the same table.
  *
- * <p>When multiple {@code @DataSet} annotations are specified (either in a single
- * {@code @Preparation} or {@code @Expectation}), files for the same table may exist across
+ * <p>When multiple {@code @DataSetSource} annotations are specified (either in a single
+ * {@code @DataSet} or {@code @ExpectedDataSet}), files for the same table may exist across
  * different datasets. This enum controls how rows from those tables are combined.
  *
  * <p>The default strategy is {@link #UNION_ALL}, which appends all rows from subsequent datasets to
@@ -14,7 +14,7 @@ package io.github.seijikohara.dbtester.api.config;
  * <p>Datasets are processed in annotation declaration order.
  *
  * @see ConventionSettings
- * @see io.github.seijikohara.dbtester.api.annotation.DataSet
+ * @see io.github.seijikohara.dbtester.api.annotation.DataSetSource
  */
 public enum TableMergeStrategy {
 

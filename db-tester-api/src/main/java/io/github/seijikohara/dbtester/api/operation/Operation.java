@@ -7,7 +7,7 @@ package io.github.seijikohara.dbtester.api.operation;
  * operation corresponds to a specific database manipulation strategy, from inserts to upserts and
  * truncations.
  *
- * @see io.github.seijikohara.dbtester.api.dataset.DataSet
+ * @see io.github.seijikohara.dbtester.api.dataset.TableSet
  */
 public enum Operation {
 

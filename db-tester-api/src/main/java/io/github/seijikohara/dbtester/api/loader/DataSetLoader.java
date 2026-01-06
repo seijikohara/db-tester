@@ -1,11 +1,11 @@
 package io.github.seijikohara.dbtester.api.loader;
 
 import io.github.seijikohara.dbtester.api.context.TestContext;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.List;
 
 /**
- * Strategy SPI that resolves {@link DataSet} instances for each test phase.
+ * Strategy SPI that resolves {@link TableSet} instances for each test phase.
  *
  * <p>Implementations of this interface define how datasets are loaded for database preparation and
  * validation. The framework invokes these methods at specific points in the test lifecycle to set
@@ -14,7 +14,7 @@ import java.util.List;
  * <p>Implementations are discovered via {@link java.util.ServiceLoader} or configured directly in
  * test annotations.
  *
- * @see DataSet
+ * @see TableSet
  * @see TestContext
  */
 public interface DataSetLoader {
@@ -30,7 +30,7 @@ public interface DataSetLoader {
    * @param context the test execution context containing test metadata and configuration
    * @return immutable list of datasets to load into the database
    */
-  List<DataSet> loadPreparationDataSets(final TestContext context);
+  List<TableSet> loadPreparationDataSets(final TestContext context);
 
   /**
    * Loads datasets for validating the database state after test execution.
@@ -42,5 +42,5 @@ public interface DataSetLoader {
    * @param context the test execution context containing test metadata and configuration
    * @return immutable list of datasets to validate against the database
    */
-  List<DataSet> loadExpectationDataSets(final TestContext context);
+  List<TableSet> loadExpectationDataSets(final TestContext context);
 }

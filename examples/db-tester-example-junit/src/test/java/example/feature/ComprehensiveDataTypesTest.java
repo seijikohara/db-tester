@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -152,8 +152,8 @@ public final class ComprehensiveDataTypesTest {
    * </ul>
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldHandleAllDataTypes() {
     logger.info("Running comprehensive data types test");
 

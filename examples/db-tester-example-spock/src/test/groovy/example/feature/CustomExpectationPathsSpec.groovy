@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -14,12 +14,12 @@ import spock.lang.Specification
 /**
  * Demonstrates custom expectation paths for flexible test data organization using Spock.
  *
- * <p>This specification demonstrates using {@link DataSet#resourceLocation()} to specify custom paths
+ * <p>This specification demonstrates using {@link DataSetSource#resourceLocation()} to specify custom paths
  * for expectation data, enabling flexible test data organization beyond convention-based defaults.
  *
  * <p>Key features demonstrated:
  * <ul>
- *   <li>Custom expectation paths using {@link DataSet} annotation
+ *   <li>Custom expectation paths using {@link DataSetSource} annotation
  *   <li>Organizing multiple expectation scenarios in subdirectories
  *   <li>Multi-stage testing with different expected states
  *   <li>Complex business logic validation with database state changes
@@ -95,7 +95,7 @@ class CustomExpectationPathsSpec extends Specification {
 	/**
 	 * Demonstrates custom expectation paths with basic INSERT operation.
 	 *
-	 * <p>This test uses {@link DataSet#resourceLocation()} to specify a custom path for expectation
+	 * <p>This test uses {@link DataSetSource#resourceLocation()} to specify a custom path for expectation
 	 * data, demonstrating how to organize test data in non-default directories.
 	 *
 	 * <p>Test flow:
@@ -105,9 +105,9 @@ class CustomExpectationPathsSpec extends Specification {
 	 *   <li>Expectation: Verifies both records from {@code expected-basic/} directory
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(
-	dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomExpectationPathsSpec/expected-basic/'
 	)
 	)
@@ -135,9 +135,9 @@ class CustomExpectationPathsSpec extends Specification {
 	 *   <li>Expectation: Validates selected columns from {@code expected-ignore-columns/} directory
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(
-	dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomExpectationPathsSpec/expected-ignore-columns/'
 	)
 	)
@@ -165,9 +165,9 @@ class CustomExpectationPathsSpec extends Specification {
 	 *   <li>Expectation: Verifies order-item relationship from {@code expected-query/} directory
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(
-	dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomExpectationPathsSpec/expected-query/'
 	)
 	)
@@ -195,9 +195,9 @@ class CustomExpectationPathsSpec extends Specification {
 	 *   <li>Expectation: Verifies PENDING status from {@code expected-stage1/} directory
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(
-	dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomExpectationPathsSpec/expected-stage1/'
 	)
 	)
@@ -225,9 +225,9 @@ class CustomExpectationPathsSpec extends Specification {
 	 *   <li>Expectation: Verifies SHIPPED status from {@code expected-stage2/} directory
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(
-	dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomExpectationPathsSpec/expected-stage2/'
 	)
 	)

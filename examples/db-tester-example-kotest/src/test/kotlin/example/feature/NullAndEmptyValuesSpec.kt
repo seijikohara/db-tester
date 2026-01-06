@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -110,8 +110,8 @@ class NullAndEmptyValuesSpec : AnnotationSpec() {
      * - Expectation: Verifies all three records including NULL values
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should handle null values`(): Unit =
         logger.info("Running null values test").also {
             executeSql(

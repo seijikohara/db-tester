@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -161,8 +161,8 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseAlphabeticalOrdering() throws Exception {
     logger.info("Running alphabetical ordering test");
 
@@ -188,8 +188,8 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseManualOrdering() throws Exception {
     logger.info("Running manual ordering test");
 
@@ -216,14 +216,14 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(
+  @DataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableOrderingStrategiesTest/programmatic/"))
-  @Expectation(
+  @ExpectedDataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableOrderingStrategiesTest/programmatic/expected/"))
   void shouldUseProgrammaticOrdering() throws Exception {
@@ -251,8 +251,8 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldHandleManyToManyRelationships() throws Exception {
     logger.info("Running many-to-many relationships test");
 

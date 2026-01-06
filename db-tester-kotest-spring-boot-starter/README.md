@@ -69,8 +69,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should save user`() {
         userRepository.save(User("Alice", "alice@example.com"))
     }
@@ -81,12 +81,12 @@ Register `SpringBootDatabaseTestExtension` in the `init` block. DataSource is au
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names in `@DataSet`:
+For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```kotlin
 @Test
-@Preparation(dataSets = [DataSet(dataSourceName = "primaryDataSource")])
-@Expectation(dataSets = [DataSet(dataSourceName = "primaryDataSource")])
+@DataSet(dataSets = [DataSetSource(dataSourceName = "primaryDataSource")])
+@ExpectedDataSet(dataSets = [DataSetSource(dataSourceName = "primaryDataSource")])
 fun `should test primary database`() {
     // Test with primary DataSource
 }

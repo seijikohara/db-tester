@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.api.spi;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import javax.sql.DataSource;
 
 /**
@@ -35,10 +35,10 @@ public interface ExpectationProvider {
    * it with the expected data. Only columns present in the expected table are included in the
    * comparison.
    *
-   * @param expectedDataSet the expected dataset containing expected table data
+   * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
    * @throws AssertionError if verification fails (row count mismatch, column value mismatch, or
    *     table structure mismatch)
    */
-  void verifyExpectation(DataSet expectedDataSet, DataSource dataSource);
+  void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
 }

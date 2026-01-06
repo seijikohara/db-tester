@@ -1,8 +1,8 @@
 package example.database.oracle
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.annotation.EnabledIf
@@ -133,7 +133,7 @@ class OracleIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @Preparation(dataSets = [DataSet(scenarioNames = ["smokeTest"])])
-    @Expectation(dataSets = [DataSet(scenarioNames = ["smokeTest"])])
+    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on Oracle`(): Unit = logger.info("Running Oracle integration smoke test").let { }
 }

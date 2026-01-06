@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.context.TestContext;
@@ -84,23 +84,23 @@ class ExpectationVerifierTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
       final var context = new TestContext(testClass, testMethod, mockConfiguration, mockRegistry);
 
-      final var expectation = testMethod.getAnnotation(Expectation.class);
+      final var expectedDataSet = testMethod.getAnnotation(ExpectedDataSet.class);
 
       // When & Then
       assertDoesNotThrow(
-          () -> verifier.verify(context, expectation),
+          () -> verifier.verify(context, expectedDataSet),
           "should complete without error when no datasets found");
     }
   }
 
-  /** Test class with Expectation annotation. */
+  /** Test class with ExpectedDataSet annotation. */
   static class TestClass {
 
     /** Test constructor. */
     TestClass() {}
 
-    /** Test method with Expectation annotation. */
-    @Expectation
+    /** Test method with ExpectedDataSet annotation. */
+    @ExpectedDataSet
     void testMethod() {}
   }
 }

@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * <p>This class is immutable and thread-safe.
  *
  * @see ScenarioFilter
- * @see FilteredDataSet
+ * @see FilteredTableSet
  */
 public final class FilteredTable implements Table {
 

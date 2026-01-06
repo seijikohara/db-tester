@@ -30,7 +30,7 @@ classDiagram
 
 ## Validation Errors
 
-Thrown when expectation verification fails (`@Expectation` phase).
+Thrown when expectation verification fails (`@ExpectedDataSet` phase).
 
 ### Output Format
 

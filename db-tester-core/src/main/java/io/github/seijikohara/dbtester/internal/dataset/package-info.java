@@ -5,7 +5,7 @@
  * module, including:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet} - basic dataset
+ *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet} - basic dataset
  *       implementation
  *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTable} - basic table
  *       implementation

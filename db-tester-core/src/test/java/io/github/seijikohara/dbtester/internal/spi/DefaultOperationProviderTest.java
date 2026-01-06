@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor;
@@ -72,7 +72,7 @@ class DefaultOperationProviderTest {
 
   /** Tests for the execute() method. */
   @Nested
-  @DisplayName("execute(Operation, DataSet, DataSource, TableOrderingStrategy) method")
+  @DisplayName("execute(Operation, TableSet, DataSource, TableOrderingStrategy) method")
   class ExecuteMethod {
 
     /** Tests for the execute method. */
@@ -85,14 +85,14 @@ class DefaultOperationProviderTest {
     void shouldDelegateToOperationExecutor_whenCalled() {
       // Given
       final var operation = Operation.CLEAN_INSERT;
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
-              any(DataSet.class),
+              any(TableSet.class),
               any(DataSource.class),
               any(TableOrderingStrategy.class));
 
@@ -110,14 +110,14 @@ class DefaultOperationProviderTest {
     void shouldHandleInsertOperation_whenCalled() {
       // Given
       final var operation = Operation.INSERT;
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
-              any(DataSet.class),
+              any(TableSet.class),
               any(DataSource.class),
               any(TableOrderingStrategy.class));
 
@@ -135,14 +135,14 @@ class DefaultOperationProviderTest {
     void shouldHandleDeleteAllOperation_whenCalled() {
       // Given
       final var operation = Operation.DELETE_ALL;
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
-              any(DataSet.class),
+              any(TableSet.class),
               any(DataSource.class),
               any(TableOrderingStrategy.class));
 
@@ -160,14 +160,14 @@ class DefaultOperationProviderTest {
     void shouldHandleTruncateTableOperation_whenCalled() {
       // Given
       final var operation = Operation.TRUNCATE_TABLE;
-      final var dataSet = mock(DataSet.class);
+      final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
-              any(DataSet.class),
+              any(TableSet.class),
               any(DataSource.class),
               any(TableOrderingStrategy.class));
 

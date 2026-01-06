@@ -5,11 +5,11 @@
 
 ## アノテーション
 
-### @Preparation
+### @DataSet
 
 テストメソッド実行前に適用するデータセットを宣言します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.Preparation`
+**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
 **ターゲット**: `METHOD`, `TYPE`
 
@@ -17,7 +17,7 @@
 
 | 属性 | 型 | デフォルト | 説明 |
 |------|-----|-----------|------|
-| `dataSets` | `DataSet[]` | `{}` | 実行するデータセット。空の場合は規約ベースの検出を使用 |
+| `sources` | `DataSetSource[]` | `{}` | 実行するデータセット。空の場合は規約ベースの検出を使用 |
 | `operation` | `Operation` | `CLEAN_INSERT` | 適用するデータベース操作 |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | テーブル処理順序を決定する戦略 |
 
@@ -30,25 +30,25 @@
 **例**:
 
 ```java
-@Preparation
+@DataSet
 void testMethod() { }
 
-@Preparation(operation = Operation.INSERT)
+@DataSet(operation = Operation.INSERT)
 void testWithInsertOnly() { }
 
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithForeignKeyOrdering() { }
 
-@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+@DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
 void testWithCustomPath() { }
 ```
 
 
-### @Expectation
+### @ExpectedDataSet
 
 テスト実行後の期待されるデータベース状態を定義するデータセットを宣言します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.Expectation`
+**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
 **ターゲット**: `METHOD`, `TYPE`
 
@@ -56,7 +56,7 @@ void testWithCustomPath() { }
 
 | 属性 | 型 | デフォルト | 説明 |
 |------|-----|-----------|------|
-| `dataSets` | `DataSet[]` | `{}` | 検証用データセット。空の場合は規約ベースの検出を使用 |
+| `sources` | `DataSetSource[]` | `{}` | 検証用データセット。空の場合は規約ベースの検出を使用 |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | 検証時のテーブル処理順序を決定する戦略 |
 
 **検証の動作**:
@@ -68,25 +68,25 @@ void testWithCustomPath() { }
 **例**:
 
 ```java
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 void testWithVerification() { }
 
-@Expectation(dataSets = @DataSet(resourceLocation = "expected/custom"))
+@ExpectedDataSet(sources = @DataSetSource(resourceLocation = "expected/custom"))
 void testWithCustomExpectation() { }
 
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrdering() { }
 ```
 
 
-### @DataSet
+### @DataSetSource
 
-`@Preparation`または`@Expectation`内で個々のデータセットパラメータを設定します。
+`@DataSet`または`@ExpectedDataSet`内で個々のデータセットパラメータを設定します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
+**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSetSource`
 
-**ターゲット**: なし (`@Target({})`) - このアノテーションはクラスやメソッドに直接適用できません。`@Preparation#dataSets()`と`@Expectation#dataSets()`配列内でのみ使用されます。直接適用しようとするとコンパイルエラーになります。
+**ターゲット**: なし (`@Target({})`) - このアノテーションはクラスやメソッドに直接適用できません。`@DataSet#sources()`と`@ExpectedDataSet#sources()`配列内でのみ使用されます。直接適用しようとするとコンパイルエラーになります。
 
 **属性**:
 
@@ -108,31 +108,31 @@ void testWithAlphabeticalOrdering() { }
 **例**:
 
 ```java
-@Preparation(dataSets = {
-    @DataSet(dataSourceName = "primary"),
-    @DataSet(dataSourceName = "secondary", resourceLocation = "secondary-data")
+@DataSet(sources = {
+    @DataSetSource(dataSourceName = "primary"),
+    @DataSetSource(dataSourceName = "secondary", resourceLocation = "secondary-data")
 })
 void testMultipleDataSources() { }
 
-@Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
+@DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
 ```
 
 
-## DataSetインターフェース
+## TableSetインターフェース
 
-### DataSet
+### TableSet
 
 データベーステーブルの論理的なコレクションを表します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.dataset.DataSet`
+**パッケージ**: `io.github.seijikohara.dbtester.api.dataset.TableSet`
 
 **ファクトリメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `of(List<Table>)` | `DataSet` | 指定されたテーブルでデータセットを作成します |
-| `of(Table...)` | `DataSet` | 指定されたテーブルでデータセットを作成します（可変長引数） |
+| `of(List<Table>)` | `TableSet` | 指定されたテーブルでテーブルセットを作成します |
+| `of(Table...)` | `TableSet` | 指定されたテーブルでテーブルセットを作成します（可変長引数） |
 
 **インスタンスメソッド**:
 
@@ -146,7 +146,7 @@ void testMultipleScenarios() { }
 
 - テーブル順序は保持されます（挿入順序）
 - 返されるすべてのコレクションはイミュータブルです
-- データセット内でテーブル名は一意です
+- テーブルセット内でテーブル名は一意です
 
 
 ### Table
@@ -373,14 +373,14 @@ JDBCから取得したデータベースカラムメタデータを表します�
 
 | メソッド | 説明 |
 |----------|------|
-| `assertEquals(DataSet, DataSet)` | 2つのデータセットが等しいことを検証 |
-| `assertEquals(DataSet, DataSet, AssertionFailureHandler)` | カスタム失敗ハンドラーで検証 |
+| `assertEquals(TableSet, TableSet)` | 2つのテーブルセットが等しいことを検証 |
+| `assertEquals(TableSet, TableSet, AssertionFailureHandler)` | カスタム失敗ハンドラーで検証 |
 | `assertEquals(Table, Table)` | 2つのテーブルが等しいことを検証 |
 | `assertEquals(Table, Table, Collection<String>)` | 追加カラムを含めてテーブルを検証 |
 | `assertEquals(Table, Table, AssertionFailureHandler)` | カスタム失敗ハンドラーでテーブルを検証 |
-| `assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection<String>)` | 指定カラムを除外してデータセット内のテーブルを検証 |
+| `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | 指定カラムを除外してテーブルセット内のテーブルを検証 |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
-| `assertEqualsByQuery(DataSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待データセットと検証 |
+| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルセットと検証 |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
 
 **可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
@@ -388,19 +388,19 @@ JDBCから取得したデータベースカラムメタデータを表します�
 **例**:
 
 ```java
-// 基本的なデータセット比較
-DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet);
+// 基本的なテーブルセット比較
+DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet);
 
 // カスタム失敗ハンドラー付き
-DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, (message, expected, actual) -> {
+DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expected, actual) -> {
     // カスタム失敗処理
 });
 
 // 特定カラムを除外
-DatabaseAssertion.assertEqualsIgnoreColumns(expectedDataSet, actualDataSet, "USERS", "CREATED_AT", "UPDATED_AT");
+DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
 
 // SQLクエリ結果の比較
-DatabaseAssertion.assertEqualsByQuery(expectedDataSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
+DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
 ```
 
 ### AssertionFailureHandler

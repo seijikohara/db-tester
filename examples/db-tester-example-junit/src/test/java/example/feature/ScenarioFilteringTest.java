@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *   <li>Test method name as automatic scenario filter
  *   <li>Reducing CSV file duplication
  *   <li>Maintaining related test data in one place
- *   <li>Class-level {@code @Preparation} and {@code @Expectation} annotations
+ *   <li>Class-level {@code @DataSet} and {@code @ExpectedDataSet} annotations
  * </ul>
  *
  * <p>CSV files contain scenario marker column that filters rows by test method name:
@@ -48,8 +48,8 @@ import org.slf4j.LoggerFactory;
  * demonstrates method-level annotation usage.
  */
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 public final class ScenarioFilteringTest {
 
   /** Logger instance for test execution logging. */
@@ -153,7 +153,7 @@ public final class ScenarioFilteringTest {
    *   <li>Expectation: Verifies both records exist with ACTIVE status
    * </ul>
    *
-   * <p>Note: {@code @Preparation} and {@code @Expectation} are applied at the class level.
+   * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
   void shouldCreateActiveUser() {
@@ -182,7 +182,7 @@ public final class ScenarioFilteringTest {
    *   <li>Expectation: Verifies both records exist with INACTIVE status
    * </ul>
    *
-   * <p>Note: {@code @Preparation} and {@code @Expectation} are applied at the class level.
+   * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
   void shouldCreateInactiveUser() {
@@ -211,7 +211,7 @@ public final class ScenarioFilteringTest {
    *   <li>Expectation: Verifies ID=1 remains ACTIVE and ID=2 is SUSPENDED
    * </ul>
    *
-   * <p>Note: {@code @Preparation} and {@code @Expectation} are applied at the class level.
+   * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
   void shouldHandleMultipleUsers() {

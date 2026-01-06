@@ -65,8 +65,8 @@ class UserRepositorySpec extends Specification {
     @Autowired
     UserRepository userRepository
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def "should save user"() {
         when:
         userRepository.save(new User("Alice", "alice@example.com"))
@@ -81,11 +81,11 @@ Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is 
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names in `@DataSet`:
+For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```groovy
-@Preparation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
-@Expectation(dataSets = @DataSet(dataSourceName = "primaryDataSource"))
+@DataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
+@ExpectedDataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
 def "should test primary database"() {
     // Test with primary DataSource
 }

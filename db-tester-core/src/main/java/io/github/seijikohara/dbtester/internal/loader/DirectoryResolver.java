@@ -165,7 +165,7 @@ record DirectoryResolver(Class<?> testClass) {
 
                       Expected location: %s
 
-                      Hint: Create the directory and add dataset files (for example, TABLE_NAME.csv), or use @DataSet(resourceLocation = "...") to specify a custom location.""",
+                      Hint: Create the directory and add dataset files (for example, TABLE_NAME.csv), or use @DataSetSource(resourceLocation = "...") to specify a custom location.""",
                       resourcePath, expectedLocation);
               return new DataSetLoadException(message);
             });

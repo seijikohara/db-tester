@@ -85,7 +85,7 @@ Test framework modules depend on `db-tester-api` at compile time. The `db-tester
 
 | Package | Responsibility |
 |---------|----------------|
-| `annotation` | `@Preparation`, `@Expectation`, `@DataSet` annotations |
+| `annotation` | `@DataSet`, `@ExpectedDataSet`, `@DataSetSource` annotations |
 | `assertion` | Programmatic assertion API |
 | `config` | Configuration classes and registries |
 | `context` | Test execution context |
@@ -131,10 +131,10 @@ Source: [db-tester-core/src/main/java](https://github.com/seijikohara/db-tester/
 |---------|----------------|-------------|
 | Value Object | `TableName`, `ColumnName`, `CellValue` | Immutable objects with equality by value |
 | Entity | `Table`, `Row` | Objects with identity within aggregate |
-| Aggregate | `DataSet` | Root entity with consistency boundary |
-| Factory | `DataSetFactory` | Complex object creation |
+| Aggregate | `TableSet` | Root entity with consistency boundary |
+| Factory | `TableSetFactory` | Complex object creation |
 | Repository | `DataSourceRegistry` | Data source management |
-| Domain Service | `DataSetComparator` | Stateless operations on entities |
+| Domain Service | `TableSetComparator` | Stateless operations on entities |
 
 ### Service Provider Interface (SPI)
 
@@ -143,13 +143,13 @@ The framework uses SPI for loose coupling between modules:
 ```mermaid
 flowchart LR
     subgraph JUNIT[db-tester-junit]
-        U1[DataSetLoader]
+        U1[TableSetLoader]
         U2[OperationProvider]
         U3[ScenarioResolver]
     end
 
     subgraph CORE[db-tester-core]
-        P1[DataSetLoaderProvider]
+        P1[TableSetLoaderProvider]
         P2[OperationProvider]
         P3[ScenarioResolver]
     end

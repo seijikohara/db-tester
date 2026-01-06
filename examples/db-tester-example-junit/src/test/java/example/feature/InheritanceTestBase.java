@@ -3,7 +3,7 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>Shared {@code @ExtendWith(DatabaseTestExtension.class)} configuration
- *   <li>Class-level {@code @Preparation} annotation inherited by subclasses
+ *   <li>Class-level {@code @DataSet} annotation inherited by subclasses
  *   <li>Common database setup and utility methods
  *   <li>Reusable test infrastructure
  * </ul>
@@ -33,16 +33,16 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>The {@code @ExtendWith} annotation
- *   <li>The class-level {@code @Preparation} annotation
+ *   <li>The class-level {@code @DataSet} annotation
  *   <li>Database setup and helper methods
  * </ul>
  *
  * @see InheritedAnnotationTest
  */
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation(
+@DataSet(
     dataSets =
-        @DataSet(
+        @DataSetSource(
             resourceLocation = "classpath:example/feature/InheritanceTestBase/",
             scenarioNames = "baseSetup"))
 public abstract class InheritanceTestBase {

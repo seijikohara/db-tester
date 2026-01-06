@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.context.TestContext;
@@ -84,23 +84,23 @@ class PreparationExecutorTest {
       final var testMethod = testClass.getDeclaredMethod("testMethod");
       final var context = new TestContext(testClass, testMethod, mockConfiguration, mockRegistry);
 
-      final var preparation = testMethod.getAnnotation(Preparation.class);
+      final var dataSet = testMethod.getAnnotation(DataSet.class);
 
       // When & Then
       assertDoesNotThrow(
-          () -> executor.execute(context, preparation),
+          () -> executor.execute(context, dataSet),
           "should complete without error when no datasets found");
     }
   }
 
-  /** Test class with Preparation annotation. */
+  /** Test class with DataSet annotation. */
   static class TestClass {
 
     /** Test constructor. */
     TestClass() {}
 
-    /** Test method with Preparation annotation. */
-    @Preparation
+    /** Test method with DataSet annotation. */
+    @DataSet
     void testMethod() {}
   }
 }

@@ -23,7 +23,7 @@ features:
   - icon:
       src: /icons/declarative.svg
     title: Declarative Testing
-    details: Use @Preparation and @Expectation annotations to define test data setup and verification.
+    details: Use @DataSet and @ExpectedDataSet annotations to define test data setup and verification.
   - icon:
       src: /icons/convention.svg
     title: Convention over Configuration
@@ -131,8 +131,8 @@ dependencies {
 package com.example;
 
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation  // Loads test data from CSV
-@Expectation  // Verifies database state
+@DataSet  // Loads test data from CSV
+@ExpectedDataSet  // Verifies database state
 class UserRepositoryTest {
 
     @Test
@@ -151,8 +151,8 @@ class UserRepositoryTest {
 package com.example
 
 @DatabaseTest
-@Preparation  // Loads test data from CSV
-@Expectation  // Verifies database state
+@DataSet  // Loads test data from CSV
+@ExpectedDataSet  // Verifies database state
 class UserRepositorySpec extends Specification {
 
     def "should create user"() {
@@ -176,8 +176,8 @@ class UserRepositorySpec extends Specification {
 ```kotlin [Kotest]
 package com.example
 
-@Preparation  // Loads test data from CSV
-@Expectation  // Verifies database state
+@DataSet  // Loads test data from CSV
+@ExpectedDataSet  // Verifies database state
 class UserRepositorySpec : AnnotationSpec() {
 
     init {
@@ -205,7 +205,7 @@ class UserRepositorySpec : AnnotationSpec() {
 ```text [JUnit]
 src/test/resources/
 └── com/example/UserRepositoryTest/
-    ├── users.csv              # Preparation data with [Scenario] column
+    ├── users.csv              # DataSet data with [Scenario] column
     └── expected/
         └── users.csv          # Expected state with [Scenario] column
 ```
@@ -213,7 +213,7 @@ src/test/resources/
 ```text [Spock]
 src/test/resources/
 └── com/example/UserRepositorySpec/
-    ├── users.csv              # Preparation data with [Scenario] column
+    ├── users.csv              # DataSet data with [Scenario] column
     └── expected/
         └── users.csv          # Expected state with [Scenario] column
 ```
@@ -221,7 +221,7 @@ src/test/resources/
 ```text [Kotest]
 src/test/resources/
 └── com/example/UserRepositorySpec/
-    ├── users.csv              # Preparation data with [Scenario] column
+    ├── users.csv              # DataSet data with [Scenario] column
     └── expected/
         └── users.csv          # Expected state with [Scenario] column
 ```

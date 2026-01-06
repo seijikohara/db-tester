@@ -1,6 +1,6 @@
 package io.github.seijikohara.dbtester.spock.lifecycle
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
@@ -35,38 +35,38 @@ class SpockPreparationExecutorSpec extends Specification {
 	}
 
 	def 'should throw NullPointerException when context is null'() {
-		given: 'a mock Preparation annotation'
-		def preparation = Mock(Preparation)
+		given: 'a mock DataSet annotation'
+		def dataSet = Mock(DataSet)
 
 		when: 'executing with null context'
-		executor.execute(null, preparation)
+		executor.execute(null, dataSet)
 
 		then: 'NullPointerException is thrown'
 		def e = thrown(NullPointerException)
 		e.message.contains('context must not be null')
 	}
 
-	def 'should throw NullPointerException when preparation is null'() {
+	def 'should throw NullPointerException when dataSet is null'() {
 		given: 'a valid TestContext'
 		def context = createTestContext()
 
-		when: 'executing with null preparation'
+		when: 'executing with null dataSet'
 		executor.execute(context, null)
 
 		then: 'NullPointerException is thrown'
 		def e = thrown(NullPointerException)
-		e.message.contains('preparation must not be null')
+		e.message.contains('dataSet must not be null')
 	}
 
 	def 'should handle empty datasets gracefully'() {
 		given: 'a context with empty datasets'
 		def context = createTestContextWithEmptyDatasets()
 
-		and: 'a mock Preparation annotation'
-		def preparation = createMockPreparation(Operation.CLEAN_INSERT)
+		and: 'a mock DataSet annotation'
+		def dataSet = createMockDataSet(Operation.CLEAN_INSERT)
 
 		when: 'executing preparation'
-		executor.execute(context, preparation)
+		executor.execute(context, dataSet)
 
 		then: 'no exception is thrown'
 		noExceptionThrown()
@@ -109,17 +109,17 @@ class SpockPreparationExecutorSpec extends Specification {
 	}
 
 	/**
-	 * Creates a mock Preparation annotation with the specified operation.
+	 * Creates a mock DataSet annotation with the specified operation.
 	 *
 	 * @param operation the operation to use
 	 * @return the mocked annotation
 	 */
-	private Preparation createMockPreparation(Operation operation) {
-		def preparation = Mock(Preparation)
-		preparation.operation() >> operation
-		preparation.tableOrdering() >> TableOrderingStrategy.AUTO
-		preparation.paths() >> ([] as String[])
-		return preparation
+	private DataSet createMockDataSet(Operation operation) {
+		def dataSet = Mock(DataSet)
+		dataSet.operation() >> operation
+		dataSet.tableOrdering() >> TableOrderingStrategy.AUTO
+		dataSet.paths() >> ([] as String[])
+		return dataSet
 	}
 
 	/**

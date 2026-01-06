@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -155,8 +155,8 @@ public final class NullAndEmptyValuesTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldHandleNullValues() throws Exception {
     logger.info("Running NULL values test");
 

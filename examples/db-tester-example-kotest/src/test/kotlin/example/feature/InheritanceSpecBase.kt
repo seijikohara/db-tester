@@ -1,7 +1,7 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -14,19 +14,19 @@ import javax.sql.DataSource
  * Base specification demonstrating annotation inheritance for database tests with Kotest.
  *
  * This base specification provides:
- * - Class-level [Preparation] annotation inherited by subclasses
+ * - Class-level [DataSet] annotation inherited by subclasses
  * - Common database setup and utility methods
  * - Reusable test infrastructure
  *
  * Child specifications inherit:
- * - The class-level [Preparation] annotation
+ * - The class-level [DataSet] annotation
  * - Database setup and helper methods
  *
  * @see InheritedAnnotationSpec
  */
-@Preparation(
+@DataSet(
     dataSets = [
-        DataSet(
+        DataSetSource(
             resourceLocation = "classpath:example/feature/InheritanceSpecBase/",
             scenarioNames = ["baseSetup"],
         ),

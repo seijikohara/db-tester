@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.api.assertion;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import java.util.Collection;
 import java.util.List;
@@ -15,11 +15,11 @@ import org.jspecify.annotations.Nullable;
  * <p>While the extension primarily relies on annotation-driven expectations, there are situations
  * where tests need direct control over intermediate validation. {@code DatabaseAssertion} supports
  * those scenarios by exposing assertion helpers that operate on framework abstractions ({@link
- * DataSet}, {@link Table}, {@link DataSource}) and internally delegate to the assertion provider
+ * TableSet}, {@link Table}, {@link DataSource}) and internally delegate to the assertion provider
  * implementation loaded via {@link ServiceLoader}. Typical use cases include verifying state
  * mid-test, asserting ad-hoc SQL queries, or comparing tables while ignoring volatile columns.
  *
- * @see io.github.seijikohara.dbtester.api.annotation.Expectation
+ * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  * @see AssertionProvider
  */
 public final class DatabaseAssertion {
@@ -83,8 +83,8 @@ public final class DatabaseAssertion {
    * @throws AssertionError if the table data does not match the expected data
    */
   public static void assertEqualsIgnoreColumns(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final String tableName,
       final Collection<String> ignoreColumnNames) {
     getProvider().assertEqualsIgnoreColumns(expected, actual, tableName, ignoreColumnNames);
@@ -103,8 +103,8 @@ public final class DatabaseAssertion {
    * @throws AssertionError if the table data does not match the expected data
    */
   public static void assertEqualsIgnoreColumns(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final String tableName,
       final String... ignoreColumnNames) {
     assertEqualsIgnoreColumns(expected, actual, tableName, List.of(ignoreColumnNames));
@@ -160,7 +160,7 @@ public final class DatabaseAssertion {
    * @throws AssertionError if the query results do not match the expected data
    */
   public static void assertEqualsByQuery(
-      final DataSet expected,
+      final TableSet expected,
       final DataSource dataSource,
       final String sqlQuery,
       final String tableName,
@@ -184,7 +184,7 @@ public final class DatabaseAssertion {
    * @throws AssertionError if the query results do not match the expected data
    */
   public static void assertEqualsByQuery(
-      final DataSet expected,
+      final TableSet expected,
       final DataSource dataSource,
       final String sqlQuery,
       final String tableName,
@@ -243,7 +243,7 @@ public final class DatabaseAssertion {
    * @param actual the actual dataset to validate
    * @throws AssertionError if the datasets do not match
    */
-  public static void assertEquals(final DataSet expected, final DataSet actual) {
+  public static void assertEquals(final TableSet expected, final TableSet actual) {
     getProvider().assertEquals(expected, actual);
   }
 
@@ -262,8 +262,8 @@ public final class DatabaseAssertion {
    *     failureHandler} is {@code null})
    */
   public static void assertEquals(
-      final DataSet expected,
-      final DataSet actual,
+      final TableSet expected,
+      final TableSet actual,
       final @Nullable AssertionFailureHandler failureHandler) {
     getProvider().assertEquals(expected, actual, failureHandler);
   }

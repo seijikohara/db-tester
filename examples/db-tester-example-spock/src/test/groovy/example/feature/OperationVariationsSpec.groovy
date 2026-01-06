@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
@@ -65,8 +65,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Deletes all existing rows, then inserts test data. Most common operation for test setup.
 	 */
-	@Preparation(operation = Operation.CLEAN_INSERT)
-	@Expectation
+	@DataSet(operation = Operation.CLEAN_INSERT)
+	@ExpectedDataSet
 	def 'should use clean insert operation'() {
 		when: 'inserting a new product after clean insert'
 		sql.execute '''
@@ -83,8 +83,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Uses DELETE_ALL preparation to ensure clean state, then demonstrates INSERT behavior.
 	 */
-	@Preparation(operation = Operation.DELETE_ALL)
-	@Expectation
+	@DataSet(operation = Operation.DELETE_ALL)
+	@ExpectedDataSet
 	def 'should use insert operation'() {
 		when: 'inserting products into empty table'
 		sql.executeInsert '''
@@ -109,8 +109,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Updates existing rows only. The UPDATE operation requires rows to already exist.
 	 */
-	@Preparation(operation = Operation.CLEAN_INSERT)
-	@Expectation
+	@DataSet(operation = Operation.CLEAN_INSERT)
+	@ExpectedDataSet
 	def 'should use update operation'() {
 		when: 'updating an existing product'
 		sql.executeUpdate 'UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2'
@@ -124,8 +124,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Updates row if exists, inserts if not exists.
 	 */
-	@Preparation(operation = Operation.REFRESH)
-	@Expectation
+	@DataSet(operation = Operation.REFRESH)
+	@ExpectedDataSet
 	def 'should use refresh operation'() {
 		when: 'inserting a new product after refresh'
 		sql.execute '''
@@ -142,8 +142,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Clears table completely before inserting test data.
 	 */
-	@Preparation(operation = Operation.DELETE_ALL)
-	@Expectation
+	@DataSet(operation = Operation.DELETE_ALL)
+	@ExpectedDataSet
 	def 'should use delete all operation'() {
 		when: 'inserting a product into empty table'
 		sql.execute '''
@@ -158,8 +158,8 @@ class OperationVariationsSpec extends Specification {
 	/**
 	 * Demonstrates testing deletion scenarios with database validation.
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use delete operation'() {
 		when: 'deleting a specific product'
 		sql.execute 'DELETE FROM TABLE1 WHERE ID = 2'
@@ -173,8 +173,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Truncates tables then inserts test data for predictable ID values.
 	 */
-	@Preparation(operation = Operation.TRUNCATE_INSERT)
-	@Expectation
+	@DataSet(operation = Operation.TRUNCATE_INSERT)
+	@ExpectedDataSet
 	def 'should use truncate insert operation'() {
 		when: 'inserting after truncate'
 		sql.execute '''
@@ -191,8 +191,8 @@ class OperationVariationsSpec extends Specification {
 	 *
 	 * <p>Truncates tables, removing all data and resetting auto-increment sequences.
 	 */
-	@Preparation(operation = Operation.TRUNCATE_TABLE)
-	@Expectation
+	@DataSet(operation = Operation.TRUNCATE_TABLE)
+	@ExpectedDataSet
 	def 'should use truncate table operation'() {
 		when: 'inserting after truncate'
 		sql.execute '''

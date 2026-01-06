@@ -4,8 +4,8 @@ import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.get;
 import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.open;
 import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.run;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
 import io.github.seijikohara.dbtester.api.operation.Operation;
@@ -107,27 +107,27 @@ public final class OperationExecutor {
    * Executes a database operation on the given dataset.
    *
    * @param operation the operation to execute
-   * @param dataSet the dataset to operate on
+   * @param tableSet the dataset to operate on
    * @param dataSource the data source
    * @param tableOrderingStrategy the strategy for determining table processing order
    * @throws DatabaseTesterException if the operation fails
    */
   public void execute(
       final Operation operation,
-      final DataSet dataSet,
+      final TableSet tableSet,
       final DataSource dataSource,
       final TableOrderingStrategy tableOrderingStrategy) {
     logger.debug(
         "Executing operation {} on dataset with {} tables using strategy {}",
         operation,
-        dataSet.getTables().size(),
+        tableSet.getTables().size(),
         tableOrderingStrategy);
 
     try (final var connectionResource = open(dataSource::getConnection)) {
       final var connection = connectionResource.value();
       run(() -> connection.setAutoCommit(false));
       try {
-        executeOperation(operation, dataSet, connection, tableOrderingStrategy);
+        executeOperation(operation, tableSet, connection, tableOrderingStrategy);
         run(connection::commit);
         logger.debug("Successfully executed operation {}", operation);
       } catch (final DatabaseOperationException e) {
@@ -141,17 +141,17 @@ public final class OperationExecutor {
    * Executes the specified operation on the dataset using the provided connection.
    *
    * @param operation the operation to execute
-   * @param dataSet the dataset to operate on
+   * @param tableSet the dataset to operate on
    * @param connection the database connection
    * @param tableOrderingStrategy the strategy for determining table processing order
    * @throws DatabaseOperationException if a database error occurs
    */
   void executeOperation(
       final Operation operation,
-      final DataSet dataSet,
+      final TableSet tableSet,
       final Connection connection,
       final TableOrderingStrategy tableOrderingStrategy) {
-    final var tables = resolveTableOrder(dataSet.getTables(), connection, tableOrderingStrategy);
+    final var tables = resolveTableOrder(tableSet.getTables(), connection, tableOrderingStrategy);
 
     switch (operation) {
       case NONE -> {

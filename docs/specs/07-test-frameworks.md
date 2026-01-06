@@ -13,8 +13,8 @@ This document describes the integration with JUnit, Spock, and Kotest test frame
 **Location**: `io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension`
 
 **Implemented Interfaces**:
-- `BeforeEachCallback` - Preparation phase execution
-- `AfterEachCallback` - Expectation phase verification
+- `BeforeEachCallback` - DataSet phase execution
+- `AfterEachCallback` - ExpectedDataSet phase verification
 - `ParameterResolver` - `ExtensionContext` injection
 
 ### Registration
@@ -41,8 +41,8 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void testCreateUser() {
         // Test implementation
     }
@@ -88,16 +88,16 @@ class UserRepositoryTest {
     @Nested
     class CreateTests {
         @Test
-        @Preparation
-        @Expectation
+        @DataSet
+        @ExpectedDataSet
         void testCreateUser() { }  // Uses parent's registry
     }
 
     @Nested
     class UpdateTests {
         @Test
-        @Preparation
-        @Expectation
+        @DataSet
+        @ExpectedDataSet
         void testUpdateUser() { }  // Uses parent's registry
     }
 }
@@ -108,15 +108,15 @@ class UserRepositoryTest {
 Method-level annotations override class-level:
 
 ```java
-@Preparation(operation = Operation.CLEAN_INSERT)  // Class default
+@DataSet(operation = Operation.CLEAN_INSERT)  // Class default
 class UserRepositoryTest {
 
     @Test
-    @Preparation(operation = Operation.INSERT)  // Overrides class
+    @DataSet(operation = Operation.INSERT)  // Overrides class
     void testWithInsert() { }
 
     @Test
-    @Preparation  // Uses class default
+    @DataSet  // Uses class default
     void testWithDefault() { }
 }
 ```
@@ -149,8 +149,8 @@ class UserRepositorySpec extends Specification {
         dbTesterRegistry.registerDefault(dataSource)
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() {
         // Test implementation
     }
@@ -180,8 +180,8 @@ class UserRepositorySpec extends Specification {
         dbTesterConfiguration = Configuration.withConventions(conventions)
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() { }
 }
 ```
@@ -198,7 +198,7 @@ class UserRepositorySpec extends Specification {
 The scenario name is derived from the feature method:
 
 ```groovy
-@Preparation
+@DataSet
 def 'should create user with email'() {
     // Scenario name: "should create user with email"
 }
@@ -209,7 +209,7 @@ def 'should create user with email'() {
 For parameterized tests with `where:` blocks, the iteration name is used:
 
 ```groovy
-@Preparation
+@DataSet
 def 'should process #status order'() {
     expect:
     // Test implementation
@@ -231,7 +231,7 @@ Scenario names: `"should process PENDING order"`, `"should process COMPLETED ord
 
 **Location**: `io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension`
 
-**Type**: `TestCaseExtension` - Intercepts test case execution for preparation and expectation phases.
+**Type**: `TestCaseExtension` - Intercepts test case execution for data set and expected data set phases.
 
 ### Registration
 
@@ -252,8 +252,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         // Test implementation
     }
@@ -325,7 +325,7 @@ Use backtick method names for descriptive test names:
 
 ```kotlin
 @Test
-@Preparation
+@DataSet
 fun `should create user with email`() {
     // Scenario name: "should create user with email"
 }
@@ -334,7 +334,7 @@ fun `should create user with email`() {
 ### AnnotationSpec Requirement
 
 DB Tester requires `AnnotationSpec` style for Kotest integration because:
-1. Annotations (`@Preparation`, `@Expectation`) can be applied to test methods
+1. Annotations (`@DataSet`, `@ExpectedDataSet`) can be applied to test methods
 2. Method resolution via reflection is reliable
 3. Familiar JUnit-like structure for Java developers
 
@@ -359,8 +359,8 @@ The Spring Boot extension automatically:
 class UserRepositoryTest {
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void testCreateUser() {
         // DataSource automatically registered from Spring context
     }
@@ -391,9 +391,9 @@ class DataSourceConfig {
 class MultiDatabaseTest {
 
     @Test
-    @Preparation(dataSets = {
-        @DataSet(dataSourceName = ""),          // Primary (default)
-        @DataSet(dataSourceName = "secondary")  // Secondary
+    @DataSet(sources = {
+        @DataSetSource(dataSourceName = ""),          // Primary (default)
+        @DataSetSource(dataSourceName = "secondary")  // Secondary
     })
     void testMultipleDatabases() { }
 }
@@ -413,8 +413,8 @@ db-tester.auto-register-data-sources=true
 # Data format (CSV or TSV)
 db-tester.convention.data-format=CSV
 
-# Expectation directory suffix
-db-tester.convention.expectation-suffix=/expected
+# ExpectedDataSet directory suffix
+db-tester.convention.expected-data-set-suffix=/expected
 
 # Scenario marker column name
 db-tester.convention.scenario-marker=[Scenario]
@@ -422,11 +422,11 @@ db-tester.convention.scenario-marker=[Scenario]
 # Table merge strategy (FIRST, LAST, UNION, UNION_ALL)
 db-tester.convention.table-merge-strategy=UNION_ALL
 
-# Default preparation operation
-db-tester.operation.preparation=CLEAN_INSERT
+# Default data set operation
+db-tester.operation.data-set=CLEAN_INSERT
 
-# Default expectation operation (typically NONE for verification only)
-db-tester.operation.expectation=NONE
+# Default expected data set operation (typically NONE for verification only)
+db-tester.operation.expected-data-set=NONE
 ```
 
 Property names use singular form (`convention`, `operation`) not plural.
@@ -444,8 +444,8 @@ Property names use singular form (`convention`, `operation`) not plural.
 @SpringBootDatabaseTest
 class UserRepositorySpec extends Specification {
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def 'should create user'() {
         // DataSource automatically registered from Spring context
     }
@@ -472,8 +472,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         // DataSource automatically registered from Spring context
     }
@@ -503,12 +503,12 @@ flowchart TD
 
         subgraph each["For each Test method"]
             BE["beforeEach()"]
-            BE --> BE1["Find Preparation"]
+            BE --> BE1["Find DataSet"]
             BE1 --> BE2[Load datasets]
             BE2 --> BE3[Execute operation]
             BE3 --> TM[Test method execution]
             TM --> AE["afterEach()"]
-            AE --> AE1["Find Expectation"]
+            AE --> AE1["Find ExpectedDataSet"]
             AE1 --> AE2[Load expected datasets]
             AE2 --> AE3[Compare with database]
             AE3 --> AE4[Report mismatches]
@@ -532,10 +532,10 @@ flowchart TD
 
         subgraph each["For each feature method"]
             INT1["Interceptor (Before)"]
-            INT1 --> INT1A["Execute Preparation"]
+            INT1 --> INT1A["Execute DataSet"]
             INT1A --> FM[Feature method execution]
             FM --> INT2["Interceptor (After)"]
-            INT2 --> INT2A["Execute Expectation"]
+            INT2 --> INT2A["Execute ExpectedDataSet"]
         end
 
         SS3 --> each
@@ -558,11 +558,11 @@ flowchart TD
 
         subgraph each["For each @Test method"]
             INT["intercept()"]
-            INT --> INT1["Find Preparation"]
+            INT --> INT1["Find DataSet"]
             INT1 --> INT2[Load datasets]
             INT2 --> INT3[Execute operation]
             INT3 --> TM[Test method execution]
-            TM --> INT4["Find Expectation"]
+            TM --> INT4["Find ExpectedDataSet"]
             INT4 --> INT5[Load expected datasets]
             INT5 --> INT6[Compare with database]
             INT6 --> INT7[Report mismatches]
@@ -577,19 +577,19 @@ flowchart TD
 
 ### Lifecycle Executor Classes
 
-| Framework | Preparation | Expectation |
+| Framework | DataSet | ExpectedDataSet |
 |-----------|-------------|-------------|
-| JUnit | `PreparationExecutor` | `ExpectationVerifier` |
-| Spock | `SpockPreparationExecutor` | `SpockExpectationVerifier` |
-| Kotest | `KotestPreparationExecutor` | `KotestExpectationVerifier` |
+| JUnit | `DataSetExecutor` | `ExpectedDataSetVerifier` |
+| Spock | `SpockDataSetExecutor` | `SpockExpectedDataSetVerifier` |
+| Kotest | `KotestDataSetExecutor` | `KotestExpectedDataSetVerifier` |
 
 ### Error Handling
 
 | Phase | Error Type | Behavior |
 |-------|------------|----------|
-| Preparation | `DatabaseOperationException` | Test fails before execution |
-| Test | Any exception | Expectation still runs |
-| Expectation | `ValidationException` | Test fails with comparison details |
+| DataSet | `DatabaseOperationException` | Test fails before execution |
+| Test | Any exception | ExpectedDataSet still runs |
+| ExpectedDataSet | `ValidationException` | Test fails with comparison details |
 
 ## Related Specifications
 

@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -164,14 +164,14 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
                 scenarioNames = "createUser"))
-    @Expectation(
+    @ExpectedDataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
                 scenarioNames = "createUser"))
@@ -201,14 +201,14 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
                 scenarioNames = "updateStatus"))
-    @Expectation(
+    @ExpectedDataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
                 scenarioNames = "updateStatus"))
@@ -249,14 +249,14 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
                 scenarioNames = "addProduct"))
-    @Expectation(
+    @ExpectedDataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
                 scenarioNames = "addProduct"))
@@ -286,14 +286,14 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
                 scenarioNames = "updatePrice"))
-    @Expectation(
+    @ExpectedDataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
                 scenarioNames = "updatePrice"))

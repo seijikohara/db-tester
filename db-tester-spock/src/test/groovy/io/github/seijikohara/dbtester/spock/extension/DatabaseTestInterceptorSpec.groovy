@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.spock.extension
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
 import spock.lang.Specification
@@ -20,33 +20,33 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create instance with both annotations'() {
 		given: 'mock annotations'
-		def preparation = Mock(Preparation)
-		def expectation = Mock(Expectation)
+		def dataSet = Mock(DataSet)
+		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(preparation, expectation)
+		def interceptor = new DatabaseTestInterceptor(dataSet, expectedDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
 	}
 
-	def 'should create instance with only Preparation annotation'() {
-		given: 'mock Preparation annotation'
-		def preparation = Mock(Preparation)
+	def 'should create instance with only DataSet annotation'() {
+		given: 'mock DataSet annotation'
+		def dataSet = Mock(DataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(preparation, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
 	}
 
-	def 'should create instance with only Expectation annotation'() {
-		given: 'mock Expectation annotation'
-		def expectation = Mock(Expectation)
+	def 'should create instance with only ExpectedDataSet annotation'() {
+		given: 'mock ExpectedDataSet annotation'
+		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, expectation)
+		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -69,12 +69,12 @@ class DatabaseTestInterceptorSpec extends Specification {
 	}
 
 	def 'should create interceptor with different operations'() {
-		given: 'preparations with different operations'
-		def preparation = Mock(Preparation)
-		preparation.operation() >> operation
+		given: 'data sets with different operations'
+		def dataSet = Mock(DataSet)
+		dataSet.operation() >> operation
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(preparation, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
@@ -90,41 +90,41 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create multiple independent interceptors'() {
 		given: 'different annotations'
-		def prep1 = Mock(Preparation)
-		def prep2 = Mock(Preparation)
-		def exp1 = Mock(Expectation)
-		def exp2 = Mock(Expectation)
+		def dataSet1 = Mock(DataSet)
+		def dataSet2 = Mock(DataSet)
+		def expectedDataSet1 = Mock(ExpectedDataSet)
+		def expectedDataSet2 = Mock(ExpectedDataSet)
 
 		when: 'creating multiple interceptors'
-		def interceptor1 = new DatabaseTestInterceptor(prep1, exp1)
-		def interceptor2 = new DatabaseTestInterceptor(prep2, exp2)
+		def interceptor1 = new DatabaseTestInterceptor(dataSet1, expectedDataSet1)
+		def interceptor2 = new DatabaseTestInterceptor(dataSet2, expectedDataSet2)
 
 		then: 'interceptors are independent'
 		!interceptor1.is(interceptor2)
 	}
 
-	def 'should create interceptor with Preparation having custom paths'() {
-		given: 'Preparation with custom paths'
-		def preparation = Mock(Preparation)
-		preparation.paths() >> ([
+	def 'should create interceptor with DataSet having custom paths'() {
+		given: 'DataSet with custom paths'
+		def dataSet = Mock(DataSet)
+		dataSet.paths() >> ([
 			'custom/path1.csv',
 			'custom/path2.csv'
 		] as String[])
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(preparation, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
 	}
 
-	def 'should create interceptor with Expectation having custom columns'() {
-		given: 'Expectation with custom columns'
-		def expectation = Mock(Expectation)
-		expectation.columns() >> (['id', 'name', 'status'] as String[])
+	def 'should create interceptor with ExpectedDataSet having custom columns'() {
+		given: 'ExpectedDataSet with custom columns'
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.columns() >> (['id', 'name', 'status'] as String[])
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, expectation)
+		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet)
 
 		then: 'interceptor is created successfully'
 		interceptor != null

@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
@@ -170,16 +170,16 @@ public final class DataFormatTest {
      * </ul>
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$CsvFormatTest/shouldLoadCsvFormatData/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$CsvFormatTest/shouldLoadCsvFormatData/expected/")
         })
@@ -269,16 +269,16 @@ public final class DataFormatTest {
      * </ul>
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$TsvFormatTest/shouldLoadTsvFormatData/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$TsvFormatTest/shouldLoadTsvFormatData/expected/")
         })

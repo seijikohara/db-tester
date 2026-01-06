@@ -1,15 +1,15 @@
 package io.github.seijikohara.dbtester.internal.jdbc.read;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
-import io.github.seijikohara.dbtester.internal.dataset.SimpleDataSet;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -88,9 +88,9 @@ public final class TableReader {
    * @return the current dataset
    * @throws DatabaseTesterException if fetching fails
    */
-  public DataSet fetchDataSet(final DataSource dataSource, final List<String> tableNames) {
+  public TableSet fetchTableSet(final DataSource dataSource, final List<String> tableNames) {
     final var tables = tableNames.stream().map(name -> fetchTable(dataSource, name)).toList();
-    return new SimpleDataSet(tables);
+    return new SimpleTableSet(tables);
   }
 
   /**

@@ -2,12 +2,12 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * <p>This test class illustrates two complementary validation strategies:
  *
  * <ul>
- *   <li><strong>Annotation-based validation</strong> using {@code @Expectation} - suitable for
+ *   <li><strong>Annotation-based validation</strong> using {@code @ExpectedDataSet} - suitable for
  *       standard table comparisons with convention-based expected data
  *   <li><strong>Programmatic validation</strong> using custom SQL queries - provides flexibility
  *       for complex scenarios where annotation-based testing is insufficient
@@ -160,8 +160,8 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldDemonstrateBasicProgrammaticAPI() throws Exception {
     logger.info("Running programmatic API demonstration");
 
@@ -175,7 +175,7 @@ public final class ProgrammaticAssertionApiTest {
    * Demonstrates programmatic custom SQL query validation.
    *
    * <p>This test shows validation using direct SQL queries instead of relying on
-   * {@code @Expectation} annotation. Programmatic assertions provide flexibility for custom
+   * {@code @ExpectedDataSet} annotation. Programmatic assertions provide flexibility for custom
    * validation scenarios.
    *
    * <p>Test flow:
@@ -189,7 +189,7 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldValidateUsingMultipleQueries() throws Exception {
     logger.info("Running multiple query validation test");
 
@@ -258,7 +258,7 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldValidateQueryResultsUsingAssertEqualsByQuery() throws Exception {
     logger.info("Running assertEqualsByQuery demonstration");
 
@@ -312,7 +312,7 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldIgnoreSpecificColumnsUsingAssertEqualsIgnoreColumns() throws Exception {
     logger.info("Running assertEqualsIgnoreColumns demonstration");
 
@@ -411,7 +411,7 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldCompareTablesDirectlyUsingAssertEquals() throws Exception {
     logger.info("Running assertEquals demonstration");
 
@@ -456,19 +456,19 @@ public final class ProgrammaticAssertionApiTest {
   }
 
   /**
-   * Demonstrates using {@link DatabaseAssertion#assertEqualsByQuery} with DataSet for multi-table
+   * Demonstrates using {@link DatabaseAssertion#assertEqualsByQuery} with TableSet for multi-table
    * scenarios.
    *
-   * <p>This test shows how to use DataSet-based assertions when working with expected data that
+   * <p>This test shows how to use TableSet-based assertions when working with expected data that
    * contains multiple tables. The query results are compared against a specific table within the
    * expected dataset.
    *
    * @throws Exception if test fails
    */
   @Test
-  @Preparation
-  void shouldValidateUsingDataSetBasedAssertEqualsByQuery() throws Exception {
-    logger.info("Running DataSet-based assertEqualsByQuery demonstration");
+  @DataSet
+  void shouldValidateUsingTableSetBasedAssertEqualsByQuery() throws Exception {
+    logger.info("Running TableSet-based assertEqualsByQuery demonstration");
 
     // Build expected table
     final var columnId = new ColumnName("ID");
@@ -488,13 +488,13 @@ public final class ProgrammaticAssertionApiTest {
     final var expectedTable =
         Table.of(new TableName("TABLE1"), List.of(columnId, columnValue), List.of(row1, row2));
 
-    // Wrap table in a DataSet
-    final var expectedDataSet = DataSet.of(expectedTable);
+    // Wrap table in a TableSet
+    final var expectedTableSet = TableSet.of(expectedTable);
 
-    // Use DataSet-based assertEqualsByQuery
+    // Use TableSet-based assertEqualsByQuery
     DatabaseAssertion.assertEqualsByQuery(
-        expectedDataSet, dataSource, "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID", "TABLE1");
+        expectedTableSet, dataSource, "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID", "TABLE1");
 
-    logger.info("DataSet-based assertEqualsByQuery validation completed");
+    logger.info("TableSet-based assertEqualsByQuery validation completed");
   }
 }

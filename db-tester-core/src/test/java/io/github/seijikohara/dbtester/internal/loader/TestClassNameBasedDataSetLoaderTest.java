@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
@@ -99,7 +99,7 @@ class TestClassNameBasedDataSetLoaderTest {
     void shouldReturnDataSets_whenPreparationAnnotationProvided() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
-      final var testClass = TestHelperWithPreparation.class;
+      final var testClass = TestHelperWithDataSet.class;
       final var testMethod = testClass.getDeclaredMethod("testMethod");
       final var context = new TestContext(testClass, testMethod, configuration, registry);
 
@@ -156,7 +156,7 @@ class TestClassNameBasedDataSetLoaderTest {
     void shouldReturnDataSets_whenExpectationAnnotationProvided() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
-      final var testClass = TestHelperWithExpectation.class;
+      final var testClass = TestHelperWithExpectedDataSet.class;
       final var testMethod = testClass.getDeclaredMethod("testMethod");
       final var context = new TestContext(testClass, testMethod, configuration, registry);
 
@@ -194,23 +194,23 @@ class TestClassNameBasedDataSetLoaderTest {
     }
   }
 
-  /** Test helper class with Preparation annotation. */
-  static class TestHelperWithPreparation {
+  /** Test helper class with DataSet annotation. */
+  static class TestHelperWithDataSet {
     /** Test constructor. */
-    TestHelperWithPreparation() {}
+    TestHelperWithDataSet() {}
 
-    /** Test method with Preparation annotation. */
-    @Preparation
+    /** Test method with DataSet annotation. */
+    @DataSet
     void testMethod() {}
   }
 
-  /** Test helper class with Expectation annotation. */
-  static class TestHelperWithExpectation {
+  /** Test helper class with ExpectedDataSet annotation. */
+  static class TestHelperWithExpectedDataSet {
     /** Test constructor. */
-    TestHelperWithExpectation() {}
+    TestHelperWithExpectedDataSet() {}
 
-    /** Test method with Expectation annotation. */
-    @Expectation
+    /** Test method with ExpectedDataSet annotation. */
+    @ExpectedDataSet
     void testMethod() {}
   }
 
@@ -223,16 +223,16 @@ class TestClassNameBasedDataSetLoaderTest {
     void testMethod() {}
   }
 
-  /** Tests for explicit @DataSet annotations. */
+  /** Tests for explicit @DataSetSource annotations. */
   @Nested
-  @DisplayName("explicit @DataSet annotations")
+  @DisplayName("explicit @DataSetSource annotations")
   class ExplicitDataSetMethod {
 
-    /** Tests for explicit DataSet annotations. */
+    /** Tests for explicit DataSetSource annotations. */
     ExplicitDataSetMethod() {}
 
     /**
-     * Verifies that loadPreparationDataSets loads data sets when explicit @DataSet with
+     * Verifies that loadPreparationDataSets loads data sets when explicit @DataSetSource with
      * resourceLocation.
      *
      * @throws NoSuchMethodException if method cannot be found
@@ -240,7 +240,7 @@ class TestClassNameBasedDataSetLoaderTest {
     @Test
     @Tag("normal")
     @DisplayName(
-        "should load data sets when Preparation has explicit @DataSet with resourceLocation")
+        "should load data sets when DataSet has explicit @DataSetSource with resourceLocation")
     void shouldLoadDataSets_whenPreparationHasExplicitDataSet() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
@@ -260,7 +260,7 @@ class TestClassNameBasedDataSetLoaderTest {
     }
 
     /**
-     * Verifies that loadExpectationDataSets loads data sets when explicit @DataSet with
+     * Verifies that loadExpectationDataSets loads data sets when explicit @DataSetSource with
      * resourceLocation.
      *
      * @throws NoSuchMethodException if method cannot be found
@@ -268,7 +268,7 @@ class TestClassNameBasedDataSetLoaderTest {
     @Test
     @Tag("normal")
     @DisplayName(
-        "should load data sets when Expectation has explicit @DataSet with resourceLocation")
+        "should load data sets when ExpectedDataSet has explicit @DataSetSource with resourceLocation")
     void shouldLoadDataSets_whenExpectationHasExplicitDataSet() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
@@ -288,16 +288,17 @@ class TestClassNameBasedDataSetLoaderTest {
     }
 
     /**
-     * Verifies that loadPreparationDataSets merges data sets when multiple @DataSet annotations.
+     * Verifies that loadPreparationDataSets merges data sets when multiple @DataSetSource
+     * annotations.
      *
-     * <p>When multiple @DataSet annotations are specified, they are merged into a single DataSet
-     * according to the configured TableMergeStrategy.
+     * <p>When multiple @DataSetSource annotations are specified, they are merged into a single
+     * TableSet according to the configured TableMergeStrategy.
      *
      * @throws NoSuchMethodException if method cannot be found
      */
     @Test
     @Tag("normal")
-    @DisplayName("should merge data sets when Preparation has multiple @DataSet annotations")
+    @DisplayName("should merge data sets when DataSet has multiple @DataSetSource annotations")
     void shouldMergeDataSets_whenPreparationHasMultipleDataSets() throws NoSuchMethodException {
       // Given
       final var loader = new TestClassNameBasedDataSetLoader();
@@ -329,7 +330,7 @@ class TestClassNameBasedDataSetLoaderTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should filter by scenario names when @DataSet specifies scenarioNames")
+    @DisplayName("should filter by scenario names when @DataSetSource specifies scenarioNames")
     void shouldFilterByScenarioNames_whenDataSetSpecifiesScenarioNames()
         throws NoSuchMethodException {
       // Given
@@ -355,7 +356,7 @@ class TestClassNameBasedDataSetLoaderTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should use custom data source when @DataSet specifies dataSourceName")
+    @DisplayName("should use custom data source when @DataSetSource specifies dataSourceName")
     void shouldUseCustomDataSource_whenDataSetSpecifiesDataSourceName()
         throws NoSuchMethodException {
       // Given
@@ -378,76 +379,76 @@ class TestClassNameBasedDataSetLoaderTest {
     }
   }
 
-  /** Test helper class with explicit @DataSet in @Preparation. */
+  /** Test helper class with explicit @DataSetSource in @DataSet. */
   static class TestHelperWithExplicitPreparationDataSet {
     /** Test constructor. */
     TestHelperWithExplicitPreparationDataSet() {}
 
-    /** Test method with explicit @DataSet. */
-    @Preparation(
+    /** Test method with explicit @DataSetSource. */
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithExplicitPreparationDataSet/custom-location"))
     void testMethod() {}
   }
 
-  /** Test helper class with explicit @DataSet in @Expectation. */
+  /** Test helper class with explicit @DataSetSource in @ExpectedDataSet. */
   static class TestHelperWithExplicitExpectationDataSet {
     /** Test constructor. */
     TestHelperWithExplicitExpectationDataSet() {}
 
-    /** Test method with explicit @DataSet. */
-    @Expectation(
+    /** Test method with explicit @DataSetSource. */
+    @ExpectedDataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithExplicitExpectationDataSet/custom-location/expected"))
     void testMethod() {}
   }
 
-  /** Test helper class with multiple @DataSet annotations. */
+  /** Test helper class with multiple @DataSetSource annotations. */
   static class TestHelperWithMultipleDataSets {
     /** Test constructor. */
     TestHelperWithMultipleDataSets() {}
 
-    /** Test method with multiple @DataSet. */
-    @Preparation(
+    /** Test method with multiple @DataSetSource. */
+    @DataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithMultipleDataSets/dataset1"),
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithMultipleDataSets/dataset2")
         })
     void testMethod() {}
   }
 
-  /** Test helper class with @DataSet specifying scenarioNames. */
+  /** Test helper class with @DataSetSource specifying scenarioNames. */
   static class TestHelperWithScenarioNames {
     /** Test constructor. */
     TestHelperWithScenarioNames() {}
 
     /** Test method with scenarioNames. */
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithScenarioNames/",
                 scenarioNames = {"scenario1"}))
     void testMethod() {}
   }
 
-  /** Test helper class with @DataSet specifying dataSourceName. */
+  /** Test helper class with @DataSetSource specifying dataSourceName. */
   static class TestHelperWithCustomDataSource {
     /** Test constructor. */
     TestHelperWithCustomDataSource() {}
 
     /** Test method with dataSourceName. */
-    @Preparation(
+    @DataSet(
         dataSets =
-            @DataSet(
+            @DataSetSource(
                 resourceLocation =
                     "classpath:io/github/seijikohara/dbtester/internal/loader/TestClassNameBasedDataSetLoaderTest$TestHelperWithCustomDataSource/",
                 dataSourceName = "custom"))

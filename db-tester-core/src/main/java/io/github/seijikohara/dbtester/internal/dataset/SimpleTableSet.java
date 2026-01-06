@@ -1,18 +1,18 @@
 package io.github.seijikohara.dbtester.internal.dataset;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
 
 /**
- * Simple immutable implementation of {@link DataSet}.
+ * Simple immutable implementation of {@link TableSet}.
  *
  * <p>This implementation stores tables in a list and provides lookup by table name.
  */
-public final class SimpleDataSet implements DataSet {
+public final class SimpleTableSet implements TableSet {
 
   /** The tables in this dataset. */
   private final List<Table> tables;
@@ -22,7 +22,7 @@ public final class SimpleDataSet implements DataSet {
    *
    * @param tables the tables in this dataset
    */
-  public SimpleDataSet(final List<Table> tables) {
+  public SimpleTableSet(final List<Table> tables) {
     this.tables = List.copyOf(tables);
   }
 

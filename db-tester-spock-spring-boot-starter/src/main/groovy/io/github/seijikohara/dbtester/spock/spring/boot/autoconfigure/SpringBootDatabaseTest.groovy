@@ -11,8 +11,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * Enables Spring Boot-integrated database testing support for a Spock specification.
  *
  * <p>Apply this annotation to a Spring Boot test specification to enable automatic processing of
- * {@link io.github.seijikohara.dbtester.api.annotation.Preparation @Preparation} and
- * {@link io.github.seijikohara.dbtester.api.annotation.Expectation @Expectation} annotations
+ * {@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} and
+ * {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet} annotations
  * on feature methods, with automatic DataSource discovery from the Spring ApplicationContext.
  *
  * <p>Example usage:
@@ -21,8 +21,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * @SpringBootDatabaseTest
  * class UserRepositorySpec extends Specification {
  *
- *     @Preparation
- *     @Expectation
+ *     @DataSet
+ *     @ExpectedDataSet
  *     def "can insert and retrieve user"() {
  *         // test implementation
  *     }
@@ -36,8 +36,8 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * <p>Configuration can be customized via {@code application.properties} or
  * {@code application.yml} using the {@code db-tester.*} prefix.
  *
- * @see io.github.seijikohara.dbtester.api.annotation.Preparation
- * @see io.github.seijikohara.dbtester.api.annotation.Expectation
+ * @see io.github.seijikohara.dbtester.api.annotation.DataSet
+ * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  * @see DbTesterSpockAutoConfiguration
  */
 @Inherited

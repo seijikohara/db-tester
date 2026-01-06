@@ -1,13 +1,13 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
 import io.github.seijikohara.dbtester.api.config.DataFormat;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.domain.FileExtension;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
 import io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry;
-import io.github.seijikohara.dbtester.internal.scenario.FilteredDataSet;
+import io.github.seijikohara.dbtester.internal.scenario.FilteredTableSet;
 import io.github.seijikohara.dbtester.internal.scenario.ScenarioFilter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>The factory creates datasets by detecting the file format from directory contents, retrieving
  * the appropriate format provider from {@link FormatRegistry}, parsing the data files into a raw
- * DataSet, and applying scenario filtering to include only relevant rows.
+ * TableSet, and applying scenario filtering to include only relevant rows.
  *
  * <p>When data files include a scenario marker column, only rows matching the specified scenario
  * names are included in the dataset. This allows organizing multiple test scenarios within the same
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  *
  * <p>This class is stateless and thread-safe. All methods are side-effect free.
  *
- * @see DataSet
+ * @see TableSet
  * @see FormatRegistry
  * @see io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
  * @see io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider
@@ -77,7 +77,7 @@ public final class DataSetFactory {
    * @throws DataSetLoadException if the dataset cannot be created or loaded (unsupported format,
    *     empty directory, I/O errors, etc.)
    */
-  DataSet createDataSet(
+  TableSet createTableSet(
       final Path directory,
       final Collection<ScenarioName> scenarioNames,
       final ScenarioMarker scenarioMarker,
@@ -97,12 +97,12 @@ public final class DataSetFactory {
         provider.getClass().getSimpleName(),
         fileExtension.value());
 
-    final var rawDataSet = provider.parse(directory);
+    final var rawTableSet = provider.parse(directory);
     final var filter = new ScenarioFilter(scenarioMarker, scenarioNames);
 
     logger.debug("Applied scenario filter with {} scenario names", scenarioNames.size());
 
-    return new FilteredDataSet(rawDataSet, filter, dataSource);
+    return new FilteredTableSet(rawTableSet, filter, dataSource);
   }
 
   /**

@@ -5,7 +5,7 @@
  * way. The main interfaces are:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.dataset.DataSet} - A collection of tables
+ *   <li>{@link io.github.seijikohara.dbtester.api.dataset.TableSet} - A collection of tables
  *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Table} - A single database table with
  *       columns and rows
  *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Row} - A single row within a table

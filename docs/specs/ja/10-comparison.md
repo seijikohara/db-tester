@@ -33,7 +33,7 @@
 | CDI/Jakarta EE | - | - | Yes | - | - | - |
 | Cucumber/BDD | - | - | Yes | - | - | - |
 
-*DSL: アノテーション（`@DataSet`、`@ExpectedDataSet`）は非対応。[RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl)プログラマティックAPIを使用。
+*DSL: アノテーション（`@DataSet`、`@ExpectedDataSet`など）は非対応。[RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl)プログラマティックAPIを使用。
 
 **分析:**
 - DB TesterはJUnit 6とKotestをネイティブサポートする唯一のフレームワーク
@@ -146,9 +146,9 @@ USER:
 ```
 
 **SPI拡張性（DB Tester）:**
-- カスタム`DataSetLoaderProvider`実装
+- カスタム`TableSetLoaderProvider`実装
 - カスタム`OperationProvider`実装
-- カスタム`ExpectationProvider`実装
+- カスタム`ExpectedDataSetProvider`実装
 
 ---
 
@@ -225,8 +225,8 @@ db-tester-kotest  → Kotest 6拡張
 **例:**
 ```java
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation  // com/example/UserTest/users.csvを読み込み
-@Expectation  // com/example/UserTest/expected/users.csvで検証
+@DataSet  // com/example/UserTest/users.csvを読み込み
+@ExpectedDataSet  // com/example/UserTest/expected/users.csvで検証
 class UserTest {
     @Test
     void shouldCreateUser() {
@@ -464,8 +464,8 @@ public void testQueryDoesNotModify() {
 
 | Database Rider | DB Tester | 備考 |
 |----------------|-----------|------|
-| `@DataSet("users.yml")` | `@Preparation` | YAMLをCSVに変換 |
-| `@ExpectedDataSet("expected.yml")` | `@Expectation` | YAMLをCSVに変換 |
+| `@DataSet("users.yml")` | `@DataSet` | YAMLをCSVに変換 |
+| `@ExpectedDataSet("expected.yml")` | `@ExpectedDataSet` | YAMLをCSVに変換 |
 | `strategy = SeedStrategy.CLEAN_INSERT` | `operation = Operation.CLEAN_INSERT` | 同じセマンティクス |
 | `ignoreCols = {"id"}` | `excludeColumns = {"id"}` | 同じ機能 |
 | `cleanBefore = true` | デフォルト動作 | CLEAN_INSERTがデフォルト |
@@ -475,8 +475,8 @@ public void testQueryDoesNotModify() {
 
 | Spring Test DBUnit | DB Tester | 備考 |
 |--------------------|-----------|------|
-| `@DatabaseSetup("/data.xml")` | `@Preparation` | XMLをCSVに変換 |
-| `@ExpectedDatabase("/expected.xml")` | `@Expectation` | XMLをCSVに変換 |
+| `@DatabaseSetup("/data.xml")` | `@DataSet` | XMLをCSVに変換 |
+| `@ExpectedDatabase("/expected.xml")` | `@ExpectedDataSet` | XMLをCSVに変換 |
 | `DbUnitTestExecutionListener` | `DatabaseTestExtension` | JUnit 6拡張 |
 | `@DbUnitConfiguration` | `@DatabaseTestConfiguration` | 類似オプション |
 
@@ -487,7 +487,7 @@ public void testQueryDoesNotModify() {
 | `insertInto("users").columns(...).values(...)` | `users.csv`ファイル | ファイルに外部化 |
 | `deleteAllFrom("users")` | CLEAN_INSERTに暗黙的 | デフォルト動作 |
 | `DbSetupTracker` | 不要 | 各テストが独自データを持つ |
-| アサーションなし | `@Expectation` | 検証を追加 |
+| アサーションなし | `@ExpectedDataSet` | 検証を追加 |
 
 ---
 

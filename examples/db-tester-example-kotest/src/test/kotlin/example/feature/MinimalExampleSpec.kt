@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -15,7 +15,7 @@ import javax.sql.DataSource
  *
  * This test illustrates:
  * - Automatic CSV file resolution based on test class and method names
- * - Method-level `@Preparation` and `@Expectation` annotations
+ * - Method-level `@DataSet` and `@ExpectedDataSet` annotations
  * - Single table operations with minimal configuration
  * - H2 in-memory database setup
  *
@@ -98,8 +98,8 @@ class MinimalExampleSpec : AnnotationSpec() {
      * - Expectation: Verifies all three products from `expected/TABLE1.csv`
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should load and verify product data`(): Unit =
         logger.info("Running minimal example test").also {
             executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Keyboard', 79.99)")

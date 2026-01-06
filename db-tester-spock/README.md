@@ -68,8 +68,8 @@ class UserRepositorySpec extends Specification {
         dbTesterRegistry.registerDefault(dataSource)
     }
 
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     def "should create user"() {
         when:
         userRepository.create(new User("Alice", "alice@example.com"))
@@ -103,8 +103,8 @@ Apply annotations at the class level for all feature methods:
 
 ```groovy
 @DatabaseTest
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 class UserRepositorySpec extends Specification {
 
     def "should create user"() {
@@ -118,7 +118,7 @@ class UserRepositorySpec extends Specification {
 Override class-level annotations at the method level:
 
 ```groovy
-@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
 def "should create user with custom data"() {
     // Uses custom data location
 }

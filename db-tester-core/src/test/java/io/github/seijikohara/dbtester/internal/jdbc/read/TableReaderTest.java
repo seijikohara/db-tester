@@ -341,7 +341,7 @@ class TableReaderTest {
       when(resultSet.next()).thenReturn(false);
 
       // When
-      final var result = reader.fetchDataSet(dataSource, List.of("USERS", "PRODUCTS"));
+      final var result = reader.fetchTableSet(dataSource, List.of("USERS", "PRODUCTS"));
 
       // Then
       final var tableNames = result.getTables().stream().map(t -> t.getName().value()).toList();

@@ -1,7 +1,7 @@
 package example
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure.SpringBootDatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.collections.shouldHaveSize
@@ -19,7 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest
  *
  * - Automatic DataSource registration via [SpringBootDatabaseTestExtension] - no manual setup required
  * - Convention-based CSV file resolution
- * - `@Preparation` and `@Expectation` annotations for database state management
+ * - `@DataSet` and `@ExpectedDataSet` annotations for database state management
  * - Spring Data JPA integration with test framework
  *
  * CSV files are located at:
@@ -48,7 +48,7 @@ class UserRepositorySpec : AnnotationSpec() {
      * - Verification: Asserts the correct number and content of users
      */
     @Test
-    @Preparation
+    @DataSet
     fun `should find all users`(): Unit =
         logger
             .info("Testing findAllByOrderByIdAsc() operation")
@@ -70,7 +70,7 @@ class UserRepositorySpec : AnnotationSpec() {
      * - Verification: Asserts the correct user is returned
      */
     @Test
-    @Preparation
+    @DataSet
     fun `should find user by id`(): Unit =
         logger
             .info("Testing findById() operation")
@@ -92,8 +92,8 @@ class UserRepositorySpec : AnnotationSpec() {
      * - Expectation: Verifies final database state from `expected/USERS.csv`
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should save new user`(): Unit =
         logger
             .info("Testing save() operation")
@@ -113,7 +113,7 @@ class UserRepositorySpec : AnnotationSpec() {
      * - Verification: Asserts the user was deleted and remaining users are correct
      */
     @Test
-    @Preparation
+    @DataSet
     fun `should delete user`(): Unit =
         logger
             .info("Testing deleteById() operation")

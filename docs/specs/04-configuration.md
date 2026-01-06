@@ -16,7 +16,7 @@ Aggregates runtime configuration for the database testing extension.
 |-----------|------|-------------|
 | `conventions` | `ConventionSettings` | Dataset directory resolution rules |
 | `operations` | `OperationDefaults` | Default database operations |
-| `loader` | `DataSetLoader` | Dataset loading strategy |
+| `loader` | `TableSetLoader` | Dataset loading strategy |
 
 ### Factory Methods
 
@@ -25,7 +25,7 @@ Aggregates runtime configuration for the database testing extension.
 | `defaults()` | Creates configuration with all framework defaults |
 | `withConventions(ConventionSettings)` | Custom conventions with default operations and loader |
 | `withOperations(OperationDefaults)` | Custom operations with default conventions and loader |
-| `withLoader(DataSetLoader)` | Custom loader with default conventions and operations |
+| `withLoader(TableSetLoader)` | Custom loader with default conventions and operations |
 
 ### Default Behavior
 
@@ -33,7 +33,7 @@ When `Configuration.defaults()` is used:
 
 1. Conventions: `ConventionSettings.standard()`
 2. Operations: `OperationDefaults.standard()`
-3. Loader: Loaded via ServiceLoader from `DataSetLoaderProvider`
+3. Loader: Loaded via ServiceLoader from `TableSetLoaderProvider`
 
 ### Usage Example
 
@@ -61,7 +61,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `baseDirectory` | `@Nullable String` | `null` | Absolute or relative base path; null for classpath-relative |
-| `expectationSuffix` | `String` | `"/expected"` | Subdirectory for expectation datasets |
+| `expectedDataSetSuffix` | `String` | `"/expected"` | Subdirectory for expected datasets |
 | `scenarioMarker` | `String` | `"[Scenario]"` | Column name for scenario filtering |
 | `dataFormat` | `DataFormat` | `CSV` | File format for dataset files |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
@@ -101,11 +101,11 @@ When `baseDirectory` is specified:
     └── TABLE1.csv
 ```
 
-### Expectation Suffix
+### ExpectedDataSet Suffix
 
-The `expectationSuffix` is appended to the preparation path:
+The `expectedDataSetSuffix` is appended to the data set path:
 
-| Preparation Path | Suffix | Expectation Path |
+| DataSet Path | Suffix | ExpectedDataSet Path |
 |-----------------|--------|------------------|
 | `com/example/UserTest` | `/expected` | `com/example/UserTest/expected` |
 | `/data/test` | `/expected` | `/data/test/expected` |
@@ -187,14 +187,14 @@ Defines default database operations for preparation and expectation phases.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before test runs |
-| `expectation` | `Operation` | `NONE` | Default operation executed after test completes |
+| `dataSet` | `Operation` | `CLEAN_INSERT` | Default operation executed before test runs |
+| `expectedDataSet` | `Operation` | `NONE` | Default operation executed after test completes |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
-| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation and `NONE` for expectation |
+| `standard()` | Creates defaults with `CLEAN_INSERT` for data set and `NONE` for expected data set |
 
 ## DataFormat
 
@@ -295,7 +295,7 @@ TestContext context = new TestContext(
 );
 
 // Used by loaders and executors
-List<DataSet> datasets = loader.loadPreparationDataSets(context);
+List<TableSet> tableSets = loader.loadDataSetTableSets(context);
 ```
 
 ## Related Specifications

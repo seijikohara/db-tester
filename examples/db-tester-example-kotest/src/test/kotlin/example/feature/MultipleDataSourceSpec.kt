@@ -1,8 +1,8 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
@@ -16,7 +16,7 @@ import javax.sql.DataSource
  *
  * This specification shows:
  * - Registering multiple named data sources
- * - Using [DataSet.dataSourceName] in annotations
+ * - Using [DataSetSource.dataSourceName] in annotations
  * - Working with different databases simultaneously
  *
  * Use cases:
@@ -118,17 +118,17 @@ class MultipleDataSourceSpec : AnnotationSpec() {
      * - Expectation: Verifies all three customers exist in default database
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/default/",
                 scenarioNames = ["default"],
             ),
         ],
     )
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/default/expected/",
                 scenarioNames = ["default"],
             ),
@@ -146,7 +146,7 @@ class MultipleDataSourceSpec : AnnotationSpec() {
     /**
      * Tests operations on the named secondary (inventory) database.
      *
-     * Uses [DataSet.dataSourceName] = "inventory" to specify the secondary database.
+     * Uses [DataSetSource.dataSourceName] = "inventory" to specify the secondary database.
      *
      * Test flow:
      * - Preparation: Loads inventory database - TABLE1(ID=1 Laptop, ID=2 Keyboard)
@@ -154,18 +154,18 @@ class MultipleDataSourceSpec : AnnotationSpec() {
      * - Expectation: Verifies all three products exist in inventory database
      */
     @Test
-    @Preparation(
+    @DataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 dataSourceName = "inventory",
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/inventory/",
                 scenarioNames = ["inventory"],
             ),
         ],
     )
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = [
-            DataSet(
+            DataSetSource(
                 dataSourceName = "inventory",
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/inventory/expected/",
                 scenarioNames = ["inventory"],

@@ -17,7 +17,7 @@ DB Testerフレームワークで利用可能な設定クラスとオプショ�
 |---------------|-----|------|
 | `conventions` | `ConventionSettings` | データセットディレクトリ解決ルール |
 | `operations` | `OperationDefaults` | デフォルトのデータベース操作 |
-| `loader` | `DataSetLoader` | データセット読み込み戦略 |
+| `loader` | `TableSetLoader` | テーブルセット読み込み戦略 |
 
 ### ファクトリメソッド
 
@@ -26,7 +26,7 @@ DB Testerフレームワークで利用可能な設定クラスとオプショ�
 | `defaults()` | すべてのフレームワークデフォルトで設定を作成 |
 | `withConventions(ConventionSettings)` | カスタム規約とデフォルトの操作およびローダー |
 | `withOperations(OperationDefaults)` | カスタム操作とデフォルトの規約およびローダー |
-| `withLoader(DataSetLoader)` | カスタムローダーとデフォルトの規約および操作 |
+| `withLoader(TableSetLoader)` | カスタムローダーとデフォルトの規約および操作 |
 
 ### デフォルト動作
 
@@ -34,7 +34,7 @@ DB Testerフレームワークで利用可能な設定クラスとオプショ�
 
 1. 規約: `ConventionSettings.standard()`
 2. 操作: `OperationDefaults.standard()`
-3. ローダー: `DataSetLoaderProvider`からServiceLoader経由で読み込み
+3. ローダー: `TableSetLoaderProvider`からServiceLoader経由で読み込み
 
 ### 使用例
 
@@ -253,9 +253,9 @@ static void setup(ExtensionContext context) {
 データセットはアノテーション宣言順に処理されます:
 
 ```java
-@Preparation(dataSets = {
-    @DataSet(resourceLocation = "dataset1"),  // 最初に処理
-    @DataSet(resourceLocation = "dataset2")   // 2番目に処理
+@DataSet(sources = {
+    @DataSetSource(resourceLocation = "dataset1"),  // 最初に処理
+    @DataSetSource(resourceLocation = "dataset2")   // 2番目に処理
 })
 ```
 
@@ -302,7 +302,7 @@ TestContext context = new TestContext(
 );
 
 // ローダーとエグゼキューターで使用
-List<DataSet> datasets = loader.loadPreparationDataSets(context);
+List<TableSet> tableSets = loader.loadPreparationTableSets(context);
 ```
 
 

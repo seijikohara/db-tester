@@ -4,11 +4,11 @@ This document describes the public API provided by the `db-tester-api` module.
 
 ## Annotations
 
-### @Preparation
+### @DataSet
 
 Declares datasets to apply before a test method executes.
 
-**Location**: `io.github.seijikohara.dbtester.api.annotation.Preparation`
+**Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
 **Target**: `METHOD`, `TYPE`
 
@@ -16,7 +16,7 @@ Declares datasets to apply before a test method executes.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `dataSets` | `DataSet[]` | `{}` | Datasets to execute; empty triggers convention-based discovery |
+| `sources` | `DataSetSource[]` | `{}` | Dataset sources to execute; empty triggers convention-based discovery |
 | `operation` | `Operation` | `CLEAN_INSERT` | Database operation to apply |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
 
@@ -29,24 +29,24 @@ Declares datasets to apply before a test method executes.
 **Example**:
 
 ```java
-@Preparation
+@DataSet
 void testMethod() { }
 
-@Preparation(operation = Operation.INSERT)
+@DataSet(operation = Operation.INSERT)
 void testWithInsertOnly() { }
 
-@Preparation(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
+@DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
 void testWithForeignKeyOrdering() { }
 
-@Preparation(dataSets = @DataSet(resourceLocation = "custom/path"))
+@DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
 void testWithCustomPath() { }
 ```
 
-### @Expectation
+### @ExpectedDataSet
 
 Declares datasets that define the expected database state after test execution.
 
-**Location**: `io.github.seijikohara.dbtester.api.annotation.Expectation`
+**Location**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
 **Target**: `METHOD`, `TYPE`
 
@@ -54,7 +54,7 @@ Declares datasets that define the expected database state after test execution.
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `dataSets` | `DataSet[]` | `{}` | Datasets for verification; empty triggers convention-based discovery |
+| `sources` | `DataSetSource[]` | `{}` | Dataset sources for verification; empty triggers convention-based discovery |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order during verification |
 
 **Verification Behavior**:
@@ -66,24 +66,24 @@ Declares datasets that define the expected database state after test execution.
 **Example**:
 
 ```java
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 void testWithVerification() { }
 
-@Expectation(dataSets = @DataSet(resourceLocation = "expected/custom"))
+@ExpectedDataSet(sources = @DataSetSource(resourceLocation = "expected/custom"))
 void testWithCustomExpectation() { }
 
-@Expectation(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
+@ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrdering() { }
 ```
 
-### @DataSet
+### @DataSetSource
 
-Configures individual dataset parameters within `@Preparation` or `@Expectation`.
+Configures individual dataset parameters within `@DataSet` or `@ExpectedDataSet`.
 
-**Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
+**Location**: `io.github.seijikohara.dbtester.api.annotation.DataSetSource`
 
-**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. Use it exclusively within `@Preparation#dataSets()` and `@Expectation#dataSets()` arrays.
+**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. Use it exclusively within `@DataSet#sources()` and `@ExpectedDataSet#sources()` arrays.
 
 **Attributes**:
 
@@ -105,30 +105,30 @@ Configures individual dataset parameters within `@Preparation` or `@Expectation`
 **Example**:
 
 ```java
-@Preparation(dataSets = {
-    @DataSet(dataSourceName = "primary"),
-    @DataSet(dataSourceName = "secondary", resourceLocation = "secondary-data")
+@DataSet(sources = {
+    @DataSetSource(dataSourceName = "primary"),
+    @DataSetSource(dataSourceName = "secondary", resourceLocation = "secondary-data")
 })
 void testMultipleDataSources() { }
 
-@Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
+@DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
 ```
 
-## DataSet Interfaces
+## TableSet Interfaces
 
-### DataSet
+### TableSet
 
 Represents a logical collection of database tables.
 
-**Location**: `io.github.seijikohara.dbtester.api.dataset.DataSet`
+**Location**: `io.github.seijikohara.dbtester.api.dataset.TableSet`
 
 **Factory Methods**:
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `of(List<Table>)` | `DataSet` | Creates a dataset with the specified tables |
-| `of(Table...)` | `DataSet` | Creates a dataset with the specified tables (varargs) |
+| `of(List<Table>)` | `TableSet` | Creates a table set with the specified tables |
+| `of(Table...)` | `TableSet` | Creates a table set with the specified tables (varargs) |
 
 **Instance Methods**:
 
@@ -142,7 +142,7 @@ Represents a logical collection of database tables.
 
 - Table order is preserved (insertion order)
 - All returned collections are immutable
-- Table names are unique within a dataset
+- Table names are unique within a table set
 
 ### Table
 
@@ -358,14 +358,14 @@ Static facade for programmatic database assertions. This utility class delegates
 
 | Method | Description |
 |--------|-------------|
-| `assertEquals(DataSet, DataSet)` | Asserts two datasets are equal |
-| `assertEquals(DataSet, DataSet, AssertionFailureHandler)` | Asserts with custom failure handler |
+| `assertEquals(TableSet, TableSet)` | Asserts two table sets are equal |
+| `assertEquals(TableSet, TableSet, AssertionFailureHandler)` | Asserts with custom failure handler |
 | `assertEquals(Table, Table)` | Asserts two tables are equal |
 | `assertEquals(Table, Table, Collection<String>)` | Asserts tables with additional columns to include |
 | `assertEquals(Table, Table, AssertionFailureHandler)` | Asserts tables with custom failure handler |
-| `assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection<String>)` | Asserts table in datasets, ignoring specified columns |
+| `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | Asserts table in table sets, ignoring specified columns |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
-| `assertEqualsByQuery(DataSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected dataset |
+| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table set |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
 
 **Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
@@ -373,19 +373,19 @@ Static facade for programmatic database assertions. This utility class delegates
 **Example**:
 
 ```java
-// Basic dataset comparison
-DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet);
+// Basic table set comparison
+DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet);
 
 // With custom failure handler
-DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, (message, expected, actual) -> {
+DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expected, actual) -> {
     // Custom failure handling
 });
 
 // Ignoring specific columns
-DatabaseAssertion.assertEqualsIgnoreColumns(expectedDataSet, actualDataSet, "USERS", "CREATED_AT", "UPDATED_AT");
+DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
 
 // Comparing SQL query results
-DatabaseAssertion.assertEqualsByQuery(expectedDataSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
+DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
 ```
 
 ### AssertionFailureHandler
@@ -424,7 +424,7 @@ AssertionFailureHandler collector = (message, expected, actual) -> {
     failures.add(String.format("%s: expected=%s, actual=%s", message, expected, actual));
 };
 
-DatabaseAssertion.assertEquals(expectedDataSet, actualDataSet, collector);
+DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, collector);
 if (!failures.isEmpty()) {
     throw new AssertionError("Multiple failures:\n" + String.join("\n", failures));
 }

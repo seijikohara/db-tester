@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
@@ -158,19 +158,19 @@ public final class TableMergeStrategyTest {
      * <p>With FIRST strategy, only dataset1's rows should be loaded.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/dataset1/"),
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/dataset2/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/shouldUseOnlyFirstDataset/expected/")
         })
@@ -244,19 +244,19 @@ public final class TableMergeStrategyTest {
      * <p>With LAST strategy, only dataset2's rows should be loaded.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/dataset1/"),
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/dataset2/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/shouldUseOnlyLastDataset/expected/")
         })
@@ -330,19 +330,19 @@ public final class TableMergeStrategyTest {
      * <p>With UNION strategy, duplicate row [2=Bob] should appear only once.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/dataset1/"),
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/dataset2/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/shouldMergeAndRemoveDuplicates/expected/")
         })
@@ -417,19 +417,19 @@ public final class TableMergeStrategyTest {
      * may cause primary key violations if the table has a primary key constraint on ID.
      */
     @Test
-    @Preparation(
+    @DataSet(
         operation = Operation.INSERT,
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/dataset1/"),
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/dataset2/")
         })
-    @Expectation(
+    @ExpectedDataSet(
         dataSets = {
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/shouldMergeAndKeepAllRows/expected/")
         })

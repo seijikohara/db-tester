@@ -30,8 +30,8 @@ import org.springframework.test.context.TestContextManager
  *     }
  *
  *     @Test
- *     @Preparation
- *     @Expectation
+ *     @DataSet
+ *     @ExpectedDataSet
  *     fun `should verify database state`() {
  *         // test implementation
  *     }

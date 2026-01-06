@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.kotest.extension
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.context.TestContext
@@ -18,12 +18,12 @@ import kotlin.reflect.jvm.javaMethod
 /**
  * Kotest extension for database testing.
  *
- * This extension processes [Preparation] and [Expectation] annotations to set up
+ * This extension processes [DataSet] and [ExpectedDataSet] annotations to set up
  * test data before each test and verify database state after each test.
  *
  * The extension performs two responsibilities:
- * 1. Before each test, resolves [Preparation] declarations and executes the resulting datasets.
- * 2. After each test, resolves [Expectation] declarations and validates the database contents.
+ * 1. Before each test, resolves [DataSet] declarations and executes the resulting datasets.
+ * 2. After each test, resolves [ExpectedDataSet] declarations and validates the database contents.
  *
  * **Usage with AnnotationSpec:**
  * ```kotlin
@@ -32,8 +32,8 @@ import kotlin.reflect.jvm.javaMethod
  *         listOf(DatabaseTestExtension(::getDbTesterRegistry))
  *
  *     @Test
- *     @Preparation
- *     @Expectation
+ *     @DataSet
+ *     @ExpectedDataSet
  *     fun `should verify database state`() {
  *         // test implementation
  *     }
@@ -42,8 +42,8 @@ import kotlin.reflect.jvm.javaMethod
  *
  * @property registryProvider provider function that returns the [DataSourceRegistry]
  * @property configurationProvider optional provider function for custom [Configuration]
- * @see Preparation
- * @see Expectation
+ * @see DataSet
+ * @see ExpectedDataSet
  */
 class DatabaseTestExtension(
     private val registryProvider: () -> DataSourceRegistry,
@@ -70,32 +70,32 @@ class DatabaseTestExtension(
     ): TestResult =
         requireMethod(testCase)
             .let { method ->
-                findPreparation(testCase, method) to findExpectation(testCase, method)
-            }.let { (preparation, expectation) ->
+                findDataSet(testCase, method) to findExpectedDataSet(testCase, method)
+            }.let { (dataSet, expectedDataSet) ->
                 when {
-                    preparation != null || expectation != null ->
-                        executeWithAnnotations(testCase, execute, preparation, expectation)
+                    dataSet != null || expectedDataSet != null ->
+                        executeWithAnnotations(testCase, execute, dataSet, expectedDataSet)
                     else -> execute(testCase)
                 }
             }
 
     /**
-     * Executes the test case with preparation and/or expectation handling.
+     * Executes the test case with dataset and/or expected dataset handling.
      *
      * @param testCase the test case being executed
      * @param execute the function to execute the test case
-     * @param preparation the preparation annotation, or null
-     * @param expectation the expectation annotation, or null
+     * @param dataSet the DataSet annotation, or null
+     * @param expectedDataSet the ExpectedDataSet annotation, or null
      * @return the test result
      */
     private suspend fun executeWithAnnotations(
         testCase: TestCase,
         execute: suspend (TestCase) -> TestResult,
-        preparation: Preparation?,
-        expectation: Expectation?,
+        dataSet: DataSet?,
+        expectedDataSet: ExpectedDataSet?,
     ): TestResult =
         createTestContext(testCase, requireMethod(testCase)).let { testContext ->
-            preparation?.also {
+            dataSet?.also {
                 logger.debug(
                     "Executing preparation for {}.{}()",
                     testContext.testClass().simpleName,
@@ -104,13 +104,13 @@ class DatabaseTestExtension(
                 preparationExecutor.execute(testContext, it)
             }
             execute(testCase).also { result ->
-                if (result is TestResult.Success && expectation != null) {
+                if (result is TestResult.Success && expectedDataSet != null) {
                     logger.debug(
                         "Verifying expectation for {}.{}()",
                         testContext.testClass().simpleName,
                         testContext.testMethod().name,
                     )
-                    expectationVerifier.verify(testContext, expectation)
+                    expectationVerifier.verify(testContext, expectedDataSet)
                 }
             }
         }
@@ -173,36 +173,36 @@ class DatabaseTestExtension(
     private fun sanitizeMethodName(name: String): String = name.replace("`", "").replace(" ", "\$")
 
     /**
-     * Finds the effective [Preparation] annotation for the current test.
+     * Finds the effective [DataSet] annotation for the current test.
      *
      * Method-level annotations take precedence over class-level annotations.
      *
      * @param testCase the test case
      * @param method the resolved test method
-     * @return the preparation annotation if found, or null
+     * @return the DataSet annotation if found, or null
      */
-    private fun findPreparation(
+    private fun findDataSet(
         testCase: TestCase,
         method: Method,
-    ): Preparation? =
-        method.getAnnotation(Preparation::class.java)
-            ?: testCase.spec::class.findAnnotation<Preparation>()
-            ?: testCase.spec::class.java.getAnnotation(Preparation::class.java)
+    ): DataSet? =
+        method.getAnnotation(DataSet::class.java)
+            ?: testCase.spec::class.findAnnotation<DataSet>()
+            ?: testCase.spec::class.java.getAnnotation(DataSet::class.java)
 
     /**
-     * Finds the effective [Expectation] annotation for the current test.
+     * Finds the effective [ExpectedDataSet] annotation for the current test.
      *
      * Method-level annotations take precedence over class-level annotations.
      *
      * @param testCase the test case
      * @param method the resolved test method
-     * @return the expectation annotation if found, or null
+     * @return the ExpectedDataSet annotation if found, or null
      */
-    private fun findExpectation(
+    private fun findExpectedDataSet(
         testCase: TestCase,
         method: Method,
-    ): Expectation? =
-        method.getAnnotation(Expectation::class.java)
-            ?: testCase.spec::class.findAnnotation<Expectation>()
-            ?: testCase.spec::class.java.getAnnotation(Expectation::class.java)
+    ): ExpectedDataSet? =
+        method.getAnnotation(ExpectedDataSet::class.java)
+            ?: testCase.spec::class.findAnnotation<ExpectedDataSet>()
+            ?: testCase.spec::class.java.getAnnotation(ExpectedDataSet::class.java)
 }

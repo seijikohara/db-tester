@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -119,8 +119,8 @@ class TableOrderingStrategiesSpec extends Specification {
 	 *   <li>Expectation: Verifies TABLE1 has 3 rows, TABLE2 has 4 rows
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use alphabetical ordering'() {
 		when: 'inserting new records following alphabetical order'
 		sql.execute "INSERT INTO TABLE1 (ID, COLUMN1) VALUES (3, 'Services')"
@@ -142,8 +142,8 @@ class TableOrderingStrategiesSpec extends Specification {
 	 *   <li>Expectation: Verifies TABLE3 has 4 rows, TABLE4 has 3 rows with new association
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should use manual ordering'() {
 		when: 'inserting records with manual ordering'
 		sql.execute "INSERT INTO TABLE3 (ID, COLUMN1) VALUES (4, 'Featured')"
@@ -166,13 +166,13 @@ class TableOrderingStrategiesSpec extends Specification {
 	 *   <li>Expectation: Verifies TABLE2(1,1,'Updated Widget')
 	 * </ul>
 	 */
-	@Preparation(
-	dataSets = @DataSet(
+	@DataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/TableOrderingStrategiesSpec/programmatic/'
 	)
 	)
-	@Expectation(
-	dataSets = @DataSet(
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/TableOrderingStrategiesSpec/programmatic/expected/'
 	)
 	)
@@ -197,8 +197,8 @@ class TableOrderingStrategiesSpec extends Specification {
 	 *   <li>Expectation: Verifies all 4 tables have new records with proper foreign key relationships
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should handle many to many relationships'() {
 		when: 'inserting records with many-to-many relationships'
 		sql.execute "INSERT INTO TABLE1 (ID, COLUMN1) VALUES (4, 'Accessories')"

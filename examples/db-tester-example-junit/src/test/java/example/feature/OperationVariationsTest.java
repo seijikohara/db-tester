@@ -2,8 +2,8 @@ package example.feature;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
@@ -149,8 +149,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.CLEAN_INSERT)
-  @Expectation
+  @DataSet(operation = Operation.CLEAN_INSERT)
+  @ExpectedDataSet
   void shouldUseCleanInsertOperation() throws Exception {
     logger.info("Running CLEAN_INSERT operation test");
 
@@ -185,8 +185,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.DELETE_ALL)
-  @Expectation
+  @DataSet(operation = Operation.DELETE_ALL)
+  @ExpectedDataSet
   void shouldUseInsertOperation() throws Exception {
     logger.info("Running INSERT operation test");
 
@@ -232,8 +232,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.CLEAN_INSERT)
-  @Expectation
+  @DataSet(operation = Operation.CLEAN_INSERT)
+  @ExpectedDataSet
   void shouldUseUpdateOperation() throws Exception {
     logger.info("Running UPDATE operation test");
 
@@ -259,8 +259,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.REFRESH)
-  @Expectation
+  @DataSet(operation = Operation.REFRESH)
+  @ExpectedDataSet
   void shouldUseRefreshOperation() throws Exception {
     logger.info("Running REFRESH operation test");
 
@@ -289,8 +289,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.DELETE_ALL)
-  @Expectation
+  @DataSet(operation = Operation.DELETE_ALL)
+  @ExpectedDataSet
   void shouldUseDeleteAllOperation() throws Exception {
     logger.info("Running DELETE_ALL operation test");
 
@@ -331,8 +331,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation
-  @Expectation
+  @DataSet
+  @ExpectedDataSet
   void shouldUseDeleteOperation() throws Exception {
     logger.info("Running DELETE operation test");
 
@@ -360,8 +360,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.TRUNCATE_INSERT)
-  @Expectation
+  @DataSet(operation = Operation.TRUNCATE_INSERT)
+  @ExpectedDataSet
   void shouldUseTruncateInsertOperation() throws Exception {
     logger.info("Running TRUNCATE_INSERT operation test");
 
@@ -391,8 +391,8 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @Preparation(operation = Operation.TRUNCATE_TABLE)
-  @Expectation
+  @DataSet(operation = Operation.TRUNCATE_TABLE)
+  @ExpectedDataSet
   void shouldUseTruncateTableOperation() throws Exception {
     logger.info("Running TRUNCATE_TABLE operation test");
 

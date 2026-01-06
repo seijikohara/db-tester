@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
@@ -81,9 +81,9 @@ class DefaultAssertionProviderTest {
     }
   }
 
-  /** Tests for the assertEquals(DataSet, DataSet) method. */
+  /** Tests for the assertEquals(TableSet, TableSet) method. */
   @Nested
-  @DisplayName("assertEquals(DataSet, DataSet) method")
+  @DisplayName("assertEquals(TableSet, TableSet) method")
   class AssertEqualsDataSetMethod {
 
     /** Tests for the assertEquals method. */
@@ -95,9 +95,11 @@ class DefaultAssertionProviderTest {
     @DisplayName("should delegate to comparator when called")
     void shouldDelegateToComparator_whenCalled() {
       // Given
-      final var expected = mock(DataSet.class);
-      final var actual = mock(DataSet.class);
-      doNothing().when(mockComparator).assertEquals(any(DataSet.class), any(DataSet.class), any());
+      final var expected = mock(TableSet.class);
+      final var actual = mock(TableSet.class);
+      doNothing()
+          .when(mockComparator)
+          .assertEquals(any(TableSet.class), any(TableSet.class), any());
 
       // When
       provider.assertEquals(expected, actual);
@@ -107,9 +109,9 @@ class DefaultAssertionProviderTest {
     }
   }
 
-  /** Tests for the assertEquals(DataSet, DataSet, AssertionFailureHandler) method. */
+  /** Tests for the assertEquals(TableSet, TableSet, AssertionFailureHandler) method. */
   @Nested
-  @DisplayName("assertEquals(DataSet, DataSet, AssertionFailureHandler) method")
+  @DisplayName("assertEquals(TableSet, TableSet, AssertionFailureHandler) method")
   class AssertEqualsDataSetWithHandlerMethod {
 
     /** Tests for the assertEquals method with handler. */
@@ -121,10 +123,12 @@ class DefaultAssertionProviderTest {
     @DisplayName("should pass handler to comparator when handler provided")
     void shouldPassHandlerToComparator_whenHandlerProvided() {
       // Given
-      final var expected = mock(DataSet.class);
-      final var actual = mock(DataSet.class);
+      final var expected = mock(TableSet.class);
+      final var actual = mock(TableSet.class);
       final var handler = mock(AssertionFailureHandler.class);
-      doNothing().when(mockComparator).assertEquals(any(DataSet.class), any(DataSet.class), any());
+      doNothing()
+          .when(mockComparator)
+          .assertEquals(any(TableSet.class), any(TableSet.class), any());
 
       // When
       provider.assertEquals(expected, actual, handler);
@@ -189,9 +193,9 @@ class DefaultAssertionProviderTest {
     }
   }
 
-  /** Tests for the assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection) method. */
+  /** Tests for the assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection) method. */
   @Nested
-  @DisplayName("assertEqualsIgnoreColumns(DataSet, DataSet, String, Collection) method")
+  @DisplayName("assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection) method")
   class AssertEqualsIgnoreColumnsDataSetMethod {
 
     /** Tests for the assertEqualsIgnoreColumns method. */
@@ -203,14 +207,14 @@ class DefaultAssertionProviderTest {
     @DisplayName("should delegate to comparator when called")
     void shouldDelegateToComparator_whenCalled() {
       // Given
-      final var expected = mock(DataSet.class);
-      final var actual = mock(DataSet.class);
+      final var expected = mock(TableSet.class);
+      final var actual = mock(TableSet.class);
       final var tableName = "users";
       final Collection<String> ignoreColumns = List.of("CREATED_AT");
       doNothing()
           .when(mockComparator)
           .assertEqualsIgnoreColumns(
-              any(DataSet.class), any(DataSet.class), any(String.class), any());
+              any(TableSet.class), any(TableSet.class), any(String.class), any());
 
       // When
       provider.assertEqualsIgnoreColumns(expected, actual, tableName, ignoreColumns);
@@ -249,9 +253,9 @@ class DefaultAssertionProviderTest {
     }
   }
 
-  /** Tests for the assertEqualsByQuery(DataSet, DataSource, String, String, Collection) method. */
+  /** Tests for the assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method. */
   @Nested
-  @DisplayName("assertEqualsByQuery(DataSet, DataSource, String, String, Collection) method")
+  @DisplayName("assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method")
   class AssertEqualsByQueryDataSetMethod {
 
     /** Tests for the assertEqualsByQuery method. */
@@ -263,7 +267,7 @@ class DefaultAssertionProviderTest {
     @DisplayName("should execute query and compare when called")
     void shouldExecuteQueryAndCompare_whenCalled() {
       // Given
-      final var expectedDataSet = mock(DataSet.class);
+      final var expectedDataSet = mock(TableSet.class);
       final var expectedTable = mock(Table.class);
       final var actualTable = mock(Table.class);
       final var dataSource = mock(DataSource.class);
@@ -292,7 +296,7 @@ class DefaultAssertionProviderTest {
     @DisplayName("should throw exception when expected table not found")
     void shouldThrowException_whenExpectedTableNotFound() {
       // Given
-      final var expectedDataSet = mock(DataSet.class);
+      final var expectedDataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var query = "SELECT * FROM users";
       final var tableName = "nonexistent";

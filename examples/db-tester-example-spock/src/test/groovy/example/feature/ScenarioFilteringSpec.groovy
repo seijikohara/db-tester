@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -23,7 +23,7 @@ import spock.lang.Specification
  *   <li>Sharing a single CSV file across multiple feature methods
  *   <li>Feature method name as automatic scenario filter
  *   <li>Reducing CSV file duplication
- *   <li>Class-level {@code @Preparation} and {@code @Expectation} annotations
+ *   <li>Class-level {@code @DataSet} and {@code @ExpectedDataSet} annotations
  * </ul>
  *
  * <p>CSV files contain scenario marker column that filters rows by feature method name:
@@ -33,8 +33,8 @@ import spock.lang.Specification
  * should create inactive user,1,bob,bob@example.com,INACTIVE
  * </pre>
  */
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 @DatabaseTest
 class ScenarioFilteringSpec extends Specification {
 

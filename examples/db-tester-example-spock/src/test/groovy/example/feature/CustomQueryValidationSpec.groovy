@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -103,8 +103,8 @@ class CustomQueryValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies all four records from {@code expected-filtered/}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-filtered/'
 	))
 	def 'should validate regional sales'() {
@@ -130,8 +130,8 @@ class CustomQueryValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies all four records from {@code expected-aggregation/}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-aggregation/'
 	))
 	def 'should validate sales summary'() {
@@ -157,8 +157,8 @@ class CustomQueryValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies all four records including February data from {@code expected-join/}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-join/'
 	))
 	def 'should validate high value sales'() {
@@ -185,8 +185,8 @@ class CustomQueryValidationSpec extends Specification {
 	 *   <li>Expectation: Verifies all four January records from {@code expected-daterange/}
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation(dataSets = @DataSet(
+	@DataSet
+	@ExpectedDataSet(dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-daterange/'
 	))
 	def 'should validate january sales'() {

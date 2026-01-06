@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.internal.scenario;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +21,10 @@ import org.slf4j.LoggerFactory;
  * @see ScenarioFilter
  * @see FilteredTable
  */
-public final class FilteredDataSet implements DataSet {
+public final class FilteredTableSet implements TableSet {
 
   /** Logger for this class. */
-  private static final Logger logger = LoggerFactory.getLogger(FilteredDataSet.class);
+  private static final Logger logger = LoggerFactory.getLogger(FilteredTableSet.class);
 
   /** The scenario-filtered tables. */
   private final List<Table> tables;
@@ -35,16 +35,16 @@ public final class FilteredDataSet implements DataSet {
   /**
    * Creates a filtered dataset from a source dataset.
    *
-   * @param sourceDataSet the source dataset to filter
+   * @param sourceTableSet the source dataset to filter
    * @param filter the scenario filter to apply
    * @param dataSource the data source to associate with this dataset, or null
    */
-  public FilteredDataSet(
-      final DataSet sourceDataSet,
+  public FilteredTableSet(
+      final TableSet sourceTableSet,
       final ScenarioFilter filter,
       final @Nullable DataSource dataSource) {
     this.tables =
-        sourceDataSet.getTables().stream()
+        sourceTableSet.getTables().stream()
             .map(table -> (Table) new FilteredTable(table, filter))
             .toList();
     this.dataSource = dataSource;

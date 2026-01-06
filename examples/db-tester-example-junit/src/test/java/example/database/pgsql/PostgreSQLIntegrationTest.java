@@ -3,8 +3,8 @@ package example.database.pgsql;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -124,8 +124,8 @@ public final class PostgreSQLIntegrationTest {
    * </ul>
    */
   @Test
-  @Preparation(dataSets = @DataSet(scenarioNames = "smokeTest"))
-  @Expectation(dataSets = @DataSet(scenarioNames = "smokeTest"))
+  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnPostgreSQL() {
     logger.info("Running PostgreSQL integration smoke test");
   }

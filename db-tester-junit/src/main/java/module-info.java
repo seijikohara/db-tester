@@ -2,8 +2,8 @@
  * DB Tester JUnit module providing JUnit Jupiter extension for database testing.
  *
  * <p>This module provides the {@code @ExtendWith(DatabaseTestExtension.class)} extension for JUnit
- * 5 tests, enabling declarative database setup and verification using {@code @Preparation} and
- * {@code @Expectation} annotations.
+ * 5 tests, enabling declarative database setup and verification using {@code @DataSet} and
+ * {@code @ExpectedDataSet} annotations.
  */
 module io.github.seijikohara.dbtester.junit {
   // Public API exports

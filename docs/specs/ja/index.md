@@ -23,7 +23,7 @@ features:
   - icon:
       src: /icons/declarative.svg
     title: 宣言的なテスト
-    details: "@Preparationと@Expectationアノテーションを使用して、テストデータのセットアップと検証を定義できます。"
+    details: "@DataSetと@ExpectedDataSetアノテーションを使用して、テストデータのセットアップと検証を定義できます。"
   - icon:
       src: /icons/convention.svg
     title: 設定より規約
@@ -131,8 +131,8 @@ dependencies {
 package com.example;
 
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation  // CSVからテストデータを読み込む
-@Expectation  // データベースの状態を検証
+@DataSet  // CSVからテストデータを読み込む
+@ExpectedDataSet  // データベースの状態を検証
 class UserRepositoryTest {
 
     @Test
@@ -151,8 +151,8 @@ class UserRepositoryTest {
 package com.example
 
 @DatabaseTest
-@Preparation  // CSVからテストデータを読み込む
-@Expectation  // データベースの状態を検証
+@DataSet  // CSVからテストデータを読み込む
+@ExpectedDataSet  // データベースの状態を検証
 class UserRepositorySpec extends Specification {
 
     def "should create user"() {
@@ -176,8 +176,8 @@ class UserRepositorySpec extends Specification {
 ```kotlin [Kotest]
 package com.example
 
-@Preparation  // CSVからテストデータを読み込む
-@Expectation  // データベースの状態を検証
+@DataSet  // CSVからテストデータを読み込む
+@ExpectedDataSet  // データベースの状態を検証
 class UserRepositorySpec : AnnotationSpec() {
 
     init {

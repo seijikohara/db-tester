@@ -2,7 +2,7 @@ package io.github.seijikohara.dbtester.internal.loader;
 
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.context.TestContext;
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
@@ -25,7 +25,7 @@ import org.jspecify.annotations.Nullable;
  * scenario filter.
  *
  * @see DataSetLoader
- * @see io.github.seijikohara.dbtester.api.annotation.DataSet
+ * @see io.github.seijikohara.dbtester.api.annotation.DataSetSource
  */
 public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
 
@@ -52,24 +52,24 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    * @return immutable list of preparation datasets (may be empty)
    */
   @Override
-  public List<DataSet> loadPreparationDataSets(final TestContext context) {
+  public List<TableSet> loadPreparationDataSets(final TestContext context) {
     final var testClass = context.testClass();
     final var testMethod = context.testMethod();
     final var conventions = context.configuration().conventions();
     final var mergeStrategy = conventions.tableMergeStrategy();
 
     return annotationResolver
-        .findPreparation(testMethod, testClass)
+        .findDataSet(testMethod, testClass)
         .map(
-            preparation -> {
-              final var dataSets = preparation.dataSets();
+            dataSet -> {
+              final var dataSetSources = dataSet.dataSets();
               // When dataSets is empty, load from convention-based location with default config
-              final var loadedDataSets =
-                  dataSets.length == 0
-                      ? loadConventionBasedDataSet(context, null)
-                      : loadDataSets(context, List.of(dataSets), null);
+              final var loadedTableSets =
+                  dataSetSources.length == 0
+                      ? loadConventionBasedTableSet(context, null)
+                      : loadTableSets(context, List.of(dataSetSources), null);
               // Merge datasets if there are multiple
-              return mergeDataSets(loadedDataSets, mergeStrategy);
+              return mergeTableSets(loadedTableSets, mergeStrategy);
             })
         .orElse(List.of());
   }
@@ -81,7 +81,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    * @return immutable list of expectation datasets (may be empty)
    */
   @Override
-  public List<DataSet> loadExpectationDataSets(final TestContext context) {
+  public List<TableSet> loadExpectationDataSets(final TestContext context) {
     final var testClass = context.testClass();
     final var testMethod = context.testMethod();
     final var conventions = context.configuration().conventions();
@@ -89,17 +89,17 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
     final var mergeStrategy = conventions.tableMergeStrategy();
 
     return annotationResolver
-        .findExpectation(testMethod, testClass)
+        .findExpectedDataSet(testMethod, testClass)
         .map(
-            expectation -> {
-              final var dataSets = expectation.dataSets();
+            expectedDataSet -> {
+              final var dataSetSources = expectedDataSet.dataSets();
               // When dataSets is empty, load from convention-based location with default config
-              final var loadedDataSets =
-                  dataSets.length == 0
-                      ? loadConventionBasedDataSet(context, expectFileSuffix)
-                      : loadDataSets(context, List.of(dataSets), expectFileSuffix);
+              final var loadedTableSets =
+                  dataSetSources.length == 0
+                      ? loadConventionBasedTableSet(context, expectFileSuffix)
+                      : loadTableSets(context, List.of(dataSetSources), expectFileSuffix);
               // Merge datasets if there are multiple
-              return mergeDataSets(loadedDataSets, mergeStrategy);
+              return mergeTableSets(loadedTableSets, mergeStrategy);
             })
         .orElse(List.of());
   }
@@ -110,26 +110,26 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    * <p>If there are multiple datasets, they are merged according to the strategy. The result is
    * always a list containing at most one dataset.
    *
-   * @param dataSets the datasets to merge
+   * @param tableSets the datasets to merge
    * @param strategy the merge strategy to apply
    * @return a list containing the merged dataset, or empty list if input is empty
    */
-  private List<DataSet> mergeDataSets(
-      final List<DataSet> dataSets, final TableMergeStrategy strategy) {
-    if (dataSets.isEmpty()) {
+  private List<TableSet> mergeTableSets(
+      final List<TableSet> tableSets, final TableMergeStrategy strategy) {
+    if (tableSets.isEmpty()) {
       return List.of();
     }
-    if (dataSets.size() == 1) {
-      return dataSets;
+    if (tableSets.size() == 1) {
+      return tableSets;
     }
-    final var merged = dataSetMerger.merge(dataSets, strategy);
+    final var merged = dataSetMerger.merge(tableSets, strategy);
     return List.of(merged);
   }
 
   /**
    * Loads a dataset using convention-based resolution with default configuration.
    *
-   * <p>This method is called when {@code @Preparation} or {@code @Expectation} is used without
+   * <p>This method is called when {@code @DataSet} or {@code @ExpectedDataSet} is used without
    * specifying {@code dataSets}. It creates a single dataset using:
    *
    * <ul>
@@ -143,7 +143,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    * @param suffix the directory suffix for dataset files, or {@code null} for no suffix
    * @return list containing a single convention-based dataset
    */
-  private List<DataSet> loadConventionBasedDataSet(
+  private List<TableSet> loadConventionBasedTableSet(
       final TestContext context, final @Nullable String suffix) {
     final var testMethod = context.testMethod();
     final var testClass = context.testClass();
@@ -164,33 +164,34 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
     // Configure default data source
     final var registry = context.registry();
     final var dataSource = registry.getDefault();
-    final var dataSet =
-        dataSetFactory.createDataSet(
+    final var tableSet =
+        dataSetFactory.createTableSet(
             directory, scenarioNames, scenarioMarker, dataFormat, dataSource);
 
-    return List.of(dataSet);
+    return List.of(tableSet);
   }
 
   /**
    * Loads multiple datasets from annotations.
    *
    * @param context the test execution context
-   * @param dataSetAnnotations list of dataset annotations to process
+   * @param dataSetSourceAnnotations list of dataset source annotations to process
    * @param suffix the directory suffix for dataset files, or {@code null} for no suffix
    * @return collection of loaded datasets
    */
-  private List<DataSet> loadDataSets(
+  private List<TableSet> loadTableSets(
       final TestContext context,
-      final Collection<io.github.seijikohara.dbtester.api.annotation.DataSet> dataSetAnnotations,
+      final Collection<io.github.seijikohara.dbtester.api.annotation.DataSetSource>
+          dataSetSourceAnnotations,
       final @Nullable String suffix) {
     final var processor = new DataSetProcessor(context, suffix, annotationResolver, dataSetFactory);
-    return dataSetAnnotations.stream().map(processor::createDataSet).toList();
+    return dataSetSourceAnnotations.stream().map(processor::createTableSet).toList();
   }
 
   /**
    * Processor for creating datasets from annotations.
    *
-   * <p>This inner class encapsulates the logic for processing a single DataSet annotation,
+   * <p>This inner class encapsulates the logic for processing a single DataSetSource annotation,
    * resolving its directory location, loading data files, and configuring the data source.
    */
   private static final class DataSetProcessor {
@@ -238,13 +239,13 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
     }
 
     /**
-     * Creates a dataset from a DataSet annotation.
+     * Creates a dataset from a DataSetSource annotation.
      *
-     * @param annotation the DataSet annotation
+     * @param annotation the DataSetSource annotation
      * @return the loaded dataset
      */
-    private DataSet createDataSet(
-        final io.github.seijikohara.dbtester.api.annotation.DataSet annotation) {
+    private TableSet createTableSet(
+        final io.github.seijikohara.dbtester.api.annotation.DataSetSource annotation) {
       final var resourceLocation = annotationResolver.extractResourceLocation(annotation);
       final var directory = resolveDirectory(resourceLocation.orElse(null));
 
@@ -258,7 +259,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
       final var dataSourceName = annotationResolver.resolveDataSourceName(annotation);
       final var dataSource = resolveDataSource(dataSourceName.orElse(null));
 
-      return dataSetFactory.createDataSet(
+      return dataSetFactory.createTableSet(
           directory, scenarioNames, scenarioMarker, dataFormat, dataSource);
     }
 

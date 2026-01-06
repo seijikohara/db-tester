@@ -42,8 +42,8 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     void shouldSaveUser() {
         userRepository.save(new User("Alice", "alice@example.com"));
     }

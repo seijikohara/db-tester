@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
@@ -86,12 +86,12 @@ class MultipleDataSourcesTest {
   }
 
   /**
-   * Verifies that @Preparation works with the default (primary) DataSource.
+   * Verifies that @DataSet works with the default (primary) DataSource.
    *
    * <p>CSV files located at: {@code src/test/resources/example/MultipleDataSourcesTest/USERS.csv}
    */
   @Test
-  @Preparation
+  @DataSet
   void shouldPrepareDefaultDataSource() {
     logger.info("Testing preparation with default DataSource");
 

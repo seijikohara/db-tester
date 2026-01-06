@@ -3,8 +3,8 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.Expectation;
-import io.github.seijikohara.dbtester.api.annotation.Preparation;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * <ul>
  *   <li>Explicit {@code resourceLocation} specification
- *   <li>Multiple {@code scenarioNames} in a single DataSet
+ *   <li>Multiple {@code scenarioNames} in a single DataSetSource
  *   <li>Class-level vs method-level annotation precedence
  *   <li>Custom directory structure
  *   <li>Multiple tables with foreign key relationships
@@ -45,9 +45,9 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @ExtendWith(DatabaseTestExtension.class)
-@Preparation(
+@DataSet(
     dataSets =
-        @DataSet(
+        @DataSetSource(
             resourceLocation = "classpath:example/feature/AnnotationConfigurationTest/",
             scenarioNames = "classLevel"))
 public final class AnnotationConfigurationTest {
@@ -154,12 +154,12 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
-  @Preparation(
+  @DataSet(
       dataSets =
-          @DataSet(
+          @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/AnnotationConfigurationTest/custom-location/"))
-  @Expectation
+  @ExpectedDataSet
   void shouldUseCustomResourceLocation() {
     logger.info("Running custom resource location test");
 
@@ -182,8 +182,8 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
-  @Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
-  @Expectation
+  @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
+  @ExpectedDataSet
   void shouldHandleMultipleScenarios() {
     logger.info("Running multiple scenarios test");
 
@@ -193,19 +193,19 @@ public final class AnnotationConfigurationTest {
   }
 
   /**
-   * Demonstrates multiple scenario names in a single {@code @DataSet} for preparation and
+   * Demonstrates multiple scenario names in a single {@code @DataSetSource} for preparation and
    * expectation.
    *
    * <p>This test uses the same pattern as {@link #shouldHandleMultipleScenarios()} to show that
-   * combining multiple scenarios in a single {@code @DataSet} annotation correctly merges all
+   * combining multiple scenarios in a single {@code @DataSetSource} annotation correctly merges all
    * matching rows from the CSV files.
    *
-   * <p><strong>Note:</strong> When using multiple {@code @DataSet} annotations in an array (e.g.,
-   * {@code dataSets = {@DataSet(...), @DataSet(...)}}), each DataSet is processed independently
-   * with the specified operation. For {@code CLEAN_INSERT}, this means each subsequent DataSet
-   * would clear the table and insert only its data, losing previously inserted rows. To merge data
-   * from multiple scenarios, use a single {@code @DataSet} with multiple scenario names as shown
-   * here.
+   * <p><strong>Note:</strong> When using multiple {@code @DataSetSource} annotations in an array
+   * (e.g., {@code dataSets = {@DataSetSource(...), @DataSetSource(...)}}), each DataSetSource is
+   * processed independently with the specified operation. For {@code CLEAN_INSERT}, this means each
+   * subsequent DataSetSource would clear the table and insert only its data, losing previously
+   * inserted rows. To merge data from multiple scenarios, use a single {@code @DataSetSource} with
+   * multiple scenario names as shown here.
    *
    * <p>Test flow:
    *
@@ -216,8 +216,8 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
-  @Preparation(dataSets = @DataSet(scenarioNames = {"scenario1", "scenario2"}))
-  @Expectation(dataSets = @DataSet(scenarioNames = "shouldMergeMultipleDataSets"))
+  @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
+  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "shouldMergeMultipleDataSets"))
   void shouldMergeMultipleDataSets() {
     logger.info("Running multiple DataSet array test");
 
@@ -229,19 +229,19 @@ public final class AnnotationConfigurationTest {
   /**
    * Demonstrates class-level annotation inheritance.
    *
-   * <p>This test uses the class-level {@code @Preparation} annotation defined at the class level.
+   * <p>This test uses the class-level {@code @DataSet} annotation defined at the class level.
    *
    * <p>Test flow:
    *
    * <ul>
-   *   <li>Preparation: Uses class-level @Preparation with scenario "classLevel" - TABLE1(ID=1 HR),
+   *   <li>Preparation: Uses class-level @DataSet with scenario "classLevel" - TABLE1(ID=1 HR),
    *       TABLE2(ID=1 Charlie)
    *   <li>Execution: Inserts new employee (ID=100, New Employee, 45000.00) into TABLE2
    *   <li>Expectation: Verifies HR department and two employees (Charlie + New Employee)
    * </ul>
    */
   @Test
-  @Expectation
+  @ExpectedDataSet
   void shouldUseClassLevelAnnotation() {
     logger.info("Running class-level annotation test");
 
@@ -269,8 +269,8 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
-  @Preparation(dataSets = @DataSet(scenarioNames = "multiDataSet1"))
-  @Expectation(dataSets = @DataSet(scenarioNames = "multiDataSet"))
+  @DataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet1"))
+  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet"))
   void shouldHandleMultipleDataSets() {
     logger.info("Running multiple DataSets test");
 

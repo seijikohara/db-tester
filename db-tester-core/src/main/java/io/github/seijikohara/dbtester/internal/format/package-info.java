@@ -3,7 +3,7 @@
  *
  * <p>This package provides the Service Provider Interface (SPI) and implementations for parsing
  * various data file formats (CSV, TSV, etc.) into {@link
- * io.github.seijikohara.dbtester.api.dataset.DataSet} objects.
+ * io.github.seijikohara.dbtester.api.dataset.TableSet} objects.
  *
  * <p>Key components:
  *

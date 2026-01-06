@@ -70,8 +70,8 @@ class UserRepositorySpec : AnnotationSpec() {
     }
 
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should create user`() {
         userRepository.create(User("Alice", "alice@example.com"))
     }
@@ -103,8 +103,8 @@ fun setupSpec() {
 Apply annotations at the class level for all test methods:
 
 ```kotlin
-@Preparation
-@Expectation
+@DataSet
+@ExpectedDataSet
 class UserRepositorySpec : AnnotationSpec() {
 
     @Test
@@ -120,7 +120,7 @@ Override class-level annotations at the method level:
 
 ```kotlin
 @Test
-@Preparation(dataSets = [DataSet(resourceLocation = "custom/path")])
+@DataSet(dataSets = [DataSetSource(resourceLocation = "custom/path")])
 fun `should create user with custom data`() {
     // Uses custom data location
 }

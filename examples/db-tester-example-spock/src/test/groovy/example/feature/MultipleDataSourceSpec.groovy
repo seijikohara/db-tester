@@ -2,8 +2,8 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -124,14 +124,14 @@ class MultipleDataSourceSpec extends Specification {
 	 *   <li>Expectation: Verifies all three customers exist in default database
 	 * </ul>
 	 */
-	@Preparation(
-	dataSets = @DataSet(
+	@DataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/default/',
 	scenarioNames = 'default'
 	)
 	)
-	@Expectation(
-	dataSets = @DataSet(
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/default/expected/',
 	scenarioNames = 'default'
 	)
@@ -159,15 +159,15 @@ class MultipleDataSourceSpec extends Specification {
 	 *   <li>Expectation: Verifies all three products exist in inventory database
 	 * </ul>
 	 */
-	@Preparation(
-	dataSets = @DataSet(
+	@DataSet(
+	dataSets = @DataSetSource(
 	dataSourceName = 'inventory',
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/inventory/',
 	scenarioNames = 'inventory'
 	)
 	)
-	@Expectation(
-	dataSets = @DataSet(
+	@ExpectedDataSet(
+	dataSets = @DataSetSource(
 	dataSourceName = 'inventory',
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/inventory/expected/',
 	scenarioNames = 'inventory'

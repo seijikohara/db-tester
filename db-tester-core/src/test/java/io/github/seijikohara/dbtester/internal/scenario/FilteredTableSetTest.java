@@ -8,9 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import io.github.seijikohara.dbtester.api.dataset.DataSet;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -26,12 +26,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link FilteredDataSet}. */
-@DisplayName("FilteredDataSet")
-class FilteredDataSetTest {
+/** Unit tests for {@link FilteredTableSet}. */
+@DisplayName("FilteredTableSet")
+class FilteredTableSetTest {
 
-  /** Tests for the FilteredDataSet class. */
-  FilteredDataSetTest() {}
+  /** Tests for the FilteredTableSet class. */
+  FilteredTableSetTest() {}
 
   /** The filter for testing. */
   private ScenarioFilter filter;
@@ -63,7 +63,7 @@ class FilteredDataSetTest {
       final var sourceDataSet = createMockDataSet();
 
       // When
-      final var result = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var result = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // Then
       assertNotNull(result, "instance should not be null");
@@ -78,7 +78,7 @@ class FilteredDataSetTest {
       final var sourceDataSet = createMockDataSet();
 
       // When
-      final var result = new FilteredDataSet(sourceDataSet, filter, null);
+      final var result = new FilteredTableSet(sourceDataSet, filter, null);
 
       // Then
       assertNotNull(result, "instance should not be null");
@@ -100,7 +100,7 @@ class FilteredDataSetTest {
     void shouldReturnFilteredTables_whenCalled() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
       final var result = filteredDataSet.getTables();
@@ -119,7 +119,7 @@ class FilteredDataSetTest {
     void shouldReturnImmutableList_whenCalled() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
       final var result = filteredDataSet.getTables();
@@ -144,7 +144,7 @@ class FilteredDataSetTest {
     void shouldReturnTable_whenTableExists() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
       final var tableName = new TableName("users");
 
       // When
@@ -162,7 +162,7 @@ class FilteredDataSetTest {
     void shouldReturnEmpty_whenTableDoesNotExist() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
       final var tableName = new TableName("nonexistent");
 
       // When
@@ -188,7 +188,7 @@ class FilteredDataSetTest {
     void shouldReturnDataSource_whenPresent() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, mockDataSource);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
       final var result = filteredDataSet.getDataSource();
@@ -205,7 +205,7 @@ class FilteredDataSetTest {
     void shouldReturnEmpty_whenDataSourceIsNull() {
       // Given
       final var sourceDataSet = createMockDataSet();
-      final var filteredDataSet = new FilteredDataSet(sourceDataSet, filter, null);
+      final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, null);
 
       // When
       final var result = filteredDataSet.getDataSource();
@@ -216,12 +216,12 @@ class FilteredDataSetTest {
   }
 
   /**
-   * Creates a mock DataSet for testing.
+   * Creates a mock TableSet for testing.
    *
-   * @return mock DataSet
+   * @return mock TableSet
    */
-  private DataSet createMockDataSet() {
-    final var mockDataSet = mock(DataSet.class);
+  private TableSet createMockDataSet() {
+    final var mockDataSet = mock(TableSet.class);
     final var mockTable = createMockTable();
     when(mockDataSet.getTables()).thenReturn(List.of(mockTable));
     return mockDataSet;

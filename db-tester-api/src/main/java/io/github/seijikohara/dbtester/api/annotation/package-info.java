@@ -4,13 +4,13 @@
  * <p>The package contains three cooperating annotations:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.Preparation @Preparation} defines the
- *       datasets and database operations that establish the pre-test state.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.Expectation @Expectation} specifies
- *       the datasets that capture the expected database state after a test.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} captures the
- *       fine-grained metadata required to locate and filter an individual dataset, regardless of
- *       the underlying file format.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} defines the datasets
+ *       and database operations that establish the pre-test state.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet}
+ *       specifies the datasets that capture the expected database state after a test.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSetSource @DataSetSource} captures
+ *       the fine-grained metadata required to locate and filter an individual dataset, regardless
+ *       of the underlying file format.
  * </ul>
  *
  * <p>When explicit locations are omitted the {@link

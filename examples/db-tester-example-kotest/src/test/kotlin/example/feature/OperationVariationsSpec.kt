@@ -1,7 +1,7 @@
 package example.feature
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
@@ -109,8 +109,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Deletes all existing rows, then inserts test data. Most common operation for test setup.
      */
     @Test
-    @Preparation(operation = Operation.CLEAN_INSERT)
-    @Expectation
+    @DataSet(operation = Operation.CLEAN_INSERT)
+    @ExpectedDataSet
     fun `should use clean insert operation`(): Unit =
         logger.info("Running clean insert operation test").also {
             executeSql(
@@ -129,8 +129,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Uses DELETE_ALL preparation to ensure clean state, then demonstrates INSERT behavior.
      */
     @Test
-    @Preparation(operation = Operation.DELETE_ALL)
-    @Expectation
+    @DataSet(operation = Operation.DELETE_ALL)
+    @ExpectedDataSet
     fun `should use insert operation`(): Unit =
         logger.info("Running insert operation test").also {
             executeSql(
@@ -163,8 +163,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Updates existing rows only. The UPDATE operation requires rows to already exist.
      */
     @Test
-    @Preparation(operation = Operation.CLEAN_INSERT)
-    @Expectation
+    @DataSet(operation = Operation.CLEAN_INSERT)
+    @ExpectedDataSet
     fun `should use update operation`(): Unit =
         logger.info("Running update operation test").also {
             executeSql(dataSource, "UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2")
@@ -178,8 +178,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * so we first ensure ID=3 does not exist to make this test independent of execution order.
      */
     @Test
-    @Preparation(operation = Operation.REFRESH)
-    @Expectation
+    @DataSet(operation = Operation.REFRESH)
+    @ExpectedDataSet
     fun `should use refresh operation`(): Unit =
         logger.info("Running refresh operation test").also {
             // Ensure ID=3 doesn't exist (REFRESH doesn't delete rows not in CSV)
@@ -200,8 +200,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Clears table completely before inserting test data.
      */
     @Test
-    @Preparation(operation = Operation.DELETE_ALL)
-    @Expectation
+    @DataSet(operation = Operation.DELETE_ALL)
+    @ExpectedDataSet
     fun `should use delete all operation`(): Unit =
         logger.info("Running delete all operation test").also {
             executeSql(
@@ -218,8 +218,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Demonstrates testing deletion scenarios with database validation.
      */
     @Test
-    @Preparation
-    @Expectation
+    @DataSet
+    @ExpectedDataSet
     fun `should use delete operation`(): Unit =
         logger.info("Running delete operation test").also {
             executeSql(dataSource, "DELETE FROM TABLE1 WHERE ID = 2")
@@ -232,8 +232,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Truncates tables then inserts test data for predictable ID values.
      */
     @Test
-    @Preparation(operation = Operation.TRUNCATE_INSERT)
-    @Expectation
+    @DataSet(operation = Operation.TRUNCATE_INSERT)
+    @ExpectedDataSet
     fun `should use truncate insert operation`(): Unit =
         logger.info("Running truncate insert operation test").also {
             executeSql(
@@ -252,8 +252,8 @@ class OperationVariationsSpec : AnnotationSpec() {
      * Truncates tables, removing all data and resetting auto-increment sequences.
      */
     @Test
-    @Preparation(operation = Operation.TRUNCATE_TABLE)
-    @Expectation
+    @DataSet(operation = Operation.TRUNCATE_TABLE)
+    @ExpectedDataSet
     fun `should use truncate table operation`(): Unit =
         logger.info("Running truncate table operation test").also {
             executeSql(

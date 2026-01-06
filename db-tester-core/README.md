@@ -65,7 +65,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | Package | Description |
 |---------|-------------|
 | `internal.assertion` | Database assertion and comparison implementations |
-| `internal.dataset` | DataSet, Table, Row implementations |
+| `internal.dataset` | TableSet, Table, Row implementations |
 | `internal.domain` | Internal type-safe domain value objects |
 | `internal.format` | Format parsing framework |
 | `internal.format.csv` | CSV format provider implementation |
@@ -119,7 +119,7 @@ requires io.github.seijikohara.dbtester.core;
 | `OperationExecutor` | Coordinates JDBC operation execution |
 | `TableReader` | Reads table data from database |
 | `FormatRegistry` | Manages format providers (CSV, TSV) |
-| `DataSetMerger` | Merges multiple datasets using configured strategy |
+| `TableSetMerger` | Merges multiple datasets using configured strategy |
 
 ## Related Modules
 

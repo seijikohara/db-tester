@@ -1,8 +1,8 @@
 package example.feature
 
 import groovy.sql.Sql
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
@@ -16,7 +16,7 @@ import spock.lang.Specification
  *
  * <p>This specification illustrates two complementary validation strategies:
  * <ul>
- *   <li><strong>Annotation-based validation</strong> using {@code @Expectation} - suitable for
+ *   <li><strong>Annotation-based validation</strong> using {@code @ExpectedDataSet} - suitable for
  *       standard table comparisons with convention-based expected data
  *   <li><strong>Programmatic validation</strong> using custom SQL queries - provides flexibility
  *       for complex scenarios where annotation-based testing is insufficient
@@ -109,8 +109,8 @@ class ProgrammaticAssertionApiSpec extends Specification {
 	 *   <li>Expectation: Verifies all three records including NULL COLUMN3
 	 * </ul>
 	 */
-	@Preparation
-	@Expectation
+	@DataSet
+	@ExpectedDataSet
 	def 'should demonstrate basic programmatic API'() {
 		when: 'inserting new record with NULL column'
 		sql.execute "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)"
@@ -123,7 +123,7 @@ class ProgrammaticAssertionApiSpec extends Specification {
 	 * Demonstrates programmatic custom SQL query validation.
 	 *
 	 * <p>This test shows validation using direct SQL queries instead of relying on
-	 * {@code @Expectation} annotation. Programmatic assertions provide flexibility for custom
+	 * {@code @ExpectedDataSet} annotation. Programmatic assertions provide flexibility for custom
 	 * validation scenarios.
 	 *
 	 * <p>Test flow:
@@ -133,7 +133,7 @@ class ProgrammaticAssertionApiSpec extends Specification {
 	 *   <li>Expectation: Validates using SQL queries to verify row count and specific records
 	 * </ul>
 	 */
-	@Preparation
+	@DataSet
 	def 'should validate using multiple queries'() {
 		when: 'inserting two new records'
 		sql.execute "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Value3', 300)"

@@ -1,7 +1,7 @@
 package io.github.seijikohara.dbtester.spock.extension
 
-import io.github.seijikohara.dbtester.api.annotation.Expectation
-import io.github.seijikohara.dbtester.api.annotation.Preparation
+import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.context.TestContext
@@ -26,29 +26,29 @@ import org.spockframework.runtime.extension.IMethodInvocation
  */
 class DatabaseTestInterceptor implements IMethodInterceptor {
 
-	protected final Preparation preparation
-	protected final Expectation expectation
+	protected final DataSet dataSet
+	protected final ExpectedDataSet expectedDataSet
 	protected final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
 	protected final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
 
 	/**
 	 * Creates a new interceptor with the given annotations.
 	 *
-	 * @param preparation the preparation annotation (may be null)
-	 * @param expectation the expectation annotation (may be null)
+	 * @param dataSet the data set annotation (may be null)
+	 * @param expectedDataSet the expected data set annotation (may be null)
 	 */
-	DatabaseTestInterceptor(Preparation preparation, Expectation expectation) {
-		this.preparation = preparation
-		this.expectation = expectation
+	DatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet) {
+		this.dataSet = dataSet
+		this.expectedDataSet = expectedDataSet
 	}
 
 	@Override
 	void intercept(IMethodInvocation invocation) throws Throwable {
 		def testContext = createTestContext(invocation)
 
-		preparation?.with { preparationExecutor.execute(testContext, it) }
+		dataSet?.with { preparationExecutor.execute(testContext, it) }
 		invocation.proceed()
-		expectation?.with { expectationVerifier.verify(testContext, it) }
+		expectedDataSet?.with { expectationVerifier.verify(testContext, it) }
 	}
 
 	/**

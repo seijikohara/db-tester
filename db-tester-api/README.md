@@ -4,7 +4,7 @@ This module defines the public API for DB Tester, including annotations, configu
 
 ## Overview
 
-- **Annotations** - `@Preparation`, `@Expectation`, and `@DataSet` for declarative test configuration
+- **Annotations** - `@DataSet`, `@ExpectedDataSet`, and `@DataSetSource` for declarative test configuration
 - **Configuration** - `Configuration`, `ConventionSettings`, and `DataSourceRegistry` for framework setup
 - **Domain Objects** - Type-safe wrappers (`TableName`, `ColumnName`, `CellValue`) for database identifiers
 - **SPI Interfaces** - Extension points for custom implementations (`OperationProvider`, `AssertionProvider`)
@@ -63,11 +63,11 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 | Package | Description |
 |---------|-------------|
-| `api.annotation` | Test annotations (`@Preparation`, `@Expectation`, `@DataSet`) |
+| `api.annotation` | Test annotations (`@DataSet`, `@ExpectedDataSet`, `@DataSetSource`) |
 | `api.assertion` | Programmatic assertion API (`DatabaseAssertion`, `AssertionFailureHandler`) |
 | `api.config` | Configuration classes (`Configuration`, `ConventionSettings`, `DataSourceRegistry`) |
 | `api.context` | Test execution context (`TestContext`) |
-| `api.dataset` | Dataset interfaces (`DataSet`, `Table`, `Row`) |
+| `api.dataset` | Dataset interfaces (`TableSet`, `Table`, `Row`) |
 | `api.domain` | Type-safe domain objects (`TableName`, `ColumnName`, `CellValue`, `ComparisonStrategy`) |
 | `api.exception` | Exception hierarchy (`DatabaseTesterException`, `DataSetLoadException`) |
 | `api.loader` | Dataset loader interface (`DataSetLoader`) |
@@ -89,9 +89,9 @@ module your.module {
 
 | Class | Description |
 |-------|-------------|
-| [`@Preparation`](src/main/java/io/github/seijikohara/dbtester/api/annotation/Preparation.java) | Configures test data setup before execution |
-| [`@Expectation`](src/main/java/io/github/seijikohara/dbtester/api/annotation/Expectation.java) | Configures database state verification after execution |
-| [`@DataSet`](src/main/java/io/github/seijikohara/dbtester/api/annotation/DataSet.java) | Specifies dataset location and filtering options |
+| [`@DataSet`](src/main/java/io/github/seijikohara/dbtester/api/annotation/DataSet.java) | Configures test data setup before execution |
+| [`@ExpectedDataSet`](src/main/java/io/github/seijikohara/dbtester/api/annotation/ExpectedDataSet.java) | Configures database state verification after execution |
+| [`@DataSetSource`](src/main/java/io/github/seijikohara/dbtester/api/annotation/DataSetSource.java) | Specifies dataset location and filtering options |
 | [`Configuration`](src/main/java/io/github/seijikohara/dbtester/api/config/Configuration.java) | Main framework configuration |
 | [`ConventionSettings`](src/main/java/io/github/seijikohara/dbtester/api/config/ConventionSettings.java) | Dataset resolution conventions |
 | [`DataSourceRegistry`](src/main/java/io/github/seijikohara/dbtester/api/config/DataSourceRegistry.java) | Registry for managing multiple data sources |
