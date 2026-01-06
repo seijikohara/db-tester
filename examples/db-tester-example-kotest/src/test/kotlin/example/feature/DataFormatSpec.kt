@@ -51,6 +51,7 @@ class CsvFormatSpec : AnnotationSpec() {
                     DataFormat.CSV,
                     TableMergeStrategy.UNION_ALL,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 
@@ -181,6 +182,7 @@ class TsvFormatSpec : AnnotationSpec() {
                     DataFormat.TSV,
                     TableMergeStrategy.UNION_ALL,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 

@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtens
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -133,7 +134,8 @@ public final class DataFormatTest {
                   "[Scenario]", // default scenario marker
                   DataFormat.CSV, // CSV format
                   TableMergeStrategy.UNION_ALL,
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, csvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -232,7 +234,8 @@ public final class DataFormatTest {
                   "[Scenario]", // default scenario marker
                   DataFormat.TSV, // TSV format
                   TableMergeStrategy.UNION_ALL,
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, tsvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

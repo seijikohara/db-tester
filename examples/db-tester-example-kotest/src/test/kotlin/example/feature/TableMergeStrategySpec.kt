@@ -49,6 +49,7 @@ class FirstStrategySpec : AnnotationSpec() {
                     DataFormat.CSV,
                     TableMergeStrategy.FIRST,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 
@@ -165,6 +166,7 @@ class LastStrategySpec : AnnotationSpec() {
                     DataFormat.CSV,
                     TableMergeStrategy.LAST,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 
@@ -277,6 +279,7 @@ class UnionStrategySpec : AnnotationSpec() {
                     DataFormat.CSV,
                     TableMergeStrategy.UNION,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 
@@ -393,6 +396,7 @@ class UnionAllStrategySpec : AnnotationSpec() {
                     DataFormat.CSV,
                     TableMergeStrategy.UNION_ALL,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 

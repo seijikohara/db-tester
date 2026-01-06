@@ -68,6 +68,7 @@ static void setup(ExtensionContext context) {
 | `dataFormat` | `DataFormat` | `CSV` | データセットファイルのファイル形式 |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | 重複テーブルのマージ戦略 |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | テーブル読み込み順序指定用ファイル名 |
+| `globalExcludeColumns` | `Set<String>` | `Set.of()` | すべての検証から除外するカラム名（大文字小文字を区別しない） |
 
 ### ファクトリメソッド
 
@@ -77,6 +78,7 @@ static void setup(ExtensionContext context) {
 | `withDataFormat(DataFormat)` | 指定した形式でコピーを作成 |
 | `withTableMergeStrategy(TableMergeStrategy)` | 指定したマージ戦略でコピーを作成 |
 | `withLoadOrderFileName(String)` | 指定した読み込み順序ファイル名でコピーを作成 |
+| `withGlobalExcludeColumns(Set<String>)` | 指定したグローバル除外カラムでコピーを作成 |
 
 ### ディレクトリ解決
 

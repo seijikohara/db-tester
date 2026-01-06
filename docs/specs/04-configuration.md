@@ -66,6 +66,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `dataFormat` | `DataFormat` | `CSV` | File format for dataset files |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | File name for table loading order specification |
+| `globalExcludeColumns` | `Set<String>` | `Set.of()` | Column names to exclude from all verifications (case-insensitive) |
 
 ### Factory Methods
 
@@ -75,6 +76,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `withDataFormat(DataFormat)` | Creates copy with specified format |
 | `withTableMergeStrategy(TableMergeStrategy)` | Creates copy with specified merge strategy |
 | `withLoadOrderFileName(String)` | Creates copy with specified load order file name |
+| `withGlobalExcludeColumns(Set<String>)` | Creates copy with specified global exclude columns |
 
 ### Directory Resolution
 

@@ -3,7 +3,9 @@ package io.github.seijikohara.dbtester.api.config;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -58,7 +60,11 @@ class ConventionSettingsTest {
               assertEquals(
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                   settings.loadOrderFileName(),
-                  "loadOrderFileName should be default"));
+                  "loadOrderFileName should be default"),
+          () ->
+              assertTrue(
+                  settings.globalExcludeColumns().isEmpty(),
+                  "globalExcludeColumns should be empty by default"));
     }
 
     /** Verifies that standard returns consistent instances. */
@@ -98,7 +104,8 @@ class ConventionSettingsTest {
 
       // When
       final var settings =
-          new ConventionSettings(baseDir, suffix, marker, format, strategy, loadOrderFileName);
+          new ConventionSettings(
+              baseDir, suffix, marker, format, strategy, loadOrderFileName, Set.of());
 
       // Then
       assertAll(
@@ -131,7 +138,8 @@ class ConventionSettingsTest {
               ConventionSettings.DEFAULT_SCENARIO_MARKER,
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+              Set.of());
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -144,7 +152,8 @@ class ConventionSettingsTest {
     void should_accept_empty_strings_for_suffix_and_marker() {
       // Given & When
       final var settings =
-          new ConventionSettings(null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "");
+          new ConventionSettings(
+              null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "", Set.of());
 
       // Then
       assertAll(
@@ -177,7 +186,8 @@ class ConventionSettingsTest {
               ConventionSettings.DEFAULT_SCENARIO_MARKER,
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+              Set.of());
       final var settings2 =
           new ConventionSettings(
               "/base",
@@ -185,7 +195,8 @@ class ConventionSettingsTest {
               ConventionSettings.DEFAULT_SCENARIO_MARKER,
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+              Set.of());
 
       // When & Then
       assertAll(
@@ -207,7 +218,8 @@ class ConventionSettingsTest {
               ConventionSettings.DEFAULT_SCENARIO_MARKER,
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+              Set.of());
       final var settings2 =
           new ConventionSettings(
               null,
@@ -215,7 +227,8 @@ class ConventionSettingsTest {
               ConventionSettings.DEFAULT_SCENARIO_MARKER,
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME);
+              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+              Set.of());
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");

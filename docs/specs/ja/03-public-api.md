@@ -95,6 +95,7 @@ void testWithAlphabeticalOrdering() { }
 | `resourceLocation` | `String` | `""` | データセットディレクトリパス。空の場合は規約ベースの検出を使用 |
 | `dataSourceName` | `String` | `""` | 名前付きDataSource識別子。空の場合はデフォルトを使用 |
 | `scenarioNames` | `String[]` | `{}` | シナリオフィルタ。空の場合はテストメソッド名を使用 |
+| `excludeColumns` | `String[]` | `{}` | 検証から除外するカラム名（大文字小文字を区別しない）。`@ExpectedDataSet`でのみ有効 |
 
 **リソースロケーション形式**:
 
@@ -116,7 +117,18 @@ void testMultipleDataSources() { }
 
 @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
 void testMultipleScenarios() { }
+
+@ExpectedDataSet(sources = @DataSetSource(
+    excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
+))
+void testWithExcludedColumns() { }
 ```
+
+**カラム除外の動作**:
+
+- カラム名は比較のために大文字に正規化されます
+- データセットごとの除外は`ConventionSettings`のグローバル除外と結合されます
+- 除外は`@ExpectedDataSet`の検証にのみ適用され、`@DataSet`の準備には適用されません
 
 
 ## TableSetインターフェース

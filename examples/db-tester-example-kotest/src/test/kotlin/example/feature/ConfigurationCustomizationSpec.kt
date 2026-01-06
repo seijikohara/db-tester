@@ -49,6 +49,7 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
                     DataFormat.CSV, // use CSV format (default)
                     TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                    emptySet(),
                 ),
             )
 

@@ -3,8 +3,8 @@ package io.github.seijikohara.dbtester.spock.lifecycle
 import groovy.util.logging.Slf4j
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.exception.ValidationException
+import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider
 
 /**
@@ -45,30 +45,32 @@ class SpockExpectationVerifier {
 				context.testClass().simpleName,
 				context.testMethod().name)
 
-		def tableSets = context.configuration().loader().loadExpectationDataSets(context)
+		def expectedTableSets = context.configuration().loader().loadExpectationDataSetsWithExclusions(context)
 
-		if (tableSets.empty) {
+		if (expectedTableSets.empty) {
 			log.debug('No expectation datasets found')
 			return
 		}
 
-		tableSets.each { tableSet ->
-			verifyTableSet(context, tableSet)
+		expectedTableSets.each { expectedTableSet ->
+			verifyExpectedTableSet(context, expectedTableSet)
 		}
 	}
 
 	/**
-	 * Verifies a single table set against the database.
+	 * Verifies a single expected table set against the database.
 	 *
 	 * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison including
 	 * column filtering and detailed assertion messages. If verification fails, wraps the exception
 	 * with additional test context.
 	 *
 	 * @param context the test context providing access to the data source registry
-	 * @param tableSet the expected table set containing tables and optional data source
+	 * @param expectedTableSet the expected table set with exclusion metadata
 	 * @throws ValidationException if verification fails with wrapped context information
 	 */
-	private void verifyTableSet(TestContext context, TableSet tableSet) {
+	private void verifyExpectedTableSet(TestContext context, ExpectedTableSet expectedTableSet) {
+		def tableSet = expectedTableSet.tableSet()
+		def excludeColumns = expectedTableSet.excludeColumns()
 		def dataSource = tableSet.dataSource
 				.orElseGet { -> context.registry().get('') }
 
@@ -77,8 +79,12 @@ class SpockExpectationVerifier {
 				context.testMethod().name,
 				tableCount)
 
+		if (expectedTableSet.hasExclusions()) {
+			log.debug('Excluding columns from verification: {}', excludeColumns)
+		}
+
 		try {
-			expectationProvider.verifyExpectation(tableSet, dataSource)
+			expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns)
 
 			log.info('Expectation validation completed successfully for {}: {} tables',
 					context.testMethod().name,

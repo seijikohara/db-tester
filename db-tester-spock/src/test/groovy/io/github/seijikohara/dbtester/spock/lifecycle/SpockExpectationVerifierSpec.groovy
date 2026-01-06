@@ -106,6 +106,11 @@ class SpockExpectationVerifierSpec extends Specification {
 					List loadExpectationDataSets(TestContext ctx) {
 						return []
 					}
+
+					@Override
+					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
+						return []
+					}
 				}
 		def configuration = new Configuration(
 				ConventionSettings.standard(),

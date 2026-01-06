@@ -2,8 +2,8 @@ package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.context.TestContext;
-import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
+import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import java.util.ServiceLoader;
 import javax.sql.DataSource;
@@ -56,28 +56,33 @@ public final class ExpectationVerifier {
         context.testClass().getSimpleName(),
         context.testMethod().getName());
 
-    final var tableSets = context.configuration().loader().loadExpectationDataSets(context);
+    final var expectedTableSets =
+        context.configuration().loader().loadExpectationDataSetsWithExclusions(context);
 
-    if (tableSets.isEmpty()) {
+    if (expectedTableSets.isEmpty()) {
       logger.debug("No expectation datasets found");
       return;
     }
 
-    tableSets.forEach(tableSet -> verifyTableSet(context, tableSet));
+    expectedTableSets.forEach(
+        expectedTableSet -> verifyExpectedTableSet(context, expectedTableSet));
   }
 
   /**
-   * Verifies a single TableSet against the database.
+   * Verifies a single ExpectedTableSet against the database.
    *
    * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison
    * including column filtering and detailed assertion messages. If verification fails, wraps the
    * exception with additional test context.
    *
    * @param context the test context providing access to the data source registry
-   * @param tableSet the expected TableSet containing tables and optional data source
+   * @param expectedTableSet the expected TableSet with exclusion metadata
    * @throws ValidationException if verification fails with wrapped context information
    */
-  private void verifyTableSet(final TestContext context, final TableSet tableSet) {
+  private void verifyExpectedTableSet(
+      final TestContext context, final ExpectedTableSet expectedTableSet) {
+    final var tableSet = expectedTableSet.tableSet();
+    final var excludeColumns = expectedTableSet.excludeColumns();
     final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
 
     final var tableCount = tableSet.getTables().size();
@@ -86,8 +91,12 @@ public final class ExpectationVerifier {
         context.testMethod().getName(),
         tableCount);
 
+    if (expectedTableSet.hasExclusions()) {
+      logger.debug("Excluding columns from verification: {}", excludeColumns);
+    }
+
     try {
-      expectationProvider.verifyExpectation(tableSet, dataSource);
+      expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",

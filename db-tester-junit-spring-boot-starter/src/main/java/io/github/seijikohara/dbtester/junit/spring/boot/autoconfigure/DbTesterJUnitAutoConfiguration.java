@@ -77,7 +77,8 @@ public class DbTesterJUnitAutoConfiguration {
             conventionProps.getScenarioMarker(),
             conventionProps.getDataFormat(),
             conventionProps.getTableMergeStrategy(),
-            conventionProps.getLoadOrderFileName());
+            conventionProps.getLoadOrderFileName(),
+            conventionProps.getGlobalExcludeColumns());
 
     final OperationDefaults operations =
         new OperationDefaults(operationProps.getPreparation(), operationProps.getExpectation());

@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtens
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -134,7 +135,8 @@ public final class TableMergeStrategyTest {
                   "[Scenario]",
                   DataFormat.CSV,
                   TableMergeStrategy.FIRST, // FIRST strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -220,7 +222,8 @@ public final class TableMergeStrategyTest {
                   "[Scenario]",
                   DataFormat.CSV,
                   TableMergeStrategy.LAST, // LAST strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -306,7 +309,8 @@ public final class TableMergeStrategyTest {
                   "[Scenario]",
                   DataFormat.CSV,
                   TableMergeStrategy.UNION, // UNION strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -392,7 +396,8 @@ public final class TableMergeStrategyTest {
                   "[Scenario]",
                   DataFormat.CSV,
                   TableMergeStrategy.UNION_ALL, // UNION_ALL strategy (default)
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME));
+                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+                  Set.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

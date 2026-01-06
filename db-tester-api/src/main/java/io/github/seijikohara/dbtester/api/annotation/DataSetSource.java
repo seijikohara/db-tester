@@ -71,4 +71,32 @@ public @interface DataSetSource {
    * @return scenario names to keep, or an empty array to fall back to the test method name
    */
   String[] scenarioNames() default {};
+
+  /**
+   * Lists the column names to exclude from assertion verification.
+   *
+   * <p>Columns listed here are ignored during database state comparison. This is useful for
+   * excluding auto-generated columns (timestamps, version numbers, auto-increment IDs) that cannot
+   * be predicted in test data.
+   *
+   * <p>Column name matching is case-insensitive. For example, specifying {@code "CREATED_AT"} will
+   * exclude columns named {@code "created_at"}, {@code "CREATED_AT"}, or {@code "Created_At"}.
+   *
+   * <p>This attribute only applies to expectation verification (when used within {@link
+   * ExpectedDataSet#dataSets()}). It has no effect when used within {@link DataSet#dataSets()} for
+   * preparation.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * @ExpectedDataSet(dataSets = @DataSetSource(
+   *     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
+   * ))
+   * void testUserCreation() { }
+   * }</pre>
+   *
+   * @return column names to exclude from verification, or an empty array for no exclusions
+   * @see io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion#assertEqualsIgnoreColumns
+   */
+  String[] excludeColumns() default {};
 }

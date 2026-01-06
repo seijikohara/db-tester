@@ -5,14 +5,17 @@ import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
+import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
 import io.github.seijikohara.dbtester.internal.format.spi.FormatProvider;
 import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolverRegistry;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
@@ -105,6 +108,43 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
   }
 
   /**
+   * {@inheritDoc}
+   *
+   * @param context the test execution context
+   * @return immutable list of expected table sets with column exclusion metadata
+   */
+  @Override
+  public List<ExpectedTableSet> loadExpectationDataSetsWithExclusions(final TestContext context) {
+    final var testClass = context.testClass();
+    final var testMethod = context.testMethod();
+    final var conventions = context.configuration().conventions();
+    final var expectFileSuffix = conventions.expectationSuffix();
+    final var mergeStrategy = conventions.tableMergeStrategy();
+    final var globalExcludeColumns = conventions.globalExcludeColumns();
+
+    return annotationResolver
+        .findExpectedDataSet(testMethod, testClass)
+        .map(
+            expectedDataSet -> {
+              final var dataSetSources = expectedDataSet.dataSets();
+              // When dataSets is empty, load from convention-based location with default config
+              if (dataSetSources.length == 0) {
+                final var loadedTableSets = loadConventionBasedTableSet(context, expectFileSuffix);
+                final var mergedTableSets = mergeTableSets(loadedTableSets, mergeStrategy);
+                // Use only global exclude columns when no DataSetSource annotations
+                return mergedTableSets.stream()
+                    .map(tableSet -> ExpectedTableSet.of(tableSet, globalExcludeColumns))
+                    .toList();
+              } else {
+                // Load with annotation-level exclude columns
+                return loadExpectedTableSetsWithExclusions(
+                    context, List.of(dataSetSources), expectFileSuffix, globalExcludeColumns);
+              }
+            })
+        .orElse(List.of());
+  }
+
+  /**
    * Merges multiple datasets into a single dataset list.
    *
    * <p>If there are multiple datasets, they are merged according to the strategy. The result is
@@ -186,6 +226,61 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
       final @Nullable String suffix) {
     final var processor = new DataSetProcessor(context, suffix, annotationResolver, dataSetFactory);
     return dataSetSourceAnnotations.stream().map(processor::createTableSet).toList();
+  }
+
+  /**
+   * Loads expected table sets with column exclusion metadata from annotations.
+   *
+   * <p>Each DataSetSource annotation may specify its own excludeColumns, which are combined with
+   * global exclude columns. Currently, all loaded TableSets share the combined exclude columns from
+   * all annotations plus global settings.
+   *
+   * @param context the test execution context
+   * @param dataSetSourceAnnotations list of dataset source annotations to process
+   * @param suffix the directory suffix for dataset files, or {@code null} for no suffix
+   * @param globalExcludeColumns column names to exclude globally
+   * @return list of expected table sets with exclusion metadata
+   */
+  private List<ExpectedTableSet> loadExpectedTableSetsWithExclusions(
+      final TestContext context,
+      final Collection<io.github.seijikohara.dbtester.api.annotation.DataSetSource>
+          dataSetSourceAnnotations,
+      final @Nullable String suffix,
+      final Set<String> globalExcludeColumns) {
+    final var processor = new DataSetProcessor(context, suffix, annotationResolver, dataSetFactory);
+    return dataSetSourceAnnotations.stream()
+        .map(
+            annotation -> {
+              final var tableSet = processor.createTableSet(annotation);
+              final var annotationExcludeColumns =
+                  annotationResolver.resolveExcludeColumns(annotation);
+              // Combine annotation-level and global exclude columns
+              final var combinedExcludeColumns =
+                  combineExcludeColumns(annotationExcludeColumns, globalExcludeColumns);
+              return ExpectedTableSet.of(tableSet, combinedExcludeColumns);
+            })
+        .toList();
+  }
+
+  /**
+   * Combines annotation-level and global exclude columns into a single set.
+   *
+   * @param annotationExcludeColumns exclude columns from the annotation
+   * @param globalExcludeColumns global exclude columns from convention settings
+   * @return combined set of exclude columns (uppercase for case-insensitive matching)
+   */
+  private Set<String> combineExcludeColumns(
+      final Set<String> annotationExcludeColumns, final Set<String> globalExcludeColumns) {
+    if (annotationExcludeColumns.isEmpty()) {
+      return globalExcludeColumns;
+    }
+    if (globalExcludeColumns.isEmpty()) {
+      return annotationExcludeColumns;
+    }
+    final var combined = new HashSet<>(annotationExcludeColumns);
+    // Normalize global columns to uppercase for consistent case-insensitive matching
+    globalExcludeColumns.stream().map(String::toUpperCase).forEach(combined::add);
+    return Set.copyOf(combined);
   }
 
   /**

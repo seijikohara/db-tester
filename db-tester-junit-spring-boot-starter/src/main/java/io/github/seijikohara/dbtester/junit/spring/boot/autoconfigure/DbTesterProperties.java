@@ -4,6 +4,7 @@ import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -137,6 +138,8 @@ public class DbTesterProperties {
    *       UNION_ALL)
    *   <li>{@code db-tester.convention.load-order-file-name} - File name for table loading order
    *       (default: {@value ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME})
+   *   <li>{@code db-tester.convention.global-exclude-columns} - Column names to exclude globally
+   *       from expectation verifications (default: empty)
    * </ul>
    */
   public static class ConventionProperties {
@@ -175,6 +178,12 @@ public class DbTesterProperties {
      * ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}.
      */
     private String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME;
+
+    /**
+     * Column names to exclude globally from all expectation verifications. Useful for excluding
+     * auto-generated columns such as timestamps, version numbers, or auto-increment IDs.
+     */
+    private Set<String> globalExcludeColumns = Set.of();
 
     /**
      * Returns the base directory for dataset resolution.
@@ -282,6 +291,24 @@ public class DbTesterProperties {
      */
     public void setLoadOrderFileName(final String loadOrderFileName) {
       this.loadOrderFileName = loadOrderFileName;
+    }
+
+    /**
+     * Returns the global exclude columns.
+     *
+     * @return the column names to exclude globally
+     */
+    public Set<String> getGlobalExcludeColumns() {
+      return globalExcludeColumns;
+    }
+
+    /**
+     * Sets the global exclude columns.
+     *
+     * @param globalExcludeColumns the column names to exclude globally
+     */
+    public void setGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
+      this.globalExcludeColumns = globalExcludeColumns;
     }
   }
 
