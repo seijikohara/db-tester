@@ -1,19 +1,20 @@
 package io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrarSupport
+import io.github.seijikohara.dbtester.spring.support.PrimaryBeanResolver
 import org.slf4j.LoggerFactory
 import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import org.springframework.context.ConfigurableApplicationContext
 import javax.sql.DataSource
 
 /**
  * Registers Spring-managed [DataSource] beans with a [DataSourceRegistry].
  *
  * This class acts as a bridge between the Spring application context and the database testing
- * framework. It discovers all [DataSource] beans in the context and provides methods to
- * register them with a [DataSourceRegistry].
+ * framework. It discovers all [DataSource] beans in the context and delegates registration to
+ * [DataSourceRegistrarSupport].
  *
  * The registrar discovers DataSource beans using the following rules:
  * - If a single DataSource is found, it becomes the default
@@ -21,6 +22,7 @@ import javax.sql.DataSource
  * - All DataSources are registered by their bean names for named access
  *
  * @see DataSourceRegistry
+ * @see DataSourceRegistrarSupport
  * @see DbTesterKotestAutoConfiguration
  */
 class DataSourceRegistrar(
@@ -28,7 +30,6 @@ class DataSourceRegistrar(
 ) : ApplicationContextAware {
     /** Companion object containing class-level constants and logger. */
     companion object {
-        private const val DEFAULT_DATASOURCE_BEAN_NAME = "dataSource"
         private val logger = LoggerFactory.getLogger(DataSourceRegistrar::class.java)
     }
 
@@ -50,8 +51,7 @@ class DataSourceRegistrar(
      *
      * This method performs the following:
      * 1. Discovers all DataSource beans in the application context
-     * 2. Registers the primary DataSource as the default
-     * 3. Registers all DataSources by their bean names
+     * 2. Delegates to [DataSourceRegistrarSupport] for registration
      *
      * If auto-registration is disabled in properties, this method does nothing.
      *
@@ -67,35 +67,16 @@ class DataSourceRegistrar(
                         .getBeansOfType(DataSource::class.java)
                         .takeIf { it.isNotEmpty() }
                         ?.also { dataSources ->
-                            logger.info("Registering {} DataSource(s) with DataSourceRegistry", dataSources.size)
-                            registerDataSources(registry, dataSources, context)
+                            DataSourceRegistrarSupport.registerDataSources(
+                                registry,
+                                dataSources,
+                                { name -> PrimaryBeanResolver.isPrimaryBean(context, name, logger) },
+                                logger,
+                            )
                         }
                         ?: logger.debug("No DataSource beans found")
                 }
         }
-
-    /**
-     * Registers DataSources with the registry.
-     *
-     * @param registry the DataSourceRegistry to populate
-     * @param dataSources the map of DataSource beans
-     * @param context the application context
-     */
-    private fun registerDataSources(
-        registry: DataSourceRegistry,
-        dataSources: Map<String, DataSource>,
-        context: ApplicationContext,
-    ): Unit =
-        dataSources
-            .forEach { (name, dataSource) ->
-                registry.register(name, dataSource)
-                logger.debug("Registered DataSource '{}' with registry", name)
-            }.also {
-                resolveDefaultDataSource(dataSources, context)?.let { (name, dataSource) ->
-                    registry.registerDefault(dataSource)
-                    logger.info("Registered DataSource '{}' as default", name)
-                }
-            }
 
     /**
      * Requires the application context to be set.
@@ -108,48 +89,4 @@ class DataSourceRegistrar(
             ?: throw IllegalStateException(
                 "ApplicationContext not set. Ensure this bean is managed by Spring and properly initialized.",
             )
-
-    /**
-     * Resolves the default DataSource from the discovered DataSources.
-     *
-     * Resolution priority:
-     * 1. Single DataSource (automatic default)
-     * 2. Primary-annotated DataSource
-     * 3. DataSource named "dataSource"
-     *
-     * @param dataSources the map of discovered DataSources
-     * @param context the application context
-     * @return the default DataSource entry, or null if none found
-     */
-    private fun resolveDefaultDataSource(
-        dataSources: Map<String, DataSource>,
-        context: ApplicationContext,
-    ): Map.Entry<String, DataSource>? =
-        when {
-            dataSources.size == 1 -> dataSources.entries.first()
-            else ->
-                dataSources.entries.find { (name, _) -> isPrimaryBean(context, name) }
-                    ?: dataSources.entries.find { it.key == DEFAULT_DATASOURCE_BEAN_NAME }
-        }
-
-    /**
-     * Checks if a bean is marked as primary.
-     *
-     * @param context the application context
-     * @param beanName the bean name to check
-     * @return true if the bean is primary
-     */
-    private fun isPrimaryBean(
-        context: ApplicationContext,
-        beanName: String,
-    ): Boolean =
-        (context as? ConfigurableApplicationContext)?.beanFactory?.let { factory ->
-            when {
-                factory.containsBeanDefinition(beanName) -> factory.getBeanDefinition(beanName).isPrimary
-                else -> {
-                    logger.debug("Unable to determine if bean '{}' is primary", beanName)
-                    false
-                }
-            }
-        } ?: false
 }

@@ -15,6 +15,7 @@ dependencies {
     constraints {
         api(project(":db-tester-api"))
         api(project(":db-tester-core"))
+        api(project(":db-tester-spring-support"))
         api(project(":db-tester-junit"))
         api(project(":db-tester-spock"))
         api(project(":db-tester-kotest"))

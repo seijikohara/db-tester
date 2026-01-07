@@ -13,6 +13,9 @@ dependencies {
     // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
 
+    // Spring support (common DataSource registration logic)
+    implementation(project(":db-tester-spring-support"))
+
     // Kotlin
     implementation(platform(libs.kotlin.bom))
     implementation(libs.kotlin.stdlib)

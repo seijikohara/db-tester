@@ -34,6 +34,7 @@ include(
     "db-tester-bom",
     "db-tester-api",
     "db-tester-core",
+    "db-tester-spring-support",
     "db-tester-junit",
     "db-tester-spock",
     "db-tester-kotest",

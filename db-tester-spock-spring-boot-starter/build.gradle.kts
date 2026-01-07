@@ -17,6 +17,9 @@ dependencies {
     // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
 
+    // Spring support (common DataSource registration logic)
+    implementation(project(":db-tester-spring-support"))
+
     // Spock Spring integration - provides SpringExtension for ApplicationContext access
     implementation(libs.spock.spring)
 

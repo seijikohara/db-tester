@@ -4,7 +4,7 @@ DB Testerフレームワークのモジュール構造、依存関係、およ�
 
 ## モジュール構造
 
-本フレームワークは、階層化されたアーキテクチャで構成された10のモジュールから構成されています。
+本フレームワークは、階層化されたアーキテクチャで構成された11のモジュールから構成されています。
 
 ```mermaid
 graph TD
@@ -13,6 +13,7 @@ graph TD
     subgraph Core
         API[db-tester-api]
         CORE[db-tester-core]
+        SPRING_SUPPORT[db-tester-spring-support]
     end
 
     subgraph "Test Frameworks"
@@ -29,6 +30,7 @@ graph TD
 
     BOM --> API
     BOM --> CORE
+    BOM --> SPRING_SUPPORT
     BOM --> JUNIT
     BOM --> SPOCK
     BOM --> KOTEST
@@ -37,6 +39,7 @@ graph TD
     BOM --> KOTEST_STARTER
 
     CORE --> API
+    SPRING_SUPPORT --> API
     JUNIT -->|compile| API
     JUNIT -.->|runtime| CORE
     SPOCK -->|compile| API
@@ -44,8 +47,11 @@ graph TD
     KOTEST -->|compile| API
     KOTEST -.->|runtime| CORE
     JUNIT_STARTER --> JUNIT
+    JUNIT_STARTER --> SPRING_SUPPORT
     SPOCK_STARTER --> SPOCK
+    SPOCK_STARTER --> SPRING_SUPPORT
     KOTEST_STARTER --> KOTEST
+    KOTEST_STARTER --> SPRING_SUPPORT
 ```
 
 ### モジュールの責務
@@ -55,6 +61,7 @@ graph TD
 | `db-tester-bom` | バージョン管理と依存関係の整合 |
 | `db-tester-api` | パブリックアノテーション、設定、ドメインモデル、SPIインターフェース |
 | `db-tester-core` | JDBC操作、フォーマット解析、SPI実装 |
+| `db-tester-spring-support` | Spring Boot starter向け共通DataSource登録ロジック |
 | `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEachコールバック |
 | `db-tester-spock` | Spockアノテーション駆動型拡張とインターセプター |
 | `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
@@ -70,6 +77,7 @@ graph TD
 |------------|-----------|
 | `db-tester-api` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-api/build.gradle.kts) |
 | `db-tester-core` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-core/build.gradle.kts) |
+| `db-tester-spring-support` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spring-support/build.gradle.kts) |
 | `db-tester-junit` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit/build.gradle.kts) |
 | `db-tester-spock` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock/build.gradle.kts) |
 | `db-tester-kotest` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest/build.gradle.kts) |
