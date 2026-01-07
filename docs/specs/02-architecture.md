@@ -4,7 +4,7 @@ This document describes the module structure, dependencies, and architectural pa
 
 ## Module Structure
 
-The framework consists of ten modules organized in a layered architecture:
+The framework consists of eleven modules organized in a layered architecture:
 
 ```mermaid
 graph TD
@@ -13,6 +13,7 @@ graph TD
     subgraph Core
         API[db-tester-api]
         CORE[db-tester-core]
+        SPRING_SUPPORT[db-tester-spring-support]
     end
 
     subgraph "Test Frameworks"
@@ -29,6 +30,7 @@ graph TD
 
     BOM --> API
     BOM --> CORE
+    BOM --> SPRING_SUPPORT
     BOM --> JUNIT
     BOM --> SPOCK
     BOM --> KOTEST
@@ -37,6 +39,7 @@ graph TD
     BOM --> KOTEST_STARTER
 
     CORE --> API
+    SPRING_SUPPORT --> API
     JUNIT -->|compile| API
     JUNIT -.->|runtime| CORE
     SPOCK -->|compile| API
@@ -44,8 +47,11 @@ graph TD
     KOTEST -->|compile| API
     KOTEST -.->|runtime| CORE
     JUNIT_STARTER --> JUNIT
+    JUNIT_STARTER --> SPRING_SUPPORT
     SPOCK_STARTER --> SPOCK
+    SPOCK_STARTER --> SPRING_SUPPORT
     KOTEST_STARTER --> KOTEST
+    KOTEST_STARTER --> SPRING_SUPPORT
 ```
 
 ### Module Responsibilities

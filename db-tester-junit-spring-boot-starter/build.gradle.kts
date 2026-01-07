@@ -12,6 +12,9 @@ dependencies {
     // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
 
+    // Spring support (common DataSource registration logic)
+    implementation(project(":db-tester-spring-support"))
+
     // Internal implementation
     implementation(libs.spring.boot.autoconfigure)
     annotationProcessor(libs.spring.boot.configuration.processor)
