@@ -217,6 +217,24 @@ DatabaseOperationException: Failed to execute INSERT on table USERS
 Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 ```
 
+### Invalid SQL Identifier
+
+When a table name or column name contains invalid characters:
+
+```
+DatabaseOperationException: Invalid SQL identifier: 'user-accounts'.
+Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
+```
+
+**Common causes**:
+
+| Cause | Example | Solution |
+|-------|---------|----------|
+| Hyphen in name | `user-accounts.csv` | Rename to `user_accounts.csv` |
+| Space in name | `user accounts.csv` | Rename to `user_accounts.csv` |
+| Starts with digit | `123_table.csv` | Rename to `table_123.csv` |
+| Special characters | `users$.csv` | Remove special characters |
+
 ### Common Causes
 
 | Error | Cause | Solution |
@@ -225,6 +243,7 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 | Foreign key violation | INSERT child before parent | Check table ordering |
 | Column not found | CSV column name typo | Verify column names match schema |
 | Data truncation | Value exceeds column size | Check data fits column definition |
+| Invalid identifier | Table/column name has invalid characters | Use only letters, digits, underscores |
 
 
 ## Configuration Errors

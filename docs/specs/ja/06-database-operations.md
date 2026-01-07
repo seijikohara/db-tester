@@ -398,6 +398,61 @@ void testBothPhases() { }
 4. テストフレームワークに伝播
 
 
+## SQL識別子の検証
+
+### 概要
+
+本フレームワークは、SQL文に識別子を挿入する前に、すべてのSQL識別子（テーブル名とカラム名）を検証します。この検証により、不正な入力によるSQL構文エラーや潜在的なセキュリティ問題を防止します。
+
+### 検証ルール
+
+識別子は以下のパターンに一致する必要があります:
+
+```regex
+^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$
+```
+
+**有効な識別子**:
+
+| 例 | 説明 |
+|----|------|
+| `USERS` | シンプルな大文字名 |
+| `user_accounts` | アンダースコア付きの小文字 |
+| `_temp_table` | アンダースコアで始まる |
+| `public.users` | スキーマ修飾名 |
+| `Table123` | 数字を含む混合ケース |
+
+**無効な識別子**:
+
+| 例 | 理由 |
+|----|------|
+| `123table` | 数字で始まる |
+| `user-accounts` | ハイフンを含む |
+| `user name` | スペースを含む |
+| `table;DROP` | セミコロンを含む |
+
+### エラーハンドリング
+
+無効な識別子が検出されると、説明的なメッセージを含む`IllegalArgumentException`がスローされます:
+
+```
+Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
+```
+
+この例外は通常、データベース操作中に`DatabaseOperationException`でラップされます。
+
+### 識別子のソース
+
+識別子は以下から派生します:
+
+| ソース | 例 |
+|--------|-----|
+| CSV/TSVファイル名 | `USERS.csv` → テーブル `USERS` |
+| CSV/TSVヘッダー行 | `ID,NAME,EMAIL` → カラム |
+| `@DataSetSource`属性 | カスタムパスと名前 |
+
+検証エラーを避けるため、すべてのデータファイルが命名規則に従っていることを確認してください。
+
 ## 型変換
 
 ### 文字列からSQL型への変換

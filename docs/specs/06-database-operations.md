@@ -382,6 +382,61 @@ On exception:
 3. Wrap exception in `DatabaseOperationException`
 4. Propagate to test framework
 
+## SQL Identifier Validation
+
+### Overview
+
+The framework validates all SQL identifiers (table names and column names) before interpolating them into SQL statements. This validation prevents malformed inputs from causing SQL syntax errors or potential security issues.
+
+### Validation Rules
+
+Identifiers must match the following pattern:
+
+```regex
+^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$
+```
+
+**Valid identifiers**:
+
+| Example | Description |
+|---------|-------------|
+| `USERS` | Simple uppercase name |
+| `user_accounts` | Lowercase with underscores |
+| `_temp_table` | Starting with underscore |
+| `public.users` | Schema-qualified name |
+| `Table123` | Mixed case with digits |
+
+**Invalid identifiers**:
+
+| Example | Reason |
+|---------|--------|
+| `123table` | Starts with digit |
+| `user-accounts` | Contains hyphen |
+| `user name` | Contains space |
+| `table;DROP` | Contains semicolon |
+
+### Error Handling
+
+When an invalid identifier is detected, an `IllegalArgumentException` is thrown with a descriptive message:
+
+```
+Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
+```
+
+This exception is typically wrapped in a `DatabaseOperationException` during database operations.
+
+### Identifier Sources
+
+Identifiers are derived from:
+
+| Source | Example |
+|--------|---------|
+| CSV/TSV filename | `USERS.csv` → table `USERS` |
+| CSV/TSV header row | `ID,NAME,EMAIL` → columns |
+| `@DataSetSource` attributes | Custom paths and names |
+
+Ensure all data files follow the naming conventions to avoid validation errors.
+
 ## Type Conversion
 
 ### String to SQL Type

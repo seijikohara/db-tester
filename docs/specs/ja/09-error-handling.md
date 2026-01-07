@@ -217,6 +217,24 @@ DatabaseOperationException: Failed to execute INSERT on table USERS
 Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 ```
 
+### 無効なSQL識別子
+
+テーブル名またはカラム名に無効な文字が含まれている場合:
+
+```
+DatabaseOperationException: Invalid SQL identifier: 'user-accounts'.
+Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
+```
+
+**一般的な原因**:
+
+| 原因 | 例 | 解決策 |
+|------|-----|--------|
+| 名前にハイフン | `user-accounts.csv` | `user_accounts.csv`にリネーム |
+| 名前にスペース | `user accounts.csv` | `user_accounts.csv`にリネーム |
+| 数字で始まる | `123_table.csv` | `table_123.csv`にリネーム |
+| 特殊文字 | `users$.csv` | 特殊文字を削除 |
+
 ### 一般的な原因
 
 | エラー | 原因 | 解決策 |
@@ -225,6 +243,7 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 | 外部キー違反 | 親より先に子をINSERT | テーブル順序を確認 |
 | カラムが見つからない | CSVカラム名のタイプミス | カラム名がスキーマと一致することを確認 |
 | データ切り詰め | 値がカラムサイズを超過 | データがカラム定義に収まることを確認 |
+| 無効な識別子 | テーブル/カラム名に無効な文字 | 英字、数字、アンダースコアのみを使用 |
 
 
 ## 設定エラー

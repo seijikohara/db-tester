@@ -72,7 +72,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | `internal.format.tsv` | TSV format provider implementation |
 | `internal.format.parser` | Delimited text parsing utilities |
 | `internal.format.spi` | Format provider SPI (`FormatProvider`, `FormatRegistry`) |
-| `internal.jdbc` | JDBC utilities and connection handling |
+| `internal.jdbc` | JDBC utilities, SQL identifier validation, and connection handling |
 | `internal.jdbc.read` | Database read operations (table data retrieval, type conversion) |
 | `internal.jdbc.write` | Database write operations (INSERT, UPDATE, DELETE, TRUNCATE) |
 | `internal.loader` | Data loading and merging implementations |
@@ -118,6 +118,7 @@ requires io.github.seijikohara.dbtester.core;
 | `DataSetComparator` | Compares expected and actual datasets |
 | `OperationExecutor` | Coordinates JDBC operation execution |
 | `TableReader` | Reads table data from database |
+| `SqlIdentifier` | Validates SQL identifiers (table/column names) |
 | `FormatRegistry` | Manages format providers (CSV, TSV) |
 | `TableSetMerger` | Merges multiple datasets using configured strategy |
 
