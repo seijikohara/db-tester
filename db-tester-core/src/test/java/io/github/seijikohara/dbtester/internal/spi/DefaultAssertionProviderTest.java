@@ -283,7 +283,7 @@ class DefaultAssertionProviderTest {
           .assertEqualsIgnoreColumns(any(Table.class), any(Table.class), any());
 
       // When
-      provider.assertEqualsByQuery(expectedDataSet, dataSource, query, tableName, ignoreColumns);
+      provider.assertEqualsByQuery(expectedDataSet, dataSource, tableName, query, ignoreColumns);
 
       // Then
       verify(mockTableReader).executeQuery(dataSource, query, tableName);
@@ -309,7 +309,7 @@ class DefaultAssertionProviderTest {
           AssertionError.class,
           () ->
               provider.assertEqualsByQuery(
-                  expectedDataSet, dataSource, query, tableName, ignoreColumns),
+                  expectedDataSet, dataSource, tableName, query, ignoreColumns),
           "should throw AssertionError");
     }
   }

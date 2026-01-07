@@ -121,8 +121,8 @@ public interface AssertionProvider {
                                    Collection<String> ignoreColumnNames);
 
     // SQLクエリベース比較
-    void assertEqualsByQuery(TableSet expected, DataSource dataSource, String sqlQuery,
-                             String tableName, Collection<String> ignoreColumnNames);
+    void assertEqualsByQuery(TableSet expected, DataSource dataSource, String tableName,
+                             String sqlQuery, Collection<String> ignoreColumnNames);
     void assertEqualsByQuery(Table expected, DataSource dataSource, String tableName,
                              String sqlQuery, Collection<String> ignoreColumnNames);
 }

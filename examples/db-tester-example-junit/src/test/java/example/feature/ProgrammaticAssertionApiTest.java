@@ -493,7 +493,7 @@ public final class ProgrammaticAssertionApiTest {
 
     // Use TableSet-based assertEqualsByQuery
     DatabaseAssertion.assertEqualsByQuery(
-        expectedTableSet, dataSource, "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID", "TABLE1");
+        expectedTableSet, dataSource, "TABLE1", "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID");
 
     logger.info("TableSet-based assertEqualsByQuery validation completed");
   }

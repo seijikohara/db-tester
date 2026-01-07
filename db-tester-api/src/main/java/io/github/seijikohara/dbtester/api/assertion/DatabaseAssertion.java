@@ -154,18 +154,18 @@ public final class DatabaseAssertion {
    *
    * @param expected the expected dataset containing the table to compare
    * @param dataSource the data source for executing the SQL query
-   * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param tableName the name of the table in the expected dataset to compare
+   * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param ignoreColumnNames collection of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected data
    */
   public static void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
-      final String sqlQuery,
       final String tableName,
+      final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
-    getProvider().assertEqualsByQuery(expected, dataSource, sqlQuery, tableName, ignoreColumnNames);
+    getProvider().assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
   /**
@@ -178,18 +178,18 @@ public final class DatabaseAssertion {
    *
    * @param expected the expected dataset containing the table to compare
    * @param dataSource the data source for executing the SQL query
-   * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param tableName the name of the table in the expected dataset to compare
+   * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param ignoreColumnNames varargs of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected data
    */
   public static void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
-      final String sqlQuery,
       final String tableName,
+      final String sqlQuery,
       final String... ignoreColumnNames) {
-    assertEqualsByQuery(expected, dataSource, sqlQuery, tableName, List.of(ignoreColumnNames));
+    assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, List.of(ignoreColumnNames));
   }
 
   /**

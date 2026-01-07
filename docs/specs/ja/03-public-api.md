@@ -412,7 +412,7 @@ DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expec
 DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
 
 // SQLクエリ結果の比較
-DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "SELECT * FROM USERS WHERE status = 'ACTIVE'", "USERS");
+DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
 ```
 
 ### AssertionFailureHandler

@@ -140,16 +140,16 @@ public interface AssertionProvider {
    *
    * @param expected the expected dataset containing reference data
    * @param dataSource the data source for executing the SQL query
-   * @param sqlQuery the SQL query to execute (SELECT statement)
    * @param tableName the name of the table in the expected dataset to compare against query results
+   * @param sqlQuery the SQL query to execute (SELECT statement)
    * @param ignoreColumnNames columns to exclude from comparison (e.g., auto-generated timestamps)
    * @throws AssertionError if the query results do not match the expected dataset
    */
   void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
-      final String sqlQuery,
       final String tableName,
+      final String sqlQuery,
       final Collection<String> ignoreColumnNames);
 
   /**

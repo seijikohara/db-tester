@@ -94,8 +94,8 @@ public final class DefaultAssertionProvider implements AssertionProvider {
   public void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
-      final String sqlQuery,
       final String tableName,
+      final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
     final var actualTable = tableReader.executeQuery(dataSource, sqlQuery, tableName);
     final var expectedTable =
