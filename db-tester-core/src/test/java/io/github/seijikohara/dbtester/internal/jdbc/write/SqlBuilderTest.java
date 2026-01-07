@@ -79,7 +79,7 @@ class SqlBuilderTest {
       assertEquals(
           "INSERT INTO USERS (ID, NAME, EMAIL) VALUES (?, ?, ?)",
           result,
-          "should build correct INSERT SQL");
+          "should build correct INSERT SQL with validated identifiers");
     }
 
     /** Verifies that buildInsert handles single column. */
@@ -96,7 +96,10 @@ class SqlBuilderTest {
       final var result = builder.buildInsert(mockTable);
 
       // Then
-      assertEquals("INSERT INTO SIMPLE (VALUE) VALUES (?)", result, "should handle single column");
+      assertEquals(
+          "INSERT INTO SIMPLE (VALUE) VALUES (?)",
+          result,
+          "should handle single column with validated identifiers");
     }
   }
 
@@ -125,7 +128,7 @@ class SqlBuilderTest {
       assertEquals(
           "UPDATE USERS SET NAME = ?, EMAIL = ? WHERE ID = ?",
           result,
-          "should build correct UPDATE SQL");
+          "should build correct UPDATE SQL with validated identifiers");
     }
 
     /** Verifies that buildUpdate handles single update column. */
@@ -143,7 +146,9 @@ class SqlBuilderTest {
 
       // Then
       assertEquals(
-          "UPDATE USERS SET NAME = ? WHERE ID = ?", result, "should handle single update column");
+          "UPDATE USERS SET NAME = ? WHERE ID = ?",
+          result,
+          "should handle single update column with validated identifiers");
     }
   }
 
@@ -168,7 +173,10 @@ class SqlBuilderTest {
       final var result = builder.buildDelete(tableName, pkColumn);
 
       // Then
-      assertEquals("DELETE FROM USERS WHERE ID = ?", result, "should build correct DELETE SQL");
+      assertEquals(
+          "DELETE FROM USERS WHERE ID = ?",
+          result,
+          "should build correct DELETE SQL with validated identifiers");
     }
   }
 
@@ -192,7 +200,8 @@ class SqlBuilderTest {
       final var result = builder.buildDeleteAll(tableName);
 
       // Then
-      assertEquals("DELETE FROM USERS", result, "should build correct DELETE ALL SQL");
+      assertEquals(
+          "DELETE FROM USERS", result, "should build correct DELETE ALL SQL with validated table");
     }
   }
 
@@ -216,7 +225,8 @@ class SqlBuilderTest {
       final var result = builder.buildTruncate(tableName);
 
       // Then
-      assertEquals("TRUNCATE TABLE USERS", result, "should build correct TRUNCATE SQL");
+      assertEquals(
+          "TRUNCATE TABLE USERS", result, "should build correct TRUNCATE SQL with validated table");
     }
   }
 
@@ -241,7 +251,9 @@ class SqlBuilderTest {
 
       // Then
       assertEquals(
-          "SELECT * FROM USERS WHERE 1=0", result, "should build correct metadata query SQL");
+          "SELECT * FROM USERS WHERE 1=0",
+          result,
+          "should build correct metadata query SQL with validated table");
     }
   }
 }

@@ -1,5 +1,7 @@
 package io.github.seijikohara.dbtester.internal.jdbc.read;
 
+import static io.github.seijikohara.dbtester.internal.jdbc.SqlIdentifier.validate;
+
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -56,7 +58,8 @@ public final class TableReader {
    * @throws DatabaseTesterException if fetching fails
    */
   public Table fetchTable(final DataSource dataSource, final String tableName) {
-    return executeQuery(dataSource, String.format("SELECT * FROM %s", tableName), tableName);
+    return executeQuery(
+        dataSource, String.format("SELECT * FROM %s", validate(tableName)), tableName);
   }
 
   /**
@@ -75,8 +78,8 @@ public final class TableReader {
     }
 
     final var columnList =
-        columns.stream().map(ColumnName::value).collect(Collectors.joining(", "));
-    final var sql = String.format("SELECT %s FROM %s", columnList, tableName);
+        columns.stream().map(col -> validate(col.value())).collect(Collectors.joining(", "));
+    final var sql = String.format("SELECT %s FROM %s", columnList, validate(tableName));
     return executeQuery(dataSource, sql, tableName);
   }
 

@@ -1,5 +1,7 @@
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 
+import static io.github.seijikohara.dbtester.internal.jdbc.SqlIdentifier.validate;
+
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import java.util.List;
@@ -28,11 +30,14 @@ public final class SqlBuilder {
    */
   public String buildInsert(final Table table) {
     final var columns =
-        table.getColumns().stream().map(ColumnName::value).collect(Collectors.joining(", "));
+        table.getColumns().stream()
+            .map(col -> validate(col.value()))
+            .collect(Collectors.joining(", "));
     final var placeholders =
         table.getColumns().stream().map(c -> "?").collect(Collectors.joining(", "));
     return String.format(
-        "INSERT INTO %s (%s) VALUES (%s)", table.getName().value(), columns, placeholders);
+        "INSERT INTO %s (%s) VALUES (%s)",
+        validate(table.getName().value()), columns, placeholders);
   }
 
   /**
@@ -47,9 +52,11 @@ public final class SqlBuilder {
       final String tableName, final ColumnName pkColumn, final List<ColumnName> updateColumns) {
     final var setClause =
         updateColumns.stream()
-            .map(c -> String.format("%s = ?", c.value()))
+            .map(c -> String.format("%s = ?", validate(c.value())))
             .collect(Collectors.joining(", "));
-    return String.format("UPDATE %s SET %s WHERE %s = ?", tableName, setClause, pkColumn.value());
+    return String.format(
+        "UPDATE %s SET %s WHERE %s = ?",
+        validate(tableName), setClause, validate(pkColumn.value()));
   }
 
   /**
@@ -60,7 +67,8 @@ public final class SqlBuilder {
    * @return the DELETE SQL statement
    */
   public String buildDelete(final String tableName, final ColumnName pkColumn) {
-    return String.format("DELETE FROM %s WHERE %s = ?", tableName, pkColumn.value());
+    return String.format(
+        "DELETE FROM %s WHERE %s = ?", validate(tableName), validate(pkColumn.value()));
   }
 
   /**
@@ -70,7 +78,7 @@ public final class SqlBuilder {
    * @return the DELETE ALL SQL statement
    */
   public String buildDeleteAll(final String tableName) {
-    return String.format("DELETE FROM %s", tableName);
+    return String.format("DELETE FROM %s", validate(tableName));
   }
 
   /**
@@ -80,7 +88,7 @@ public final class SqlBuilder {
    * @return the TRUNCATE TABLE SQL statement
    */
   public String buildTruncate(final String tableName) {
-    return String.format("TRUNCATE TABLE %s", tableName);
+    return String.format("TRUNCATE TABLE %s", validate(tableName));
   }
 
   /**
@@ -90,6 +98,6 @@ public final class SqlBuilder {
    * @return the SELECT SQL statement that returns no rows but includes all column metadata
    */
   public String buildMetadataQuery(final String tableName) {
-    return String.format("SELECT * FROM %s WHERE 1=0", tableName);
+    return String.format("SELECT * FROM %s WHERE 1=0", validate(tableName));
   }
 }
