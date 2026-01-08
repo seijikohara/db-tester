@@ -18,6 +18,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -48,7 +50,8 @@ import org.slf4j.LoggerFactory;
  * Operation#CLEAN_INSERT} for preparation, {@link Operation#NONE} for expectation).
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class ConfigurationCustomizationTest {
+@DisplayName("ConfigurationCustomizationTest")
+final class ConfigurationCustomizationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger =
@@ -58,7 +61,7 @@ public final class ConfigurationCustomizationTest {
   private static DataSource dataSource;
 
   /** Creates ConfigurationCustomizationTest instance. */
-  public ConfigurationCustomizationTest() {}
+  ConfigurationCustomizationTest() {}
 
   /**
    * Sets up H2 in-memory database connection, schema, and custom configuration.
@@ -167,17 +170,22 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom scenario marker for row filtering")
   @DataSet
   @ExpectedDataSet
   void shouldUseCustomScenarioMarker() {
+    // Given
     logger.info("Running test with custom scenario marker [TestCase]");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (2, 'Bob', 'ACTIVE', '2024-01-15')
         """);
 
+    // Then
     logger.info("Custom scenario marker test completed");
   }
 
@@ -195,13 +203,18 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom expectation suffix for expected data path")
   @DataSet
   @ExpectedDataSet
   void shouldUseCustomExpectationSuffix() {
+    // Given
     logger.info("Running test with custom expectation suffix /verify");
 
+    // When
     executeSql("UPDATE TABLE1 SET COLUMN2 = 'SUSPENDED' WHERE ID = 1");
 
+    // Then
     logger.info("Custom expectation suffix test completed");
   }
 
@@ -220,17 +233,22 @@ public final class ConfigurationCustomizationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom operation defaults with standard operations")
   @DataSet
   @ExpectedDataSet
   void shouldUseCustomOperationDefaults() {
+    // Given
     logger.info("Running test with default operation settings");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (3, 'Charlie', 'INACTIVE', '2024-02-01')
         """);
 
+    // Then
     logger.info("Test with default operation settings completed");
   }
 }

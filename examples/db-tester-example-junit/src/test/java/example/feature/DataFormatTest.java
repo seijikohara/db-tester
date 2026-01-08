@@ -19,7 +19,9 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,13 +41,13 @@ import org.slf4j.LoggerFactory;
  *
  * <p>CSV files use comma (,) as delimiter, TSV files use tab character as delimiter.
  */
-public final class DataFormatTest {
+final class DataFormatTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(DataFormatTest.class);
 
   /** Creates DataFormatTest instance. */
-  public DataFormatTest() {}
+  DataFormatTest() {}
 
   /**
    * Creates an H2 in-memory DataSource.
@@ -107,6 +109,7 @@ public final class DataFormatTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("CsvFormatTest")
   class CsvFormatTest {
 
     /** DataSource for CSV format tests. */
@@ -172,6 +175,8 @@ public final class DataFormatTest {
      * </ul>
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should load CSV format data correctly")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -186,10 +191,13 @@ public final class DataFormatTest {
                   "classpath:example/feature/DataFormatTest$CsvFormatTest/shouldLoadCsvFormatData/expected/")
         })
     void shouldLoadCsvFormatData() {
+      // Given
       logger.info("Testing CSV format data loading");
 
+      // When
       executeSql("INSERT INTO DATA_FORMAT (ID, NAME, DATA_VALUE) VALUES (3, 'Charlie', 300)");
 
+      // Then
       logger.info("CSV format test completed");
     }
   }
@@ -207,6 +215,7 @@ public final class DataFormatTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("TsvFormatTest")
   class TsvFormatTest {
 
     /** DataSource for TSV format tests. */
@@ -272,6 +281,8 @@ public final class DataFormatTest {
      * </ul>
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should load TSV format data correctly")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -286,10 +297,13 @@ public final class DataFormatTest {
                   "classpath:example/feature/DataFormatTest$TsvFormatTest/shouldLoadTsvFormatData/expected/")
         })
     void shouldLoadTsvFormatData() {
+      // Given
       logger.info("Testing TSV format data loading");
 
+      // When
       executeSql("INSERT INTO DATA_FORMAT (ID, NAME, DATA_VALUE) VALUES (3, 'Charlie', 300)");
 
+      // Then
       logger.info("TSV format test completed");
     }
   }

@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -30,13 +32,14 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
  */
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
-public final class PostgreSQLIntegrationTest {
+@DisplayName("PostgreSQLIntegrationTest")
+final class PostgreSQLIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(PostgreSQLIntegrationTest.class);
 
   /** Creates PostgreSQL integration test instance. */
-  public PostgreSQLIntegrationTest() {}
+  PostgreSQLIntegrationTest() {}
 
   /** PostgreSQL container for integration testing. */
   @Container
@@ -124,9 +127,12 @@ public final class PostgreSQLIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on PostgreSQL")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnPostgreSQL() {
+    // When & Then
     logger.info("Running PostgreSQL integration smoke test");
   }
 }

@@ -19,7 +19,9 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -41,13 +43,13 @@ import org.slf4j.LoggerFactory;
  * <p>Each nested test class configures a different merge strategy and verifies the expected
  * behavior when loading multiple datasets that contain the same table.
  */
-public final class TableMergeStrategyTest {
+final class TableMergeStrategyTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(TableMergeStrategyTest.class);
 
   /** Creates TableMergeStrategyTest instance. */
-  public TableMergeStrategyTest() {}
+  TableMergeStrategyTest() {}
 
   /**
    * Creates an H2 in-memory DataSource.
@@ -109,6 +111,7 @@ public final class TableMergeStrategyTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("FirstStrategyTest")
   class FirstStrategyTest {
 
     /** DataSource for FIRST strategy tests. */
@@ -160,6 +163,8 @@ public final class TableMergeStrategyTest {
      * <p>With FIRST strategy, only dataset1's rows should be loaded.
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should use only first dataset when FIRST merge strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -177,6 +182,7 @@ public final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/shouldUseOnlyFirstDataset/expected/")
         })
     void shouldUseOnlyFirstDataset() {
+      // When & Then
       logger.info("Testing FIRST merge strategy - expecting only first dataset rows");
       // No operation needed - just verify the merged result
       logger.info("FIRST merge strategy test completed");
@@ -196,6 +202,7 @@ public final class TableMergeStrategyTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("LastStrategyTest")
   class LastStrategyTest {
 
     /** DataSource for LAST strategy tests. */
@@ -247,6 +254,8 @@ public final class TableMergeStrategyTest {
      * <p>With LAST strategy, only dataset2's rows should be loaded.
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should use only last dataset when LAST merge strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -264,6 +273,7 @@ public final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/shouldUseOnlyLastDataset/expected/")
         })
     void shouldUseOnlyLastDataset() {
+      // When & Then
       logger.info("Testing LAST merge strategy - expecting only last dataset rows");
       // No operation needed - just verify the merged result
       logger.info("LAST merge strategy test completed");
@@ -283,6 +293,7 @@ public final class TableMergeStrategyTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("UnionStrategyTest")
   class UnionStrategyTest {
 
     /** DataSource for UNION strategy tests. */
@@ -334,6 +345,8 @@ public final class TableMergeStrategyTest {
      * <p>With UNION strategy, duplicate row [2=Bob] should appear only once.
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should merge datasets and remove duplicates when UNION strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -351,6 +364,7 @@ public final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/shouldMergeAndRemoveDuplicates/expected/")
         })
     void shouldMergeAndRemoveDuplicates() {
+      // When & Then
       logger.info("Testing UNION merge strategy - expecting merged rows without duplicates");
       // No operation needed - just verify the merged result
       logger.info("UNION merge strategy test completed");
@@ -370,6 +384,7 @@ public final class TableMergeStrategyTest {
    */
   @Nested
   @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("UnionAllStrategyTest")
   class UnionAllStrategyTest {
 
     /** DataSource for UNION_ALL strategy tests. */
@@ -422,6 +437,8 @@ public final class TableMergeStrategyTest {
      * may cause primary key violations if the table has a primary key constraint on ID.
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should merge datasets and keep all rows when UNION_ALL strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
         dataSets = {
@@ -439,6 +456,7 @@ public final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/shouldMergeAndKeepAllRows/expected/")
         })
     void shouldMergeAndKeepAllRows() {
+      // When & Then
       logger.info("Testing UNION_ALL merge strategy - expecting all rows including duplicates");
       // No operation needed - just verify the merged result
       logger.info("UNION_ALL merge strategy test completed");

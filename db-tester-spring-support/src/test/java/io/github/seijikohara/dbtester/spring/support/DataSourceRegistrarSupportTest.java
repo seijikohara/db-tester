@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.spring.support;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -162,9 +163,11 @@ class DataSourceRegistrarSupportTest {
           DataSourceRegistrarSupport.resolveDefaultDataSource(dataSources, neverPrimary);
 
       // Then
-      assertTrue(result.isPresent());
-      assertEquals("only", result.get().getKey());
-      assertEquals(dataSource, result.get().getValue());
+      assertAll(
+          "single DataSource resolution",
+          () -> assertTrue(result.isPresent(), "result should be present"),
+          () -> assertEquals("only", result.get().getKey(), "key should be 'only'"),
+          () -> assertEquals(dataSource, result.get().getValue(), "value should be the DataSource"));
     }
 
     /** Verifies primary DataSource is preferred. */
@@ -185,9 +188,11 @@ class DataSourceRegistrarSupportTest {
           DataSourceRegistrarSupport.resolveDefaultDataSource(dataSources, isPrimary);
 
       // Then
-      assertTrue(result.isPresent());
-      assertEquals("primary", result.get().getKey());
-      assertEquals(ds2, result.get().getValue());
+      assertAll(
+          "primary DataSource resolution",
+          () -> assertTrue(result.isPresent(), "result should be present"),
+          () -> assertEquals("primary", result.get().getKey(), "key should be 'primary'"),
+          () -> assertEquals(ds2, result.get().getValue(), "value should be the primary DataSource"));
     }
 
     /** Verifies fallback to "dataSource" bean name. */
@@ -208,9 +213,12 @@ class DataSourceRegistrarSupportTest {
           DataSourceRegistrarSupport.resolveDefaultDataSource(dataSources, neverPrimary);
 
       // Then
-      assertTrue(result.isPresent());
-      assertEquals("dataSource", result.get().getKey());
-      assertEquals(ds1, result.get().getValue());
+      assertAll(
+          "dataSource bean name fallback",
+          () -> assertTrue(result.isPresent(), "result should be present"),
+          () -> assertEquals("dataSource", result.get().getKey(), "key should be 'dataSource'"),
+          () ->
+              assertEquals(ds1, result.get().getValue(), "value should be the dataSource bean"));
     }
 
     /** Verifies empty when no match. */
@@ -231,7 +239,7 @@ class DataSourceRegistrarSupportTest {
           DataSourceRegistrarSupport.resolveDefaultDataSource(dataSources, neverPrimary);
 
       // Then
-      assertFalse(result.isPresent());
+      assertFalse(result.isPresent(), "result should be empty when no default can be resolved");
     }
   }
 
@@ -260,8 +268,10 @@ class DataSourceRegistrarSupportTest {
       final var result = DataSourceRegistrarSupport.findPrimaryDataSource(dataSources, isPrimary);
 
       // Then
-      assertTrue(result.isPresent());
-      assertEquals("primary", result.get().getKey());
+      assertAll(
+          "primary DataSource found",
+          () -> assertTrue(result.isPresent(), "result should be present"),
+          () -> assertEquals("primary", result.get().getKey(), "key should be 'primary'"));
     }
 
     /** Verifies empty when no primary. */
@@ -278,7 +288,7 @@ class DataSourceRegistrarSupportTest {
       final var result = DataSourceRegistrarSupport.findPrimaryDataSource(dataSources, neverPrimary);
 
       // Then
-      assertFalse(result.isPresent());
+      assertFalse(result.isPresent(), "result should be empty when no primary exists");
     }
   }
 
@@ -306,9 +316,11 @@ class DataSourceRegistrarSupportTest {
       final var result = DataSourceRegistrarSupport.findDataSourceByName(dataSources, "target");
 
       // Then
-      assertTrue(result.isPresent());
-      assertEquals("target", result.get().getKey());
-      assertEquals(ds2, result.get().getValue());
+      assertAll(
+          "DataSource found by name",
+          () -> assertTrue(result.isPresent(), "result should be present"),
+          () -> assertEquals("target", result.get().getKey(), "key should be 'target'"),
+          () -> assertEquals(ds2, result.get().getValue(), "value should be the target DataSource"));
     }
 
     /** Verifies empty when name not found. */
@@ -324,7 +336,7 @@ class DataSourceRegistrarSupportTest {
       final var result = DataSourceRegistrarSupport.findDataSourceByName(dataSources, "missing");
 
       // Then
-      assertFalse(result.isPresent());
+      assertFalse(result.isPresent(), "result should be empty when name not found");
     }
 
     /** Verifies empty when name is null. */
@@ -340,7 +352,7 @@ class DataSourceRegistrarSupportTest {
       final var result = DataSourceRegistrarSupport.findDataSourceByName(dataSources, null);
 
       // Then
-      assertFalse(result.isPresent());
+      assertFalse(result.isPresent(), "result should be empty when name is null");
     }
   }
 }

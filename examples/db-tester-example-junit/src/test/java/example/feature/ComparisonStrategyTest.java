@@ -20,11 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -50,7 +52,8 @@ import org.slf4j.LoggerFactory;
  * creating columns with specific comparison strategies.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class ComparisonStrategyTest {
+@DisplayName("ComparisonStrategyTest")
+final class ComparisonStrategyTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(ComparisonStrategyTest.class);
@@ -59,7 +62,7 @@ public final class ComparisonStrategyTest {
   private static DataSource dataSource;
 
   /** Creates ComparisonStrategyTest instance. */
-  public ComparisonStrategyTest() {}
+  ComparisonStrategyTest() {}
 
   /**
    * Sets up H2 in-memory database and schema.
@@ -137,9 +140,8 @@ public final class ComparisonStrategyTest {
       final String tableName, final List<String> columnNames, final Object... values) {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
-    for (int i = 0; i < columns.size() && i < values.length; i++) {
-      rowValues.put(columns.get(i), new CellValue(values[i]));
-    }
+    IntStream.range(0, Math.min(columns.size(), values.length))
+        .forEach(i -> rowValues.put(columns.get(i), new CellValue(values[i])));
     final var row = Row.of(rowValues);
     return Table.of(new TableName(tableName), columns, List.of(row));
   }
@@ -157,9 +159,8 @@ public final class ComparisonStrategyTest {
       final String tableName, final List<String> columnNames, final Object... values) {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
-    for (int i = 0; i < columns.size() && i < values.length; i++) {
-      rowValues.put(columns.get(i), new CellValue(values[i]));
-    }
+    IntStream.range(0, Math.min(columns.size(), values.length))
+        .forEach(i -> rowValues.put(columns.get(i), new CellValue(values[i])));
     final var row = Row.of(rowValues);
     return Table.of(new TableName(tableName), columns, List.of(row));
   }
@@ -174,32 +175,32 @@ public final class ComparisonStrategyTest {
 
     /** Verifies STRICT strategy passes when values match exactly. */
     @Test
+    @Tag("normal")
     @DisplayName("should pass when values match exactly")
     void shouldPassWhenValuesMatchExactly() {
+      // Given
       logger.info("Testing STRICT strategy with exact match");
-
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "Alice");
       final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "Alice");
 
-      // Should pass - exact match
+      // When & Then
       assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("STRICT strategy exact match test completed");
     }
 
     /** Verifies STRICT strategy fails when values differ. */
     @Test
+    @Tag("error")
     @DisplayName("should fail when values differ")
     void shouldFailWhenValuesDiffer() {
+      // Given
       logger.info("Testing STRICT strategy with mismatched values");
-
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "Alice");
       final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "ALICE");
 
-      // Should fail - case differs
+      // When & Then
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("STRICT strategy mismatch test completed");
     }
   }
@@ -214,39 +215,34 @@ public final class ComparisonStrategyTest {
 
     /** Verifies NUMERIC strategy handles different numeric types. */
     @Test
+    @Tag("normal")
     @DisplayName("should match different numeric types with same value")
     void shouldMatchDifferentNumericTypesWithSameValue() {
+      // Given
       logger.info("Testing NUMERIC strategy with different numeric types");
-
-      // Expected with Integer
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, 100);
-
-      // Actual with BigDecimal (different type, same value)
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("100.00"));
 
-      // Should pass - numeric values are equal
-      // Note: Default STRICT comparison may fail here; test documents behavior
+      // When & Then
       assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("NUMERIC strategy type conversion test completed");
     }
 
     /** Verifies NUMERIC strategy handles precision differences. */
     @Test
+    @Tag("edge-case")
     @DisplayName("should match values with different precision")
     void shouldMatchValuesWithDifferentPrecision() {
+      // Given
       logger.info("Testing NUMERIC strategy with precision differences");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("99.99"));
-
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("99.990"));
 
-      // Should pass - numerically equal despite different precision
+      // When & Then
       assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("NUMERIC strategy precision test completed");
     }
   }
@@ -261,17 +257,17 @@ public final class ComparisonStrategyTest {
 
     /** Verifies CASE_INSENSITIVE strategy documents case-sensitive behavior. */
     @Test
+    @Tag("error")
     @DisplayName("should demonstrate case-sensitive comparison by default")
     void shouldDemonstrateCaseSensitiveComparison() {
+      // Given
       logger.info("Testing default case-sensitive comparison");
-
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "alice");
       final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "ALICE");
 
-      // Default STRICT comparison fails on case difference
+      // When & Then
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("Case-sensitive comparison test completed");
     }
   }
@@ -286,21 +282,20 @@ public final class ComparisonStrategyTest {
 
     /** Verifies assertEqualsIgnoreColumns ignores specified columns. */
     @Test
+    @Tag("normal")
     @DisplayName("should skip comparison for ignored columns")
     void shouldSkipComparisonForIgnoredColumns() {
+      // Given
       logger.info("Testing IGNORE strategy using assertEqualsIgnoreColumns");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-01-01");
-
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-12-31");
 
-      // Should pass - TIMESTAMP column is ignored via assertEqualsIgnoreColumns
+      // When & Then
       assertDoesNotThrow(
           () ->
               DatabaseAssertion.assertEqualsIgnoreColumns(expectedTable, actualTable, "TIMESTAMP"));
-
       logger.info("IGNORE strategy test completed");
     }
   }
@@ -315,41 +310,39 @@ public final class ComparisonStrategyTest {
 
     /** Verifies value comparison when both expected and actual are not null. */
     @Test
+    @Tag("normal")
     @DisplayName("should pass when both values are not null")
     void shouldPassWhenValuesAreNotNull() {
+      // Given
       logger.info("Testing NOT_NULL strategy with non-null values");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "expected-value");
-
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "expected-value");
 
-      // Should pass - values match
+      // When & Then
       assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("NOT_NULL strategy test completed");
     }
 
     /** Verifies that comparison fails when expected is not null but actual is null. */
     @Test
+    @Tag("error")
     @DisplayName("should fail when expected is not null but actual is null")
     @SuppressWarnings("NullAway")
     void shouldFailWhenActualIsNull() {
+      // Given
       logger.info("Testing comparison with null value");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "any-value");
-
       final Object nullValue = null;
       final var actualTable =
           createTableWithNullableValues(
               "COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, nullValue);
 
-      // Should fail - actual value is null but expected is not
+      // When & Then
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("NOT_NULL strategy null value test completed");
     }
   }
@@ -364,38 +357,36 @@ public final class ComparisonStrategyTest {
 
     /** Verifies exact match comparison. */
     @Test
+    @Tag("normal")
     @DisplayName("should match exact values")
     void shouldMatchExactValues() {
+      // Given
       logger.info("Testing exact value comparison");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
-
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
 
-      // Should pass - exact match
+      // When & Then
       assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("REGEX strategy test completed");
     }
 
     /** Verifies comparison fails when values don't match. */
     @Test
+    @Tag("error")
     @DisplayName("should fail when values don't match")
     void shouldFailWhenValuesDontMatch() {
+      // Given
       logger.info("Testing value mismatch");
-
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
-
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "invalid-email");
 
-      // Should fail - values don't match
+      // When & Then
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-
       logger.info("REGEX strategy non-matching test completed");
     }
   }

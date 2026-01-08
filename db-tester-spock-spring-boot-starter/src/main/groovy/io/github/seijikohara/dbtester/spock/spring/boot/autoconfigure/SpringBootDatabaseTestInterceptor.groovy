@@ -31,13 +31,27 @@ import org.springframework.test.context.TestContextManager
  */
 class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 
+	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(SpringBootDatabaseTestInterceptor)
 
+	/** The data set annotation for preparation phase (may be null). */
 	private final DataSet dataSet
+
+	/** The expected data set annotation for verification phase (may be null). */
 	private final ExpectedDataSet expectedDataSet
+
+	/** Executor for the preparation phase. */
 	private final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
+
+	/** Verifier for the expectation phase. */
 	private final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
 
+	/**
+	 * Creates a new interceptor with the given annotations.
+	 *
+	 * @param dataSet the data set annotation (may be null)
+	 * @param expectedDataSet the expected data set annotation (may be null)
+	 */
 	SpringBootDatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet) {
 		this.dataSet = dataSet
 		this.expectedDataSet = expectedDataSet
@@ -52,6 +66,12 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		expectedDataSet?.with { expectationVerifier.verify(testContext, it) }
 	}
 
+	/**
+	 * Creates a TestContext from the Spock invocation.
+	 *
+	 * @param invocation the method invocation
+	 * @return the test context
+	 */
 	private TestContext createTestContext(IMethodInvocation invocation) {
 		def specClass = invocation.spec.reflection
 		def featureMethod = (invocation.feature?.featureMethod?.reflection
@@ -89,6 +109,14 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		}
 	}
 
+	/**
+	 * Gets the Configuration from the ApplicationContext.
+	 *
+	 * <p>Falls back to defaults if the bean is not available.
+	 *
+	 * @param applicationContext the Spring ApplicationContext
+	 * @return the configuration
+	 */
 	private Configuration getConfiguration(ApplicationContext applicationContext) {
 		try {
 			if (applicationContext.containsBean('dbTesterConfiguration')) {
@@ -100,6 +128,15 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		Configuration.defaults()
 	}
 
+	/**
+	 * Gets the DataSourceRegistry from the ApplicationContext.
+	 *
+	 * <p>Populates the registry with DataSources if empty.
+	 *
+	 * @param applicationContext the Spring ApplicationContext
+	 * @return the data source registry
+	 * @throws IllegalStateException if the registry bean is not found
+	 */
 	private DataSourceRegistry getDataSourceRegistry(ApplicationContext applicationContext) {
 		try {
 			def registry = applicationContext.getBean('dbTesterDataSourceRegistry', DataSourceRegistry)

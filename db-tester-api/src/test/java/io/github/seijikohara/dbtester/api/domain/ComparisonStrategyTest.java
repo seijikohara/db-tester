@@ -1,10 +1,15 @@
 package io.github.seijikohara.dbtester.api.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link ComparisonStrategy}. */
@@ -24,29 +29,40 @@ class ComparisonStrategyTest {
 
     /** Verifies that STRICT matches equal objects. */
     @Test
-    @DisplayName("matches equal objects")
-    void matchesEqualObjects() {
-      assertTrue(ComparisonStrategy.STRICT.matches("hello", "hello"));
-      assertTrue(ComparisonStrategy.STRICT.matches(123, 123));
-      assertTrue(ComparisonStrategy.STRICT.matches(null, null));
+    @Tag("normal")
+    @DisplayName("should match when objects are equal")
+    void shouldMatch_whenObjectsAreEqual() {
+      // When & Then
+      assertTrue(ComparisonStrategy.STRICT.matches("hello", "hello"), "should match equal strings");
+      assertTrue(ComparisonStrategy.STRICT.matches(123, 123), "should match equal integers");
+      assertTrue(ComparisonStrategy.STRICT.matches(null, null), "should match null values");
     }
 
     /** Verifies that STRICT does not match different objects. */
     @Test
-    @DisplayName("does not match different objects")
-    void doesNotMatchDifferentObjects() {
-      assertFalse(ComparisonStrategy.STRICT.matches("hello", "world"));
-      assertFalse(ComparisonStrategy.STRICT.matches(123, 456));
-      assertFalse(ComparisonStrategy.STRICT.matches("123", 123));
-      assertFalse(ComparisonStrategy.STRICT.matches(null, "hello"));
+    @Tag("normal")
+    @DisplayName("should not match when objects are different")
+    void shouldNotMatch_whenObjectsAreDifferent() {
+      // When & Then
+      assertFalse(
+          ComparisonStrategy.STRICT.matches("hello", "world"),
+          "should not match different strings");
+      assertFalse(
+          ComparisonStrategy.STRICT.matches(123, 456), "should not match different integers");
+      assertFalse(
+          ComparisonStrategy.STRICT.matches("123", 123), "should not match string and integer");
+      assertFalse(
+          ComparisonStrategy.STRICT.matches(null, "hello"), "should not match null and string");
     }
 
     /** Verifies that isStrict returns true. */
     @Test
-    @DisplayName("isStrict returns true")
-    void isStrictReturnsTrue() {
-      assertTrue(ComparisonStrategy.STRICT.isStrict());
-      assertFalse(ComparisonStrategy.STRICT.isIgnore());
+    @Tag("normal")
+    @DisplayName("should return true when isStrict called")
+    void shouldReturnTrue_whenIsStrictCalled() {
+      // When & Then
+      assertTrue(ComparisonStrategy.STRICT.isStrict(), "should return true for isStrict");
+      assertFalse(ComparisonStrategy.STRICT.isIgnore(), "should return false for isIgnore");
     }
   }
 
@@ -60,19 +76,25 @@ class ComparisonStrategyTest {
 
     /** Verifies that IGNORE always matches. */
     @Test
-    @DisplayName("always matches")
-    void alwaysMatches() {
-      assertTrue(ComparisonStrategy.IGNORE.matches("hello", "world"));
-      assertTrue(ComparisonStrategy.IGNORE.matches(null, 123));
-      assertTrue(ComparisonStrategy.IGNORE.matches("anything", null));
+    @Tag("normal")
+    @DisplayName("should always match regardless of values")
+    void shouldAlwaysMatch_whenCalled() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.IGNORE.matches("hello", "world"), "should match different strings");
+      assertTrue(ComparisonStrategy.IGNORE.matches(null, 123), "should match null and integer");
+      assertTrue(
+          ComparisonStrategy.IGNORE.matches("anything", null), "should match string and null");
     }
 
     /** Verifies that isIgnore returns true. */
     @Test
-    @DisplayName("isIgnore returns true")
-    void isIgnoreReturnsTrue() {
-      assertTrue(ComparisonStrategy.IGNORE.isIgnore());
-      assertFalse(ComparisonStrategy.IGNORE.isStrict());
+    @Tag("normal")
+    @DisplayName("should return true when isIgnore called")
+    void shouldReturnTrue_whenIsIgnoreCalled() {
+      // When & Then
+      assertTrue(ComparisonStrategy.IGNORE.isIgnore(), "should return true for isIgnore");
+      assertFalse(ComparisonStrategy.IGNORE.isStrict(), "should return false for isStrict");
     }
   }
 
@@ -86,38 +108,56 @@ class ComparisonStrategyTest {
 
     /** Verifies that NUMERIC matches equal numbers. */
     @Test
-    @DisplayName("matches equal numbers")
-    void matchesEqualNumbers() {
-      assertTrue(ComparisonStrategy.NUMERIC.matches(123, 123));
-      assertTrue(ComparisonStrategy.NUMERIC.matches(123L, 123));
+    @Tag("normal")
+    @DisplayName("should match when numbers are equal")
+    void shouldMatch_whenNumbersAreEqual() {
+      // When & Then
+      assertTrue(ComparisonStrategy.NUMERIC.matches(123, 123), "should match equal integers");
+      assertTrue(ComparisonStrategy.NUMERIC.matches(123L, 123), "should match Long and Integer");
       assertTrue(
-          ComparisonStrategy.NUMERIC.matches(new BigDecimal("99.99"), new BigDecimal("99.99")));
+          ComparisonStrategy.NUMERIC.matches(new BigDecimal("99.99"), new BigDecimal("99.99")),
+          "should match equal BigDecimals");
     }
 
     /** Verifies that NUMERIC matches string and number representations. */
     @Test
-    @DisplayName("matches string and number representations")
-    void matchesStringAndNumber() {
-      assertTrue(ComparisonStrategy.NUMERIC.matches("123", 123));
-      assertTrue(ComparisonStrategy.NUMERIC.matches("99.99", new BigDecimal("99.99")));
-      assertTrue(ComparisonStrategy.NUMERIC.matches(123, "123"));
+    @Tag("normal")
+    @DisplayName("should match when string represents same number")
+    void shouldMatch_whenStringRepresentsSameNumber() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.NUMERIC.matches("123", 123),
+          "should match string '123' and integer 123");
+      assertTrue(
+          ComparisonStrategy.NUMERIC.matches("99.99", new BigDecimal("99.99")),
+          "should match string and BigDecimal");
+      assertTrue(ComparisonStrategy.NUMERIC.matches(123, "123"), "should match integer and string");
     }
 
     /** Verifies that NUMERIC does not match different numbers. */
     @Test
-    @DisplayName("does not match different numbers")
-    void doesNotMatchDifferentNumbers() {
-      assertFalse(ComparisonStrategy.NUMERIC.matches(123, 456));
-      assertFalse(ComparisonStrategy.NUMERIC.matches("123", "456"));
+    @Tag("normal")
+    @DisplayName("should not match when numbers are different")
+    void shouldNotMatch_whenNumbersAreDifferent() {
+      // When & Then
+      assertFalse(
+          ComparisonStrategy.NUMERIC.matches(123, 456), "should not match different integers");
+      assertFalse(
+          ComparisonStrategy.NUMERIC.matches("123", "456"),
+          "should not match different number strings");
     }
 
     /** Verifies that NUMERIC handles null values. */
     @Test
-    @DisplayName("handles null values")
-    void handlesNullValues() {
-      assertTrue(ComparisonStrategy.NUMERIC.matches(null, null));
-      assertFalse(ComparisonStrategy.NUMERIC.matches(null, 123));
-      assertFalse(ComparisonStrategy.NUMERIC.matches(123, null));
+    @Tag("edge-case")
+    @DisplayName("should handle null values correctly")
+    void shouldHandle_whenNullValuesProvided() {
+      // When & Then
+      assertTrue(ComparisonStrategy.NUMERIC.matches(null, null), "should match null with null");
+      assertFalse(
+          ComparisonStrategy.NUMERIC.matches(null, 123), "should not match null with number");
+      assertFalse(
+          ComparisonStrategy.NUMERIC.matches(123, null), "should not match number with null");
     }
   }
 
@@ -131,27 +171,46 @@ class ComparisonStrategyTest {
 
     /** Verifies that CASE_INSENSITIVE matches strings ignoring case. */
     @Test
-    @DisplayName("matches strings ignoring case")
-    void matchesStringsIgnoringCase() {
-      assertTrue(ComparisonStrategy.CASE_INSENSITIVE.matches("Hello", "HELLO"));
-      assertTrue(ComparisonStrategy.CASE_INSENSITIVE.matches("WORLD", "world"));
-      assertTrue(ComparisonStrategy.CASE_INSENSITIVE.matches("Test", "test"));
+    @Tag("normal")
+    @DisplayName("should match when strings differ only in case")
+    void shouldMatch_whenStringsIgnoringCase() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.CASE_INSENSITIVE.matches("Hello", "HELLO"),
+          "should match 'Hello' and 'HELLO'");
+      assertTrue(
+          ComparisonStrategy.CASE_INSENSITIVE.matches("WORLD", "world"),
+          "should match 'WORLD' and 'world'");
+      assertTrue(
+          ComparisonStrategy.CASE_INSENSITIVE.matches("Test", "test"),
+          "should match 'Test' and 'test'");
     }
 
     /** Verifies that CASE_INSENSITIVE does not match different strings. */
     @Test
-    @DisplayName("does not match different strings")
-    void doesNotMatchDifferentStrings() {
-      assertFalse(ComparisonStrategy.CASE_INSENSITIVE.matches("Hello", "World"));
+    @Tag("normal")
+    @DisplayName("should not match when strings are different")
+    void shouldNotMatch_whenStringsAreDifferent() {
+      // When & Then
+      assertFalse(
+          ComparisonStrategy.CASE_INSENSITIVE.matches("Hello", "World"),
+          "should not match different strings");
     }
 
     /** Verifies that CASE_INSENSITIVE handles null values. */
     @Test
-    @DisplayName("handles null values")
-    void handlesNullValues() {
-      assertTrue(ComparisonStrategy.CASE_INSENSITIVE.matches(null, null));
-      assertFalse(ComparisonStrategy.CASE_INSENSITIVE.matches(null, "hello"));
-      assertFalse(ComparisonStrategy.CASE_INSENSITIVE.matches("hello", null));
+    @Tag("edge-case")
+    @DisplayName("should handle null values correctly")
+    void shouldHandle_whenNullValuesProvided() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.CASE_INSENSITIVE.matches(null, null), "should match null with null");
+      assertFalse(
+          ComparisonStrategy.CASE_INSENSITIVE.matches(null, "hello"),
+          "should not match null with string");
+      assertFalse(
+          ComparisonStrategy.CASE_INSENSITIVE.matches("hello", null),
+          "should not match string with null");
     }
   }
 
@@ -165,136 +224,182 @@ class ComparisonStrategyTest {
 
     /** Verifies that TIMESTAMP_FLEXIBLE matches timestamps ignoring fractional seconds. */
     @Test
-    @DisplayName("matches timestamps ignoring fractional seconds")
-    void matchesTimestampsIgnoringFractionalSeconds() {
+    @Tag("normal")
+    @DisplayName("should match when timestamps differ only in fractional seconds")
+    void shouldMatch_whenTimestampsIgnoringFractionalSeconds() {
+      // When & Then
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00", "2024-01-15 10:30:00.123"));
+              "2024-01-15 10:30:00", "2024-01-15 10:30:00.123"),
+          "should match timestamp without and with fractional seconds");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00.000", "2024-01-15 10:30:00"));
+              "2024-01-15 10:30:00.000", "2024-01-15 10:30:00"),
+          "should match timestamp with .000 and without");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00.123456789Z", "2024-01-15T10:30:00Z"));
+              "2024-01-15T10:30:00.123456789Z", "2024-01-15T10:30:00Z"),
+          "should match ISO timestamps ignoring fractional seconds");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE properly converts timezones to UTC for comparison. */
     @Test
-    @DisplayName("matches timestamps representing same instant in different timezones")
-    void matchesTimestampsRepresentingSameInstantInDifferentTimezones() {
+    @Tag("normal")
+    @DisplayName("should match when timestamps represent same instant in different timezones")
+    void shouldMatch_whenTimestampsRepresentSameInstantInDifferentTimezones() {
+      // When & Then
       // JST (UTC+9) 10:30 = UTC 01:30
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00+09:00", "2024-01-15T01:30:00Z"));
+              "2024-01-15T10:30:00+09:00", "2024-01-15T01:30:00Z"),
+          "should match JST and UTC representing same instant");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00+09:00", "2024-01-15 01:30:00Z"));
+              "2024-01-15 10:30:00+09:00", "2024-01-15 01:30:00Z"),
+          "should match space-separated JST and UTC");
 
       // EST (UTC-5) 10:30 = UTC 15:30
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00-05:00", "2024-01-15T15:30:00Z"));
+              "2024-01-15T10:30:00-05:00", "2024-01-15T15:30:00Z"),
+          "should match EST and UTC representing same instant");
 
       // JST 19:30 = EST 05:30 (same instant)
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T19:30:00+09:00", "2024-01-15T05:30:00-05:00"));
+              "2024-01-15T19:30:00+09:00", "2024-01-15T05:30:00-05:00"),
+          "should match JST and EST representing same instant");
     }
 
     /** Verifies that timestamps without timezone are treated as UTC. */
     @Test
-    @DisplayName("treats timestamps without timezone as UTC")
-    void treatsTimestampsWithoutTimezoneAsUtc() {
+    @Tag("edge-case")
+    @DisplayName("should treat timestamps without timezone as UTC")
+    void shouldTreatAsUtc_whenTimezoneNotSpecified() {
+      // When & Then
       // Timestamp without timezone should match UTC timestamp with same time
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00", "2024-01-15T10:30:00Z"));
+              "2024-01-15 10:30:00", "2024-01-15T10:30:00Z"),
+          "should match local timestamp with UTC");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00", "2024-01-15 10:30:00Z"));
+              "2024-01-15T10:30:00", "2024-01-15 10:30:00Z"),
+          "should match T-separated local with space-separated UTC");
 
       // Should NOT match different timezone that results in different UTC time
       assertFalse(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00", "2024-01-15T10:30:00+09:00"));
+              "2024-01-15 10:30:00", "2024-01-15T10:30:00+09:00"),
+          "should not match local time with different timezone");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE does not match different timestamps. */
     @Test
-    @DisplayName("does not match different timestamps")
-    void doesNotMatchDifferentTimestamps() {
+    @Tag("normal")
+    @DisplayName("should not match when timestamps are different")
+    void shouldNotMatch_whenTimestampsAreDifferent() {
+      // When & Then
       assertFalse(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00", "2024-01-15 10:31:00"));
+              "2024-01-15 10:30:00", "2024-01-15 10:31:00"),
+          "should not match timestamps with different minutes");
       assertFalse(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00Z", "2024-01-15T10:30:01Z"));
+              "2024-01-15T10:30:00Z", "2024-01-15T10:30:01Z"),
+          "should not match timestamps with different seconds");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE handles null values correctly. */
     @Test
-    @DisplayName("handles null values")
-    void handlesNullValues() {
-      assertTrue(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, null));
-      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, "2024-01-15 10:30:00"));
-      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15 10:30:00", null));
+    @Tag("edge-case")
+    @DisplayName("should handle null values correctly")
+    void shouldHandle_whenNullValuesProvided() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, null), "should match null with null");
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, "2024-01-15 10:30:00"),
+          "should not match null with timestamp");
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15 10:30:00", null),
+          "should not match timestamp with null");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE handles various ISO-8601 formats. */
     @Test
-    @DisplayName("handles various ISO-8601 formats")
-    void handlesVariousIso8601Formats() {
+    @Tag("normal")
+    @DisplayName("should handle various ISO-8601 formats")
+    void shouldHandle_whenVariousIso8601FormatsProvided() {
+      // When & Then
       // T separator vs space separator
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00Z", "2024-01-15 10:30:00Z"));
+              "2024-01-15T10:30:00Z", "2024-01-15 10:30:00Z"),
+          "should match T-separated and space-separated");
 
       // With and without seconds
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30Z", "2024-01-15T10:30:00Z"));
+              "2024-01-15T10:30Z", "2024-01-15T10:30:00Z"),
+          "should match with and without seconds");
 
       // Different fractional second precisions
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15T10:30:00.1Z", "2024-01-15T10:30:00.123456Z"));
+              "2024-01-15T10:30:00.1Z", "2024-01-15T10:30:00.123456Z"),
+          "should match different fractional second precisions");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE handles java.sql.Timestamp.toString() format. */
     @Test
-    @DisplayName("handles java.sql.Timestamp.toString() format")
-    void handlesJavaSqlTimestampFormat() {
+    @Tag("normal")
+    @DisplayName("should handle java.sql.Timestamp.toString() format")
+    void shouldHandle_whenJavaSqlTimestampFormatProvided() {
+      // When & Then
       // java.sql.Timestamp.toString() produces format like "2024-01-15 10:30:00.0"
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00"));
+              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00"),
+          "should match Timestamp format with regular format");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00.0", "2024-01-15T10:30:00Z"));
+              "2024-01-15 10:30:00.0", "2024-01-15T10:30:00Z"),
+          "should match Timestamp format with ISO format");
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00.123", "2024-01-15 10:30:00.0"));
+              "2024-01-15 10:30:00.123", "2024-01-15 10:30:00.0"),
+          "should match different Timestamp formats");
 
       // Comparing java.sql.Timestamp format with OffsetDateTime format
       // Both should be treated as UTC when no timezone is specified
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00.123456"));
+              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00.123456"),
+          "should match different precisions");
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE falls back to string comparison for invalid formats. */
     @Test
-    @DisplayName("falls back to string comparison for invalid formats")
-    void fallsBackToStringComparisonForInvalidFormats() {
+    @Tag("edge-case")
+    @DisplayName("should fall back to string comparison when format is invalid")
+    void shouldFallBackToStringComparison_whenFormatIsInvalid() {
+      // When & Then
       // Invalid formats should fall back to string equals comparison
       assertTrue(
-          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "invalid-timestamp"));
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "invalid-timestamp"),
+          "should match identical invalid formats");
       assertFalse(
-          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "other-invalid"));
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "other-invalid"),
+          "should not match different invalid formats");
 
       // Partial timestamps (date only) - should fall back to string comparison
-      assertTrue(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-15"));
-      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-16"));
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-15"),
+          "should match identical date-only strings");
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-16"),
+          "should not match different date-only strings");
     }
   }
 
@@ -308,19 +413,31 @@ class ComparisonStrategyTest {
 
     /** Verifies that NOT_NULL matches when actual is not null. */
     @Test
-    @DisplayName("matches when actual is not null")
-    void matchesWhenActualIsNotNull() {
-      assertTrue(ComparisonStrategy.NOT_NULL.matches("anything", "hello"));
-      assertTrue(ComparisonStrategy.NOT_NULL.matches(null, 123));
-      assertTrue(ComparisonStrategy.NOT_NULL.matches("expected", "actual"));
+    @Tag("normal")
+    @DisplayName("should match when actual value is not null")
+    void shouldMatch_whenActualIsNotNull() {
+      // When & Then
+      assertTrue(
+          ComparisonStrategy.NOT_NULL.matches("anything", "hello"),
+          "should match when actual is string");
+      assertTrue(
+          ComparisonStrategy.NOT_NULL.matches(null, 123), "should match when actual is number");
+      assertTrue(
+          ComparisonStrategy.NOT_NULL.matches("expected", "actual"),
+          "should match any non-null actual");
     }
 
     /** Verifies that NOT_NULL does not match when actual is null. */
     @Test
-    @DisplayName("does not match when actual is null")
-    void doesNotMatchWhenActualIsNull() {
-      assertFalse(ComparisonStrategy.NOT_NULL.matches("hello", null));
-      assertFalse(ComparisonStrategy.NOT_NULL.matches(null, null));
+    @Tag("normal")
+    @DisplayName("should not match when actual value is null")
+    void shouldNotMatch_whenActualIsNull() {
+      // When & Then
+      assertFalse(
+          ComparisonStrategy.NOT_NULL.matches("hello", null),
+          "should not match when actual is null");
+      assertFalse(
+          ComparisonStrategy.NOT_NULL.matches(null, null), "should not match when both are null");
     }
   }
 
@@ -334,36 +451,57 @@ class ComparisonStrategyTest {
 
     /** Verifies that REGEX matches values against pattern. */
     @Test
-    @DisplayName("matches values against pattern")
-    void matchesValuesAgainstPattern() {
+    @Tag("normal")
+    @DisplayName("should match when value matches pattern")
+    void shouldMatch_whenValueMatchesPattern() {
+      // Given
       final var strategy = ComparisonStrategy.regex("[a-f0-9-]{36}");
-      assertTrue(strategy.matches(null, "a1b2c3d4-e5f6-7890-abcd-ef1234567890"));
+
+      // When & Then
+      assertTrue(
+          strategy.matches(null, "a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+          "should match UUID pattern");
     }
 
     /** Verifies that REGEX does not match non-matching values. */
     @Test
-    @DisplayName("does not match non-matching values")
-    void doesNotMatchNonMatchingValues() {
+    @Tag("normal")
+    @DisplayName("should not match when value does not match pattern")
+    void shouldNotMatch_whenValueDoesNotMatchPattern() {
+      // Given
       final var strategy = ComparisonStrategy.regex("\\d+");
-      assertFalse(strategy.matches(null, "abc"));
+
+      // When & Then
+      assertFalse(strategy.matches(null, "abc"), "should not match non-numeric string");
     }
 
     /** Verifies that REGEX does not match null actual value. */
     @Test
-    @DisplayName("does not match null actual value")
-    void doesNotMatchNullActualValue() {
+    @Tag("edge-case")
+    @DisplayName("should not match when actual value is null")
+    void shouldNotMatch_whenActualValueIsNull() {
+      // Given
       final var strategy = ComparisonStrategy.regex(".*");
-      assertFalse(strategy.matches("expected", null));
+
+      // When & Then
+      assertFalse(strategy.matches("expected", null), "should not match null actual");
     }
 
     /** Verifies that REGEX has correct type and pattern. */
     @Test
-    @DisplayName("has correct type and pattern")
-    void hasCorrectTypeAndPattern() {
+    @Tag("normal")
+    @DisplayName("should have correct type and pattern")
+    void shouldHaveCorrectTypeAndPattern_whenCreated() {
+      // Given
       final var strategy = ComparisonStrategy.regex("test.*");
-      assertEquals(ComparisonStrategy.Type.REGEX, strategy.getType());
-      assertNotNull(strategy.getPattern());
-      assertEquals("test.*", strategy.getPattern().pattern());
+
+      // When & Then
+      assertEquals(ComparisonStrategy.Type.REGEX, strategy.getType(), "should have REGEX type");
+      assertTrue(strategy.getPattern().isPresent(), "should have pattern");
+      assertEquals(
+          "test.*",
+          strategy.getPattern().map(p -> p.pattern()).orElse(""),
+          "should have correct pattern string");
     }
   }
 
@@ -377,31 +515,45 @@ class ComparisonStrategyTest {
 
     /** Verifies that same strategy constants are equal. */
     @Test
-    @DisplayName("same strategy constants are equal")
-    void sameStrategyConstantsAreEqual() {
-      assertSame(ComparisonStrategy.STRICT, ComparisonStrategy.STRICT);
-      assertSame(ComparisonStrategy.IGNORE, ComparisonStrategy.IGNORE);
+    @Tag("normal")
+    @DisplayName("should be same instance when using constants")
+    void shouldBeSameInstance_whenUsingConstants() {
+      // When & Then
+      assertSame(
+          ComparisonStrategy.STRICT, ComparisonStrategy.STRICT, "STRICT should be same instance");
+      assertSame(
+          ComparisonStrategy.IGNORE, ComparisonStrategy.IGNORE, "IGNORE should be same instance");
     }
 
     /** Verifies that regex strategies with same pattern are equal. */
     @Test
-    @DisplayName("regex strategies with same pattern are equal")
-    void regexStrategiesWithSamePatternAreEqual() {
+    @Tag("normal")
+    @DisplayName("should be equal when regex patterns are same")
+    void shouldBeEqual_whenRegexPatternsAreSame() {
+      // Given
       final var strategy1 = ComparisonStrategy.regex("test");
       final var strategy2 = ComparisonStrategy.regex("test");
 
-      assertEquals(strategy1, strategy2);
-      assertEquals(strategy1.hashCode(), strategy2.hashCode());
+      // When & Then
+      assertEquals(strategy1, strategy2, "strategies with same pattern should be equal");
+      assertEquals(
+          strategy1.hashCode(),
+          strategy2.hashCode(),
+          "strategies with same pattern should have same hashCode");
     }
 
     /** Verifies that regex strategies with different patterns are not equal. */
     @Test
-    @DisplayName("regex strategies with different patterns are not equal")
-    void regexStrategiesWithDifferentPatternsAreNotEqual() {
+    @Tag("normal")
+    @DisplayName("should not be equal when regex patterns are different")
+    void shouldNotBeEqual_whenRegexPatternsAreDifferent() {
+      // Given
       final var strategy1 = ComparisonStrategy.regex("test");
       final var strategy2 = ComparisonStrategy.regex("other");
 
-      assertNotEquals(strategy1, strategy2);
+      // When & Then
+      assertNotEquals(
+          strategy1, strategy2, "strategies with different patterns should not be equal");
     }
   }
 
@@ -415,18 +567,33 @@ class ComparisonStrategyTest {
 
     /** Verifies that toString returns readable representation for constants. */
     @Test
-    @DisplayName("returns readable representation for constants")
-    void returnsReadableRepresentationForConstants() {
-      assertEquals("ComparisonStrategy[STRICT]", ComparisonStrategy.STRICT.toString());
-      assertEquals("ComparisonStrategy[IGNORE]", ComparisonStrategy.IGNORE.toString());
+    @Tag("normal")
+    @DisplayName("should return readable representation for constants")
+    void shouldReturnReadableRepresentation_whenCalledOnConstants() {
+      // When & Then
+      assertEquals(
+          "ComparisonStrategy[STRICT]",
+          ComparisonStrategy.STRICT.toString(),
+          "should return STRICT representation");
+      assertEquals(
+          "ComparisonStrategy[IGNORE]",
+          ComparisonStrategy.IGNORE.toString(),
+          "should return IGNORE representation");
     }
 
     /** Verifies that toString returns pattern for regex strategy. */
     @Test
-    @DisplayName("returns pattern for regex strategy")
-    void returnsPatternForRegexStrategy() {
+    @Tag("normal")
+    @DisplayName("should return pattern for regex strategy")
+    void shouldReturnPattern_whenCalledOnRegexStrategy() {
+      // Given
       final var strategy = ComparisonStrategy.regex("\\d+");
-      assertEquals("ComparisonStrategy[REGEX:\\d+]", strategy.toString());
+
+      // When & Then
+      assertEquals(
+          "ComparisonStrategy[REGEX:\\d+]",
+          strategy.toString(),
+          "should return REGEX representation with pattern");
     }
   }
 }

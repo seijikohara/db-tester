@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -54,7 +56,8 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class TableOrderingStrategiesTest {
+@DisplayName("TableOrderingStrategiesTest")
+final class TableOrderingStrategiesTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(TableOrderingStrategiesTest.class);
@@ -63,7 +66,7 @@ public final class TableOrderingStrategiesTest {
   private static DataSource dataSource;
 
   /** Creates TableOrderingStrategiesTest instance. */
-  public TableOrderingStrategiesTest() {}
+  TableOrderingStrategiesTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -161,14 +164,19 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use automatic alphabetical table ordering")
   @DataSet
   @ExpectedDataSet
   void shouldUseAlphabeticalOrdering() throws Exception {
+    // Given
     logger.info("Running alphabetical ordering test");
 
+    // When
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1) VALUES (3, 'Services')");
     executeSql("INSERT INTO TABLE2 (ID, COLUMN1, COLUMN2) VALUES (4, 3, 'Consulting')");
 
+    // Then
     logger.info("Alphabetical ordering test completed");
   }
 
@@ -188,14 +196,19 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use manual table ordering via load-order.txt file")
   @DataSet
   @ExpectedDataSet
   void shouldUseManualOrdering() throws Exception {
+    // Given
     logger.info("Running manual ordering test");
 
+    // When
     executeSql("INSERT INTO TABLE3 (ID, COLUMN1) VALUES (4, 'Featured')");
     executeSql("INSERT INTO TABLE4 (COLUMN1, COLUMN2) VALUES (1, 4)");
 
+    // Then
     logger.info("Manual ordering test completed");
   }
 
@@ -216,6 +229,8 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use programmatic ordering via custom resource location")
   @DataSet(
       dataSets =
           @DataSetSource(
@@ -227,10 +242,13 @@ public final class TableOrderingStrategiesTest {
               resourceLocation =
                   "classpath:example/feature/TableOrderingStrategiesTest/programmatic/expected/"))
   void shouldUseProgrammaticOrdering() throws Exception {
+    // Given
     logger.info("Running programmatic ordering test");
 
+    // When
     executeSql("UPDATE TABLE2 SET COLUMN2 = 'Updated Widget' WHERE ID = 1");
 
+    // Then
     logger.info("Programmatic ordering test completed");
   }
 
@@ -251,17 +269,22 @@ public final class TableOrderingStrategiesTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should handle complex many-to-many relationships with proper ordering")
   @DataSet
   @ExpectedDataSet
   void shouldHandleManyToManyRelationships() throws Exception {
+    // Given
     logger.info("Running many-to-many relationships test");
 
+    // When
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1) VALUES (4, 'Accessories')");
     executeSql("INSERT INTO TABLE2 (ID, COLUMN1, COLUMN2) VALUES (5, 4, 'Cable')");
     executeSql("INSERT INTO TABLE3 (ID, COLUMN1) VALUES (5, 'Essential')");
     executeSql("INSERT INTO TABLE4 (COLUMN1, COLUMN2) VALUES (5, 1)");
     executeSql("INSERT INTO TABLE4 (COLUMN1, COLUMN2) VALUES (5, 5)");
 
+    // Then
     logger.info("Many-to-many relationships test completed");
   }
 }

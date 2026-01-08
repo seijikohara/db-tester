@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.api.domain;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -112,12 +113,12 @@ public final class Cell {
   }
 
   /**
-   * Returns the raw value, or null if the cell is NULL.
+   * Returns the raw value, or empty if the cell is NULL.
    *
-   * @return the raw value or null
+   * @return the raw value or empty
    */
-  public @Nullable Object getRawValue() {
-    return value.value();
+  public Optional<Object> getRawValue() {
+    return Optional.ofNullable(value.value());
   }
 
   /**
@@ -163,33 +164,32 @@ public final class Cell {
   }
 
   /**
-   * Returns the value as a String, or null if the value is NULL.
+   * Returns the value as a String, or empty if the value is NULL.
    *
-   * @return the string representation or null
+   * @return the string representation or empty
    */
-  public @Nullable String getValueAsString() {
-    final var rawValue = value.value();
-    return rawValue != null ? rawValue.toString() : null;
+  public Optional<String> getValueAsString() {
+    return Optional.ofNullable(value.value()).map(Object::toString);
   }
 
   /**
-   * Returns the value as a Number, or null if not applicable.
+   * Returns the value as a Number, or empty if not applicable.
    *
-   * @return the value as Number, or null
+   * @return the value as Number, or empty
    */
-  public @Nullable Number getValueAsNumber() {
+  public Optional<Number> getValueAsNumber() {
     final var rawValue = value.value();
     if (rawValue instanceof Number number) {
-      return number;
+      return Optional.of(number);
     }
     if (rawValue instanceof String string) {
       try {
-        return new BigDecimal(string.trim());
+        return Optional.of(new BigDecimal(string.trim()));
       } catch (final NumberFormatException exception) {
-        return null;
+        return Optional.empty();
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   @Override

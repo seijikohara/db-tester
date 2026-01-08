@@ -14,6 +14,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import oracle.jdbc.pool.OracleDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +38,14 @@ import org.testcontainers.oracle.OracleContainer;
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
-public final class OracleIntegrationTest {
+@DisplayName("OracleIntegrationTest")
+final class OracleIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(OracleIntegrationTest.class);
 
   /** Creates Oracle integration test instance. */
-  public OracleIntegrationTest() {}
+  OracleIntegrationTest() {}
 
   /** Oracle container for integration testing. */
   @Container
@@ -137,9 +140,12 @@ public final class OracleIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on Oracle")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnOracle() {
+    // When & Then
     logger.info("Running Oracle integration smoke test");
   }
 }

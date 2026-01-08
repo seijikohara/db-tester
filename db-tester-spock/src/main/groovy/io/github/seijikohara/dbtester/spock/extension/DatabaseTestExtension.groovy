@@ -20,6 +20,16 @@ import org.spockframework.runtime.model.SpecInfo
  */
 class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> {
 
+	/**
+	 * Visits the specification and registers interceptors for annotated feature methods.
+	 *
+	 * <p>This method scans all feature methods in the specification for {@link DataSet} and
+	 * {@link ExpectedDataSet} annotations. For each feature method with at least one of these
+	 * annotations, it registers a {@link DatabaseTestInterceptor} to handle database operations.
+	 *
+	 * @param annotation the {@link DatabaseTest} annotation on the specification class
+	 * @param spec the specification info containing metadata about the test class
+	 */
 	@Override
 	void visitSpecAnnotation(DatabaseTest annotation, SpecInfo spec) {
 		def specClass = spec.reflection

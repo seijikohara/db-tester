@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -41,13 +43,14 @@ import org.testcontainers.neo4j.Neo4jContainer;
  */
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
-public final class Neo4jIntegrationTest {
+@DisplayName("Neo4jIntegrationTest")
+final class Neo4jIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(Neo4jIntegrationTest.class);
 
   /** Creates Neo4j integration test instance. */
-  public Neo4jIntegrationTest() {}
+  Neo4jIntegrationTest() {}
 
   /** Neo4j container for integration testing. */
   @Container
@@ -136,9 +139,12 @@ public final class Neo4jIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on Neo4j")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnNeo4j() {
+    // When & Then
     logger.info("Running Neo4j integration smoke test");
   }
 }

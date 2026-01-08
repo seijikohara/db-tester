@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class MultipleDataSourceTest {
+@DisplayName("MultipleDataSourceTest")
+final class MultipleDataSourceTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(MultipleDataSourceTest.class);
@@ -51,7 +54,7 @@ public final class MultipleDataSourceTest {
   private static DataSource secondaryDataSource;
 
   /** Creates MultipleDataSourceTest instance. */
-  public MultipleDataSourceTest() {}
+  MultipleDataSourceTest() {}
 
   /**
    * Sets up two H2 in-memory databases.
@@ -175,6 +178,8 @@ public final class MultipleDataSourceTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should manage customers in default database")
   @DataSet(
       dataSets =
           @DataSetSource(
@@ -187,8 +192,10 @@ public final class MultipleDataSourceTest {
                   "classpath:example/feature/MultipleDataSourceTest/default/expected/",
               scenarioNames = "default"))
   void shouldManageCustomersInDefaultDatabase() throws Exception {
+    // Given
     logger.info("Running test on default database");
 
+    // When
     executeSql(
         primaryDataSource,
         """
@@ -196,6 +203,7 @@ public final class MultipleDataSourceTest {
         VALUES (3, 'Charlie Brown', 'charlie@example.com')
         """);
 
+    // Then
     logger.info("Default database test completed");
   }
 
@@ -215,6 +223,8 @@ public final class MultipleDataSourceTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should manage products in named inventory database")
   @DataSet(
       dataSets =
           @DataSetSource(
@@ -229,8 +239,10 @@ public final class MultipleDataSourceTest {
                   "classpath:example/feature/MultipleDataSourceTest/inventory/expected/",
               scenarioNames = "inventory"))
   void shouldManageProductsInInventoryDatabase() throws Exception {
+    // Given
     logger.info("Running test on inventory database");
 
+    // When
     executeSql(
         secondaryDataSource,
         """
@@ -238,6 +250,7 @@ public final class MultipleDataSourceTest {
         VALUES (3, 'Monitor', 25)
         """);
 
+    // Then
     logger.info("Inventory database test completed");
   }
 }

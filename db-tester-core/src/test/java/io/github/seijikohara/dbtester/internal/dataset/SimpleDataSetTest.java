@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -263,10 +264,10 @@ class SimpleTableSetTest {
   private static Table createTableWithRows(
       final String tableName, final List<String> columnNames, final int rowCount) {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
-    final var rows = new ArrayList<Row>();
-    for (int i = 0; i < rowCount; i++) {
-      rows.add(new SimpleRow(Map.of(columns.getFirst(), new CellValue(i))));
-    }
+    final var rows =
+        IntStream.range(0, rowCount)
+            .mapToObj(i -> (Row) new SimpleRow(Map.of(columns.getFirst(), new CellValue(i))))
+            .toList();
     return new SimpleTable(new TableName(tableName), columns, rows);
   }
 }

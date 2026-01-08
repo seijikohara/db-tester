@@ -21,6 +21,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -53,7 +55,8 @@ import org.slf4j.LoggerFactory;
  * state verification, or comparing multiple dataset sources.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class ProgrammaticAssertionApiTest {
+@DisplayName("ProgrammaticAssertionApiTest")
+final class ProgrammaticAssertionApiTest {
 
   /** Logger instance. */
   private static final Logger logger = LoggerFactory.getLogger(ProgrammaticAssertionApiTest.class);
@@ -62,7 +65,7 @@ public final class ProgrammaticAssertionApiTest {
   private static DataSource dataSource;
 
   /** Creates ProgrammaticAssertionApiTest instance. */
-  public ProgrammaticAssertionApiTest() {}
+  ProgrammaticAssertionApiTest() {}
 
   /**
    * Sets up H2 in-memory database and schema.
@@ -160,14 +163,19 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should demonstrate basic programmatic API for database validation")
   @DataSet
   @ExpectedDataSet
   void shouldDemonstrateBasicProgrammaticAPI() throws Exception {
+    // Given
     logger.info("Running programmatic API demonstration");
 
+    // When
     executeSql(
         "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)");
 
+    // Then
     logger.info("Programmatic API demonstration completed - uses standard @Expectation validation");
   }
 
@@ -189,13 +197,18 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate database state using multiple SQL queries")
   @DataSet
   void shouldValidateUsingMultipleQueries() throws Exception {
+    // Given
     logger.info("Running multiple query validation test");
 
+    // When
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Value3', 300)");
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (4, 'Value4', 400)");
 
+    // Then
     // Programmatic validation using SQL queries
     try (final var connection = dataSource.getConnection();
         final var statement = connection.createStatement()) {
@@ -258,10 +271,14 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate query results using assertEqualsByQuery")
   @DataSet
   void shouldValidateQueryResultsUsingAssertEqualsByQuery() throws Exception {
+    // Given
     logger.info("Running assertEqualsByQuery demonstration");
 
+    // When & Then
     // Build expected table programmatically
     final var columnId = new ColumnName("ID");
     final var columnValue = new ColumnName("COLUMN1");
@@ -312,10 +329,14 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should ignore specific columns using assertEqualsIgnoreColumns")
   @DataSet
   void shouldIgnoreSpecificColumnsUsingAssertEqualsIgnoreColumns() throws Exception {
+    // Given
     logger.info("Running assertEqualsIgnoreColumns demonstration");
 
+    // When
     // Insert a row where COLUMN3 has a non-deterministic value
     executeSql(
         "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, 'RandomExtra')");
@@ -391,6 +412,7 @@ public final class ProgrammaticAssertionApiTest {
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(actualRow1, actualRow2, actualRow3));
 
+    // Then
     // Compare tables while ignoring COLUMN3
     DatabaseAssertion.assertEqualsIgnoreColumns(expectedTable, actualTable, "COLUMN3");
 
@@ -411,8 +433,11 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should compare tables directly using assertEquals")
   @DataSet
   void shouldCompareTablesDirectlyUsingAssertEquals() throws Exception {
+    // Given & When
     logger.info("Running assertEquals demonstration");
 
     // Build expected table
@@ -449,6 +474,7 @@ public final class ProgrammaticAssertionApiTest {
             List.of(columnId, columnValue, columnNumber, columnExtra),
             List.of(row1, row2)); // Same data as expected
 
+    // Then
     // Direct table comparison
     DatabaseAssertion.assertEquals(expectedTable, actualTable);
 
@@ -466,10 +492,14 @@ public final class ProgrammaticAssertionApiTest {
    * @throws Exception if test fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate using TableSet-based assertEqualsByQuery for multi-table scenarios")
   @DataSet
   void shouldValidateUsingTableSetBasedAssertEqualsByQuery() throws Exception {
+    // Given
     logger.info("Running TableSet-based assertEqualsByQuery demonstration");
 
+    // When & Then
     // Build expected table
     final var columnId = new ColumnName("ID");
     final var columnValue = new ColumnName("COLUMN1");

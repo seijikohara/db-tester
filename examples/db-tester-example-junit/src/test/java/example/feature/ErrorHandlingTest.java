@@ -12,6 +12,7 @@ import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +36,13 @@ import org.slf4j.LoggerFactory;
  * because they test programmatic assertions directly without database operations.
  */
 @DisplayName("Error Handling Scenarios")
-public final class ErrorHandlingTest {
+final class ErrorHandlingTest {
 
   /** Logger instance. */
   private static final Logger logger = LoggerFactory.getLogger(ErrorHandlingTest.class);
 
   /** Creates ErrorHandlingTest instance. */
-  public ErrorHandlingTest() {}
+  ErrorHandlingTest() {}
 
   /**
    * Demonstrates what happens when expected has more rows than actual.
@@ -50,8 +51,10 @@ public final class ErrorHandlingTest {
    * actual database state. The error message should clearly indicate the row count difference.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when expected has more rows than actual")
   void shouldFailWhenExpectedHasMoreRows() {
+    // Given
     logger.info("Testing scenario: expected has more rows than actual");
 
     final var columnId = new ColumnName("ID");
@@ -71,6 +74,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -90,8 +94,10 @@ public final class ErrorHandlingTest {
    * expected. Users should be able to identify this as a data insertion or cleanup issue.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when actual has more rows than expected")
   void shouldFailWhenActualHasMoreRows() {
+    // Given
     logger.info("Testing scenario: actual has more rows than expected");
 
     final var columnId = new ColumnName("ID");
@@ -109,6 +115,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(row1, row2));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -125,8 +132,10 @@ public final class ErrorHandlingTest {
    * the actual value.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when string values differ")
   void shouldFailWhenStringValuesDiffer() {
+    // Given
     logger.info("Testing scenario: string value mismatch");
 
     final var columnId = new ColumnName("ID");
@@ -144,6 +153,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -159,8 +169,10 @@ public final class ErrorHandlingTest {
    * <p>This test shows the error message when a numeric cell value differs.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when numeric values differ")
   void shouldFailWhenNumericValuesDiffer() {
+    // Given
     logger.info("Testing scenario: numeric value mismatch");
 
     final var columnId = new ColumnName("ID");
@@ -178,6 +190,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -193,8 +206,10 @@ public final class ErrorHandlingTest {
    * <p>This test shows the error message when expected has null but actual has a value.
    */
   @Test
+  @Tag("edge-case")
   @DisplayName("should fail when null vs non-null values differ")
   void shouldFailWhenNullHandlingDiffers() {
+    // Given
     logger.info("Testing scenario: null vs non-null mismatch");
 
     final var columnId = new ColumnName("ID");
@@ -211,6 +226,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -227,8 +243,10 @@ public final class ErrorHandlingTest {
    * not present in the actual data.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when expected has extra columns")
   void shouldFailWhenExpectedHasExtraColumns() {
+    // Given
     logger.info("Testing scenario: expected has extra columns");
 
     final var columnId = new ColumnName("ID");
@@ -257,6 +275,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -273,8 +292,10 @@ public final class ErrorHandlingTest {
    * match.
    */
   @Test
+  @Tag("error")
   @DisplayName("should fail when column names differ")
   void shouldFailWhenColumnNamesDiffer() {
+    // Given
     logger.info("Testing scenario: column names differ");
 
     final var columnId = new ColumnName("ID");
@@ -296,6 +317,7 @@ public final class ErrorHandlingTest {
     final var actualTable =
         Table.of(new TableName("TEST_TABLE"), List.of(columnId, columnValue), List.of(actualRow));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class,
@@ -312,8 +334,10 @@ public final class ErrorHandlingTest {
    * name, row position, column name, expected vs actual values.
    */
   @Test
+  @Tag("normal")
   @DisplayName("should provide sufficient context in error messages")
   void shouldProvideSufficientContext() {
+    // Given
     logger.info("Testing error message quality");
 
     final var columnId = new ColumnName("ID");
@@ -370,6 +394,7 @@ public final class ErrorHandlingTest {
             List.of(columnId, columnName, columnStatus),
             List.of(row1, row2, actualRow3));
 
+    // When & Then
     final var exception =
         assertThrows(
             AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));

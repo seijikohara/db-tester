@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -30,13 +32,14 @@ import org.testcontainers.mysql.MySQLContainer;
  */
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
-public final class MySQLIntegrationTest {
+@DisplayName("MySQLIntegrationTest")
+final class MySQLIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(MySQLIntegrationTest.class);
 
   /** Creates MySQL integration test instance. */
-  public MySQLIntegrationTest() {}
+  MySQLIntegrationTest() {}
 
   /** MySQL container for integration testing. */
   @Container
@@ -123,9 +126,12 @@ public final class MySQLIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on MySQL")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnMySQL() {
+    // When & Then
     logger.info("Running MySQL integration smoke test");
   }
 }

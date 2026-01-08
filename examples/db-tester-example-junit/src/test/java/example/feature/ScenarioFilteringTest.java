@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -48,9 +50,10 @@ import org.slf4j.LoggerFactory;
  * demonstrates method-level annotation usage.
  */
 @ExtendWith(DatabaseTestExtension.class)
+@DisplayName("ScenarioFilteringTest")
 @DataSet
 @ExpectedDataSet
-public final class ScenarioFilteringTest {
+final class ScenarioFilteringTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(ScenarioFilteringTest.class);
@@ -59,7 +62,7 @@ public final class ScenarioFilteringTest {
   private static DataSource dataSource;
 
   /** Creates ScenarioFilteringTest instance. */
-  public ScenarioFilteringTest() {}
+  ScenarioFilteringTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -156,15 +159,20 @@ public final class ScenarioFilteringTest {
    * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should create active user with scenario filtering")
   void shouldCreateActiveUser() {
+    // Given
     logger.info("Running scenario test: shouldCreateActiveUser");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (2, 'charlie', 'charlie@example.com', 'ACTIVE')
         """);
 
+    // Then
     logger.info("Active user created successfully");
   }
 
@@ -185,15 +193,20 @@ public final class ScenarioFilteringTest {
    * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should create inactive user with scenario filtering")
   void shouldCreateInactiveUser() {
+    // Given
     logger.info("Running scenario test: shouldCreateInactiveUser");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (2, 'david', 'david@example.com', 'INACTIVE')
         """);
 
+    // Then
     logger.info("Inactive user created successfully");
   }
 
@@ -214,11 +227,16 @@ public final class ScenarioFilteringTest {
    * <p>Note: {@code @DataSet} and {@code @ExpectedDataSet} are applied at the class level.
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should handle multiple users with scenario filtering and update operation")
   void shouldHandleMultipleUsers() {
+    // Given
     logger.info("Running scenario test: shouldHandleMultipleUsers");
 
+    // When
     executeSql("UPDATE TABLE1 SET COLUMN3 = 'SUSPENDED' WHERE ID = 2");
 
+    // Then
     logger.info("User status updated successfully");
   }
 }

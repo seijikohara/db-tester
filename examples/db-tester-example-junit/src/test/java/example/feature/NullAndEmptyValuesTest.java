@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -43,7 +45,8 @@ import org.slf4j.LoggerFactory;
  * versus NULL, use quoted empty string {@code ""} for empty string and empty cell for NULL.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class NullAndEmptyValuesTest {
+@DisplayName("NullAndEmptyValuesTest")
+final class NullAndEmptyValuesTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(NullAndEmptyValuesTest.class);
@@ -52,7 +55,7 @@ public final class NullAndEmptyValuesTest {
   private static DataSource dataSource;
 
   /** Creates NullAndEmptyValuesTest instance. */
-  public NullAndEmptyValuesTest() {}
+  NullAndEmptyValuesTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -155,18 +158,22 @@ public final class NullAndEmptyValuesTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("edge-case")
+  @DisplayName("should handle NULL values in CSV files correctly")
   @DataSet
   @ExpectedDataSet
   void shouldHandleNullValues() throws Exception {
+    // Given
     logger.info("Running NULL values test");
 
-    // Insert record with NULL values
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (3, 'Third Record', NULL, 300, NULL)
         """);
 
+    // Then
     logger.info("NULL values test completed successfully");
   }
 }
