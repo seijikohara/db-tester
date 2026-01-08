@@ -17,6 +17,7 @@ import io.github.seijikohara.dbtester.api.spi.OperationProvider
 @Slf4j
 class SpockPreparationExecutor {
 
+	/** Provider for database operations. */
 	private final OperationProvider operationProvider = ServiceLoader.load(OperationProvider).findFirst().orElseThrow()
 
 	/**

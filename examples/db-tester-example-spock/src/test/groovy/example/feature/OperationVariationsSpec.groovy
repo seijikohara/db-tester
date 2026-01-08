@@ -19,7 +19,7 @@ import spock.lang.Specification
  *   <li>{@link Operation#CLEAN_INSERT} - Delete all rows, then insert (default, most common)
  *   <li>{@link Operation#INSERT} - Insert new rows (fails if primary key already exists)
  *   <li>{@link Operation#UPDATE} - Update existing rows only (fails if row not exists)
- *   <li>{@link Operation#REFRESH} - Update if exists, insert if not (upsert)
+ *   <li>{@link Operation#UPSERT} - Update if exists, insert if not (upsert)
  *   <li>{@link Operation#DELETE} - Delete only specified rows by primary key
  *   <li>{@link Operation#DELETE_ALL} - Delete all rows from tables
  *   <li>{@link Operation#TRUNCATE_TABLE} - Truncate tables, resetting auto-increment sequences
@@ -120,14 +120,14 @@ class OperationVariationsSpec extends Specification {
 	}
 
 	/**
-	 * Demonstrates REFRESH operation (upsert).
+	 * Demonstrates UPSERT operation.
 	 *
 	 * <p>Updates row if exists, inserts if not exists.
 	 */
-	@DataSet(operation = Operation.REFRESH)
+	@DataSet(operation = Operation.UPSERT)
 	@ExpectedDataSet
-	def 'should use refresh operation'() {
-		when: 'inserting a new product after refresh'
+	def 'should use upsert operation'() {
+		when: 'inserting a new product after upsert'
 		sql.execute '''
 			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
 			VALUES (3, 'Headphones', 40, CURRENT_TIMESTAMP)

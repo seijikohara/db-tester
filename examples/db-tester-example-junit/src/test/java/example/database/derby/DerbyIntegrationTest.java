@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,13 +28,14 @@ import org.slf4j.LoggerFactory;
  * smoke test to ensure Derby compatibility.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class DerbyIntegrationTest {
+@DisplayName("DerbyIntegrationTest")
+final class DerbyIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(DerbyIntegrationTest.class);
 
   /** Creates Derby integration test instance. */
-  public DerbyIntegrationTest() {}
+  DerbyIntegrationTest() {}
 
   /**
    * Sets up Derby in-memory database connection and schema.
@@ -109,9 +112,12 @@ public final class DerbyIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on Derby")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnDerby() {
+    // When & Then
     logger.info("Running Derby integration smoke test");
   }
 }

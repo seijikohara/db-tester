@@ -22,7 +22,7 @@
  *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.TruncateExecutor} - Executes
  *       TRUNCATE operations
  *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.RefreshExecutor} - Executes
- *       UPSERT (and deprecated REFRESH) operations
+ *       UPSERT operations
  * </ul>
  */
 @NullMarked

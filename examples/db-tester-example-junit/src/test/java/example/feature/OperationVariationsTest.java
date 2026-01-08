@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -44,7 +46,8 @@ import org.slf4j.LoggerFactory;
  * relevant to the specific test case.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class OperationVariationsTest {
+@DisplayName("OperationVariationsTest")
+final class OperationVariationsTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(OperationVariationsTest.class);
@@ -53,7 +56,7 @@ public final class OperationVariationsTest {
   private static DataSource dataSource;
 
   /** Creates OperationVariationsTest instance. */
-  public OperationVariationsTest() {}
+  OperationVariationsTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -149,17 +152,22 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use CLEAN_INSERT operation to delete all rows then insert test data")
   @DataSet(operation = Operation.CLEAN_INSERT)
   @ExpectedDataSet
   void shouldUseCleanInsertOperation() throws Exception {
+    // Given
     logger.info("Running CLEAN_INSERT operation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (3, 'Tablet', 25, CURRENT_TIMESTAMP)
         """);
 
+    // Then
     logger.info("CLEAN_INSERT operation completed");
   }
 
@@ -185,11 +193,15 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use INSERT operation to add new rows without deleting existing data")
   @DataSet(operation = Operation.DELETE_ALL)
   @ExpectedDataSet
   void shouldUseInsertOperation() throws Exception {
+    // Given
     logger.info("Running INSERT operation test");
 
+    // When
     // Demonstrate INSERT by adding rows to the empty table
     executeSql(
         """
@@ -207,6 +219,7 @@ public final class OperationVariationsTest {
         VALUES (3, 'Smartwatch', 30, CURRENT_TIMESTAMP)
         """);
 
+    // Then
     logger.info("INSERT operation completed");
   }
 
@@ -232,14 +245,19 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use UPDATE operation to modify existing rows")
   @DataSet(operation = Operation.CLEAN_INSERT)
   @ExpectedDataSet
   void shouldUseUpdateOperation() throws Exception {
+    // Given
     logger.info("Running UPDATE operation test");
 
+    // When
     // Update an existing row - ID=2 already exists from preparation
     executeSql("UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2");
 
+    // Then
     logger.info("UPDATE operation completed");
   }
 
@@ -259,17 +277,22 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use UPSERT operation to update if exists or insert if not")
   @DataSet(operation = Operation.UPSERT)
   @ExpectedDataSet
   void shouldUseUpsertOperation() throws Exception {
+    // Given
     logger.info("Running UPSERT operation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (3, 'Headphones', 40, CURRENT_TIMESTAMP)
         """);
 
+    // Then
     logger.info("UPSERT operation completed");
   }
 
@@ -289,11 +312,15 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use DELETE_ALL operation to clear table completely before inserting")
   @DataSet(operation = Operation.DELETE_ALL)
   @ExpectedDataSet
   void shouldUseDeleteAllOperation() throws Exception {
+    // Given
     logger.info("Running DELETE_ALL operation test");
 
+    // When
     // After DELETE_ALL, table is empty
     executeSql(
         """
@@ -301,6 +328,7 @@ public final class OperationVariationsTest {
         VALUES (1, 'Camera', 15, CURRENT_TIMESTAMP)
         """);
 
+    // Then
     logger.info("DELETE_ALL operation completed");
   }
 
@@ -331,15 +359,20 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use DELETE operation to remove specific rows by primary key")
   @DataSet
   @ExpectedDataSet
   void shouldUseDeleteOperation() throws Exception {
+    // Given
     logger.info("Running DELETE operation test");
 
+    // When
     // Execute business logic that deletes specific rows
     // Simulate application code deleting row 2
     executeSql("DELETE FROM TABLE1 WHERE ID = 2");
 
+    // Then
     logger.info("DELETE operation test completed");
   }
 
@@ -360,17 +393,22 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use TRUNCATE_INSERT operation to truncate then insert with predictable IDs")
   @DataSet(operation = Operation.TRUNCATE_INSERT)
   @ExpectedDataSet
   void shouldUseTruncateInsertOperation() throws Exception {
+    // Given
     logger.info("Running TRUNCATE_INSERT operation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (3, 'Monitor', 12, NULL)
         """);
 
+    // Then
     logger.info("TRUNCATE_INSERT operation completed");
   }
 
@@ -391,11 +429,16 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName(
+      "should use TRUNCATE_TABLE operation to clear data and reset auto-increment sequences")
   @DataSet(operation = Operation.TRUNCATE_TABLE)
   @ExpectedDataSet
   void shouldUseTruncateTableOperation() throws Exception {
+    // Given
     logger.info("Running TRUNCATE_TABLE operation test");
 
+    // When
     // After TRUNCATE_TABLE, table is empty and sequences are reset
     executeSql(
         """
@@ -403,6 +446,7 @@ public final class OperationVariationsTest {
         VALUES (1, 'Keyboard', 25, NULL)
         """);
 
+    // Then
     logger.info("TRUNCATE_TABLE operation completed");
   }
 }

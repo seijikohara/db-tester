@@ -18,6 +18,7 @@ import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -335,9 +336,8 @@ class DataSetMergerTest {
       final String tableName, final List<String> columnNames, final List<String> values) {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
-    for (var i = 0; i < columns.size(); i++) {
-      rowValues.put(columns.get(i), new CellValue(values.get(i)));
-    }
+    IntStream.range(0, columns.size())
+        .forEach(i -> rowValues.put(columns.get(i), new CellValue(values.get(i))));
     final Row row = new SimpleRow(rowValues);
     final Table table = new SimpleTable(new TableName(tableName), columns, List.of(row));
     return new SimpleTableSet(List.of(table));

@@ -1,10 +1,15 @@
 package io.github.seijikohara.dbtester.api.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.JDBCType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -26,28 +31,38 @@ class ColumnMetadataTest {
 
     /** Verifies that of() creates metadata with type and nullable. */
     @Test
+    @Tag("normal")
     @DisplayName("of() creates metadata with type and nullable")
-    void ofCreatesMetadataWithTypeAndNullable() {
+    void shouldCreateMetadata_whenTypeAndNullableProvided() {
+      // When
       final var metadata = ColumnMetadata.of(JDBCType.VARCHAR, true);
 
-      assertEquals(JDBCType.VARCHAR, metadata.jdbcType());
-      assertTrue(metadata.nullable());
-      assertFalse(metadata.primaryKey());
-      assertEquals(0, metadata.ordinalPosition());
-      assertEquals(0, metadata.precision());
-      assertEquals(0, metadata.scale());
-      assertNull(metadata.defaultValue());
+      // Then
+      assertAll(
+          "metadata should have correct default values",
+          () -> assertEquals(JDBCType.VARCHAR, metadata.jdbcType(), "jdbcType should be VARCHAR"),
+          () -> assertTrue(metadata.nullable(), "nullable should be true"),
+          () -> assertFalse(metadata.primaryKey(), "primaryKey should be false"),
+          () -> assertEquals(0, metadata.ordinalPosition(), "ordinalPosition should be 0"),
+          () -> assertEquals(0, metadata.precision(), "precision should be 0"),
+          () -> assertEquals(0, metadata.scale(), "scale should be 0"),
+          () -> assertNull(metadata.defaultValue(), "defaultValue should be null"));
     }
 
     /** Verifies that primaryKey() creates primary key metadata. */
     @Test
+    @Tag("normal")
     @DisplayName("primaryKey() creates primary key metadata")
-    void primaryKeyCreatesPrimaryKeyMetadata() {
+    void shouldCreatePrimaryKeyMetadata_whenPrimaryKeyFactoryMethodCalled() {
+      // When
       final var metadata = ColumnMetadata.primaryKey(JDBCType.BIGINT);
 
-      assertEquals(JDBCType.BIGINT, metadata.jdbcType());
-      assertFalse(metadata.nullable());
-      assertTrue(metadata.primaryKey());
+      // Then
+      assertAll(
+          "metadata should have primary key properties",
+          () -> assertEquals(JDBCType.BIGINT, metadata.jdbcType(), "jdbcType should be BIGINT"),
+          () -> assertFalse(metadata.nullable(), "nullable should be false for primary key"),
+          () -> assertTrue(metadata.primaryKey(), "primaryKey should be true"));
     }
   }
 
@@ -65,6 +80,7 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {
@@ -79,9 +95,15 @@ class ColumnMetadataTest {
           "NUMERIC"
         })
     @DisplayName("returns true for numeric types")
-    void returnsTrueForNumericTypes(final JDBCType type) {
+    void shouldReturnTrue_whenNumericType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertTrue(metadata.isNumeric());
+
+      // When
+      final var isNumeric = metadata.isNumeric();
+
+      // Then
+      assertTrue(isNumeric, "isNumeric should return true for " + type);
     }
 
     /**
@@ -90,21 +112,35 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"VARCHAR", "CHAR", "DATE", "TIMESTAMP", "BLOB", "BOOLEAN"})
     @DisplayName("returns false for non-numeric types")
-    void returnsFalseForNonNumericTypes(final JDBCType type) {
+    void shouldReturnFalse_whenNonNumericType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertFalse(metadata.isNumeric());
+
+      // When
+      final var isNumeric = metadata.isNumeric();
+
+      // Then
+      assertFalse(isNumeric, "isNumeric should return false for " + type);
     }
 
     /** Verifies that isNumeric returns false for null type. */
     @Test
+    @Tag("edge-case")
     @DisplayName("returns false for null type")
-    void returnsFalseForNullType() {
+    void shouldReturnFalse_whenNullType() {
+      // Given
       final var metadata = new ColumnMetadata(null, true, false, 0, 0, 0, null);
-      assertFalse(metadata.isNumeric());
+
+      // When
+      final var isNumeric = metadata.isNumeric();
+
+      // Then
+      assertFalse(isNumeric, "isNumeric should return false for null type");
     }
   }
 
@@ -122,6 +158,7 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {
@@ -135,9 +172,15 @@ class ColumnMetadataTest {
           "NCLOB"
         })
     @DisplayName("returns true for textual types")
-    void returnsTrueForTextualTypes(final JDBCType type) {
+    void shouldReturnTrue_whenTextualType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertTrue(metadata.isTextual());
+
+      // When
+      final var isTextual = metadata.isTextual();
+
+      // Then
+      assertTrue(isTextual, "isTextual should return true for " + type);
     }
 
     /**
@@ -146,13 +189,20 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"INTEGER", "DATE", "BLOB", "BOOLEAN"})
     @DisplayName("returns false for non-textual types")
-    void returnsFalseForNonTextualTypes(final JDBCType type) {
+    void shouldReturnFalse_whenNonTextualType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertFalse(metadata.isTextual());
+
+      // When
+      final var isTextual = metadata.isTextual();
+
+      // Then
+      assertFalse(isTextual, "isTextual should return false for " + type);
     }
   }
 
@@ -170,13 +220,20 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"DATE", "TIME", "TIMESTAMP", "TIME_WITH_TIMEZONE", "TIMESTAMP_WITH_TIMEZONE"})
     @DisplayName("returns true for temporal types")
-    void returnsTrueForTemporalTypes(final JDBCType type) {
+    void shouldReturnTrue_whenTemporalType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertTrue(metadata.isTemporal());
+
+      // When
+      final var isTemporal = metadata.isTemporal();
+
+      // Then
+      assertTrue(isTemporal, "isTemporal should return true for " + type);
     }
 
     /**
@@ -185,13 +242,20 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"VARCHAR", "INTEGER", "BOOLEAN"})
     @DisplayName("returns false for non-temporal types")
-    void returnsFalseForNonTemporalTypes(final JDBCType type) {
+    void shouldReturnFalse_whenNonTemporalType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertFalse(metadata.isTemporal());
+
+      // When
+      final var isTemporal = metadata.isTemporal();
+
+      // Then
+      assertFalse(isTemporal, "isTemporal should return false for " + type);
     }
   }
 
@@ -209,13 +273,20 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"BINARY", "VARBINARY", "LONGVARBINARY", "BLOB"})
     @DisplayName("returns true for binary types")
-    void returnsTrueForBinaryTypes(final JDBCType type) {
+    void shouldReturnTrue_whenBinaryType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertTrue(metadata.isBinary());
+
+      // When
+      final var isBinary = metadata.isBinary();
+
+      // Then
+      assertTrue(isBinary, "isBinary should return true for " + type);
     }
   }
 
@@ -233,13 +304,20 @@ class ColumnMetadataTest {
      * @param type the JDBC type to test
      */
     @ParameterizedTest
+    @Tag("normal")
     @EnumSource(
         value = JDBCType.class,
         names = {"BOOLEAN", "BIT"})
     @DisplayName("returns true for boolean types")
-    void returnsTrueForBooleanTypes(final JDBCType type) {
+    void shouldReturnTrue_whenBooleanType(final JDBCType type) {
+      // Given
       final var metadata = ColumnMetadata.of(type, true);
-      assertTrue(metadata.isBoolean());
+
+      // When
+      final var isBoolean = metadata.isBoolean();
+
+      // Then
+      assertTrue(isBoolean, "isBoolean should return true for " + type);
     }
   }
 
@@ -253,42 +331,85 @@ class ColumnMetadataTest {
 
     /** Verifies that isLikelyAutoIncrement returns true for integer primary key without default. */
     @Test
+    @Tag("normal")
     @DisplayName("returns true for integer primary key without default")
-    void returnsTrueForIntegerPkWithoutDefault() {
+    void shouldReturnTrue_whenIntegerPkWithoutDefault() {
+      // Given
       final var metadata = new ColumnMetadata(JDBCType.INTEGER, false, true, 1, 0, 0, null);
-      assertTrue(metadata.isLikelyAutoIncrement());
+
+      // When
+      final var isLikelyAutoIncrement = metadata.isLikelyAutoIncrement();
+
+      // Then
+      assertTrue(
+          isLikelyAutoIncrement,
+          "isLikelyAutoIncrement should return true for integer PK without default");
     }
 
     /** Verifies that isLikelyAutoIncrement returns true for bigint primary key without default. */
     @Test
+    @Tag("normal")
     @DisplayName("returns true for bigint primary key without default")
-    void returnsTrueForBigintPkWithoutDefault() {
+    void shouldReturnTrue_whenBigintPkWithoutDefault() {
+      // Given
       final var metadata = new ColumnMetadata(JDBCType.BIGINT, false, true, 1, 0, 0, null);
-      assertTrue(metadata.isLikelyAutoIncrement());
+
+      // When
+      final var isLikelyAutoIncrement = metadata.isLikelyAutoIncrement();
+
+      // Then
+      assertTrue(
+          isLikelyAutoIncrement,
+          "isLikelyAutoIncrement should return true for bigint PK without default");
     }
 
     /** Verifies that isLikelyAutoIncrement returns false for non-primary key. */
     @Test
+    @Tag("normal")
     @DisplayName("returns false for non-primary key")
-    void returnsFalseForNonPk() {
+    void shouldReturnFalse_whenNonPrimaryKey() {
+      // Given
       final var metadata = new ColumnMetadata(JDBCType.INTEGER, false, false, 1, 0, 0, null);
-      assertFalse(metadata.isLikelyAutoIncrement());
+
+      // When
+      final var isLikelyAutoIncrement = metadata.isLikelyAutoIncrement();
+
+      // Then
+      assertFalse(
+          isLikelyAutoIncrement, "isLikelyAutoIncrement should return false for non-primary key");
     }
 
     /** Verifies that isLikelyAutoIncrement returns false for primary key with default value. */
     @Test
+    @Tag("normal")
     @DisplayName("returns false for primary key with default value")
-    void returnsFalseForPkWithDefault() {
+    void shouldReturnFalse_whenPkWithDefault() {
+      // Given
       final var metadata = new ColumnMetadata(JDBCType.INTEGER, false, true, 1, 0, 0, "0");
-      assertFalse(metadata.isLikelyAutoIncrement());
+
+      // When
+      final var isLikelyAutoIncrement = metadata.isLikelyAutoIncrement();
+
+      // Then
+      assertFalse(
+          isLikelyAutoIncrement,
+          "isLikelyAutoIncrement should return false for PK with default value");
     }
 
     /** Verifies that isLikelyAutoIncrement returns false for non-integer primary key. */
     @Test
+    @Tag("normal")
     @DisplayName("returns false for non-integer primary key")
-    void returnsFalseForNonIntegerPk() {
+    void shouldReturnFalse_whenNonIntegerPk() {
+      // Given
       final var metadata = new ColumnMetadata(JDBCType.VARCHAR, false, true, 1, 0, 0, null);
-      assertFalse(metadata.isLikelyAutoIncrement());
+
+      // When
+      final var isLikelyAutoIncrement = metadata.isLikelyAutoIncrement();
+
+      // Then
+      assertFalse(
+          isLikelyAutoIncrement, "isLikelyAutoIncrement should return false for non-integer PK");
     }
   }
 }

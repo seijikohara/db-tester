@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -30,13 +32,14 @@ import org.testcontainers.mssqlserver.MSSQLServerContainer;
  */
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
-public final class MSSQLServerIntegrationTest {
+@DisplayName("MSSQLServerIntegrationTest")
+final class MSSQLServerIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(MSSQLServerIntegrationTest.class);
 
   /** Creates SQL Server integration test instance. */
-  public MSSQLServerIntegrationTest() {}
+  MSSQLServerIntegrationTest() {}
 
   /** SQL Server container for integration testing. */
   @Container
@@ -123,9 +126,12 @@ public final class MSSQLServerIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on SQL Server")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnSQLServer() {
+    // When & Then
     logger.info("Running SQL Server integration smoke test");
   }
 }

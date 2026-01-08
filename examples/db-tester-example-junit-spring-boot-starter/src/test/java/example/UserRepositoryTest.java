@@ -8,6 +8,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -38,7 +40,8 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @SpringBootTest(classes = ExampleApplication.class)
 @ExtendWith(SpringBootDatabaseTestExtension.class)
-public class UserRepositoryTest {
+@DisplayName("UserRepositoryTest")
+class UserRepositoryTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(UserRepositoryTest.class);
@@ -52,7 +55,7 @@ public class UserRepositoryTest {
    * @param userRepository the user repository to test
    */
   @Autowired
-  public UserRepositoryTest(final UserRepository userRepository) {
+  UserRepositoryTest(final UserRepository userRepository) {
     this.userRepository = userRepository;
   }
 
@@ -68,12 +71,16 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should find all users ordered by id")
   @DataSet
   void shouldFindAllUsers() {
     logger.info("Testing findAllByOrderByIdAsc() operation");
 
+    // When
     final List<User> users = userRepository.findAllByOrderByIdAsc();
 
+    // Then
     assertAll(
         "findAllByOrderByIdAsc results",
         () -> assertEquals(2, users.size()),
@@ -95,12 +102,16 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should find user by id")
   @DataSet
   void shouldFindUserById() {
     logger.info("Testing findById() operation");
 
+    // When
     final var userOptional = userRepository.findById(1L);
 
+    // Then
     assertTrue(userOptional.isPresent(), "User should be present");
     final var user = userOptional.orElseThrow();
 
@@ -124,12 +135,17 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should save new user and verify database state")
   @DataSet
   @ExpectedDataSet
   void shouldSaveNewUser() {
     logger.info("Testing save() operation");
 
+    // Given
     final var newUser = new User(3L, "Charlie", "charlie@example.com");
+
+    // When & Then
     userRepository.save(newUser);
 
     logger.info("Saved new user: {}", newUser);
@@ -147,13 +163,16 @@ public class UserRepositoryTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should delete user by id")
   @DataSet
   void shouldDeleteUser() {
     logger.info("Testing deleteById() operation");
 
+    // When
     userRepository.deleteById(2L);
 
-    // Verify the user was deleted
+    // Then
     final List<User> remainingUsers = userRepository.findAllByOrderByIdAsc();
 
     assertAll(

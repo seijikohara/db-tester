@@ -1,10 +1,17 @@
 package io.github.seijikohara.dbtester.api.domain;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.JDBCType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link Column}. */
@@ -24,27 +31,45 @@ class ColumnTest {
 
     /** Verifies that of(String) creates a column with default settings. */
     @Test
+    @Tag("normal")
     @DisplayName("of(String) creates column with default settings")
-    void ofStringCreatesColumnWithDefaults() {
+    void shouldCreateColumnWithDefaults_whenStringProvided() {
+      // When
       final var column = Column.of("user_id");
 
-      assertEquals("user_id", column.getNameValue());
-      assertEquals(new ColumnName("user_id"), column.getName());
-      assertFalse(column.hasMetadata());
-      assertNull(column.getMetadata());
-      assertEquals(ComparisonStrategy.STRICT, column.getComparisonStrategy());
-      assertFalse(column.isIgnored());
+      // Then
+      assertAll(
+          "column should have default settings",
+          () -> assertEquals("user_id", column.getNameValue(), "name value should be 'user_id'"),
+          () ->
+              assertEquals(
+                  new ColumnName("user_id"), column.getName(), "name should equal ColumnName"),
+          () -> assertFalse(column.hasMetadata(), "should not have metadata"),
+          () -> assertTrue(column.getMetadata().isEmpty(), "metadata should be empty"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.STRICT,
+                  column.getComparisonStrategy(),
+                  "comparison strategy should be STRICT"),
+          () -> assertFalse(column.isIgnored(), "should not be ignored"));
     }
 
     /** Verifies that of(ColumnName) creates a column from existing ColumnName. */
     @Test
+    @Tag("normal")
     @DisplayName("of(ColumnName) creates column from existing ColumnName")
-    void ofColumnNameCreatesColumn() {
+    void shouldCreateColumn_whenColumnNameProvided() {
+      // Given
       final var name = new ColumnName("email");
+
+      // When
       final var column = Column.of(name);
 
-      assertSame(name, column.getName());
-      assertEquals("email", column.getNameValue());
+      // Then
+      assertAll(
+          "column should use provided ColumnName",
+          () -> assertSame(name, column.getName(), "name should be the same instance"),
+          () -> assertEquals("email", column.getNameValue(), "name value should be 'email'"));
     }
   }
 
@@ -58,8 +83,10 @@ class ColumnTest {
 
     /** Verifies that builder builds a column with all properties. */
     @Test
+    @Tag("normal")
     @DisplayName("builds column with all properties")
-    void buildsColumnWithAllProperties() {
+    void shouldBuildColumnWithAllProperties_whenAllPropertiesSet() {
+      // When
       final var column =
           Column.builder("price")
               .jdbcType(JDBCType.DECIMAL)
@@ -72,49 +99,75 @@ class ColumnTest {
               .comparisonStrategy(ComparisonStrategy.NUMERIC)
               .build();
 
-      assertEquals("price", column.getNameValue());
-      assertTrue(column.hasMetadata());
+      // Then
+      assertAll(
+          "column should have all specified properties",
+          () -> assertEquals("price", column.getNameValue(), "name value should be 'price'"),
+          () -> assertTrue(column.hasMetadata(), "should have metadata"),
+          () -> assertTrue(column.getMetadata().isPresent(), "metadata should be present"));
 
-      final var metadata = column.getMetadata();
-      assertNotNull(metadata);
-      assertEquals(JDBCType.DECIMAL, metadata.jdbcType());
-      assertEquals(10, metadata.precision());
-      assertEquals(2, metadata.scale());
-      assertFalse(metadata.nullable());
-      assertFalse(metadata.primaryKey());
-      assertEquals(3, metadata.ordinalPosition());
-      assertEquals("0.00", metadata.defaultValue());
+      final var metadata = column.getMetadata().orElseThrow();
+      assertAll(
+          "metadata should have correct values",
+          () -> assertEquals(JDBCType.DECIMAL, metadata.jdbcType(), "jdbcType should be DECIMAL"),
+          () -> assertEquals(10, metadata.precision(), "precision should be 10"),
+          () -> assertEquals(2, metadata.scale(), "scale should be 2"),
+          () -> assertFalse(metadata.nullable(), "nullable should be false"),
+          () -> assertFalse(metadata.primaryKey(), "primaryKey should be false"),
+          () -> assertEquals(3, metadata.ordinalPosition(), "ordinalPosition should be 3"),
+          () -> assertEquals("0.00", metadata.defaultValue(), "defaultValue should be '0.00'"));
 
-      assertEquals(ComparisonStrategy.NUMERIC, column.getComparisonStrategy());
+      assertEquals(
+          ComparisonStrategy.NUMERIC,
+          column.getComparisonStrategy(),
+          "comparison strategy should be NUMERIC");
     }
 
     /** Verifies that builder builds a column with regex pattern. */
     @Test
+    @Tag("normal")
     @DisplayName("builds column with regex pattern")
-    void buildsColumnWithRegexPattern() {
+    void shouldBuildColumnWithRegexPattern_whenRegexPatternSet() {
+      // When
       final var column = Column.builder("uuid").regexPattern("[a-f0-9-]{36}").build();
 
-      assertEquals(ComparisonStrategy.Type.REGEX, column.getComparisonStrategy().getType());
-      assertNotNull(column.getComparisonStrategy().getPattern());
+      // Then
+      assertAll(
+          "column should have regex comparison strategy",
+          () ->
+              assertEquals(
+                  ComparisonStrategy.Type.REGEX,
+                  column.getComparisonStrategy().getType(),
+                  "comparison strategy type should be REGEX"),
+          () ->
+              assertTrue(
+                  column.getComparisonStrategy().getPattern().isPresent(),
+                  "pattern should be present"));
     }
 
     /** Verifies that builder builds a column with IGNORE strategy. */
     @Test
+    @Tag("normal")
     @DisplayName("builds column with IGNORE strategy")
-    void buildsColumnWithIgnoreStrategy() {
+    void shouldBuildColumnWithIgnoreStrategy_whenIgnoreStrategySet() {
+      // When
       final var column =
           Column.builder("created_at").comparisonStrategy(ComparisonStrategy.IGNORE).build();
 
-      assertTrue(column.isIgnored());
+      // Then
+      assertTrue(column.isIgnored(), "column should be ignored");
     }
 
     /** Verifies that builder with minimal settings creates no metadata. */
     @Test
+    @Tag("edge-case")
     @DisplayName("builds column with minimal settings creates no metadata")
-    void buildsColumnWithMinimalSettingsCreatesNoMetadata() {
+    void shouldNotCreateMetadata_whenMinimalSettingsProvided() {
+      // When
       final var column = Column.builder("name").nullable(true).build();
 
-      assertFalse(column.hasMetadata());
+      // Then
+      assertFalse(column.hasMetadata(), "column should not have metadata with minimal settings");
     }
   }
 
@@ -128,15 +181,30 @@ class ColumnTest {
 
     /** Verifies that withComparisonStrategy creates a new column with updated strategy. */
     @Test
+    @Tag("normal")
     @DisplayName("creates new column with updated strategy")
-    void createsNewColumnWithUpdatedStrategy() {
+    void shouldCreateNewColumnWithUpdatedStrategy_whenWithComparisonStrategyCalled() {
+      // Given
       final var original = Column.of("id");
+
+      // When
       final var updated = original.withComparisonStrategy(ComparisonStrategy.IGNORE);
 
-      assertNotSame(original, updated);
-      assertEquals(ComparisonStrategy.STRICT, original.getComparisonStrategy());
-      assertEquals(ComparisonStrategy.IGNORE, updated.getComparisonStrategy());
-      assertEquals(original.getName(), updated.getName());
+      // Then
+      assertAll(
+          "withComparisonStrategy should create new column with updated strategy",
+          () -> assertNotSame(original, updated, "should be a different instance"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.STRICT,
+                  original.getComparisonStrategy(),
+                  "original should keep STRICT strategy"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.IGNORE,
+                  updated.getComparisonStrategy(),
+                  "updated should have IGNORE strategy"),
+          () -> assertEquals(original.getName(), updated.getName(), "names should be equal"));
     }
   }
 
@@ -150,16 +218,25 @@ class ColumnTest {
 
     /** Verifies that withMetadata creates a new column with updated metadata. */
     @Test
+    @Tag("normal")
     @DisplayName("creates new column with updated metadata")
-    void createsNewColumnWithUpdatedMetadata() {
+    void shouldCreateNewColumnWithUpdatedMetadata_whenWithMetadataCalled() {
+      // Given
       final var original = Column.of("id");
       final var metadata = ColumnMetadata.primaryKey(JDBCType.BIGINT);
+
+      // When
       final var updated = original.withMetadata(metadata);
 
-      assertNotSame(original, updated);
-      assertFalse(original.hasMetadata());
-      assertTrue(updated.hasMetadata());
-      assertSame(metadata, updated.getMetadata());
+      // Then
+      assertAll(
+          "withMetadata should create new column with updated metadata",
+          () -> assertNotSame(original, updated, "should be a different instance"),
+          () -> assertFalse(original.hasMetadata(), "original should not have metadata"),
+          () -> assertTrue(updated.hasMetadata(), "updated should have metadata"),
+          () ->
+              assertSame(
+                  metadata, updated.getMetadata().orElseThrow(), "metadata should be the same"));
     }
   }
 
@@ -173,23 +250,31 @@ class ColumnTest {
 
     /** Verifies that equals is based on column name only. */
     @Test
+    @Tag("normal")
     @DisplayName("equals based on column name only")
-    void equalsBasedOnNameOnly() {
+    void shouldBeEqual_whenSameColumnName() {
+      // Given
       final var col1 = Column.of("id");
       final var col2 = Column.builder("id").jdbcType(JDBCType.INTEGER).primaryKey(true).build();
 
-      assertEquals(col1, col2);
-      assertEquals(col1.hashCode(), col2.hashCode());
+      // When & Then
+      assertAll(
+          "columns with same name should be equal",
+          () -> assertEquals(col1, col2, "columns should be equal"),
+          () -> assertEquals(col1.hashCode(), col2.hashCode(), "hash codes should be equal"));
     }
 
     /** Verifies that different names are not equal. */
     @Test
+    @Tag("normal")
     @DisplayName("different names are not equal")
-    void differentNamesNotEqual() {
+    void shouldNotBeEqual_whenDifferentNames() {
+      // Given
       final var col1 = Column.of("id");
       final var col2 = Column.of("user_id");
 
-      assertNotEquals(col1, col2);
+      // When & Then
+      assertNotEquals(col1, col2, "columns with different names should not be equal");
     }
   }
 
@@ -203,14 +288,19 @@ class ColumnTest {
 
     /** Verifies that compareTo compares by column name. */
     @Test
+    @Tag("normal")
     @DisplayName("compares by column name")
-    void comparesByName() {
+    void shouldCompareByName_whenCompareToMethodCalled() {
+      // Given
       final var a = Column.of("a");
       final var b = Column.of("b");
 
-      assertTrue(a.compareTo(b) < 0);
-      assertTrue(b.compareTo(a) > 0);
-      assertEquals(0, a.compareTo(Column.of("a")));
+      // When & Then
+      assertAll(
+          "compareTo should compare by column name",
+          () -> assertTrue(a.compareTo(b) < 0, "'a' should be less than 'b'"),
+          () -> assertTrue(b.compareTo(a) > 0, "'b' should be greater than 'a'"),
+          () -> assertEquals(0, a.compareTo(Column.of("a")), "'a' should equal 'a'"));
     }
   }
 
@@ -224,11 +314,17 @@ class ColumnTest {
 
     /** Verifies that toString returns a readable representation. */
     @Test
+    @Tag("normal")
     @DisplayName("returns readable representation")
-    void returnsReadableRepresentation() {
+    void shouldReturnReadableRepresentation_whenToStringCalled() {
+      // Given
       final var column = Column.of("user_name");
 
-      assertEquals("Column[user_name]", column.toString());
+      // When
+      final var result = column.toString();
+
+      // Then
+      assertEquals("Column[user_name]", result, "toString should return readable representation");
     }
   }
 }

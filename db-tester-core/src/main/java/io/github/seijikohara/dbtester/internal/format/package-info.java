@@ -14,8 +14,6 @@
  *       registration and lookup
  *   <li>{@link io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser} - CSV/TSV
  *       parser
- *   <li>{@link io.github.seijikohara.dbtester.internal.format.TableOrdering} - Table ordering file
- *       management
  * </ul>
  *
  * @see io.github.seijikohara.dbtester.api.dataset

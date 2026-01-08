@@ -13,7 +13,9 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -47,7 +49,8 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class NestedConventionTest {
+@DisplayName("NestedConventionTest")
+final class NestedConventionTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(NestedConventionTest.class);
@@ -56,7 +59,7 @@ public final class NestedConventionTest {
   private static DataSource dataSource;
 
   /** Creates NestedConventionTest instance. */
-  public NestedConventionTest() {}
+  NestedConventionTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -143,6 +146,7 @@ public final class NestedConventionTest {
    * classpath:example/feature/NestedConventionTest/UserTests/}.
    */
   @Nested
+  @DisplayName("UserTests")
   class UserTests {
 
     /** Creates UserTests instance. */
@@ -164,6 +168,8 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should create new user with convention-based data loading")
     @DataSet(
         dataSets =
             @DataSetSource(
@@ -176,14 +182,17 @@ public final class NestedConventionTest {
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
                 scenarioNames = "createUser"))
     void shouldCreateNewUser() throws Exception {
+      // Given
       logger.info("Running nested test: shouldCreateNewUser");
 
+      // When
       executeSql(
           """
           INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
           VALUES (2, 'jane_doe', 'jane@example.com', true)
           """);
 
+      // Then
       logger.info("Nested test completed: shouldCreateNewUser");
     }
 
@@ -201,6 +210,8 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should update user status with convention-based data loading")
     @DataSet(
         dataSets =
             @DataSetSource(
@@ -213,10 +224,13 @@ public final class NestedConventionTest {
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
                 scenarioNames = "updateStatus"))
     void shouldUpdateUserStatus() throws Exception {
+      // Given
       logger.info("Running nested test: shouldUpdateUserStatus");
 
+      // When
       executeSql("UPDATE TABLE1 SET COLUMN3 = false WHERE ID = 1");
 
+      // Then
       logger.info("Nested test completed: shouldUpdateUserStatus");
     }
   }
@@ -228,6 +242,7 @@ public final class NestedConventionTest {
    * classpath:example/feature/NestedConventionTest/ProductTests/}.
    */
   @Nested
+  @DisplayName("ProductTests")
   class ProductTests {
 
     /** Creates ProductTests instance. */
@@ -249,6 +264,8 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should add new product with convention-based data loading")
     @DataSet(
         dataSets =
             @DataSetSource(
@@ -261,14 +278,17 @@ public final class NestedConventionTest {
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
                 scenarioNames = "addProduct"))
     void shouldAddNewProduct() throws Exception {
+      // Given
       logger.info("Running nested test: shouldAddNewProduct");
 
+      // When
       executeSql(
           """
           INSERT INTO TABLE2 (ID, COLUMN1, COLUMN2, COLUMN3)
           VALUES (2, 'Tablet', 299.99, 15)
           """);
 
+      // Then
       logger.info("Nested test completed: shouldAddNewProduct");
     }
 
@@ -286,6 +306,8 @@ public final class NestedConventionTest {
      * @throws Exception if database operation fails
      */
     @Test
+    @Tag("normal")
+    @DisplayName("should update product price with convention-based data loading")
     @DataSet(
         dataSets =
             @DataSetSource(
@@ -298,10 +320,13 @@ public final class NestedConventionTest {
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
                 scenarioNames = "updatePrice"))
     void shouldUpdateProductPrice() throws Exception {
+      // Given
       logger.info("Running nested test: shouldUpdateProductPrice");
 
+      // When
       executeSql("UPDATE TABLE2 SET COLUMN2 = 899.99 WHERE ID = 1");
 
+      // Then
       logger.info("Nested test completed: shouldUpdateProductPrice");
     }
   }

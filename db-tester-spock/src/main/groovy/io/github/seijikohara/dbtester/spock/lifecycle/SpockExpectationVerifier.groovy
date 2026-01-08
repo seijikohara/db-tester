@@ -25,6 +25,7 @@ import io.github.seijikohara.dbtester.api.spi.ExpectationProvider
 @Slf4j
 class SpockExpectationVerifier {
 
+	/** Provider for expectation verification operations. */
 	private final ExpectationProvider expectationProvider = ServiceLoader.load(ExpectationProvider).findFirst().orElseThrow()
 
 	/**

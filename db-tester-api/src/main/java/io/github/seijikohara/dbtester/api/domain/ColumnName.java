@@ -25,28 +25,6 @@ public record ColumnName(String value) implements Comparable<ColumnName> {
     value = validateNonBlankString(value, "Column name");
   }
 
-  /**
-   * Converts this ColumnName to a rich Column with default settings.
-   *
-   * <p>The returned Column has no metadata and uses STRICT comparison strategy.
-   *
-   * @return a new Column wrapping this name
-   */
-  public Column toColumn() {
-    return Column.of(this);
-  }
-
-  /**
-   * Creates a Column builder from this name.
-   *
-   * <p>Use this to create a Column with custom metadata and comparison strategy.
-   *
-   * @return a new Column.Builder for this column name
-   */
-  public Column.Builder toColumnBuilder() {
-    return Column.builder(this);
-  }
-
   @Override
   public int compareTo(final ColumnName other) {
     return this.value.compareTo(other.value());

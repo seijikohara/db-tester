@@ -9,6 +9,8 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
 import javax.sql.DataSource;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -36,6 +38,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 @SpringBootTest(
     classes = {ExampleApplication.class, MultipleDataSourcesTest.MultiDataSourceConfig.class})
 @ExtendWith(SpringBootDatabaseTestExtension.class)
+@DisplayName("MultipleDataSourcesTest")
 class MultipleDataSourcesTest {
 
   /** Logger for test execution logging. */
@@ -67,10 +70,14 @@ class MultipleDataSourcesTest {
    * @param context the extension context for accessing the registry
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should register multiple DataSources")
   void shouldRegisterMultipleDataSources(
       final org.junit.jupiter.api.extension.ExtensionContext context) {
+    // Given
     final DataSourceRegistry registry = DatabaseTestExtension.getRegistry(context);
 
+    // When & Then
     assertAll(
         "Multiple DataSource registration",
         () -> assertNotNull(registry.get("mainDb"), "mainDb should be registered"),
@@ -91,13 +98,17 @@ class MultipleDataSourcesTest {
    * <p>CSV files located at: {@code src/test/resources/example/MultipleDataSourcesTest/USERS.csv}
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should prepare default DataSource with DataSet")
   @DataSet
   void shouldPrepareDefaultDataSource() {
     logger.info("Testing preparation with default DataSource");
 
+    // When
     final var jdbcClient = JdbcClient.create(mainDataSource);
     final var count = jdbcClient.sql("SELECT COUNT(*) FROM USERS").query(Long.class).single();
 
+    // Then
     assertEquals(2L, count, "Default DataSource should have 2 users from preparation");
     logger.info("Default DataSource has {} users", count);
   }
@@ -109,17 +120,21 @@ class MultipleDataSourcesTest {
    * allowing direct database operations on the secondary database.
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should access named DataSource directly")
   void shouldAccessNamedDataSource() {
     logger.info("Testing direct access to named DataSource (archiveDb)");
 
+    // Given
     final var jdbcClient = JdbcClient.create(archiveDataSource);
 
-    // Insert test data directly
+    // When
     jdbcClient
         .sql(
             "INSERT INTO ARCHIVED_USERS (ID, NAME, EMAIL, ARCHIVED_AT) VALUES (1, 'Test', 'test@example.com', CURRENT_TIMESTAMP)")
         .update();
 
+    // Then
     final var count =
         jdbcClient.sql("SELECT COUNT(*) FROM ARCHIVED_USERS").query(Long.class).single();
 

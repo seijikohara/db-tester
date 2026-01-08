@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -38,7 +40,8 @@ import org.slf4j.LoggerFactory;
  * convention-based paths are insufficient for complex test scenarios.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class CustomExpectationPathsTest {
+@DisplayName("CustomExpectationPathsTest")
+final class CustomExpectationPathsTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(CustomExpectationPathsTest.class);
@@ -47,7 +50,7 @@ public final class CustomExpectationPathsTest {
   private static DataSource dataSource;
 
   /** Creates CustomExpectationPathsTest instance. */
-  public CustomExpectationPathsTest() {}
+  CustomExpectationPathsTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -143,6 +146,8 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should insert new order with custom expectation path")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -150,14 +155,17 @@ public final class CustomExpectationPathsTest {
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-basic/"))
   void shouldInsertNewOrder() {
+    // Given
     logger.info("Running basic INSERT test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (2, 1, 299.99, '2024-02-15', 'PENDING')
         """);
 
+    // Then
     logger.info("Basic INSERT test completed");
   }
 
@@ -176,6 +184,8 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate with partial columns using custom expectation path")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -183,14 +193,17 @@ public final class CustomExpectationPathsTest {
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-ignore-columns/"))
   void shouldValidateWithPartialColumns() {
+    // Given
     logger.info("Running partial column validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (2, 2, 599.99, '2024-03-20', 'SHIPPED')
         """);
 
+    // Then
     logger.info("Partial column validation test completed");
   }
 
@@ -209,6 +222,8 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate order items with custom expectation path")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -216,14 +231,17 @@ public final class CustomExpectationPathsTest {
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-query/"))
   void shouldValidateOrderItems() {
+    // Given
     logger.info("Running order items validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE2 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (3, 1, 'Headphones', 1, 79.99)
         """);
 
+    // Then
     logger.info("Order items validation completed");
   }
 
@@ -242,6 +260,8 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should create order in pending state (stage 1)")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -249,14 +269,17 @@ public final class CustomExpectationPathsTest {
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage1/"))
   void shouldCreateOrder() {
+    // Given
     logger.info("Running order creation test (stage 1)");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (2, 1, 150.00, '2024-04-10', 'PENDING')
         """);
 
+    // Then
     logger.info("Order creation test completed");
   }
 
@@ -275,6 +298,8 @@ public final class CustomExpectationPathsTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should ship order and transition to shipped state (stage 2)")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -282,16 +307,18 @@ public final class CustomExpectationPathsTest {
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage2/"))
   void shouldShipOrder() {
+    // Given
     logger.info("Running order shipment test (stage 2)");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (2, 1, 150.00, '2024-04-10', 'PENDING')
         """);
-
     executeSql("UPDATE TABLE1 SET COLUMN4 = 'SHIPPED' WHERE ID = 2");
 
+    // Then
     logger.info("Order shipment test completed");
   }
 }

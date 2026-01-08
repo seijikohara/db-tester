@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.hsqldb.jdbc.JDBCDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -26,13 +28,14 @@ import org.slf4j.LoggerFactory;
  * is a smoke test to ensure HSQLDB compatibility.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class HSQLDBIntegrationTest {
+@DisplayName("HSQLDBIntegrationTest")
+final class HSQLDBIntegrationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(HSQLDBIntegrationTest.class);
 
   /** Creates HSQLDB integration test instance. */
-  public HSQLDBIntegrationTest() {}
+  HSQLDBIntegrationTest() {}
 
   /**
    * Sets up HSQLDB in-memory database connection and schema.
@@ -110,9 +113,12 @@ public final class HSQLDBIntegrationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should execute basic database operations on HSQLDB")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnHSQLDB() {
+    // When & Then
     logger.info("Running HSQLDB integration smoke test");
   }
 }

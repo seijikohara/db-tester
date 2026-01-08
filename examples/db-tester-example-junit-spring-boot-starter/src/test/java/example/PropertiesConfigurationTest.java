@@ -10,6 +10,8 @@ import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -61,7 +63,8 @@ import org.springframework.test.context.ActiveProfiles;
 @SpringBootTest(classes = ExampleApplication.class)
 @ExtendWith(SpringBootDatabaseTestExtension.class)
 @ActiveProfiles("custom-config")
-public class PropertiesConfigurationTest {
+@DisplayName("PropertiesConfigurationTest")
+class PropertiesConfigurationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(PropertiesConfigurationTest.class);
@@ -79,8 +82,7 @@ public class PropertiesConfigurationTest {
    * @param configuration the DB Tester configuration
    */
   @Autowired
-  public PropertiesConfigurationTest(
-      final JdbcTemplate jdbcTemplate, final Configuration configuration) {
+  PropertiesConfigurationTest(final JdbcTemplate jdbcTemplate, final Configuration configuration) {
     this.jdbcTemplate = jdbcTemplate;
     this.configuration = configuration;
   }
@@ -92,9 +94,12 @@ public class PropertiesConfigurationTest {
    * application-custom-config.properties} are correctly bound to the Configuration bean.
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should inject configuration from properties")
   void shouldInjectConfigurationFromProperties() {
     logger.info("Verifying Configuration injection from properties");
 
+    // When & Then
     assertNotNull(configuration, "Configuration should be injected");
     assertNotNull(configuration.conventions(), "Conventions should not be null");
     assertNotNull(configuration.operations(), "Operations should not be null");
@@ -144,11 +149,14 @@ public class PropertiesConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom scenario marker from properties")
   @DataSet
   @ExpectedDataSet
   void shouldUseCustomScenarioMarkerFromProperties() {
     logger.info("Testing custom scenario marker [TestCase] configured via properties");
 
+    // When & Then
     jdbcTemplate.update(
         "INSERT INTO CONFIG_ITEMS (ID, NAME, STATUS, CREATED_DATE) VALUES (?, ?, ?, ?)",
         2,
@@ -174,11 +182,14 @@ public class PropertiesConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom expectation suffix from properties")
   @DataSet
   @ExpectedDataSet
   void shouldUseCustomExpectationSuffixFromProperties() {
     logger.info("Testing custom expectation suffix /verify configured via properties");
 
+    // When & Then
     jdbcTemplate.update("UPDATE CONFIG_ITEMS SET STATUS = ? WHERE ID = ?", "DISABLED", 1);
 
     logger.info("Custom expectation suffix test completed");

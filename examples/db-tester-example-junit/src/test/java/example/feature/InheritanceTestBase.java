@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
         @DataSetSource(
             resourceLocation = "classpath:example/feature/InheritanceTestBase/",
             scenarioNames = "baseSetup"))
-public abstract class InheritanceTestBase {
+abstract class InheritanceTestBase {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(InheritanceTestBase.class);

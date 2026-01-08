@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -45,12 +47,13 @@ import org.slf4j.LoggerFactory;
  * </pre>
  */
 @ExtendWith(DatabaseTestExtension.class)
+@DisplayName("AnnotationConfigurationTest")
 @DataSet(
     dataSets =
         @DataSetSource(
             resourceLocation = "classpath:example/feature/AnnotationConfigurationTest/",
             scenarioNames = "classLevel"))
-public final class AnnotationConfigurationTest {
+final class AnnotationConfigurationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(AnnotationConfigurationTest.class);
@@ -59,7 +62,7 @@ public final class AnnotationConfigurationTest {
   private static DataSource dataSource;
 
   /** Creates AnnotationConfigurationTest instance. */
-  public AnnotationConfigurationTest() {}
+  AnnotationConfigurationTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -154,6 +157,8 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use custom resource location for data set loading")
   @DataSet(
       dataSets =
           @DataSetSource(
@@ -161,10 +166,13 @@ public final class AnnotationConfigurationTest {
                   "classpath:example/feature/AnnotationConfigurationTest/custom-location/"))
   @ExpectedDataSet
   void shouldUseCustomResourceLocation() {
+    // Given
     logger.info("Running custom resource location test");
 
+    // When
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Marketing', 'Tokyo')");
 
+    // Then
     logger.info("Custom resource location test completed");
   }
 
@@ -182,13 +190,18 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should handle multiple scenario names in a single DataSetSource")
   @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
   @ExpectedDataSet
   void shouldHandleMultipleScenarios() {
+    // Given
     logger.info("Running multiple scenarios test");
 
+    // When
     executeSql("UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2");
 
+    // Then
     logger.info("Multiple scenarios test completed");
   }
 
@@ -216,13 +229,18 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should merge multiple data sets from different scenarios")
   @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "shouldMergeMultipleDataSets"))
   void shouldMergeMultipleDataSets() {
+    // Given
     logger.info("Running multiple DataSet array test");
 
+    // When
     executeSql("UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2");
 
+    // Then
     logger.info("Multiple DataSet array test completed");
   }
 
@@ -241,16 +259,21 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use class-level DataSet annotation when method has none")
   @ExpectedDataSet
   void shouldUseClassLevelAnnotation() {
+    // Given
     logger.info("Running class-level annotation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE2 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (100, 'New Employee', 1, 45000.00)
         """);
 
+    // Then
     logger.info("Class-level annotation test completed");
   }
 
@@ -269,17 +292,22 @@ public final class AnnotationConfigurationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should handle different scenarios for preparation and expectation")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet1"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet"))
   void shouldHandleMultipleDataSets() {
+    // Given
     logger.info("Running multiple DataSets test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2)
         VALUES (4, 'Research', 'Osaka')
         """);
 
+    // Then
     logger.info("Multiple DataSets test completed");
   }
 }

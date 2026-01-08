@@ -105,10 +105,10 @@ public final class ComparisonStrategy {
   /**
    * Returns the regex pattern for REGEX strategies.
    *
-   * @return the pattern, or null if not a REGEX strategy
+   * @return the pattern, or empty if not a REGEX strategy
    */
-  public @Nullable Pattern getPattern() {
-    return pattern;
+  public Optional<Pattern> getPattern() {
+    return Optional.ofNullable(pattern);
   }
 
   /**
@@ -168,10 +168,10 @@ public final class ComparisonStrategy {
    */
   private boolean compareNumericValues(final Object expected, final Object actual) {
     try {
-      return Optional.ofNullable(toNumber(expected))
+      return toNumber(expected)
           .flatMap(
               expNum ->
-                  Optional.ofNullable(toNumber(actual))
+                  toNumber(actual)
                       .map(
                           actNum -> {
                             final var expectedDecimal = new BigDecimal(expNum.toString());
@@ -188,20 +188,20 @@ public final class ComparisonStrategy {
    * Converts an object to a Number if possible.
    *
    * @param value the value to convert
-   * @return the number, or null if not convertible
+   * @return the number, or empty if not convertible
    */
-  private @Nullable Number toNumber(final Object value) {
+  private Optional<Number> toNumber(final Object value) {
     if (value instanceof Number num) {
-      return num;
+      return Optional.of(num);
     }
     if (value instanceof String str) {
       try {
-        return new BigDecimal(str.trim());
+        return Optional.of(new BigDecimal(str.trim()));
       } catch (final NumberFormatException e) {
-        return null;
+        return Optional.empty();
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   /**

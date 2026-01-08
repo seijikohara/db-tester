@@ -81,37 +81,37 @@ class KotestExpectationVerifier {
         context: TestContext,
         expectedTableSet: ExpectedTableSet,
         methodName: String,
-    ) {
-        val tableSet = expectedTableSet.tableSet()
-        val excludeColumns = expectedTableSet.excludeColumns()
-        val dataSource = tableSet.dataSource.orElseGet { context.registry().get("") }
-        val tableCount = tableSet.tables.size
+    ): Unit =
+        expectedTableSet.tableSet().let { tableSet ->
+            val excludeColumns = expectedTableSet.excludeColumns()
+            val dataSource = tableSet.dataSource.orElseGet { context.registry().get("") }
+            val tableCount = tableSet.tables.size
 
-        logger.info(
-            "Validating expectation dataset for {}: {} tables",
-            methodName,
-            tableCount,
-        )
+            logger.info(
+                "Validating expectation dataset for {}: {} tables",
+                methodName,
+                tableCount,
+            )
 
-        if (expectedTableSet.hasExclusions()) {
-            logger.debug("Excluding columns from verification: {}", excludeColumns)
-        }
-
-        runCatching { expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns) }
-            .onSuccess {
-                logger.info(
-                    "Expectation validation completed successfully for {}: {} tables",
-                    methodName,
-                    tableCount,
-                )
-            }.onFailure { e ->
-                when (e) {
-                    is ValidationException -> throw ValidationException(
-                        "Failed to verify expectation dataset for $methodName",
-                        e,
-                    )
-                    else -> throw e
-                }
+            if (expectedTableSet.hasExclusions()) {
+                logger.debug("Excluding columns from verification: {}", excludeColumns)
             }
-    }
+
+            runCatching { expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns) }
+                .onSuccess {
+                    logger.info(
+                        "Expectation validation completed successfully for {}: {} tables",
+                        methodName,
+                        tableCount,
+                    )
+                }.onFailure { e ->
+                    when (e) {
+                        is ValidationException -> throw ValidationException(
+                            "Failed to verify expectation dataset for $methodName",
+                            e,
+                        )
+                        else -> throw e
+                    }
+                }
+        }
 }

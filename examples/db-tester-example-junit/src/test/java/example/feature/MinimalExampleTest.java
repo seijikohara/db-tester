@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -39,7 +41,8 @@ import org.slf4j.LoggerFactory;
  * </ul>
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class MinimalExampleTest {
+@DisplayName("MinimalExampleTest")
+final class MinimalExampleTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(MinimalExampleTest.class);
@@ -48,7 +51,7 @@ public final class MinimalExampleTest {
   private static DataSource dataSource;
 
   /** Creates MinimalExampleTest instance. */
-  public MinimalExampleTest() {}
+  MinimalExampleTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -142,14 +145,20 @@ public final class MinimalExampleTest {
    *   <li>Expectation: Verifies all three products from {@code expected/TABLE1.csv}
    * </ul>
    */
+  /** Verifies that product data can be loaded and verified using convention-based CSV files. */
   @Test
+  @Tag("normal")
+  @DisplayName("should load and verify product data")
   @DataSet
   @ExpectedDataSet
   void shouldLoadAndVerifyProductData() {
+    // Given
     logger.info("Running minimal example test");
 
+    // When
     executeSql("INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Keyboard', 79.99)");
 
+    // Then
     logger.info("Product data inserted successfully");
   }
 }

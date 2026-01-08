@@ -22,7 +22,7 @@ package io.github.seijikohara.dbtester.internal.domain;
  * @param <T> the concrete identifier type implementing this interface (self-type)
  */
 public sealed interface StringIdentifier<T extends StringIdentifier<T>> extends Comparable<T>
-    permits ScenarioMarker, SchemaName {
+    permits ScenarioMarker {
 
   /**
    * Returns the string value of this identifier.

@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -37,7 +39,8 @@ import org.slf4j.LoggerFactory;
  * datasets using DbUnit APIs.
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class CustomQueryValidationTest {
+@DisplayName("CustomQueryValidationTest")
+final class CustomQueryValidationTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(CustomQueryValidationTest.class);
@@ -46,7 +49,7 @@ public final class CustomQueryValidationTest {
   private static DataSource dataSource;
 
   /** Creates CustomQueryValidationTest instance. */
-  public CustomQueryValidationTest() {}
+  CustomQueryValidationTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -141,6 +144,8 @@ public final class CustomQueryValidationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate regional sales with filtered data")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -148,14 +153,17 @@ public final class CustomQueryValidationTest {
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-filtered/"))
   void shouldValidateRegionalSales() {
+    // Given
     logger.info("Running regional sales validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 3, '2024-01-25', 350.00, 'East')
         """);
 
+    // Then
     logger.info("Regional sales validation completed");
   }
 
@@ -173,6 +181,8 @@ public final class CustomQueryValidationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate sales summary with aggregated data")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -180,14 +190,17 @@ public final class CustomQueryValidationTest {
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-aggregation/"))
   void shouldValidateSalesSummary() {
+    // Given
     logger.info("Running sales summary validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 1, '2024-01-25', 500.00, 'West')
         """);
 
+    // Then
     logger.info("Sales summary validation completed");
   }
 
@@ -206,6 +219,8 @@ public final class CustomQueryValidationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate high-value sales with join data")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -213,14 +228,17 @@ public final class CustomQueryValidationTest {
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-join/"))
   void shouldValidateHighValueSales() {
+    // Given
     logger.info("Running high-value sales validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 1, '2024-02-01', 600.00, 'North')
         """);
 
+    // Then
     logger.info("High-value sales validation completed");
   }
 
@@ -239,6 +257,8 @@ public final class CustomQueryValidationTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should validate January sales with date range filtering")
   @DataSet
   @ExpectedDataSet(
       dataSets =
@@ -246,14 +266,17 @@ public final class CustomQueryValidationTest {
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-daterange/"))
   void shouldValidateJanuarySales() {
+    // Given
     logger.info("Running January sales validation test");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 2, '2024-01-25', 450.00, 'South')
         """);
 
+    // Then
     logger.info("January sales validation completed");
   }
 }

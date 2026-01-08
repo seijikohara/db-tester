@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -47,7 +49,8 @@ import org.slf4j.LoggerFactory;
  * empty columns (nothing between commas).
  */
 @ExtendWith(DatabaseTestExtension.class)
-public final class ComprehensiveDataTypesTest {
+@DisplayName("ComprehensiveDataTypesTest")
+final class ComprehensiveDataTypesTest {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(ComprehensiveDataTypesTest.class);
@@ -56,7 +59,7 @@ public final class ComprehensiveDataTypesTest {
   private static DataSource dataSource;
 
   /** Creates ComprehensiveDataTypesTest instance. */
-  public ComprehensiveDataTypesTest() {}
+  ComprehensiveDataTypesTest() {}
 
   /**
    * Sets up H2 in-memory database connection and schema.
@@ -152,11 +155,15 @@ public final class ComprehensiveDataTypesTest {
    * </ul>
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should handle all H2 CSV-representable data types")
   @DataSet
   @ExpectedDataSet
   void shouldHandleAllDataTypes() {
+    // Given
     logger.info("Running comprehensive data types test");
 
+    // When
     executeSql(
         """
         INSERT INTO DATA_TYPES (
@@ -182,6 +189,7 @@ public final class ComprehensiveDataTypesTest {
         )
         """);
 
+    // Then
     logger.info("Data types test completed successfully");
   }
 }

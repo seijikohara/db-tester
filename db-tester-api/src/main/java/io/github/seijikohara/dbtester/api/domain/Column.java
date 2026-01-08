@@ -114,10 +114,10 @@ public final class Column implements Comparable<Column> {
   /**
    * Returns the column metadata if available.
    *
-   * @return the metadata, or null if not set
+   * @return the metadata, or empty if not set
    */
-  public @Nullable ColumnMetadata getMetadata() {
-    return metadata;
+  public Optional<ColumnMetadata> getMetadata() {
+    return Optional.ofNullable(metadata);
   }
 
   /**

@@ -330,30 +330,6 @@ class OperationExecutorTest {
     }
 
     /**
-     * Verifies that deprecated REFRESH operation delegates to refresh executor.
-     *
-     * @throws SQLException if a database error occurs
-     */
-    @Test
-    @Tag("normal")
-    @SuppressWarnings("removal")
-    @DisplayName("should delegate to refresh executor for deprecated REFRESH operation")
-    void shouldDelegateToRefreshExecutor_whenRefreshOperation() throws SQLException {
-      // Given
-      final var connection = mock(Connection.class);
-      final var dataSet = mock(TableSet.class);
-      final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
-
-      // When
-      executor.executeOperation(
-          Operation.REFRESH, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
-
-      // Then
-      verify(refreshExecutor).execute(tables, connection);
-    }
-
-    /**
      * Verifies that TRUNCATE_TABLE operation delegates to truncate executor.
      *
      * @throws SQLException if a database error occurs

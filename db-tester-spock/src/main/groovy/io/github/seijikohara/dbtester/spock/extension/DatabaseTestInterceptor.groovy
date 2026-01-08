@@ -26,9 +26,16 @@ import org.spockframework.runtime.extension.IMethodInvocation
  */
 class DatabaseTestInterceptor implements IMethodInterceptor {
 
+	/** The data set annotation for preparation phase (may be null). */
 	protected final DataSet dataSet
+
+	/** The expected data set annotation for verification phase (may be null). */
 	protected final ExpectedDataSet expectedDataSet
+
+	/** Executor for the preparation phase. */
 	protected final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
+
+	/** Verifier for the expectation phase. */
 	protected final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
 
 	/**
@@ -161,6 +168,11 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 
 	/**
 	 * Finds a field by name and type in the class hierarchy.
+	 *
+	 * @param clazz the class to search
+	 * @param fieldName the name of the field to find
+	 * @param fieldType the expected type of the field
+	 * @return the field, or null if not found
 	 */
 	private static Field findField(Class<?> clazz, String fieldName, Class<?> fieldType) {
 		generateSequence(clazz) { it.superclass }
@@ -171,6 +183,10 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 
 	/**
 	 * Generates a sequence starting from seed, applying generator until null.
+	 *
+	 * @param seed the initial value
+	 * @param generator the function to generate the next value
+	 * @return the list of generated values
 	 */
 	private static <T> List<T> generateSequence(T seed, Closure<T> generator) {
 		def result = []

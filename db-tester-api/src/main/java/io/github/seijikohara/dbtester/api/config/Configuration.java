@@ -72,18 +72,6 @@ public record Configuration(
   }
 
   /**
-   * Creates a configuration that overrides the default operations while leaving other components on
-   * their conventional values.
-   *
-   * @param operations operation defaults to apply
-   * @return configuration composed of standard conventions, the supplied operations, and default
-   *     loader
-   */
-  public static Configuration withOperations(final OperationDefaults operations) {
-    return new Configuration(ConventionSettings.standard(), operations, LoaderHolder.INSTANCE);
-  }
-
-  /**
    * Creates a configuration that uses a custom dataset loader and default values for the remaining
    * components.
    *

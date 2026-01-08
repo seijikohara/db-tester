@@ -59,7 +59,7 @@ class PrimaryBeanResolverTest {
       final var result = PrimaryBeanResolver.isPrimaryBean(context, "myBean", logger);
 
       // Then
-      assertTrue(result);
+      assertTrue(result, "should return true when bean is marked as @Primary");
     }
 
     /** Verifies false when bean is not primary. */
@@ -81,7 +81,7 @@ class PrimaryBeanResolverTest {
       final var result = PrimaryBeanResolver.isPrimaryBean(context, "myBean", logger);
 
       // Then
-      assertFalse(result);
+      assertFalse(result, "should return false when bean is not marked as @Primary");
     }
 
     /** Verifies false when context is not configurable. */
@@ -96,7 +96,7 @@ class PrimaryBeanResolverTest {
       final var result = PrimaryBeanResolver.isPrimaryBean(context, "myBean", logger);
 
       // Then
-      assertFalse(result);
+      assertFalse(result, "should return false when context is not ConfigurableApplicationContext");
     }
 
     /** Verifies false when bean definition not found. */
@@ -115,7 +115,7 @@ class PrimaryBeanResolverTest {
       final var result = PrimaryBeanResolver.isPrimaryBean(context, "myBean", logger);
 
       // Then
-      assertFalse(result);
+      assertFalse(result, "should return false when bean definition is not found");
     }
   }
 }

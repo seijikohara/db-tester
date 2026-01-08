@@ -4,6 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import java.sql.SQLException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +36,14 @@ import org.slf4j.LoggerFactory;
  *     TABLE1.csv        (child class specific expectations)
  * </pre>
  */
-public final class InheritedAnnotationTest extends InheritanceTestBase {
+@DisplayName("InheritedAnnotationTest")
+final class InheritedAnnotationTest extends InheritanceTestBase {
 
   /** Logger instance for test execution logging. */
   private static final Logger logger = LoggerFactory.getLogger(InheritedAnnotationTest.class);
 
   /** Creates InheritedAnnotationTest instance. */
-  public InheritedAnnotationTest() {}
+  InheritedAnnotationTest() {}
 
   /**
    * Executes a SQL statement against the test database.
@@ -72,16 +75,21 @@ public final class InheritedAnnotationTest extends InheritanceTestBase {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should use inherited class-level @DataSet annotation")
   @ExpectedDataSet
   void shouldUseInheritedPreparation() throws Exception {
+    // Given
     logger.info("Running test with inherited @DataSet");
 
+    // When
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
         VALUES (3, 'Monitor', 20, 'Warehouse B')
         """);
 
+    // Then
     final var count = getRecordCount("TABLE1");
     logger.info("Record count after insert: {}", count);
 
@@ -105,13 +113,18 @@ public final class InheritedAnnotationTest extends InheritanceTestBase {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should override inherited @DataSet with method-level annotation")
   @DataSet(dataSets = @DataSetSource(scenarioNames = "overrideSetup"))
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "overrideSetup"))
   void shouldOverrideInheritedPreparation() throws Exception {
+    // Given
     logger.info("Running test with overridden @DataSet");
 
+    // When
     executeSql("UPDATE TABLE1 SET COLUMN2 = 50 WHERE ID = 1");
 
+    // Then
     logger.info("Test with overridden @DataSet completed");
   }
 
@@ -131,15 +144,20 @@ public final class InheritedAnnotationTest extends InheritanceTestBase {
    * @throws Exception if database operation fails
    */
   @Test
+  @Tag("normal")
+  @DisplayName("should combine inherited @DataSet with method-level @ExpectedDataSet")
   @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "combinedTest"))
   void shouldCombineInheritedAndMethodLevelAnnotations() throws Exception {
+    // Given
     logger.info("Running test with combined annotations");
 
+    // When
     executeSql(
         """
         UPDATE TABLE1 SET COLUMN3 = 'Warehouse C' WHERE COLUMN1 = 'Laptop'
         """);
 
+    // Then
     logger.info("Test with combined annotations completed");
   }
 }
