@@ -103,6 +103,7 @@ class OperationDefaultsTest {
     /** Verifies that all operation types are accepted. */
     @Test
     @Tag("normal")
+    @SuppressWarnings("removal")
     @DisplayName("should accept all operation types")
     void should_accept_all_operation_types() {
       // Given & When & Then - verify no exceptions for various combinations
@@ -110,13 +111,14 @@ class OperationDefaultsTest {
           "should accept all operation types",
           () -> new OperationDefaults(Operation.UPDATE, Operation.NONE),
           () -> new OperationDefaults(Operation.INSERT, Operation.DELETE),
-          () -> new OperationDefaults(Operation.REFRESH, Operation.DELETE_ALL),
+          () -> new OperationDefaults(Operation.UPSERT, Operation.DELETE_ALL),
+          () -> new OperationDefaults(Operation.REFRESH, Operation.DELETE_ALL), // deprecated
           () -> new OperationDefaults(Operation.DELETE, Operation.TRUNCATE_TABLE),
           () -> new OperationDefaults(Operation.DELETE_ALL, Operation.CLEAN_INSERT),
           () -> new OperationDefaults(Operation.TRUNCATE_TABLE, Operation.TRUNCATE_INSERT),
           () -> new OperationDefaults(Operation.CLEAN_INSERT, Operation.UPDATE),
           () -> new OperationDefaults(Operation.TRUNCATE_INSERT, Operation.INSERT),
-          () -> new OperationDefaults(Operation.NONE, Operation.REFRESH));
+          () -> new OperationDefaults(Operation.NONE, Operation.UPSERT));
     }
   }
 

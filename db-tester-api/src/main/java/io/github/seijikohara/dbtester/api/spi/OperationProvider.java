@@ -21,7 +21,8 @@ import javax.sql.DataSource;
  *   <li>{@code UPDATE} - Update existing rows
  *   <li>{@code DELETE} - Delete specific rows
  *   <li>{@code DELETE_ALL} - Delete all rows from tables
- *   <li>{@code REFRESH} - Upsert (insert or update)
+ *   <li>{@code UPSERT} - Upsert (insert or update)
+ *   <li>{@code REFRESH} - Deprecated, use {@code UPSERT} instead
  *   <li>{@code TRUNCATE_TABLE} - Truncate tables
  *   <li>{@code CLEAN_INSERT} - Delete all then insert
  *   <li>{@code TRUNCATE_INSERT} - Truncate then insert

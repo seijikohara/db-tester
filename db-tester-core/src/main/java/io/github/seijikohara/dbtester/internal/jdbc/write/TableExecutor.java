@@ -18,7 +18,7 @@ import java.util.List;
  *   <li>{@link UpdateExecutor} - UPDATE operations
  *   <li>{@link DeleteExecutor} - DELETE operations
  *   <li>{@link TruncateExecutor} - TRUNCATE operations
- *   <li>{@link RefreshExecutor} - REFRESH (upsert) operations
+ *   <li>{@link RefreshExecutor} - UPSERT (and deprecated REFRESH) operations
  * </ul>
  *
  * <p>All implementations must be stateless and thread-safe.

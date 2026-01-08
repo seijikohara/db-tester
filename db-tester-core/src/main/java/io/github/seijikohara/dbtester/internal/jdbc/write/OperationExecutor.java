@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link UpdateExecutor} - UPDATE operations
  *   <li>{@link DeleteExecutor} - DELETE and DELETE_ALL operations
  *   <li>{@link TruncateExecutor} - TRUNCATE operations
- *   <li>{@link RefreshExecutor} - REFRESH (upsert) operations
+ *   <li>{@link RefreshExecutor} - UPSERT (and deprecated REFRESH) operations
  * </ul>
  *
- * <p>Supported operations include: NONE, INSERT, UPDATE, DELETE, DELETE_ALL, REFRESH,
- * TRUNCATE_TABLE, CLEAN_INSERT, and TRUNCATE_INSERT.
+ * <p>Supported operations include: NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, REFRESH
+ * (deprecated), TRUNCATE_TABLE, CLEAN_INSERT, and TRUNCATE_INSERT.
  *
  * <p>This class is stateless and thread-safe.
  */
@@ -58,7 +58,7 @@ public final class OperationExecutor {
   /** The truncate executor for TRUNCATE operations. */
   private final TruncateExecutor truncateExecutor;
 
-  /** The refresh executor for REFRESH (upsert) operations. */
+  /** The refresh executor for UPSERT (and deprecated REFRESH) operations. */
   private final RefreshExecutor refreshExecutor;
 
   /** The table order resolver for table ordering. */
@@ -161,7 +161,7 @@ public final class OperationExecutor {
       case UPDATE -> updateExecutor.execute(tables, connection);
       case DELETE -> deleteExecutor.execute(tables, connection);
       case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection);
-      case REFRESH -> refreshExecutor.execute(tables, connection);
+      case UPSERT, REFRESH -> refreshExecutor.execute(tables, connection);
       case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection);
       case CLEAN_INSERT -> {
         deleteExecutor.executeDeleteAll(tables.reversed(), connection);

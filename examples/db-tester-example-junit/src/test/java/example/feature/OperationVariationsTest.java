@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link Operation#CLEAN_INSERT} - Delete all rows, then insert (default, most common)
  *   <li>{@link Operation#INSERT} - Insert new rows (fails if primary key already exists)
  *   <li>{@link Operation#UPDATE} - Update existing rows only (fails if row not exists)
- *   <li>{@link Operation#REFRESH} - Update if exists, insert if not (upsert)
+ *   <li>{@link Operation#UPSERT} - Update if exists, insert if not (upsert)
  *   <li>{@link Operation#DELETE} - Delete only specified rows by primary key
  *   <li>{@link Operation#DELETE_ALL} - Delete all rows from tables
  *   <li>{@link Operation#TRUNCATE_TABLE} - Truncate tables, resetting auto-increment sequences
@@ -244,14 +244,14 @@ public final class OperationVariationsTest {
   }
 
   /**
-   * Demonstrates REFRESH operation (upsert).
+   * Demonstrates UPSERT operation.
    *
    * <p>Updates row if exists, inserts if not exists. Flexible operation for mixed scenarios.
    *
    * <p>Test flow:
    *
    * <ul>
-   *   <li>Preparation: REFRESH - TABLE1(ID=1 Laptop, ID=2 Mouse) with upsert
+   *   <li>Preparation: UPSERT - TABLE1(ID=1 Laptop, ID=2 Mouse) with upsert
    *   <li>Execution: Inserts ID=3 (Headphones, 40)
    *   <li>Expectation: Verifies all three products exist
    * </ul>
@@ -259,10 +259,10 @@ public final class OperationVariationsTest {
    * @throws Exception if database operation fails
    */
   @Test
-  @DataSet(operation = Operation.REFRESH)
+  @DataSet(operation = Operation.UPSERT)
   @ExpectedDataSet
-  void shouldUseRefreshOperation() throws Exception {
-    logger.info("Running REFRESH operation test");
+  void shouldUseUpsertOperation() throws Exception {
+    logger.info("Running UPSERT operation test");
 
     executeSql(
         """
@@ -270,7 +270,7 @@ public final class OperationVariationsTest {
         VALUES (3, 'Headphones', 40, CURRENT_TIMESTAMP)
         """);
 
-    logger.info("REFRESH operation completed");
+    logger.info("UPSERT operation completed");
   }
 
   /**

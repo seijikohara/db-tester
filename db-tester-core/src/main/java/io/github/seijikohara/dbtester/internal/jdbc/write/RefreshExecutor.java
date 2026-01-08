@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Executes REFRESH (upsert) operations on database tables.
+ * Executes UPSERT (and deprecated REFRESH) operations on database tables.
  *
  * <p>This class implements {@link TableExecutor} and provides methods to perform upsert operations
  * - attempting to update first, then inserting if no rows were affected.
