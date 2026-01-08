@@ -75,6 +75,9 @@ static void setup(ExtensionContext context) {
 | メソッド | 説明 |
 |----------|------|
 | `standard()` | すべてのデフォルトで設定を作成 |
+| `withBaseDirectory(String)` | 指定したベースディレクトリでコピーを作成（nullでクラスパス相対） |
+| `withExpectationSuffix(String)` | 指定した期待サフィックスでコピーを作成 |
+| `withScenarioMarker(String)` | 指定したシナリオマーカーでコピーを作成 |
 | `withDataFormat(DataFormat)` | 指定した形式でコピーを作成 |
 | `withTableMergeStrategy(TableMergeStrategy)` | 指定したマージ戦略でコピーを作成 |
 | `withLoadOrderFileName(String)` | 指定した読み込み順序ファイル名でコピーを作成 |
