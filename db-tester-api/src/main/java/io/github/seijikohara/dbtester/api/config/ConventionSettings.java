@@ -87,6 +87,69 @@ public record ConventionSettings(
   }
 
   /**
+   * Creates a new ConventionSettings with the specified base directory.
+   *
+   * <p>The base directory can be an absolute path or a path relative to the classpath. A {@code
+   * null} value instructs the loader to resolve dataset locations relative to the test class
+   * package on the classpath.
+   *
+   * @param baseDirectory the base directory path, or null for convention-based resolution
+   * @return a new ConventionSettings with the specified base directory
+   */
+  public ConventionSettings withBaseDirectory(final @Nullable String baseDirectory) {
+    return new ConventionSettings(
+        baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified expectation suffix.
+   *
+   * <p>The expectation suffix is appended to the preparation directory when resolving expectation
+   * datasets. This suffix is typically a subdirectory name that separates expected outcome data
+   * from preparation data.
+   *
+   * @param expectationSuffix the suffix appended to base path for expectation datasets
+   * @return a new ConventionSettings with the specified expectation suffix
+   */
+  public ConventionSettings withExpectationSuffix(final String expectationSuffix) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified scenario marker.
+   *
+   * <p>The scenario marker is the column name that identifies scenario markers in scenario-aware
+   * dataset formats. Rows containing this column are filtered based on scenario names specified in
+   * test annotations or derived from test method names.
+   *
+   * @param scenarioMarker the column name used to identify scenario rows
+   * @return a new ConventionSettings with the specified scenario marker
+   */
+  public ConventionSettings withScenarioMarker(final String scenarioMarker) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns);
+  }
+
+  /**
    * Creates a new ConventionSettings with the specified data format.
    *
    * @param dataFormat the data format to use
