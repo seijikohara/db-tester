@@ -281,6 +281,21 @@ class ComparisonStrategyTest {
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
               "2024-01-15 10:30:00.0", "2024-01-15 10:30:00.123456"));
     }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE falls back to string comparison for invalid formats. */
+    @Test
+    @DisplayName("falls back to string comparison for invalid formats")
+    void fallsBackToStringComparisonForInvalidFormats() {
+      // Invalid formats should fall back to string equals comparison
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "invalid-timestamp"));
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "other-invalid"));
+
+      // Partial timestamps (date only) - should fall back to string comparison
+      assertTrue(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-15"));
+      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-16"));
+    }
   }
 
   /** Tests for NOT_NULL strategy. */
