@@ -334,7 +334,7 @@ Defines value comparison behavior during assertion.
 | `IGNORE` | Skip comparison entirely |
 | `NUMERIC` | Type-aware numeric comparison using BigDecimal |
 | `CASE_INSENSITIVE` | Case-insensitive string comparison |
-| `TIMESTAMP_FLEXIBLE` | Ignores sub-second precision and timezone |
+| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
 | `NOT_NULL` | Verifies value is not null |
 | `REGEX` | Pattern matching using regular expressions |
 
@@ -352,7 +352,7 @@ Defines value comparison behavior during assertion.
 | `IGNORE` | true | true | true | true |
 | `NUMERIC` | true | false | false | BigDecimal comparison |
 | `CASE_INSENSITIVE` | true | false | false | equalsIgnoreCase() |
-| `TIMESTAMP_FLEXIBLE` | true | false | false | Normalized comparison |
+| `TIMESTAMP_FLEXIBLE` | true | false | false | UTC epoch comparison |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
 

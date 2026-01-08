@@ -173,18 +173,50 @@ class ComparisonStrategyTest {
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
               "2024-01-15 10:30:00.000", "2024-01-15 10:30:00"));
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00.123456789Z", "2024-01-15T10:30:00Z"));
     }
 
-    /** Verifies that TIMESTAMP_FLEXIBLE matches timestamps ignoring timezone. */
+    /** Verifies that TIMESTAMP_FLEXIBLE properly converts timezones to UTC for comparison. */
     @Test
-    @DisplayName("matches timestamps ignoring timezone")
-    void matchesTimestampsIgnoringTimezone() {
+    @DisplayName("matches timestamps representing same instant in different timezones")
+    void matchesTimestampsRepresentingSameInstantInDifferentTimezones() {
+      // JST (UTC+9) 10:30 = UTC 01:30
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00", "2024-01-15 10:30:00+09:00"));
+              "2024-01-15T10:30:00+09:00", "2024-01-15T01:30:00Z"));
       assertTrue(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
-              "2024-01-15 10:30:00Z", "2024-01-15 10:30:00"));
+              "2024-01-15 10:30:00+09:00", "2024-01-15 01:30:00Z"));
+
+      // EST (UTC-5) 10:30 = UTC 15:30
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00-05:00", "2024-01-15T15:30:00Z"));
+
+      // JST 19:30 = EST 05:30 (same instant)
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T19:30:00+09:00", "2024-01-15T05:30:00-05:00"));
+    }
+
+    /** Verifies that timestamps without timezone are treated as UTC. */
+    @Test
+    @DisplayName("treats timestamps without timezone as UTC")
+    void treatsTimestampsWithoutTimezoneAsUtc() {
+      // Timestamp without timezone should match UTC timestamp with same time
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00", "2024-01-15T10:30:00Z"));
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00", "2024-01-15 10:30:00Z"));
+
+      // Should NOT match different timezone that results in different UTC time
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00", "2024-01-15T10:30:00+09:00"));
     }
 
     /** Verifies that TIMESTAMP_FLEXIBLE does not match different timestamps. */
@@ -194,6 +226,75 @@ class ComparisonStrategyTest {
       assertFalse(
           ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
               "2024-01-15 10:30:00", "2024-01-15 10:31:00"));
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00Z", "2024-01-15T10:30:01Z"));
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE handles null values correctly. */
+    @Test
+    @DisplayName("handles null values")
+    void handlesNullValues() {
+      assertTrue(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, null));
+      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(null, "2024-01-15 10:30:00"));
+      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15 10:30:00", null));
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE handles various ISO-8601 formats. */
+    @Test
+    @DisplayName("handles various ISO-8601 formats")
+    void handlesVariousIso8601Formats() {
+      // T separator vs space separator
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00Z", "2024-01-15 10:30:00Z"));
+
+      // With and without seconds
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30Z", "2024-01-15T10:30:00Z"));
+
+      // Different fractional second precisions
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15T10:30:00.1Z", "2024-01-15T10:30:00.123456Z"));
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE handles java.sql.Timestamp.toString() format. */
+    @Test
+    @DisplayName("handles java.sql.Timestamp.toString() format")
+    void handlesJavaSqlTimestampFormat() {
+      // java.sql.Timestamp.toString() produces format like "2024-01-15 10:30:00.0"
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00"));
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00.0", "2024-01-15T10:30:00Z"));
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00.123", "2024-01-15 10:30:00.0"));
+
+      // Comparing java.sql.Timestamp format with OffsetDateTime format
+      // Both should be treated as UTC when no timezone is specified
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches(
+              "2024-01-15 10:30:00.0", "2024-01-15 10:30:00.123456"));
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE falls back to string comparison for invalid formats. */
+    @Test
+    @DisplayName("falls back to string comparison for invalid formats")
+    void fallsBackToStringComparisonForInvalidFormats() {
+      // Invalid formats should fall back to string equals comparison
+      assertTrue(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "invalid-timestamp"));
+      assertFalse(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("invalid-timestamp", "other-invalid"));
+
+      // Partial timestamps (date only) - should fall back to string comparison
+      assertTrue(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-15"));
+      assertFalse(ComparisonStrategy.TIMESTAMP_FLEXIBLE.matches("2024-01-15", "2024-01-16"));
     }
   }
 
