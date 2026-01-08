@@ -169,7 +169,7 @@ Operations and comparison strategies use the strategy pattern:
 
 | Strategy Interface | Implementations |
 |-------------------|-----------------|
-| `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, REFRESH, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
+| `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
 | `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
 | `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |

@@ -358,7 +358,7 @@ Column names are case-insensitive. Per-dataset exclusions are combined with glob
 | `CLEAN_INSERT` | Delete all rows, then insert (default) |
 | `INSERT` | Insert rows |
 | `UPDATE` | Update existing rows |
-| `REFRESH` | Upsert (insert or update) |
+| `UPSERT` | Upsert (insert or update) |
 | `DELETE` | Delete specified rows |
 | `DELETE_ALL` | Delete all rows |
 | `TRUNCATE_TABLE` | Truncate tables |

@@ -14,7 +14,7 @@ DB Testerフレームワークがサポートするデータベース操作に�
 | `NONE` | データベース操作なし | 読み取り専用の検証 |
 | `INSERT` | 新規行を挿入 | 空テーブルまたは追加 |
 | `UPDATE` | 主キーで既存行を更新 | 既存データの変更 |
-| `REFRESH` | Upsert（挿入または更新） | 挿入と更新の混在 |
+| `UPSERT` | Upsert（挿入または更新） | 挿入と更新の混在 |
 | `DELETE` | 主キーで特定行を削除 | 選択的な削除 |
 | `DELETE_ALL` | テーブルの全行を削除 | シーケンスリセットなしのクリア |
 | `TRUNCATE_TABLE` | テーブルを切り捨て | シーケンスリセット付きのクリア |
@@ -76,7 +76,7 @@ DB Testerフレームワークがサポートするデータベース操作に�
 - データセットに主キーカラムが含まれていること
 
 
-### REFRESH
+### UPSERT
 
 Upsert操作（挿入または更新）を実行します。
 
@@ -339,7 +339,7 @@ void testBothPhases() { }
 
 | 操作 | 順序 |
 |------|------|
-| INSERT, REFRESH | 親テーブルが先（FK順） |
+| INSERT, UPSERT | 親テーブルが先（FK順） |
 | DELETE, DELETE_ALL | 子テーブルが先（FK逆順） |
 | TRUNCATE_TABLE | 子テーブルが先 |
 | CLEAN_INSERT | DELETE逆順、INSERT順方向 |

@@ -69,7 +69,7 @@ For comprehensive understanding, read the specifications in this order:
 | `CLEAN_INSERT` | Delete all then insert (default) |
 | `INSERT` | Insert new rows |
 | `UPDATE` | Update existing rows |
-| `REFRESH` | Upsert (insert or update) |
+| `UPSERT` | Upsert (insert or update) |
 | `DELETE` | Delete specific rows |
 | `DELETE_ALL` | Delete all rows |
 | `TRUNCATE_TABLE` | Truncate tables |

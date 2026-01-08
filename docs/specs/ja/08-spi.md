@@ -91,7 +91,7 @@ public interface OperationProvider {
 - `UPDATE` - 主キーで更新
 - `DELETE` - 主キーで削除
 - `DELETE_ALL` - 全行を削除
-- `REFRESH` - Upsert（挿入または更新）
+- `UPSERT` - Upsert（挿入または更新）
 - `TRUNCATE_TABLE` - テーブルを切り捨て
 - `CLEAN_INSERT` - 全削除後に挿入
 - `TRUNCATE_INSERT` - 切り捨て後に挿入

@@ -239,7 +239,7 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 
 | エラー | 原因 | 解決策 |
 |--------|------|--------|
-| 重複キー | 既存の主キーでINSERT | CLEAN_INSERTまたはREFRESHを使用 |
+| 重複キー | 既存の主キーでINSERT | CLEAN_INSERTまたはUPSERTを使用 |
 | 外部キー違反 | 親より先に子をINSERT | テーブル順序を確認 |
 | カラムが見つからない | CSVカラム名のタイプミス | カラム名がスキーマと一致することを確認 |
 | データ切り詰め | 値がカラムサイズを超過 | データがカラム定義に収まることを確認 |

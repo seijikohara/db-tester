@@ -13,7 +13,7 @@ This document describes the database operations supported by the DB Tester frame
 | `NONE` | No database operation | Read-only verification |
 | `INSERT` | Insert new rows | Empty tables or append |
 | `UPDATE` | Update existing rows by primary key | Modify existing data |
-| `REFRESH` | Upsert (insert or update) | Mixed insert and update |
+| `UPSERT` | Upsert (insert or update) | Mixed insert and update |
 | `DELETE` | Delete specific rows by primary key | Selective removal |
 | `DELETE_ALL` | Delete all rows from tables | Clear without sequence reset |
 | `TRUNCATE_TABLE` | Truncate tables | Clear with sequence reset |
@@ -71,7 +71,7 @@ Updates existing rows identified by primary key.
 - Tables must have primary keys defined
 - Dataset must include primary key columns
 
-### REFRESH
+### UPSERT
 
 Performs upsert operations (insert or update).
 
@@ -326,7 +326,7 @@ When no `load-order.txt` file exists, the framework can resolve table dependenci
 
 | Operation | Order |
 |-----------|-------|
-| INSERT, REFRESH | Parent tables first (FK order) |
+| INSERT, UPSERT | Parent tables first (FK order) |
 | DELETE, DELETE_ALL | Child tables first (reverse FK order) |
 | TRUNCATE_TABLE | Child tables first |
 | CLEAN_INSERT | Delete reverse, Insert forward |

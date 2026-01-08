@@ -6,7 +6,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 - **Convention-Based Testing** - CSV file resolution based on specification class and feature method names
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
-- **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, REFRESH, DELETE)
+- **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, UPSERT, DELETE)
 - **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j
 
 ## Prerequisites

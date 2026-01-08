@@ -28,7 +28,7 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 3. 設定された戦略を使用してテーブルを順序付け（デフォルト: `AUTO`）
 4. 設定されたデータベース操作を適用（デフォルト: `CLEAN_INSERT`）
 
-利用可能な操作: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `REFRESH`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`
+利用可能な操作: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `UPSERT`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`
 
 ### 検証フェーズ
 
