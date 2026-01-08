@@ -19,7 +19,7 @@ import javax.sql.DataSource
  * - [Operation.CLEAN_INSERT] - Delete all rows, then insert (default, most common)
  * - [Operation.INSERT] - Insert new rows (fails if primary key already exists)
  * - [Operation.UPDATE] - Update existing rows only (fails if row not exists)
- * - [Operation.REFRESH] - Update if exists, insert if not (upsert)
+ * - [Operation.UPSERT] - Update if exists, insert if not (upsert)
  * - [Operation.DELETE] - Delete only specified rows by primary key
  * - [Operation.DELETE_ALL] - Delete all rows from tables
  * - [Operation.TRUNCATE_TABLE] - Truncate tables, resetting auto-increment sequences
@@ -33,7 +33,7 @@ class OperationVariationsSpec : AnnotationSpec() {
     /**
      * Ensures tests run in sequential (source code) order to match Spock behavior.
      *
-     * This is important because some tests (e.g., REFRESH operation) depend on the
+     * This is important because some tests (e.g., UPSERT operation) depend on the
      * database state from previous tests not containing unexpected data.
      */
     override fun testCaseOrder(): TestCaseOrder = TestCaseOrder.Sequential
@@ -172,17 +172,17 @@ class OperationVariationsSpec : AnnotationSpec() {
         }
 
     /**
-     * Demonstrates REFRESH operation (upsert).
+     * Demonstrates UPSERT operation.
      *
-     * Updates row if exists, inserts if not exists. REFRESH does not delete rows not in the CSV,
+     * Updates row if exists, inserts if not exists. UPSERT does not delete rows not in the CSV,
      * so we first ensure ID=3 does not exist to make this test independent of execution order.
      */
     @Test
-    @DataSet(operation = Operation.REFRESH)
+    @DataSet(operation = Operation.UPSERT)
     @ExpectedDataSet
-    fun `should use refresh operation`(): Unit =
-        logger.info("Running refresh operation test").also {
-            // Ensure ID=3 doesn't exist (REFRESH doesn't delete rows not in CSV)
+    fun `should use upsert operation`(): Unit =
+        logger.info("Running upsert operation test").also {
+            // Ensure ID=3 doesn't exist (UPSERT doesn't delete rows not in CSV)
             executeSql(dataSource, "DELETE FROM TABLE1 WHERE ID = 3")
             executeSql(
                 dataSource,
@@ -191,7 +191,7 @@ class OperationVariationsSpec : AnnotationSpec() {
                 VALUES (3, 'Headphones', 40, CURRENT_TIMESTAMP)
                 """.trimIndent(),
             )
-            logger.info("Refresh operation test completed")
+            logger.info("Upsert operation test completed")
         }
 
     /**

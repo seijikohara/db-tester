@@ -7,9 +7,9 @@ should use insert operation,2,Monitor,15
 should use insert operation,3,Smartwatch,30
 should use update operation,1,Laptop,5
 should use update operation,2,Monitor,8
-should use refresh operation,1,Laptop,12
-should use refresh operation,2,Mouse,55
-should use refresh operation,3,Headphones,40
+should use upsert operation,1,Laptop,12
+should use upsert operation,2,Mouse,55
+should use upsert operation,3,Headphones,40
 should use delete all operation,1,Camera,15
 should use delete operation,1,Laptop,10
 should use delete operation,3,Tablet,20

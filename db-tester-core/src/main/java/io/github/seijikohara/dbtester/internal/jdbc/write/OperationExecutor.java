@@ -15,10 +15,10 @@ import java.sql.Connection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,11 +33,11 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link UpdateExecutor} - UPDATE operations
  *   <li>{@link DeleteExecutor} - DELETE and DELETE_ALL operations
  *   <li>{@link TruncateExecutor} - TRUNCATE operations
- *   <li>{@link RefreshExecutor} - UPSERT (and deprecated REFRESH) operations
+ *   <li>{@link RefreshExecutor} - UPSERT operations
  * </ul>
  *
- * <p>Supported operations include: NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, REFRESH
- * (deprecated), TRUNCATE_TABLE, CLEAN_INSERT, and TRUNCATE_INSERT.
+ * <p>Supported operations include: NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT,
+ * TRUNCATE_TABLE, CLEAN_INSERT, and TRUNCATE_INSERT.
  *
  * <p>This class is stateless and thread-safe.
  */
@@ -58,7 +58,7 @@ public final class OperationExecutor {
   /** The truncate executor for TRUNCATE operations. */
   private final TruncateExecutor truncateExecutor;
 
-  /** The refresh executor for UPSERT (and deprecated REFRESH) operations. */
+  /** The refresh executor for UPSERT operations. */
   private final RefreshExecutor refreshExecutor;
 
   /** The table order resolver for table ordering. */
@@ -161,7 +161,7 @@ public final class OperationExecutor {
       case UPDATE -> updateExecutor.execute(tables, connection);
       case DELETE -> deleteExecutor.execute(tables, connection);
       case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection);
-      case UPSERT, REFRESH -> refreshExecutor.execute(tables, connection);
+      case UPSERT -> refreshExecutor.execute(tables, connection);
       case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection);
       case CLEAN_INSERT -> {
         deleteExecutor.executeDeleteAll(tables.reversed(), connection);
@@ -214,7 +214,7 @@ public final class OperationExecutor {
   private List<Table> resolveTableOrderAuto(final List<Table> tables, final Connection connection) {
     // Try foreign key resolution
     try {
-      final var schema = getSchema(connection);
+      final var schema = getSchema(connection).orElse(null);
       final var tableNames = tables.stream().map(Table::getName).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
@@ -242,7 +242,7 @@ public final class OperationExecutor {
   private List<Table> resolveTableOrderByForeignKey(
       final List<Table> tables, final Connection connection) {
     try {
-      final var schema = getSchema(connection);
+      final var schema = getSchema(connection).orElse(null);
       final var tableNames = tables.stream().map(Table::getName).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
@@ -279,9 +279,9 @@ public final class OperationExecutor {
    * Gets the schema from the connection.
    *
    * @param connection the database connection
-   * @return the schema name, or null if not available
+   * @return an Optional containing the schema name, or empty if not available
    */
-  private @Nullable String getSchema(final Connection connection) {
-    return get(connection::getSchema);
+  private Optional<String> getSchema(final Connection connection) {
+    return Optional.ofNullable(get(connection::getSchema));
   }
 }

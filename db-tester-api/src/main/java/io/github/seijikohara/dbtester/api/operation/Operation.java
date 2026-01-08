@@ -49,16 +49,6 @@ public enum Operation {
   UPSERT,
 
   /**
-   * Upserts rows by updating matches and inserting new entries.
-   *
-   * <p>Updates existing rows by primary key and inserts rows that do not exist.
-   *
-   * @deprecated Use {@link #UPSERT} instead. Will be removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  REFRESH,
-
-  /**
    * Deletes only the dataset rows identified by primary key.
    *
    * <p>Removes specific rows from the database based on primary key matching. Other rows remain
