@@ -1,6 +1,14 @@
 package io.github.seijikohara.dbtester.api.domain;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -42,7 +50,13 @@ public final class ComparisonStrategy {
   public static final ComparisonStrategy CASE_INSENSITIVE =
       new ComparisonStrategy(Type.CASE_INSENSITIVE, null);
 
-  /** Flexible timestamp comparison. Ignores sub-second precision and timezone differences. */
+  /**
+   * Flexible timestamp comparison. Converts timestamps to UTC and ignores sub-second precision.
+   *
+   * <p>This strategy properly handles timezone differences by converting all timestamps to UTC
+   * before comparison. For example, "2024-01-15T10:30:00+09:00" and "2024-01-15T01:30:00Z" are
+   * considered equal because they represent the same instant in time.
+   */
   public static final ComparisonStrategy TIMESTAMP_FLEXIBLE =
       new ComparisonStrategy(Type.TIMESTAMP_FLEXIBLE, null);
 
@@ -206,33 +220,104 @@ public final class ComparisonStrategy {
   /**
    * Compares two timestamp values with flexible precision.
    *
+   * <p>Converts both timestamps to UTC epoch seconds for comparison, properly handling timezone
+   * differences. If timezone information is not present, the timestamp is treated as UTC.
+   *
    * @param expected the expected value
    * @param actual the actual value
-   * @return {@code true} if timestamps match (ignoring sub-second precision), {@code false}
-   *     otherwise
+   * @return {@code true} if timestamps represent the same instant (ignoring sub-second precision),
+   *     {@code false} otherwise
    */
   private boolean compareTimestamp(final @Nullable Object expected, final @Nullable Object actual) {
     return compareNullable(
         expected,
         actual,
-        (exp, act) ->
-            normalizeTimestamp(exp.toString()).equals(normalizeTimestamp(act.toString())));
+        (exp, act) -> {
+          final var expectedEpoch = parseToEpochSecond(exp.toString());
+          final var actualEpoch = parseToEpochSecond(act.toString());
+          return expectedEpoch.equals(actualEpoch);
+        });
   }
 
   /**
-   * Normalizes a timestamp string by removing sub-second precision.
+   * Parses a timestamp string to epoch seconds (UTC).
+   *
+   * <p>Supports various timestamp formats:
+   *
+   * <ul>
+   *   <li>ISO-8601 with offset: "2024-01-15T10:30:00+09:00"
+   *   <li>ISO-8601 with Z: "2024-01-15T10:30:00Z"
+   *   <li>SQL timestamp with offset: "2024-01-15 10:30:00+09:00"
+   *   <li>SQL timestamp without offset: "2024-01-15 10:30:00" (treated as UTC)
+   *   <li>With fractional seconds: "2024-01-15T10:30:00.123456+09:00"
+   * </ul>
    *
    * @param timestamp the timestamp string
-   * @return normalized timestamp
+   * @return epoch seconds in UTC, or the original string if parsing fails
    */
-  private String normalizeTimestamp(final String timestamp) {
-    // Remove fractional seconds and timezone info for flexible comparison
-    return timestamp
-        .replaceAll("\\.\\d+", "") // Remove fractional seconds
-        .replaceAll("[+-]\\d{2}:?\\d{2}$", "") // Remove timezone offset
-        .replaceAll("Z$", "") // Remove UTC indicator
-        .trim();
+  private Object parseToEpochSecond(final String timestamp) {
+    final var normalized = timestamp.trim().replace(' ', 'T');
+
+    // Try parsing as OffsetDateTime (with timezone)
+    try {
+      final var odt = OffsetDateTime.parse(normalized, FLEXIBLE_OFFSET_FORMATTER);
+      return odt.toEpochSecond();
+    } catch (final DateTimeParseException ignored) {
+      // Continue to next format
+    }
+
+    // Try parsing as LocalDateTime (without timezone, treat as UTC)
+    try {
+      final var ldt = LocalDateTime.parse(normalized, FLEXIBLE_LOCAL_FORMATTER);
+      return ldt.toEpochSecond(ZoneOffset.UTC);
+    } catch (final DateTimeParseException ignored) {
+      // Continue to next format
+    }
+
+    // Try parsing as Instant
+    try {
+      return Instant.parse(normalized).getEpochSecond();
+    } catch (final DateTimeParseException ignored) {
+      // Parsing failed, return original string for equals comparison
+    }
+
+    return timestamp;
   }
+
+  /** Formatter for timestamps with timezone offset. */
+  private static final DateTimeFormatter FLEXIBLE_OFFSET_FORMATTER =
+      new DateTimeFormatterBuilder()
+          .append(DateTimeFormatter.ISO_LOCAL_DATE)
+          .appendLiteral('T')
+          .appendValue(ChronoField.HOUR_OF_DAY, 2)
+          .appendLiteral(':')
+          .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+          .optionalStart()
+          .appendLiteral(':')
+          .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+          .optionalEnd()
+          .optionalStart()
+          .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+          .optionalEnd()
+          .appendOffset("+HH:MM", "Z")
+          .toFormatter();
+
+  /** Formatter for timestamps without timezone (treated as UTC). */
+  private static final DateTimeFormatter FLEXIBLE_LOCAL_FORMATTER =
+      new DateTimeFormatterBuilder()
+          .append(DateTimeFormatter.ISO_LOCAL_DATE)
+          .appendLiteral('T')
+          .appendValue(ChronoField.HOUR_OF_DAY, 2)
+          .appendLiteral(':')
+          .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
+          .optionalStart()
+          .appendLiteral(':')
+          .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
+          .optionalEnd()
+          .optionalStart()
+          .appendFraction(ChronoField.NANO_OF_SECOND, 0, 9, true)
+          .optionalEnd()
+          .toFormatter();
 
   /**
    * Matches the actual value against the regex pattern.
