@@ -348,7 +348,7 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `IGNORE` | 比較を完全にスキップ |
 | `NUMERIC` | BigDecimalを使用した型を考慮した数値比較 |
 | `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 |
-| `TIMESTAMP_FLEXIBLE` | サブ秒精度とタイムゾーンを無視 |
+| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 |
 | `NOT_NULL` | 値がnullでないことを検証 |
 | `REGEX` | 正規表現を使用したパターンマッチング |
 
@@ -366,7 +366,7 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `IGNORE` | true | true | true | true |
 | `NUMERIC` | true | false | false | BigDecimal比較 |
 | `CASE_INSENSITIVE` | true | false | false | equalsIgnoreCase() |
-| `TIMESTAMP_FLEXIBLE` | true | false | false | 正規化比較 |
+| `TIMESTAMP_FLEXIBLE` | true | false | false | UTCエポック比較 |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
 
