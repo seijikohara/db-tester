@@ -73,6 +73,9 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | Method | Description |
 |--------|-------------|
 | `standard()` | Creates settings with all defaults |
+| `withBaseDirectory(String)` | Creates copy with specified base directory (null for classpath-relative) |
+| `withExpectationSuffix(String)` | Creates copy with specified expectation suffix |
+| `withScenarioMarker(String)` | Creates copy with specified scenario marker |
 | `withDataFormat(DataFormat)` | Creates copy with specified format |
 | `withTableMergeStrategy(TableMergeStrategy)` | Creates copy with specified merge strategy |
 | `withLoadOrderFileName(String)` | Creates copy with specified load order file name |

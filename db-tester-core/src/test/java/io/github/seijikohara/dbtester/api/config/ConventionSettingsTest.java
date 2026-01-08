@@ -384,4 +384,221 @@ class ConventionSettingsTest {
                   "tableMergeStrategy should match"));
     }
   }
+
+  /** Tests for the withBaseDirectory method. */
+  @Nested
+  @DisplayName("withBaseDirectory() method")
+  class WithBaseDirectoryMethod {
+
+    /** Tests for the withBaseDirectory method. */
+    WithBaseDirectoryMethod() {}
+
+    /** Verifies that withBaseDirectory returns a new instance with the specified directory. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified base directory")
+    void should_return_new_instance_with_specified_base_directory() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var customDirectory = "/custom/base";
+
+      // When
+      final var modified = original.withBaseDirectory(customDirectory);
+
+      // Then
+      assertAll(
+          "should have new base directory while preserving other values",
+          () ->
+              assertEquals(
+                  customDirectory, modified.baseDirectory(), "baseDirectory should be custom"),
+          () ->
+              assertEquals(
+                  original.expectationSuffix(),
+                  modified.expectationSuffix(),
+                  "expectationSuffix should match"),
+          () ->
+              assertEquals(
+                  original.scenarioMarker(),
+                  modified.scenarioMarker(),
+                  "scenarioMarker should match"),
+          () ->
+              assertEquals(original.dataFormat(), modified.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  original.tableMergeStrategy(),
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  original.loadOrderFileName(),
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should match"));
+    }
+
+    /** Verifies that withBaseDirectory accepts null for convention-based resolution. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should accept null for convention-based resolution")
+    void should_accept_null_for_convention_based_resolution() {
+      // Given
+      final var original = ConventionSettings.standard().withBaseDirectory("/some/path");
+
+      // When
+      final var modified = original.withBaseDirectory(null);
+
+      // Then
+      assertNull(modified.baseDirectory(), "baseDirectory should be null");
+    }
+  }
+
+  /** Tests for the withExpectationSuffix method. */
+  @Nested
+  @DisplayName("withExpectationSuffix() method")
+  class WithExpectationSuffixMethod {
+
+    /** Tests for the withExpectationSuffix method. */
+    WithExpectationSuffixMethod() {}
+
+    /** Verifies that withExpectationSuffix returns a new instance with the specified suffix. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified expectation suffix")
+    void should_return_new_instance_with_specified_expectation_suffix() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var customSuffix = "/outcome";
+
+      // When
+      final var modified = original.withExpectationSuffix(customSuffix);
+
+      // Then
+      assertAll(
+          "should have new expectation suffix while preserving other values",
+          () ->
+              assertEquals(
+                  customSuffix, modified.expectationSuffix(), "expectationSuffix should be custom"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.scenarioMarker(),
+                  modified.scenarioMarker(),
+                  "scenarioMarker should match"),
+          () ->
+              assertEquals(original.dataFormat(), modified.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  original.tableMergeStrategy(),
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  original.loadOrderFileName(),
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should match"));
+    }
+  }
+
+  /** Tests for the withScenarioMarker method. */
+  @Nested
+  @DisplayName("withScenarioMarker() method")
+  class WithScenarioMarkerMethod {
+
+    /** Tests for the withScenarioMarker method. */
+    WithScenarioMarkerMethod() {}
+
+    /** Verifies that withScenarioMarker returns a new instance with the specified marker. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified scenario marker")
+    void should_return_new_instance_with_specified_scenario_marker() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var customMarker = "[TestCase]";
+
+      // When
+      final var modified = original.withScenarioMarker(customMarker);
+
+      // Then
+      assertAll(
+          "should have new scenario marker while preserving other values",
+          () ->
+              assertEquals(
+                  customMarker, modified.scenarioMarker(), "scenarioMarker should be custom"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.expectationSuffix(),
+                  modified.expectationSuffix(),
+                  "expectationSuffix should match"),
+          () ->
+              assertEquals(original.dataFormat(), modified.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  original.tableMergeStrategy(),
+                  modified.tableMergeStrategy(),
+                  "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  original.loadOrderFileName(),
+                  modified.loadOrderFileName(),
+                  "loadOrderFileName should match"));
+    }
+  }
+
+  /** Tests for fluent API chaining. */
+  @Nested
+  @DisplayName("fluent API chaining")
+  class FluentApiChaining {
+
+    /** Tests for fluent API chaining. */
+    FluentApiChaining() {}
+
+    /** Verifies that all with* methods can be chained together. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should support chaining all with* methods")
+    void should_support_chaining_all_with_methods() {
+      // Given & When
+      final var settings =
+          ConventionSettings.standard()
+              .withBaseDirectory("/custom/base")
+              .withExpectationSuffix("/outcome")
+              .withScenarioMarker("[TestCase]")
+              .withDataFormat(DataFormat.TSV)
+              .withTableMergeStrategy(TableMergeStrategy.FIRST)
+              .withLoadOrderFileName("custom-order.txt")
+              .withGlobalExcludeColumns(Set.of("created_at", "updated_at"));
+
+      // Then
+      assertAll(
+          "should have all custom values",
+          () ->
+              assertEquals("/custom/base", settings.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  "/outcome", settings.expectationSuffix(), "expectationSuffix should match"),
+          () ->
+              assertEquals("[TestCase]", settings.scenarioMarker(), "scenarioMarker should match"),
+          () -> assertEquals(DataFormat.TSV, settings.dataFormat(), "dataFormat should match"),
+          () ->
+              assertEquals(
+                  TableMergeStrategy.FIRST,
+                  settings.tableMergeStrategy(),
+                  "tableMergeStrategy should match"),
+          () ->
+              assertEquals(
+                  "custom-order.txt",
+                  settings.loadOrderFileName(),
+                  "loadOrderFileName should match"),
+          () ->
+              assertEquals(
+                  Set.of("created_at", "updated_at"),
+                  settings.globalExcludeColumns(),
+                  "globalExcludeColumns should match"));
+    }
+  }
 }
