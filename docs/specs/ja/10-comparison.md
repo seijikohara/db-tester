@@ -86,7 +86,7 @@ src/test/resources/
 | NONE | Yes | Yes | Yes | Yes | - | - |
 | INSERT | Yes | Yes | Yes | Yes | Yes | Yes |
 | UPDATE | Yes | Yes | Yes | Yes | - | - |
-| REFRESH | Yes | Yes | Yes | Yes | - | - |
+| UPSERT | Yes | Yes | Yes | Yes | - | - |
 | DELETE | Yes | Yes | Yes | Yes | Yes | Yes |
 | DELETE_ALL | Yes | Yes | Yes | Yes | Yes | - |
 | TRUNCATE_TABLE | Yes | Yes | Yes | Yes | Yes | - |

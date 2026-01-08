@@ -28,7 +28,7 @@ The data set phase executes before each test method. The framework performs the 
 3. Orders tables using the configured strategy (default: `AUTO`)
 4. Applies the configured database operation (default: `CLEAN_INSERT`)
 
-Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `REFRESH`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
+Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `UPSERT`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
 
 ### ExpectedDataSet Phase
 

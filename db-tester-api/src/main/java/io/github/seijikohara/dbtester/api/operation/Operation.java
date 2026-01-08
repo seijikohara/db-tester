@@ -35,10 +35,27 @@ public enum Operation {
   INSERT,
 
   /**
+   * Upserts rows by updating existing matches and inserting new entries.
+   *
+   * <p>For each row in the dataset:
+   *
+   * <ul>
+   *   <li>If a row with matching primary key exists, update it
+   *   <li>If no matching row exists, insert the new row
+   * </ul>
+   *
+   * @since 1.1
+   */
+  UPSERT,
+
+  /**
    * Upserts rows by updating matches and inserting new entries.
    *
    * <p>Updates existing rows by primary key and inserts rows that do not exist.
+   *
+   * @deprecated Use {@link #UPSERT} instead. Will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   REFRESH,
 
   /**

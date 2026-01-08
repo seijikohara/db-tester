@@ -239,7 +239,7 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| Duplicate key | INSERT with existing primary key | Use CLEAN_INSERT or REFRESH |
+| Duplicate key | INSERT with existing primary key | Use CLEAN_INSERT or UPSERT |
 | Foreign key violation | INSERT child before parent | Check table ordering |
 | Column not found | CSV column name typo | Verify column names match schema |
 | Data truncation | Value exceeds column size | Check data fits column definition |

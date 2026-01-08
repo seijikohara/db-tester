@@ -94,7 +94,7 @@ public interface OperationProvider {
 | `UPDATE` | Update by primary key |
 | `DELETE` | Delete by primary key |
 | `DELETE_ALL` | Delete all rows |
-| `REFRESH` | Upsert (insert or update) |
+| `UPSERT` | Upsert (insert or update) |
 | `TRUNCATE_TABLE` | Truncate tables |
 | `CLEAN_INSERT` | Delete all then insert |
 | `TRUNCATE_INSERT` | Truncate then insert |

@@ -7,9 +7,9 @@ shouldUseInsertOperation,2,Monitor,15
 shouldUseInsertOperation,3,Smartwatch,30
 shouldUseUpdateOperation,1,Laptop,5
 shouldUseUpdateOperation,2,Monitor,8
-shouldUseRefreshOperation,1,Laptop,12
-shouldUseRefreshOperation,2,Mouse,55
-shouldUseRefreshOperation,3,Headphones,40
+shouldUseUpsertOperation,1,Laptop,12
+shouldUseUpsertOperation,2,Mouse,55
+shouldUseUpsertOperation,3,Headphones,40
 shouldUseDeleteAllOperation,1,Camera,15
 shouldUseDeleteOperation,1,Laptop,10
 shouldUseDeleteOperation,3,Tablet,20
