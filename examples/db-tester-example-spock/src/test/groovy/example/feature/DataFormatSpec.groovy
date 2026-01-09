@@ -85,7 +85,8 @@ class DataFormatSpec extends Specification {
 					DataFormat.CSV, // CSV format
 					TableMergeStrategy.UNION_ALL,
 					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-					Set.of()
+					Set.of(),
+					Map.of()
 					)
 					)
 		}
@@ -206,7 +207,8 @@ class DataFormatSpec extends Specification {
 					DataFormat.TSV, // TSV format
 					TableMergeStrategy.UNION_ALL,
 					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-					Set.of()
+					Set.of(),
+					Map.of()
 					)
 					)
 		}

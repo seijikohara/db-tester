@@ -72,17 +72,18 @@ public final class ExpectationVerifier {
    * Verifies a single ExpectedTableSet against the database.
    *
    * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison
-   * including column filtering and detailed assertion messages. If verification fails, wraps the
-   * exception with additional test context.
+   * including column filtering, column comparison strategies, and detailed assertion messages. If
+   * verification fails, wraps the exception with additional test context.
    *
    * @param context the test context providing access to the data source registry
-   * @param expectedTableSet the expected TableSet with exclusion metadata
+   * @param expectedTableSet the expected TableSet with exclusion and strategy metadata
    * @throws ValidationException if verification fails with wrapped context information
    */
   private void verifyExpectedTableSet(
       final TestContext context, final ExpectedTableSet expectedTableSet) {
     final var tableSet = expectedTableSet.tableSet();
     final var excludeColumns = expectedTableSet.excludeColumns();
+    final var columnStrategies = expectedTableSet.columnStrategies();
     final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
 
     final var tableCount = tableSet.getTables().size();
@@ -95,8 +96,12 @@ public final class ExpectationVerifier {
       logger.debug("Excluding columns from verification: {}", excludeColumns);
     }
 
+    if (expectedTableSet.hasColumnStrategies()) {
+      logger.debug("Using column strategies for: {}", columnStrategies.keySet());
+    }
+
     try {
-      expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns);
+      expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns, columnStrategies);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",

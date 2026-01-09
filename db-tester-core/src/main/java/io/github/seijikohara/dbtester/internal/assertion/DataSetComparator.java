@@ -1,11 +1,13 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -16,6 +18,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -261,6 +264,47 @@ public class DataSetComparator {
   }
 
   /**
+   * Asserts that two tables are equal with column-specific comparison strategies.
+   *
+   * <p>This method compares tables using the specified comparison strategies for individual
+   * columns. Columns can be ignored, compared case-insensitively, matched against regex patterns,
+   * etc.
+   *
+   * <p>Column exclusion takes precedence: columns in the ignore set are skipped entirely before
+   * column strategies are applied.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @param ignoreColumnNames columns to ignore during comparison (uppercase, case-insensitive)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @throws AssertionError if row counts differ or if any column values fail comparison
+   */
+  public void assertEqualsWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<String> ignoreColumnNames,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    final var result = new ComparisonResult();
+    final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var tableName = expected.getName().value();
+    final var expectedRows = expected.getRows();
+    final var actualRows = actual.getRows();
+
+    checkRowCountMismatch(tableName, expectedRows, actualRows, result);
+
+    compareRowPairs(
+        tableName,
+        expectedRows,
+        actualRows,
+        result,
+        (table, rowIndex, expectedRow, actualRow, res) ->
+            compareRowsWithStrategies(
+                table, rowIndex, expectedRow, actualRow, ignoreSet, columnStrategies, res));
+
+    result.assertNoDifferences();
+  }
+
+  /**
    * Checks if expected and actual row lists have different sizes and records the mismatch.
    *
    * @param tableName the table name for error reporting
@@ -360,6 +404,74 @@ public class DataSetComparator {
             .filter(columnName -> !ignoreSet.contains(columnName.value()))
             .collect(Collectors.toSet());
     compareRowColumns(tableName, rowIndex, expected, actual, columnsToCompare, result);
+  }
+
+  /**
+   * Compares two rows with column-specific comparison strategies.
+   *
+   * @param tableName the table name for error reporting
+   * @param rowIndex the row index for error reporting
+   * @param expected the expected row
+   * @param actual the actual row
+   * @param ignoreSet set of column names to ignore (uppercase)
+   * @param columnStrategies map of column strategies keyed by uppercase column name
+   * @param result the result collector
+   */
+  private void compareRowsWithStrategies(
+      final String tableName,
+      final int rowIndex,
+      final Row expected,
+      final Row actual,
+      final Set<String> ignoreSet,
+      final Map<String, ColumnStrategyMapping> columnStrategies,
+      final ComparisonResult result) {
+    expected.getValues().keySet().stream()
+        // Filter out ignored columns
+        .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
+        // Filter columns that fail comparison
+        .filter(
+            columnName -> {
+              final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
+              final var expectedValue = expected.getValue(columnName);
+              final var actualValue = actual.getValue(columnName);
+
+              // Get strategy for this column, or use default comparison
+              final var strategyMapping = columnStrategies.get(upperColumnName);
+              if (strategyMapping != null) {
+                return !compareWithStrategy(expectedValue, actualValue, strategyMapping.strategy());
+              }
+              // Default: use standard comparison
+              return !valuesAreEqual(expectedValue, actualValue);
+            })
+        // Collect mismatches
+        .forEach(
+            columnName ->
+                result.addValueMismatch(
+                    tableName,
+                    rowIndex,
+                    columnName.value(),
+                    extractValueOrNull(expected.getValue(columnName)),
+                    extractValueOrNull(actual.getValue(columnName))));
+  }
+
+  /**
+   * Compares two CellValue objects using the specified comparison strategy.
+   *
+   * @param expected the expected cell value (nullable)
+   * @param actual the actual cell value (nullable)
+   * @param strategy the comparison strategy to use
+   * @return true if the values match according to the strategy
+   */
+  private boolean compareWithStrategy(
+      final @Nullable CellValue expected,
+      final @Nullable CellValue actual,
+      final ComparisonStrategy strategy) {
+    // Extract inner values
+    final var expectedObj = Optional.ofNullable(expected).map(CellValue::value).orElse(null);
+    final var actualObj = Optional.ofNullable(actual).map(CellValue::value).orElse(null);
+
+    // Use the strategy's matches method
+    return strategy.matches(expectedObj, actualObj);
   }
 
   /**

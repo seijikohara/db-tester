@@ -1,7 +1,9 @@
 package io.github.seijikohara.dbtester.api.spi;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.Collection;
+import java.util.Map;
 import javax.sql.DataSource;
 
 /**
@@ -73,5 +75,47 @@ public interface ExpectationProvider {
     // Note: excludeColumns is intentionally ignored in the default implementation
     // for backward compatibility with existing providers.
     verifyExpectation(expectedTableSet, dataSource);
+  }
+
+  /**
+   * Verifies that the database state matches the expected dataset with column comparison
+   * strategies.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection)} with
+   * column-specific comparison strategy support. Each column can have its own comparison strategy:
+   *
+   * <ul>
+   *   <li>{@code STRICT} - Exact match (default)
+   *   <li>{@code IGNORE} - Skip comparison entirely
+   *   <li>{@code NUMERIC} - Type-aware numeric comparison
+   *   <li>{@code CASE_INSENSITIVE} - Case-insensitive string comparison
+   *   <li>{@code TIMESTAMP_FLEXIBLE} - Ignores sub-second precision and handles timezone
+   *   <li>{@code NOT_NULL} - Only verify the value is not null
+   *   <li>{@code REGEX} - Match against a regular expression pattern
+   * </ul>
+   *
+   * <p>Column exclusion takes precedence: columns in {@code excludeColumns} are skipped entirely
+   * before column strategies are applied.
+   *
+   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
+   * Collection)} when no column strategies are provided. Implementations should override this
+   * method to support column strategies.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @throws AssertionError if verification fails
+   * @see ColumnStrategyMapping
+   * @see io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+   */
+  default void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final Collection<String> excludeColumns,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    // Default implementation ignores column strategies for backward compatibility.
+    // Implementations should override this method to support column strategies.
+    verifyExpectation(expectedTableSet, dataSource, excludeColumns);
   }
 }

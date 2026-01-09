@@ -1,9 +1,11 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import io.github.seijikohara.dbtester.internal.assertion.ExpectationVerifier;
 import java.util.Collection;
+import java.util.Map;
 import javax.sql.DataSource;
 
 /**
@@ -44,5 +46,15 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
       final DataSource dataSource,
       final Collection<String> excludeColumns) {
     expectationVerifier.verifyExpectation(expectedTableSet, dataSource, excludeColumns);
+  }
+
+  @Override
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final Collection<String> excludeColumns,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    expectationVerifier.verifyExpectation(
+        expectedTableSet, dataSource, excludeColumns, columnStrategies);
   }
 }

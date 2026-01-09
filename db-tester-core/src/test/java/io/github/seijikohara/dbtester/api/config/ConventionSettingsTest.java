@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -105,7 +106,7 @@ class ConventionSettingsTest {
       // When
       final var settings =
           new ConventionSettings(
-              baseDir, suffix, marker, format, strategy, loadOrderFileName, Set.of());
+              baseDir, suffix, marker, format, strategy, loadOrderFileName, Set.of(), Map.of());
 
       // Then
       assertAll(
@@ -139,7 +140,8 @@ class ConventionSettingsTest {
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of());
+              Set.of(),
+              Map.of());
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -153,7 +155,7 @@ class ConventionSettingsTest {
       // Given & When
       final var settings =
           new ConventionSettings(
-              null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "", Set.of());
+              null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "", Set.of(), Map.of());
 
       // Then
       assertAll(
@@ -187,7 +189,8 @@ class ConventionSettingsTest {
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of());
+              Set.of(),
+              Map.of());
       final var settings2 =
           new ConventionSettings(
               "/base",
@@ -196,7 +199,8 @@ class ConventionSettingsTest {
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of());
+              Set.of(),
+              Map.of());
 
       // When & Then
       assertAll(
@@ -219,7 +223,8 @@ class ConventionSettingsTest {
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of());
+              Set.of(),
+              Map.of());
       final var settings2 =
           new ConventionSettings(
               null,
@@ -228,7 +233,8 @@ class ConventionSettingsTest {
               DataFormat.CSV,
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of());
+              Set.of(),
+              Map.of());
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");

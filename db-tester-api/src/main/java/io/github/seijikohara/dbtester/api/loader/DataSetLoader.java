@@ -1,8 +1,10 @@
 package io.github.seijikohara.dbtester.api.loader;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -46,25 +48,36 @@ public interface DataSetLoader {
   List<TableSet> loadExpectationDataSets(final TestContext context);
 
   /**
-   * Loads datasets for validating the database state with column exclusion metadata.
+   * Loads datasets for validating the database state with column comparison configuration.
    *
-   * <p>This method extends {@link #loadExpectationDataSets(TestContext)} to include column
-   * exclusion information from annotations ({@link
-   * io.github.seijikohara.dbtester.api.annotation.DataSetSource#excludeColumns()}) and global
-   * settings ({@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#globalExcludeColumns()}).
+   * <p>This method extends {@link #loadExpectationDataSets(TestContext)} to include:
+   *
+   * <ul>
+   *   <li>Column exclusion information from annotations ({@link
+   *       io.github.seijikohara.dbtester.api.annotation.DataSetSource#excludeColumns()}) and global
+   *       settings ({@link
+   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#globalExcludeColumns()})
+   *   <li>Column comparison strategies from annotations ({@link
+   *       io.github.seijikohara.dbtester.api.annotation.DataSetSource#columnStrategies()}) and
+   *       global settings ({@link
+   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#globalColumnStrategies()})
+   * </ul>
    *
    * <p>The default implementation wraps results from {@link #loadExpectationDataSets(TestContext)}
-   * with global exclude columns only. Implementations should override this method to also include
-   * annotation-level exclusions.
+   * with global settings only. Implementations should override this method to also include
+   * annotation-level configurations.
    *
    * @param context the test execution context containing test metadata and configuration
-   * @return immutable list of expected table sets with column exclusion metadata
+   * @return immutable list of expected table sets with column comparison configuration
    */
   default List<ExpectedTableSet> loadExpectationDataSetsWithExclusions(final TestContext context) {
-    final var globalExcludeColumns = context.configuration().conventions().globalExcludeColumns();
+    final var conventions = context.configuration().conventions();
+    final var globalExcludeColumns = conventions.globalExcludeColumns();
+    final Map<String, ColumnStrategyMapping> globalColumnStrategies =
+        conventions.globalColumnStrategies();
     return loadExpectationDataSets(context).stream()
-        .map(tableSet -> ExpectedTableSet.of(tableSet, globalExcludeColumns))
+        .map(
+            tableSet -> ExpectedTableSet.of(tableSet, globalExcludeColumns, globalColumnStrategies))
         .collect(Collectors.toUnmodifiableList());
   }
 }

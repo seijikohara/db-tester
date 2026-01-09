@@ -62,16 +62,17 @@ class SpockExpectationVerifier {
 	 * Verifies a single expected table set against the database.
 	 *
 	 * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison including
-	 * column filtering and detailed assertion messages. If verification fails, wraps the exception
-	 * with additional test context.
+	 * column filtering, column comparison strategies, and detailed assertion messages. If verification
+	 * fails, wraps the exception with additional test context.
 	 *
 	 * @param context the test context providing access to the data source registry
-	 * @param expectedTableSet the expected table set with exclusion metadata
+	 * @param expectedTableSet the expected table set with exclusion and strategy metadata
 	 * @throws ValidationException if verification fails with wrapped context information
 	 */
 	private void verifyExpectedTableSet(TestContext context, ExpectedTableSet expectedTableSet) {
 		def tableSet = expectedTableSet.tableSet()
 		def excludeColumns = expectedTableSet.excludeColumns()
+		def columnStrategies = expectedTableSet.columnStrategies()
 		def dataSource = tableSet.dataSource
 				.orElseGet { -> context.registry().get('') }
 
@@ -84,8 +85,12 @@ class SpockExpectationVerifier {
 			log.debug('Excluding columns from verification: {}', excludeColumns)
 		}
 
+		if (expectedTableSet.hasColumnStrategies()) {
+			log.debug('Using column strategies for: {}', columnStrategies.keySet())
+		}
+
 		try {
-			expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns)
+			expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns, columnStrategies)
 
 			log.info('Expectation validation completed successfully for {}: {} tables',
 					context.testMethod().name,

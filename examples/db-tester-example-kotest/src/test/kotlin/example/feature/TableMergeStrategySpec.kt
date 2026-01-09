@@ -50,6 +50,7 @@ class FirstStrategySpec : AnnotationSpec() {
                     TableMergeStrategy.FIRST,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
+                    emptyMap(),
                 ),
             )
 
@@ -167,6 +168,7 @@ class LastStrategySpec : AnnotationSpec() {
                     TableMergeStrategy.LAST,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
+                    emptyMap(),
                 ),
             )
 
@@ -280,6 +282,7 @@ class UnionStrategySpec : AnnotationSpec() {
                     TableMergeStrategy.UNION,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
+                    emptyMap(),
                 ),
             )
 
@@ -397,6 +400,7 @@ class UnionAllStrategySpec : AnnotationSpec() {
                     TableMergeStrategy.UNION_ALL,
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
+                    emptyMap(),
                 ),
             )
 

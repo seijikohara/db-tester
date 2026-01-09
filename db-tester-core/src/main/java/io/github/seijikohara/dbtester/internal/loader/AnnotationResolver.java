@@ -1,14 +1,18 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
+import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolverRegistry;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -134,6 +138,36 @@ public final class AnnotationResolver {
         .filter(Predicate.not(String::isEmpty))
         .map(String::toUpperCase)
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /**
+   * Resolves column comparison strategies from a {@link DataSetSource} annotation.
+   *
+   * <p>This method extracts column-specific comparison strategies from the annotation. Column names
+   * are normalized to uppercase for case-insensitive matching. The returned map is keyed by
+   * uppercase column name.
+   *
+   * @param annotation the dataset source annotation
+   * @return map of column names to their comparison strategies
+   */
+  Map<String, ColumnStrategyMapping> resolveColumnStrategies(final DataSetSource annotation) {
+    return Stream.of(annotation.columnStrategies())
+        .collect(
+            Collectors.toUnmodifiableMap(
+                cs -> cs.name().toUpperCase(Locale.ROOT),
+                this::toColumnStrategyMapping,
+                (existing, replacement) -> replacement));
+  }
+
+  /**
+   * Converts a {@link ColumnStrategy} annotation to a {@link ColumnStrategyMapping}.
+   *
+   * @param columnStrategy the column strategy annotation
+   * @return the corresponding ColumnStrategyMapping
+   */
+  private ColumnStrategyMapping toColumnStrategyMapping(final ColumnStrategy columnStrategy) {
+    final var strategy = columnStrategy.strategy().toComparisonStrategy(columnStrategy.pattern());
+    return ColumnStrategyMapping.of(columnStrategy.name(), strategy);
   }
 
   /**

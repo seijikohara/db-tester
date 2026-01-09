@@ -61,7 +61,8 @@ class DbTesterSpockAutoConfiguration {
 				conventionProps.dataFormat,
 				conventionProps.tableMergeStrategy,
 				conventionProps.loadOrderFileName,
-				conventionProps.globalExcludeColumns
+				conventionProps.globalExcludeColumns,
+				Map.of()
 				)
 
 		def operations = new OperationDefaults(

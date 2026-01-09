@@ -13,6 +13,7 @@ import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -139,7 +140,8 @@ final class TableMergeStrategyTest {
                   DataFormat.CSV,
                   TableMergeStrategy.FIRST, // FIRST strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -230,7 +232,8 @@ final class TableMergeStrategyTest {
                   DataFormat.CSV,
                   TableMergeStrategy.LAST, // LAST strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -321,7 +324,8 @@ final class TableMergeStrategyTest {
                   DataFormat.CSV,
                   TableMergeStrategy.UNION, // UNION strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -412,7 +416,8 @@ final class TableMergeStrategyTest {
                   DataFormat.CSV,
                   TableMergeStrategy.UNION_ALL, // UNION_ALL strategy (default)
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

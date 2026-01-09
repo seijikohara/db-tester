@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
@@ -7,6 +8,7 @@ import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
 import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
+import java.util.Map;
 import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
@@ -70,6 +72,8 @@ public class DbTesterJUnitAutoConfiguration {
     final DbTesterProperties.ConventionProperties conventionProps = properties.getConvention();
     final DbTesterProperties.OperationProperties operationProps = properties.getOperation();
 
+    final Map<String, ColumnStrategyMapping> globalColumnStrategies = Map.of();
+
     final ConventionSettings conventions =
         new ConventionSettings(
             conventionProps.getBaseDirectory(),
@@ -78,7 +82,8 @@ public class DbTesterJUnitAutoConfiguration {
             conventionProps.getDataFormat(),
             conventionProps.getTableMergeStrategy(),
             conventionProps.getLoadOrderFileName(),
-            conventionProps.getGlobalExcludeColumns());
+            conventionProps.getGlobalExcludeColumns(),
+            globalColumnStrategies);
 
     final OperationDefaults operations =
         new OperationDefaults(operationProps.getPreparation(), operationProps.getExpectation());

@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.config;
 
+import java.util.Map;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
@@ -16,6 +17,8 @@ import org.jspecify.annotations.Nullable;
  *     table
  * @param loadOrderFileName the file name used to specify table loading order in dataset directories
  * @param globalExcludeColumns column names to exclude from all expectation verifications globally
+ * @param globalColumnStrategies column comparison strategies applied to all expectation
+ *     verifications globally, keyed by uppercase column name
  */
 public record ConventionSettings(
     @Nullable String baseDirectory,
@@ -24,7 +27,8 @@ public record ConventionSettings(
     DataFormat dataFormat,
     TableMergeStrategy tableMergeStrategy,
     String loadOrderFileName,
-    Set<String> globalExcludeColumns) {
+    Set<String> globalExcludeColumns,
+    Map<String, ColumnStrategyMapping> globalColumnStrategies) {
 
   /**
    * Default base directory for dataset resolution.
@@ -68,12 +72,17 @@ public record ConventionSettings(
   /** Default global exclude columns (empty set). */
   private static final Set<String> DEFAULT_GLOBAL_EXCLUDE_COLUMNS = Set.of();
 
+  /** Default global column strategies (empty map). */
+  private static final Map<String, ColumnStrategyMapping> DEFAULT_GLOBAL_COLUMN_STRATEGIES =
+      Map.of();
+
   /**
    * Creates a convention instance populated with the framework defaults.
    *
    * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
    *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy,
-   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, and no global exclude columns
+   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, no global exclude columns, and no
+   *     global column strategies
    */
   public static ConventionSettings standard() {
     return new ConventionSettings(
@@ -83,7 +92,8 @@ public record ConventionSettings(
         DEFAULT_DATA_FORMAT,
         DEFAULT_TABLE_MERGE_STRATEGY,
         DEFAULT_LOAD_ORDER_FILE_NAME,
-        DEFAULT_GLOBAL_EXCLUDE_COLUMNS);
+        DEFAULT_GLOBAL_EXCLUDE_COLUMNS,
+        DEFAULT_GLOBAL_COLUMN_STRATEGIES);
   }
 
   /**
@@ -104,7 +114,8 @@ public record ConventionSettings(
         this.dataFormat,
         this.tableMergeStrategy,
         this.loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -125,7 +136,8 @@ public record ConventionSettings(
         this.dataFormat,
         this.tableMergeStrategy,
         this.loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -146,7 +158,8 @@ public record ConventionSettings(
         this.dataFormat,
         this.tableMergeStrategy,
         this.loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -163,7 +176,8 @@ public record ConventionSettings(
         dataFormat,
         this.tableMergeStrategy,
         this.loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -180,7 +194,8 @@ public record ConventionSettings(
         this.dataFormat,
         tableMergeStrategy,
         this.loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -197,7 +212,8 @@ public record ConventionSettings(
         this.dataFormat,
         this.tableMergeStrategy,
         loadOrderFileName,
-        this.globalExcludeColumns);
+        this.globalExcludeColumns,
+        this.globalColumnStrategies);
   }
 
   /**
@@ -220,6 +236,46 @@ public record ConventionSettings(
         this.dataFormat,
         this.tableMergeStrategy,
         this.loadOrderFileName,
-        globalExcludeColumns);
+        globalExcludeColumns,
+        this.globalColumnStrategies);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified global column strategies.
+   *
+   * <p>Column strategies defined here are applied to all expectation verifications unless
+   * overridden by annotation-level {@link
+   * io.github.seijikohara.dbtester.api.annotation.ColumnStrategy} configurations. This is useful
+   * for applying consistent comparison strategies across all tests without repeating the
+   * configuration in each annotation.
+   *
+   * <p>The map keys are uppercase column names for case-insensitive matching.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withGlobalColumnStrategies(Map.of(
+   *         "CREATED_AT", ColumnStrategyMapping.ignore("CREATED_AT"),
+   *         "UPDATED_AT", ColumnStrategyMapping.ignore("UPDATED_AT"),
+   *         "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")
+   *     ));
+   * }</pre>
+   *
+   * @param globalColumnStrategies the column strategies to apply globally
+   * @return a new ConventionSettings with the specified global column strategies
+   * @see ColumnStrategyMapping
+   */
+  public ConventionSettings withGlobalColumnStrategies(
+      final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        globalColumnStrategies);
   }
 }

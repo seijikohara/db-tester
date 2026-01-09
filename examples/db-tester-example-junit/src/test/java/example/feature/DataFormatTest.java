@@ -13,6 +13,7 @@ import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -138,7 +139,8 @@ final class DataFormatTest {
                   DataFormat.CSV, // CSV format
                   TableMergeStrategy.UNION_ALL,
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, csvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -244,7 +246,8 @@ final class DataFormatTest {
                   DataFormat.TSV, // TSV format
                   TableMergeStrategy.UNION_ALL,
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of()));
+                  Set.of(),
+                  Map.of()));
       DatabaseTestExtension.setConfiguration(context, tsvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

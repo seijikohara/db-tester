@@ -50,6 +50,7 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
                     TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
+                    emptyMap(),
                 ),
             )
 

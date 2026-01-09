@@ -69,11 +69,11 @@ class KotestExpectationVerifier {
      * Verifies a single ExpectedTableSet against the database.
      *
      * Delegates to [ExpectationProvider.verifyExpectation] for full data comparison
-     * including column filtering and detailed assertion messages. If verification fails, wraps the
-     * exception with additional test context.
+     * including column filtering, column comparison strategies, and detailed assertion messages.
+     * If verification fails, wraps the exception with additional test context.
      *
      * @param context the test context providing access to the data source registry
-     * @param expectedTableSet the expected TableSet with exclusion metadata
+     * @param expectedTableSet the expected TableSet with exclusion and strategy metadata
      * @param methodName the test method name for logging
      * @throws ValidationException if verification fails with wrapped context information
      */
@@ -84,6 +84,7 @@ class KotestExpectationVerifier {
     ): Unit =
         expectedTableSet.tableSet().let { tableSet ->
             val excludeColumns = expectedTableSet.excludeColumns()
+            val columnStrategies = expectedTableSet.columnStrategies()
             val dataSource = tableSet.dataSource.orElseGet { context.registry().get("") }
             val tableCount = tableSet.tables.size
 
@@ -97,21 +98,32 @@ class KotestExpectationVerifier {
                 logger.debug("Excluding columns from verification: {}", excludeColumns)
             }
 
-            runCatching { expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns) }
-                .onSuccess {
-                    logger.info(
-                        "Expectation validation completed successfully for {}: {} tables",
-                        methodName,
-                        tableCount,
-                    )
-                }.onFailure { e ->
-                    when (e) {
-                        is ValidationException -> throw ValidationException(
+            if (expectedTableSet.hasColumnStrategies()) {
+                logger.debug("Using column strategies for: {}", columnStrategies.keys)
+            }
+
+            runCatching {
+                expectationProvider.verifyExpectation(
+                    tableSet,
+                    dataSource,
+                    excludeColumns,
+                    columnStrategies,
+                )
+            }.onSuccess {
+                logger.info(
+                    "Expectation validation completed successfully for {}: {} tables",
+                    methodName,
+                    tableCount,
+                )
+            }.onFailure { e ->
+                when (e) {
+                    is ValidationException ->
+                        throw ValidationException(
                             "Failed to verify expectation dataset for $methodName",
                             e,
                         )
-                        else -> throw e
-                    }
+                    else -> throw e
                 }
+            }
         }
 }

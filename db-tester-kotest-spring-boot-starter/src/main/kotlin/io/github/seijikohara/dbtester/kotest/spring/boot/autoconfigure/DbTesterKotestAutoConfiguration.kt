@@ -63,6 +63,7 @@ class DbTesterKotestAutoConfiguration {
                     conventionProps.tableMergeStrategy,
                     conventionProps.loadOrderFileName,
                     conventionProps.globalExcludeColumns,
+                    emptyMap(),
                 )
             }.let { conventions ->
                 OperationDefaults(

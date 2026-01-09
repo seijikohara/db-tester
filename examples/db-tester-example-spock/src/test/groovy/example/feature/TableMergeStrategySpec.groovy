@@ -81,7 +81,9 @@ class TableMergeStrategySpec extends Specification {
 					'[Scenario]',
 					DataFormat.CSV,
 					TableMergeStrategy.FIRST,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of()
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
+					Set.of(),
+					Map.of()
 					)
 					)
 		}
@@ -180,7 +182,7 @@ class TableMergeStrategySpec extends Specification {
 					'[Scenario]',
 					DataFormat.CSV,
 					TableMergeStrategy.LAST,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of()
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
 					)
 					)
 		}
@@ -279,7 +281,7 @@ class TableMergeStrategySpec extends Specification {
 					'[Scenario]',
 					DataFormat.CSV,
 					TableMergeStrategy.UNION,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of()
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
 					)
 					)
 		}
@@ -378,7 +380,7 @@ class TableMergeStrategySpec extends Specification {
 					'[Scenario]',
 					DataFormat.CSV,
 					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of()
+					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
 					)
 					)
 		}

@@ -99,4 +99,39 @@ public @interface DataSetSource {
    * @see io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion#assertEqualsIgnoreColumns
    */
   String[] excludeColumns() default {};
+
+  /**
+   * Lists the column-specific comparison strategies for expectation verification.
+   *
+   * <p>Each {@link ColumnStrategy} defines how a specific column should be compared during database
+   * state verification. This allows fine-grained control over comparison behavior for individual
+   * columns.
+   *
+   * <p>Column strategies override the default strict comparison. For columns not listed here, the
+   * default {@link Strategy#STRICT} comparison is used unless a global column strategy is
+   * configured in {@link io.github.seijikohara.dbtester.api.config.ConventionSettings}.
+   *
+   * <p>This attribute only applies to expectation verification (when used within {@link
+   * ExpectedDataSet#dataSets()}). It has no effect when used within {@link DataSet#dataSets()} for
+   * preparation.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * @ExpectedDataSet(dataSets = @DataSetSource(
+   *     columnStrategies = {
+   *         @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
+   *         @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),
+   *         @ColumnStrategy(name = "ID", strategy = Strategy.REGEX, pattern = "[a-f0-9-]{36}")
+   *     }
+   * ))
+   * void testUserCreation() { }
+   * }</pre>
+   *
+   * @return column strategies for verification, or an empty array for default (strict) comparison
+   * @see ColumnStrategy
+   * @see Strategy
+   * @see io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+   */
+  ColumnStrategy[] columnStrategies() default {};
 }

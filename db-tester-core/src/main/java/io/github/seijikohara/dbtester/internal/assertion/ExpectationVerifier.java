@@ -1,9 +1,11 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
@@ -131,6 +133,70 @@ public final class ExpectationVerifier {
                 comparator.assertEqualsIgnoreColumns(
                     expectedTable, actualTable, normalizedExcludeColumns);
               }
+            });
+
+    logger.debug(
+        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+  }
+
+  /**
+   * Verifies database state matches expected dataset with column comparison strategies.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection)} with
+   * column-specific comparison strategy support. Each column can have its own comparison strategy
+   * (IGNORE, CASE_INSENSITIVE, NUMERIC, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX, or STRICT).
+   *
+   * <p>Column exclusion takes precedence: columns in excludeColumns are skipped entirely before
+   * column strategies are applied.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison, or null/empty for no exclusions
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @throws AssertionError if verification fails
+   */
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final @Nullable Collection<String> excludeColumns,
+      final @Nullable Map<String, ColumnStrategyMapping> columnStrategies) {
+    // If no column strategies, delegate to simpler method
+    if (columnStrategies == null || columnStrategies.isEmpty()) {
+      verifyExpectation(expectedTableSet, dataSource, excludeColumns);
+      return;
+    }
+
+    logger.debug("Verifying expectation for {} tables", expectedTableSet.getTables().size());
+
+    final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
+
+    if (!normalizedExcludeColumns.isEmpty()) {
+      logger.debug("Excluding columns from verification: {}", normalizedExcludeColumns);
+    }
+
+    logger.debug("Using column strategies for: {}", columnStrategies.keySet());
+
+    expectedTableSet
+        .getTables()
+        .forEach(
+            expectedTable -> {
+              final var tableName = expectedTable.getName().value();
+              final var expectedColumns = expectedTable.getColumns();
+
+              logger.trace(
+                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+
+              final var actualTable =
+                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+
+              logger.trace(
+                  "Comparing table {}: expected {} rows, actual {} rows",
+                  tableName,
+                  expectedTable.getRowCount(),
+                  actualTable.getRowCount());
+
+              comparator.assertEqualsWithStrategies(
+                  expectedTable, actualTable, normalizedExcludeColumns, columnStrategies);
             });
 
     logger.debug(

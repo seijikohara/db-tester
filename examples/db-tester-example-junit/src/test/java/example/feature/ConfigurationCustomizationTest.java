@@ -12,6 +12,7 @@ import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -83,7 +84,8 @@ final class ConfigurationCustomizationTest {
                 DataFormat.CSV, // use CSV format (default)
                 TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
                 ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                Set.of()));
+                Set.of(),
+                Map.of()));
     DatabaseTestExtension.setConfiguration(context, customConfig);
 
     final var testRegistry = DatabaseTestExtension.getRegistry(context);
