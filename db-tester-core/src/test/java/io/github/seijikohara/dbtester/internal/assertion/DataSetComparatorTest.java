@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -18,6 +19,7 @@ import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -389,5 +391,229 @@ class DataSetComparatorTest {
             .map(Row.class::cast)
             .toList();
     return new SimpleTable(new TableName(tableName), columns, rows);
+  }
+
+  /** Tests for the assertEqualsWithStrategies(Table, Table, Collection, Map) method. */
+  @Nested
+  @DisplayName("assertEqualsWithStrategies(Table, Table, Collection, Map) method")
+  class AssertEqualsWithStrategiesMethod {
+
+    /** Tests for the assertEqualsWithStrategies method. */
+    AssertEqualsWithStrategiesMethod() {}
+
+    /** Verifies that assertEqualsWithStrategies passes with empty strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when strategies are empty and values match")
+    void shouldPass_whenStrategiesAreEmptyAndValuesMatch() {
+      // Given
+      final var expected = createTable("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+      final var actual = createTable("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), new HashMap<>()),
+          "should not throw when values match with empty strategies");
+    }
+
+    /** Verifies that assertEqualsWithStrategies ignores columns with IGNORE strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when IGNORE strategy is applied to differing column")
+    void shouldPass_whenIgnoreStrategyApplied() {
+      // Given
+      final var expected =
+          createTable(
+              "USERS", List.of("ID", "NAME", "CREATED_AT"), List.of("1", "Alice", "2024-01-01"));
+      final var actual =
+          createTable(
+              "USERS", List.of("ID", "NAME", "CREATED_AT"), List.of("1", "Alice", "2025-12-31"));
+
+      // When & Then - CREATED_AT is in ignoreColumns set
+      assertDoesNotThrow(
+          () ->
+              comparator.assertEqualsWithStrategies(
+                  expected, actual, Set.of("CREATED_AT"), new HashMap<>()),
+          "should not throw when ignored column differs");
+    }
+
+    /** Verifies that assertEqualsWithStrategies uses CASE_INSENSITIVE strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when CASE_INSENSITIVE strategy matches case-different values")
+    void shouldPass_whenCaseInsensitiveStrategyMatches() {
+      // Given
+      final var expected =
+          createTable("USERS", List.of("ID", "EMAIL"), List.of("1", "Alice@TEST.com"));
+      final var actual =
+          createTable("USERS", List.of("ID", "EMAIL"), List.of("1", "alice@test.COM"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
+          "should not throw when case-insensitive comparison matches");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when CASE_INSENSITIVE does not match. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when CASE_INSENSITIVE strategy does not match")
+    void shouldThrow_whenCaseInsensitiveStrategyDoesNotMatch() {
+      // Given
+      final var expected =
+          createTable("USERS", List.of("ID", "EMAIL"), List.of("1", "alice@test.com"));
+      final var actual = createTable("USERS", List.of("ID", "EMAIL"), List.of("1", "bob@test.com"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("EMAIL"),
+          "exception message should mention the differing column");
+    }
+
+    /** Verifies that assertEqualsWithStrategies uses REGEX strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when REGEX strategy matches pattern")
+    void shouldPass_whenRegexStrategyMatches() {
+      // Given
+      final var expected =
+          createTable("USERS", List.of("ID", "UUID"), List.of("1", "[a-f0-9-]{36}"));
+      final var actual =
+          createTable(
+              "USERS", List.of("ID", "UUID"), List.of("1", "550e8400-e29b-41d4-a716-446655440000"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("UUID", ColumnStrategyMapping.regex("UUID", "[a-f0-9-]{36}"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
+          "should not throw when regex pattern matches");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when REGEX does not match. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when REGEX strategy does not match")
+    void shouldThrow_whenRegexStrategyDoesNotMatch() {
+      // Given
+      final var expected =
+          createTable("USERS", List.of("ID", "UUID"), List.of("1", "[a-f0-9-]{36}"));
+      final var actual = createTable("USERS", List.of("ID", "UUID"), List.of("1", "not-a-uuid"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("UUID", ColumnStrategyMapping.regex("UUID", "[a-f0-9-]{36}"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("UUID"),
+          "exception message should mention the differing column");
+    }
+
+    /** Verifies that assertEqualsWithStrategies uses NOT_NULL strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when NOT_NULL strategy finds non-null value")
+    void shouldPass_whenNotNullStrategyFindsValue() {
+      // Given
+      final var expected = createTable("USERS", List.of("ID", "TOKEN"), List.of("1", "any-value"));
+      final var actual =
+          createTable("USERS", List.of("ID", "TOKEN"), List.of("1", "different-value"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("TOKEN", ColumnStrategyMapping.notNull("TOKEN"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
+          "should not throw when NOT_NULL strategy finds non-null value");
+    }
+
+    /** Verifies that assertEqualsWithStrategies handles multiple strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when multiple strategies are applied correctly")
+    void shouldPass_whenMultipleStrategiesApplied() {
+      // Given
+      final var expected =
+          createTable(
+              "USERS",
+              List.of("ID", "EMAIL", "TOKEN", "CREATED_AT"),
+              List.of("1", "Alice@Test.COM", "expected-token", "2024-01-01"));
+      final var actual =
+          createTable(
+              "USERS",
+              List.of("ID", "EMAIL", "TOKEN", "CREATED_AT"),
+              List.of("1", "alice@test.com", "actual-token", "2025-12-31"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"));
+      strategies.put("TOKEN", ColumnStrategyMapping.notNull("TOKEN"));
+
+      // When & Then - CREATED_AT is ignored, EMAIL is case-insensitive, TOKEN is not-null
+      assertDoesNotThrow(
+          () ->
+              comparator.assertEqualsWithStrategies(
+                  expected, actual, Set.of("CREATED_AT"), strategies),
+          "should not throw when multiple strategies pass");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when row count differs. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when row count differs")
+    void shouldThrow_whenRowCountDiffers() {
+      // Given
+      final var expected = createTableWithMultipleRows("USERS", List.of("ID"), List.of("1", "2"));
+      final var actual = createTableWithMultipleRows("USERS", List.of("ID"), List.of("1"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsWithStrategies(
+                      expected, actual, Set.of(), new HashMap<>()));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("row_count"),
+          "exception message should mention row count mismatch");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when STRICT strategy fails. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when values differ with default STRICT strategy")
+    void shouldThrow_whenValuesDifferWithStrictStrategy() {
+      // Given
+      final var expected = createTable("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+      final var actual = createTable("USERS", List.of("ID", "NAME"), List.of("1", "Bob"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsWithStrategies(
+                      expected, actual, Set.of(), new HashMap<>()));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("NAME"),
+          "exception message should mention the differing column");
+    }
   }
 }

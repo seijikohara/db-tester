@@ -96,6 +96,7 @@ void testWithAlphabeticalOrdering() { }
 | `dataSourceName` | `String` | `""` | 名前付きDataSource識別子。空の場合はデフォルトを使用 |
 | `scenarioNames` | `String[]` | `{}` | シナリオフィルタ。空の場合はテストメソッド名を使用 |
 | `excludeColumns` | `String[]` | `{}` | 検証から除外するカラム名（大文字小文字を区別しない）。`@ExpectedDataSet`でのみ有効 |
+| `columnStrategies` | `ColumnStrategy[]` | `{}` | カラムごとの比較戦略。`@ExpectedDataSet`でのみ有効 |
 
 **リソースロケーション形式**:
 
@@ -122,6 +123,15 @@ void testMultipleScenarios() { }
     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
 ))
 void testWithExcludedColumns() { }
+
+@ExpectedDataSet(sources = @DataSetSource(
+    columnStrategies = {
+        @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
+        @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),
+        @ColumnStrategy(name = "ID", strategy = Strategy.REGEX, pattern = "[a-f0-9-]{36}")
+    }
+))
+void testWithColumnStrategies() { }
 ```
 
 **カラム除外の動作**:
@@ -129,6 +139,48 @@ void testWithExcludedColumns() { }
 - カラム名は比較のために大文字に正規化されます
 - データセットごとの除外は`ConventionSettings`のグローバル除外と結合されます
 - 除外は`@ExpectedDataSet`の検証にのみ適用され、`@DataSet`の準備には適用されません
+
+**カラム戦略の動作**:
+
+- カラム戦略は特定のカラムのデフォルトの厳密比較をオーバーライドします
+- アノテーションレベルの戦略は`ConventionSettings`のグローバル戦略をオーバーライドします
+- 除外が優先されます：除外されたカラムは戦略が適用される前にスキップされます
+
+
+### @ColumnStrategy
+
+期待値検証時に特定のカラムの比較戦略を設定します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.ColumnStrategy`
+
+**ターゲット**: なし (`@Target({})`) - `@DataSetSource#columnStrategies()`内でのみ使用されます。
+
+**属性**:
+
+| 属性 | 型 | デフォルト | 説明 |
+|------|-----|-----------|------|
+| `name` | `String` | (必須) | カラム名（大文字小文字を区別しない） |
+| `strategy` | `Strategy` | `STRICT` | 使用する比較戦略 |
+| `pattern` | `String` | `""` | `REGEX`戦略用の正規表現パターン |
+
+
+### Strategy
+
+`@ColumnStrategy`アノテーションで使用する比較戦略の種類を定義するenumです。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.Strategy`
+
+**値**:
+
+| 値 | 説明 |
+|-----|------|
+| `STRICT` | `equals()`を使用した完全一致（デフォルト） |
+| `IGNORE` | 比較を完全にスキップ |
+| `NUMERIC` | 型を考慮した数値比較 |
+| `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 |
+| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 |
+| `NOT_NULL` | 値がnullでないことを検証 |
+| `REGEX` | パターンマッチング（`pattern`属性が必要） |
 
 
 ## TableSetインターフェース
@@ -334,6 +386,48 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `nullable` | `boolean` | カラムがnull値を許可するかどうか |
 
 
+### ColumnStrategyMapping
+
+プログラマティックなカラム比較戦略設定を表します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping`
+
+**型**: `record`
+
+**フィールド**:
+
+| フィールド | 型 | 説明 |
+|------------|-----|------|
+| `columnName` | `String` | 大文字に正規化されたカラム名 |
+| `strategy` | `ComparisonStrategy` | このカラムの比較戦略 |
+
+**ファクトリメソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `of(String, ComparisonStrategy)` | 指定された戦略でマッピングを作成 |
+| `strict(String)` | STRICT戦略でマッピングを作成 |
+| `ignore(String)` | IGNORE戦略でマッピングを作成 |
+| `caseInsensitive(String)` | CASE_INSENSITIVE戦略でマッピングを作成 |
+| `numeric(String)` | NUMERIC戦略でマッピングを作成 |
+| `timestampFlexible(String)` | TIMESTAMP_FLEXIBLE戦略でマッピングを作成 |
+| `notNull(String)` | NOT_NULL戦略でマッピングを作成 |
+| `regex(String, String)` | REGEX戦略でマッピングを作成（パターン付き） |
+
+**例**:
+
+```java
+// プログラマティックなカラム戦略設定
+var strategies = List.of(
+    ColumnStrategyMapping.ignore("CREATED_AT"),
+    ColumnStrategyMapping.caseInsensitive("EMAIL"),
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}")
+);
+
+DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strategies);
+```
+
+
 ### ComparisonStrategy
 
 アサーション時の値比較動作を定義します。
@@ -392,6 +486,7 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `assertEquals(Table, Table, AssertionFailureHandler)` | カスタム失敗ハンドラーでテーブルを検証 |
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | 指定カラムを除外してテーブルセット内のテーブルを検証 |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
+| `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | カラムごとの比較戦略でテーブルを検証 |
 | `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルセットと検証 |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
 
@@ -413,6 +508,12 @@ DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "U
 
 // SQLクエリ結果の比較
 DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+
+// カラムごとの比較戦略を使用
+DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
+    ColumnStrategyMapping.ignore("CREATED_AT"),
+    ColumnStrategyMapping.caseInsensitive("EMAIL"),
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"));
 ```
 
 ### AssertionFailureHandler

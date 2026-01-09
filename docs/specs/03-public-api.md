@@ -370,6 +370,47 @@ Represents database column metadata retrieved from JDBC.
 | `typeName` | `String` | Database-specific type name |
 | `nullable` | `boolean` | Whether column allows null values |
 
+### ColumnStrategyMapping
+
+Represents programmatic column comparison strategy configuration.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping`
+
+**Type**: `record`
+
+**Fields**:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `columnName` | `String` | Column name normalized to uppercase |
+| `strategy` | `ComparisonStrategy` | Comparison strategy for this column |
+
+**Factory Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `of(String, ComparisonStrategy)` | Creates mapping with specified strategy |
+| `strict(String)` | Creates mapping with STRICT strategy |
+| `ignore(String)` | Creates mapping with IGNORE strategy |
+| `caseInsensitive(String)` | Creates mapping with CASE_INSENSITIVE strategy |
+| `numeric(String)` | Creates mapping with NUMERIC strategy |
+| `timestampFlexible(String)` | Creates mapping with TIMESTAMP_FLEXIBLE strategy |
+| `notNull(String)` | Creates mapping with NOT_NULL strategy |
+| `regex(String, String)` | Creates mapping with REGEX strategy and pattern |
+
+**Example**:
+
+```java
+// Programmatic column strategy configuration
+var strategies = List.of(
+    ColumnStrategyMapping.ignore("CREATED_AT"),
+    ColumnStrategyMapping.caseInsensitive("EMAIL"),
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}")
+);
+
+DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strategies);
+```
+
 ### ComparisonStrategy
 
 Defines value comparison behavior during assertion.
@@ -427,6 +468,7 @@ Static facade for programmatic database assertions. This utility class delegates
 | `assertEquals(Table, Table, AssertionFailureHandler)` | Asserts tables with custom failure handler |
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | Asserts table in table sets, ignoring specified columns |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
+| `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | Asserts tables with column-specific comparison strategies |
 | `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table set |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
 
@@ -448,6 +490,12 @@ DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "U
 
 // Comparing SQL query results
 DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+
+// Using column-specific comparison strategies
+DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
+    ColumnStrategyMapping.ignore("CREATED_AT"),
+    ColumnStrategyMapping.caseInsensitive("EMAIL"),
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"));
 ```
 
 ### AssertionFailureHandler

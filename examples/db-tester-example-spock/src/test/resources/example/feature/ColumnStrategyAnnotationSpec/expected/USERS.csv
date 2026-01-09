@@ -1,0 +1,9 @@
+[Scenario],ID,NAME,EMAIL,TOKEN,CREATED_AT
+ignore strategy should skip auto-generated timestamp column,1,Alice,alice@example.com,,2024-01-01 00:00:00
+ignore strategy should skip auto-generated timestamp column,2,Bob,bob@example.com,,IGNORED
+case-insensitive strategy should compare email ignoring case,1,Alice,alice@example.com,,2024-01-01 00:00:00
+case-insensitive strategy should compare email ignoring case,2,Charlie,CHARLIE@EXAMPLE.COM,,IGNORED
+regex strategy should validate UUID format using pattern,1,Alice,alice@example.com,00000000-0000-0000-0000-000000000001,2024-01-01 00:00:00
+regex strategy should validate UUID format using pattern,2,Diana,diana@example.com,ANY_UUID_VALUE,IGNORED
+multiple column strategies should be applied correctly,1,Alice,alice@example.com,00000000-0000-0000-0000-000000000001,2024-01-01 00:00:00
+multiple column strategies should be applied correctly,2,Eve,EVE@EXAMPLE.COM,ANY_UUID_VALUE,IGNORED

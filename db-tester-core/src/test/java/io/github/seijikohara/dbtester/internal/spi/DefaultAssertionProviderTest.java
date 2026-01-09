@@ -3,12 +3,15 @@ package io.github.seijikohara.dbtester.internal.spi;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -346,6 +349,94 @@ class DefaultAssertionProviderTest {
       // Then
       verify(mockTableReader).executeQuery(dataSource, query, tableName);
       verify(mockComparator).assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumns);
+    }
+  }
+
+  /** Tests for the assertEqualsWithStrategies(Table, Table, Collection) method. */
+  @Nested
+  @DisplayName("assertEqualsWithStrategies(Table, Table, Collection) method")
+  class AssertEqualsWithStrategiesMethod {
+
+    /** Tests for the assertEqualsWithStrategies method. */
+    AssertEqualsWithStrategiesMethod() {}
+
+    /** Verifies that assertEqualsWithStrategies delegates to comparator with empty strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should delegate to comparator when called with empty strategies")
+    void shouldDelegateToComparator_whenCalledWithEmptyStrategies() {
+      // Given
+      final var expected = mock(Table.class);
+      final var actual = mock(Table.class);
+      final Collection<ColumnStrategyMapping> columnStrategies = List.of();
+      doNothing()
+          .when(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
+
+      // When
+      provider.assertEqualsWithStrategies(expected, actual, columnStrategies);
+
+      // Then
+      verify(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
+    }
+
+    /** Verifies that assertEqualsWithStrategies extracts IGNORE columns. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should extract IGNORE columns and pass to comparator")
+    void shouldExtractIgnoreColumns_whenCalledWithIgnoreStrategy() {
+      // Given
+      final var expected = mock(Table.class);
+      final var actual = mock(Table.class);
+      final Collection<ColumnStrategyMapping> columnStrategies =
+          List.of(
+              ColumnStrategyMapping.ignore("CREATED_AT"),
+              ColumnStrategyMapping.ignore("UPDATED_AT"),
+              ColumnStrategyMapping.caseInsensitive("EMAIL"));
+      doNothing()
+          .when(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
+
+      // When
+      provider.assertEqualsWithStrategies(expected, actual, columnStrategies);
+
+      // Then
+      verify(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
+    }
+
+    /** Verifies that assertEqualsWithStrategies handles mixed strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should handle mixed strategies correctly")
+    void shouldHandleMixedStrategies_whenMultipleStrategiesProvided() {
+      // Given
+      final var expected = mock(Table.class);
+      final var actual = mock(Table.class);
+      final Collection<ColumnStrategyMapping> columnStrategies =
+          List.of(
+              ColumnStrategyMapping.strict("ID"),
+              ColumnStrategyMapping.ignore("CREATED_AT"),
+              ColumnStrategyMapping.caseInsensitive("EMAIL"),
+              ColumnStrategyMapping.numeric("AMOUNT"),
+              ColumnStrategyMapping.regex("UUID", "[a-f0-9-]{36}"));
+      doNothing()
+          .when(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
+
+      // When
+      provider.assertEqualsWithStrategies(expected, actual, columnStrategies);
+
+      // Then
+      verify(mockComparator)
+          .assertEqualsWithStrategies(
+              any(Table.class), any(Table.class), anyCollection(), anyMap());
     }
   }
 }
