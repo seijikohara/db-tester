@@ -128,8 +128,8 @@ final class MSSQLServerIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on SQL Server")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnSQLServer() {
     // When & Then
     logger.info("Running SQL Server integration smoke test");

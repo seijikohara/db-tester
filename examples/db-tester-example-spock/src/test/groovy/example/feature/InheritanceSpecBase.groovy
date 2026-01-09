@@ -30,7 +30,7 @@ import spock.lang.Specification
  */
 @DatabaseTest
 @DataSet(
-dataSets = @DataSetSource(
+sources = @DataSetSource(
 resourceLocation = 'classpath:example/feature/InheritanceSpecBase/',
 scenarioNames = 'baseSetup'
 )

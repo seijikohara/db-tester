@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * <p>Example usage:
  *
  * <pre>{@code
- * @ExpectedDataSet(dataSets = @DataSetSource(
+ * @ExpectedDataSet(sources = @DataSetSource(
  *     columnStrategies = {
  *         @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
  *         @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),
@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
  * columns named {@code "email"}, {@code "EMAIL"}, or {@code "Email"}.
  *
  * <p>This annotation only applies to expectation verification (when used within {@link
- * ExpectedDataSet#dataSets()}). It has no effect when used within {@link DataSet#dataSets()} for
+ * ExpectedDataSet#sources()}). It has no effect when used within {@link DataSet#sources()} for
  * preparation.
  *
  * @see Strategy

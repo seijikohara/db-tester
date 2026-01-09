@@ -157,14 +157,14 @@ class TableOrderingStrategiesSpec : AnnotationSpec() {
      */
     @Test
     @DataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/TableOrderingStrategiesSpec/programmatic/",
             ),
         ],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/TableOrderingStrategiesSpec/programmatic/expected/",
             ),

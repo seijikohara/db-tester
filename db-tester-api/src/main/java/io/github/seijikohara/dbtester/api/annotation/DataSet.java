@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  *
  * <p>Each associated {@link DataSetSource} is executed using the configured {@link #operation()}
  * (default {@link Operation#CLEAN_INSERT}) so that tests start from a deterministic database state.
- * When the {@link #dataSets()} array is empty, the extension locates datasets via the convention
+ * When the {@link #sources()} array is empty, the extension locates datasets via the convention
  * settings and applies the test method name as the scenario filter.
  *
  * @see DataSetSource
@@ -29,17 +29,18 @@ import java.lang.annotation.Target;
 public @interface DataSet {
 
   /**
-   * Lists the datasets that must be executed before the test.
+   * Lists the dataset sources that must be executed before the test.
    *
-   * <p>Datasets are executed in declaration order. Leaving the array empty instructs the extension
+   * <p>Sources are executed in declaration order. Leaving the array empty instructs the extension
    * to rely on convention-based discovery.
    *
-   * @return ordered collection of datasets; empty when convention-based discovery should be used
+   * @return ordered collection of dataset sources; empty when convention-based discovery should be
+   *     used
    */
-  DataSetSource[] dataSets() default {};
+  DataSetSource[] sources() default {};
 
   /**
-   * Provides the database operation that is applied to every dataset in {@link #dataSets()}.
+   * Provides the database operation that is applied to every dataset in {@link #sources()}.
    *
    * @return the preparation operation, defaulting to {@link Operation#CLEAN_INSERT}
    */

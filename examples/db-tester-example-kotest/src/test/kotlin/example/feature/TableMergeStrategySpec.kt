@@ -127,10 +127,10 @@ class FirstStrategySpec : AnnotationSpec() {
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/")],
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/")],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/FirstStrategySpec/should use only first dataset/expected/",
             ),
@@ -245,10 +245,10 @@ class LastStrategySpec : AnnotationSpec() {
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/")],
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/")],
     )
     @ExpectedDataSet(
-        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/should use only last dataset/expected/")],
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/should use only last dataset/expected/")],
     )
     fun `should use only last dataset`(): Unit =
         logger.info("Running LAST strategy test").also {
@@ -359,10 +359,10 @@ class UnionStrategySpec : AnnotationSpec() {
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/")],
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/")],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/UnionStrategySpec/should merge and remove duplicates/expected/",
             ),
@@ -477,10 +477,10 @@ class UnionAllStrategySpec : AnnotationSpec() {
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = [DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/")],
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/")],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/UnionAllStrategySpec/should merge and keep all rows/expected/",
             ),

@@ -2,6 +2,8 @@ package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
+import java.lang.System.Logger;
+import java.lang.System.Logger.Level;
 import java.util.Collection;
 import java.util.Map;
 import javax.sql.DataSource;
@@ -30,6 +32,9 @@ import javax.sql.DataSource;
  * @see java.util.ServiceLoader
  */
 public interface ExpectationProvider {
+
+  /** Logger for warning messages about unsupported features in default implementations. */
+  Logger LOGGER = System.getLogger(ExpectationProvider.class.getName());
 
   /**
    * Verifies that the database state matches the expected dataset.
@@ -72,8 +77,14 @@ public interface ExpectationProvider {
       final Collection<String> excludeColumns) {
     // Default implementation delegates to the basic verifyExpectation method.
     // Implementations should override this method to support column exclusion.
-    // Note: excludeColumns is intentionally ignored in the default implementation
-    // for backward compatibility with existing providers.
+    if (excludeColumns != null && !excludeColumns.isEmpty()) {
+      LOGGER.log(
+          Level.WARNING,
+          "Column exclusions specified but current ExpectationProvider does not support them. "
+              + "Exclusions will be ignored: {0}. Override verifyExpectation(TableSet, DataSource, "
+              + "Collection) to support column exclusion.",
+          excludeColumns);
+    }
     verifyExpectation(expectedTableSet, dataSource);
   }
 
@@ -116,6 +127,14 @@ public interface ExpectationProvider {
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     // Default implementation ignores column strategies for backward compatibility.
     // Implementations should override this method to support column strategies.
+    if (columnStrategies != null && !columnStrategies.isEmpty()) {
+      LOGGER.log(
+          Level.WARNING,
+          "Column strategies specified but current ExpectationProvider does not support them. "
+              + "Strategies will be ignored: {0}. Override verifyExpectation(TableSet, DataSource, "
+              + "Collection, Map) to support column strategies.",
+          columnStrategies.keySet());
+    }
     verifyExpectation(expectedTableSet, dataSource, excludeColumns);
   }
 }

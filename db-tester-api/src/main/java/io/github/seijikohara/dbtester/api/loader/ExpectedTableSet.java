@@ -37,6 +37,18 @@ public record ExpectedTableSet(
     Map<String, ColumnStrategyMapping> columnStrategies) {
 
   /**
+   * Creates an ExpectedTableSet with defensive copies of the provided collections.
+   *
+   * @param tableSet the expected dataset (required)
+   * @param excludeColumns column names to exclude (will be copied for immutability)
+   * @param columnStrategies column strategies (will be copied for immutability)
+   */
+  public ExpectedTableSet {
+    excludeColumns = Set.copyOf(excludeColumns);
+    columnStrategies = Map.copyOf(columnStrategies);
+  }
+
+  /**
    * Creates an ExpectedTableSet with no column exclusions or strategies.
    *
    * @param tableSet the expected dataset

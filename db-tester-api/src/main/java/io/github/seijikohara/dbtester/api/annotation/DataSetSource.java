@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
  * </ol>
  *
  * <p>{@code @DataSetSource} is not applied directly to test classes or methods. Instead it augments
- * the {@link DataSet#dataSets()} and {@link ExpectedDataSet#dataSets()} containers that describe
- * the per-phase datasets.
+ * the {@link DataSet#sources()} and {@link ExpectedDataSet#sources()} containers that describe the
+ * per-phase datasets.
  */
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
@@ -83,13 +83,13 @@ public @interface DataSetSource {
    * exclude columns named {@code "created_at"}, {@code "CREATED_AT"}, or {@code "Created_At"}.
    *
    * <p>This attribute only applies to expectation verification (when used within {@link
-   * ExpectedDataSet#dataSets()}). It has no effect when used within {@link DataSet#dataSets()} for
+   * ExpectedDataSet#sources()}). It has no effect when used within {@link DataSet#sources()} for
    * preparation.
    *
    * <p>Example usage:
    *
    * <pre>{@code
-   * @ExpectedDataSet(dataSets = @DataSetSource(
+   * @ExpectedDataSet(sources = @DataSetSource(
    *     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
    * ))
    * void testUserCreation() { }
@@ -112,13 +112,13 @@ public @interface DataSetSource {
    * configured in {@link io.github.seijikohara.dbtester.api.config.ConventionSettings}.
    *
    * <p>This attribute only applies to expectation verification (when used within {@link
-   * ExpectedDataSet#dataSets()}). It has no effect when used within {@link DataSet#dataSets()} for
+   * ExpectedDataSet#sources()}). It has no effect when used within {@link DataSet#sources()} for
    * preparation.
    *
    * <p>Example usage:
    *
    * <pre>{@code
-   * @ExpectedDataSet(dataSets = @DataSetSource(
+   * @ExpectedDataSet(sources = @DataSetSource(
    *     columnStrategies = {
    *         @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
    *         @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),

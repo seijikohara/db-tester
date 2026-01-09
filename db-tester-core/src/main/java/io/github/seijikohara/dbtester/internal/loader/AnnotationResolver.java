@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolves annotation values for database test configurations.
@@ -43,6 +45,9 @@ import java.util.stream.Stream;
  * @see ExpectedDataSet
  */
 public final class AnnotationResolver {
+
+  /** Logger for this class. */
+  private static final Logger logger = LoggerFactory.getLogger(AnnotationResolver.class);
 
   /** Creates a new annotation resolver. */
   public AnnotationResolver() {}
@@ -147,6 +152,9 @@ public final class AnnotationResolver {
    * are normalized to uppercase for case-insensitive matching. The returned map is keyed by
    * uppercase column name.
    *
+   * <p>If duplicate column names are found (case-insensitive), a warning is logged and the later
+   * definition takes precedence.
+   *
    * @param annotation the dataset source annotation
    * @return map of column names to their comparison strategies
    */
@@ -156,7 +164,15 @@ public final class AnnotationResolver {
             Collectors.toUnmodifiableMap(
                 cs -> cs.name().toUpperCase(Locale.ROOT),
                 this::toColumnStrategyMapping,
-                (existing, replacement) -> replacement));
+                (existing, replacement) -> {
+                  logger.warn(
+                      "Duplicate column strategy for '{}'. Using the later definition with "
+                          + "strategy: {}. Previous strategy was: {}",
+                      replacement.columnName(),
+                      replacement.strategy(),
+                      existing.strategy());
+                  return replacement;
+                }));
   }
 
   /**

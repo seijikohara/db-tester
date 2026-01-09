@@ -81,7 +81,7 @@ class HSQLDBIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on HSQLDB`(): Unit = logger.info("Running HSQLDB integration smoke test").let { }
 }

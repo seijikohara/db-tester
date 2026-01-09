@@ -33,10 +33,14 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
   /**
    * Creates a ColumnStrategyMapping with the column name normalized to uppercase.
    *
-   * @param columnName the column name
+   * @param columnName the column name (must not be blank)
    * @param strategy the comparison strategy
+   * @throws IllegalArgumentException if columnName is blank
    */
   public ColumnStrategyMapping {
+    if (columnName == null || columnName.isBlank()) {
+      throw new IllegalArgumentException("columnName must not be blank");
+    }
     columnName = columnName.toUpperCase(Locale.ROOT);
   }
 
@@ -127,6 +131,7 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    * @param columnName the column name for regex matching
    * @param pattern the regex pattern
    * @return a new ColumnStrategyMapping with REGEX strategy
+   * @throws java.util.regex.PatternSyntaxException if the pattern is not a valid regular expression
    */
   public static ColumnStrategyMapping regex(final String columnName, final String pattern) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.regex(pattern));

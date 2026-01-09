@@ -142,8 +142,8 @@ final class OracleIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on Oracle")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnOracle() {
     // When & Then
     logger.info("Running Oracle integration smoke test");

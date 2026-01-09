@@ -181,13 +181,13 @@ final class DataFormatTest {
     @DisplayName("should load CSV format data correctly")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$CsvFormatTest/shouldLoadCsvFormatData/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$CsvFormatTest/shouldLoadCsvFormatData/expected/")
@@ -288,13 +288,13 @@ final class DataFormatTest {
     @DisplayName("should load TSV format data correctly")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$TsvFormatTest/shouldLoadTsvFormatData/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/DataFormatTest$TsvFormatTest/shouldLoadTsvFormatData/expected/")

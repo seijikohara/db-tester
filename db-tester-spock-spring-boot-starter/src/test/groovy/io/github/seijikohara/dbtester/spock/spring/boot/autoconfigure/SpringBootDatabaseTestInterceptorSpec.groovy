@@ -108,7 +108,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	}
 
 	def 'should handle different operation types'() {
-		given: 'dataSets with different operations'
+		given: 'sources with different operations'
 		def dataSet = createMockDataSet(operation)
 		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
 

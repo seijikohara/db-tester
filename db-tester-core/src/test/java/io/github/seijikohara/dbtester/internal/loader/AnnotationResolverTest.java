@@ -1,15 +1,21 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.annotation.Strategy;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -191,7 +197,7 @@ class AnnotationResolverTest {
     void shouldReturnSpecifiedScenarioNames_whenProvided() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -214,7 +220,7 @@ class AnnotationResolverTest {
     void shouldReturnMethodName_whenScenarioNamesNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutScenarioNames.class.getDeclaredMethod("myTestMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -237,7 +243,7 @@ class AnnotationResolverTest {
     void shouldTrimAndFilterEmpty_scenarioNames() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithEmptyScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -261,7 +267,7 @@ class AnnotationResolverTest {
       // Given
       final var testMethod =
           TestClassWithWhitespaceScenarioNames.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveScenarioNames(annotation, testMethod);
@@ -293,7 +299,7 @@ class AnnotationResolverTest {
     void shouldReturnLocation_whenSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithResourceLocation.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.extractResourceLocation(annotation);
@@ -315,7 +321,7 @@ class AnnotationResolverTest {
     void shouldReturnEmpty_whenNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutResourceLocation.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.extractResourceLocation(annotation);
@@ -344,7 +350,7 @@ class AnnotationResolverTest {
     void shouldReturnName_whenSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithDataSourceName.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveDataSourceName(annotation);
@@ -367,7 +373,7 @@ class AnnotationResolverTest {
     void shouldReturnEmpty_whenNotSpecified() throws NoSuchMethodException {
       // Given
       final var testMethod = TestClassWithoutDataSourceName.class.getDeclaredMethod("testMethod");
-      final var annotation = testMethod.getAnnotation(DataSet.class).dataSets()[0];
+      final var annotation = testMethod.getAnnotation(DataSet.class).sources()[0];
 
       // When
       final var result = resolver.resolveDataSourceName(annotation);
@@ -449,7 +455,7 @@ class AnnotationResolverTest {
     TestClassWithScenarioNames() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
+    @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
     void testMethod() {}
   }
 
@@ -459,7 +465,7 @@ class AnnotationResolverTest {
     TestClassWithoutScenarioNames() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource)
+    @DataSet(sources = @DataSetSource)
     void myTestMethod() {}
   }
 
@@ -469,7 +475,7 @@ class AnnotationResolverTest {
     TestClassWithEmptyScenarioNames() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource(scenarioNames = {"", " "}))
+    @DataSet(sources = @DataSetSource(scenarioNames = {"", " "}))
     void testMethod() {}
   }
 
@@ -479,7 +485,7 @@ class AnnotationResolverTest {
     TestClassWithWhitespaceScenarioNames() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource(scenarioNames = {" scenario1 "}))
+    @DataSet(sources = @DataSetSource(scenarioNames = {" scenario1 "}))
     void testMethod() {}
   }
 
@@ -489,7 +495,7 @@ class AnnotationResolverTest {
     TestClassWithResourceLocation() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
+    @DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
     void testMethod() {}
   }
 
@@ -499,7 +505,7 @@ class AnnotationResolverTest {
     TestClassWithoutResourceLocation() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource)
+    @DataSet(sources = @DataSetSource)
     void testMethod() {}
   }
 
@@ -509,7 +515,7 @@ class AnnotationResolverTest {
     TestClassWithDataSourceName() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource(dataSourceName = "customDataSource"))
+    @DataSet(sources = @DataSetSource(dataSourceName = "customDataSource"))
     void testMethod() {}
   }
 
@@ -519,7 +525,294 @@ class AnnotationResolverTest {
     TestClassWithoutDataSourceName() {}
 
     /** Test method. */
-    @DataSet(dataSets = @DataSetSource)
+    @DataSet(sources = @DataSetSource)
+    void testMethod() {}
+  }
+
+  /** Tests for the resolveExcludeColumns() method. */
+  @Nested
+  @DisplayName("resolveExcludeColumns(DataSetSource) method")
+  class ResolveExcludeColumnsMethod {
+
+    /** Tests for the resolveExcludeColumns method. */
+    ResolveExcludeColumnsMethod() {}
+
+    /**
+     * Verifies that resolveExcludeColumns returns empty set when not specified.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return empty set when excludeColumns not specified")
+    void shouldReturnEmptySet_whenExcludeColumnsNotSpecified() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithoutExcludeColumns.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveExcludeColumns(annotation);
+
+      // Then
+      assertTrue(result.isEmpty(), "should return empty set");
+    }
+
+    /**
+     * Verifies that resolveExcludeColumns returns uppercase columns when specified.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return uppercase columns when excludeColumns specified")
+    void shouldReturnUppercaseColumns_whenExcludeColumnsSpecified() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithExcludeColumns.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveExcludeColumns(annotation);
+
+      // Then
+      assertEquals(
+          Set.of("CREATED_AT", "UPDATED_AT"), result, "should return uppercase column names");
+    }
+
+    /**
+     * Verifies that resolveExcludeColumns filters empty strings.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should filter empty strings from excludeColumns")
+    void shouldFilterEmptyStrings_fromExcludeColumns() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithEmptyExcludeColumns.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveExcludeColumns(annotation);
+
+      // Then
+      assertEquals(Set.of("COLUMN1"), result, "should filter empty strings");
+    }
+  }
+
+  /** Tests for the resolveColumnStrategies() method. */
+  @Nested
+  @DisplayName("resolveColumnStrategies(DataSetSource) method")
+  class ResolveColumnStrategiesMethod {
+
+    /** Tests for the resolveColumnStrategies method. */
+    ResolveColumnStrategiesMethod() {}
+
+    /**
+     * Verifies that resolveColumnStrategies returns empty map when not specified.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return empty map when columnStrategies not specified")
+    void shouldReturnEmptyMap_whenColumnStrategiesNotSpecified() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithoutColumnStrategies.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveColumnStrategies(annotation);
+
+      // Then
+      assertTrue(result.isEmpty(), "should return empty map");
+    }
+
+    /**
+     * Verifies that resolveColumnStrategies converts annotations to mappings.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert annotations to mappings when columnStrategies specified")
+    void shouldConvertAnnotationsToMappings_whenColumnStrategiesSpecified()
+        throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithColumnStrategies.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveColumnStrategies(annotation);
+
+      // Then
+      assertAll(
+          "should have correct mappings",
+          () -> assertEquals(2, result.size(), "should have 2 mappings"),
+          () -> assertTrue(result.containsKey("EMAIL"), "should contain EMAIL key"),
+          () -> assertTrue(result.containsKey("CREATED_AT"), "should contain CREATED_AT key"),
+          () -> {
+            final var emailMapping = result.get("EMAIL");
+            assertNotNull(emailMapping, "EMAIL mapping should not be null");
+            assertEquals(
+                ComparisonStrategy.CASE_INSENSITIVE,
+                emailMapping.strategy(),
+                "EMAIL should have CASE_INSENSITIVE strategy");
+          },
+          () -> {
+            final var createdAtMapping = result.get("CREATED_AT");
+            assertNotNull(createdAtMapping, "CREATED_AT mapping should not be null");
+            assertEquals(
+                ComparisonStrategy.IGNORE,
+                createdAtMapping.strategy(),
+                "CREATED_AT should have IGNORE strategy");
+          });
+    }
+
+    /**
+     * Verifies that resolveColumnStrategies normalizes column names to uppercase.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should normalize column names to uppercase")
+    void shouldNormalizeColumnNames_toUppercase() throws NoSuchMethodException {
+      // Given
+      final var testMethod =
+          TestClassWithLowercaseColumnStrategy.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveColumnStrategies(annotation);
+
+      // Then
+      assertTrue(
+          result.containsKey("LOWERCASE_COLUMN"),
+          "should normalize lowercase column name to uppercase");
+    }
+
+    /**
+     * Verifies that resolveColumnStrategies handles REGEX strategy with pattern.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should handle REGEX strategy with pattern")
+    void shouldHandleRegexStrategy_withPattern() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithRegexStrategy.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When
+      final var result = resolver.resolveColumnStrategies(annotation);
+
+      // Then
+      assertAll(
+          "should have correct REGEX mapping",
+          () -> assertTrue(result.containsKey("UUID"), "should contain UUID key"),
+          () -> {
+            final var uuidMapping = result.get("UUID");
+            assertNotNull(uuidMapping, "UUID mapping should not be null");
+            assertEquals(
+                ComparisonStrategy.Type.REGEX,
+                uuidMapping.strategy().getType(),
+                "should be REGEX type");
+          },
+          () -> {
+            final var uuidMapping = result.get("UUID");
+            assertNotNull(uuidMapping, "UUID mapping should not be null");
+            assertTrue(uuidMapping.strategy().getPattern().isPresent(), "should have pattern");
+          });
+    }
+  }
+
+  /** Test class without exclude columns. */
+  static class TestClassWithoutExcludeColumns {
+    /** Test constructor. */
+    TestClassWithoutExcludeColumns() {}
+
+    /** Test method. */
+    @ExpectedDataSet(sources = @DataSetSource)
+    void testMethod() {}
+  }
+
+  /** Test class with exclude columns. */
+  static class TestClassWithExcludeColumns {
+    /** Test constructor. */
+    TestClassWithExcludeColumns() {}
+
+    /** Test method. */
+    @ExpectedDataSet(sources = @DataSetSource(excludeColumns = {"created_at", "updated_at"}))
+    void testMethod() {}
+  }
+
+  /** Test class with empty exclude columns. */
+  static class TestClassWithEmptyExcludeColumns {
+    /** Test constructor. */
+    TestClassWithEmptyExcludeColumns() {}
+
+    /** Test method. */
+    @ExpectedDataSet(sources = @DataSetSource(excludeColumns = {"column1", "", "  "}))
+    void testMethod() {}
+  }
+
+  /** Test class without column strategies. */
+  static class TestClassWithoutColumnStrategies {
+    /** Test constructor. */
+    TestClassWithoutColumnStrategies() {}
+
+    /** Test method. */
+    @ExpectedDataSet(sources = @DataSetSource)
+    void testMethod() {}
+  }
+
+  /** Test class with column strategies. */
+  static class TestClassWithColumnStrategies {
+    /** Test constructor. */
+    TestClassWithColumnStrategies() {}
+
+    /** Test method. */
+    @ExpectedDataSet(
+        sources =
+            @DataSetSource(
+                columnStrategies = {
+                  @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
+                  @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE)
+                }))
+    void testMethod() {}
+  }
+
+  /** Test class with lowercase column strategy. */
+  static class TestClassWithLowercaseColumnStrategy {
+    /** Test constructor. */
+    TestClassWithLowercaseColumnStrategy() {}
+
+    /** Test method. */
+    @ExpectedDataSet(
+        sources =
+            @DataSetSource(
+                columnStrategies = {
+                  @ColumnStrategy(name = "lowercase_column", strategy = Strategy.STRICT)
+                }))
+    void testMethod() {}
+  }
+
+  /** Test class with REGEX strategy. */
+  static class TestClassWithRegexStrategy {
+    /** Test constructor. */
+    TestClassWithRegexStrategy() {}
+
+    /** Test method. */
+    @ExpectedDataSet(
+        sources =
+            @DataSetSource(
+                columnStrategies = {
+                  @ColumnStrategy(
+                      name = "uuid",
+                      strategy = Strategy.REGEX,
+                      pattern = "[a-f0-9-]{36}")
+                }))
     void testMethod() {}
   }
 }

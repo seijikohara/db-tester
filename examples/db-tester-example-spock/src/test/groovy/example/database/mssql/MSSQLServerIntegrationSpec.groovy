@@ -134,8 +134,8 @@ class MSSQLServerIntegrationSpec extends Specification {
 	 *   <li>Basic CRUD operations work correctly
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on SQL Server'() {
 		expect: 'smoke test passes'
 		logger.info('Running SQL Server integration smoke test')

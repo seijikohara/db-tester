@@ -111,7 +111,7 @@ class MySQLIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on MySQL`(): Unit = logger.info("Running MySQL integration smoke test").let { }
 }

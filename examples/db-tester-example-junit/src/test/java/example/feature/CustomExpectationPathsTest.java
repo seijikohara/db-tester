@@ -150,7 +150,7 @@ final class CustomExpectationPathsTest {
   @DisplayName("should insert new order with custom expectation path")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-basic/"))
@@ -188,7 +188,7 @@ final class CustomExpectationPathsTest {
   @DisplayName("should validate with partial columns using custom expectation path")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-ignore-columns/"))
@@ -226,7 +226,7 @@ final class CustomExpectationPathsTest {
   @DisplayName("should validate order items with custom expectation path")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-query/"))
@@ -264,7 +264,7 @@ final class CustomExpectationPathsTest {
   @DisplayName("should create order in pending state (stage 1)")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage1/"))
@@ -302,7 +302,7 @@ final class CustomExpectationPathsTest {
   @DisplayName("should ship order and transition to shipped state (stage 2)")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomExpectationPathsTest/expected-stage2/"))

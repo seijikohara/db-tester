@@ -135,8 +135,8 @@ class MySQLIntegrationSpec extends Specification {
 	 *   <li>Basic CRUD operations work correctly
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on MySQL'() {
 		expect: 'smoke test passes'
 		logger.info('Running MySQL integration smoke test')

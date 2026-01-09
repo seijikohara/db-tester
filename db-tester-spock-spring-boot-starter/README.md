@@ -84,8 +84,8 @@ Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is 
 For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```groovy
-@DataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
-@ExpectedDataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
+@DataSet(sources = @DataSetSource(dataSourceName = "primaryDataSource"))
+@ExpectedDataSet(sources = @DataSetSource(dataSourceName = "primaryDataSource"))
 def "should test primary database"() {
     // Test with primary DataSource
 }

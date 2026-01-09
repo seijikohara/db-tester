@@ -120,7 +120,7 @@ Override class-level annotations at the method level:
 
 ```kotlin
 @Test
-@DataSet(dataSets = [DataSetSource(resourceLocation = "custom/path")])
+@DataSet(sources = [DataSetSource(resourceLocation = "custom/path")])
 fun `should create user with custom data`() {
     // Uses custom data location
 }

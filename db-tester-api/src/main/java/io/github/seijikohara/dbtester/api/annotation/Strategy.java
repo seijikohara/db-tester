@@ -12,7 +12,7 @@ import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
  * <p>Example usage:
  *
  * <pre>{@code
- * @ExpectedDataSet(dataSets = @DataSetSource(
+ * @ExpectedDataSet(sources = @DataSetSource(
  *     columnStrategies = {
  *         @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
  *         @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE)

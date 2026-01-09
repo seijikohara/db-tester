@@ -116,14 +116,14 @@ class DataFormatSpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = [
+		sources = [
 			@DataSetSource(
 			resourceLocation = 'classpath:example/feature/DataFormatSpec$CsvFormatSpec/should load CSV format data/'
 			)
 		]
 		)
 		@ExpectedDataSet(
-		dataSets = [
+		sources = [
 			@DataSetSource(
 			resourceLocation = 'classpath:example/feature/DataFormatSpec$CsvFormatSpec/should load CSV format data/expected/'
 			)
@@ -238,14 +238,14 @@ class DataFormatSpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = [
+		sources = [
 			@DataSetSource(
 			resourceLocation = 'classpath:example/feature/DataFormatSpec$TsvFormatSpec/should load TSV format data/'
 			)
 		]
 		)
 		@ExpectedDataSet(
-		dataSets = [
+		sources = [
 			@DataSetSource(
 			resourceLocation = 'classpath:example/feature/DataFormatSpec$TsvFormatSpec/should load TSV format data/expected/'
 			)

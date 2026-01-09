@@ -68,8 +68,8 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
         .findDataSet(testMethod, testClass)
         .map(
             dataSet -> {
-              final var dataSetSources = dataSet.dataSets();
-              // When dataSets is empty, load from convention-based location with default config
+              final var dataSetSources = dataSet.sources();
+              // When sources is empty, load from convention-based location with default config
               final var loadedTableSets =
                   dataSetSources.length == 0
                       ? loadConventionBasedTableSet(context, null)
@@ -98,8 +98,8 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
         .findExpectedDataSet(testMethod, testClass)
         .map(
             expectedDataSet -> {
-              final var dataSetSources = expectedDataSet.dataSets();
-              // When dataSets is empty, load from convention-based location with default config
+              final var dataSetSources = expectedDataSet.sources();
+              // When sources is empty, load from convention-based location with default config
               final var loadedTableSets =
                   dataSetSources.length == 0
                       ? loadConventionBasedTableSet(context, expectFileSuffix)
@@ -130,8 +130,8 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
         .findExpectedDataSet(testMethod, testClass)
         .map(
             expectedDataSet -> {
-              final var dataSetSources = expectedDataSet.dataSets();
-              // When dataSets is empty, load from convention-based location with default config
+              final var dataSetSources = expectedDataSet.sources();
+              // When sources is empty, load from convention-based location with default config
               if (dataSetSources.length == 0) {
                 final var loadedTableSets = loadConventionBasedTableSet(context, expectFileSuffix);
                 final var mergedTableSets = mergeTableSets(loadedTableSets, mergeStrategy);
@@ -181,7 +181,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    * Loads a dataset using convention-based resolution with default configuration.
    *
    * <p>This method is called when {@code @DataSet} or {@code @ExpectedDataSet} is used without
-   * specifying {@code dataSets}. It creates a single dataset using:
+   * specifying {@code sources}. It creates a single dataset using:
    *
    * <ul>
    *   <li>Default resource location (convention-based: {@code classpath:[test-class]/})

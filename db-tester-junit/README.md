@@ -109,7 +109,7 @@ Override class-level annotations at the method level:
 
 ```java
 @Test
-@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
+@DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
 void testWithCustomDataSet() {
     // Uses custom data location
 }

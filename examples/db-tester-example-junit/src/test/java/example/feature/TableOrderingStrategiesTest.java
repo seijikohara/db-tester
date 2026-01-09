@@ -232,12 +232,12 @@ final class TableOrderingStrategiesTest {
   @Tag("normal")
   @DisplayName("should use programmatic ordering via custom resource location")
   @DataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableOrderingStrategiesTest/programmatic/"))
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableOrderingStrategiesTest/programmatic/expected/"))

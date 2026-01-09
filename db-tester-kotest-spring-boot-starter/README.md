@@ -85,8 +85,8 @@ For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```kotlin
 @Test
-@DataSet(dataSets = [DataSetSource(dataSourceName = "primaryDataSource")])
-@ExpectedDataSet(dataSets = [DataSetSource(dataSourceName = "primaryDataSource")])
+@DataSet(sources = [DataSetSource(dataSourceName = "primaryDataSource")])
+@ExpectedDataSet(sources = [DataSetSource(dataSourceName = "primaryDataSource")])
 fun `should test primary database`() {
     // Test with primary DataSource
 }

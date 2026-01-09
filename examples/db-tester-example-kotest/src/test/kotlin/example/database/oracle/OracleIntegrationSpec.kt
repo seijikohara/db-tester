@@ -133,7 +133,7 @@ class OracleIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on Oracle`(): Unit = logger.info("Running Oracle integration smoke test").let { }
 }

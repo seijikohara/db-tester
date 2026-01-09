@@ -104,7 +104,7 @@ class CustomQueryValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-filtered/'
 	))
 	def 'should validate regional sales'() {
@@ -131,7 +131,7 @@ class CustomQueryValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-aggregation/'
 	))
 	def 'should validate sales summary'() {
@@ -158,7 +158,7 @@ class CustomQueryValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-join/'
 	))
 	def 'should validate high value sales'() {
@@ -186,7 +186,7 @@ class CustomQueryValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-daterange/'
 	))
 	def 'should validate january sales'() {

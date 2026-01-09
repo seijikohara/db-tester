@@ -193,7 +193,7 @@ final class PartialColumnValidationTest {
   @DisplayName("should ignore auto-generated columns like ID and timestamps")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/PartialColumnValidationTest/expected-ignore-columns/"))
@@ -232,7 +232,7 @@ final class PartialColumnValidationTest {
   @DisplayName("should validate with minimal columns including default value verification")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/PartialColumnValidationTest/expected-combined/"))
@@ -274,7 +274,7 @@ final class PartialColumnValidationTest {
   @DisplayName("should validate database state after UPDATE operation")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/PartialColumnValidationTest/expected-after-update/"))

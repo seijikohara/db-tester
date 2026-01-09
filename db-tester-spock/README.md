@@ -118,7 +118,7 @@ class UserRepositorySpec extends Specification {
 Override class-level annotations at the method level:
 
 ```groovy
-@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/path"))
+@DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
 def "should create user with custom data"() {
     // Uses custom data location
 }

@@ -169,7 +169,7 @@ final class TableMergeStrategyTest {
     @DisplayName("should use only first dataset when FIRST merge strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/dataset1/"),
@@ -178,7 +178,7 @@ final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/dataset2/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_FirstStrategyTest/shouldUseOnlyFirstDataset/expected/")
@@ -261,7 +261,7 @@ final class TableMergeStrategyTest {
     @DisplayName("should use only last dataset when LAST merge strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/dataset1/"),
@@ -270,7 +270,7 @@ final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/dataset2/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_LastStrategyTest/shouldUseOnlyLastDataset/expected/")
@@ -353,7 +353,7 @@ final class TableMergeStrategyTest {
     @DisplayName("should merge datasets and remove duplicates when UNION strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/dataset1/"),
@@ -362,7 +362,7 @@ final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/dataset2/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionStrategyTest/shouldMergeAndRemoveDuplicates/expected/")
@@ -446,7 +446,7 @@ final class TableMergeStrategyTest {
     @DisplayName("should merge datasets and keep all rows when UNION_ALL strategy is configured")
     @DataSet(
         operation = Operation.INSERT,
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/dataset1/"),
@@ -455,7 +455,7 @@ final class TableMergeStrategyTest {
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/dataset2/")
         })
     @ExpectedDataSet(
-        dataSets = {
+        sources = {
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/TableMergeStrategyTest_UnionAllStrategyTest/shouldMergeAndKeepAllRows/expected/")

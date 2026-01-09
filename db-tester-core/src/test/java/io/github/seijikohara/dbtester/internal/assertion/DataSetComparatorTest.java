@@ -393,6 +393,24 @@ class DataSetComparatorTest {
     return new SimpleTable(new TableName(tableName), columns, rows);
   }
 
+  /**
+   * Creates a Table with null value in the second column.
+   *
+   * @param tableName the table name
+   * @param columnNames the column names (must have at least 2 columns)
+   * @param firstColumnValue the value for the first column
+   * @return the created Table with null in second column
+   */
+  private static Table createTableWithNullValue(
+      final String tableName, final List<String> columnNames, final String firstColumnValue) {
+    final var columns = columnNames.stream().map(ColumnName::new).toList();
+    final var rowValues = new java.util.LinkedHashMap<ColumnName, CellValue>();
+    rowValues.put(columns.get(0), new CellValue(firstColumnValue));
+    rowValues.put(columns.get(1), CellValue.NULL);
+    final var row = new SimpleRow(rowValues);
+    return new SimpleTable(new TableName(tableName), columns, List.of(row));
+  }
+
   /** Tests for the assertEqualsWithStrategies(Table, Table, Collection, Map) method. */
   @Nested
   @DisplayName("assertEqualsWithStrategies(Table, Table, Collection, Map) method")
@@ -540,6 +558,115 @@ class DataSetComparatorTest {
       assertDoesNotThrow(
           () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
           "should not throw when NOT_NULL strategy finds non-null value");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when NOT_NULL strategy finds null. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when NOT_NULL strategy finds null value")
+    void shouldThrow_whenNotNullStrategyFindsNullValue() {
+      // Given
+      final var expected = createTable("USERS", List.of("ID", "TOKEN"), List.of("1", "any-value"));
+      final var actual = createTableWithNullValue("USERS", List.of("ID", "TOKEN"), "1");
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("TOKEN", ColumnStrategyMapping.notNull("TOKEN"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("TOKEN"),
+          "exception message should mention the null column");
+    }
+
+    /** Verifies that assertEqualsWithStrategies uses NUMERIC strategy for numeric comparison. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when NUMERIC strategy matches equivalent numeric values")
+    void shouldPass_whenNumericStrategyMatchesEquivalentValues() {
+      // Given
+      final var expected = createTable("PRODUCTS", List.of("ID", "PRICE"), List.of("1", "99.99"));
+      final var actual = createTable("PRODUCTS", List.of("ID", "PRICE"), List.of("1", "99.990"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("PRICE", ColumnStrategyMapping.numeric("PRICE"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
+          "should not throw when NUMERIC strategy matches equivalent numeric values");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when NUMERIC values differ. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when NUMERIC strategy detects different values")
+    void shouldThrow_whenNumericStrategyDetectsDifferentValues() {
+      // Given
+      final var expected = createTable("PRODUCTS", List.of("ID", "PRICE"), List.of("1", "99.99"));
+      final var actual = createTable("PRODUCTS", List.of("ID", "PRICE"), List.of("1", "100.00"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("PRICE", ColumnStrategyMapping.numeric("PRICE"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("PRICE"),
+          "exception message should mention the differing column");
+    }
+
+    /** Verifies that assertEqualsWithStrategies uses TIMESTAMP_FLEXIBLE strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName(
+        "should pass when TIMESTAMP_FLEXIBLE strategy matches timestamps with different precision")
+    void shouldPass_whenTimestampFlexibleStrategyMatches() {
+      // Given
+      final var expected =
+          createTable("EVENTS", List.of("ID", "CREATED_AT"), List.of("1", "2024-01-15 10:30:00"));
+      final var actual =
+          createTable(
+              "EVENTS", List.of("ID", "CREATED_AT"), List.of("1", "2024-01-15 10:30:00.000"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("CREATED_AT", ColumnStrategyMapping.timestampFlexible("CREATED_AT"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies),
+          "should not throw when TIMESTAMP_FLEXIBLE matches timestamps with different precision");
+    }
+
+    /** Verifies that assertEqualsWithStrategies throws when TIMESTAMP_FLEXIBLE detects mismatch. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when TIMESTAMP_FLEXIBLE strategy detects different timestamps")
+    void shouldThrow_whenTimestampFlexibleStrategyDetectsDifferentValues() {
+      // Given
+      final var expected =
+          createTable("EVENTS", List.of("ID", "CREATED_AT"), List.of("1", "2024-01-15 10:30:00"));
+      final var actual =
+          createTable("EVENTS", List.of("ID", "CREATED_AT"), List.of("1", "2024-01-15 11:00:00"));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("CREATED_AT", ColumnStrategyMapping.timestampFlexible("CREATED_AT"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () -> comparator.assertEqualsWithStrategies(expected, actual, Set.of(), strategies));
+
+      assertNotNull(exception.getMessage(), "exception message should not be null");
+      assertTrue(
+          exception.getMessage().contains("CREATED_AT"),
+          "exception message should mention the differing column");
     }
 
     /** Verifies that assertEqualsWithStrategies handles multiple strategies. */

@@ -304,8 +304,8 @@ Each test method loads only rows matching its name.
 Specify explicit resource locations instead of convention-based discovery:
 
 ```java
-@DataSet(dataSets = @DataSetSource(resourceLocation = "custom/data"))
-@ExpectedDataSet(dataSets = @DataSetSource(resourceLocation = "custom/expected"))
+@DataSet(sources = @DataSetSource(resourceLocation = "custom/data"))
+@ExpectedDataSet(sources = @DataSetSource(resourceLocation = "custom/expected"))
 void testWithCustomLocation() { }
 ```
 
@@ -318,7 +318,7 @@ Exclude columns (such as timestamps or auto-generated IDs) from verification:
 ```java
 @Test
 @DataSet
-@ExpectedDataSet(dataSets = @DataSetSource(
+@ExpectedDataSet(sources = @DataSetSource(
     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
 ))
 void testWithExcludedColumns() {
@@ -389,7 +389,7 @@ registry.register("secondary", secondaryDataSource);
 ```
 
 ```java
-@DataSet(dataSets = @DataSetSource(dataSourceName = "secondary"))
+@DataSet(sources = @DataSetSource(dataSourceName = "secondary"))
 ```
 
 ---

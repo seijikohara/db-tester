@@ -114,7 +114,7 @@ class Neo4jIntegrationSpec : AnnotationSpec() {
      * - Framework handles graph database results correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on Neo4j`(): Unit = logger.info("Running Neo4j integration smoke test")
 }

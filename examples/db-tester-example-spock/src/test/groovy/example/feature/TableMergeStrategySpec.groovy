@@ -106,10 +106,10 @@ class TableMergeStrategySpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/')
 		)
 		@ExpectedDataSet(
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/should use only first dataset/expected/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/should use only first dataset/expected/')
 		)
 		def 'should use only first dataset'() {
 			when: 'adding additional data'
@@ -205,10 +205,10 @@ class TableMergeStrategySpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
 		)
 		@ExpectedDataSet(
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/should use only last dataset/expected/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/should use only last dataset/expected/')
 		)
 		def 'should use only last dataset'() {
 			when: 'adding additional data'
@@ -304,10 +304,10 @@ class TableMergeStrategySpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/')
 		)
 		@ExpectedDataSet(
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/should merge and remove duplicates/expected/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/should merge and remove duplicates/expected/')
 		)
 		def 'should merge and remove duplicates'() {
 			when: 'adding additional unique data'
@@ -403,10 +403,10 @@ class TableMergeStrategySpec extends Specification {
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/')
 		)
 		@ExpectedDataSet(
-		dataSets = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/should merge and keep all rows/expected/')
+		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/should merge and keep all rows/expected/')
 		)
 		def 'should merge and keep all rows'() {
 			when: 'adding additional data'

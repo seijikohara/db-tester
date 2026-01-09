@@ -33,7 +33,7 @@ import javax.sql.DataSource
  * ```
  */
 @DataSet(
-    dataSets = [
+    sources = [
         DataSetSource(
             resourceLocation = "classpath:example/feature/AnnotationConfigurationSpec/",
             scenarioNames = ["classLevel"],
@@ -118,7 +118,7 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      */
     @Test
     @DataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/AnnotationConfigurationSpec/custom-location/",
             ),
@@ -145,7 +145,7 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * - Expectation: Verifies both departments and updated employee salary
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
     @ExpectedDataSet
     fun `should handle multiple scenarios`(): Unit =
         logger.info("Running multiple scenarios test").also {
@@ -157,8 +157,8 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * Demonstrates multiple scenario names for preparation and expectation.
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["should merge multiple data sets"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["scenario1", "scenario2"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["should merge multiple data sets"])])
     fun `should merge multiple data sets`(): Unit =
         logger.info("Running merge multiple data sets test").also {
             executeSql(dataSource, "UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2")
@@ -190,8 +190,8 @@ class AnnotationConfigurationSpec : AnnotationSpec() {
      * Demonstrates using different scenarios for preparation and expectation.
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["multiDataSet1"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["multiDataSet"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["multiDataSet1"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["multiDataSet"])])
     fun `should handle multiple data sets`(): Unit =
         logger.info("Running multiple data sets test").also {
             executeSql(

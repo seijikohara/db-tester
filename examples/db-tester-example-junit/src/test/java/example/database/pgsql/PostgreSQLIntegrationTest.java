@@ -129,8 +129,8 @@ final class PostgreSQLIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on PostgreSQL")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnPostgreSQL() {
     // When & Then
     logger.info("Running PostgreSQL integration smoke test");

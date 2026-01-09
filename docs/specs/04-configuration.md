@@ -252,7 +252,7 @@ Defines how tables from multiple datasets merge.
 Datasets are processed in annotation declaration order:
 
 ```java
-@Preparation(dataSets = {
+@Preparation(sources = {
     @DataSet(resourceLocation = "dataset1"),  // Processed first
     @DataSet(resourceLocation = "dataset2")   // Processed second
 })

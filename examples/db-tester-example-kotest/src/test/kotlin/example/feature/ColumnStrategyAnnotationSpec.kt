@@ -108,7 +108,7 @@ class ColumnStrategyAnnotationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 columnStrategies = [
                     ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),
@@ -140,7 +140,7 @@ class ColumnStrategyAnnotationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 columnStrategies = [
                     ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
@@ -173,7 +173,7 @@ class ColumnStrategyAnnotationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 columnStrategies = [
                     ColumnStrategy(
@@ -210,7 +210,7 @@ class ColumnStrategyAnnotationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 columnStrategies = [
                     ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),

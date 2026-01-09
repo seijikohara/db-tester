@@ -81,8 +81,8 @@ For multiple DataSource beans, use bean names in `@DataSetSource`:
 
 ```java
 @Test
-@DataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
-@ExpectedDataSet(dataSets = @DataSetSource(dataSourceName = "primaryDataSource"))
+@DataSet(sources = @DataSetSource(dataSourceName = "primaryDataSource"))
+@ExpectedDataSet(sources = @DataSetSource(dataSourceName = "primaryDataSource"))
 void testPrimaryDatabase() {
     // Test with primary DataSource
 }

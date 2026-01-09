@@ -25,7 +25,7 @@ import javax.sql.DataSource
  * @see InheritedAnnotationSpec
  */
 @DataSet(
-    dataSets = [
+    sources = [
         DataSetSource(
             resourceLocation = "classpath:example/feature/InheritanceSpecBase/",
             scenarioNames = ["baseSetup"],

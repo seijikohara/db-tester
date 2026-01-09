@@ -616,17 +616,26 @@ public class DataSetComparator {
   /**
    * Compares a value with a CLOB.
    *
+   * <p>If CLOB reading fails, this method throws an AssertionError rather than returning a
+   * potentially incorrect comparison result. This ensures test failures are explicit and
+   * debuggable.
+   *
    * @param expected the expected value
    * @param clob the CLOB to compare against
    * @return true if they are equal
+   * @throws AssertionError if CLOB content cannot be read
    */
   private boolean compareWithClob(final Object expected, final Clob clob) {
     try {
-      final String clobString = readClob(clob);
+      final var clobString = readClob(clob);
       return expected.toString().equals(clobString);
     } catch (final SQLException | IOException e) {
-      // When CLOB reading fails, fall back to string comparison
-      return expected.toString().equals(clob.toString());
+      throw new AssertionError(
+          String.format(
+              "Failed to read CLOB content for comparison. "
+                  + "Unable to determine equality. Error: %s",
+              e.getMessage()),
+          e);
     }
   }
 

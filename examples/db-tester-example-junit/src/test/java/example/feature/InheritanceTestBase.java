@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 @ExtendWith(DatabaseTestExtension.class)
 @DataSet(
-    dataSets =
+    sources =
         @DataSetSource(
             resourceLocation = "classpath:example/feature/InheritanceTestBase/",
             scenarioNames = "baseSetup"))

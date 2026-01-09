@@ -90,7 +90,7 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
         mockk<DataSet>().also { dataSet ->
             every { dataSet.operation } returns operation
             every { dataSet.tableOrdering } returns TableOrderingStrategy.AUTO
-            every { dataSet.dataSets } returns emptyArray()
+            every { dataSet.sources } returns emptyArray()
         }
 
     /**

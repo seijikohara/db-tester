@@ -71,8 +71,8 @@ class InheritedAnnotationSpec extends InheritanceSpecBase {
 	 *   <li>Expectation: Verifies ID=1 has COLUMN2=50
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'overrideSetup'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'overrideSetup'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'overrideSetup'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'overrideSetup'))
 	def 'should override inherited preparation'() {
 		when: 'updating a record with overridden preparation'
 		sql.executeUpdate 'UPDATE TABLE1 SET COLUMN2 = 50 WHERE ID = 1'
@@ -93,7 +93,7 @@ class InheritedAnnotationSpec extends InheritanceSpecBase {
 	 *   <li>Expectation: Verifies ID=1 has COLUMN3='Warehouse C', ID=2 unchanged
 	 * </ul>
 	 */
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'combinedTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'combinedTest'))
 	def 'should combine inherited and method level annotations'() {
 		when: 'updating a record with combined annotations'
 		sql.execute '''

@@ -171,12 +171,12 @@ final class NestedConventionTest {
     @Tag("normal")
     @DisplayName("should create new user with convention-based data loading")
     @DataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
                 scenarioNames = "createUser"))
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
@@ -213,12 +213,12 @@ final class NestedConventionTest {
     @Tag("normal")
     @DisplayName("should update user status with convention-based data loading")
     @DataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
                 scenarioNames = "updateStatus"))
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/UserTests/expected/",
@@ -267,12 +267,12 @@ final class NestedConventionTest {
     @Tag("normal")
     @DisplayName("should add new product with convention-based data loading")
     @DataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
                 scenarioNames = "addProduct"))
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
@@ -309,12 +309,12 @@ final class NestedConventionTest {
     @Tag("normal")
     @DisplayName("should update product price with convention-based data loading")
     @DataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
                 scenarioNames = "updatePrice"))
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 resourceLocation =
                     "classpath:example/feature/NestedConventionTest/ProductTests/expected/",

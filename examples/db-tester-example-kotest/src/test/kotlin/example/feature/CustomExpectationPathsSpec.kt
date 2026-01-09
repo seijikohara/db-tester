@@ -106,7 +106,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-basic/",
             ),
@@ -138,7 +138,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-ignore-columns/",
             ),
@@ -170,7 +170,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-query/",
             ),
@@ -202,7 +202,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-stage1/",
             ),
@@ -234,7 +234,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomExpectationPathsSpec/expected-stage2/",
             ),

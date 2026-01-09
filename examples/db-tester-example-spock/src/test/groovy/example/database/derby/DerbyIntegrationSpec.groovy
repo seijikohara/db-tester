@@ -94,8 +94,8 @@ class DerbyIntegrationSpec extends Specification {
 	 *   <li>Basic CRUD operations work correctly
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on Derby'() {
 		when: 'running Derby integration smoke test'
 		logger.info('Running Derby integration smoke test')

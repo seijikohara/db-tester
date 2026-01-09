@@ -35,7 +35,7 @@ import spock.lang.Specification
  * </pre>
  */
 @DataSet(
-dataSets = @DataSetSource(
+sources = @DataSetSource(
 resourceLocation = 'classpath:example/feature/AnnotationConfigurationSpec/',
 scenarioNames = 'classLevel'
 )
@@ -83,7 +83,7 @@ class AnnotationConfigurationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/AnnotationConfigurationSpec/custom-location/'
 	)
 	)
@@ -111,7 +111,7 @@ class AnnotationConfigurationSpec extends Specification {
 	 *   <li>Expectation: Verifies both departments and updated employee salary
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
+	@DataSet(sources = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
 	@ExpectedDataSet
 	def 'should handle multiple scenarios'() {
 		when: 'updating employee salary'
@@ -124,8 +124,8 @@ class AnnotationConfigurationSpec extends Specification {
 	/**
 	 * Demonstrates multiple scenario names for preparation and expectation.
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'should merge multiple data sets'))
+	@DataSet(sources = @DataSetSource(scenarioNames = ['scenario1', 'scenario2']))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'should merge multiple data sets'))
 	def 'should merge multiple data sets'() {
 		when: 'updating employee salary'
 		sql.executeUpdate 'UPDATE TABLE2 SET COLUMN3 = 65000.00 WHERE ID = 2'
@@ -161,8 +161,8 @@ class AnnotationConfigurationSpec extends Specification {
 	/**
 	 * Demonstrates using different scenarios for preparation and expectation.
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'multiDataSet1'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'multiDataSet'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'multiDataSet1'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'multiDataSet'))
 	def 'should handle multiple data sets'() {
 		when: 'inserting a new department'
 		sql.execute '''

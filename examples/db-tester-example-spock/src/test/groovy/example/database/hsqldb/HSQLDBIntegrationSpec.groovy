@@ -95,8 +95,8 @@ class HSQLDBIntegrationSpec extends Specification {
 	 *   <li>Basic CRUD operations work correctly
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on HSQLDB'() {
 		when: 'running HSQLDB integration smoke test'
 		logger.info('Running HSQLDB integration smoke test')

@@ -161,7 +161,7 @@ final class ColumnStrategyAnnotationTest {
     @DisplayName("should ignore auto-generated timestamp column")
     @DataSet
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 columnStrategies =
                     @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE)))
@@ -200,7 +200,7 @@ final class ColumnStrategyAnnotationTest {
     @DisplayName("should compare email case-insensitively")
     @DataSet
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 columnStrategies = {
                   @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
@@ -241,7 +241,7 @@ final class ColumnStrategyAnnotationTest {
     @DisplayName("should validate UUID format using regex pattern")
     @DataSet
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 columnStrategies = {
                   @ColumnStrategy(
@@ -285,7 +285,7 @@ final class ColumnStrategyAnnotationTest {
     @DisplayName("should apply multiple column strategies")
     @DataSet
     @ExpectedDataSet(
-        dataSets =
+        sources =
             @DataSetSource(
                 columnStrategies = {
                   @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),

@@ -136,7 +136,7 @@ class PartialColumnValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/'
 	))
 	def 'should ignore auto generated columns'() {
@@ -163,7 +163,7 @@ class PartialColumnValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-combined/'
 	))
 	def 'should validate with minimal columns'() {
@@ -193,7 +193,7 @@ class PartialColumnValidationSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-after-update/'
 	))
 	def 'should validate after update'() {

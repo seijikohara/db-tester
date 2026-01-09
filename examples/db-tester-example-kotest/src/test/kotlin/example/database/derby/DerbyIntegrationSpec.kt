@@ -80,7 +80,7 @@ class DerbyIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on Derby`(): Unit = logger.info("Running Derby integration smoke test").let { }
 }

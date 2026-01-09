@@ -125,13 +125,13 @@ class MultipleDataSourceSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/default/',
 	scenarioNames = 'default'
 	)
 	)
 	@ExpectedDataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/default/expected/',
 	scenarioNames = 'default'
 	)
@@ -160,14 +160,14 @@ class MultipleDataSourceSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	dataSourceName = 'inventory',
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/inventory/',
 	scenarioNames = 'inventory'
 	)
 	)
 	@ExpectedDataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	dataSourceName = 'inventory',
 	resourceLocation = 'classpath:example/feature/MultipleDataSourceSpec/inventory/expected/',
 	scenarioNames = 'inventory'

@@ -128,8 +128,8 @@ final class MySQLIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on MySQL")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnMySQL() {
     // When & Then
     logger.info("Running MySQL integration smoke test");

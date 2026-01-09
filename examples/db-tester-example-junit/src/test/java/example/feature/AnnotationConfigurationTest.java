@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(DatabaseTestExtension.class)
 @DisplayName("AnnotationConfigurationTest")
 @DataSet(
-    dataSets =
+    sources =
         @DataSetSource(
             resourceLocation = "classpath:example/feature/AnnotationConfigurationTest/",
             scenarioNames = "classLevel"))
@@ -160,7 +160,7 @@ final class AnnotationConfigurationTest {
   @Tag("normal")
   @DisplayName("should use custom resource location for data set loading")
   @DataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/AnnotationConfigurationTest/custom-location/"))
@@ -192,7 +192,7 @@ final class AnnotationConfigurationTest {
   @Test
   @Tag("normal")
   @DisplayName("should handle multiple scenario names in a single DataSetSource")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
+  @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
   @ExpectedDataSet
   void shouldHandleMultipleScenarios() {
     // Given
@@ -214,7 +214,7 @@ final class AnnotationConfigurationTest {
    * matching rows from the CSV files.
    *
    * <p><strong>Note:</strong> When using multiple {@code @DataSetSource} annotations in an array
-   * (e.g., {@code dataSets = {@DataSetSource(...), @DataSetSource(...)}}), each DataSetSource is
+   * (e.g., {@code sources = {@DataSetSource(...), @DataSetSource(...)}}), each DataSetSource is
    * processed independently with the specified operation. For {@code CLEAN_INSERT}, this means each
    * subsequent DataSetSource would clear the table and insert only its data, losing previously
    * inserted rows. To merge data from multiple scenarios, use a single {@code @DataSetSource} with
@@ -231,8 +231,8 @@ final class AnnotationConfigurationTest {
   @Test
   @Tag("normal")
   @DisplayName("should merge multiple data sets from different scenarios")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "shouldMergeMultipleDataSets"))
+  @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "shouldMergeMultipleDataSets"))
   void shouldMergeMultipleDataSets() {
     // Given
     logger.info("Running multiple DataSet array test");
@@ -294,8 +294,8 @@ final class AnnotationConfigurationTest {
   @Test
   @Tag("normal")
   @DisplayName("should handle different scenarios for preparation and expectation")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet1"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "multiDataSet"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "multiDataSet1"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "multiDataSet"))
   void shouldHandleMultipleDataSets() {
     // Given
     logger.info("Running multiple DataSets test");

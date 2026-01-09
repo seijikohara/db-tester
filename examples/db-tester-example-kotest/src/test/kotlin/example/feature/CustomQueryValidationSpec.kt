@@ -104,7 +104,7 @@ class CustomQueryValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-filtered/",
             ),
@@ -135,7 +135,7 @@ class CustomQueryValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-aggregation/",
             ),
@@ -166,7 +166,7 @@ class CustomQueryValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-join/",
             ),
@@ -198,7 +198,7 @@ class CustomQueryValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/CustomQueryValidationSpec/expected-daterange/",
             ),

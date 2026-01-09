@@ -141,8 +141,8 @@ final class Neo4jIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on Neo4j")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnNeo4j() {
     // When & Then
     logger.info("Running Neo4j integration smoke test");

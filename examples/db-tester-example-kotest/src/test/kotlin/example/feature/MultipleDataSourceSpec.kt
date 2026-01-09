@@ -119,7 +119,7 @@ class MultipleDataSourceSpec : AnnotationSpec() {
      */
     @Test
     @DataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/default/",
                 scenarioNames = ["default"],
@@ -127,7 +127,7 @@ class MultipleDataSourceSpec : AnnotationSpec() {
         ],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/default/expected/",
                 scenarioNames = ["default"],
@@ -155,7 +155,7 @@ class MultipleDataSourceSpec : AnnotationSpec() {
      */
     @Test
     @DataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 dataSourceName = "inventory",
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/inventory/",
@@ -164,7 +164,7 @@ class MultipleDataSourceSpec : AnnotationSpec() {
         ],
     )
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 dataSourceName = "inventory",
                 resourceLocation = "classpath:example/feature/MultipleDataSourceSpec/inventory/expected/",

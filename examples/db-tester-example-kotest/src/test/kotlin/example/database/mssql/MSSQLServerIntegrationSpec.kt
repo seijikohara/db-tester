@@ -113,7 +113,7 @@ class MSSQLServerIntegrationSpec : AnnotationSpec() {
      * - Basic CRUD operations work correctly
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["smokeTest"])])
     fun `should execute basic database operations on SQL Server`(): Unit = logger.info("Running SQL Server integration smoke test").let { }
 }

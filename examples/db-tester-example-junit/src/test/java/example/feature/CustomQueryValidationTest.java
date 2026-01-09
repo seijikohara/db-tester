@@ -148,7 +148,7 @@ final class CustomQueryValidationTest {
   @DisplayName("should validate regional sales with filtered data")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-filtered/"))
@@ -185,7 +185,7 @@ final class CustomQueryValidationTest {
   @DisplayName("should validate sales summary with aggregated data")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-aggregation/"))
@@ -223,7 +223,7 @@ final class CustomQueryValidationTest {
   @DisplayName("should validate high-value sales with join data")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-join/"))
@@ -261,7 +261,7 @@ final class CustomQueryValidationTest {
   @DisplayName("should validate January sales with date range filtering")
   @DataSet
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/CustomQueryValidationTest/expected-daterange/"))

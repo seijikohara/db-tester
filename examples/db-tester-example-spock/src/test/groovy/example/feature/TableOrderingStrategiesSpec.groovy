@@ -167,12 +167,12 @@ class TableOrderingStrategiesSpec extends Specification {
 	 * </ul>
 	 */
 	@DataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/TableOrderingStrategiesSpec/programmatic/'
 	)
 	)
 	@ExpectedDataSet(
-	dataSets = @DataSetSource(
+	sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/TableOrderingStrategiesSpec/programmatic/expected/'
 	)
 	)

@@ -134,7 +134,7 @@ class PartialColumnValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/",
             ),
@@ -165,7 +165,7 @@ class PartialColumnValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-combined/",
             ),
@@ -200,7 +200,7 @@ class PartialColumnValidationSpec : AnnotationSpec() {
     @Test
     @DataSet
     @ExpectedDataSet(
-        dataSets = [
+        sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-after-update/",
             ),

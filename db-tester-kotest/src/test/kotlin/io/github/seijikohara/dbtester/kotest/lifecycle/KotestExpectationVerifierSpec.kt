@@ -86,7 +86,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
      */
     private fun createMockExpectedDataSet(): ExpectedDataSet =
         mockk<ExpectedDataSet>().also { expectedDataSet ->
-            every { expectedDataSet.dataSets } returns emptyArray()
+            every { expectedDataSet.sources } returns emptyArray()
             every { expectedDataSet.tableOrdering } returns TableOrderingStrategy.AUTO
         }
 

@@ -114,8 +114,8 @@ final class DerbyIntegrationTest {
   @Test
   @Tag("normal")
   @DisplayName("should execute basic database operations on Derby")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "smokeTest"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "smokeTest"))
   void shouldExecuteBasicDatabaseOperationsOnDerby() {
     // When & Then
     logger.info("Running Derby integration smoke test");

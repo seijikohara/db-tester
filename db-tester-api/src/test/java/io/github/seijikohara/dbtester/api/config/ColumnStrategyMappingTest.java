@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.api.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
@@ -63,6 +64,55 @@ class ColumnStrategyMappingTest {
 
       // Then
       assertSame(ComparisonStrategy.NUMERIC, mapping.strategy(), "strategy should be preserved");
+    }
+
+    /** Verifies that empty column name throws exception. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when column name is empty")
+    void shouldThrowException_whenColumnNameIsEmpty() {
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> new ColumnStrategyMapping("", ComparisonStrategy.STRICT),
+              "should throw exception for empty column name");
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("must not be blank"),
+          "exception message should mention blank validation");
+    }
+
+    /** Verifies that blank column name throws exception. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when column name is blank")
+    void shouldThrowException_whenColumnNameIsBlank() {
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> new ColumnStrategyMapping("   ", ComparisonStrategy.STRICT),
+              "should throw exception for blank column name");
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("must not be blank"),
+          "exception message should mention blank validation");
+    }
+
+    /** Verifies that null column name throws exception. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when column name is null")
+    @SuppressWarnings("NullAway")
+    void shouldThrowException_whenColumnNameIsNull() {
+      // When & Then
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> new ColumnStrategyMapping(null, ComparisonStrategy.STRICT),
+          "should throw exception for null column name");
     }
   }
 

@@ -134,8 +134,8 @@ class Neo4jIntegrationSpec extends Specification {
 	 *   <li>Framework handles graph database results correctly
 	 * </ul>
 	 */
-	@DataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
-	@ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = 'smokeTest'))
+	@DataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
+	@ExpectedDataSet(sources = @DataSetSource(scenarioNames = 'smokeTest'))
 	def 'should execute basic database operations on Neo4j'() {
 		expect: 'smoke test passes'
 		logger.info('Running Neo4j integration smoke test')

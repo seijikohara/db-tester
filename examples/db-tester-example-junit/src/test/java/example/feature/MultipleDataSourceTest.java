@@ -181,12 +181,12 @@ final class MultipleDataSourceTest {
   @Tag("normal")
   @DisplayName("should manage customers in default database")
   @DataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation = "classpath:example/feature/MultipleDataSourceTest/default/",
               scenarioNames = "default"))
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               resourceLocation =
                   "classpath:example/feature/MultipleDataSourceTest/default/expected/",
@@ -226,13 +226,13 @@ final class MultipleDataSourceTest {
   @Tag("normal")
   @DisplayName("should manage products in named inventory database")
   @DataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               dataSourceName = "inventory",
               resourceLocation = "classpath:example/feature/MultipleDataSourceTest/inventory/",
               scenarioNames = "inventory"))
   @ExpectedDataSet(
-      dataSets =
+      sources =
           @DataSetSource(
               dataSourceName = "inventory",
               resourceLocation =

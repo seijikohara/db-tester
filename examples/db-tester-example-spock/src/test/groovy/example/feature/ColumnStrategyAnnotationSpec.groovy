@@ -79,7 +79,7 @@ class ColumnStrategyAnnotationSpec extends Specification {
 	// ==================== IGNORE Strategy Tests ====================
 
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	columnStrategies = @ColumnStrategy(name = 'CREATED_AT', strategy = Strategy.IGNORE)
 	))
 	def 'ignore strategy should skip auto-generated timestamp column'() {
@@ -96,7 +96,7 @@ class ColumnStrategyAnnotationSpec extends Specification {
 	// ==================== CASE_INSENSITIVE Strategy Tests ====================
 
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	columnStrategies = [
 		@ColumnStrategy(name = 'EMAIL', strategy = Strategy.CASE_INSENSITIVE),
 		@ColumnStrategy(name = 'CREATED_AT', strategy = Strategy.IGNORE)
@@ -116,7 +116,7 @@ class ColumnStrategyAnnotationSpec extends Specification {
 	// ==================== REGEX Strategy Tests ====================
 
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	columnStrategies = [
 		@ColumnStrategy(
 		name = 'TOKEN',
@@ -140,7 +140,7 @@ class ColumnStrategyAnnotationSpec extends Specification {
 	// ==================== Multiple Strategies Tests ====================
 
 	@DataSet
-	@ExpectedDataSet(dataSets = @DataSetSource(
+	@ExpectedDataSet(sources = @DataSetSource(
 	columnStrategies = [
 		@ColumnStrategy(name = 'CREATED_AT', strategy = Strategy.IGNORE),
 		@ColumnStrategy(name = 'EMAIL', strategy = Strategy.CASE_INSENSITIVE),

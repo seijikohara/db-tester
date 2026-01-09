@@ -69,8 +69,8 @@ class InheritedAnnotationSpec : InheritanceSpecBase() {
      * - ExpectedDataSet: Verifies ID=1 has COLUMN2=50
      */
     @Test
-    @DataSet(dataSets = [DataSetSource(scenarioNames = ["overrideSetup"])])
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["overrideSetup"])])
+    @DataSet(sources = [DataSetSource(scenarioNames = ["overrideSetup"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["overrideSetup"])])
     fun `should override inherited preparation`(): Unit =
         logger.info("Running override inherited preparation test").also {
             executeSql("UPDATE TABLE1 SET COLUMN2 = 50 WHERE ID = 1")
@@ -88,7 +88,7 @@ class InheritedAnnotationSpec : InheritanceSpecBase() {
      * - ExpectedDataSet: Verifies ID=1 has COLUMN3='Warehouse C', ID=2 unchanged
      */
     @Test
-    @ExpectedDataSet(dataSets = [DataSetSource(scenarioNames = ["combinedTest"])])
+    @ExpectedDataSet(sources = [DataSetSource(scenarioNames = ["combinedTest"])])
     fun `should combine inherited and method level annotations`(): Unit =
         logger.info("Running combined annotations test").also {
             executeSql(

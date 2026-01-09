@@ -115,8 +115,8 @@ final class InheritedAnnotationTest extends InheritanceTestBase {
   @Test
   @Tag("normal")
   @DisplayName("should override inherited @DataSet with method-level annotation")
-  @DataSet(dataSets = @DataSetSource(scenarioNames = "overrideSetup"))
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "overrideSetup"))
+  @DataSet(sources = @DataSetSource(scenarioNames = "overrideSetup"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "overrideSetup"))
   void shouldOverrideInheritedPreparation() throws Exception {
     // Given
     logger.info("Running test with overridden @DataSet");
@@ -146,7 +146,7 @@ final class InheritedAnnotationTest extends InheritanceTestBase {
   @Test
   @Tag("normal")
   @DisplayName("should combine inherited @DataSet with method-level @ExpectedDataSet")
-  @ExpectedDataSet(dataSets = @DataSetSource(scenarioNames = "combinedTest"))
+  @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "combinedTest"))
   void shouldCombineInheritedAndMethodLevelAnnotations() throws Exception {
     // Given
     logger.info("Running test with combined annotations");
