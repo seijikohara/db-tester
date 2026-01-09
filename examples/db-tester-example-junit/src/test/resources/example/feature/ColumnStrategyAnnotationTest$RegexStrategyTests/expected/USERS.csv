@@ -1,0 +1,3 @@
+[Scenario],ID,NAME,EMAIL,TOKEN,CREATED_AT
+shouldValidateUuidFormat,1,Alice,alice@example.com,00000000-0000-0000-0000-000000000001,2024-01-01 00:00:00
+shouldValidateUuidFormat,2,Diana,diana@example.com,ANY_UUID_VALUE,IGNORED

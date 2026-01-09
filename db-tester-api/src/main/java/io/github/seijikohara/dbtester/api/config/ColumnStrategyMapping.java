@@ -2,7 +2,6 @@ package io.github.seijikohara.dbtester.api.config;
 
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import java.util.Locale;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Associates a column name with its comparison strategy for expectation verification.
@@ -16,10 +15,13 @@ import org.jspecify.annotations.Nullable;
  * <pre>{@code
  * var settings = ConventionSettings.standard()
  *     .withGlobalColumnStrategies(Map.of(
- *         "CREATED_AT", ColumnStrategyMapping.of("CREATED_AT", ComparisonStrategy.IGNORE),
- *         "EMAIL", ColumnStrategyMapping.of("EMAIL", ComparisonStrategy.CASE_INSENSITIVE)
+ *         "CREATED_AT", ColumnStrategyMapping.ignore("CREATED_AT"),
+ *         "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")
  *     ));
  * }</pre>
+ *
+ * <p>The column name is normalized to uppercase in the constructor, so mappings created with
+ * different cases of the same column name will have equal column names after construction.
  *
  * @param columnName the column name (stored in uppercase for case-insensitive matching)
  * @param strategy the comparison strategy to use for this column
@@ -48,6 +50,19 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
   public static ColumnStrategyMapping of(
       final String columnName, final ComparisonStrategy strategy) {
     return new ColumnStrategyMapping(columnName, strategy);
+  }
+
+  /**
+   * Creates a ColumnStrategyMapping for strict (exact match) comparison.
+   *
+   * <p>This is a convenience method equivalent to {@code of(columnName,
+   * ComparisonStrategy.STRICT)}.
+   *
+   * @param columnName the column name for strict comparison
+   * @return a new ColumnStrategyMapping with STRICT strategy
+   */
+  public static ColumnStrategyMapping strict(final String columnName) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.STRICT);
   }
 
   /**
@@ -115,21 +130,5 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    */
   public static ColumnStrategyMapping regex(final String columnName, final String pattern) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.regex(pattern));
-  }
-
-  @Override
-  public boolean equals(final @Nullable Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (!(obj instanceof ColumnStrategyMapping other)) {
-      return false;
-    }
-    return columnName.equals(other.columnName);
-  }
-
-  @Override
-  public int hashCode() {
-    return columnName.hashCode();
   }
 }

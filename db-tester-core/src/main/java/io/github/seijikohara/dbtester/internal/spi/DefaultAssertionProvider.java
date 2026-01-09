@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -8,6 +9,9 @@ import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
+import java.util.Locale;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
@@ -88,6 +92,33 @@ public final class DefaultAssertionProvider implements AssertionProvider {
   public void assertEqualsIgnoreColumns(
       final Table expected, final Table actual, final Collection<String> ignoreColumnNames) {
     comparator.assertEqualsIgnoreColumns(expected, actual, ignoreColumnNames);
+  }
+
+  @Override
+  public void assertEqualsWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<ColumnStrategyMapping> columnStrategies) {
+    // Convert collection to map keyed by uppercase column name
+    final var strategyMap =
+        columnStrategies.stream()
+            .collect(
+                Collectors.toMap(
+                    mapping -> mapping.columnName().toUpperCase(Locale.ROOT),
+                    Function.identity(),
+                    (existing, replacement) -> replacement));
+
+    // Extract columns marked with IGNORE strategy for the ignore set
+    final var ignoreSet =
+        columnStrategies.stream()
+            .filter(
+                mapping ->
+                    mapping.strategy().getType()
+                        == io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.Type.IGNORE)
+            .map(mapping -> mapping.columnName().toUpperCase(Locale.ROOT))
+            .collect(Collectors.toSet());
+
+    comparator.assertEqualsWithStrategies(expected, actual, ignoreSet, strategyMap);
   }
 
   @Override

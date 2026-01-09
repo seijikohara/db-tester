@@ -1,0 +1,3 @@
+[Scenario],ID,NAME,EMAIL,TOKEN,CREATED_AT
+shouldIgnoreTimestampColumn,1,Alice,alice@example.com,,2024-01-01 00:00:00
+shouldIgnoreTimestampColumn,2,Bob,bob@example.com,,IGNORED

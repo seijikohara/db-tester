@@ -93,6 +93,7 @@ Configures individual dataset parameters within `@DataSet` or `@ExpectedDataSet`
 | `dataSourceName` | `String` | `""` | Named DataSource identifier; empty uses default |
 | `scenarioNames` | `String[]` | `{}` | Scenario filters; empty uses test method name |
 | `excludeColumns` | `String[]` | `{}` | Column names to exclude from verification (case-insensitive); only effective in `@ExpectedDataSet` |
+| `columnStrategies` | `ColumnStrategy[]` | `{}` | Column-specific comparison strategies; only effective in `@ExpectedDataSet` |
 
 **Resource Location Formats**:
 
@@ -119,6 +120,15 @@ void testMultipleScenarios() { }
     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
 ))
 void testWithExcludedColumns() { }
+
+@ExpectedDataSet(sources = @DataSetSource(
+    columnStrategies = {
+        @ColumnStrategy(name = "EMAIL", strategy = Strategy.CASE_INSENSITIVE),
+        @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.IGNORE),
+        @ColumnStrategy(name = "ID", strategy = Strategy.REGEX, pattern = "[a-f0-9-]{36}")
+    }
+))
+void testWithColumnStrategies() { }
 ```
 
 **Column Exclusion Behavior**:
@@ -126,6 +136,46 @@ void testWithExcludedColumns() { }
 - Column names are normalized to uppercase for comparison
 - Per-dataset exclusions are combined with global exclusions from `ConventionSettings`
 - Exclusions apply only to `@ExpectedDataSet` verification, not `@DataSet` preparation
+
+**Column Strategy Behavior**:
+
+- Column strategies override default strict comparison for specific columns
+- Annotation-level strategies override global strategies from `ConventionSettings`
+- Exclusions take precedence: excluded columns are skipped before strategies apply
+
+### @ColumnStrategy
+
+Configures the comparison strategy for a specific column during expectation verification.
+
+**Location**: `io.github.seijikohara.dbtester.api.annotation.ColumnStrategy`
+
+**Target**: None (`@Target({})`) - Use exclusively within `@DataSetSource#columnStrategies()`.
+
+**Attributes**:
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `String` | (required) | Column name (case-insensitive) |
+| `strategy` | `Strategy` | `STRICT` | Comparison strategy to use |
+| `pattern` | `String` | `""` | Regex pattern for `REGEX` strategy |
+
+### Strategy
+
+Enum defining comparison strategy types for use in `@ColumnStrategy` annotations.
+
+**Location**: `io.github.seijikohara.dbtester.api.annotation.Strategy`
+
+**Values**:
+
+| Value | Description |
+|-------|-------------|
+| `STRICT` | Exact match using `equals()` (default) |
+| `IGNORE` | Skip comparison entirely |
+| `NUMERIC` | Type-aware numeric comparison |
+| `CASE_INSENSITIVE` | Case-insensitive string comparison |
+| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
+| `NOT_NULL` | Verifies value is not null |
+| `REGEX` | Pattern matching (requires `pattern` attribute) |
 
 ## TableSet Interfaces
 

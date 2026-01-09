@@ -1,0 +1,3 @@
+[Scenario],ID,NAME,EMAIL,TOKEN,CREATED_AT
+shouldApplyMultipleStrategies,1,Alice,alice@example.com,00000000-0000-0000-0000-000000000001,2024-01-01 00:00:00
+shouldApplyMultipleStrategies,2,Eve,EVE@EXAMPLE.COM,ANY_UUID_VALUE,IGNORED

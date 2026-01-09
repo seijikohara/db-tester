@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.Collection;
@@ -131,6 +132,36 @@ public interface AssertionProvider {
    */
   void assertEqualsIgnoreColumns(
       final Table expected, final Table actual, final Collection<String> ignoreColumnNames);
+
+  /**
+   * Asserts that two tables are equal with column-specific comparison strategies.
+   *
+   * <p>This method compares tables using the specified comparison strategies for individual
+   * columns. Columns can be ignored, compared case-insensitively, matched against regex patterns,
+   * etc. This provides fine-grained control over how each column is compared.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * assertEqualsWithStrategies(
+   *     expectedTable,
+   *     actualTable,
+   *     ColumnStrategyMapping.ignore("CREATED_AT"),
+   *     ColumnStrategyMapping.caseInsensitive("EMAIL"),
+   *     ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}")
+   * );
+   * }</pre>
+   *
+   * @param expected the expected table containing reference data
+   * @param actual the actual table to validate against expected
+   * @param columnStrategies column comparison strategies to apply
+   * @throws AssertionError if the tables do not match according to the strategies
+   * @see ColumnStrategyMapping
+   */
+  void assertEqualsWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<ColumnStrategyMapping> columnStrategies);
 
   /**
    * Asserts that the results of a SQL query match the expected dataset.

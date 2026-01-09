@@ -1,0 +1,12 @@
+-- DDL for ColumnStrategyAnnotationTest
+-- Demonstrates annotation-based column comparison strategies
+
+DROP TABLE IF EXISTS USERS;
+
+CREATE TABLE USERS (
+    ID INTEGER PRIMARY KEY,
+    NAME VARCHAR(100) NOT NULL,
+    EMAIL VARCHAR(255) NOT NULL,
+    TOKEN VARCHAR(36),
+    CREATED_AT TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

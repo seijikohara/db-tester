@@ -88,6 +88,19 @@ class ColumnStrategyMappingTest {
       assertSame(ComparisonStrategy.CASE_INSENSITIVE, mapping.strategy(), "strategy should be set");
     }
 
+    /** Verifies strict() factory method. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should create STRICT mapping with strict()")
+    void shouldCreateStrictMapping() {
+      // When
+      final ColumnStrategyMapping mapping = ColumnStrategyMapping.strict("name");
+
+      // Then
+      assertEquals("NAME", mapping.columnName(), "column name should be normalized");
+      assertSame(ComparisonStrategy.STRICT, mapping.strategy(), "strategy should be STRICT");
+    }
+
     /** Verifies ignore() factory method. */
     @Test
     @Tag("normal")
@@ -187,21 +200,37 @@ class ColumnStrategyMappingTest {
     /** Tests for equals and hashCode. */
     EqualityTests() {}
 
-    /** Verifies equality based on column name only. */
+    /** Verifies equality when column name and strategy match. */
     @Test
     @Tag("normal")
-    @DisplayName("should be equal when column names match")
-    void shouldBeEqual_whenColumnNamesMatch() {
+    @DisplayName("should be equal when column name and strategy match")
+    void shouldBeEqual_whenColumnNameAndStrategyMatch() {
       // Given
       final ColumnStrategyMapping mapping1 =
           ColumnStrategyMapping.of("email", ComparisonStrategy.STRICT);
       final ColumnStrategyMapping mapping2 =
-          ColumnStrategyMapping.of("EMAIL", ComparisonStrategy.IGNORE);
+          ColumnStrategyMapping.of("EMAIL", ComparisonStrategy.STRICT);
 
       // When & Then
-      assertEquals(mapping1, mapping2, "mappings with same column name should be equal");
+      assertEquals(
+          mapping1, mapping2, "mappings with same column name and strategy should be equal");
       assertEquals(
           mapping1.hashCode(), mapping2.hashCode(), "hash codes should match for equal mappings");
+    }
+
+    /** Verifies inequality when strategies differ. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should not be equal when strategies differ")
+    void shouldNotBeEqual_whenStrategiesDiffer() {
+      // Given
+      final ColumnStrategyMapping mapping1 =
+          ColumnStrategyMapping.of("email", ComparisonStrategy.STRICT);
+      final ColumnStrategyMapping mapping2 =
+          ColumnStrategyMapping.of("email", ComparisonStrategy.IGNORE);
+
+      // When & Then
+      assertNotEquals(mapping1, mapping2, "mappings with different strategies should not be equal");
     }
 
     /** Verifies inequality when column names differ. */

@@ -101,7 +101,7 @@ src/test/resources/
 | Delta Assertions | - | - | - | - | - | Yes |
 | Column Exclusion | Yes | Yes | Yes | Yes | - | Yes |
 | Row Ordering Control | Yes | Yes | Yes | Yes | - | Yes |
-| Regex Matching | - | - | Yes | - | - | - |
+| Regex Matching | Yes | - | Yes | - | - | - |
 | Scriptable Expected Values | - | - | Yes | - | - | - |
 | Scenario Filtering | Yes | - | - | - | - | - |
 | Structured Error Output | Yes (YAML) | - | - | - | - | - |
@@ -168,7 +168,7 @@ USER:
 | Limitation | Impact | Alternative |
 |------------|--------|-------------|
 | **No delta assertions** | Cannot verify only the changes made by test | Verify full expected state |
-| **No regex in assertions** | Cannot match patterns like UUIDs or timestamps | Use column exclusion for dynamic values |
+
 | **No scriptable datasets** | Cannot embed dynamic values in CSV | Prepare data programmatically before test |
 | **No dataset export** | Cannot capture current DB state for debugging | Use database client tools |
 | **No replacement/placeholder** | Cannot use variables in datasets | Define explicit values per scenario |

@@ -1,8 +1,10 @@
 package io.github.seijikohara.dbtester.api.assertion;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.ServiceLoader;
@@ -142,6 +144,44 @@ public final class DatabaseAssertion {
   public static void assertEqualsIgnoreColumns(
       final Table expected, final Table actual, final String... ignoreColumnNames) {
     assertEqualsIgnoreColumns(expected, actual, List.of(ignoreColumnNames));
+  }
+
+  /**
+   * Asserts that the actual table matches the expected table with column-specific comparison
+   * strategies.
+   *
+   * <p>This method compares tables using the specified comparison strategies for individual
+   * columns. Columns can be ignored, compared case-insensitively, matched against regex patterns,
+   * etc.
+   *
+   * @param expected the expected table data
+   * @param actual the actual table data to validate
+   * @param columnStrategies column comparison strategies to apply
+   * @throws AssertionError if the tables do not match according to the strategies
+   * @see ColumnStrategyMapping
+   */
+  public static void assertEqualsWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<ColumnStrategyMapping> columnStrategies) {
+    getProvider().assertEqualsWithStrategies(expected, actual, columnStrategies);
+  }
+
+  /**
+   * Asserts that the actual table matches the expected table with column-specific comparison
+   * strategies.
+   *
+   * <p>This is a convenience overload that accepts strategies as varargs.
+   *
+   * @param expected the expected table data
+   * @param actual the actual table data to validate
+   * @param columnStrategies column comparison strategies to apply
+   * @throws AssertionError if the tables do not match according to the strategies
+   * @see ColumnStrategyMapping
+   */
+  public static void assertEqualsWithStrategies(
+      final Table expected, final Table actual, final ColumnStrategyMapping... columnStrategies) {
+    assertEqualsWithStrategies(expected, actual, Arrays.asList(columnStrategies));
   }
 
   /**
