@@ -1,5 +1,7 @@
 package io.github.seijikohara.dbtester.internal.jdbc.read;
 
+import static io.github.seijikohara.dbtester.internal.domain.InternalConstants.BASE64_PREFIX;
+
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,9 +25,6 @@ import org.jspecify.annotations.Nullable;
  * <p>This class is stateless and thread-safe.
  */
 public final class TypeConverter {
-
-  /** Prefix for Base64-encoded blob data. */
-  private static final String BASE64_PREFIX = "[BASE64]";
 
   /** Creates a new type converter. */
   public TypeConverter() {

@@ -1,5 +1,7 @@
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 
+import static io.github.seijikohara.dbtester.internal.domain.InternalConstants.BASE64_PREFIX;
+
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
@@ -41,9 +43,6 @@ import java.util.stream.IntStream;
  * <p>This class is stateless and thread-safe.
  */
 public final class ParameterBinder {
-
-  /** Prefix for Base64-encoded blob data in CSV files. */
-  private static final String BASE64_PREFIX = "[BASE64]";
 
   /** Creates a new parameter binder. */
   public ParameterBinder() {}
