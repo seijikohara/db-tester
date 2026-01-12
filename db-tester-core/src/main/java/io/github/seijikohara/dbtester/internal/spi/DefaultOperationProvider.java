@@ -1,11 +1,14 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.OperationProvider;
 import io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor;
+import java.time.Duration;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Default implementation of {@link OperationProvider} that uses JDBC for database operations.
@@ -39,7 +42,10 @@ public final class DefaultOperationProvider implements OperationProvider {
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy) {
-    operationExecutor.execute(operation, tableSet, dataSource, tableOrderingStrategy);
+      final TableOrderingStrategy tableOrderingStrategy,
+      final TransactionMode transactionMode,
+      final @Nullable Duration queryTimeout) {
+    operationExecutor.execute(
+        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout);
   }
 }

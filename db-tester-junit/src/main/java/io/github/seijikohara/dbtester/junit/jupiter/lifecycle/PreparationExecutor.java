@@ -6,7 +6,9 @@ import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.OperationProvider;
+import java.time.Duration;
 import java.util.ServiceLoader;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,12 +77,18 @@ public final class PreparationExecutor {
       final Operation operation,
       final TableOrderingStrategy tableOrderingStrategy) {
     final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
+    final var conventions = context.configuration().conventions();
+    final var transactionMode = conventions.transactionMode();
+    final @Nullable Duration queryTimeout = conventions.queryTimeout();
 
     logger.debug(
-        "Applying {} operation with TableSet using {} table ordering",
+        "Applying {} operation with TableSet using {} table ordering (transactionMode={}, timeout={})",
         operation,
-        tableOrderingStrategy);
+        tableOrderingStrategy,
+        transactionMode,
+        queryTimeout);
 
-    operationProvider.execute(operation, tableSet, dataSource, tableOrderingStrategy);
+    operationProvider.execute(
+        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout);
   }
 }

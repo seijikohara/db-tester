@@ -2,14 +2,17 @@ package io.github.seijikohara.dbtester.internal.spi;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor;
+import java.time.Duration;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -72,7 +75,9 @@ class DefaultOperationProviderTest {
 
   /** Tests for the execute() method. */
   @Nested
-  @DisplayName("execute(Operation, TableSet, DataSource, TableOrderingStrategy) method")
+  @DisplayName(
+      "execute(Operation, TableSet, DataSource, TableOrderingStrategy, TransactionMode, Duration)"
+          + " method")
   class ExecuteMethod {
 
     /** Tests for the execute method. */
@@ -88,19 +93,24 @@ class DefaultOperationProviderTest {
       final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.SINGLE_TRANSACTION;
+      final Duration queryTimeout = null;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
               any(TableSet.class),
               any(DataSource.class),
-              any(TableOrderingStrategy.class));
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              isNull());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
     }
 
     /** Verifies that execute handles INSERT operation. */
@@ -113,19 +123,24 @@ class DefaultOperationProviderTest {
       final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.SINGLE_TRANSACTION;
+      final Duration queryTimeout = null;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
               any(TableSet.class),
               any(DataSource.class),
-              any(TableOrderingStrategy.class));
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              isNull());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
     }
 
     /** Verifies that execute handles DELETE_ALL operation. */
@@ -138,19 +153,24 @@ class DefaultOperationProviderTest {
       final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.SINGLE_TRANSACTION;
+      final Duration queryTimeout = null;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
               any(TableSet.class),
               any(DataSource.class),
-              any(TableOrderingStrategy.class));
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              isNull());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
     }
 
     /** Verifies that execute handles TRUNCATE_TABLE operation. */
@@ -163,19 +183,84 @@ class DefaultOperationProviderTest {
       final var dataSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
       final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.SINGLE_TRANSACTION;
+      final Duration queryTimeout = null;
       doNothing()
           .when(mockOperationExecutor)
           .execute(
               any(Operation.class),
               any(TableSet.class),
               any(DataSource.class),
-              any(TableOrderingStrategy.class));
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              isNull());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
 
       // Then
-      verify(mockOperationExecutor).execute(operation, dataSet, dataSource, strategy);
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+    }
+
+    /** Verifies that execute passes query timeout to operation executor. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass query timeout to operation executor when specified")
+    void shouldPassQueryTimeout_whenSpecified() {
+      // Given
+      final var operation = Operation.INSERT;
+      final var dataSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.AUTO_COMMIT;
+      final var queryTimeout = Duration.ofSeconds(30);
+      doNothing()
+          .when(mockOperationExecutor)
+          .execute(
+              any(Operation.class),
+              any(TableSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              any(Duration.class));
+
+      // When
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+
+      // Then
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+    }
+
+    /** Verifies that execute handles NONE transaction mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should handle NONE transaction mode when specified")
+    void shouldHandleNoneTransactionMode_whenSpecified() {
+      // Given
+      final var operation = Operation.INSERT;
+      final var dataSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      final var strategy = TableOrderingStrategy.AUTO;
+      final var transactionMode = TransactionMode.NONE;
+      final Duration queryTimeout = null;
+      doNothing()
+          .when(mockOperationExecutor)
+          .execute(
+              any(Operation.class),
+              any(TableSet.class),
+              any(DataSource.class),
+              any(TableOrderingStrategy.class),
+              any(TransactionMode.class),
+              isNull());
+
+      // When
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+
+      // Then
+      verify(mockOperationExecutor)
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
     }
   }
 }

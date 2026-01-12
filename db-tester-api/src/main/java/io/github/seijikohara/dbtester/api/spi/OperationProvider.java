@@ -1,10 +1,13 @@
 package io.github.seijikohara.dbtester.api.spi;
 
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
+import java.time.Duration;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Service Provider Interface for executing database operations.
@@ -39,18 +42,23 @@ public interface OperationProvider {
   /**
    * Executes a database operation on the given dataset.
    *
-   * <p>The operation is performed within a transaction that is committed on success or rolled back
-   * on failure.
+   * <p>The operation is performed according to the specified transaction mode. When using {@link
+   * TransactionMode#SINGLE_TRANSACTION}, changes are committed on success or rolled back on
+   * failure.
    *
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source for database connections
    * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param transactionMode the transaction behavior mode
+   * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseTesterException if the operation fails
    */
   void execute(
       Operation operation,
       TableSet tableSet,
       DataSource dataSource,
-      TableOrderingStrategy tableOrderingStrategy);
+      TableOrderingStrategy tableOrderingStrategy,
+      TransactionMode transactionMode,
+      @Nullable Duration queryTimeout);
 }

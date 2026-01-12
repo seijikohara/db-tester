@@ -2,11 +2,13 @@ package io.github.seijikohara.dbtester.spock.lifecycle
 
 import groovy.util.logging.Slf4j
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
 import io.github.seijikohara.dbtester.api.spi.OperationProvider
+import java.time.Duration
 
 /**
  * Executes the preparation phase of database testing for Spock specifications.
@@ -64,9 +66,13 @@ class SpockPreparationExecutor {
 	private void executeTableSet(TestContext context, TableSet tableSet, Operation operation, TableOrderingStrategy tableOrderingStrategy) {
 		def dataSource = tableSet.dataSource
 				.orElseGet { -> context.registry().get('') }
+		def conventions = context.configuration().conventions()
+		TransactionMode transactionMode = conventions.transactionMode()
+		Duration queryTimeout = conventions.queryTimeout()
 
-		log.debug('Applying {} operation with dataset using {} table ordering', operation, tableOrderingStrategy)
+		log.debug('Applying {} operation with dataset using {} table ordering (transactionMode={}, timeout={})',
+				operation, tableOrderingStrategy, transactionMode, queryTimeout)
 
-		operationProvider.execute(operation, tableSet, dataSource, tableOrderingStrategy)
+		operationProvider.execute(operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout)
 	}
 }

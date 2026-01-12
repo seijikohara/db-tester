@@ -1,12 +1,14 @@
 package io.github.seijikohara.dbtester.kotest.lifecycle
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
 import io.github.seijikohara.dbtester.api.spi.OperationProvider
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.ServiceLoader
 
 /**
@@ -73,16 +75,27 @@ class KotestPreparationExecutor {
         tableSet: TableSet,
         operation: Operation,
         tableOrderingStrategy: TableOrderingStrategy,
-    ): Unit =
-        tableSet.dataSource
-            .orElseGet { context.registry().get("") }
-            .also {
-                logger.debug(
-                    "Applying {} operation with dataset using {} table ordering",
-                    operation,
-                    tableOrderingStrategy,
-                )
-            }.let { dataSource ->
-                operationProvider.execute(operation, tableSet, dataSource, tableOrderingStrategy)
-            }
+    ) {
+        val dataSource = tableSet.dataSource.orElseGet { context.registry().get("") }
+        val conventions = context.configuration().conventions()
+        val transactionMode: TransactionMode = conventions.transactionMode()
+        val queryTimeout: Duration? = conventions.queryTimeout()
+
+        logger.debug(
+            "Applying {} operation with dataset using {} table ordering (transactionMode={}, timeout={})",
+            operation,
+            tableOrderingStrategy,
+            transactionMode,
+            queryTimeout,
+        )
+
+        operationProvider.execute(
+            operation,
+            tableSet,
+            dataSource,
+            tableOrderingStrategy,
+            transactionMode,
+            queryTimeout,
+        )
+    }
 }
