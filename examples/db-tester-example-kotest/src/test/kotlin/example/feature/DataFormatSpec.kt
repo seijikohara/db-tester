@@ -47,21 +47,22 @@ class CsvFormatSpec : AnnotationSpec() {
 
         private val sharedConfiguration: Configuration =
             Configuration.withConventions(
-                ConventionSettings(
-                    null,
-                    "/expected",
-                    "[Scenario]",
-                    DataFormat.CSV,
-                    TableMergeStrategy.UNION_ALL,
-                    ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                    emptySet(),
-                    emptyMap(),
-                    RowOrdering.ORDERED,
-                    null,
-                    0,
-                    Duration.ofMillis(100),
-                    TransactionMode.SINGLE_TRANSACTION,
-                ),
+                ConventionSettings
+                    .builder()
+                    .baseDirectory(null)
+                    .expectationSuffix("/expected")
+                    .scenarioMarker("[Scenario]")
+                    .dataFormat(DataFormat.CSV)
+                    .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                    .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                    .globalExcludeColumns(emptySet())
+                    .globalColumnStrategies(emptyMap())
+                    .rowOrdering(RowOrdering.ORDERED)
+                    .queryTimeout(null)
+                    .retryCount(0)
+                    .retryDelay(Duration.ofMillis(100))
+                    .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                    .build(),
             )
 
         private fun createDataSource(): DataSource =
@@ -184,21 +185,22 @@ class TsvFormatSpec : AnnotationSpec() {
 
         private val sharedConfiguration: Configuration =
             Configuration.withConventions(
-                ConventionSettings(
-                    null,
-                    "/expected",
-                    "[Scenario]",
-                    DataFormat.TSV,
-                    TableMergeStrategy.UNION_ALL,
-                    ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                    emptySet(),
-                    emptyMap(),
-                    RowOrdering.ORDERED,
-                    null,
-                    0,
-                    Duration.ofMillis(100),
-                    TransactionMode.SINGLE_TRANSACTION,
-                ),
+                ConventionSettings
+                    .builder()
+                    .baseDirectory(null)
+                    .expectationSuffix("/expected")
+                    .scenarioMarker("[Scenario]")
+                    .dataFormat(DataFormat.TSV)
+                    .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                    .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                    .globalExcludeColumns(emptySet())
+                    .globalColumnStrategies(emptyMap())
+                    .rowOrdering(RowOrdering.ORDERED)
+                    .queryTimeout(null)
+                    .retryCount(0)
+                    .retryDelay(Duration.ofMillis(100))
+                    .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                    .build(),
             )
 
         private fun createDataSource(): DataSource =

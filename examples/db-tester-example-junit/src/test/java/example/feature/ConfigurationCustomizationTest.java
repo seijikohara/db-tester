@@ -80,20 +80,21 @@ final class ConfigurationCustomizationTest {
     // Set custom configuration before registering data source
     final var customConfig =
         Configuration.withConventions(
-            new ConventionSettings(
-                null, // use classpath-relative resolution
-                "/verify", // custom expectation suffix
-                "[TestCase]", // custom scenario marker
-                DataFormat.CSV, // use CSV format (default)
-                TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
-                ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                Set.of(),
-                Map.of(),
-                RowOrdering.ORDERED,
-                null,
-                0,
-                Duration.ofMillis(100),
-                TransactionMode.SINGLE_TRANSACTION));
+            ConventionSettings.builder()
+                .baseDirectory(null) // use classpath-relative resolution
+                .expectationSuffix("/verify") // custom expectation suffix
+                .scenarioMarker("[TestCase]") // custom scenario marker
+                .dataFormat(DataFormat.CSV) // use CSV format (default)
+                .tableMergeStrategy(TableMergeStrategy.UNION_ALL) // use UNION_ALL merge strategy
+                .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                .globalExcludeColumns(Set.of())
+                .globalColumnStrategies(Map.of())
+                .rowOrdering(RowOrdering.ORDERED)
+                .queryTimeout(null)
+                .retryCount(0)
+                .retryDelay(Duration.ofMillis(100))
+                .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                .build());
     DatabaseTestExtension.setConfiguration(context, customConfig);
 
     final var testRegistry = DatabaseTestExtension.getRegistry(context);

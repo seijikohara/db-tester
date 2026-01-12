@@ -52,23 +52,33 @@ class TestClassNameBasedDataSetLoaderTest {
     registry.registerDefault(mockDataSource);
 
     final var conventions =
-        new ConventionSettings(
-            null,
-            "/expected",
-            "SCENARIO",
-            DataFormat.CSV,
-            TableMergeStrategy.UNION_ALL,
-            ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-            Set.of(),
-            Map.of(),
-            RowOrdering.ORDERED,
-            null,
-            0,
-            Duration.ofMillis(100),
-            TransactionMode.SINGLE_TRANSACTION);
-    final var operationDefaults = new OperationDefaults(Operation.CLEAN_INSERT, Operation.NONE);
+        ConventionSettings.builder()
+            .baseDirectory(null)
+            .expectationSuffix("/expected")
+            .scenarioMarker("SCENARIO")
+            .dataFormat(DataFormat.CSV)
+            .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+            .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+            .globalExcludeColumns(Set.of())
+            .globalColumnStrategies(Map.of())
+            .rowOrdering(RowOrdering.ORDERED)
+            .queryTimeout(null)
+            .retryCount(0)
+            .retryDelay(Duration.ofMillis(100))
+            .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+            .build();
+    final var operationDefaults =
+        OperationDefaults.builder()
+            .preparation(Operation.CLEAN_INSERT)
+            .expectation(Operation.NONE)
+            .build();
     final var loader = new TestClassNameBasedDataSetLoader();
-    configuration = new Configuration(conventions, operationDefaults, loader);
+    configuration =
+        Configuration.builder()
+            .conventions(conventions)
+            .operations(operationDefaults)
+            .loader(loader)
+            .build();
   }
 
   /** Tests for the constructor. */

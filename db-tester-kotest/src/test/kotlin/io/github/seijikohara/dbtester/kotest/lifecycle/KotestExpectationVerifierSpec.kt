@@ -66,15 +66,17 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                         every { loader.loadExpectationDataSets(any()) } returns emptyList()
                         every { loader.loadExpectationDataSetsWithExclusions(any()) } returns emptyList()
                     }.let { loader ->
-                        Configuration(
-                            ConventionSettings.standard(),
-                            OperationDefaults.standard(),
-                            loader,
-                        ).let { configuration ->
-                            DataSourceRegistry().let { registry ->
-                                TestContext(testClass, testMethod, configuration, registry)
+                        Configuration
+                            .builder()
+                            .conventions(ConventionSettings.standard())
+                            .operations(OperationDefaults.standard())
+                            .loader(loader)
+                            .build()
+                            .let { configuration ->
+                                DataSourceRegistry().let { registry ->
+                                    TestContext(testClass, testMethod, configuration, registry)
+                                }
                             }
-                        }
                     }
             }
         }

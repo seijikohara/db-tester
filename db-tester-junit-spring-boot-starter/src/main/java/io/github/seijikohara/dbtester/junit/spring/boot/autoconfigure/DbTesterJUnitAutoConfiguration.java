@@ -86,11 +86,18 @@ public class DbTesterJUnitAutoConfiguration {
             .withGlobalColumnStrategies(globalColumnStrategies);
 
     final OperationDefaults operations =
-        new OperationDefaults(operationProps.getPreparation(), operationProps.getExpectation());
+        OperationDefaults.builder()
+            .preparation(operationProps.getPreparation())
+            .expectation(operationProps.getExpectation())
+            .build();
 
     final DataSetLoader loader = loadDataSetLoader();
 
-    return new Configuration(conventions, operations, loader);
+    return Configuration.builder()
+        .conventions(conventions)
+        .operations(operations)
+        .loader(loader)
+        .build();
   }
 
   /**

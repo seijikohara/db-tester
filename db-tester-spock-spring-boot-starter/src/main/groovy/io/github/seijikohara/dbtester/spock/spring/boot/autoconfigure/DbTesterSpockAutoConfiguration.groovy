@@ -64,14 +64,18 @@ class DbTesterSpockAutoConfiguration {
 				.withGlobalExcludeColumns(conventionProps.globalExcludeColumns)
 				.withGlobalColumnStrategies(Map.of())
 
-		def operations = new OperationDefaults(
-				operationProps.preparation,
-				operationProps.expectation
-				)
+		def operations = OperationDefaults.builder()
+				.preparation(operationProps.preparation)
+				.expectation(operationProps.expectation)
+				.build()
 
 		def loader = loadDataSetLoader()
 
-		return new Configuration(conventions, operations, loader)
+		return Configuration.builder()
+				.conventions(conventions)
+				.operations(operations)
+				.loader(loader)
+				.build()
 	}
 
 	/**

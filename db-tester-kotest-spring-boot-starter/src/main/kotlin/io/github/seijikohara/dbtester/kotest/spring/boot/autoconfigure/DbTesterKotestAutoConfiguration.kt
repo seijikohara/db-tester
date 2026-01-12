@@ -66,20 +66,29 @@ class DbTesterKotestAutoConfiguration {
                     .withGlobalExcludeColumns(conventionProps.globalExcludeColumns)
                     .withGlobalColumnStrategies(emptyMap())
             }.let { conventions ->
-                OperationDefaults(
-                    properties.operation.preparation,
-                    properties.operation.expectation,
-                ).let { operations ->
-                    ServiceLoader
-                        .load(DataSetLoaderProvider::class.java)
-                        .findFirst()
-                        .map { it.loader }
-                        .orElseThrow {
-                            IllegalStateException(
-                                "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
-                            )
-                        }.let { loader -> Configuration(conventions, operations, loader) }
-                }
+                OperationDefaults
+                    .builder()
+                    .preparation(properties.operation.preparation)
+                    .expectation(properties.operation.expectation)
+                    .build()
+                    .let { operations ->
+                        ServiceLoader
+                            .load(DataSetLoaderProvider::class.java)
+                            .findFirst()
+                            .map { it.loader }
+                            .orElseThrow {
+                                IllegalStateException(
+                                    "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
+                                )
+                            }.let { loader ->
+                                Configuration
+                                    .builder()
+                                    .conventions(conventions)
+                                    .operations(operations)
+                                    .loader(loader)
+                                    .build()
+                            }
+                    }
             }
 
     /**

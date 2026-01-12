@@ -136,20 +136,21 @@ final class TableMergeStrategyTest {
 
       final var config =
           Configuration.withConventions(
-              new ConventionSettings(
-                  null,
-                  "/expected",
-                  "[Scenario]",
-                  DataFormat.CSV,
-                  TableMergeStrategy.FIRST, // FIRST strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of(),
-                  Map.of(),
-                  RowOrdering.ORDERED,
-                  null,
-                  0,
-                  Duration.ofMillis(100),
-                  TransactionMode.SINGLE_TRANSACTION));
+              ConventionSettings.builder()
+                  .baseDirectory(null)
+                  .expectationSuffix("/expected")
+                  .scenarioMarker("[Scenario]")
+                  .dataFormat(DataFormat.CSV)
+                  .tableMergeStrategy(TableMergeStrategy.FIRST) // FIRST strategy
+                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                  .globalExcludeColumns(Set.of())
+                  .globalColumnStrategies(Map.of())
+                  .rowOrdering(RowOrdering.ORDERED)
+                  .queryTimeout(null)
+                  .retryCount(0)
+                  .retryDelay(Duration.ofMillis(100))
+                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                  .build());
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -233,20 +234,21 @@ final class TableMergeStrategyTest {
 
       final var config =
           Configuration.withConventions(
-              new ConventionSettings(
-                  null,
-                  "/expected",
-                  "[Scenario]",
-                  DataFormat.CSV,
-                  TableMergeStrategy.LAST, // LAST strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of(),
-                  Map.of(),
-                  RowOrdering.ORDERED,
-                  null,
-                  0,
-                  Duration.ofMillis(100),
-                  TransactionMode.SINGLE_TRANSACTION));
+              ConventionSettings.builder()
+                  .baseDirectory(null)
+                  .expectationSuffix("/expected")
+                  .scenarioMarker("[Scenario]")
+                  .dataFormat(DataFormat.CSV)
+                  .tableMergeStrategy(TableMergeStrategy.LAST) // LAST strategy
+                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                  .globalExcludeColumns(Set.of())
+                  .globalColumnStrategies(Map.of())
+                  .rowOrdering(RowOrdering.ORDERED)
+                  .queryTimeout(null)
+                  .retryCount(0)
+                  .retryDelay(Duration.ofMillis(100))
+                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                  .build());
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -330,20 +332,21 @@ final class TableMergeStrategyTest {
 
       final var config =
           Configuration.withConventions(
-              new ConventionSettings(
-                  null,
-                  "/expected",
-                  "[Scenario]",
-                  DataFormat.CSV,
-                  TableMergeStrategy.UNION, // UNION strategy
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of(),
-                  Map.of(),
-                  RowOrdering.ORDERED,
-                  null,
-                  0,
-                  Duration.ofMillis(100),
-                  TransactionMode.SINGLE_TRANSACTION));
+              ConventionSettings.builder()
+                  .baseDirectory(null)
+                  .expectationSuffix("/expected")
+                  .scenarioMarker("[Scenario]")
+                  .dataFormat(DataFormat.CSV)
+                  .tableMergeStrategy(TableMergeStrategy.UNION) // UNION strategy
+                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                  .globalExcludeColumns(Set.of())
+                  .globalColumnStrategies(Map.of())
+                  .rowOrdering(RowOrdering.ORDERED)
+                  .queryTimeout(null)
+                  .retryCount(0)
+                  .retryDelay(Duration.ofMillis(100))
+                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                  .build());
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -427,20 +430,21 @@ final class TableMergeStrategyTest {
 
       final var config =
           Configuration.withConventions(
-              new ConventionSettings(
-                  null,
-                  "/expected",
-                  "[Scenario]",
-                  DataFormat.CSV,
-                  TableMergeStrategy.UNION_ALL, // UNION_ALL strategy (default)
-                  ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-                  Set.of(),
-                  Map.of(),
-                  RowOrdering.ORDERED,
-                  null,
-                  0,
-                  Duration.ofMillis(100),
-                  TransactionMode.SINGLE_TRANSACTION));
+              ConventionSettings.builder()
+                  .baseDirectory(null)
+                  .expectationSuffix("/expected")
+                  .scenarioMarker("[Scenario]")
+                  .dataFormat(DataFormat.CSV)
+                  .tableMergeStrategy(TableMergeStrategy.UNION_ALL) // UNION_ALL strategy (default)
+                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                  .globalExcludeColumns(Set.of())
+                  .globalColumnStrategies(Map.of())
+                  .rowOrdering(RowOrdering.ORDERED)
+                  .queryTimeout(null)
+                  .retryCount(0)
+                  .retryDelay(Duration.ofMillis(100))
+                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                  .build());
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

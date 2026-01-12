@@ -76,7 +76,8 @@ class OperationDefaultsTest {
       final var expectOp = Operation.DELETE_ALL;
 
       // When
-      final var defaults = new OperationDefaults(prepOp, expectOp);
+      final var defaults =
+          OperationDefaults.builder().preparation(prepOp).expectation(expectOp).build();
 
       // Then
       assertAll(
@@ -91,7 +92,11 @@ class OperationDefaultsTest {
     @DisplayName("should accept NONE for both operations")
     void should_accept_none_for_both_operations() {
       // Given & When
-      final var defaults = new OperationDefaults(Operation.NONE, Operation.NONE);
+      final var defaults =
+          OperationDefaults.builder()
+              .preparation(Operation.NONE)
+              .expectation(Operation.NONE)
+              .build();
 
       // Then
       assertAll(
@@ -108,15 +113,51 @@ class OperationDefaultsTest {
       // Given & When & Then - verify no exceptions for various combinations
       assertAll(
           "should accept all operation types",
-          () -> new OperationDefaults(Operation.UPDATE, Operation.NONE),
-          () -> new OperationDefaults(Operation.INSERT, Operation.DELETE),
-          () -> new OperationDefaults(Operation.UPSERT, Operation.DELETE_ALL),
-          () -> new OperationDefaults(Operation.DELETE, Operation.TRUNCATE_TABLE),
-          () -> new OperationDefaults(Operation.DELETE_ALL, Operation.CLEAN_INSERT),
-          () -> new OperationDefaults(Operation.TRUNCATE_TABLE, Operation.TRUNCATE_INSERT),
-          () -> new OperationDefaults(Operation.CLEAN_INSERT, Operation.UPDATE),
-          () -> new OperationDefaults(Operation.TRUNCATE_INSERT, Operation.INSERT),
-          () -> new OperationDefaults(Operation.NONE, Operation.UPSERT));
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.UPDATE)
+                  .expectation(Operation.NONE)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.INSERT)
+                  .expectation(Operation.DELETE)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.UPSERT)
+                  .expectation(Operation.DELETE_ALL)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.DELETE)
+                  .expectation(Operation.TRUNCATE_TABLE)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.DELETE_ALL)
+                  .expectation(Operation.CLEAN_INSERT)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.TRUNCATE_TABLE)
+                  .expectation(Operation.TRUNCATE_INSERT)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.CLEAN_INSERT)
+                  .expectation(Operation.UPDATE)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.TRUNCATE_INSERT)
+                  .expectation(Operation.INSERT)
+                  .build(),
+          () ->
+              OperationDefaults.builder()
+                  .preparation(Operation.NONE)
+                  .expectation(Operation.UPSERT)
+                  .build());
     }
   }
 
@@ -134,8 +175,16 @@ class OperationDefaultsTest {
     @DisplayName("should be equal when operations are the same")
     void should_be_equal_when_operations_are_the_same() {
       // Given
-      final var defaults1 = new OperationDefaults(Operation.INSERT, Operation.DELETE);
-      final var defaults2 = new OperationDefaults(Operation.INSERT, Operation.DELETE);
+      final var defaults1 =
+          OperationDefaults.builder()
+              .preparation(Operation.INSERT)
+              .expectation(Operation.DELETE)
+              .build();
+      final var defaults2 =
+          OperationDefaults.builder()
+              .preparation(Operation.INSERT)
+              .expectation(Operation.DELETE)
+              .build();
 
       // When & Then
       assertAll(

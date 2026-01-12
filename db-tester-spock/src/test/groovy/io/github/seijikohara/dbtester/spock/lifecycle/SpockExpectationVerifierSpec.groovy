@@ -112,11 +112,11 @@ class SpockExpectationVerifierSpec extends Specification {
 						return []
 					}
 				}
-		def configuration = new Configuration(
-				ConventionSettings.standard(),
-				OperationDefaults.standard(),
-				loader
-				)
+		def configuration = Configuration.builder()
+				.conventions(ConventionSettings.standard())
+				.operations(OperationDefaults.standard())
+				.loader(loader)
+				.build()
 		def registry = new DataSourceRegistry()
 		new TestContext(testClass, testMethod, configuration, registry)
 	}

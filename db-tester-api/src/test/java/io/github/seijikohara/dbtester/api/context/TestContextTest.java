@@ -54,8 +54,11 @@ class TestContextTest {
       testClass = SampleTestClass.class;
       testMethod = SampleTestClass.class.getMethod("sampleTestMethod");
       configuration =
-          new Configuration(
-              ConventionSettings.standard(), OperationDefaults.standard(), createMockLoader());
+          Configuration.builder()
+              .conventions(ConventionSettings.standard())
+              .operations(OperationDefaults.standard())
+              .loader(createMockLoader())
+              .build();
       registry = new DataSourceRegistry();
     }
 
@@ -329,8 +332,11 @@ class TestContextTest {
    * @return a Configuration instance
    */
   private static Configuration createConfiguration() {
-    return new Configuration(
-        ConventionSettings.standard(), OperationDefaults.standard(), createMockLoader());
+    return Configuration.builder()
+        .conventions(ConventionSettings.standard())
+        .operations(OperationDefaults.standard())
+        .loader(createMockLoader())
+        .build();
   }
 
   /** Sample test class used for testing. */

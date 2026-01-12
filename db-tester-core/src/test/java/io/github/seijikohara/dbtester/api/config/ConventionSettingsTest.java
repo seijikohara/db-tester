@@ -119,20 +119,21 @@ class ConventionSettingsTest {
 
       // When
       final var settings =
-          new ConventionSettings(
-              baseDir,
-              suffix,
-              marker,
-              format,
-              strategy,
-              loadOrderFileName,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory(baseDir)
+              .expectationSuffix(suffix)
+              .scenarioMarker(marker)
+              .dataFormat(format)
+              .tableMergeStrategy(strategy)
+              .loadOrderFileName(loadOrderFileName)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
 
       // Then
       assertAll(
@@ -159,20 +160,21 @@ class ConventionSettingsTest {
     void should_accept_null_base_directory() {
       // Given & When
       final var settings =
-          new ConventionSettings(
-              null,
-              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
-              ConventionSettings.DEFAULT_SCENARIO_MARKER,
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory(null)
+              .expectationSuffix(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX)
+              .scenarioMarker(ConventionSettings.DEFAULT_SCENARIO_MARKER)
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -185,20 +187,21 @@ class ConventionSettingsTest {
     void should_accept_empty_strings_for_suffix_and_marker() {
       // Given & When
       final var settings =
-          new ConventionSettings(
-              null,
-              "",
-              "",
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              "",
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory(null)
+              .expectationSuffix("")
+              .scenarioMarker("")
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName("")
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
 
       // Then
       assertAll(
@@ -225,35 +228,37 @@ class ConventionSettingsTest {
     void should_be_equal_when_values_are_the_same() {
       // Given
       final var settings1 =
-          new ConventionSettings(
-              "/base",
-              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
-              ConventionSettings.DEFAULT_SCENARIO_MARKER,
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory("/base")
+              .expectationSuffix(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX)
+              .scenarioMarker(ConventionSettings.DEFAULT_SCENARIO_MARKER)
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
       final var settings2 =
-          new ConventionSettings(
-              "/base",
-              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
-              ConventionSettings.DEFAULT_SCENARIO_MARKER,
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory("/base")
+              .expectationSuffix(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX)
+              .scenarioMarker(ConventionSettings.DEFAULT_SCENARIO_MARKER)
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
 
       // When & Then
       assertAll(
@@ -269,35 +274,37 @@ class ConventionSettingsTest {
     void should_be_equal_when_both_have_null_base_directory() {
       // Given
       final var settings1 =
-          new ConventionSettings(
-              null,
-              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
-              ConventionSettings.DEFAULT_SCENARIO_MARKER,
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory(null)
+              .expectationSuffix(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX)
+              .scenarioMarker(ConventionSettings.DEFAULT_SCENARIO_MARKER)
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
       final var settings2 =
-          new ConventionSettings(
-              null,
-              ConventionSettings.DEFAULT_EXPECTATION_SUFFIX,
-              ConventionSettings.DEFAULT_SCENARIO_MARKER,
-              DataFormat.CSV,
-              TableMergeStrategy.UNION_ALL,
-              ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-              Set.of(),
-              Map.of(),
-              RowOrdering.ORDERED,
-              null,
-              0,
-              Duration.ofMillis(100),
-              TransactionMode.SINGLE_TRANSACTION);
+          ConventionSettings.builder()
+              .baseDirectory(null)
+              .expectationSuffix(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX)
+              .scenarioMarker(ConventionSettings.DEFAULT_SCENARIO_MARKER)
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .globalExcludeColumns(Set.of())
+              .globalColumnStrategies(Map.of())
+              .rowOrdering(RowOrdering.ORDERED)
+              .queryTimeout(null)
+              .retryCount(0)
+              .retryDelay(Duration.ofMillis(100))
+              .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+              .build();
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");
