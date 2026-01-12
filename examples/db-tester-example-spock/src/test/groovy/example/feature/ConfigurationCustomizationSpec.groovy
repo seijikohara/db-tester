@@ -5,9 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
-import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
@@ -56,16 +54,9 @@ class ConfigurationCustomizationSpec extends Specification {
 	 * including interceptor invocation.
 	 */
 	static Configuration sharedConfiguration = Configuration.withConventions(
-	new ConventionSettings(
-	null,                       // use classpath-relative resolution
-	'/verify',                  // custom expectation suffix
-	'[TestCase]',               // custom scenario marker
-	DataFormat.CSV,             // use CSV format (default)
-	TableMergeStrategy.UNION_ALL, // use UNION_ALL merge strategy (default)
-	ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-	Set.of(),
-	Map.of()
-	)
+	ConventionSettings.standard()
+	.withExpectationSuffix('/verify')
+	.withScenarioMarker('[TestCase]')
 	)
 
 	/**

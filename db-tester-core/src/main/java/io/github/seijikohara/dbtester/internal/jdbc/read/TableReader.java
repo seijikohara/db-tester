@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Reads table data from a database using JDBC.
@@ -58,8 +60,25 @@ public final class TableReader {
    * @throws DatabaseTesterException if fetching fails
    */
   public Table fetchTable(final DataSource dataSource, final String tableName) {
+    return fetchTable(dataSource, tableName, (Duration) null);
+  }
+
+  /**
+   * Fetches the current state of a table from the database with a query timeout.
+   *
+   * @param dataSource the data source
+   * @param tableName the table name
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @return the current table data
+   * @throws DatabaseTesterException if fetching fails
+   */
+  public Table fetchTable(
+      final DataSource dataSource, final String tableName, final @Nullable Duration queryTimeout) {
     return executeQuery(
-        dataSource, String.format("SELECT * FROM %s", validate(tableName)), tableName);
+        dataSource,
+        String.format("SELECT * FROM %s", validate(tableName)),
+        tableName,
+        queryTimeout);
   }
 
   /**
@@ -73,14 +92,32 @@ public final class TableReader {
    */
   public Table fetchTable(
       final DataSource dataSource, final String tableName, final Collection<ColumnName> columns) {
+    return fetchTable(dataSource, tableName, columns, null);
+  }
+
+  /**
+   * Fetches the current state of a table with query timeout, including only specified columns.
+   *
+   * @param dataSource the data source
+   * @param tableName the table name
+   * @param columns the columns to include
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @return the current table data with only the specified columns
+   * @throws DatabaseTesterException if fetching fails
+   */
+  public Table fetchTable(
+      final DataSource dataSource,
+      final String tableName,
+      final Collection<ColumnName> columns,
+      final @Nullable Duration queryTimeout) {
     if (columns.isEmpty()) {
-      return fetchTable(dataSource, tableName);
+      return fetchTable(dataSource, tableName, queryTimeout);
     }
 
     final var columnList =
         columns.stream().map(col -> validate(col.value())).collect(Collectors.joining(", "));
     final var sql = String.format("SELECT %s FROM %s", columnList, validate(tableName));
-    return executeQuery(dataSource, sql, tableName);
+    return executeQuery(dataSource, sql, tableName, queryTimeout);
   }
 
   /**
@@ -92,7 +129,24 @@ public final class TableReader {
    * @throws DatabaseTesterException if fetching fails
    */
   public TableSet fetchTableSet(final DataSource dataSource, final List<String> tableNames) {
-    final var tables = tableNames.stream().map(name -> fetchTable(dataSource, name)).toList();
+    return fetchTableSet(dataSource, tableNames, null);
+  }
+
+  /**
+   * Fetches the current state of multiple tables from the database with a query timeout.
+   *
+   * @param dataSource the data source
+   * @param tableNames the table names
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @return the current dataset
+   * @throws DatabaseTesterException if fetching fails
+   */
+  public TableSet fetchTableSet(
+      final DataSource dataSource,
+      final List<String> tableNames,
+      final @Nullable Duration queryTimeout) {
+    final var tables =
+        tableNames.stream().map(name -> fetchTable(dataSource, name, queryTimeout)).toList();
     return new SimpleTableSet(tables);
   }
 
@@ -107,29 +161,52 @@ public final class TableReader {
    */
   public Table executeQuery(
       final DataSource dataSource, final String sqlQuery, final String tableName) {
+    return executeQuery(dataSource, sqlQuery, tableName, null);
+  }
+
+  /**
+   * Executes a SQL query and returns the results as a Table with a query timeout.
+   *
+   * @param dataSource the data source
+   * @param sqlQuery the SQL query to execute
+   * @param tableName the table name for the results
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @return the query results as a Table
+   * @throws DatabaseTesterException if the query fails
+   */
+  public Table executeQuery(
+      final DataSource dataSource,
+      final String sqlQuery,
+      final String tableName,
+      final @Nullable Duration queryTimeout) {
     try (final var connection = dataSource.getConnection();
-        final var statement = connection.prepareStatement(sqlQuery);
-        final var resultSet = statement.executeQuery()) {
+        final var statement = connection.prepareStatement(sqlQuery)) {
 
-      final var metaData = resultSet.getMetaData();
-      final var columnCount = metaData.getColumnCount();
+      if (queryTimeout != null) {
+        statement.setQueryTimeout((int) queryTimeout.toSeconds());
+      }
 
-      final var columnNames =
-          IntStream.rangeClosed(1, columnCount)
-              .mapToObj(
-                  i -> {
-                    try {
-                      return new ColumnName(metaData.getColumnName(i));
-                    } catch (final SQLException e) {
-                      throw new DatabaseTesterException(
-                          String.format("Failed to retrieve column name at index: %d", i), e);
-                    }
-                  })
-              .toList();
+      try (final var resultSet = statement.executeQuery()) {
+        final var metaData = resultSet.getMetaData();
+        final var columnCount = metaData.getColumnCount();
 
-      final var rows = readAllRows(resultSet, columnNames, columnCount);
+        final var columnNames =
+            IntStream.rangeClosed(1, columnCount)
+                .mapToObj(
+                    i -> {
+                      try {
+                        return new ColumnName(metaData.getColumnName(i));
+                      } catch (final SQLException e) {
+                        throw new DatabaseTesterException(
+                            String.format("Failed to retrieve column name at index: %d", i), e);
+                      }
+                    })
+                .toList();
 
-      return new SimpleTable(new TableName(tableName), columnNames, rows);
+        final var rows = readAllRows(resultSet, columnNames, columnCount);
+
+        return new SimpleTable(new TableName(tableName), columnNames, rows);
+      }
     } catch (final SQLException e) {
       throw new DatabaseTesterException(String.format("Failed to execute query: %s", sqlQuery), e);
     }

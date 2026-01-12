@@ -3,6 +3,8 @@ package io.github.seijikohara.dbtester.internal.jdbc.write;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -137,13 +139,16 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
 
       when(dataSource.getConnection()).thenReturn(connection);
+      when(connection.getAutoCommit()).thenReturn(true);
       when(dataSet.getTables()).thenReturn(List.of());
 
       // When
       executor.execute(Operation.NONE, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
+      verify(connection).getAutoCommit();
       verify(connection).setAutoCommit(false);
+      verify(connection).setAutoCommit(true);
       verify(connection).commit();
       verify(connection, never()).rollback();
     }
@@ -167,7 +172,7 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(List.of(table));
       doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
           .when(insertExecutor)
-          .execute(any(), any());
+          .execute(any(), any(), any());
 
       // When & Then
       assertThrows(
@@ -207,11 +212,11 @@ class OperationExecutorTest {
           Operation.NONE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(insertExecutor, never()).execute(any(), any());
-      verify(updateExecutor, never()).execute(any(), any());
-      verify(deleteExecutor, never()).execute(any(), any());
-      verify(truncateExecutor, never()).execute(any(), any());
-      verify(refreshExecutor, never()).execute(any(), any());
+      verify(insertExecutor, never()).execute(any(), any(), any());
+      verify(updateExecutor, never()).execute(any(), any(), any());
+      verify(deleteExecutor, never()).execute(any(), any(), any());
+      verify(truncateExecutor, never()).execute(any(), any(), any());
+      verify(refreshExecutor, never()).execute(any(), any(), any());
     }
 
     /**
@@ -234,7 +239,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(insertExecutor).execute(tables, connection);
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -257,7 +262,7 @@ class OperationExecutorTest {
           Operation.UPDATE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(updateExecutor).execute(tables, connection);
+      verify(updateExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -280,7 +285,7 @@ class OperationExecutorTest {
           Operation.DELETE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(deleteExecutor).execute(tables, connection);
+      verify(deleteExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -303,7 +308,7 @@ class OperationExecutorTest {
           Operation.DELETE_ALL, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(deleteExecutor).executeDeleteAll(tables, connection);
+      verify(deleteExecutor).executeDeleteAll(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -326,7 +331,7 @@ class OperationExecutorTest {
           Operation.UPSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(refreshExecutor).execute(tables, connection);
+      verify(refreshExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -349,7 +354,7 @@ class OperationExecutorTest {
           Operation.TRUNCATE_TABLE, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(truncateExecutor).execute(tables, connection);
+      verify(truncateExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -373,8 +378,8 @@ class OperationExecutorTest {
           Operation.CLEAN_INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(deleteExecutor).executeDeleteAll(tables.reversed(), connection);
-      verify(insertExecutor).execute(tables, connection);
+      verify(deleteExecutor).executeDeleteAll(eq(tables.reversed()), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -398,8 +403,8 @@ class OperationExecutorTest {
           Operation.TRUNCATE_INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(truncateExecutor).execute(tables.reversed(), connection);
-      verify(insertExecutor).execute(tables, connection);
+      verify(truncateExecutor).execute(eq(tables.reversed()), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
     }
   }
 
@@ -433,7 +438,7 @@ class OperationExecutorTest {
 
       // Then - tableOrderResolver should not be called for single table
       verify(tableOrderResolver, never()).resolveOrder(any(), any(), any());
-      verify(insertExecutor).execute(tables, connection);
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -459,7 +464,7 @@ class OperationExecutorTest {
 
       // Then - tableOrderResolver should not be called for LOAD_ORDER_FILE
       verify(tableOrderResolver, never()).resolveOrder(any(), any(), any());
-      verify(insertExecutor).execute(tables, connection);
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**
@@ -487,7 +492,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then - verify insert is called (with sorted order, but we verify the sorted list)
-      verify(insertExecutor).execute(List.of(tableA, tableB, tableC), connection);
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB, tableC)), eq(connection), isNull());
     }
 
     /**
@@ -521,7 +526,7 @@ class OperationExecutorTest {
       // Then - verify insert is called with reordered tables (B, A)
       verify(tableOrderResolver)
           .resolveOrder(List.of(tableNameA, tableNameB), connection, "PUBLIC");
-      verify(insertExecutor).execute(List.of(tableB, tableA), connection);
+      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull());
     }
 
     /**
@@ -553,7 +558,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.FOREIGN_KEY);
 
       // Then - verify insert is called with original order
-      verify(insertExecutor).execute(List.of(tableA, tableB), connection);
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
     }
 
     /**
@@ -586,7 +591,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.FOREIGN_KEY);
 
       // Then - verify insert is called with original order (fallback)
-      verify(insertExecutor).execute(List.of(tableA, tableB), connection);
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
     }
 
     /**
@@ -617,7 +622,7 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with reordered tables
-      verify(insertExecutor).execute(List.of(tableB, tableA), connection);
+      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull());
     }
 
     /**
@@ -649,7 +654,7 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with original order (fallback)
-      verify(insertExecutor).execute(List.of(tableA, tableB), connection);
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
     }
 
     /**
@@ -680,7 +685,7 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with original order
-      verify(insertExecutor).execute(List.of(tableA, tableB), connection);
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
     }
   }
 }

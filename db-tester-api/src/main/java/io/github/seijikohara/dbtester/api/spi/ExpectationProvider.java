@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.lang.System.Logger;
 import java.lang.System.Logger.Level;
@@ -136,5 +137,42 @@ public interface ExpectationProvider {
           columnStrategies.keySet());
     }
     verifyExpectation(expectedTableSet, dataSource, excludeColumns);
+  }
+
+  /**
+   * Verifies that the database state matches the expected dataset with row ordering control.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map)} with
+   * row ordering support. When set to {@link RowOrdering#UNORDERED}, rows are compared without
+   * considering their position, using set-based matching.
+   *
+   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
+   * Collection, Map)} when row ordering is {@link RowOrdering#ORDERED}. Implementations should
+   * override this method to support unordered comparison.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
+   * @throws AssertionError if verification fails
+   * @see RowOrdering
+   */
+  default void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final Collection<String> excludeColumns,
+      final Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering) {
+    // Default implementation ignores row ordering for backward compatibility.
+    // Implementations should override this method to support unordered comparison.
+    if (rowOrdering == RowOrdering.UNORDERED) {
+      LOGGER.log(
+          Level.WARNING,
+          "Unordered row comparison requested but current ExpectationProvider does not support it. "
+              + "Falling back to ordered comparison. Override verifyExpectation(TableSet, "
+              + "DataSource, Collection, Map, RowOrdering) to support unordered comparison.");
+    }
+    verifyExpectation(expectedTableSet, dataSource, excludeColumns, columnStrategies);
   }
 }

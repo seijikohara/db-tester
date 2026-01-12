@@ -6,7 +6,10 @@ import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.run;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
+import java.sql.Statement;
+import java.time.Duration;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +45,15 @@ public final class DeleteExecutor implements TableExecutor {
 
   @Override
   public void execute(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> deleteTable(table, connection));
+    tables.forEach(table -> deleteTable(table, connection, null));
+  }
+
+  @Override
+  public void execute(
+      final List<Table> tables,
+      final Connection connection,
+      final @Nullable Duration queryTimeout) {
+    tables.forEach(table -> deleteTable(table, connection, queryTimeout));
   }
 
   /**
@@ -52,9 +63,11 @@ public final class DeleteExecutor implements TableExecutor {
    *
    * @param table the table to delete from
    * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseOperationException if a database error occurs
    */
-  private void deleteTable(final Table table, final Connection connection) {
+  private void deleteTable(
+      final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
     if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
       return;
     }
@@ -65,6 +78,7 @@ public final class DeleteExecutor implements TableExecutor {
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
+      applyTimeout(preparedStatement, queryTimeout);
       table
           .getRows()
           .forEach(
@@ -86,7 +100,22 @@ public final class DeleteExecutor implements TableExecutor {
    * @throws DatabaseOperationException if a database error occurs
    */
   public void executeDeleteAll(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> deleteAllRows(table.getName().value(), connection));
+    tables.forEach(table -> deleteAllRows(table.getName().value(), connection, null));
+  }
+
+  /**
+   * Deletes all rows from all tables with a query timeout.
+   *
+   * @param tables the tables to delete from
+   * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @throws DatabaseOperationException if a database error occurs
+   */
+  public void executeDeleteAll(
+      final List<Table> tables,
+      final Connection connection,
+      final @Nullable Duration queryTimeout) {
+    tables.forEach(table -> deleteAllRows(table.getName().value(), connection, queryTimeout));
   }
 
   /**
@@ -97,10 +126,36 @@ public final class DeleteExecutor implements TableExecutor {
    * @throws DatabaseOperationException if a database error occurs
    */
   public void deleteAllRows(final String tableName, final Connection connection) {
+    deleteAllRows(tableName, connection, null);
+  }
+
+  /**
+   * Deletes all rows from a single table with a query timeout.
+   *
+   * @param tableName the table name
+   * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @throws DatabaseOperationException if a database error occurs
+   */
+  public void deleteAllRows(
+      final String tableName, final Connection connection, final @Nullable Duration queryTimeout) {
     final var sql = sqlBuilder.buildDeleteAll(tableName);
     logger.trace("Executing DELETE ALL: {}", sql);
     try (final var statementResource = open(connection::createStatement)) {
+      applyTimeout(statementResource.value(), queryTimeout);
       run(() -> statementResource.value().executeUpdate(sql));
+    }
+  }
+
+  /**
+   * Applies the query timeout to a statement if specified.
+   *
+   * @param statement the statement
+   * @param queryTimeout the query timeout, or null for no timeout
+   */
+  private void applyTimeout(final Statement statement, final @Nullable Duration queryTimeout) {
+    if (queryTimeout != null) {
+      run(() -> statement.setQueryTimeout((int) queryTimeout.toSeconds()));
     }
   }
 }

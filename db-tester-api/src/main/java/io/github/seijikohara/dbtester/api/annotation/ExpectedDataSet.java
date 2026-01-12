@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.annotation;
 
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -46,4 +47,44 @@ public @interface ExpectedDataSet {
    * @see TableOrderingStrategy
    */
   TableOrderingStrategy tableOrdering() default TableOrderingStrategy.AUTO;
+
+  /**
+   * Specifies how rows should be compared during verification.
+   *
+   * <p>When set to {@link RowOrdering#UNORDERED}, rows are compared without considering their
+   * position in the result set. This is useful when the database does not guarantee row ordering.
+   *
+   * <p>If not specified, the value from {@link
+   * io.github.seijikohara.dbtester.api.config.ConventionSettings#rowOrdering()} is used.
+   *
+   * @return the row ordering strategy, defaulting to {@link RowOrdering#ORDERED}
+   * @see RowOrdering
+   */
+  RowOrdering rowOrdering() default RowOrdering.ORDERED;
+
+  /**
+   * Specifies the number of retry attempts for verification.
+   *
+   * <p>When verification fails, the framework retries the comparison up to this many additional
+   * times, waiting {@link #retryDelayMillis()} between attempts. This is useful for eventual
+   * consistency scenarios.
+   *
+   * <p>A value of {@code -1} means the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()} is used.
+   *
+   * @return the number of retry attempts, or -1 to use the global setting
+   */
+  int retryCount() default -1;
+
+  /**
+   * Specifies the delay between retry attempts in milliseconds.
+   *
+   * <p>This delay allows transient inconsistencies to resolve before the next verification attempt.
+   *
+   * <p>A value of {@code -1} means the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()} is used.
+   *
+   * @return the delay in milliseconds, or -1 to use the global setting
+   */
+  long retryDelayMillis() default -1;
 }

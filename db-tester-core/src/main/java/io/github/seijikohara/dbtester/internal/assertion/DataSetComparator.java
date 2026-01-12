@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -302,6 +304,205 @@ public class DataSetComparator {
                 table, rowIndex, expectedRow, actualRow, ignoreSet, columnStrategies, res));
 
     result.assertNoDifferences();
+  }
+
+  // ========== Unordered comparison methods ==========
+
+  /**
+   * Asserts that two tables are equal with column-specific comparison strategies using the
+   * specified row ordering.
+   *
+   * <p>This is the primary comparison method that supports both ordered and unordered comparison
+   * modes. When {@link RowOrdering#ORDERED} is specified, rows are compared positionally (row N
+   * with row N). When {@link RowOrdering#UNORDERED} is specified, rows are compared using set-based
+   * matching.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @param ignoreColumnNames columns to ignore during comparison (uppercase, case-insensitive)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row ordering strategy
+   * @throws AssertionError if row counts differ or if any column values fail comparison
+   */
+  public void assertEqualsWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<String> ignoreColumnNames,
+      final Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering) {
+    if (rowOrdering == RowOrdering.UNORDERED) {
+      assertEqualsUnorderedWithStrategies(expected, actual, ignoreColumnNames, columnStrategies);
+    } else {
+      assertEqualsWithStrategies(expected, actual, ignoreColumnNames, columnStrategies);
+    }
+  }
+
+  /**
+   * Asserts that two tables are equal without considering row order.
+   *
+   * <p>This method performs set-based comparison: each expected row must have a matching actual
+   * row, regardless of position. Row counts must also match.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @throws AssertionError if row counts differ or if any expected row has no matching actual row
+   */
+  public void assertEqualsUnordered(final Table expected, final Table actual) {
+    assertEqualsUnorderedWithStrategies(expected, actual, Set.of(), Map.of());
+  }
+
+  /**
+   * Asserts that two tables are equal without considering row order, ignoring specified columns.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @param ignoreColumnNames columns to ignore during comparison
+   * @throws AssertionError if row counts differ or if any expected row has no matching actual row
+   */
+  public void assertEqualsUnorderedIgnoreColumns(
+      final Table expected, final Table actual, final Collection<String> ignoreColumnNames) {
+    assertEqualsUnorderedWithStrategies(expected, actual, ignoreColumnNames, Map.of());
+  }
+
+  /**
+   * Asserts that two tables are equal without considering row order, with column-specific
+   * comparison strategies.
+   *
+   * <p>This method performs set-based comparison using the specified column strategies. Each
+   * expected row must have a matching actual row. Column exclusion takes precedence over column
+   * strategies.
+   *
+   * @param expected the expected table
+   * @param actual the actual table
+   * @param ignoreColumnNames columns to ignore during comparison (uppercase, case-insensitive)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @throws AssertionError if row counts differ or if any expected row has no matching actual row
+   */
+  public void assertEqualsUnorderedWithStrategies(
+      final Table expected,
+      final Table actual,
+      final Collection<String> ignoreColumnNames,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    final var result = new ComparisonResult();
+    final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var tableName = expected.getName().value();
+    final var expectedRows = expected.getRows();
+    final var actualRows = actual.getRows();
+
+    checkRowCountMismatch(tableName, expectedRows, actualRows, result);
+
+    // Track which actual rows have been matched
+    final var unmatchedActualIndices = new ArrayList<Integer>();
+    IntStream.range(0, actualRows.size()).forEach(unmatchedActualIndices::add);
+
+    // For each expected row, find a matching actual row
+    IntStream.range(0, expectedRows.size())
+        .forEach(
+            expectedIndex -> {
+              final var expectedRow = expectedRows.get(expectedIndex);
+              final var matchIndex =
+                  findMatchingRowIndex(
+                      expectedRow, actualRows, unmatchedActualIndices, ignoreSet, columnStrategies);
+
+              if (matchIndex >= 0) {
+                // Mark this actual row as matched
+                unmatchedActualIndices.remove(Integer.valueOf(matchIndex));
+              } else {
+                // No matching row found - report the expected row as unmatched
+                reportUnmatchedExpectedRow(tableName, expectedIndex, expectedRow, result);
+              }
+            });
+
+    // Report any unmatched actual rows (extra rows)
+    unmatchedActualIndices.forEach(
+        actualIndex ->
+            result.addRowCountMismatch(
+                tableName,
+                expectedRows.size() - unmatchedActualIndices.size(),
+                actualRows.size() - unmatchedActualIndices.size() + 1));
+
+    result.assertNoDifferences();
+  }
+
+  /**
+   * Finds the index of an actual row that matches the expected row.
+   *
+   * @param expectedRow the expected row to match
+   * @param actualRows all actual rows
+   * @param unmatchedIndices indices of actual rows that haven't been matched yet
+   * @param ignoreSet columns to ignore during comparison
+   * @param columnStrategies column comparison strategies
+   * @return the index of a matching actual row, or -1 if no match found
+   */
+  private int findMatchingRowIndex(
+      final Row expectedRow,
+      final List<Row> actualRows,
+      final List<Integer> unmatchedIndices,
+      final Set<String> ignoreSet,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    return unmatchedIndices.stream()
+        .filter(index -> rowsMatch(expectedRow, actualRows.get(index), ignoreSet, columnStrategies))
+        .findFirst()
+        .orElse(-1);
+  }
+
+  /**
+   * Checks if two rows match according to the comparison rules.
+   *
+   * @param expected the expected row
+   * @param actual the actual row
+   * @param ignoreSet columns to ignore
+   * @param columnStrategies column comparison strategies
+   * @return true if the rows match
+   */
+  private boolean rowsMatch(
+      final Row expected,
+      final Row actual,
+      final Set<String> ignoreSet,
+      final Map<String, ColumnStrategyMapping> columnStrategies) {
+    return expected.getValues().keySet().stream()
+        // Filter out ignored columns
+        .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
+        // Check if all remaining columns match
+        .allMatch(
+            columnName -> {
+              final var expectedValue = expected.getValue(columnName);
+              final var actualValue = actual.getValue(columnName);
+              final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
+
+              // Get strategy for this column, or use default comparison
+              final var strategyMapping = columnStrategies.get(upperColumnName);
+              if (strategyMapping != null) {
+                return compareWithStrategy(expectedValue, actualValue, strategyMapping.strategy());
+              }
+              // Default: use standard comparison
+              return valuesAreEqual(expectedValue, actualValue);
+            });
+  }
+
+  /**
+   * Reports an unmatched expected row by adding value mismatches for all columns.
+   *
+   * @param tableName the table name
+   * @param rowIndex the row index
+   * @param expectedRow the unmatched expected row
+   * @param result the result collector
+   */
+  private void reportUnmatchedExpectedRow(
+      final String tableName,
+      final int rowIndex,
+      final Row expectedRow,
+      final ComparisonResult result) {
+    expectedRow
+        .getValues()
+        .forEach(
+            (columnName, expectedValue) ->
+                result.addValueMismatch(
+                    tableName,
+                    rowIndex,
+                    columnName.value(),
+                    extractValueOrNull(expectedValue),
+                    "[no matching row]"));
   }
 
   /**

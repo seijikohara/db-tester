@@ -56,6 +56,9 @@ Declares datasets that define the expected database state after test execution.
 |-----------|------|---------|-------------|
 | `sources` | `DataSetSource[]` | `{}` | Dataset sources for verification; empty triggers convention-based discovery |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order during verification |
+| `rowOrdering` | `RowOrdering` | `ORDERED` | Row comparison strategy (positional or set-based) |
+| `retryCount` | `int` | `-1` | Retry attempts for verification; `-1` uses global setting |
+| `retryDelayMillis` | `long` | `-1` | Delay between retries in milliseconds; `-1` uses global setting |
 
 **Verification Behavior**:
 
@@ -75,6 +78,12 @@ void testWithCustomExpectation() { }
 
 @ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrdering() { }
+
+@ExpectedDataSet(rowOrdering = RowOrdering.UNORDERED)
+void testWithUnorderedComparison() { }
+
+@ExpectedDataSet(retryCount = 3, retryDelayMillis = 500)
+void testWithRetry() { }
 ```
 
 ### @DataSetSource
@@ -176,6 +185,28 @@ Enum defining comparison strategy types for use in `@ColumnStrategy` annotations
 | `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
 | `NOT_NULL` | Verifies value is not null |
 | `REGEX` | Pattern matching (requires `pattern` attribute) |
+
+### RowOrdering
+
+Enum defining row comparison strategies for use in `@ExpectedDataSet` annotations.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.RowOrdering`
+
+**Values**:
+
+| Value | Description |
+|-------|-------------|
+| `ORDERED` | Positional comparison (row-by-row by index). Default behavior. |
+| `UNORDERED` | Set-based comparison (rows matched regardless of position) |
+
+**When to Use**:
+
+| Mode | Use Case |
+|------|----------|
+| `ORDERED` | Query includes ORDER BY; row order is significant; maximum performance |
+| `UNORDERED` | No ORDER BY; row order not significant; database may return rows in unpredictable order |
+
+**Performance Note**: Unordered comparison has O(n*m) complexity in the worst case.
 
 ## TableSet Interfaces
 

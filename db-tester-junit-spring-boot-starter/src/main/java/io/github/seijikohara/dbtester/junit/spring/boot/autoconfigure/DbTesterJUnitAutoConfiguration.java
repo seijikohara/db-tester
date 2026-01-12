@@ -75,15 +75,15 @@ public class DbTesterJUnitAutoConfiguration {
     final Map<String, ColumnStrategyMapping> globalColumnStrategies = Map.of();
 
     final ConventionSettings conventions =
-        new ConventionSettings(
-            conventionProps.getBaseDirectory(),
-            conventionProps.getExpectationSuffix(),
-            conventionProps.getScenarioMarker(),
-            conventionProps.getDataFormat(),
-            conventionProps.getTableMergeStrategy(),
-            conventionProps.getLoadOrderFileName(),
-            conventionProps.getGlobalExcludeColumns(),
-            globalColumnStrategies);
+        ConventionSettings.standard()
+            .withBaseDirectory(conventionProps.getBaseDirectory())
+            .withExpectationSuffix(conventionProps.getExpectationSuffix())
+            .withScenarioMarker(conventionProps.getScenarioMarker())
+            .withDataFormat(conventionProps.getDataFormat())
+            .withTableMergeStrategy(conventionProps.getTableMergeStrategy())
+            .withLoadOrderFileName(conventionProps.getLoadOrderFileName())
+            .withGlobalExcludeColumns(conventionProps.getGlobalExcludeColumns())
+            .withGlobalColumnStrategies(globalColumnStrategies);
 
     final OperationDefaults operations =
         new OperationDefaults(operationProps.getPreparation(), operationProps.getExpectation());

@@ -3,7 +3,9 @@ package io.github.seijikohara.dbtester.internal.jdbc.write;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
+import java.time.Duration;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,15 @@ public final class RefreshExecutor implements TableExecutor {
 
   @Override
   public void execute(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> refreshTable(table, connection));
+    tables.forEach(table -> refreshTable(table, connection, null));
+  }
+
+  @Override
+  public void execute(
+      final List<Table> tables,
+      final Connection connection,
+      final @Nullable Duration queryTimeout) {
+    tables.forEach(table -> refreshTable(table, connection, queryTimeout));
   }
 
   /**
@@ -49,9 +59,11 @@ public final class RefreshExecutor implements TableExecutor {
    *
    * @param table the table to refresh
    * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseOperationException if a database error occurs
    */
-  private void refreshTable(final Table table, final Connection connection) {
+  private void refreshTable(
+      final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
     if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
       return;
     }
@@ -66,10 +78,15 @@ public final class RefreshExecutor implements TableExecutor {
             row -> {
               final var updated =
                   updateExecutor.tryUpdateRow(
-                      table.getName().value(), primaryKeyColumn, updateColumns, row, connection);
+                      table.getName().value(),
+                      primaryKeyColumn,
+                      updateColumns,
+                      row,
+                      connection,
+                      queryTimeout);
               if (!updated) {
                 logger.trace("Update affected no rows, inserting into {}", table.getName().value());
-                insertExecutor.insertRow(table, row, connection);
+                insertExecutor.insertRow(table, row, connection, queryTimeout);
               }
             });
   }

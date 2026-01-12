@@ -6,12 +6,15 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
+import java.time.Duration
 import javax.sql.DataSource
 
 /**
@@ -51,6 +54,11 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
                     ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                     emptySet(),
                     emptyMap(),
+                    RowOrdering.ORDERED,
+                    null,
+                    0,
+                    Duration.ofMillis(100),
+                    TransactionMode.SINGLE_TRANSACTION,
                 ),
             )
 

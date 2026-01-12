@@ -8,7 +8,6 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import javax.sql.DataSource
@@ -78,16 +77,8 @@ class DataFormatSpec extends Specification {
 
 			// CSV is the default format, but we explicitly configure it for clarity
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null, // classpath-relative
-					'/expected', // default expectation suffix
-					'[Scenario]', // default scenario marker
-					DataFormat.CSV, // CSV format
-					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-					Set.of(),
-					Map.of()
-					)
+					ConventionSettings.standard()
+					.withDataFormat(DataFormat.CSV)
 					)
 		}
 
@@ -200,16 +191,8 @@ class DataFormatSpec extends Specification {
 
 			// Configure TSV format
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null, // classpath-relative
-					'/expected', // default expectation suffix
-					'[Scenario]', // default scenario marker
-					DataFormat.TSV, // TSV format
-					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-					Set.of(),
-					Map.of()
-					)
+					ConventionSettings.standard()
+					.withDataFormat(DataFormat.TSV)
 					)
 		}
 

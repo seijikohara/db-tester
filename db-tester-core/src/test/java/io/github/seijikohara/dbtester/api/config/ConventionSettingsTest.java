@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
@@ -65,7 +66,20 @@ class ConventionSettingsTest {
           () ->
               assertTrue(
                   settings.globalExcludeColumns().isEmpty(),
-                  "globalExcludeColumns should be empty by default"));
+                  "globalExcludeColumns should be empty by default"),
+          () ->
+              assertEquals(
+                  RowOrdering.ORDERED, settings.rowOrdering(), "rowOrdering should be ORDERED"),
+          () -> assertNull(settings.queryTimeout(), "queryTimeout should be null by default"),
+          () -> assertEquals(0, settings.retryCount(), "retryCount should be 0 by default"),
+          () ->
+              assertEquals(
+                  Duration.ofMillis(100), settings.retryDelay(), "retryDelay should be 100ms"),
+          () ->
+              assertEquals(
+                  TransactionMode.SINGLE_TRANSACTION,
+                  settings.transactionMode(),
+                  "transactionMode should be SINGLE_TRANSACTION"));
     }
 
     /** Verifies that standard returns consistent instances. */
@@ -106,7 +120,19 @@ class ConventionSettingsTest {
       // When
       final var settings =
           new ConventionSettings(
-              baseDir, suffix, marker, format, strategy, loadOrderFileName, Set.of(), Map.of());
+              baseDir,
+              suffix,
+              marker,
+              format,
+              strategy,
+              loadOrderFileName,
+              Set.of(),
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
 
       // Then
       assertAll(
@@ -141,7 +167,12 @@ class ConventionSettingsTest {
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
               Set.of(),
-              Map.of());
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
 
       // Then
       assertNull(settings.baseDirectory(), "baseDirectory should be null");
@@ -155,7 +186,19 @@ class ConventionSettingsTest {
       // Given & When
       final var settings =
           new ConventionSettings(
-              null, "", "", DataFormat.CSV, TableMergeStrategy.UNION_ALL, "", Set.of(), Map.of());
+              null,
+              "",
+              "",
+              DataFormat.CSV,
+              TableMergeStrategy.UNION_ALL,
+              "",
+              Set.of(),
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
 
       // Then
       assertAll(
@@ -190,7 +233,12 @@ class ConventionSettingsTest {
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
               Set.of(),
-              Map.of());
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
       final var settings2 =
           new ConventionSettings(
               "/base",
@@ -200,7 +248,12 @@ class ConventionSettingsTest {
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
               Set.of(),
-              Map.of());
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
 
       // When & Then
       assertAll(
@@ -224,7 +277,12 @@ class ConventionSettingsTest {
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
               Set.of(),
-              Map.of());
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
       final var settings2 =
           new ConventionSettings(
               null,
@@ -234,7 +292,12 @@ class ConventionSettingsTest {
               TableMergeStrategy.UNION_ALL,
               ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
               Set.of(),
-              Map.of());
+              Map.of(),
+              RowOrdering.ORDERED,
+              null,
+              0,
+              Duration.ofMillis(100),
+              TransactionMode.SINGLE_TRANSACTION);
 
       // When & Then
       assertEquals(settings1, settings2, "should be equal with null baseDirectory");
@@ -577,7 +640,12 @@ class ConventionSettingsTest {
               .withDataFormat(DataFormat.TSV)
               .withTableMergeStrategy(TableMergeStrategy.FIRST)
               .withLoadOrderFileName("custom-order.txt")
-              .withGlobalExcludeColumns(Set.of("created_at", "updated_at"));
+              .withGlobalExcludeColumns(Set.of("created_at", "updated_at"))
+              .withRowOrdering(RowOrdering.UNORDERED)
+              .withQueryTimeout(Duration.ofSeconds(30))
+              .withRetryCount(3)
+              .withRetryDelay(Duration.ofMillis(500))
+              .withTransactionMode(TransactionMode.AUTO_COMMIT);
 
       // Then
       assertAll(
@@ -604,7 +672,208 @@ class ConventionSettingsTest {
               assertEquals(
                   Set.of("created_at", "updated_at"),
                   settings.globalExcludeColumns(),
-                  "globalExcludeColumns should match"));
+                  "globalExcludeColumns should match"),
+          () ->
+              assertEquals(
+                  RowOrdering.UNORDERED, settings.rowOrdering(), "rowOrdering should match"),
+          () ->
+              assertEquals(
+                  Duration.ofSeconds(30), settings.queryTimeout(), "queryTimeout should match"),
+          () -> assertEquals(3, settings.retryCount(), "retryCount should match"),
+          () ->
+              assertEquals(
+                  Duration.ofMillis(500), settings.retryDelay(), "retryDelay should match"),
+          () ->
+              assertEquals(
+                  TransactionMode.AUTO_COMMIT,
+                  settings.transactionMode(),
+                  "transactionMode should match"));
+    }
+  }
+
+  /** Tests for the withRowOrdering method. */
+  @Nested
+  @DisplayName("withRowOrdering() method")
+  class WithRowOrderingMethod {
+
+    /** Tests for the withRowOrdering method. */
+    WithRowOrderingMethod() {}
+
+    /** Verifies that withRowOrdering returns a new instance with the specified ordering. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified row ordering")
+    void should_return_new_instance_with_specified_row_ordering() {
+      // Given
+      final var original = ConventionSettings.standard();
+
+      // When
+      final var modified = original.withRowOrdering(RowOrdering.UNORDERED);
+
+      // Then
+      assertAll(
+          "should have new row ordering while preserving other values",
+          () ->
+              assertEquals(
+                  RowOrdering.UNORDERED, modified.rowOrdering(), "rowOrdering should be UNORDERED"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.queryTimeout(), modified.queryTimeout(), "queryTimeout should match"),
+          () ->
+              assertEquals(
+                  original.retryCount(), modified.retryCount(), "retryCount should match"));
+    }
+  }
+
+  /** Tests for the withQueryTimeout method. */
+  @Nested
+  @DisplayName("withQueryTimeout() method")
+  class WithQueryTimeoutMethod {
+
+    /** Tests for the withQueryTimeout method. */
+    WithQueryTimeoutMethod() {}
+
+    /** Verifies that withQueryTimeout returns a new instance with the specified timeout. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified query timeout")
+    void should_return_new_instance_with_specified_query_timeout() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var timeout = Duration.ofSeconds(30);
+
+      // When
+      final var modified = original.withQueryTimeout(timeout);
+
+      // Then
+      assertAll(
+          "should have new query timeout while preserving other values",
+          () -> assertEquals(timeout, modified.queryTimeout(), "queryTimeout should be 30s"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.rowOrdering(), modified.rowOrdering(), "rowOrdering should match"));
+    }
+
+    /** Verifies that withQueryTimeout accepts null for no timeout. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should accept null for no timeout")
+    void should_accept_null_for_no_timeout() {
+      // Given
+      final var original = ConventionSettings.standard().withQueryTimeout(Duration.ofSeconds(10));
+
+      // When
+      final var modified = original.withQueryTimeout(null);
+
+      // Then
+      assertNull(modified.queryTimeout(), "queryTimeout should be null");
+    }
+  }
+
+  /** Tests for the withRetryCount method. */
+  @Nested
+  @DisplayName("withRetryCount() method")
+  class WithRetryCountMethod {
+
+    /** Tests for the withRetryCount method. */
+    WithRetryCountMethod() {}
+
+    /** Verifies that withRetryCount returns a new instance with the specified count. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified retry count")
+    void should_return_new_instance_with_specified_retry_count() {
+      // Given
+      final var original = ConventionSettings.standard();
+
+      // When
+      final var modified = original.withRetryCount(3);
+
+      // Then
+      assertAll(
+          "should have new retry count while preserving other values",
+          () -> assertEquals(3, modified.retryCount(), "retryCount should be 3"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.retryDelay(), modified.retryDelay(), "retryDelay should match"));
+    }
+  }
+
+  /** Tests for the withRetryDelay method. */
+  @Nested
+  @DisplayName("withRetryDelay() method")
+  class WithRetryDelayMethod {
+
+    /** Tests for the withRetryDelay method. */
+    WithRetryDelayMethod() {}
+
+    /** Verifies that withRetryDelay returns a new instance with the specified delay. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified retry delay")
+    void should_return_new_instance_with_specified_retry_delay() {
+      // Given
+      final var original = ConventionSettings.standard();
+      final var delay = Duration.ofMillis(500);
+
+      // When
+      final var modified = original.withRetryDelay(delay);
+
+      // Then
+      assertAll(
+          "should have new retry delay while preserving other values",
+          () -> assertEquals(delay, modified.retryDelay(), "retryDelay should be 500ms"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.retryCount(), modified.retryCount(), "retryCount should match"));
+    }
+  }
+
+  /** Tests for the withTransactionMode method. */
+  @Nested
+  @DisplayName("withTransactionMode() method")
+  class WithTransactionModeMethod {
+
+    /** Tests for the withTransactionMode method. */
+    WithTransactionModeMethod() {}
+
+    /** Verifies that withTransactionMode returns a new instance with the specified mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with specified transaction mode")
+    void should_return_new_instance_with_specified_transaction_mode() {
+      // Given
+      final var original = ConventionSettings.standard();
+
+      // When
+      final var modified = original.withTransactionMode(TransactionMode.AUTO_COMMIT);
+
+      // Then
+      assertAll(
+          "should have new transaction mode while preserving other values",
+          () ->
+              assertEquals(
+                  TransactionMode.AUTO_COMMIT,
+                  modified.transactionMode(),
+                  "transactionMode should be AUTO_COMMIT"),
+          () ->
+              assertEquals(
+                  original.baseDirectory(), modified.baseDirectory(), "baseDirectory should match"),
+          () ->
+              assertEquals(
+                  original.rowOrdering(), modified.rowOrdering(), "rowOrdering should match"));
     }
   }
 }

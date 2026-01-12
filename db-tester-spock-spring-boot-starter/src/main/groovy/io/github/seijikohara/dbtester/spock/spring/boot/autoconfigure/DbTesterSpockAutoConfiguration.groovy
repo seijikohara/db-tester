@@ -54,16 +54,15 @@ class DbTesterSpockAutoConfiguration {
 		def conventionProps = properties.convention
 		def operationProps = properties.operation
 
-		def conventions = new ConventionSettings(
-				conventionProps.baseDirectory,
-				conventionProps.expectationSuffix,
-				conventionProps.scenarioMarker,
-				conventionProps.dataFormat,
-				conventionProps.tableMergeStrategy,
-				conventionProps.loadOrderFileName,
-				conventionProps.globalExcludeColumns,
-				Map.of()
-				)
+		def conventions = ConventionSettings.standard()
+				.withBaseDirectory(conventionProps.baseDirectory)
+				.withExpectationSuffix(conventionProps.expectationSuffix)
+				.withScenarioMarker(conventionProps.scenarioMarker)
+				.withDataFormat(conventionProps.dataFormat)
+				.withTableMergeStrategy(conventionProps.tableMergeStrategy)
+				.withLoadOrderFileName(conventionProps.loadOrderFileName)
+				.withGlobalExcludeColumns(conventionProps.globalExcludeColumns)
+				.withGlobalColumnStrategies(Map.of())
 
 		def operations = new OperationDefaults(
 				operationProps.preparation,

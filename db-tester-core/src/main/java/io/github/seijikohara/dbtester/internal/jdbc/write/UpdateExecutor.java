@@ -9,8 +9,11 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.IntStream;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,15 @@ public final class UpdateExecutor implements TableExecutor {
 
   @Override
   public void execute(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> updateTable(table, connection));
+    tables.forEach(table -> updateTable(table, connection, null));
+  }
+
+  @Override
+  public void execute(
+      final List<Table> tables,
+      final Connection connection,
+      final @Nullable Duration queryTimeout) {
+    tables.forEach(table -> updateTable(table, connection, queryTimeout));
   }
 
   /**
@@ -56,9 +67,11 @@ public final class UpdateExecutor implements TableExecutor {
    *
    * @param table the table to update
    * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseOperationException if a database error occurs
    */
-  private void updateTable(final Table table, final Connection connection) {
+  private void updateTable(
+      final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
     if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
       return;
     }
@@ -77,6 +90,7 @@ public final class UpdateExecutor implements TableExecutor {
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
+      applyTimeout(preparedStatement, queryTimeout);
       table
           .getRows()
           .forEach(
@@ -103,6 +117,19 @@ public final class UpdateExecutor implements TableExecutor {
   }
 
   /**
+   * Applies the query timeout to a prepared statement if specified.
+   *
+   * @param statement the prepared statement
+   * @param queryTimeout the query timeout, or null for no timeout
+   */
+  private void applyTimeout(
+      final PreparedStatement statement, final @Nullable Duration queryTimeout) {
+    if (queryTimeout != null) {
+      run(() -> statement.setQueryTimeout((int) queryTimeout.toSeconds()));
+    }
+  }
+
+  /**
    * Attempts to update a single row.
    *
    * @param tableName the table name
@@ -119,6 +146,28 @@ public final class UpdateExecutor implements TableExecutor {
       final List<ColumnName> updateColumns,
       final Row row,
       final Connection connection) {
+    return tryUpdateRow(tableName, primaryKeyColumn, updateColumns, row, connection, null);
+  }
+
+  /**
+   * Attempts to update a single row with a query timeout.
+   *
+   * @param tableName the table name
+   * @param primaryKeyColumn the primary key column
+   * @param updateColumns the columns to update
+   * @param row the row data
+   * @param connection the database connection
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @return true if the update affected at least one row
+   * @throws DatabaseOperationException if a database error occurs
+   */
+  public boolean tryUpdateRow(
+      final String tableName,
+      final ColumnName primaryKeyColumn,
+      final List<ColumnName> updateColumns,
+      final Row row,
+      final Connection connection,
+      final @Nullable Duration queryTimeout) {
     if (updateColumns.isEmpty()) {
       return false;
     }
@@ -126,6 +175,7 @@ public final class UpdateExecutor implements TableExecutor {
     final var sql = sqlBuilder.buildUpdate(tableName, primaryKeyColumn, updateColumns);
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
+      applyTimeout(preparedStatement, queryTimeout);
       IntStream.range(0, updateColumns.size())
           .forEach(
               index ->

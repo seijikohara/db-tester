@@ -8,10 +8,13 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
@@ -141,7 +144,12 @@ final class TableMergeStrategyTest {
                   TableMergeStrategy.FIRST, // FIRST strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                   Set.of(),
-                  Map.of()));
+                  Map.of(),
+                  RowOrdering.ORDERED,
+                  null,
+                  0,
+                  Duration.ofMillis(100),
+                  TransactionMode.SINGLE_TRANSACTION));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -233,7 +241,12 @@ final class TableMergeStrategyTest {
                   TableMergeStrategy.LAST, // LAST strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                   Set.of(),
-                  Map.of()));
+                  Map.of(),
+                  RowOrdering.ORDERED,
+                  null,
+                  0,
+                  Duration.ofMillis(100),
+                  TransactionMode.SINGLE_TRANSACTION));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -325,7 +338,12 @@ final class TableMergeStrategyTest {
                   TableMergeStrategy.UNION, // UNION strategy
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                   Set.of(),
-                  Map.of()));
+                  Map.of(),
+                  RowOrdering.ORDERED,
+                  null,
+                  0,
+                  Duration.ofMillis(100),
+                  TransactionMode.SINGLE_TRANSACTION));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -417,7 +435,12 @@ final class TableMergeStrategyTest {
                   TableMergeStrategy.UNION_ALL, // UNION_ALL strategy (default)
                   ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
                   Set.of(),
-                  Map.of()));
+                  Map.of(),
+                  RowOrdering.ORDERED,
+                  null,
+                  0,
+                  Duration.ofMillis(100),
+                  TransactionMode.SINGLE_TRANSACTION));
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

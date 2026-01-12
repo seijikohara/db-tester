@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -100,7 +101,7 @@ class RefreshExecutorTest {
       when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
       when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
 
-      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any()))
+      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(true);
 
       // When
@@ -109,7 +110,12 @@ class RefreshExecutorTest {
       // Then
       verify(updateExecutor)
           .tryUpdateRow(
-              eq("USERS"), eq(pkColumn), eq(List.of(nameColumn)), eq(row), eq(connection));
+              eq("USERS"),
+              eq(pkColumn),
+              eq(List.of(nameColumn)),
+              eq(row),
+              eq(connection),
+              isNull());
     }
   }
 
@@ -139,8 +145,9 @@ class RefreshExecutorTest {
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(updateExecutor, never()).tryUpdateRow(anyString(), any(), anyList(), any(), any());
-      verify(insertExecutor, never()).insertRow(any(), any(), any());
+      verify(updateExecutor, never())
+          .tryUpdateRow(anyString(), any(), anyList(), any(), any(), any());
+      verify(insertExecutor, never()).insertRow(any(), any(), any(), any());
     }
 
     /**
@@ -163,8 +170,9 @@ class RefreshExecutorTest {
       executor.execute(List.of(table), connection);
 
       // Then
-      verify(updateExecutor, never()).tryUpdateRow(anyString(), any(), anyList(), any(), any());
-      verify(insertExecutor, never()).insertRow(any(), any(), any());
+      verify(updateExecutor, never())
+          .tryUpdateRow(anyString(), any(), anyList(), any(), any(), any());
+      verify(insertExecutor, never()).insertRow(any(), any(), any(), any());
     }
 
     /**
@@ -187,7 +195,7 @@ class RefreshExecutorTest {
       when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
       when(table.getRows()).thenReturn(List.of(row));
 
-      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any()))
+      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(true);
 
       // When
@@ -196,8 +204,13 @@ class RefreshExecutorTest {
       // Then
       verify(updateExecutor)
           .tryUpdateRow(
-              eq("USERS"), eq(pkColumn), eq(List.of(nameColumn)), eq(row), eq(connection));
-      verify(insertExecutor, never()).insertRow(any(), any(), any());
+              eq("USERS"),
+              eq(pkColumn),
+              eq(List.of(nameColumn)),
+              eq(row),
+              eq(connection),
+              isNull());
+      verify(insertExecutor, never()).insertRow(any(), any(), any(), any());
     }
 
     /**
@@ -220,7 +233,7 @@ class RefreshExecutorTest {
       when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
       when(table.getRows()).thenReturn(List.of(row));
 
-      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any()))
+      when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(false);
 
       // When
@@ -229,8 +242,13 @@ class RefreshExecutorTest {
       // Then
       verify(updateExecutor)
           .tryUpdateRow(
-              eq("USERS"), eq(pkColumn), eq(List.of(nameColumn)), eq(row), eq(connection));
-      verify(insertExecutor).insertRow(eq(table), eq(row), eq(connection));
+              eq("USERS"),
+              eq(pkColumn),
+              eq(List.of(nameColumn)),
+              eq(row),
+              eq(connection),
+              isNull());
+      verify(insertExecutor).insertRow(eq(table), eq(row), eq(connection), isNull());
     }
   }
 }

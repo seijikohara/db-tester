@@ -4,6 +4,7 @@ import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.get;
 import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.open;
 import static io.github.seijikohara.dbtester.internal.jdbc.Jdbc.run;
 
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
@@ -12,6 +13,7 @@ import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableOrderResolver;
 import java.sql.Connection;
+import java.time.Duration;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -19,6 +21,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +109,8 @@ public final class OperationExecutor {
   /**
    * Executes a database operation on the given dataset.
    *
+   * <p>This method uses single transaction mode and no query timeout.
+   *
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source
@@ -117,23 +122,115 @@ public final class OperationExecutor {
       final TableSet tableSet,
       final DataSource dataSource,
       final TableOrderingStrategy tableOrderingStrategy) {
+    execute(
+        operation,
+        tableSet,
+        dataSource,
+        tableOrderingStrategy,
+        TransactionMode.SINGLE_TRANSACTION,
+        null);
+  }
+
+  /**
+   * Executes a database operation on the given dataset with transaction mode and timeout control.
+   *
+   * @param operation the operation to execute
+   * @param tableSet the dataset to operate on
+   * @param dataSource the data source
+   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param transactionMode the transaction behavior mode
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @throws DatabaseTesterException if the operation fails
+   */
+  public void execute(
+      final Operation operation,
+      final TableSet tableSet,
+      final DataSource dataSource,
+      final TableOrderingStrategy tableOrderingStrategy,
+      final TransactionMode transactionMode,
+      final @Nullable Duration queryTimeout) {
     logger.debug(
-        "Executing operation {} on dataset with {} tables using strategy {}",
+        "Executing operation {} on dataset with {} tables using strategy {} (transactionMode={}, timeout={})",
         operation,
         tableSet.getTables().size(),
-        tableOrderingStrategy);
+        tableOrderingStrategy,
+        transactionMode,
+        queryTimeout);
 
     try (final var connectionResource = open(dataSource::getConnection)) {
       final var connection = connectionResource.value();
-      run(() -> connection.setAutoCommit(false));
+      final var originalAutoCommit = get(connection::getAutoCommit);
+
       try {
-        executeOperation(operation, tableSet, connection, tableOrderingStrategy);
-        run(connection::commit);
+        configureTransaction(connection, transactionMode);
+        executeOperation(operation, tableSet, connection, tableOrderingStrategy, queryTimeout);
+        commitIfRequired(connection, transactionMode);
         logger.debug("Successfully executed operation {}", operation);
       } catch (final DatabaseOperationException e) {
-        run(connection::rollback);
+        rollbackIfRequired(connection, transactionMode);
         throw e;
+      } finally {
+        restoreAutoCommit(connection, originalAutoCommit, transactionMode);
       }
+    }
+  }
+
+  /**
+   * Configures the connection transaction settings based on the transaction mode.
+   *
+   * @param connection the database connection
+   * @param transactionMode the transaction mode
+   */
+  private void configureTransaction(
+      final Connection connection, final TransactionMode transactionMode) {
+    switch (transactionMode) {
+      case AUTO_COMMIT -> run(() -> connection.setAutoCommit(true));
+      case SINGLE_TRANSACTION -> run(() -> connection.setAutoCommit(false));
+      case NONE -> {
+        // Do not modify autoCommit state
+      }
+    }
+  }
+
+  /**
+   * Commits the transaction if required by the transaction mode.
+   *
+   * @param connection the database connection
+   * @param transactionMode the transaction mode
+   */
+  private void commitIfRequired(
+      final Connection connection, final TransactionMode transactionMode) {
+    if (transactionMode == TransactionMode.SINGLE_TRANSACTION) {
+      run(connection::commit);
+    }
+  }
+
+  /**
+   * Rolls back the transaction if required by the transaction mode.
+   *
+   * @param connection the database connection
+   * @param transactionMode the transaction mode
+   */
+  private void rollbackIfRequired(
+      final Connection connection, final TransactionMode transactionMode) {
+    if (transactionMode == TransactionMode.SINGLE_TRANSACTION) {
+      run(connection::rollback);
+    }
+  }
+
+  /**
+   * Restores the original autoCommit setting if it was changed.
+   *
+   * @param connection the database connection
+   * @param originalAutoCommit the original autoCommit value
+   * @param transactionMode the transaction mode
+   */
+  private void restoreAutoCommit(
+      final Connection connection,
+      final boolean originalAutoCommit,
+      final TransactionMode transactionMode) {
+    if (transactionMode != TransactionMode.NONE) {
+      run(() -> connection.setAutoCommit(originalAutoCommit));
     }
   }
 
@@ -151,25 +248,44 @@ public final class OperationExecutor {
       final TableSet tableSet,
       final Connection connection,
       final TableOrderingStrategy tableOrderingStrategy) {
+    executeOperation(operation, tableSet, connection, tableOrderingStrategy, null);
+  }
+
+  /**
+   * Executes the specified operation on the dataset using the provided connection with timeout.
+   *
+   * @param operation the operation to execute
+   * @param tableSet the dataset to operate on
+   * @param connection the database connection
+   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @throws DatabaseOperationException if a database error occurs
+   */
+  void executeOperation(
+      final Operation operation,
+      final TableSet tableSet,
+      final Connection connection,
+      final TableOrderingStrategy tableOrderingStrategy,
+      final @Nullable Duration queryTimeout) {
     final var tables = resolveTableOrder(tableSet.getTables(), connection, tableOrderingStrategy);
 
     switch (operation) {
       case NONE -> {
         // Do nothing
       }
-      case INSERT -> insertExecutor.execute(tables, connection);
-      case UPDATE -> updateExecutor.execute(tables, connection);
-      case DELETE -> deleteExecutor.execute(tables, connection);
-      case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection);
-      case UPSERT -> refreshExecutor.execute(tables, connection);
-      case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection);
+      case INSERT -> insertExecutor.execute(tables, connection, queryTimeout);
+      case UPDATE -> updateExecutor.execute(tables, connection, queryTimeout);
+      case DELETE -> deleteExecutor.execute(tables, connection, queryTimeout);
+      case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection, queryTimeout);
+      case UPSERT -> refreshExecutor.execute(tables, connection, queryTimeout);
+      case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection, queryTimeout);
       case CLEAN_INSERT -> {
-        deleteExecutor.executeDeleteAll(tables.reversed(), connection);
-        insertExecutor.execute(tables, connection);
+        deleteExecutor.executeDeleteAll(tables.reversed(), connection, queryTimeout);
+        insertExecutor.execute(tables, connection, queryTimeout);
       }
       case TRUNCATE_INSERT -> {
-        truncateExecutor.execute(tables.reversed(), connection);
-        insertExecutor.execute(tables, connection);
+        truncateExecutor.execute(tables.reversed(), connection, queryTimeout);
+        insertExecutor.execute(tables, connection, queryTimeout);
       }
     }
   }

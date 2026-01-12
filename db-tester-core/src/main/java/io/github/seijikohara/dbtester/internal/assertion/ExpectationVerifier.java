@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
@@ -197,6 +198,75 @@ public final class ExpectationVerifier {
 
               comparator.assertEqualsWithStrategies(
                   expectedTable, actualTable, normalizedExcludeColumns, columnStrategies);
+            });
+
+    logger.debug(
+        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+  }
+
+  /**
+   * Verifies database state matches expected dataset with row ordering control.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map)} with
+   * row ordering support. When set to {@link RowOrdering#UNORDERED}, rows are compared without
+   * considering their position, using set-based matching.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison, or null/empty for no exclusions
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
+   * @throws AssertionError if verification fails
+   */
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final @Nullable Collection<String> excludeColumns,
+      final @Nullable Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering) {
+    logger.debug(
+        "Verifying expectation for {} tables with {} ordering",
+        expectedTableSet.getTables().size(),
+        rowOrdering);
+
+    final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
+    final var effectiveColumnStrategies =
+        columnStrategies != null ? columnStrategies : Map.<String, ColumnStrategyMapping>of();
+
+    if (!normalizedExcludeColumns.isEmpty()) {
+      logger.debug("Excluding columns from verification: {}", normalizedExcludeColumns);
+    }
+
+    if (!effectiveColumnStrategies.isEmpty()) {
+      logger.debug("Using column strategies for: {}", effectiveColumnStrategies.keySet());
+    }
+
+    expectedTableSet
+        .getTables()
+        .forEach(
+            expectedTable -> {
+              final var tableName = expectedTable.getName().value();
+              final var expectedColumns = expectedTable.getColumns();
+
+              logger.trace(
+                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+
+              final var actualTable =
+                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+
+              logger.trace(
+                  "Comparing table {}: expected {} rows, actual {} rows ({})",
+                  tableName,
+                  expectedTable.getRowCount(),
+                  actualTable.getRowCount(),
+                  rowOrdering);
+
+              comparator.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  normalizedExcludeColumns,
+                  effectiveColumnStrategies,
+                  rowOrdering);
             });
 
     logger.debug(

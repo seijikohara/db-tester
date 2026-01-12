@@ -6,7 +6,6 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
-import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
@@ -75,16 +74,8 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null,
-					'/expected',
-					'[Scenario]',
-					DataFormat.CSV,
-					TableMergeStrategy.FIRST,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME,
-					Set.of(),
-					Map.of()
-					)
+					ConventionSettings.standard()
+					.withTableMergeStrategy(TableMergeStrategy.FIRST)
 					)
 		}
 
@@ -176,14 +167,8 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null,
-					'/expected',
-					'[Scenario]',
-					DataFormat.CSV,
-					TableMergeStrategy.LAST,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
-					)
+					ConventionSettings.standard()
+					.withTableMergeStrategy(TableMergeStrategy.LAST)
 					)
 		}
 
@@ -275,14 +260,8 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null,
-					'/expected',
-					'[Scenario]',
-					DataFormat.CSV,
-					TableMergeStrategy.UNION,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
-					)
+					ConventionSettings.standard()
+					.withTableMergeStrategy(TableMergeStrategy.UNION)
 					)
 		}
 
@@ -374,14 +353,8 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			sharedConfiguration = Configuration.withConventions(
-					new ConventionSettings(
-					null,
-					'/expected',
-					'[Scenario]',
-					DataFormat.CSV,
-					TableMergeStrategy.UNION_ALL,
-					ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, Set.of(), Map.of()
-					)
+					ConventionSettings.standard()
+					.withTableMergeStrategy(TableMergeStrategy.UNION_ALL)
 					)
 		}
 

@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.config;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
@@ -19,6 +20,11 @@ import org.jspecify.annotations.Nullable;
  * @param globalExcludeColumns column names to exclude from all expectation verifications globally
  * @param globalColumnStrategies column comparison strategies applied to all expectation
  *     verifications globally, keyed by uppercase column name
+ * @param rowOrdering the default row ordering strategy for expectation verification
+ * @param queryTimeout the maximum time to wait for database queries; {@code null} for no timeout
+ * @param retryCount the number of retry attempts for expectation verification (0 for no retry)
+ * @param retryDelay the delay between retry attempts
+ * @param transactionMode the transaction behavior for database operations
  */
 public record ConventionSettings(
     @Nullable String baseDirectory,
@@ -28,7 +34,12 @@ public record ConventionSettings(
     TableMergeStrategy tableMergeStrategy,
     String loadOrderFileName,
     Set<String> globalExcludeColumns,
-    Map<String, ColumnStrategyMapping> globalColumnStrategies) {
+    Map<String, ColumnStrategyMapping> globalColumnStrategies,
+    RowOrdering rowOrdering,
+    @Nullable Duration queryTimeout,
+    int retryCount,
+    Duration retryDelay,
+    TransactionMode transactionMode) {
 
   /**
    * Default base directory for dataset resolution.
@@ -76,13 +87,30 @@ public record ConventionSettings(
   private static final Map<String, ColumnStrategyMapping> DEFAULT_GLOBAL_COLUMN_STRATEGIES =
       Map.of();
 
+  /** Default row ordering strategy for expectation verification. */
+  private static final RowOrdering DEFAULT_ROW_ORDERING = RowOrdering.ORDERED;
+
+  /** Default query timeout (null means no timeout). */
+  private static final @Nullable Duration DEFAULT_QUERY_TIMEOUT = null;
+
+  /** Default retry count (0 means no retry). */
+  private static final int DEFAULT_RETRY_COUNT = 0;
+
+  /** Default retry delay (100 milliseconds). */
+  private static final Duration DEFAULT_RETRY_DELAY = Duration.ofMillis(100);
+
+  /** Default transaction mode. */
+  private static final TransactionMode DEFAULT_TRANSACTION_MODE =
+      TransactionMode.SINGLE_TRANSACTION;
+
   /**
    * Creates a convention instance populated with the framework defaults.
    *
    * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
    *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy,
-   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, no global exclude columns, and no
-   *     global column strategies
+   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, no global exclude columns, no
+   *     global column strategies, ORDERED row ordering, no query timeout, no retry, and
+   *     SINGLE_TRANSACTION transaction mode
    */
   public static ConventionSettings standard() {
     return new ConventionSettings(
@@ -93,7 +121,12 @@ public record ConventionSettings(
         DEFAULT_TABLE_MERGE_STRATEGY,
         DEFAULT_LOAD_ORDER_FILE_NAME,
         DEFAULT_GLOBAL_EXCLUDE_COLUMNS,
-        DEFAULT_GLOBAL_COLUMN_STRATEGIES);
+        DEFAULT_GLOBAL_COLUMN_STRATEGIES,
+        DEFAULT_ROW_ORDERING,
+        DEFAULT_QUERY_TIMEOUT,
+        DEFAULT_RETRY_COUNT,
+        DEFAULT_RETRY_DELAY,
+        DEFAULT_TRANSACTION_MODE);
   }
 
   /**
@@ -115,7 +148,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -137,7 +175,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -159,7 +202,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -177,7 +225,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -195,7 +248,12 @@ public record ConventionSettings(
         tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -213,7 +271,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         loadOrderFileName,
         this.globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -237,7 +300,12 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         globalExcludeColumns,
-        this.globalColumnStrategies);
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
   }
 
   /**
@@ -276,6 +344,188 @@ public record ConventionSettings(
         this.tableMergeStrategy,
         this.loadOrderFileName,
         this.globalExcludeColumns,
-        globalColumnStrategies);
+        globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified row ordering strategy.
+   *
+   * <p>The row ordering strategy determines how rows are compared during expectation verification.
+   * Use {@link RowOrdering#ORDERED} for positional comparison (default) or {@link
+   * RowOrdering#UNORDERED} for set-based comparison.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withRowOrdering(RowOrdering.UNORDERED);
+   * }</pre>
+   *
+   * @param rowOrdering the row ordering strategy to use
+   * @return a new ConventionSettings with the specified row ordering
+   * @see RowOrdering
+   */
+  public ConventionSettings withRowOrdering(final RowOrdering rowOrdering) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        this.globalColumnStrategies,
+        rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified query timeout.
+   *
+   * <p>The query timeout specifies the maximum time to wait for database queries. A {@code null}
+   * value means no timeout (queries can run indefinitely).
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withQueryTimeout(Duration.ofSeconds(30));
+   * }</pre>
+   *
+   * @param queryTimeout the query timeout duration, or null for no timeout
+   * @return a new ConventionSettings with the specified query timeout
+   */
+  public ConventionSettings withQueryTimeout(final @Nullable Duration queryTimeout) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        this.transactionMode);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified retry count.
+   *
+   * <p>The retry count specifies the number of additional attempts for expectation verification
+   * after the first failure. A value of 0 means no retry (single attempt only).
+   *
+   * <p>Retry is useful for eventual consistency scenarios where the database state may not be
+   * immediately consistent after the test action.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withRetryCount(3)
+   *     .withRetryDelay(Duration.ofMillis(500));
+   * }</pre>
+   *
+   * @param retryCount the number of retry attempts (0 for no retry)
+   * @return a new ConventionSettings with the specified retry count
+   * @throws IllegalArgumentException if retryCount is negative
+   */
+  public ConventionSettings withRetryCount(final int retryCount) {
+    if (retryCount < 0) {
+      throw new IllegalArgumentException("retryCount must not be negative");
+    }
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        retryCount,
+        this.retryDelay,
+        this.transactionMode);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified retry delay.
+   *
+   * <p>The retry delay specifies the time to wait between retry attempts for expectation
+   * verification. This delay allows transient inconsistencies to resolve before the next attempt.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withRetryCount(3)
+   *     .withRetryDelay(Duration.ofMillis(500));
+   * }</pre>
+   *
+   * @param retryDelay the delay between retry attempts
+   * @return a new ConventionSettings with the specified retry delay
+   */
+  public ConventionSettings withRetryDelay(final Duration retryDelay) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        retryDelay,
+        this.transactionMode);
+  }
+
+  /**
+   * Creates a new ConventionSettings with the specified transaction mode.
+   *
+   * <p>The transaction mode controls how transactions are managed during database operations. See
+   * {@link TransactionMode} for available options.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var settings = ConventionSettings.standard()
+   *     .withTransactionMode(TransactionMode.AUTO_COMMIT);
+   * }</pre>
+   *
+   * @param transactionMode the transaction mode to use
+   * @return a new ConventionSettings with the specified transaction mode
+   * @see TransactionMode
+   */
+  public ConventionSettings withTransactionMode(final TransactionMode transactionMode) {
+    return new ConventionSettings(
+        this.baseDirectory,
+        this.expectationSuffix,
+        this.scenarioMarker,
+        this.dataFormat,
+        this.tableMergeStrategy,
+        this.loadOrderFileName,
+        this.globalExcludeColumns,
+        this.globalColumnStrategies,
+        this.rowOrdering,
+        this.queryTimeout,
+        this.retryCount,
+        this.retryDelay,
+        transactionMode);
   }
 }

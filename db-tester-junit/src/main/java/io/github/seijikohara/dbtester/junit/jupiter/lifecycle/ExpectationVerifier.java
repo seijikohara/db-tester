@@ -1,10 +1,13 @@
 package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
+import java.time.Duration;
+import java.util.List;
 import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
@@ -43,12 +46,13 @@ public final class ExpectationVerifier {
    * Verifies the database state against expected datasets.
    *
    * <p>Loads the datasets specified in the {@link ExpectedDataSet} annotation (or resolved via
-   * conventions) and compares them with the actual database state.
+   * conventions) and compares them with the actual database state. Supports retry with configurable
+   * count and delay for eventual consistency scenarios.
    *
    * @param context the test context containing configuration and registry
-   * @param expectedDataSet the ExpectedDataSet annotation (currently unused but reserved for future
-   *     options)
-   * @throws AssertionError if the database state does not match the expected state
+   * @param expectedDataSet the ExpectedDataSet annotation containing row ordering and retry
+   *     settings
+   * @throws AssertionError if the database state does not match the expected state after retries
    */
   public void verify(final TestContext context, final ExpectedDataSet expectedDataSet) {
     logger.debug(
@@ -64,23 +68,106 @@ public final class ExpectationVerifier {
       return;
     }
 
-    expectedTableSets.forEach(
-        expectedTableSet -> verifyExpectedTableSet(context, expectedTableSet));
+    final var rowOrdering = expectedDataSet.rowOrdering();
+    final var retryCount = resolveRetryCount(expectedDataSet, context);
+    final var retryDelay = resolveRetryDelay(expectedDataSet, context);
+
+    verifyWithRetry(context, expectedTableSets, rowOrdering, retryCount, retryDelay);
+  }
+
+  /**
+   * Resolves the retry count from annotation or global settings.
+   *
+   * @param expectedDataSet the annotation
+   * @param context the test context
+   * @return the resolved retry count
+   */
+  private int resolveRetryCount(final ExpectedDataSet expectedDataSet, final TestContext context) {
+    final var annotationValue = expectedDataSet.retryCount();
+    return annotationValue >= 0
+        ? annotationValue
+        : context.configuration().conventions().retryCount();
+  }
+
+  /**
+   * Resolves the retry delay from annotation or global settings.
+   *
+   * @param expectedDataSet the annotation
+   * @param context the test context
+   * @return the resolved retry delay
+   */
+  private Duration resolveRetryDelay(
+      final ExpectedDataSet expectedDataSet, final TestContext context) {
+    final var annotationValue = expectedDataSet.retryDelayMillis();
+    return annotationValue >= 0
+        ? Duration.ofMillis(annotationValue)
+        : context.configuration().conventions().retryDelay();
+  }
+
+  /**
+   * Verifies expectation datasets with retry support.
+   *
+   * @param context the test context
+   * @param expectedTableSets the expected datasets
+   * @param rowOrdering the row ordering strategy
+   * @param retryCount the number of retries (0 = no retry)
+   * @param retryDelay the delay between retries
+   */
+  private void verifyWithRetry(
+      final TestContext context,
+      final List<ExpectedTableSet> expectedTableSets,
+      final RowOrdering rowOrdering,
+      final int retryCount,
+      final Duration retryDelay) {
+    ValidationException lastException = null;
+
+    for (int attempt = 0; attempt <= retryCount; attempt++) {
+      try {
+        if (attempt > 0) {
+          logger.debug(
+              "Retry attempt {} of {} after {} ms delay",
+              attempt,
+              retryCount,
+              retryDelay.toMillis());
+          Thread.sleep(retryDelay.toMillis());
+        }
+
+        expectedTableSets.forEach(
+            expectedTableSet -> verifyExpectedTableSet(context, expectedTableSet, rowOrdering));
+
+        // Success - exit the retry loop
+        return;
+      } catch (final ValidationException e) {
+        lastException = e;
+        if (attempt < retryCount) {
+          logger.debug("Verification failed, will retry: {}", e.getMessage());
+        }
+      } catch (final InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new ValidationException("Verification interrupted during retry delay", e);
+      }
+    }
+
+    // All retries exhausted, throw the last exception
+    throw lastException;
   }
 
   /**
    * Verifies a single ExpectedTableSet against the database.
    *
    * <p>Delegates to {@link ExpectationProvider#verifyExpectation} for full data comparison
-   * including column filtering, column comparison strategies, and detailed assertion messages. If
-   * verification fails, wraps the exception with additional test context.
+   * including column filtering, column comparison strategies, row ordering, and detailed assertion
+   * messages. If verification fails, wraps the exception with additional test context.
    *
    * @param context the test context providing access to the data source registry
    * @param expectedTableSet the expected TableSet with exclusion and strategy metadata
+   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
    * @throws ValidationException if verification fails with wrapped context information
    */
   private void verifyExpectedTableSet(
-      final TestContext context, final ExpectedTableSet expectedTableSet) {
+      final TestContext context,
+      final ExpectedTableSet expectedTableSet,
+      final RowOrdering rowOrdering) {
     final var tableSet = expectedTableSet.tableSet();
     final var excludeColumns = expectedTableSet.excludeColumns();
     final var columnStrategies = expectedTableSet.columnStrategies();
@@ -88,9 +175,10 @@ public final class ExpectationVerifier {
 
     final var tableCount = tableSet.getTables().size();
     logger.info(
-        "Validating expectation TableSet for {}: {} tables",
+        "Validating expectation TableSet for {}: {} tables ({})",
         context.testMethod().getName(),
-        tableCount);
+        tableCount,
+        rowOrdering);
 
     if (expectedTableSet.hasExclusions()) {
       logger.debug("Excluding columns from verification: {}", excludeColumns);
@@ -101,7 +189,8 @@ public final class ExpectationVerifier {
     }
 
     try {
-      expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns, columnStrategies);
+      expectationProvider.verifyExpectation(
+          tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",

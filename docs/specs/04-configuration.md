@@ -67,6 +67,12 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | File name for table loading order specification |
 | `globalExcludeColumns` | `Set<String>` | `Set.of()` | Column names to exclude from all verifications (case-insensitive) |
+| `globalColumnStrategies` | `Map<String, ColumnStrategyMapping>` | `Map.of()` | Column comparison strategies for all verifications |
+| `rowOrdering` | `RowOrdering` | `ORDERED` | Default row comparison strategy |
+| `queryTimeout` | `@Nullable Duration` | `null` | Maximum query wait time; null for no timeout |
+| `retryCount` | `int` | `0` | Retry attempts for verification (0 = no retry) |
+| `retryDelay` | `Duration` | `100ms` | Delay between retry attempts |
+| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | Transaction behavior for operations |
 
 ### Factory Methods
 
@@ -80,6 +86,12 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `withTableMergeStrategy(TableMergeStrategy)` | Creates copy with specified merge strategy |
 | `withLoadOrderFileName(String)` | Creates copy with specified load order file name |
 | `withGlobalExcludeColumns(Set<String>)` | Creates copy with specified global exclude columns |
+| `withGlobalColumnStrategies(Map<String, ColumnStrategyMapping>)` | Creates copy with specified global column strategies |
+| `withRowOrdering(RowOrdering)` | Creates copy with specified row ordering strategy |
+| `withQueryTimeout(Duration)` | Creates copy with specified query timeout (null for no timeout) |
+| `withRetryCount(int)` | Creates copy with specified retry count |
+| `withRetryDelay(Duration)` | Creates copy with specified retry delay |
+| `withTransactionMode(TransactionMode)` | Creates copy with specified transaction mode |
 
 ### Directory Resolution
 
@@ -115,6 +127,25 @@ The `expectedDataSetSuffix` is appended to the data set path:
 | `com/example/UserTest` | `/expected` | `com/example/UserTest/expected` |
 | `/data/test` | `/expected` | `/data/test/expected` |
 | `custom/path` | `/verify` | `custom/path/verify` |
+
+### Advanced Configuration Example
+
+```java
+// Configure retry, timeout, and unordered comparison
+var settings = ConventionSettings.standard()
+    .withRowOrdering(RowOrdering.UNORDERED)
+    .withQueryTimeout(Duration.ofSeconds(30))
+    .withRetryCount(3)
+    .withRetryDelay(Duration.ofMillis(500))
+    .withTransactionMode(TransactionMode.AUTO_COMMIT)
+    .withGlobalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+    .withGlobalColumnStrategies(Map.of(
+        "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
+        "VERSION", ColumnStrategyMapping.ignore("VERSION")
+    ));
+
+var config = Configuration.withConventions(settings);
+```
 
 ## DataSourceRegistry
 
@@ -266,6 +297,85 @@ When both datasets contain the same table:
 | `LAST` | Use table from dataset2 only |
 | `UNION` | Combine rows, remove exact duplicates |
 | `UNION_ALL` | Combine all rows, keep duplicates |
+
+## RowOrdering
+
+Defines how rows should be compared during expectation verification.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.RowOrdering`
+
+**Type**: `enum`
+
+### Values
+
+| Value | Description |
+|-------|-------------|
+| `ORDERED` | Positional comparison (row-by-row by index). Default behavior. |
+| `UNORDERED` | Set-based comparison (rows matched regardless of position) |
+
+### When to Use
+
+| Mode | Use Case |
+|------|----------|
+| `ORDERED` | Query includes ORDER BY; row order is significant; maximum performance |
+| `UNORDERED` | No ORDER BY; row order not significant; database may return rows in unpredictable order |
+
+### Configuration
+
+Row ordering can be configured:
+
+1. **Annotation-level**: Per-test via `@ExpectedDataSet(rowOrdering = ...)`
+2. **Global**: Via `ConventionSettings.withRowOrdering()`
+
+Annotation-level configuration takes precedence over global settings.
+
+### Performance Considerations
+
+Unordered comparison has O(n*m) complexity in the worst case, where n is the expected row count and m is the actual row count. For large datasets, consider:
+
+- Using `ORDERED` with ORDER BY in queries
+- Limiting the dataset size
+- Using primary key columns for deterministic ordering
+
+## TransactionMode
+
+Defines transaction behavior for database operations.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.TransactionMode`
+
+**Type**: `enum`
+
+### Values
+
+| Value | Description |
+|-------|-------------|
+| `AUTO_COMMIT` | Each statement committed immediately (autoCommit = true) |
+| `SINGLE_TRANSACTION` | All statements in single transaction (default) |
+| `NONE` | No transaction management (connection state unchanged) |
+
+### When to Use
+
+| Mode | Use Case |
+|------|----------|
+| `AUTO_COMMIT` | Foreign key constraints prevent transactional insertion; debugging |
+| `SINGLE_TRANSACTION` | Atomic all-or-nothing operations (recommended) |
+| `NONE` | External transaction management (Spring's @Transactional) |
+
+### Configuration Example
+
+```java
+var settings = ConventionSettings.standard()
+    .withTransactionMode(TransactionMode.AUTO_COMMIT);
+var config = Configuration.withConventions(settings);
+```
+
+### Rollback Behavior
+
+| Mode | On Failure |
+|------|------------|
+| `AUTO_COMMIT` | Partial data may remain; cannot rollback |
+| `SINGLE_TRANSACTION` | Complete rollback; no partial data |
+| `NONE` | Depends on external transaction manager |
 
 ## TestContext
 
