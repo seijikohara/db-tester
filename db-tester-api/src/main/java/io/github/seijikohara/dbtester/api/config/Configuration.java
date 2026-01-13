@@ -105,29 +105,6 @@ public final class Configuration {
   }
 
   /**
-   * Creates a configuration that overrides the convention settings while keeping other components
-   * on their defaults.
-   *
-   * @param conventions convention settings to apply
-   * @return configuration composed of the supplied conventions and default operations/loader
-   */
-  public static Configuration withConventions(final ConventionSettings conventions) {
-    return builder().conventions(conventions).build();
-  }
-
-  /**
-   * Creates a configuration that uses a custom dataset loader and default values for the remaining
-   * components.
-   *
-   * @param loader custom dataset loader implementation
-   * @return configuration constructed with standard conventions, standard operations, and the
-   *     supplied loader
-   */
-  public static Configuration withLoader(final DataSetLoader loader) {
-    return builder().loader(loader).build();
-  }
-
-  /**
    * Returns the resolution rules for locating datasets.
    *
    * @return the convention settings

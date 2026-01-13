@@ -37,21 +37,21 @@ flowchart TB
 
 ## API Module SPIs
 
-### TableSetLoaderProvider
+### DataSetLoaderProvider
 
-Provides the default `TableSetLoader` implementation.
+Provides the default `DataSetLoader` implementation.
 
-**Location**: `io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider`
+**Location**: `io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider`
 
 **Interface**:
 
 ```java
-public interface TableSetLoaderProvider {
-    TableSetLoader getLoader();
+public interface DataSetLoaderProvider {
+    DataSetLoader getLoader();
 }
 ```
 
-**Default Implementation**: `DefaultTableSetLoaderProvider` in `db-tester-core`
+**Default Implementation**: `DefaultDataSetLoaderProvider` in `db-tester-core`
 
 **Usage**: Called by `Configuration.defaults()` to obtain the loader
 
@@ -70,7 +70,9 @@ public interface OperationProvider {
         Operation operation,
         TableSet tableSet,
         DataSource dataSource,
-        TableOrderingStrategy tableOrderingStrategy);
+        TableOrderingStrategy tableOrderingStrategy,
+        TransactionMode transactionMode,
+        @Nullable Duration queryTimeout);
 }
 ```
 
@@ -84,6 +86,8 @@ public interface OperationProvider {
 | `tableSet` | `TableSet` | The table set containing tables and rows |
 | `dataSource` | `DataSource` | The JDBC data source for connections |
 | `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
+| `transactionMode` | `TransactionMode` | Transaction behavior mode |
+| `queryTimeout` | `@Nullable Duration` | Query timeout, or null for no timeout |
 
 **Operations**:
 
@@ -123,6 +127,10 @@ public interface AssertionProvider {
     void assertEqualsIgnoreColumns(Table expected, Table actual,
                                    Collection<String> ignoreColumnNames);
 
+    // Comparison with column strategies
+    void assertEqualsWithStrategies(Table expected, Table actual,
+                                    Collection<ColumnStrategyMapping> columnStrategies);
+
     // SQL query-based comparison
     void assertEqualsByQuery(TableSet expected, DataSource dataSource, String tableName,
                              String sqlQuery, Collection<String> ignoreColumnNames);
@@ -140,6 +148,7 @@ public interface AssertionProvider {
 | `assertEquals(TableSet, TableSet)` | Compare two table sets |
 | `assertEquals(Table, Table)` | Compare two tables |
 | `assertEqualsIgnoreColumns(...)` | Compare while ignoring specific columns |
+| `assertEqualsWithStrategies(...)` | Compare with column-specific comparison strategies |
 | `assertEqualsByQuery(...)` | Compare query results against expected data |
 
 **Behavior**:
@@ -151,21 +160,46 @@ public interface AssertionProvider {
 See [Error Handling - Validation Errors](09-error-handling#validation-errors) for output format details.
 
 
-### ExpectedDataSetProvider
+### ExpectationProvider
 
 Verifies database state against expected datasets.
 
-**Location**: `io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider`
+**Location**: `io.github.seijikohara.dbtester.api.spi.ExpectationProvider`
 
 **Interface**:
 
 ```java
-public interface ExpectedDataSetProvider {
-    void verifyExpectedDataSet(TableSet expectedTableSet, DataSource dataSource);
+public interface ExpectationProvider {
+    // Basic verification
+    void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
+
+    // With column exclusion
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns);
+
+    // With column strategies
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies);
+
+    // With row ordering
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies,
+                                   RowOrdering rowOrdering);
 }
 ```
 
-**Default Implementation**: `DefaultExpectedDataSetProvider` in `db-tester-core`
+**Default Implementation**: `DefaultExpectationProvider` in `db-tester-core`
+
+**Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `verifyExpectation(TableSet, DataSource)` | Basic database state verification |
+| `verifyExpectation(..., excludeColumns)` | Verify excluding specified columns |
+| `verifyExpectation(..., columnStrategies)` | Verify with column comparison strategies |
+| `verifyExpectation(..., rowOrdering)` | Verify with row ordering control |
 
 **Parameters**:
 
@@ -173,12 +207,16 @@ public interface ExpectedDataSetProvider {
 |-----------|------|-------------|
 | `expectedTableSet` | `TableSet` | The expected table set containing expected table data |
 | `dataSource` | `DataSource` | The database connection source for retrieving actual data |
+| `excludeColumns` | `Collection<String>` | Column names to exclude from comparison (case-insensitive) |
+| `columnStrategies` | `Map<String, ColumnStrategyMapping>` | Column comparison strategies keyed by column name |
+| `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
 
 **Process**:
 1. For each table in the expected dataset, fetch actual data from the database
 2. Filter actual data to include only columns present in expected table
-3. Compare filtered actual data against expected data
-4. Throw `AssertionError` if verification fails
+3. Apply column exclusions and comparison strategies
+4. Compare filtered actual data against expected data
+5. Throw `AssertionError` if verification fails
 
 
 ### ScenarioNameResolver
@@ -269,8 +307,8 @@ This is an internal SPI not intended for external implementation.
 **db-tester-core**:
 
 ```
-# META-INF/services/io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider
-io.github.seijikohara.dbtester.internal.loader.DefaultTableSetLoaderProvider
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
+io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.OperationProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
@@ -278,8 +316,8 @@ io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.AssertionProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultAssertionProvider
 
-# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider
-io.github.seijikohara.dbtester.internal.spi.DefaultExpectedDataSetProvider
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectationProvider
+io.github.seijikohara.dbtester.internal.spi.DefaultExpectationProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
 io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
@@ -313,10 +351,10 @@ io.github.seijikohara.dbtester.kotest.spi.KotestScenarioNameResolver
 
 ```java
 module io.github.seijikohara.dbtester.api {
-    uses io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider;
+    uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
     uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
     uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
-    uses io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider;
+    uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
     uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 }
 ```
@@ -325,8 +363,8 @@ module io.github.seijikohara.dbtester.api {
 
 ```java
 module io.github.seijikohara.dbtester.core {
-    provides io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider
-        with io.github.seijikohara.dbtester.internal.loader.DefaultTableSetLoaderProvider;
+    provides io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
+        with io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider;
     provides io.github.seijikohara.dbtester.api.spi.OperationProvider
         with io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
     // ... other providers
@@ -336,21 +374,21 @@ module io.github.seijikohara.dbtester.core {
 
 ## Custom Implementations
 
-### Custom TableSetLoader
+### Custom DataSetLoader
 
-To provide a custom table set loader:
+To provide a custom dataset loader:
 
-1. Implement the `TableSetLoader` interface:
+1. Implement the `DataSetLoader` interface:
 
 ```java
-public class CustomTableSetLoader implements TableSetLoader {
+public class CustomDataSetLoader implements DataSetLoader {
     @Override
-    public List<TableSet> loadDataSetTableSets(TestContext context) {
+    public List<TableSet> loadPreparationDataSets(TestContext context) {
         // Custom loading logic
     }
 
     @Override
-    public List<TableSet> loadExpectedDataSetTableSets(TestContext context) {
+    public List<TableSet> loadExpectationDataSets(TestContext context) {
         // Custom loading logic
     }
 }
@@ -359,7 +397,9 @@ public class CustomTableSetLoader implements TableSetLoader {
 2. Register via `Configuration`:
 
 ```java
-var config = Configuration.withLoader(new CustomTableSetLoader());
+var config = Configuration.builder()
+    .loader(new CustomDataSetLoader())
+    .build();
 DatabaseTestExtension.setConfiguration(context, config);
 ```
 
@@ -430,10 +470,10 @@ When multiple providers are registered:
 
 | SPI | Selection |
 |-----|-----------|
-| `TableSetLoaderProvider` | First found |
+| `DataSetLoaderProvider` | First found |
 | `OperationProvider` | First found |
 | `AssertionProvider` | First found |
-| `ExpectedDataSetProvider` | First found |
+| `ExpectationProvider` | First found |
 | `ScenarioNameResolver` | Sorted by `priority()`, first that `canResolve()` returns true |
 | `FormatProvider` | First matching `supportedFileExtension()` |
 

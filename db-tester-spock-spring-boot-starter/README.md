@@ -137,10 +137,12 @@ Override properties via Configuration API:
 Configuration dbTesterConfiguration
 
 def setupSpec() {
-    def conventions = ConventionSettings.standard()
-        .withScenarioMarker('[TestCase]')
-        .withDataFormat(DataFormat.TSV)
-    dbTesterConfiguration = Configuration.withConventions(conventions)
+    dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .scenarioMarker('[TestCase]')
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
 }
 ```
 

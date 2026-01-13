@@ -37,21 +37,21 @@ flowchart TB
 
 ## APIモジュールSPI
 
-### TableSetLoaderProvider
+### DataSetLoaderProvider
 
-デフォルトの`TableSetLoader`実装を提供します。
+デフォルトの`DataSetLoader`実装を提供します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider`
+**パッケージ**: `io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider`
 
 **インターフェース**:
 
 ```java
-public interface TableSetLoaderProvider {
-    TableSetLoader getLoader();
+public interface DataSetLoaderProvider {
+    DataSetLoader getLoader();
 }
 ```
 
-**デフォルト実装**: `db-tester-core`の`DefaultTableSetLoaderProvider`
+**デフォルト実装**: `db-tester-core`の`DefaultDataSetLoaderProvider`
 
 **使用方法**: ローダーを取得するために`Configuration.defaults()`から呼び出される
 
@@ -70,7 +70,9 @@ public interface OperationProvider {
         Operation operation,
         TableSet tableSet,
         DataSource dataSource,
-        TableOrderingStrategy tableOrderingStrategy);
+        TableOrderingStrategy tableOrderingStrategy,
+        TransactionMode transactionMode,
+        @Nullable Duration queryTimeout);
 }
 ```
 
@@ -84,6 +86,8 @@ public interface OperationProvider {
 | `tableSet` | `TableSet` | テーブルと行を含むテーブルセット |
 | `dataSource` | `DataSource` | コネクション用のJDBCデータソース |
 | `tableOrderingStrategy` | `TableOrderingStrategy` | テーブル処理順序の戦略 |
+| `transactionMode` | `TransactionMode` | トランザクション動作モード |
+| `queryTimeout` | `@Nullable Duration` | クエリタイムアウト、またはタイムアウトなしの場合はnull |
 
 **操作**:
 - `NONE` - 操作なし
@@ -120,6 +124,10 @@ public interface AssertionProvider {
     void assertEqualsIgnoreColumns(Table expected, Table actual,
                                    Collection<String> ignoreColumnNames);
 
+    // カラム戦略付き比較
+    void assertEqualsWithStrategies(Table expected, Table actual,
+                                    Collection<ColumnStrategyMapping> columnStrategies);
+
     // SQLクエリベース比較
     void assertEqualsByQuery(TableSet expected, DataSource dataSource, String tableName,
                              String sqlQuery, Collection<String> ignoreColumnNames);
@@ -137,6 +145,7 @@ public interface AssertionProvider {
 | `assertEquals(TableSet, TableSet)` | 2つのテーブルセットを比較 |
 | `assertEquals(Table, Table)` | 2つのテーブルを比較 |
 | `assertEqualsIgnoreColumns(...)` | 特定カラムを無視して比較 |
+| `assertEqualsWithStrategies(...)` | カラム固有の比較戦略を使用して比較 |
 | `assertEqualsByQuery(...)` | クエリ結果を期待データと比較 |
 
 **動作**:
@@ -148,21 +157,46 @@ public interface AssertionProvider {
 出力形式の詳細については[エラーハンドリング - 検証エラー](09-error-handling#検証エラー)を参照してください。
 
 
-### ExpectedDataSetProvider
+### ExpectationProvider
 
 期待テーブルセットに対するデータベース状態を検証します。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider`
+**パッケージ**: `io.github.seijikohara.dbtester.api.spi.ExpectationProvider`
 
 **インターフェース**:
 
 ```java
-public interface ExpectedDataSetProvider {
+public interface ExpectationProvider {
+    // 基本検証
     void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
+
+    // カラム除外付き
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns);
+
+    // カラム戦略付き
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies);
+
+    // 行順序制御付き
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies,
+                                   RowOrdering rowOrdering);
 }
 ```
 
-**デフォルト実装**: `db-tester-core`の`DefaultExpectedDataSetProvider`
+**デフォルト実装**: `db-tester-core`の`DefaultExpectationProvider`
+
+**メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `verifyExpectation(TableSet, DataSource)` | 基本的なデータベース状態検証 |
+| `verifyExpectation(..., excludeColumns)` | 指定カラムを除外して検証 |
+| `verifyExpectation(..., columnStrategies)` | カラム比較戦略付きで検証 |
+| `verifyExpectation(..., rowOrdering)` | 行順序制御付きで検証 |
 
 **パラメータ**:
 
@@ -170,12 +204,16 @@ public interface ExpectedDataSetProvider {
 |-----------|-----|------|
 | `expectedTableSet` | `TableSet` | 期待テーブルデータを含む期待テーブルセット |
 | `dataSource` | `DataSource` | 実際のデータを取得するためのデータベースコネクションソース |
+| `excludeColumns` | `Collection<String>` | 比較から除外するカラム名（大文字小文字区別なし） |
+| `columnStrategies` | `Map<String, ColumnStrategyMapping>` | カラム名でキーイングされたカラム比較戦略 |
+| `rowOrdering` | `RowOrdering` | 行比較戦略（ORDEREDまたはUNORDERED） |
 
 **プロセス**:
 1. 期待テーブルセット内の各テーブルに対して、データベースから実際のデータを取得
 2. 実際のデータを期待テーブルに存在するカラムのみにフィルタリング
-3. フィルタリングされた実際のデータを期待データと比較
-4. 検証失敗時は`AssertionError`をスロー
+3. カラム除外と比較戦略を適用
+4. フィルタリングされた実際のデータを期待データと比較
+5. 検証失敗時は`AssertionError`をスロー
 
 
 ### ScenarioNameResolver
@@ -266,8 +304,8 @@ public interface FormatProvider {
 **db-tester-core**:
 
 ```
-# META-INF/services/io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider
-io.github.seijikohara.dbtester.internal.loader.DefaultTableSetLoaderProvider
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
+io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.OperationProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
@@ -275,8 +313,8 @@ io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.AssertionProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultAssertionProvider
 
-# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider
-io.github.seijikohara.dbtester.internal.spi.DefaultExpectedDataSetProvider
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectationProvider
+io.github.seijikohara.dbtester.internal.spi.DefaultExpectationProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
 io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
@@ -310,10 +348,10 @@ io.github.seijikohara.dbtester.kotest.spi.KotestScenarioNameResolver
 
 ```java
 module io.github.seijikohara.dbtester.api {
-    uses io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider;
+    uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
     uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
     uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
-    uses io.github.seijikohara.dbtester.api.spi.ExpectedDataSetProvider;
+    uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
     uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 }
 ```
@@ -322,8 +360,8 @@ module io.github.seijikohara.dbtester.api {
 
 ```java
 module io.github.seijikohara.dbtester.core {
-    provides io.github.seijikohara.dbtester.api.spi.TableSetLoaderProvider
-        with io.github.seijikohara.dbtester.internal.loader.DefaultTableSetLoaderProvider;
+    provides io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
+        with io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider;
     provides io.github.seijikohara.dbtester.api.spi.OperationProvider
         with io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
     // ... 他のプロバイダー
@@ -333,21 +371,21 @@ module io.github.seijikohara.dbtester.core {
 
 ## カスタム実装
 
-### カスタムTableSetLoader
+### カスタムDataSetLoader
 
-カスタムテーブルセットローダーを提供するには:
+カスタムデータセットローダーを提供するには:
 
-1. `TableSetLoader`インターフェースを実装:
+1. `DataSetLoader`インターフェースを実装:
 
 ```java
-public class CustomTableSetLoader implements TableSetLoader {
+public class CustomDataSetLoader implements DataSetLoader {
     @Override
-    public List<TableSet> loadPreparationTableSets(TestContext context) {
+    public List<TableSet> loadPreparationDataSets(TestContext context) {
         // カスタム読み込みロジック
     }
 
     @Override
-    public List<TableSet> loadExpectationTableSets(TestContext context) {
+    public List<TableSet> loadExpectationDataSets(TestContext context) {
         // カスタム読み込みロジック
     }
 }
@@ -356,7 +394,9 @@ public class CustomTableSetLoader implements TableSetLoader {
 2. `Configuration`経由で登録:
 
 ```java
-var config = Configuration.withLoader(new CustomTableSetLoader());
+var config = Configuration.builder()
+    .loader(new CustomDataSetLoader())
+    .build();
 DatabaseTestExtension.setConfiguration(context, config);
 ```
 
@@ -427,10 +467,10 @@ com.example.XmlFormatProvider
 
 | SPI | 選択方法 |
 |-----|----------|
-| `TableSetLoaderProvider` | 最初に見つかったもの |
+| `DataSetLoaderProvider` | 最初に見つかったもの |
 | `OperationProvider` | 最初に見つかったもの |
 | `AssertionProvider` | 最初に見つかったもの |
-| `ExpectedDataSetProvider` | 最初に見つかったもの |
+| `ExpectationProvider` | 最初に見つかったもの |
 | `ScenarioNameResolver` | `priority()`でソート、`canResolve()`がtrueを返す最初のもの |
 | `FormatProvider` | 一致する`supportedFileExtension()`を持つ最初のもの |
 

@@ -132,10 +132,12 @@ Override properties via Configuration API:
 ```java
 @BeforeAll
 static void setup(ExtensionContext context) {
-    ConventionSettings conventions = ConventionSettings.standard()
-        .withScenarioMarker("[TestCase]")
-        .withDataFormat(DataFormat.TSV);
-    Configuration config = Configuration.withConventions(conventions);
+    Configuration config = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .scenarioMarker("[TestCase]")
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build();
     SpringBootDatabaseTestExtension.setConfiguration(context, config);
 }
 ```

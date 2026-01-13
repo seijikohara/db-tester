@@ -46,24 +46,26 @@ class CsvFormatSpec : AnnotationSpec() {
         private val logger = LoggerFactory.getLogger(CsvFormatSpec::class.java)
 
         private val sharedConfiguration: Configuration =
-            Configuration.withConventions(
-                ConventionSettings
-                    .builder()
-                    .baseDirectory(null)
-                    .expectationSuffix("/expected")
-                    .scenarioMarker("[Scenario]")
-                    .dataFormat(DataFormat.CSV)
-                    .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                    .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                    .globalExcludeColumns(emptySet())
-                    .globalColumnStrategies(emptyMap())
-                    .rowOrdering(RowOrdering.ORDERED)
-                    .queryTimeout(null)
-                    .retryCount(0)
-                    .retryDelay(Duration.ofMillis(100))
-                    .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                    .build(),
-            )
+            Configuration
+                .builder()
+                .conventions(
+                    ConventionSettings
+                        .builder()
+                        .baseDirectory(null)
+                        .expectationSuffix("/expected")
+                        .scenarioMarker("[Scenario]")
+                        .dataFormat(DataFormat.CSV)
+                        .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                        .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                        .globalExcludeColumns(emptySet())
+                        .globalColumnStrategies(emptyMap())
+                        .rowOrdering(RowOrdering.ORDERED)
+                        .queryTimeout(null)
+                        .retryCount(0)
+                        .retryDelay(Duration.ofMillis(100))
+                        .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                        .build(),
+                ).build()
 
         private fun createDataSource(): DataSource =
             JdbcDataSource().apply {
@@ -184,24 +186,26 @@ class TsvFormatSpec : AnnotationSpec() {
         private val logger = LoggerFactory.getLogger(TsvFormatSpec::class.java)
 
         private val sharedConfiguration: Configuration =
-            Configuration.withConventions(
-                ConventionSettings
-                    .builder()
-                    .baseDirectory(null)
-                    .expectationSuffix("/expected")
-                    .scenarioMarker("[Scenario]")
-                    .dataFormat(DataFormat.TSV)
-                    .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                    .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                    .globalExcludeColumns(emptySet())
-                    .globalColumnStrategies(emptyMap())
-                    .rowOrdering(RowOrdering.ORDERED)
-                    .queryTimeout(null)
-                    .retryCount(0)
-                    .retryDelay(Duration.ofMillis(100))
-                    .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                    .build(),
-            )
+            Configuration
+                .builder()
+                .conventions(
+                    ConventionSettings
+                        .builder()
+                        .baseDirectory(null)
+                        .expectationSuffix("/expected")
+                        .scenarioMarker("[Scenario]")
+                        .dataFormat(DataFormat.TSV)
+                        .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                        .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                        .globalExcludeColumns(emptySet())
+                        .globalColumnStrategies(emptyMap())
+                        .rowOrdering(RowOrdering.ORDERED)
+                        .queryTimeout(null)
+                        .retryCount(0)
+                        .retryDelay(Duration.ofMillis(100))
+                        .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                        .build(),
+                ).build()
 
         private fun createDataSource(): DataSource =
             JdbcDataSource().apply {

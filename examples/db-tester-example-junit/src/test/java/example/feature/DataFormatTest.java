@@ -134,22 +134,24 @@ final class DataFormatTest {
 
       // CSV is the default format, but we explicitly configure it for clarity
       final var csvConfig =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null) // classpath-relative
-                  .expectationSuffix("/expected") // default expectation suffix
-                  .scenarioMarker("[Scenario]") // default scenario marker
-                  .dataFormat(DataFormat.CSV) // CSV format
-                  .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null) // classpath-relative
+                      .expectationSuffix("/expected") // default expectation suffix
+                      .scenarioMarker("[Scenario]") // default scenario marker
+                      .dataFormat(DataFormat.CSV) // CSV format
+                      .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, csvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -247,22 +249,24 @@ final class DataFormatTest {
 
       // Configure TSV format
       final var tsvConfig =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null) // classpath-relative
-                  .expectationSuffix("/expected") // default expectation suffix
-                  .scenarioMarker("[Scenario]") // default scenario marker
-                  .dataFormat(DataFormat.TSV) // TSV format
-                  .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null) // classpath-relative
+                      .expectationSuffix("/expected") // default expectation suffix
+                      .scenarioMarker("[Scenario]") // default scenario marker
+                      .dataFormat(DataFormat.TSV) // TSV format
+                      .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, tsvConfig);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

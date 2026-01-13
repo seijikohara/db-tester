@@ -17,8 +17,9 @@ DB Testerフレームワークがサポートするファイル形式と解析�
 `ConventionSettings`で形式を設定します:
 
 ```java
-var conventions = ConventionSettings.standard()
-    .withDataFormat(DataFormat.TSV);
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
 ディレクトリからデータセットを読み込む際、設定された拡張子に一致するファイルのみが処理されます。

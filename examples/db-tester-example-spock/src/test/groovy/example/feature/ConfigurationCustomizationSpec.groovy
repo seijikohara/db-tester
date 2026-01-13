@@ -53,11 +53,14 @@ class ConfigurationCustomizationSpec extends Specification {
 	 * Using static initialization ensures the configuration is available before any test execution,
 	 * including interceptor invocation.
 	 */
-	static Configuration sharedConfiguration = Configuration.withConventions(
-	ConventionSettings.standard()
-	.withExpectationSuffix('/verify')
-	.withScenarioMarker('[TestCase]')
+	static Configuration sharedConfiguration = Configuration.builder()
+	.conventions(
+	ConventionSettings.builder()
+	.expectationSuffix('/verify')
+	.scenarioMarker('[TestCase]')
+	.build()
 	)
+	.build()
 
 	/**
 	 * Gets the DataSourceRegistry (Groovy property accessor).

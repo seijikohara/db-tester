@@ -135,22 +135,24 @@ final class TableMergeStrategyTest {
       logger.info("Setting up database for FIRST merge strategy test");
 
       final var config =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null)
-                  .expectationSuffix("/expected")
-                  .scenarioMarker("[Scenario]")
-                  .dataFormat(DataFormat.CSV)
-                  .tableMergeStrategy(TableMergeStrategy.FIRST) // FIRST strategy
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null)
+                      .expectationSuffix("/expected")
+                      .scenarioMarker("[Scenario]")
+                      .dataFormat(DataFormat.CSV)
+                      .tableMergeStrategy(TableMergeStrategy.FIRST) // FIRST strategy
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -233,22 +235,24 @@ final class TableMergeStrategyTest {
       logger.info("Setting up database for LAST merge strategy test");
 
       final var config =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null)
-                  .expectationSuffix("/expected")
-                  .scenarioMarker("[Scenario]")
-                  .dataFormat(DataFormat.CSV)
-                  .tableMergeStrategy(TableMergeStrategy.LAST) // LAST strategy
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null)
+                      .expectationSuffix("/expected")
+                      .scenarioMarker("[Scenario]")
+                      .dataFormat(DataFormat.CSV)
+                      .tableMergeStrategy(TableMergeStrategy.LAST) // LAST strategy
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -331,22 +335,24 @@ final class TableMergeStrategyTest {
       logger.info("Setting up database for UNION merge strategy test");
 
       final var config =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null)
-                  .expectationSuffix("/expected")
-                  .scenarioMarker("[Scenario]")
-                  .dataFormat(DataFormat.CSV)
-                  .tableMergeStrategy(TableMergeStrategy.UNION) // UNION strategy
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null)
+                      .expectationSuffix("/expected")
+                      .scenarioMarker("[Scenario]")
+                      .dataFormat(DataFormat.CSV)
+                      .tableMergeStrategy(TableMergeStrategy.UNION) // UNION strategy
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);
@@ -429,22 +435,25 @@ final class TableMergeStrategyTest {
       logger.info("Setting up database for UNION_ALL merge strategy test");
 
       final var config =
-          Configuration.withConventions(
-              ConventionSettings.builder()
-                  .baseDirectory(null)
-                  .expectationSuffix("/expected")
-                  .scenarioMarker("[Scenario]")
-                  .dataFormat(DataFormat.CSV)
-                  .tableMergeStrategy(TableMergeStrategy.UNION_ALL) // UNION_ALL strategy (default)
-                  .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                  .globalExcludeColumns(Set.of())
-                  .globalColumnStrategies(Map.of())
-                  .rowOrdering(RowOrdering.ORDERED)
-                  .queryTimeout(null)
-                  .retryCount(0)
-                  .retryDelay(Duration.ofMillis(100))
-                  .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                  .build());
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.builder()
+                      .baseDirectory(null)
+                      .expectationSuffix("/expected")
+                      .scenarioMarker("[Scenario]")
+                      .dataFormat(DataFormat.CSV)
+                      .tableMergeStrategy(
+                          TableMergeStrategy.UNION_ALL) // UNION_ALL strategy (default)
+                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                      .globalExcludeColumns(Set.of())
+                      .globalColumnStrategies(Map.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .queryTimeout(null)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .build())
+              .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
       final var registry = DatabaseTestExtension.getRegistry(context);

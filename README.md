@@ -331,10 +331,12 @@ void testWithExcludedColumns() {
 ```java
 @BeforeAll
 static void setUp(ExtensionContext context) {
-    var conventions = ConventionSettings.standard()
-        .withGlobalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"));
-    DatabaseTestExtension.setConfiguration(context,
-        Configuration.withConventions(conventions));
+    var config = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+            .build())
+        .build();
+    DatabaseTestExtension.setConfiguration(context, config);
     DatabaseTestExtension.getRegistry(context).registerDefault(dataSource);
 }
 ```
@@ -355,13 +357,14 @@ Column names are case-insensitive. Per-dataset exclusions are combined with glob
 
 | Operation | Description |
 |-----------|-------------|
-| `CLEAN_INSERT` | Delete all rows, then insert (default) |
+| `NONE` | No database operation |
 | `INSERT` | Insert rows |
 | `UPDATE` | Update existing rows |
 | `UPSERT` | Upsert (insert or update) |
 | `DELETE` | Delete specified rows |
 | `DELETE_ALL` | Delete all rows |
 | `TRUNCATE_TABLE` | Truncate tables |
+| `CLEAN_INSERT` | Delete all rows, then insert (default) |
 | `TRUNCATE_INSERT` | Truncate, then insert |
 
 ```java
@@ -376,8 +379,9 @@ Column names are case-insensitive. Per-dataset exclusions are combined with glob
 | TSV | `.tsv` |
 
 ```java
-ConventionSettings conventions = ConventionSettings.standard()
-    .withDataFormat(DataFormat.TSV);
+ConventionSettings conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
 ### Multiple DataSources

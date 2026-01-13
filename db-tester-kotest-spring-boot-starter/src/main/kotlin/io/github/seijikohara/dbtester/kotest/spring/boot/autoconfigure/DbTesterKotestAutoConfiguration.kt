@@ -56,15 +56,16 @@ class DbTesterKotestAutoConfiguration {
         properties.convention
             .let { conventionProps ->
                 ConventionSettings
-                    .standard()
-                    .withBaseDirectory(conventionProps.baseDirectory)
-                    .withExpectationSuffix(conventionProps.expectationSuffix)
-                    .withScenarioMarker(conventionProps.scenarioMarker)
-                    .withDataFormat(conventionProps.dataFormat)
-                    .withTableMergeStrategy(conventionProps.tableMergeStrategy)
-                    .withLoadOrderFileName(conventionProps.loadOrderFileName)
-                    .withGlobalExcludeColumns(conventionProps.globalExcludeColumns)
-                    .withGlobalColumnStrategies(emptyMap())
+                    .builder()
+                    .baseDirectory(conventionProps.baseDirectory)
+                    .expectationSuffix(conventionProps.expectationSuffix)
+                    .scenarioMarker(conventionProps.scenarioMarker)
+                    .dataFormat(conventionProps.dataFormat)
+                    .tableMergeStrategy(conventionProps.tableMergeStrategy)
+                    .loadOrderFileName(conventionProps.loadOrderFileName)
+                    .globalExcludeColumns(conventionProps.globalExcludeColumns)
+                    .globalColumnStrategies(emptyMap())
+                    .build()
             }.let { conventions ->
                 OperationDefaults
                     .builder()

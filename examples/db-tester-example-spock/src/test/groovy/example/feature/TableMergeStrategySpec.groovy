@@ -73,10 +73,13 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry = new DataSourceRegistry()
 			sharedRegistry.registerDefault(sharedDataSource)
 
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withTableMergeStrategy(TableMergeStrategy.FIRST)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.tableMergeStrategy(TableMergeStrategy.FIRST)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {
@@ -166,10 +169,13 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry = new DataSourceRegistry()
 			sharedRegistry.registerDefault(sharedDataSource)
 
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withTableMergeStrategy(TableMergeStrategy.LAST)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.tableMergeStrategy(TableMergeStrategy.LAST)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {
@@ -259,10 +265,13 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry = new DataSourceRegistry()
 			sharedRegistry.registerDefault(sharedDataSource)
 
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withTableMergeStrategy(TableMergeStrategy.UNION)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.tableMergeStrategy(TableMergeStrategy.UNION)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {
@@ -352,10 +361,13 @@ class TableMergeStrategySpec extends Specification {
 			sharedRegistry = new DataSourceRegistry()
 			sharedRegistry.registerDefault(sharedDataSource)
 
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withTableMergeStrategy(TableMergeStrategy.UNION_ALL)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {

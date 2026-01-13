@@ -138,11 +138,13 @@ class DatabaseTestExtensionTest {
     void shouldStoreConfiguration_whenCalled() {
       // Given
       final var customConfig =
-          Configuration.withConventions(
-              ConventionSettings.standard()
-                  .withBaseDirectory("/custom")
-                  .withExpectationSuffix("/verify")
-                  .withScenarioMarker("[Test]"));
+          Configuration.builder()
+              .conventions(
+                  ConventionSettings.standard()
+                      .withBaseDirectory("/custom")
+                      .withExpectationSuffix("/verify")
+                      .withScenarioMarker("[Test]"))
+              .build();
       final var rootContext = mock(ExtensionContext.class);
 
       when(mockContext.getTestClass()).thenReturn(Optional.of(TestClass.class));

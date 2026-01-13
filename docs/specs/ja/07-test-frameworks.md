@@ -58,9 +58,11 @@ static void setup(ExtensionContext context) {
     var registry = DatabaseTestExtension.getRegistry(context);
     registry.registerDefault(dataSource);
 
-    var conventions = ConventionSettings.standard()
-        .withDataFormat(DataFormat.TSV);
-    var config = Configuration.withConventions(conventions);
+    var config = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build();
     DatabaseTestExtension.setConfiguration(context, config);
 }
 ```
@@ -177,9 +179,11 @@ class UserRepositorySpec extends Specification {
         dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
 
-        def conventions = ConventionSettings.standard()
-            .withDataFormat(DataFormat.TSV)
-        dbTesterConfiguration = Configuration.withConventions(conventions)
+        dbTesterConfiguration = Configuration.builder()
+            .conventions(ConventionSettings.builder()
+                .dataFormat(DataFormat.TSV)
+                .build())
+            .build()
     }
 
     @DataSet
@@ -310,9 +314,11 @@ class UserRepositorySpec : AnnotationSpec() {
 class UserRepositorySpec : AnnotationSpec() {
 
     init {
-        val conventions = ConventionSettings.standard()
-            .withDataFormat(DataFormat.TSV)
-        val config = Configuration.withConventions(conventions)
+        val config = Configuration.builder()
+            .conventions(ConventionSettings.builder()
+                .dataFormat(DataFormat.TSV)
+                .build())
+            .build()
 
         extensions(DatabaseTestExtension(
             registryProvider = { registry },

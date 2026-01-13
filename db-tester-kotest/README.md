@@ -142,10 +142,12 @@ Test method names with backticks map directly to `[Scenario]` column values.
 
 ```kotlin
 init {
-    val conventions = ConventionSettings.standard()
-        .withScenarioMarker("[TestCase]")
-        .withDataFormat(DataFormat.TSV)
-    val config = Configuration.withConventions(conventions)
+    val config = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .scenarioMarker("[TestCase]")
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
 
     extensions(DatabaseTestExtension(
         registryProvider = { registry },

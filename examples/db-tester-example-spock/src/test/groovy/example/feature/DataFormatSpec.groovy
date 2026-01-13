@@ -76,10 +76,13 @@ class DataFormatSpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			// CSV is the default format, but we explicitly configure it for clarity
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withDataFormat(DataFormat.CSV)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.dataFormat(DataFormat.CSV)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {
@@ -190,10 +193,13 @@ class DataFormatSpec extends Specification {
 			sharedRegistry.registerDefault(sharedDataSource)
 
 			// Configure TSV format
-			sharedConfiguration = Configuration.withConventions(
-					ConventionSettings.standard()
-					.withDataFormat(DataFormat.TSV)
+			sharedConfiguration = Configuration.builder()
+					.conventions(
+					ConventionSettings.builder()
+					.dataFormat(DataFormat.TSV)
+					.build()
 					)
+					.build()
 		}
 
 		def setupSpec() {

@@ -24,8 +24,12 @@ Aggregates runtime configuration for the database testing extension.
 |--------|-------------|
 | `builder()` | Creates a new builder for constructing Configuration instances |
 | `defaults()` | Creates configuration with all framework defaults |
-| `withConventions(ConventionSettings)` | Custom conventions with default operations and loader |
-| `withLoader(DataSetLoader)` | Custom loader with default conventions and operations |
+
+### Instance Methods
+
+| Method | Description |
+|--------|-------------|
+| `toBuilder()` | Creates a new builder initialized with values from this instance |
 
 ### Builder Methods
 
@@ -42,7 +46,7 @@ When `Configuration.defaults()` is used:
 
 1. Conventions: `ConventionSettings.standard()`
 2. Operations: `OperationDefaults.standard()`
-3. Loader: Loaded via ServiceLoader from `TableSetLoaderProvider`
+3. Loader: Loaded via ServiceLoader from `DataSetLoaderProvider`
 
 ### Usage Example
 
@@ -63,9 +67,11 @@ var config = Configuration.builder()
 // JUnit example - customize configuration in @BeforeAll
 @BeforeAll
 static void setup(ExtensionContext context) {
-    var conventions = ConventionSettings.standard()
-        .withDataFormat(DataFormat.TSV);
-    var config = Configuration.withConventions(conventions);
+    var config = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build();
     DatabaseTestExtension.setConfiguration(context, config);
 }
 ```
@@ -102,6 +108,12 @@ Defines naming conventions for dataset discovery and scenario filtering.
 |--------|-------------|
 | `builder()` | Creates a new builder for constructing ConventionSettings instances |
 | `standard()` | Creates settings with all defaults |
+
+### Instance Methods
+
+| Method | Description |
+|--------|-------------|
+| `toBuilder()` | Creates a new builder initialized with values from this instance |
 
 ### Builder Methods
 
@@ -179,19 +191,20 @@ The `expectedDataSetSuffix` is appended to the data set path:
 
 ```java
 // Configure retry, timeout, and unordered comparison
-var settings = ConventionSettings.standard()
-    .withRowOrdering(RowOrdering.UNORDERED)
-    .withQueryTimeout(Duration.ofSeconds(30))
-    .withRetryCount(3)
-    .withRetryDelay(Duration.ofMillis(500))
-    .withTransactionMode(TransactionMode.AUTO_COMMIT)
-    .withGlobalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
-    .withGlobalColumnStrategies(Map.of(
-        "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
-        "VERSION", ColumnStrategyMapping.ignore("VERSION")
-    ));
-
-var config = Configuration.withConventions(settings);
+var config = Configuration.builder()
+    .conventions(ConventionSettings.builder()
+        .rowOrdering(RowOrdering.UNORDERED)
+        .queryTimeout(Duration.ofSeconds(30))
+        .retryCount(3)
+        .retryDelay(Duration.ofMillis(500))
+        .transactionMode(TransactionMode.AUTO_COMMIT)
+        .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+        .globalColumnStrategies(Map.of(
+            "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
+            "VERSION", ColumnStrategyMapping.ignore("VERSION")
+        ))
+        .build())
+    .build();
 ```
 
 ## DataSourceRegistry
@@ -280,6 +293,12 @@ Defines default database operations for preparation and expectation phases.
 | `builder()` | Creates a new builder for constructing OperationDefaults instances |
 | `standard()` | Creates defaults with `CLEAN_INSERT` for preparation and `NONE` for expectation |
 
+### Instance Methods
+
+| Method | Description |
+|--------|-------------|
+| `toBuilder()` | Creates a new builder initialized with values from this instance |
+
 ### Builder Methods
 
 | Method | Description |
@@ -287,6 +306,13 @@ Defines default database operations for preparation and expectation phases.
 | `preparation(Operation)` | Sets the default operation for preparation phase |
 | `expectation(Operation)` | Sets the default operation for expectation phase |
 | `build()` | Builds a new OperationDefaults instance |
+
+### With Methods (Fluent Copy)
+
+| Method | Description |
+|--------|-------------|
+| `withPreparation(Operation)` | Creates copy with specified preparation operation |
+| `withExpectation(Operation)` | Creates copy with specified expectation operation |
 
 ## DataFormat
 
@@ -420,9 +446,11 @@ Defines transaction behavior for database operations.
 ### Configuration Example
 
 ```java
-var settings = ConventionSettings.standard()
-    .withTransactionMode(TransactionMode.AUTO_COMMIT);
-var config = Configuration.withConventions(settings);
+var config = Configuration.builder()
+    .conventions(ConventionSettings.builder()
+        .transactionMode(TransactionMode.AUTO_COMMIT)
+        .build())
+    .build();
 ```
 
 ### Rollback Behavior

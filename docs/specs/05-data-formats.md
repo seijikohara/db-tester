@@ -16,8 +16,9 @@ The framework supports two delimited text formats:
 Configure the format in `ConventionSettings`:
 
 ```java
-var conventions = ConventionSettings.standard()
-    .withDataFormat(DataFormat.TSV);
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
 When loading datasets from a directory, only files matching the configured extension are processed.
