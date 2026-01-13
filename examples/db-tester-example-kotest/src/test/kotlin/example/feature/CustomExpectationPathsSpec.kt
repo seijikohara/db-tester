@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -26,7 +27,10 @@ import javax.sql.DataSource
  * This approach is useful when tests require multiple expectation variants or when
  * convention-based paths are insufficient for complex test scenarios.
  */
-class CustomExpectationPathsSpec : AnnotationSpec() {
+@DatabaseTest
+class CustomExpectationPathsSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(CustomExpectationPathsSpec::class.java)
 
@@ -73,12 +77,8 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -87,7 +87,7 @@ class CustomExpectationPathsSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for CustomExpectationPathsSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/CustomExpectationPathsSpec.sql")
             logger.info("Database setup completed")
         }

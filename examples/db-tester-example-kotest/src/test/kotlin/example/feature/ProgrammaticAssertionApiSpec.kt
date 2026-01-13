@@ -3,7 +3,8 @@ package example.feature
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import org.h2.jdbcx.JdbcDataSource
@@ -28,7 +29,10 @@ import javax.sql.DataSource
  * Programmatic assertions are useful for custom SQL queries, dynamic column filtering, mid-test
  * state verification, or comparing multiple dataset sources.
  */
-class ProgrammaticAssertionApiSpec : AnnotationSpec() {
+@DatabaseTest
+class ProgrammaticAssertionApiSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(ProgrammaticAssertionApiSpec::class.java)
 
@@ -75,12 +79,8 @@ class ProgrammaticAssertionApiSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -89,7 +89,7 @@ class ProgrammaticAssertionApiSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for ProgrammaticAssertionApiSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/ProgrammaticAssertionApiSpec.sql")
             logger.info("Database setup completed")
         }

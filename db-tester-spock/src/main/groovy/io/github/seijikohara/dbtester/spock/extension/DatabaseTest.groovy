@@ -15,32 +15,52 @@ import org.spockframework.runtime.extension.ExtensionAnnotation
  * {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet} annotations
  * on feature methods.
  *
- * <p>Example usage:
+ * <p><b>Important:</b> The specification class must implement {@link DatabaseTestSupport} to provide
+ * the {@link io.github.seijikohara.dbtester.api.config.DataSourceRegistry DataSourceRegistry}.
+ *
+ * <p><b>Usage:</b>
  * <pre>{@code
  * @DatabaseTest
- * class UserRepositorySpec extends Specification {
+ * class MySpec extends Specification implements DatabaseTestSupport {
  *
  *     DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
- *             .register(dataSource)
+ *
+ *     def setupSpec() {
+ *         dbTesterRegistry.registerDefault(createDataSource())
+ *     }
  *
  *     @DataSet
  *     @ExpectedDataSet
- *     def "can insert and retrieve user"() {
+ *     def "should verify database state"() {
  *         // test implementation
  *     }
  * }
  * }</pre>
  *
- * <p>The specification must provide a {@code dbTesterRegistry} property or field containing
- * a {@link io.github.seijikohara.dbtester.api.config.DataSourceRegistry DataSourceRegistry}
- * with registered data sources.
+ * <p><b>With custom configuration:</b>
+ * <pre>{@code
+ * @DatabaseTest
+ * class MySpec extends Specification implements DatabaseTestSupport {
  *
- * <p>Optionally, a {@code dbTesterConfiguration} property or field can be provided to
- * customize the {@link io.github.seijikohara.dbtester.api.config.Configuration Configuration}.
+ *     DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
  *
+ *     Configuration dbTesterConfiguration = Configuration.builder()
+ *         .conventions(ConventionSettings.builder()
+ *             .dataFormat(DataFormat.TSV)
+ *             .build())
+ *         .build()
+ *
+ *     @DataSet
+ *     def "should load TSV data"() {
+ *         // test implementation
+ *     }
+ * }
+ * }</pre>
+ *
+ * @see DatabaseTestExtension
+ * @see DatabaseTestSupport
  * @see io.github.seijikohara.dbtester.api.annotation.DataSet
  * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
- * @see io.github.seijikohara.dbtester.api.config.DataSourceRegistry
  */
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

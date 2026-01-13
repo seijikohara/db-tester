@@ -12,6 +12,7 @@ import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -32,7 +33,7 @@ import spock.lang.Specification
  * </ul>
  */
 @DatabaseTest
-class ComparisonStrategySpec extends Specification {
+class ComparisonStrategySpec extends Specification implements DatabaseTestSupport {
 
 	@Shared
 	DataSource dataSource

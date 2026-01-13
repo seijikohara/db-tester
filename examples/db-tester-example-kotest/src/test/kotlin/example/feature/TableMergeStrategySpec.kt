@@ -11,7 +11,8 @@ import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -39,7 +40,10 @@ object TableMergeStrategySpec
  *
  * Demonstrates configuring [TableMergeStrategy.FIRST] in [ConventionSettings].
  */
-class FirstStrategySpec : AnnotationSpec() {
+@DatabaseTest
+class FirstStrategySpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(FirstStrategySpec::class.java)
 
@@ -108,17 +112,9 @@ class FirstStrategySpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -127,7 +123,7 @@ class FirstStrategySpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for FirstStrategySpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/TableMergeStrategySpec.sql")
             logger.info("Database setup completed")
         }
@@ -165,7 +161,10 @@ class FirstStrategySpec : AnnotationSpec() {
  *
  * Demonstrates configuring [TableMergeStrategy.LAST] in [ConventionSettings].
  */
-class LastStrategySpec : AnnotationSpec() {
+@DatabaseTest
+class LastStrategySpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(LastStrategySpec::class.java)
 
@@ -234,17 +233,9 @@ class LastStrategySpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -253,7 +244,7 @@ class LastStrategySpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for LastStrategySpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/TableMergeStrategySpec.sql")
             logger.info("Database setup completed")
         }
@@ -287,7 +278,10 @@ class LastStrategySpec : AnnotationSpec() {
  *
  * Demonstrates configuring [TableMergeStrategy.UNION] in [ConventionSettings].
  */
-class UnionStrategySpec : AnnotationSpec() {
+@DatabaseTest
+class UnionStrategySpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(UnionStrategySpec::class.java)
 
@@ -356,17 +350,9 @@ class UnionStrategySpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -375,7 +361,7 @@ class UnionStrategySpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for UnionStrategySpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/TableMergeStrategySpec.sql")
             logger.info("Database setup completed")
         }
@@ -413,7 +399,10 @@ class UnionStrategySpec : AnnotationSpec() {
  *
  * Demonstrates configuring [TableMergeStrategy.UNION_ALL] in [ConventionSettings].
  */
-class UnionAllStrategySpec : AnnotationSpec() {
+@DatabaseTest
+class UnionAllStrategySpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(UnionAllStrategySpec::class.java)
 
@@ -482,17 +471,9 @@ class UnionAllStrategySpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -501,7 +482,7 @@ class UnionAllStrategySpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for UnionAllStrategySpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/TableMergeStrategySpec.sql")
             logger.info("Database setup completed")
         }

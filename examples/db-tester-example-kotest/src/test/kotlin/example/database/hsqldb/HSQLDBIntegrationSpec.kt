@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.hsqldb.jdbc.JDBCDataSource
 import org.slf4j.LoggerFactory
@@ -17,7 +18,10 @@ import javax.sql.DataSource
  * This test validates that the framework works correctly with HSQLDB (HyperSQL Database).
  * This is a smoke test to ensure HSQLDB compatibility with Kotest.
  */
-class HSQLDBIntegrationSpec : AnnotationSpec() {
+@DatabaseTest
+class HSQLDBIntegrationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(HSQLDBIntegrationSpec::class.java)
 
@@ -53,12 +57,8 @@ class HSQLDBIntegrationSpec : AnnotationSpec() {
                 }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up HSQLDB in-memory database connection and schema.
@@ -67,7 +67,7 @@ class HSQLDBIntegrationSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up HSQLDB in-memory database").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/database/hsqldb/hsqldb-integration.sql")
             logger.info("HSQLDB database setup completed")
         }

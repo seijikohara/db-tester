@@ -5,7 +5,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.MySQLContainer
@@ -23,7 +24,10 @@ import javax.sql.DataSource
  *
  * @see <a href="https://java.testcontainers.org/modules/databases/mysql/">Testcontainers MySQL</a>
  */
-class MySQLIntegrationSpec : AnnotationSpec() {
+@DatabaseTest
+class MySQLIntegrationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(MySQLIntegrationSpec::class.java)
 
@@ -77,11 +81,7 @@ class MySQLIntegrationSpec : AnnotationSpec() {
                 }
     }
 
-    private val registry = DataSourceRegistry()
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
+    override val dbTesterRegistry = DataSourceRegistry()
 
     /**
      * Sets up MySQL database connection and schema using Testcontainers.
@@ -91,7 +91,7 @@ class MySQLIntegrationSpec : AnnotationSpec() {
         logger.info("Setting up MySQL Testcontainer").also {
             mysql.start()
             val dataSource = createDataSource(mysql)
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/database/mysql/mysql-integration.sql")
             logger.info("MySQL database setup completed")
         }

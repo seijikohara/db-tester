@@ -242,6 +242,34 @@ def 'should process #status order'() {
 
 ### 登録
 
+**`@DatabaseTest`を使用した簡素化アプローチ（推奨）**:
+
+`@DatabaseTest`アノテーションは自動的に`DatabaseTestExtension`を登録し、`dbTesterRegistry`という名前のプロパティを検索してレジストリを発見します:
+
+```kotlin
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    val dbTesterRegistry = DataSourceRegistry()
+    private lateinit var dataSource: DataSource
+
+    @BeforeAll
+    fun setupSpec() {
+        dataSource = createDataSource()
+        dbTesterRegistry.registerDefault(dataSource)
+    }
+
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should create user`() {
+        // テスト実装
+    }
+}
+```
+
+**明示的な拡張機能登録**:
+
 `init`ブロックで拡張機能を登録します。Kotest 6では`extensions()`メソッドがfinalになり、オーバーライドできません:
 
 ```kotlin
@@ -268,6 +296,25 @@ class UserRepositorySpec : AnnotationSpec() {
 ```
 
 ### DataSource登録
+
+**規約ベースの発見（推奨）**:
+
+`@DatabaseTest`を使用する場合、拡張機能は`dbTesterRegistry`という名前のプロパティを検索してレジストリを発見します:
+
+```kotlin
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec() {
+    val dbTesterRegistry = DataSourceRegistry()
+
+    @BeforeAll
+    fun setupSpec() {
+        dbTesterRegistry.registerDefault(dataSource)
+        dbTesterRegistry.register("secondary", secondaryDataSource)
+    }
+}
+```
+
+**明示的なプロバイダー**:
 
 拡張機能は遅延バインドされたDataSource登録のために`registryProvider`ラムダを受け取ります:
 
@@ -306,7 +353,33 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
+### 予約プロパティ名
+
+| プロパティ名 | 型 | 目的 |
+|--------------|-----|------|
+| `dbTesterRegistry` | `DataSourceRegistry` | データソース登録 |
+| `dbTesterConfiguration` | `Configuration` | カスタム設定 |
+
 ### 設定のカスタマイズ
+
+**規約ベースの発見**:
+
+`@DatabaseTest`を使用する場合、`dbTesterConfiguration`という名前のプロパティを提供します:
+
+```kotlin
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec() {
+    val dbTesterRegistry = DataSourceRegistry()
+
+    val dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
+}
+```
+
+**明示的なプロバイダー**:
 
 拡張機能にカスタム`Configuration`を渡します:
 
@@ -322,7 +395,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
         extensions(DatabaseTestExtension(
             registryProvider = { registry },
-            configuration = config
+            configurationProvider = { config }
         ))
     }
 }
@@ -560,8 +633,8 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Specification実行
-        INIT["initブロック"]
-        INIT --> INIT1[拡張機能を登録]
+        ANN["@DatabaseTestまたはinitブロック"]
+        ANN --> ANN1[拡張機能を登録]
 
         BA["@BeforeAll"]
         BA --> BA1[Registryを初期化]
@@ -569,17 +642,18 @@ flowchart TD
 
         subgraph each["各@Testメソッドに対して"]
             INT["intercept()"]
-            INT --> INT1["DataSetを検索"]
-            INT1 --> INT2[データセットを読み込み]
-            INT2 --> INT3[操作を実行]
-            INT3 --> TM[テストメソッド実行]
-            TM --> INT4["ExpectedDataSetを検索"]
-            INT4 --> INT5[期待データセットを読み込み]
-            INT5 --> INT6[データベースと比較]
-            INT6 --> INT7[不一致を報告]
+            INT --> INT1["dbTesterRegistryを発見"]
+            INT1 --> INT2["DataSetを検索"]
+            INT2 --> INT3[データセットを読み込み]
+            INT3 --> INT4[操作を実行]
+            INT4 --> TM[テストメソッド実行]
+            TM --> INT5["ExpectedDataSetを検索"]
+            INT5 --> INT6[期待データセットを読み込み]
+            INT6 --> INT7[データベースと比較]
+            INT7 --> INT8[不一致を報告]
         end
 
-        INIT1 --> BA
+        ANN1 --> BA
         BA2 --> each
         each --> AA["@AfterAll"]
         AA --> AA1[クリーンアップ]

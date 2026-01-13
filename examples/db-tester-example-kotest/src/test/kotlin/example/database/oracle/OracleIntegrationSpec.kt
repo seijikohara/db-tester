@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.annotation.EnabledIf
 import io.kotest.core.spec.style.AnnotationSpec
 import oracle.jdbc.pool.OracleDataSource
@@ -35,7 +36,10 @@ class NotInCiCondition : io.kotest.core.annotation.EnabledCondition {
  * @see <a href="https://java.testcontainers.org/modules/databases/oraclefree/">Testcontainers Oracle Module</a>
  */
 @EnabledIf(NotInCiCondition::class)
-class OracleIntegrationSpec : AnnotationSpec() {
+@DatabaseTest
+class OracleIntegrationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(OracleIntegrationSpec::class.java)
 
@@ -99,11 +103,7 @@ class OracleIntegrationSpec : AnnotationSpec() {
                 }
     }
 
-    private val registry = DataSourceRegistry()
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
+    override val dbTesterRegistry = DataSourceRegistry()
 
     /**
      * Sets up Oracle database connection and schema using Testcontainers.
@@ -113,7 +113,7 @@ class OracleIntegrationSpec : AnnotationSpec() {
         logger.info("Setting up Oracle Testcontainer").also {
             oracle.start()
             val dataSource = createDataSource(oracle)
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/database/oracle/oracle-integration.sql")
             logger.info("Oracle database setup completed")
         }

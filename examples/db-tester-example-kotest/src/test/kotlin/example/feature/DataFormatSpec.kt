@@ -11,7 +11,8 @@ import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -41,7 +42,10 @@ object DataFormatSpec
  * 2,Bob,200
  * ```
  */
-class CsvFormatSpec : AnnotationSpec() {
+@DatabaseTest
+class CsvFormatSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(CsvFormatSpec::class.java)
 
@@ -110,17 +114,9 @@ class CsvFormatSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -129,7 +125,7 @@ class CsvFormatSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for CsvFormatSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/DataFormatSpec.sql")
             logger.info("Database setup completed")
         }
@@ -181,7 +177,10 @@ class CsvFormatSpec : AnnotationSpec() {
  * 2	Bob	200
  * ```
  */
-class TsvFormatSpec : AnnotationSpec() {
+@DatabaseTest
+class TsvFormatSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(TsvFormatSpec::class.java)
 
@@ -250,17 +249,9 @@ class TsvFormatSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -269,7 +260,7 @@ class TsvFormatSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for TsvFormatSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/DataFormatSpec.sql")
             logger.info("Database setup completed")
         }

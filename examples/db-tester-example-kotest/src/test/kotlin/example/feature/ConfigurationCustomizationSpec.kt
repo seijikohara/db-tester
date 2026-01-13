@@ -9,7 +9,8 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -34,7 +35,10 @@ import javax.sql.DataSource
  * This test class uses custom conventions while keeping default database operations
  * (CLEAN_INSERT for preparation, NONE for expectation).
  */
-class ConfigurationCustomizationSpec : AnnotationSpec() {
+@DatabaseTest
+class ConfigurationCustomizationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(ConfigurationCustomizationSpec::class.java)
 
@@ -108,17 +112,9 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterConfiguration: Configuration = sharedConfiguration
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(
-            DatabaseTestExtension(
-                registryProvider = { registry },
-                configurationProvider = { sharedConfiguration },
-            ),
-        )
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -127,7 +123,7 @@ class ConfigurationCustomizationSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for ConfigurationCustomizationSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/ConfigurationCustomizationSpec.sql")
             logger.info("Database setup completed")
         }

@@ -12,34 +12,30 @@ import java.sql.SQLException
 import javax.sql.DataSource
 
 /**
- * Demonstrates NULL value and empty string handling in CSV files using Kotest.
+ * Demonstrates the simplified `@DatabaseTest` annotation approach with Kotest.
  *
- * This specification shows:
- * - Using empty cells to represent SQL NULL values
- * - Distinguishing between NULL and empty string in VARCHAR columns
- * - Handling NOT NULL constraints
- * - NULL values in numeric and timestamp columns
+ * This test illustrates:
+ * - Using `@DatabaseTest` annotation for automatic extension registration
+ * - Convention-based registry discovery via `dbTesterRegistry` property
+ * - Cleaner test setup without explicit `init { extensions(...) }` block
  *
- * CSV format examples and NULL representation:
- * ```
- * ID,COLUMN1,COLUMN2,COLUMN3,COLUMN4
- * 1,Required Value,,100,
- * 2,Another Value,Optional Value,200,42
- * ```
+ * The `@DatabaseTest` annotation automatically registers [DatabaseTestExtension]
+ * and discovers the [DataSourceRegistry] by looking for a property named `dbTesterRegistry`.
  *
- * **Important:** Empty cells in CSV files are interpreted as SQL NULL
- * for all column types.
+ * CSV files are located at:
+ * - `src/test/resources/example/feature/DatabaseTestAnnotationSpec/TABLE1.csv`
+ * - `src/test/resources/example/feature/DatabaseTestAnnotationSpec/expected/TABLE1.csv`
  */
 @DatabaseTest
-class NullAndEmptyValuesSpec :
+class DatabaseTestAnnotationSpec :
     AnnotationSpec(),
     DatabaseTestSupport {
     companion object {
-        private val logger = LoggerFactory.getLogger(NullAndEmptyValuesSpec::class.java)
+        private val logger = LoggerFactory.getLogger(DatabaseTestAnnotationSpec::class.java)
 
         private fun createDataSource(): DataSource =
             JdbcDataSource().apply {
-                setURL("jdbc:h2:mem:NullAndEmptyValuesSpec;DB_CLOSE_DELAY=-1")
+                setURL("jdbc:h2:mem:DatabaseTestAnnotationSpec;DB_CLOSE_DELAY=-1")
                 user = "sa"
                 password = ""
             }
@@ -49,7 +45,7 @@ class NullAndEmptyValuesSpec :
             scriptPath: String,
         ): Unit =
             (
-                NullAndEmptyValuesSpec::class.java.classLoader.getResource(scriptPath)
+                DatabaseTestAnnotationSpec::class.java.classLoader.getResource(scriptPath)
                     ?: throw IllegalStateException("Script not found: $scriptPath")
             ).readText()
                 .split(";")
@@ -80,7 +76,13 @@ class NullAndEmptyValuesSpec :
                 }.let { }
     }
 
+    /**
+     * Convention-based registry discovery: the extension finds this property by name.
+     *
+     * The property must be named `dbTesterRegistry` for automatic discovery.
+     */
     override val dbTesterRegistry = DataSourceRegistry()
+
     private lateinit var dataSource: DataSource
 
     /**
@@ -88,36 +90,27 @@ class NullAndEmptyValuesSpec :
      */
     @BeforeAll
     fun setupDatabase(): Unit =
-        logger.info("Setting up H2 in-memory database for NullAndEmptyValuesSpec").also {
+        logger.info("Setting up H2 in-memory database for DatabaseTestAnnotationSpec").also {
             dataSource = createDataSource()
             dbTesterRegistry.registerDefault(dataSource)
-            executeScript(dataSource, "ddl/feature/NullAndEmptyValuesSpec.sql")
+            executeScript(dataSource, "ddl/feature/DatabaseTestAnnotationSpec.sql")
             logger.info("Database setup completed")
         }
 
     /**
-     * Demonstrates NULL value handling in CSV files.
-     *
-     * Validates:
-     * - Empty cells correctly represent SQL NULL values
-     * - NULL values in optional (nullable) columns
-     * - Empty string vs NULL distinction
-     * - NOT NULL constraints are respected
+     * Demonstrates the `@DatabaseTest` annotation-based approach.
      *
      * Test flow:
-     * - Preparation: Loads TABLE1(ID=1 with NULL COLUMN2/COLUMN4, ID=2 with values)
-     * - Execution: Inserts ID=3 (Third Record, NULL, 300, NULL)
-     * - Expectation: Verifies all three records including NULL values
+     * - Preparation: Loads TABLE1(ID=1 Mouse, ID=2 Monitor) from `TABLE1.csv`
+     * - Execution: Inserts ID=3 (Keyboard, 79.99) into TABLE1
+     * - Expectation: Verifies all three products from `expected/TABLE1.csv`
      */
     @Test
     @DataSet
     @ExpectedDataSet
-    fun `should handle null values`(): Unit =
-        logger.info("Running null values test").also {
-            executeSql(
-                dataSource,
-                "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4) VALUES (3, 'Third Record', NULL, 300, NULL)",
-            )
-            logger.info("Record with NULL values inserted successfully")
+    fun `should load and verify product data with @DatabaseTest annotation`(): Unit =
+        logger.info("Running @DatabaseTest annotation example test").also {
+            executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2) VALUES (3, 'Keyboard', 79.99)")
+            logger.info("Product data inserted successfully")
         }
 }

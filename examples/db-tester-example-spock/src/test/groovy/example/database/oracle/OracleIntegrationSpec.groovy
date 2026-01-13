@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import java.sql.SQLException
 import javax.sql.DataSource
 import oracle.jdbc.pool.OracleDataSource
@@ -37,7 +38,7 @@ import spock.lang.Specification
 })
 @Testcontainers
 @DatabaseTest
-class OracleIntegrationSpec extends Specification {
+class OracleIntegrationSpec extends Specification implements DatabaseTestSupport {
 
 	private static final Logger logger = LoggerFactory.getLogger(OracleIntegrationSpec)
 

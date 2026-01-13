@@ -137,17 +137,15 @@ class UserRepositoryTest {
 
 ### Registration
 
-The extension is activated by adding `@DatabaseTest` to the specification class:
+The extension is activated by adding `@DatabaseTest` to the specification class and implementing the `DatabaseTestSupport` trait:
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
-    @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
     }
 
@@ -159,43 +157,39 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
+### DatabaseTestSupport Trait
+
+The `DatabaseTestSupport` trait provides the contract for database testing:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `dbTesterRegistry` | `DataSourceRegistry` | Yes | Data source registration |
+| `dbTesterConfiguration` | `Configuration` | No | Custom configuration (defaults to `Configuration.defaults()`) |
+
 ### Configuration Customization
 
-Use a `@Shared` field named `dbTesterConfiguration`:
+Override `getDbTesterConfiguration()` in the specification:
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
-    @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
 
-    @Shared
-    Configuration dbTesterConfiguration
+    Configuration dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
-
-        dbTesterConfiguration = Configuration.builder()
-            .conventions(ConventionSettings.builder()
-                .dataFormat(DataFormat.TSV)
-                .build())
-            .build()
     }
 
     @DataSet
     @ExpectedDataSet
     def 'should create user'() { }
 }
-```
-
-### Reserved Field Names
-
-| Field Name | Type | Purpose |
-|------------|------|---------|
-| `dbTesterRegistry` | `DataSourceRegistry` | Data source registration |
-| `dbTesterConfiguration` | `Configuration` | Custom configuration |
 
 ### Feature Method Naming
 
@@ -239,20 +233,21 @@ Scenario names: `"should process PENDING order"`, `"should process COMPLETED ord
 
 ### Registration
 
-Register the extension in the `init` block. In Kotest 6, the `extensions()` method is final and cannot be overridden:
+**Simplified approach with `@DatabaseTest` (recommended)**:
+
+The `@DatabaseTest` annotation automatically registers `DatabaseTestExtension`. The specification class must implement the `DatabaseTestSupport` interface:
 
 ```kotlin
-class UserRepositorySpec : AnnotationSpec() {
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    private val registry = DataSourceRegistry()
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
+    override val dbTesterRegistry = DataSourceRegistry()
+    private lateinit var dataSource: DataSource
 
     @BeforeAll
     fun setupSpec() {
-        registry.registerDefault(dataSource)
+        dataSource = createDataSource()
+        dbTesterRegistry.registerDefault(dataSource)
     }
 
     @Test
@@ -264,64 +259,75 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-### DataSource Registration
+**Explicit extension registration**:
 
-The extension accepts a `registryProvider` lambda for late-bound DataSource registration:
+Register the extension in the `init` block. In Kotest 6, the `extensions()` method is final and cannot be overridden:
 
 ```kotlin
-class UserRepositorySpec : AnnotationSpec() {
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    companion object {
-        private var sharedRegistry: DataSourceRegistry? = null
-        private var sharedDataSource: DataSource? = null
-
-        private fun initializeSharedResources() {
-            sharedDataSource = createDataSource()
-            sharedRegistry = DataSourceRegistry().apply {
-                registerDefault(sharedDataSource!!)
-            }
-        }
-
-        fun getDbTesterRegistry(): DataSourceRegistry {
-            if (sharedRegistry == null) {
-                initializeSharedResources()
-            }
-            return sharedRegistry!!
-        }
-    }
+    override val dbTesterRegistry = DataSourceRegistry()
 
     init {
-        extensions(DatabaseTestExtension(registryProvider = { getDbTesterRegistry() }))
+        extensions(DatabaseTestExtension())
     }
 
     @BeforeAll
     fun setupSpec() {
-        if (sharedDataSource == null) {
-            initializeSharedResources()
-        }
+        dbTesterRegistry.registerDefault(dataSource)
+    }
+
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should create user`() {
+        // Test implementation
+    }
+}
+```
+
+### DatabaseTestSupport Interface
+
+The `DatabaseTestSupport` interface provides the contract for database testing:
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `dbTesterRegistry` | `DataSourceRegistry` | Yes | Data source registration |
+| `dbTesterConfiguration` | `Configuration` | No | Custom configuration (defaults to `Configuration.defaults()`) |
+
+### DataSource Registration
+
+Implement the `DatabaseTestSupport` interface and override `dbTesterRegistry`:
+
+```kotlin
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
+
+    override val dbTesterRegistry = DataSourceRegistry()
+
+    @BeforeAll
+    fun setupSpec() {
+        dbTesterRegistry.registerDefault(dataSource)
+        dbTesterRegistry.register("secondary", secondaryDataSource)
     }
 }
 ```
 
 ### Configuration Customization
 
-Pass a custom `Configuration` to the extension:
+Override `dbTesterConfiguration` in the interface implementation:
 
 ```kotlin
-class UserRepositorySpec : AnnotationSpec() {
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    init {
-        val config = Configuration.builder()
-            .conventions(ConventionSettings.builder()
-                .dataFormat(DataFormat.TSV)
-                .build())
-            .build()
+    override val dbTesterRegistry = DataSourceRegistry()
 
-        extensions(DatabaseTestExtension(
-            registryProvider = { registry },
-            configuration = config
-        ))
-    }
+    override val dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
 }
 ```
 
@@ -555,8 +561,8 @@ flowchart TD
 ```mermaid
 flowchart TD
     subgraph Specification Execution
-        INIT["init block"]
-        INIT --> INIT1[Register Extension]
+        ANN["@DatabaseTest or init block"]
+        ANN --> ANN1[Register Extension]
 
         BA["@BeforeAll"]
         BA --> BA1[Initialize Registry]
@@ -564,17 +570,18 @@ flowchart TD
 
         subgraph each["For each @Test method"]
             INT["intercept()"]
-            INT --> INT1["Find DataSet"]
-            INT1 --> INT2[Load datasets]
-            INT2 --> INT3[Execute operation]
-            INT3 --> TM[Test method execution]
-            TM --> INT4["Find ExpectedDataSet"]
-            INT4 --> INT5[Load expected datasets]
-            INT5 --> INT6[Compare with database]
-            INT6 --> INT7[Report mismatches]
+            INT --> INT1["Get dbTesterRegistry from DatabaseTestSupport"]
+            INT1 --> INT2["Find DataSet"]
+            INT2 --> INT3[Load datasets]
+            INT3 --> INT4[Execute operation]
+            INT4 --> TM[Test method execution]
+            TM --> INT5["Find ExpectedDataSet"]
+            INT5 --> INT6[Load expected datasets]
+            INT6 --> INT7[Compare with database]
+            INT7 --> INT8[Report mismatches]
         end
 
-        INIT1 --> BA
+        ANN1 --> BA
         BA2 --> each
         each --> AA["@AfterAll"]
         AA --> AA1[Cleanup]

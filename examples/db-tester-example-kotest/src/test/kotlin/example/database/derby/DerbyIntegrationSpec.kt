@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.apache.derby.jdbc.EmbeddedDataSource
 import org.slf4j.LoggerFactory
@@ -17,7 +18,10 @@ import javax.sql.DataSource
  * This test validates that the framework works correctly with Apache Derby database.
  * This is a smoke test to ensure Derby compatibility with Kotest.
  */
-class DerbyIntegrationSpec : AnnotationSpec() {
+@DatabaseTest
+class DerbyIntegrationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(DerbyIntegrationSpec::class.java)
 
@@ -52,12 +56,8 @@ class DerbyIntegrationSpec : AnnotationSpec() {
                 }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up Derby in-memory database connection and schema.
@@ -66,7 +66,7 @@ class DerbyIntegrationSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up Derby in-memory database").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/database/derby/derby-integration.sql")
             logger.info("Derby database setup completed")
         }

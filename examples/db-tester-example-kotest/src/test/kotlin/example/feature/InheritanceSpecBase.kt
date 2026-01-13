@@ -3,7 +3,8 @@ package example.feature
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -24,6 +25,7 @@ import javax.sql.DataSource
  *
  * @see InheritedAnnotationSpec
  */
+@DatabaseTest
 @DataSet(
     sources = [
         DataSetSource(
@@ -32,7 +34,9 @@ import javax.sql.DataSource
         ),
     ],
 )
-abstract class InheritanceSpecBase : AnnotationSpec() {
+abstract class InheritanceSpecBase :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(InheritanceSpecBase::class.java)
 
@@ -93,20 +97,12 @@ abstract class InheritanceSpecBase : AnnotationSpec() {
     /** DataSource for database operations. */
     protected lateinit var dataSource: DataSource
 
-    /**
-     * Gets the DataSourceRegistry.
-     *
-     * @return the registry
-     */
-    fun getDbTesterRegistry(): DataSourceRegistry =
-        sharedRegistry ?: run {
-            initializeSharedResources()
-            sharedRegistry!!
-        }
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { getDbTesterRegistry() }))
-    }
+    override val dbTesterRegistry: DataSourceRegistry
+        get() =
+            sharedRegistry ?: run {
+                initializeSharedResources()
+                sharedRegistry!!
+            }
 
     /**
      * Sets up H2 in-memory database connection and schema.

@@ -8,6 +8,7 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.Strategy
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -35,7 +36,7 @@ import spock.lang.Specification
  * @see Strategy
  */
 @DatabaseTest
-class ColumnStrategyAnnotationSpec extends Specification {
+class ColumnStrategyAnnotationSpec extends Specification implements DatabaseTestSupport {
 
 	@Shared
 	DataSource dataSource

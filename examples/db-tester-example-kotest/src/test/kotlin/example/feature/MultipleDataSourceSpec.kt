@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -24,7 +25,10 @@ import javax.sql.DataSource
  * - Microservices with their own databases
  * - Testing data synchronization between databases
  */
-class MultipleDataSourceSpec : AnnotationSpec() {
+@DatabaseTest
+class MultipleDataSourceSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(MultipleDataSourceSpec::class.java)
 
@@ -78,13 +82,9 @@ class MultipleDataSourceSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var primaryDataSource: DataSource
     private lateinit var secondaryDataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up two H2 in-memory databases.
@@ -97,12 +97,12 @@ class MultipleDataSourceSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory databases for MultipleDataSourceSpec").also {
             primaryDataSource = createPrimaryDataSource()
-            registry.registerDefault(primaryDataSource)
+            dbTesterRegistry.registerDefault(primaryDataSource)
             executeScript(primaryDataSource, "ddl/feature/MultipleDataSourceSpec-primary.sql")
             logger.info("Primary database setup completed")
 
             secondaryDataSource = createSecondaryDataSource()
-            registry.register("inventory", secondaryDataSource)
+            dbTesterRegistry.register("inventory", secondaryDataSource)
             executeScript(secondaryDataSource, "ddl/feature/MultipleDataSourceSpec-secondary.sql")
             logger.info("Secondary database setup completed")
         }

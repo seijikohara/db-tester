@@ -7,6 +7,7 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -34,7 +35,7 @@ import spock.lang.Specification
  * (CLEAN_INSERT for preparation, NONE for expectation).
  */
 @DatabaseTest
-class ConfigurationCustomizationSpec extends Specification {
+class ConfigurationCustomizationSpec extends Specification implements DatabaseTestSupport {
 
 	/** Shared DataSource for all feature methods. */
 	@Shared

@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.neo4j.jdbc.Neo4jDataSource
 import org.slf4j.Logger
@@ -29,7 +30,7 @@ import spock.lang.Specification
  */
 @Testcontainers
 @DatabaseTest
-class Neo4jIntegrationSpec extends Specification {
+class Neo4jIntegrationSpec extends Specification implements DatabaseTestSupport {
 
 	private static final Logger logger = LoggerFactory.getLogger(Neo4jIntegrationSpec)
 

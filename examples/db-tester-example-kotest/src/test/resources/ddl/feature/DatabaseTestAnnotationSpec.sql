@@ -1,0 +1,7 @@
+-- DDL for DatabaseTestAnnotationSpec (H2 Database)
+
+CREATE TABLE TABLE1 (
+    ID INTEGER PRIMARY KEY,
+    COLUMN1 VARCHAR(100) NOT NULL,
+    COLUMN2 DECIMAL(10, 2) NOT NULL
+);

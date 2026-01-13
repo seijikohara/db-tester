@@ -7,7 +7,8 @@ import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldNotBe
@@ -30,16 +31,15 @@ import org.slf4j.LoggerFactory
  * Note: These tests do not use database operations.
  * They test programmatic assertions directly.
  */
-class ErrorHandlingSpec : AnnotationSpec() {
+@DatabaseTest
+class ErrorHandlingSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(ErrorHandlingSpec::class.java)
     }
 
-    private val registry = DataSourceRegistry()
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
+    override val dbTesterRegistry = DataSourceRegistry()
 
     /**
      * Verifies that an assertion error is thrown when expected has more rows than actual.

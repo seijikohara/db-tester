@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
 import org.slf4j.LoggerFactory
@@ -25,7 +26,10 @@ import javax.sql.DataSource
  * [io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion.assertEqualsByQuery],
  * you would need to programmatically create expected datasets using DbUnit APIs.
  */
-class CustomQueryValidationSpec : AnnotationSpec() {
+@DatabaseTest
+class CustomQueryValidationSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(CustomQueryValidationSpec::class.java)
 
@@ -72,12 +76,8 @@ class CustomQueryValidationSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -86,7 +86,7 @@ class CustomQueryValidationSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for CustomQueryValidationSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/CustomQueryValidationSpec.sql")
             logger.info("Database setup completed")
         }

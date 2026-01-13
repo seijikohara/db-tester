@@ -8,6 +8,7 @@ import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.kotest.lifecycle.KotestExpectationVerifier
 import io.github.seijikohara.dbtester.kotest.lifecycle.KotestPreparationExecutor
 import io.kotest.core.extensions.TestCaseExtension
+import io.kotest.core.spec.Spec
 import io.kotest.core.test.TestCase
 import io.kotest.engine.test.TestResult
 import org.slf4j.LoggerFactory
@@ -25,11 +26,17 @@ import kotlin.reflect.jvm.javaMethod
  * 1. Before each test, resolves [DataSet] declarations and executes the resulting datasets.
  * 2. After each test, resolves [ExpectedDataSet] declarations and validates the database contents.
  *
- * **Usage with AnnotationSpec:**
+ * **Usage with `@DatabaseTest` annotation and `DatabaseTestSupport` interface (recommended):**
  * ```kotlin
- * class MyTest : AnnotationSpec() {
- *     override fun extensions(): List<Extension> =
- *         listOf(DatabaseTestExtension(::getDbTesterRegistry))
+ * @DatabaseTest
+ * class MyTest : AnnotationSpec(), DatabaseTestSupport {
+ *
+ *     override val dbTesterRegistry = DataSourceRegistry()
+ *
+ *     @BeforeAll
+ *     fun setup() {
+ *         dbTesterRegistry.registerDefault(createDataSource())
+ *     }
  *
  *     @Test
  *     @DataSet
@@ -40,14 +47,40 @@ import kotlin.reflect.jvm.javaMethod
  * }
  * ```
  *
- * @property registryProvider provider function that returns the [DataSourceRegistry]
- * @property configurationProvider optional provider function for custom [Configuration]
+ * **Usage with explicit extension registration:**
+ * ```kotlin
+ * class MyTest : AnnotationSpec() {
+ *     private val registry = DataSourceRegistry()
+ *
+ *     init {
+ *         extensions(DatabaseTestExtension(registryProvider = { registry }))
+ *     }
+ *
+ *     @Test
+ *     @DataSet
+ *     @ExpectedDataSet
+ *     fun `should verify database state`() {
+ *         // test implementation
+ *     }
+ * }
+ * ```
+ *
+ * When using the `@DatabaseTest` annotation, the spec class must implement
+ * [DatabaseTestSupport] to provide the registry and optional configuration.
+ *
+ * @property registryProvider optional provider function that returns the [DataSourceRegistry].
+ *     When null, the extension requires the spec to implement [DatabaseTestSupport].
+ * @property configurationProvider optional provider function for custom [Configuration].
+ *     When null, the extension uses [DatabaseTestSupport.dbTesterConfiguration] if available,
+ *     falling back to [Configuration.defaults] if not found.
+ * @see io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+ * @see DatabaseTestSupport
  * @see DataSet
  * @see ExpectedDataSet
  */
 class DatabaseTestExtension(
-    private val registryProvider: () -> DataSourceRegistry,
-    private val configurationProvider: () -> Configuration = { Configuration.defaults() },
+    private val registryProvider: (() -> DataSourceRegistry)? = null,
+    private val configurationProvider: (() -> Configuration)? = null,
 ) : TestCaseExtension {
     /** Companion object containing class-level constants and logger. */
     companion object {
@@ -118,6 +151,11 @@ class DatabaseTestExtension(
     /**
      * Creates a [TestContext] from the Kotest [TestCase].
      *
+     * Resolves the [DataSourceRegistry] and [Configuration] using the following priority:
+     * 1. Explicit provider functions passed to the constructor
+     * 2. [DatabaseTestSupport] interface implementation
+     * 3. Default values (empty registry causes error, default configuration)
+     *
      * @param testCase the Kotest test case
      * @param method the resolved test method
      * @return the test context
@@ -129,9 +167,46 @@ class DatabaseTestExtension(
         TestContext(
             testCase.spec::class.java,
             method,
-            configurationProvider(),
-            registryProvider(),
+            resolveConfiguration(testCase.spec),
+            resolveRegistry(testCase.spec),
         )
+
+    /**
+     * Resolves the [DataSourceRegistry] for the test.
+     *
+     * Resolution order:
+     * 1. Explicit provider function (if provided)
+     * 2. [DatabaseTestSupport.dbTesterRegistry] property
+     * 3. Error (spec must implement DatabaseTestSupport)
+     *
+     * @param spec the spec instance
+     * @return the resolved registry
+     * @throws IllegalStateException if no registry is available
+     */
+    private fun resolveRegistry(spec: Spec): DataSourceRegistry =
+        registryProvider?.invoke()
+            ?: (spec as? DatabaseTestSupport)?.dbTesterRegistry
+            ?: throw IllegalStateException(
+                "Spec class '${spec::class.simpleName}' must implement DatabaseTestSupport " +
+                    "to provide dbTesterRegistry, or use explicit registryProvider in " +
+                    "DatabaseTestExtension constructor.",
+            )
+
+    /**
+     * Resolves the [Configuration] for the test.
+     *
+     * Resolution order:
+     * 1. Explicit provider function (if provided)
+     * 2. [DatabaseTestSupport.dbTesterConfiguration] property
+     * 3. Default configuration via [Configuration.defaults]
+     *
+     * @param spec the spec instance
+     * @return the resolved configuration
+     */
+    private fun resolveConfiguration(spec: Spec): Configuration =
+        configurationProvider?.invoke()
+            ?: (spec as? DatabaseTestSupport)?.dbTesterConfiguration
+            ?: Configuration.defaults()
 
     /**
      * Requires and returns the test method from the test case.

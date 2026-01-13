@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -33,7 +34,7 @@ import spock.lang.Specification
  * state verification, or comparing multiple dataset sources.
  */
 @DatabaseTest
-class ProgrammaticAssertionApiSpec extends Specification {
+class ProgrammaticAssertionApiSpec extends Specification implements DatabaseTestSupport {
 
 	/** Shared DataSource for all feature methods. */
 	@Shared

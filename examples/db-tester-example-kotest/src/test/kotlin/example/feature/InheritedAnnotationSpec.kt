@@ -3,6 +3,7 @@ package example.feature
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.kotest.matchers.shouldBe
 import org.slf4j.LoggerFactory
 
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory
  *     TABLE1.csv        (child class specific expectations)
  * ```
  */
+@DatabaseTest
 class InheritedAnnotationSpec : InheritanceSpecBase() {
     companion object {
         private val logger = LoggerFactory.getLogger(InheritedAnnotationSpec::class.java)

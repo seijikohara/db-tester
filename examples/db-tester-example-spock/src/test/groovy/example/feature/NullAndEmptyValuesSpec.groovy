@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -32,7 +33,7 @@ import spock.lang.Specification
  * for all column types.
  */
 @DatabaseTest
-class NullAndEmptyValuesSpec extends Specification {
+class NullAndEmptyValuesSpec extends Specification implements DatabaseTestSupport {
 
 	@Shared
 	DataSource dataSource

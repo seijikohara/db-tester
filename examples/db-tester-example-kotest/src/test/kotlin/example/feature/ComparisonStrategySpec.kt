@@ -9,7 +9,8 @@ import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.AnnotationSpec
 import org.h2.jdbcx.JdbcDataSource
@@ -30,7 +31,10 @@ import javax.sql.DataSource
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.NOT_NULL] - Only verify the value is not null
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.regex] - Match against a regular expression
  */
-class ComparisonStrategySpec : AnnotationSpec() {
+@DatabaseTest
+class ComparisonStrategySpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(ComparisonStrategySpec::class.java)
 
@@ -92,12 +96,8 @@ class ComparisonStrategySpec : AnnotationSpec() {
                 }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -106,7 +106,7 @@ class ComparisonStrategySpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for ComparisonStrategySpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/ComparisonStrategySpec.sql")
             logger.info("Database setup completed")
         }

@@ -10,6 +10,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -30,7 +31,6 @@ import spock.lang.Specification
  * in the JUnit TableMergeStrategyTest. This Spock specification demonstrates
  * single dataset loading with different merge strategy configurations.
  */
-@DatabaseTest
 class TableMergeStrategySpec extends Specification {
 
 	/**
@@ -38,7 +38,8 @@ class TableMergeStrategySpec extends Specification {
 	 *
 	 * <p>Demonstrates configuring TableMergeStrategy.FIRST in ConventionSettings.
 	 */
-	static class FirstStrategySpec extends Specification {
+	@DatabaseTest
+	static class FirstStrategySpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource
@@ -134,7 +135,8 @@ class TableMergeStrategySpec extends Specification {
 	 *
 	 * <p>Demonstrates configuring TableMergeStrategy.LAST in ConventionSettings.
 	 */
-	static class LastStrategySpec extends Specification {
+	@DatabaseTest
+	static class LastStrategySpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource
@@ -230,7 +232,8 @@ class TableMergeStrategySpec extends Specification {
 	 *
 	 * <p>Demonstrates configuring TableMergeStrategy.UNION in ConventionSettings.
 	 */
-	static class UnionStrategySpec extends Specification {
+	@DatabaseTest
+	static class UnionStrategySpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource
@@ -326,7 +329,8 @@ class TableMergeStrategySpec extends Specification {
 	 *
 	 * <p>Demonstrates configuring TableMergeStrategy.UNION_ALL in ConventionSettings.
 	 */
-	static class UnionAllStrategySpec extends Specification {
+	@DatabaseTest
+	static class UnionAllStrategySpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource

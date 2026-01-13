@@ -10,6 +10,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -27,7 +28,6 @@ import spock.lang.Specification
  *
  * <p>CSV files use comma (,) as delimiter, TSV files use tab character as delimiter.
  */
-@DatabaseTest
 class DataFormatSpec extends Specification {
 
 	/**
@@ -40,7 +40,8 @@ class DataFormatSpec extends Specification {
 	 * 2,Bob,200
 	 * </pre>
 	 */
-	static class CsvFormatSpec extends Specification {
+	@DatabaseTest
+	static class CsvFormatSpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource
@@ -157,7 +158,8 @@ class DataFormatSpec extends Specification {
 	 * 2	Bob	200
 	 * </pre>
 	 */
-	static class TsvFormatSpec extends Specification {
+	@DatabaseTest
+	static class TsvFormatSpec extends Specification implements DatabaseTestSupport {
 
 		@Shared
 		DataSource dataSource

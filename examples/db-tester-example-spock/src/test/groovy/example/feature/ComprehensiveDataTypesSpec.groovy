@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -37,7 +38,7 @@ import spock.lang.Specification
  * empty columns (nothing between commas).
  */
 @DatabaseTest
-class ComprehensiveDataTypesSpec extends Specification {
+class ComprehensiveDataTypesSpec extends Specification implements DatabaseTestSupport {
 
 	/** Shared DataSource for all feature methods. */
 	@Shared

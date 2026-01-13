@@ -51,7 +51,37 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ## Usage
 
-### Basic Example
+### Simplified Example with `@DatabaseTest`
+
+The recommended approach uses the `@DatabaseTest` annotation with convention-based registry discovery:
+
+```kotlin
+@DatabaseTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    val dbTesterRegistry = DataSourceRegistry()
+    private lateinit var dataSource: DataSource
+
+    @BeforeAll
+    fun setupSpec() {
+        dataSource = createDataSource()
+        dbTesterRegistry.registerDefault(dataSource)
+    }
+
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should create user`() {
+        userRepository.create(User("Alice", "alice@example.com"))
+    }
+}
+```
+
+The `@DatabaseTest` annotation automatically registers `DatabaseTestExtension` and discovers the registry by looking for a property named `dbTesterRegistry`.
+
+### Explicit Extension Registration
+
+For more control, register the extension explicitly:
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec() {
@@ -82,7 +112,24 @@ Register `DatabaseTestExtension` in the `init` block. DataSource registration is
 
 ### DataSource Registration
 
-Register data sources using a `registryProvider` lambda:
+**Convention-based discovery (recommended):**
+
+When using `@DatabaseTest`, the extension discovers the registry by looking for a property named `dbTesterRegistry`:
+
+```kotlin
+@DatabaseTest
+class MySpec : AnnotationSpec() {
+    val dbTesterRegistry = DataSourceRegistry()
+
+    @BeforeAll
+    fun setupSpec() {
+        dbTesterRegistry.registerDefault(dataSource)
+        dbTesterRegistry.register("secondary", secondaryDataSource)
+    }
+}
+```
+
+**Explicit provider (for full control):**
 
 ```kotlin
 private val registry = DataSourceRegistry()
@@ -140,6 +187,26 @@ Test method names with backticks map directly to `[Scenario]` column values.
 
 ### Configuration Customization
 
+**Convention-based discovery:**
+
+When using `@DatabaseTest`, provide a property named `dbTesterConfiguration`:
+
+```kotlin
+@DatabaseTest
+class MySpec : AnnotationSpec() {
+    val dbTesterRegistry = DataSourceRegistry()
+
+    val dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .scenarioMarker("[TestCase]")
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
+}
+```
+
+**Explicit provider:**
+
 ```kotlin
 init {
     val config = Configuration.builder()
@@ -151,7 +218,7 @@ init {
 
     extensions(DatabaseTestExtension(
         registryProvider = { registry },
-        configuration = config
+        configurationProvider = { config }
     ))
 }
 ```
@@ -164,6 +231,7 @@ init {
 
 | Class | Description |
 |-------|-------------|
+| [`@DatabaseTest`](src/main/kotlin/io/github/seijikohara/dbtester/kotest/annotation/DatabaseTest.kt) | Annotation for simplified extension registration |
 | [`DatabaseTestExtension`](src/main/kotlin/io/github/seijikohara/dbtester/kotest/extension/DatabaseTestExtension.kt) | TestCaseExtension for test lifecycle integration |
 | [`KotestPreparationExecutor`](src/main/kotlin/io/github/seijikohara/dbtester/kotest/lifecycle/KotestPreparationExecutor.kt) | Executes data preparation phase |
 | [`KotestExpectationVerifier`](src/main/kotlin/io/github/seijikohara/dbtester/kotest/lifecycle/KotestExpectationVerifier.kt) | Verifies database state after test execution |

@@ -4,7 +4,8 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.core.test.TestCaseOrder
 import org.h2.jdbcx.JdbcDataSource
@@ -29,7 +30,10 @@ import javax.sql.DataSource
  * omit COLUMN3 (TIMESTAMP) to demonstrate that specifying all table columns in CSV files is not
  * required.
  */
-class OperationVariationsSpec : AnnotationSpec() {
+@DatabaseTest
+class OperationVariationsSpec :
+    AnnotationSpec(),
+    DatabaseTestSupport {
     /**
      * Ensures tests run in sequential (source code) order to match Spock behavior.
      *
@@ -84,12 +88,8 @@ class OperationVariationsSpec : AnnotationSpec() {
                 }.let { }
     }
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
-    }
 
     /**
      * Sets up H2 in-memory database connection and schema.
@@ -98,7 +98,7 @@ class OperationVariationsSpec : AnnotationSpec() {
     fun setupDatabase(): Unit =
         logger.info("Setting up H2 in-memory database for OperationVariationsSpec").also {
             dataSource = createDataSource()
-            registry.registerDefault(dataSource)
+            dbTesterRegistry.registerDefault(dataSource)
             executeScript(dataSource, "ddl/feature/OperationVariationsSpec.sql")
             logger.info("Database setup completed")
         }

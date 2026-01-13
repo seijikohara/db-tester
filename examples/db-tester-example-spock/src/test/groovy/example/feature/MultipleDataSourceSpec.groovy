@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
+import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
@@ -29,7 +30,7 @@ import spock.lang.Specification
  * </ul>
  */
 @DatabaseTest
-class MultipleDataSourceSpec extends Specification {
+class MultipleDataSourceSpec extends Specification implements DatabaseTestSupport {
 
 	/** Primary database DataSource. */
 	@Shared
