@@ -1,7 +1,5 @@
 # DB Tester仕様 - 概要
 
-DB Testerフレームワークの概要を説明します。
-
 ## 目的
 
 DB Testerは、JUnit、Spock、およびKotest向けのデータベーステストフレームワークです。CSV/TSVベースのテストデータファイルを使用し、アノテーション駆動型のデータ準備と状態検証を提供します。
@@ -133,23 +131,24 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 
 | モジュール | 説明 | ドキュメント |
 |------------|------|--------------|
-| `db-tester-api` | パブリックAPIモジュール | [アーキテクチャ](02-architecture) |
-| `db-tester-core` | 内部実装 | [アーキテクチャ](02-architecture) |
-| `db-tester-junit` | JUnit Jupiter拡張 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-spock` | Spock拡張 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-kotest` | Kotest AnnotationSpec拡張 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-junit-spring-boot-starter` | JUnit用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-spock-spring-boot-starter` | Spock用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
-| `db-tester-kotest-spring-boot-starter` | Kotest用Spring Boot統合 | [テストフレームワーク](07-test-frameworks) |
+| `db-tester-api` | パブリックAPIモジュール | [アーキテクチャ](architecture) |
+| `db-tester-core` | 内部実装 | [アーキテクチャ](architecture) |
+| `db-tester-spring-support` | Spring DataSource統合サポート | [アーキテクチャ](architecture) |
+| `db-tester-junit` | JUnit Jupiter拡張 | [テストフレームワーク](test-frameworks) |
+| `db-tester-spock` | Spock拡張 | [テストフレームワーク](test-frameworks) |
+| `db-tester-kotest` | Kotest AnnotationSpec拡張 | [テストフレームワーク](test-frameworks) |
+| `db-tester-junit-spring-boot-starter` | JUnit用Spring Boot統合 | [テストフレームワーク](test-frameworks) |
+| `db-tester-spock-spring-boot-starter` | Spock用Spring Boot統合 | [テストフレームワーク](test-frameworks) |
+| `db-tester-kotest-spring-boot-starter` | Kotest用Spring Boot統合 | [テストフレームワーク](test-frameworks) |
 | `db-tester-bom` | 依存関係管理のためのBill of Materials | - |
 
 ## 関連仕様
 
-- [アーキテクチャ](02-architecture) - モジュール構造と依存関係
-- [パブリックAPI](03-public-api) - アノテーションと設定クラス
-- [設定](04-configuration) - 設定オプションと規約
-- [データフォーマット](05-data-formats) - CSVおよびTSVファイル構造と解析
-- [データベース操作](06-database-operations) - サポートされるCRUD操作
-- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
-- [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
-- [エラーハンドリング](09-error-handling) - エラーメッセージと例外型
+- [アーキテクチャ](architecture) - モジュール構造と依存関係
+- [パブリックAPI](public-api) - アノテーションと設定クラス
+- [設定](configuration) - 設定オプションと規約
+- [データフォーマット](data-formats) - CSVおよびTSVファイル構造と解析
+- [データベース操作](database-operations) - サポートされるCRUD操作
+- [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
+- [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント
+- [エラーハンドリング](error-handling) - エラーメッセージと例外型

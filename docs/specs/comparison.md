@@ -1,6 +1,6 @@
 # Framework Comparison
 
-This page provides an in-depth comparison of DB Tester with other database testing frameworks in the Java/JVM ecosystem.
+This page compares DB Tester with other database testing frameworks in the Java/JVM ecosystem.
 
 ## Executive Summary
 
@@ -14,7 +14,7 @@ This page provides an in-depth comparison of DB Tester with other database testi
 | **JDBDT** | Incremental change verification | Smaller community |
 
 ::: info Testcontainers
-[Testcontainers](https://testcontainers.com/) is complementary to these frameworks. It provides database infrastructure (Docker containers), while the frameworks above manage test data. They can be used together.
+[Testcontainers](https://testcontainers.com/) complements these frameworks. Testcontainers provides database infrastructure (Docker containers), while these frameworks manage test data. Use them together.
 :::
 
 ## Detailed Feature Comparison
@@ -33,12 +33,12 @@ This page provides an in-depth comparison of DB Tester with other database testi
 | CDI/Jakarta EE | - | - | Yes | - | - | - |
 | Cucumber/BDD | - | - | Yes | - | - | - |
 
-*DSL: Annotations (`@DataSet`, `@ExpectedDataSet`) are supported for Database Rider. DB Tester uses these same annotation names. For Spock with Database Rider, use [RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl) programmatic API.
+*DSL: Database Rider supports `@DataSet` and `@ExpectedDataSet` annotations. DB Tester uses the same annotation names. For Spock with Database Rider, use the [RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl) programmatic API.
 
 **Analysis:**
-- DB Tester is the only framework with native JUnit 6 and Kotest support
-- Database Rider has the widest test framework coverage for JUnit 5, but Spock requires programmatic API
-- DBUnit lacks JUnit 5/6 support
+- DB Tester offers the only native JUnit 6 and Kotest support.
+- Database Rider covers the widest test framework range for JUnit 5, but Spock requires a programmatic API.
+- DBUnit lacks JUnit 5/6 support.
 
 ### Data Format Support
 
@@ -56,9 +56,9 @@ This page provides an in-depth comparison of DB Tester with other database testi
 | SQL Scripts | - | - | Yes | - | Yes | - |
 
 **Analysis:**
-- Database Rider supports the most formats (YAML, JSON, XML, CSV, Excel)
-- DB Tester focuses on CSV/TSV for straightforward data management
-- DbSetup and JDBDT prefer programmatic data definition
+- Database Rider supports the most formats (YAML, JSON, XML, CSV, Excel).
+- DB Tester focuses on CSV/TSV for data management.
+- DbSetup and JDBDT prefer programmatic data definition.
 
 ### Configuration Approach
 
@@ -161,7 +161,7 @@ USER:
 | **No YAML/JSON support** | Cannot use human-friendly formats for complex nested data | Use CSV with clear column naming |
 | **No XML support** | Cannot migrate from existing DBUnit XML datasets | Convert XML to CSV manually or via script |
 | **No Excel support** | Business users cannot maintain test data in spreadsheets | Export Excel to CSV |
-| **No programmatic dataset builder** | Cannot generate dynamic test data in code | Use SPI to implement custom DataLoader |
+| **No programmatic dataset builder** | Cannot generate dynamic test data in code | Implement custom DataLoader via SPI |
 
 ### Feature Limitations
 
@@ -169,11 +169,11 @@ USER:
 |------------|--------|-------------|
 | **No delta assertions** | Cannot verify only the changes made by test | Verify full expected state |
 
-| **No scriptable datasets** | Cannot embed dynamic values in CSV | Prepare data programmatically before test |
+| **No scriptable datasets** | Cannot embed dynamic values in CSV | Prepare data programmatically before each test |
 | **No dataset export** | Cannot capture current DB state for debugging | Use database client tools |
 | **No replacement/placeholder** | Cannot use variables in datasets | Define explicit values per scenario |
 | **No sequence reset** | Cannot reset auto-increment counters | Handle via SQL in @BeforeEach |
-| **No connection leak detection** | Memory leaks may go unnoticed | Use external monitoring tools |
+| **No connection leak detection** | Connection leaks may go unnoticed | Use external monitoring tools |
 
 ### Ecosystem Limitations
 
@@ -181,7 +181,7 @@ USER:
 |------------|--------|---------------|
 | **No JUnit 4/5 support** | Cannot use with legacy test suites | Migrate to JUnit 6 or use Database Rider |
 | **No TestNG support** | Limited options for TestNG users | Use DbSetup or JDBDT |
-| **No CDI integration** | Cannot auto-inject in Jakarta EE | Manual DataSource registration required |
+| **No CDI integration** | Cannot auto-inject in Jakarta EE | Register DataSource manually |
 | **No Cucumber support** | Cannot use in BDD scenarios | Use Database Rider for BDD |
 | **New project** | Smaller community, less battle-tested | Evaluate thoroughly before production use |
 | **Limited documentation** | Fewer examples and tutorials | Refer to test cases in source code |
@@ -207,11 +207,11 @@ Consider alternatives if you need:
 **Philosophy:** Convention over configuration with minimal boilerplate.
 
 **Unique Strengths:**
-- Zero-configuration dataset discovery based on test class/method names
-- Scenario filtering allows sharing datasets across multiple test methods
-- YAML-formatted assertion errors for readable debugging output
-- Native Kotest support (only framework with this)
-- SPI for custom extensions
+- Zero-configuration dataset discovery based on test class and method names
+- Scenario filtering shares datasets across multiple test methods
+- YAML-formatted assertion errors provide readable debugging output
+- Native Kotest support (only framework with this feature)
+- SPI enables custom extensions
 
 **Architecture:**
 ```
@@ -241,10 +241,10 @@ class UserTest {
 **Philosophy:** Comprehensive database state management with extensive customization options.
 
 **Unique Strengths:**
-- Most mature and battle-tested (since 2002)
+- Most mature and battle-tested framework (since 2002)
 - Extensive XML dataset support with schema validation
-- ReplacementDataSet for dynamic placeholders
-- Database export for capturing production-like data
+- ReplacementDataSet supports dynamic placeholders
+- Database export captures production-like data
 - Wide IDE and tool integration
 
 **Core Components:**
@@ -268,11 +268,11 @@ public void setUp() throws Exception {
 
 **Unique Strengths:**
 - Widest data format support (YAML, JSON, XML, CSV, Excel)
-- Scriptable datasets with Groovy/JavaScript
+- Scriptable datasets use Groovy/JavaScript
 - Regex matching in expected datasets
 - CDI and Cucumber integration
 - Connection leak detection
-- Active development and community
+- Active development and active community
 
 **Configuration Options:**
 ```java
@@ -307,9 +307,9 @@ class UserTest {
 
 **Unique Strengths:**
 - Deep Spring TestContext integration
-- Transaction management with Spring
+- Transaction management integrates with Spring
 - Familiar annotation style for Spring developers
-- TestExecutionListener approach
+- TestExecutionListener-based approach
 
 **Limitations:**
 - No active maintenance (last release 2016)
@@ -338,8 +338,8 @@ public class UserRepositoryTest {
 **Unique Strengths:**
 - Zero external dependencies
 - Type-safe Java/Kotlin DSL
-- DbSetupTracker for test optimization
-- Value generators for sequences
+- DbSetupTracker optimizes test execution
+- Value generators handle sequences
 - Fast execution
 
 **Limitations:**
@@ -381,10 +381,10 @@ operation.launch()
 **Philosophy:** Lightweight delta testing without external dependencies.
 
 **Unique Strengths:**
-- Delta assertions (verify only changes)
+- Delta assertions verify only changes
 - Self-contained (Java 8 SE only)
 - Programmatic dataset builders
-- CSV import/export
+- CSV import/export support
 - Lightweight (~100KB)
 
 **Delta Assertion Concept:**

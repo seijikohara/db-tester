@@ -1,11 +1,8 @@
 # DB Tester Specification - Service Provider Interface (SPI)
 
-This document describes the SPI extension points in the DB Tester framework.
-
-
 ## SPI Overview
 
-The framework uses Java ServiceLoader for loose coupling between modules:
+The framework uses Java ServiceLoader to decouple modules:
 
 ```mermaid
 flowchart TB
@@ -30,9 +27,9 @@ flowchart TB
 
 ### Design Principles
 
-1. **API Independence**: Test framework modules depend only on `db-tester-api`
-2. **Runtime Discovery**: Core implementations load via ServiceLoader
-3. **Extensibility**: Custom implementations can replace defaults
+1. **API Independence**: Test framework modules depend only on `db-tester-api`.
+2. **Runtime Discovery**: ServiceLoader loads core implementations at runtime.
+3. **Extensibility**: Custom implementations replace defaults when registered.
 
 
 ## API Module SPIs
@@ -53,7 +50,7 @@ public interface DataSetLoaderProvider {
 
 **Default Implementation**: `DefaultDataSetLoaderProvider` in `db-tester-core`
 
-**Usage**: Called by `Configuration.defaults()` to obtain the loader
+**Usage**: `Configuration.defaults()` calls this provider to obtain the loader.
 
 
 ### OperationProvider
@@ -152,12 +149,12 @@ public interface AssertionProvider {
 | `assertEqualsByQuery(...)` | Compare query results against expected data |
 
 **Behavior**:
-1. Compare expected vs actual datasets or tables
-2. Apply comparison strategies per column (STRICT, IGNORE, NUMERIC, and others)
-3. Collect all differences (not fail-fast)
-4. Output human-readable summary with YAML details on mismatch
+1. The provider compares expected and actual datasets or tables.
+2. The provider applies comparison strategies per column (STRICT, IGNORE, NUMERIC, and others).
+3. The provider collects all differences without fail-fast behavior.
+4. The provider outputs a human-readable summary with YAML details on mismatch.
 
-See [Error Handling - Validation Errors](09-error-handling#validation-errors) for output format details.
+See [Error Handling - Validation Errors](error-handling#validation-errors) for output format details.
 
 
 ### ExpectationProvider
@@ -212,11 +209,11 @@ public interface ExpectationProvider {
 | `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
 
 **Process**:
-1. For each table in the expected dataset, fetch actual data from the database
-2. Filter actual data to include only columns present in expected table
-3. Apply column exclusions and comparison strategies
-4. Compare filtered actual data against expected data
-5. Throw `AssertionError` if verification fails
+1. The provider iterates each table in the expected dataset and fetches actual data from the database.
+2. The provider filters actual data to include only columns present in the expected table.
+3. The provider applies column exclusions and comparison strategies.
+4. The provider compares filtered actual data against expected data.
+5. The provider throws `AssertionError` if verification fails.
 
 
 ### ScenarioNameResolver
@@ -260,10 +257,10 @@ public interface ScenarioNameResolver {
 | `KotestScenarioNameResolver` | `db-tester-kotest` | Resolves from Kotest test case name |
 
 **Resolution Logic**:
-1. Sort all registered resolvers by `priority()` (descending)
-2. Query each resolver via `canResolve()`
-3. Use first resolver that returns `true`
-4. Call `resolve()` to obtain scenario name
+1. The framework sorts all registered resolvers by `priority()` in descending order.
+2. The framework queries each resolver via `canResolve()`.
+3. The framework selects the first resolver that returns `true`.
+4. The framework calls `resolve()` to obtain the scenario name.
 
 
 ## Core Module SPIs
@@ -297,7 +294,7 @@ public interface FormatProvider {
 | `CsvFormatProvider` | `.csv` | Comma |
 | `TsvFormatProvider` | `.tsv` | Tab |
 
-This is an internal SPI not intended for external implementation.
+This internal SPI does not support external implementation.
 
 
 ## ServiceLoader Registration
@@ -466,7 +463,7 @@ com.example.XmlFormatProvider
 
 ### Provider Priority
 
-When multiple providers are registered:
+The framework selects providers as follows when multiple providers exist:
 
 | SPI | Selection |
 |-----|-----------|
@@ -480,7 +477,7 @@ When multiple providers are registered:
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Architecture](02-architecture) - Module structure
-- [Configuration](04-configuration) - Configuration classes
-- [Test Frameworks](07-test-frameworks) - Framework integration
+- [Overview](overview) - Framework purpose and key concepts
+- [Architecture](architecture) - Module structure
+- [Configuration](configuration) - Configuration classes
+- [Test Frameworks](test-frameworks) - Framework integration

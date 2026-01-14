@@ -77,7 +77,7 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-Register `SpringBootDatabaseTestExtension` in the `init` block. DataSource is auto-registered from Spring context.
+Register `SpringBootDatabaseTestExtension` in the `init` block. The extension registers the DataSource from the Spring context.
 
 ### Multiple DataSources
 

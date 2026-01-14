@@ -1,6 +1,6 @@
 # DB Tester - Spring Support Module
 
-This module provides common Spring utilities for the DB Tester framework. It contains shared logic used by the Spring Boot starter modules to eliminate code duplication.
+This module provides common Spring utilities for the DB Tester framework. The module contains shared logic used by the Spring Boot starter modules to eliminate code duplication.
 
 ## Overview
 
@@ -29,7 +29,7 @@ db-tester-kotest-spring-boot-starter
 
 ## Installation
 
-This module is a transitive dependency of the Spring Boot starters. Direct dependency is not required for typical usage.
+The Spring Boot starters include this module as a transitive dependency. Direct dependency is not required for typical usage.
 
 Use the Spring Boot starter modules instead:
 
@@ -72,7 +72,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ## Usage
 
-The support classes are typically used internally by the Spring Boot starters:
+The Spring Boot starters use these support classes internally:
 
 ```java
 // In a Spring Boot starter's DataSourceRegistrar

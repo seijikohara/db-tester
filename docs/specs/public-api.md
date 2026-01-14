@@ -1,12 +1,10 @@
 # DB Tester Specification - Public API
 
-This document describes the public API provided by the `db-tester-api` module.
-
 ## Annotations
 
 ### @DataSet
 
-Declares datasets to apply before a test method executes.
+Declares the datasets to apply before a test method executes.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
@@ -44,7 +42,7 @@ void testWithCustomPath() { }
 
 ### @ExpectedDataSet
 
-Declares datasets that define the expected database state after test execution.
+Declares the datasets that define the expected database state after test execution.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
@@ -88,7 +86,7 @@ void testWithRetry() { }
 
 ### @DataSetSource
 
-Configures individual dataset parameters within `@DataSet` or `@ExpectedDataSet`.
+Configures individual dataset source parameters within `@DataSet` or `@ExpectedDataSet`.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSetSource`
 
@@ -154,7 +152,7 @@ void testWithColumnStrategies() { }
 
 ### @ColumnStrategy
 
-Configures the comparison strategy for a specific column during expectation verification.
+Configures the comparison strategy for a column during expectation verification.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.ColumnStrategy`
 
@@ -212,7 +210,7 @@ Enum defining row comparison strategies for use in `@ExpectedDataSet` annotation
 
 ### TableSet
 
-Represents a logical collection of database tables.
+Represents a collection of database tables.
 
 **Location**: `io.github.seijikohara.dbtester.api.dataset.TableSet`
 
@@ -649,12 +647,12 @@ Indicates assertion or validation failure.
 - Row count differences
 - Column value mismatches
 
-**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](09-error-handling#validation-errors) for format details.
+**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](error-handling#validation-errors) for format details.
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework introduction
-- [Configuration](04-configuration) - Configuration classes
-- [Database Operations](06-database-operations) - Operation enum details
-- [SPI](08-spi) - Service Provider Interface extension points
-- [Error Handling](09-error-handling) - Error messages and exception types
+- [Overview](overview) - Framework introduction
+- [Configuration](configuration) - Configuration classes
+- [Database Operations](database-operations) - Operation enum details
+- [SPI](spi) - Service Provider Interface extension points
+- [Error Handling](error-handling) - Error messages and exception types

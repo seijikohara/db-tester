@@ -77,7 +77,7 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-The `@DatabaseTest` annotation automatically registers `DatabaseTestExtension` and discovers the registry by looking for a property named `dbTesterRegistry`.
+The `@DatabaseTest` annotation registers `DatabaseTestExtension` automatically. The extension discovers the registry by locating a property named `dbTesterRegistry`.
 
 ### Explicit Extension Registration
 
@@ -108,13 +108,13 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-Register `DatabaseTestExtension` in the `init` block. DataSource registration is required in `@BeforeAll`.
+Register `DatabaseTestExtension` in the `init` block. Register the DataSource in `@BeforeAll`.
 
 ### DataSource Registration
 
 **Convention-based discovery (recommended):**
 
-When using `@DatabaseTest`, the extension discovers the registry by looking for a property named `dbTesterRegistry`:
+When using `@DatabaseTest`, the extension discovers the registry by locating a property named `dbTesterRegistry`:
 
 ```kotlin
 @DatabaseTest
@@ -183,7 +183,7 @@ should create user,1,Alice,alice@example.com
 should update user,1,Alice Updated,alice.updated@example.com
 ```
 
-Test method names with backticks map directly to `[Scenario]` column values.
+Test method names with backticks map to `[Scenario]` column values.
 
 ### Configuration Customization
 

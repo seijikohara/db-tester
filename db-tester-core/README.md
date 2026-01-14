@@ -1,6 +1,6 @@
 # DB Tester - Core Module
 
-This module provides the internal implementation of the DB Tester framework. It implements the SPI interfaces defined in `db-tester-api` and contains database operations, dataset loaders, and format providers.
+This module provides the internal implementation of the DB Tester framework. The module implements the SPI interfaces defined in `db-tester-api`. It contains database operations, dataset loaders, and format providers.
 
 ## Overview
 
@@ -28,7 +28,7 @@ db-tester-junit / db-tester-spock / db-tester-kotest (test framework integration
 
 ## Installation
 
-This module is loaded automatically at runtime by the integration modules. Direct dependency is not required for typical usage.
+Integration modules load this module automatically at runtime via ServiceLoader. Direct dependency is not required for typical usage.
 
 Use the integration modules instead:
 
@@ -97,7 +97,7 @@ Internal format providers:
 |--------------|-----------------|
 | `FormatProvider` | `CsvFormatProvider`, `TsvFormatProvider` |
 
-These are registered via `META-INF/services/` and loaded via ServiceLoader.
+The framework registers these providers in `META-INF/services/` and loads them via ServiceLoader.
 
 ## JPMS Support
 

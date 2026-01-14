@@ -71,7 +71,7 @@ class UserRepositoryTest {
 }
 ```
 
-Register `DatabaseTestExtension` using `@ExtendWith`. DataSource registration is required in `@BeforeAll`.
+Register `DatabaseTestExtension` using `@ExtendWith`. Register the DataSource in `@BeforeAll`.
 
 ### DataSource Registration
 

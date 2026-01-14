@@ -80,7 +80,7 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-Add `@DatabaseTest` annotation to enable the extension. DataSource registration is required in `setupSpec()`.
+Add the `@DatabaseTest` annotation to enable the extension. Register the DataSource in `setupSpec()`.
 
 ### DataSource Registration
 
@@ -134,7 +134,7 @@ should create user,1,Alice,alice@example.com
 should update user,1,Alice Updated,alice.updated@example.com
 ```
 
-Feature method names with spaces map directly to `[Scenario]` column values.
+Feature method names with spaces map to `[Scenario]` column values.
 
 ### Configuration Customization
 

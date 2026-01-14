@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: はじめる
-      link: /ja/01-overview
+      link: /ja/overview
     - theme: alt
       text: GitHubで見る
       link: https://github.com/seijikohara/db-tester
@@ -27,7 +27,7 @@ features:
   - icon:
       src: /icons/convention.svg
     title: 設定より規約
-    details: テストクラスとメソッド名に基づいた自動データセット検出。規約に従えば動作します。
+    details: フレームワークがテストクラスとメソッド名に基づいてデータセットを自動検出します。
   - icon:
       src: /icons/frameworks.svg
     title: 複数フレームワーク対応
@@ -252,7 +252,7 @@ tables:
 ```
 
 ::: tip
-出力は有効なYAMLであり、CI/CD統合のために標準的なYAMLライブラリで解析できます。
+出力は有効なYAMLです。標準的なYAMLライブラリがCI/CD統合のためにこの出力を解析できます。
 :::
 
-詳細は[エラーハンドリング](/ja/09-error-handling)を参照してください。
+詳細は[エラーハンドリング](/ja/error-handling)を参照してください。

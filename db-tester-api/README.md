@@ -1,6 +1,6 @@
 # DB Tester - API Module
 
-This module defines the public API for DB Tester, including annotations, configuration types, domain objects, and SPI interfaces.
+This module provides the public API for DB Tester. The module includes annotations, configuration types, domain objects, and SPI interfaces.
 
 ## Overview
 

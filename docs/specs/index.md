@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /01-overview
+      link: /overview
     - theme: alt
       text: View on GitHub
       link: https://github.com/seijikohara/db-tester
@@ -27,7 +27,7 @@ features:
   - icon:
       src: /icons/convention.svg
     title: Convention over Configuration
-    details: Automatic dataset discovery based on test class and method names. Follow the conventions.
+    details: The framework discovers datasets based on test class and method names.
   - icon:
       src: /icons/frameworks.svg
     title: Multiple Frameworks
@@ -39,7 +39,7 @@ features:
   - icon:
       src: /icons/database.svg
     title: Database Operations
-    details: Support for CLEAN_INSERT, INSERT, UPDATE, DELETE, TRUNCATE and more with customizable table ordering.
+    details: Supports CLEAN_INSERT, INSERT, UPDATE, DELETE, TRUNCATE, and more with customizable table ordering.
   - icon:
       src: /icons/extensible.svg
     title: Extensible Architecture
@@ -230,7 +230,7 @@ src/test/resources/
 
 ### Validation Output
 
-When expectation verification fails, DB Tester provides detailed YAML-formatted error messages:
+DB Tester outputs detailed YAML-formatted error messages when expectation verification fails:
 
 ```yaml
 Assertion failed: 2 differences in USERS
@@ -252,7 +252,7 @@ tables:
 ```
 
 ::: tip
-The output is valid YAML and can be parsed by standard YAML libraries for CI/CD integration.
+The output is valid YAML. Standard YAML libraries parse this output for CI/CD integration.
 :::
 
-See [Error Handling](/09-error-handling) for more details.
+See [Error Handling](/error-handling) for more details.

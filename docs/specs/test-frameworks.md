@@ -1,7 +1,5 @@
 # DB Tester Specification - Test Framework Integration
 
-This document describes the integration with JUnit, Spock, and Kotest test frameworks.
-
 ## JUnit Integration
 
 ### Module
@@ -137,7 +135,7 @@ class UserRepositoryTest {
 
 ### Registration
 
-The extension is activated by adding `@DatabaseTest` to the specification class and implementing the `DatabaseTestSupport` trait:
+Add `@DatabaseTest` to the specification class and implement the `DatabaseTestSupport` trait to activate the extension:
 
 ```groovy
 @DatabaseTest
@@ -204,7 +202,7 @@ def 'should create user with email'() {
 
 ### Data-Driven Tests
 
-For parameterized tests with `where:` blocks, the iteration name is used:
+For parameterized tests with `where:` blocks, Spock uses the iteration name:
 
 ```groovy
 @DataSet
@@ -235,7 +233,7 @@ Scenario names: `"should process PENDING order"`, `"should process COMPLETED ord
 
 **Simplified approach with `@DatabaseTest` (recommended)**:
 
-The `@DatabaseTest` annotation automatically registers `DatabaseTestExtension`. The specification class must implement the `DatabaseTestSupport` interface:
+The `@DatabaseTest` annotation registers `DatabaseTestExtension` automatically. The specification class must implement the `DatabaseTestSupport` interface:
 
 ```kotlin
 @DatabaseTest
@@ -261,7 +259,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
 **Explicit extension registration**:
 
-Register the extension in the `init` block. In Kotest 6, the `extensions()` method is final and cannot be overridden:
+Register the extension in the `init` block. In Kotest 6, the `extensions()` method is final:
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
@@ -360,10 +358,10 @@ DB Tester requires `AnnotationSpec` style for Kotest integration because:
 
 ### Automatic DataSource Discovery
 
-The Spring Boot extension automatically:
-1. Detects Spring `ApplicationContext`
+The Spring Boot extension performs these steps automatically:
+1. Detects the Spring `ApplicationContext`
 2. Finds `DataSource` beans
-3. Registers them with `DataSourceRegistry`
+3. Registers the beans with `DataSourceRegistry`
 
 ```java
 @SpringBootTest
@@ -425,8 +423,8 @@ db-tester.auto-register-data-sources=true
 # Data format (CSV or TSV)
 db-tester.convention.data-format=CSV
 
-# ExpectedDataSet directory suffix
-db-tester.convention.expected-data-set-suffix=/expected
+# Expectation directory suffix
+db-tester.convention.expectation-suffix=/expected
 
 # Scenario marker column name
 db-tester.convention.scenario-marker=[Scenario]
@@ -434,14 +432,14 @@ db-tester.convention.scenario-marker=[Scenario]
 # Table merge strategy (FIRST, LAST, UNION, UNION_ALL)
 db-tester.convention.table-merge-strategy=UNION_ALL
 
-# Default data set operation
-db-tester.operation.data-set=CLEAN_INSERT
+# Default preparation operation
+db-tester.operation.preparation=CLEAN_INSERT
 
-# Default expected data set operation (typically NONE for verification only)
-db-tester.operation.expected-data-set=NONE
+# Default expectation operation (typically NONE for verification only)
+db-tester.operation.expectation=NONE
 ```
 
-Property names use singular form (`convention`, `operation`) not plural.
+Property names use singular form (`convention`, `operation`).
 
 ### Spock Spring Boot Starter
 
@@ -590,11 +588,11 @@ flowchart TD
 
 ### Lifecycle Executor Classes
 
-| Framework | DataSet | ExpectedDataSet |
+| Framework | Preparation | Expectation |
 |-----------|-------------|-------------|
-| JUnit | `DataSetExecutor` | `ExpectedDataSetVerifier` |
-| Spock | `SpockDataSetExecutor` | `SpockExpectedDataSetVerifier` |
-| Kotest | `KotestDataSetExecutor` | `KotestExpectedDataSetVerifier` |
+| JUnit | `PreparationExecutor` | `ExpectationVerifier` |
+| Spock | `SpockPreparationExecutor` | `SpockExpectationVerifier` |
+| Kotest | `KotestPreparationExecutor` | `KotestExpectationVerifier` |
 
 ### Error Handling
 
@@ -606,8 +604,8 @@ flowchart TD
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Public API](03-public-api) - Annotation details
-- [Configuration](04-configuration) - Configuration options
-- [SPI](08-spi) - Service Provider Interface extension points
-- [Error Handling](09-error-handling) - Lifecycle error handling
+- [Overview](overview) - Framework purpose and key concepts
+- [Public API](public-api) - Annotation details
+- [Configuration](configuration) - Configuration options
+- [SPI](spi) - Service Provider Interface extension points
+- [Error Handling](error-handling) - Lifecycle error handling

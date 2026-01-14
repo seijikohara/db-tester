@@ -1,8 +1,5 @@
 # DB Tester仕様 - データフォーマット
 
-DB Testerフレームワークがサポートするファイル形式と解析ルールについて説明します。
-
-
 ## サポートされる形式
 
 フレームワークは2つの区切りテキスト形式をサポートします:
@@ -175,6 +172,7 @@ src/test/resources/
     └── {TestClassName}/
         ├── TABLE1.csv          # 準備データ
         ├── TABLE2.csv
+        ├── load-order.txt      # テーブル順序（オプション）
         └── expected/           # 期待データ
             ├── TABLE1.csv
             └── TABLE2.csv
@@ -285,7 +283,7 @@ ORDER_ITEMS
 
 ### TableOrderingStrategyとの関係
 
-`TableOrderingStrategy` enumはテーブル順序の決定方法を制御します。詳細は[データベース操作](06-database-operations#テーブル順序戦略)を参照してください。
+`TableOrderingStrategy` enumはテーブル順序の決定方法を制御します。詳細は[データベース操作](database-operations#テーブル順序戦略)を参照してください。
 
 | 戦略 | 動作 |
 |------|------|
@@ -371,8 +369,8 @@ RFC 4180に拡張機能を追加して準拠:
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [設定](04-configuration) - DataFormatとConventionSettings
-- [データベース操作](06-database-operations) - テーブル順序と操作
-- [パブリックAPI](03-public-api) - アノテーション属性
-- [エラーハンドリング](09-error-handling) - データセット読み込みエラー
+- [概要](overview) - フレームワークの目的と主要概念
+- [設定](configuration) - DataFormatとConventionSettings
+- [データベース操作](database-operations) - テーブル順序と操作
+- [パブリックAPI](public-api) - アノテーション属性
+- [エラーハンドリング](error-handling) - データセット読み込みエラー

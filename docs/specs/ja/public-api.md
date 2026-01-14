@@ -1,8 +1,5 @@
 # DB Tester仕様 - パブリックAPI
 
-`db-tester-api`モジュールが提供するパブリックAPIについて説明します。
-
-
 ## アノテーション
 
 ### @DataSet
@@ -58,6 +55,9 @@ void testWithCustomPath() { }
 |------|-----|-----------|------|
 | `sources` | `DataSetSource[]` | `{}` | 検証用データセット。空の場合は規約ベースの検出を使用 |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | 検証時のテーブル処理順序を決定する戦略 |
+| `rowOrdering` | `RowOrdering` | `ORDERED` | 行比較戦略（位置ベースまたはセットベース） |
+| `retryCount` | `int` | `-1` | 検証のリトライ回数。`-1`はグローバル設定を使用 |
+| `retryDelayMillis` | `long` | `-1` | リトライ間隔（ミリ秒）。`-1`はグローバル設定を使用 |
 
 **検証の動作**:
 
@@ -77,6 +77,12 @@ void testWithCustomExpectation() { }
 
 @ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
 void testWithAlphabeticalOrdering() { }
+
+@ExpectedDataSet(rowOrdering = RowOrdering.UNORDERED)
+void testWithUnorderedComparison() { }
+
+@ExpectedDataSet(retryCount = 3, retryDelayMillis = 500)
+void testWithRetry() { }
 ```
 
 
@@ -181,6 +187,29 @@ void testWithColumnStrategies() { }
 | `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 |
 | `NOT_NULL` | 値がnullでないことを検証 |
 | `REGEX` | パターンマッチング（`pattern`属性が必要） |
+
+
+### RowOrdering
+
+`@ExpectedDataSet`アノテーションで使用する行比較戦略を定義するenumです。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.config.RowOrdering`
+
+**値**:
+
+| 値 | 説明 |
+|-----|------|
+| `ORDERED` | 位置ベースの比較（インデックスによる行ごと比較）。デフォルト動作 |
+| `UNORDERED` | セットベースの比較（位置に関係なく行をマッチング） |
+
+**使用場面**:
+
+| モード | ユースケース |
+|--------|------------|
+| `ORDERED` | クエリにORDER BYを含む場合。行順序が重要な場合。最大パフォーマンス |
+| `UNORDERED` | ORDER BYなしの場合。行順序が重要でない場合。データベースが予測不能な順序で行を返す可能性がある場合 |
+
+**パフォーマンスに関する注意**: UNORDERED比較は最悪の場合O(n*m)の計算量になります。
 
 
 ## TableSetインターフェース
@@ -642,13 +671,13 @@ classDiagram
 - 行数の差異
 - カラム値の不一致
 
-**出力形式**: 検証エラーは人間が読みやすい要約に続いてYAML詳細を出力します。形式の詳細は[エラーハンドリング - 検証エラー](09-error-handling#検証エラー)を参照してください。
+**出力形式**: 検証エラーは人間が読みやすい要約に続いてYAML詳細を出力します。形式の詳細は[エラーハンドリング - 検証エラー](error-handling#検証エラー)を参照してください。
 
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの紹介
-- [設定](04-configuration) - 設定クラス
-- [データベース操作](06-database-operations) - Operation enumの詳細
-- [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
-- [エラーハンドリング](09-error-handling) - エラーメッセージと例外型
+- [概要](overview) - フレームワークの紹介
+- [設定](configuration) - 設定クラス
+- [データベース操作](database-operations) - Operation enumの詳細
+- [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント
+- [エラーハンドリング](error-handling) - エラーメッセージと例外型

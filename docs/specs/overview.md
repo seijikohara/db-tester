@@ -1,10 +1,8 @@
 # DB Tester Specification - Overview
 
-This document provides a high-level overview of the DB Tester framework.
-
 ## Purpose
 
-DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification using CSV or TSV test data files.
+DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification. Test data files use CSV or TSV format.
 
 The framework addresses the following challenges in database testing:
 
@@ -21,7 +19,7 @@ The framework addresses the following challenges in database testing:
 
 ### DataSet Phase
 
-The data set phase executes before each test method. The framework performs the following steps:
+The data set phase executes before each test method. The framework performs these steps:
 
 1. Resolves dataset files based on test class and method names
 2. Filters rows by scenario markers when applicable
@@ -32,7 +30,7 @@ Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `UPSER
 
 ### ExpectedDataSet Phase
 
-The expected data set phase executes after each test method. The framework performs the following steps:
+The expected data set phase executes after each test method. The framework performs these steps:
 
 1. Loads expected datasets from the designated directory (default: `expected/` subdirectory)
 2. Reads actual data from the database
@@ -43,7 +41,7 @@ Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIV
 
 ### Convention-Based Discovery
 
-The framework resolves dataset locations automatically based on test class package and name:
+The framework resolves dataset locations based on test class package and name:
 
 ```
 src/test/resources/
@@ -87,7 +85,7 @@ The framework separates public API from internal implementation:
 | `db-tester-api` | Public | Annotations, configuration, domain models, SPI interfaces |
 | `db-tester-core` | Internal | JDBC operations, format parsing, SPI implementations |
 
-Test framework modules depend only on the API module at compile time. The core module loads at runtime via Java ServiceLoader.
+Test framework modules depend only on the API module at compile time. The core module loads at runtime via Java ServiceLoader mechanism.
 
 ### Immutability
 
@@ -133,23 +131,24 @@ The framework uses standard JDBC operations. It supports any JDBC-compliant data
 
 | Module | Description | Documentation |
 |--------|-------------|---------------|
-| `db-tester-api` | Public API module | [Architecture](02-architecture) |
-| `db-tester-core` | Internal implementation | [Architecture](02-architecture) |
-| `db-tester-junit` | JUnit Jupiter extension | [Test Frameworks](07-test-frameworks) |
-| `db-tester-spock` | Spock extension | [Test Frameworks](07-test-frameworks) |
-| `db-tester-kotest` | Kotest AnnotationSpec extension | [Test Frameworks](07-test-frameworks) |
-| `db-tester-junit-spring-boot-starter` | Spring Boot integration for JUnit | [Test Frameworks](07-test-frameworks) |
-| `db-tester-spock-spring-boot-starter` | Spring Boot integration for Spock | [Test Frameworks](07-test-frameworks) |
-| `db-tester-kotest-spring-boot-starter` | Spring Boot integration for Kotest | [Test Frameworks](07-test-frameworks) |
+| `db-tester-api` | Public API module | [Architecture](architecture) |
+| `db-tester-core` | Internal implementation | [Architecture](architecture) |
+| `db-tester-spring-support` | Spring DataSource integration support | [Architecture](architecture) |
+| `db-tester-junit` | JUnit Jupiter extension | [Test Frameworks](test-frameworks) |
+| `db-tester-spock` | Spock extension | [Test Frameworks](test-frameworks) |
+| `db-tester-kotest` | Kotest AnnotationSpec extension | [Test Frameworks](test-frameworks) |
+| `db-tester-junit-spring-boot-starter` | Spring Boot integration for JUnit | [Test Frameworks](test-frameworks) |
+| `db-tester-spock-spring-boot-starter` | Spring Boot integration for Spock | [Test Frameworks](test-frameworks) |
+| `db-tester-kotest-spring-boot-starter` | Spring Boot integration for Kotest | [Test Frameworks](test-frameworks) |
 | `db-tester-bom` | Bill of Materials for dependency management | - |
 
 ## Related Specifications
 
-- [Architecture](02-architecture) - Module structure and dependencies
-- [Public API](03-public-api) - Annotations and configuration classes
-- [Configuration](04-configuration) - Configuration options and conventions
-- [Data Formats](05-data-formats) - CSV and TSV file structure and parsing
-- [Database Operations](06-database-operations) - Supported CRUD operations
-- [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
-- [SPI](08-spi) - Service Provider Interface extension points
-- [Error Handling](09-error-handling) - Error messages and exception types
+- [Architecture](architecture) - Module structure and dependencies
+- [Public API](public-api) - Annotations and configuration classes
+- [Configuration](configuration) - Configuration options and conventions
+- [Data Formats](data-formats) - CSV and TSV file structure and parsing
+- [Database Operations](database-operations) - Supported CRUD operations
+- [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
+- [SPI](spi) - Service Provider Interface extension points
+- [Error Handling](error-handling) - Error messages and exception types

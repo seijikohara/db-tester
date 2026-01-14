@@ -1,10 +1,8 @@
 # DB Tester仕様 - アーキテクチャ
 
-DB Testerフレームワークのモジュール構造、依存関係、およびアーキテクチャパターンについて説明します。
-
 ## モジュール構造
 
-本フレームワークは、階層化されたアーキテクチャで構成された11のモジュールから構成されています。
+本フレームワークは、階層化されたアーキテクチャで構成された10のモジュールから構成されています。
 
 ```mermaid
 graph TD
@@ -232,9 +230,9 @@ module io.github.seijikohara.dbtester.api {
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [パブリックAPI](03-public-api) - アノテーションと設定クラス
-- [設定](04-configuration) - 設定オプション
-- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
-- [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
-- [エラーハンドリング](09-error-handling) - エラーメッセージと例外型
+- [概要](overview) - フレームワークの目的と主要概念
+- [パブリックAPI](public-api) - アノテーションと設定クラス
+- [設定](configuration) - 設定オプション
+- [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
+- [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント
+- [エラーハンドリング](error-handling) - エラーメッセージと例外型

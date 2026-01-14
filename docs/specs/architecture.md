@@ -1,10 +1,8 @@
 # DB Tester Specification - Architecture
 
-This document describes the module structure, dependencies, and architectural patterns of the DB Tester framework.
-
 ## Module Structure
 
-The framework consists of eleven modules organized in a layered architecture:
+The framework consists of ten modules in a layered architecture:
 
 ```mermaid
 graph TD
@@ -61,6 +59,7 @@ graph TD
 | `db-tester-bom` | Version management and dependency alignment |
 | `db-tester-api` | Public annotations, configuration, domain models, SPI interfaces |
 | `db-tester-core` | JDBC operations, format parsing, SPI implementations |
+| `db-tester-spring-support` | Spring DataSource integration support |
 | `db-tester-junit` | JUnit Jupiter BeforeEach and AfterEach callbacks |
 | `db-tester-spock` | Spock annotation-driven extension and interceptors |
 | `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
@@ -70,7 +69,7 @@ graph TD
 
 ## Module Dependencies
 
-Dependencies are defined in each module's `build.gradle.kts`. See the source files for current dependencies:
+Each module's `build.gradle.kts` file defines its dependencies. See the source files for current dependencies:
 
 | Module | Build Configuration |
 |--------|---------------------|
@@ -83,7 +82,7 @@ Dependencies are defined in each module's `build.gradle.kts`. See the source fil
 | `db-tester-spock-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock-spring-boot-starter/build.gradle.kts) |
 | `db-tester-kotest-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest-spring-boot-starter/build.gradle.kts) |
 
-Test framework modules depend on `db-tester-api` at compile time. The `db-tester-core` module loads at runtime via ServiceLoader.
+Test framework modules depend on `db-tester-api` at compile time. The framework loads `db-tester-core` at runtime via ServiceLoader.
 
 ## Package Organization
 
@@ -230,9 +229,9 @@ module io.github.seijikohara.dbtester.api {
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Public API](03-public-api) - Annotations and configuration classes
-- [Configuration](04-configuration) - Configuration options
-- [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
-- [SPI](08-spi) - Service Provider Interface extension points
-- [Error Handling](09-error-handling) - Error messages and exception types
+- [Overview](overview) - Framework purpose and key concepts
+- [Public API](public-api) - Annotations and configuration classes
+- [Configuration](configuration) - Configuration options
+- [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
+- [SPI](spi) - Service Provider Interface extension points
+- [Error Handling](error-handling) - Error messages and exception types

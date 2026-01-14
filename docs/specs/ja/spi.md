@@ -1,8 +1,5 @@
 # DB Tester仕様 - サービスプロバイダーインターフェース（SPI）
 
-DB TesterフレームワークのSPI拡張ポイントについて説明します。
-
-
 ## SPI概要
 
 本フレームワークはモジュール間の疎結合のためにJava ServiceLoaderを使用します:
@@ -154,7 +151,7 @@ public interface AssertionProvider {
 3. すべての差異を収集（フェイルファストではない）
 4. 不一致時は人間が読みやすい要約 + YAML詳細を出力
 
-出力形式の詳細については[エラーハンドリング - 検証エラー](09-error-handling#検証エラー)を参照してください。
+出力形式の詳細については[エラーハンドリング - 検証エラー](error-handling#検証エラー)を参照してください。
 
 
 ### ExpectationProvider
@@ -294,7 +291,7 @@ public interface FormatProvider {
 | `CsvFormatProvider` | `.csv` | カンマ |
 | `TsvFormatProvider` | `.tsv` | タブ |
 
-**注意**: FormatProviderは外部実装を意図していない内部SPIです。
+**注意**: FormatProviderは内部SPIであり、外部実装をサポートしていません。
 
 
 ## ServiceLoader登録
@@ -477,7 +474,7 @@ com.example.XmlFormatProvider
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [アーキテクチャ](02-architecture) - モジュール構造
-- [設定](04-configuration) - 設定クラス
-- [テストフレームワーク](07-test-frameworks) - フレームワーク統合
+- [概要](overview) - フレームワークの目的と主要概念
+- [アーキテクチャ](architecture) - モジュール構造
+- [設定](configuration) - 設定クラス
+- [テストフレームワーク](test-frameworks) - フレームワーク統合

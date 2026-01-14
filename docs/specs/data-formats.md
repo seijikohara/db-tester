@@ -1,10 +1,8 @@
 # DB Tester Specification - Data Formats
 
-This document describes the file formats supported by the DB Tester framework and their parsing rules.
-
 ## Supported Formats
 
-The framework supports two delimited text formats:
+The framework supports two delimited text formats for dataset files:
 
 | Format | Extension | Delimiter | Default |
 |--------|-----------|-----------|---------|
@@ -21,7 +19,7 @@ var conventions = ConventionSettings.builder()
     .build();
 ```
 
-When loading datasets from a directory, only files matching the configured extension are processed.
+When loading datasets from a directory, the framework processes only files matching the configured extension.
 
 ## File Structure
 
@@ -66,7 +64,7 @@ order_id	user_id	amount	status
 
 ### Scenario Marker Column
 
-The scenario marker column enables multiple test methods to share dataset files:
+The scenario marker column enables multiple test methods to share a dataset file:
 
 | Column Name | Configurable | Default |
 |-------------|--------------|---------|
@@ -74,11 +72,11 @@ The scenario marker column enables multiple test methods to share dataset files:
 
 ### Scenario Column Behavior
 
-When a dataset file contains the scenario marker column:
+When a dataset file contains the scenario marker column, the framework performs these steps:
 
-1. Filter rows where the marker matches the current scenario
-2. Remove the scenario marker column from the resulting dataset
-3. Pass remaining columns and data to the database operation
+1. Filters rows where the marker matches the current scenario
+2. Removes the scenario marker column from the resulting dataset
+3. Passes remaining columns and data to the database operation
 
 ### Example with Scenarios
 
@@ -101,7 +99,7 @@ For test method `testCreate`, the framework filters to:
 
 ### Scenario Resolution
 
-The scenario name is resolved in the following order:
+The scenario name resolves in the following order:
 
 1. Explicit `scenarioNames` in `@DataSetSource` annotation
 2. Test method name (via `ScenarioNameResolver` SPI)
@@ -115,7 +113,7 @@ A single test can use multiple scenarios:
 void testMultipleScenarios() { }
 ```
 
-Rows matching any of the specified scenarios are included.
+The framework includes rows matching any of the specified scenarios.
 
 ## Special Values
 
@@ -278,7 +276,7 @@ The table ordering interacts with database operations as follows:
 
 ### Relationship with TableOrderingStrategy
 
-The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](06-database-operations#table-ordering-strategy) for full details.
+The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](database-operations#table-ordering-strategy) for full details.
 
 | Strategy | Behavior |
 |----------|----------|
@@ -362,8 +360,8 @@ All values are parsed as strings and converted during database operations:
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Configuration](04-configuration) - DataFormat and ConventionSettings
-- [Database Operations](06-database-operations) - Table ordering and operations
-- [Public API](03-public-api) - Annotation attributes
-- [Error Handling](09-error-handling) - Dataset load errors
+- [Overview](overview) - Framework purpose and key concepts
+- [Configuration](configuration) - DataFormat and ConventionSettings
+- [Database Operations](database-operations) - Table ordering and operations
+- [Public API](public-api) - Annotation attributes
+- [Error Handling](error-handling) - Dataset load errors

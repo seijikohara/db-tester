@@ -73,7 +73,7 @@ class UserRepositoryTest {
 }
 ```
 
-Register `SpringBootDatabaseTestExtension` using `@ExtendWith`. DataSource is auto-registered from Spring context.
+Register `SpringBootDatabaseTestExtension` using `@ExtendWith`. The extension registers the DataSource from the Spring context.
 
 ### Multiple DataSources
 

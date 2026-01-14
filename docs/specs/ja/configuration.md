@@ -1,8 +1,5 @@
 # DB Tester仕様 - 設定
 
-DB Testerフレームワークで利用可能な設定クラスとオプションについて説明します。
-
-
 ## Configurationクラス
 
 データベーステスト拡張のランタイム設定を集約します。
@@ -52,6 +49,19 @@ DB Testerフレームワークで利用可能な設定クラスとオプショ�
 ### 使用例
 
 ```java
+// デフォルトを使用
+var config = Configuration.defaults();
+
+// ビルダーでカスタマイズ
+var config = Configuration.builder()
+    .conventions(ConventionSettings.builder()
+        .dataFormat(DataFormat.TSV)
+        .build())
+    .operations(OperationDefaults.builder()
+        .preparation(Operation.TRUNCATE_INSERT)
+        .build())
+    .build();
+
 // JUnitの例 - @BeforeAllで設定をカスタマイズ
 @BeforeAll
 static void setup(ExtensionContext context) {
@@ -496,9 +506,9 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [パブリックAPI](03-public-api) - アノテーションとインターフェース
-- [データフォーマット](05-data-formats) - CSVおよびTSVファイル構造
-- [データベース操作](06-database-operations) - サポートされる操作
-- [テストフレームワーク](07-test-frameworks) - JUnit、Spock、およびKotestの統合
-- [エラーハンドリング](09-error-handling) - エラーメッセージと例外型
+- [概要](overview) - フレームワークの目的と主要概念
+- [パブリックAPI](public-api) - アノテーションとインターフェース
+- [データフォーマット](data-formats) - CSVおよびTSVファイル構造
+- [データベース操作](database-operations) - サポートされる操作
+- [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
+- [エラーハンドリング](error-handling) - エラーメッセージと例外型

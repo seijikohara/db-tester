@@ -77,7 +77,7 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
-Add `@SpringBootDatabaseTest` annotation to enable the extension. DataSource is auto-registered from Spring context.
+Add the `@SpringBootDatabaseTest` annotation to enable the extension. The extension registers the DataSource from the Spring context.
 
 ### Multiple DataSources
 

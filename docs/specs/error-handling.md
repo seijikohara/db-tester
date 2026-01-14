@@ -1,8 +1,5 @@
 # DB Tester Specification - Error Handling
 
-This document describes the error handling and error output in the DB Tester framework.
-
-
 ## Exception Hierarchy
 
 All framework exceptions extend `DatabaseTesterException`:
@@ -30,11 +27,11 @@ classDiagram
 
 ## Validation Errors
 
-Thrown when expectation verification fails (`@ExpectedDataSet` phase).
+The framework throws `ValidationException` when expectation verification fails (`@ExpectedDataSet` phase).
 
 ### Output Format
 
-Validation errors collect **all differences** and report them with a human-readable summary followed by YAML details:
+The framework collects **all differences** and reports them with a human-readable summary followed by YAML details:
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -62,7 +59,7 @@ tables:
           type: "DECIMAL(10,2)"
 ```
 
-The output is **valid YAML** (after the first summary line). Standard YAML libraries can parse it for CI/CD integration.
+The output is **valid YAML** after the first summary line. Standard YAML libraries parse this output for CI/CD integration.
 
 ### Output Structure
 
@@ -86,7 +83,7 @@ The output is **valid YAML** (after the first summary line). Standard YAML libra
 
 ### Value Comparison Rules
 
-The comparator applies the following rules before reporting mismatches:
+The comparator applies these rules before reporting mismatches:
 
 | Rule | Description |
 |------|-------------|
@@ -95,16 +92,16 @@ The comparator applies the following rules before reporting mismatches:
 | Floating point | Epsilon comparison (precision 1e-6) |
 | Boolean | "1", "0", "true", "false", "yes", "no", "y", and "n" supported |
 | Timestamp precision | "2024-01-01 10:00:00" matches "2024-01-01 10:00:00.0" |
-| CLOB | Compared as string |
+| CLOB | The comparator treats CLOB as string |
 
 
 ## Dataset Load Errors
 
-Thrown when dataset files cannot be loaded or parsed.
+The framework throws `DataSetLoadException` when the loader cannot load or parse dataset files.
 
 ### Directory Not Found (Classpath)
 
-When dataset directory does not exist on classpath:
+The loader reports this error when the dataset directory does not exist on the classpath:
 
 ```
 Dataset directory not found on classpath: 'com/example/UserRepositoryTest'
@@ -114,7 +111,7 @@ Hint: Create the directory and add dataset files...
 
 ### Directory Not Found (Filesystem)
 
-When dataset directory does not exist on filesystem:
+The loader reports this error when the dataset directory does not exist on the filesystem:
 
 ```
 Dataset directory does not exist: '/path/to/datasets'
@@ -123,7 +120,7 @@ Hint: Create the directory and add dataset files...
 
 ### Path Is Not Directory
 
-When the path exists but is a file:
+The loader reports this error when the path exists but refers to a file:
 
 ```
 Path exists but is not a directory: '/path/to/file.csv'
@@ -132,7 +129,7 @@ Hint: Ensure the path points to a directory, not a file.
 
 ### No Supported Files
 
-When directory exists but contains no supported data files:
+The loader reports this error when the directory exists but contains no supported data files:
 
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
@@ -142,7 +139,7 @@ Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 
 ### Empty File
 
-When a data file is empty:
+The parser reports this error when a data file is empty:
 
 ```
 File is empty: /path/to/USERS.csv
@@ -150,7 +147,7 @@ File is empty: /path/to/USERS.csv
 
 ### Parse Failure
 
-When file parsing fails:
+The parser reports this error when file parsing fails:
 
 ```
 Failed to parse file: /path/to/USERS.csv
@@ -158,7 +155,7 @@ Failed to parse file: /path/to/USERS.csv
 
 ### Load Order File Error
 
-When `load-order.txt` file cannot be read or written:
+The loader reports this error when it cannot read or write the `load-order.txt` file:
 
 ```
 Failed to read load order file: /path/to/load-order.txt
@@ -168,16 +165,16 @@ Failed to read load order file: /path/to/load-order.txt
 Failed to write load order file: /path/to/load-order.txt
 ```
 
-For details about the load order file format and usage, see [Data Formats - Load Order](05-data-formats#load-order).
+For details about the load order file format and usage, see [Data Formats - Load Order](data-formats#load-order).
 
 
 ## DataSource Errors
 
-Thrown when DataSource lookup fails.
+The framework throws `DataSourceNotFoundException` when DataSource lookup fails.
 
 ### Default DataSource Not Registered
 
-When no default DataSource is registered:
+The framework reports this error when no default DataSource is registered:
 
 ```
 No default data source registered
@@ -191,7 +188,7 @@ registry.registerDefault(dataSource);
 
 ### Named DataSource Not Found
 
-When a named DataSource is not registered:
+The framework reports this error when the named DataSource is not registered:
 
 ```
 No data source registered for name: secondary_db
@@ -206,11 +203,11 @@ registry.register("secondary_db", dataSource);
 
 ## Database Operation Errors
 
-Thrown when SQL operations fail during preparation phase.
+The framework throws `DatabaseOperationException` when SQL operations fail during the preparation phase.
 
 ### Wrapped SQL Exception
 
-Database operation errors wrap the underlying `SQLException`:
+`DatabaseOperationException` wraps the underlying `SQLException`:
 
 ```
 DatabaseOperationException: Failed to execute INSERT on table USERS
@@ -219,7 +216,7 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 
 ### Invalid SQL Identifier
 
-When a table name or column name contains invalid characters:
+The framework reports this error when a table name or column name contains invalid characters:
 
 ```
 DatabaseOperationException: Invalid SQL identifier: 'user-accounts'.
@@ -248,11 +245,11 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 
 ## Configuration Errors
 
-Thrown during framework initialization.
+The framework throws `ConfigurationException` during initialization.
 
 ### Invalid Configuration
 
-When configuration values are invalid:
+The framework reports this error when configuration values are invalid:
 
 ```
 ConfigurationException: Invalid data format: XML
@@ -260,7 +257,7 @@ ConfigurationException: Invalid data format: XML
 
 ### Missing Required Setting
 
-When a required setting is missing:
+The framework reports this error when a required setting is missing:
 
 ```
 ConfigurationException: Convention settings cannot be null
@@ -314,7 +311,7 @@ Condition not satisfied:
 
 ### Test Method Context
 
-Errors include the test method name for context:
+The framework includes the test method name in errors for context:
 
 ```
 Failed to verify expectation dataset for testUserCreation
@@ -342,7 +339,7 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Public API](03-public-api) - Exception classes
-- [Database Operations](06-database-operations) - Operation failures
-- [Test Frameworks](07-test-frameworks) - Test lifecycle and error handling
+- [Overview](overview) - Framework purpose and key concepts
+- [Public API](public-api) - Exception classes
+- [Database Operations](database-operations) - Operation failures
+- [Test Frameworks](test-frameworks) - Test lifecycle and error handling

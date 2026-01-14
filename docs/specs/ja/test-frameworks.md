@@ -1,8 +1,5 @@
 # DB Tester仕様 - テストフレームワーク統合
 
-JUnit、Spock、およびKotestテストフレームワークとの統合について説明します。
-
-
 ## JUnit統合
 
 ### モジュール
@@ -139,17 +136,15 @@ class UserRepositoryTest {
 
 ### 登録
 
-拡張機能は、Specificationクラスに`@DatabaseTest`を追加することで有効化されます:
+拡張機能は、Specificationクラスに`@DatabaseTest`を追加し、`DatabaseTestSupport`トレイトを実装することで有効化されます:
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
-    @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
     }
 
@@ -161,43 +156,39 @@ class UserRepositorySpec extends Specification {
 }
 ```
 
+### DatabaseTestSupportトレイト
+
+`DatabaseTestSupport`トレイトはデータベーステストのコントラクトを提供します:
+
+| プロパティ | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `dbTesterRegistry` | `DataSourceRegistry` | Yes | データソース登録 |
+| `dbTesterConfiguration` | `Configuration` | No | カスタム設定（デフォルトは`Configuration.defaults()`） |
+
 ### 設定のカスタマイズ
 
-`dbTesterConfiguration`という名前の`@Shared`フィールドを使用します:
+Specificationで`getDbTesterConfiguration()`をオーバーライドします:
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
-    @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
 
-    @Shared
-    Configuration dbTesterConfiguration
+    Configuration dbTesterConfiguration = Configuration.builder()
+        .conventions(ConventionSettings.builder()
+            .dataFormat(DataFormat.TSV)
+            .build())
+        .build()
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
-
-        dbTesterConfiguration = Configuration.builder()
-            .conventions(ConventionSettings.builder()
-                .dataFormat(DataFormat.TSV)
-                .build())
-            .build()
     }
 
     @DataSet
     @ExpectedDataSet
     def 'should create user'() { }
 }
-```
-
-### 予約フィールド名
-
-| フィールド名 | 型 | 目的 |
-|--------------|-----|------|
-| `dbTesterRegistry` | `DataSourceRegistry` | データソース登録 |
-| `dbTesterConfiguration` | `Configuration` | カスタム設定 |
 
 ### フィーチャーメソッド命名
 
@@ -212,7 +203,7 @@ def 'should create user with email'() {
 
 ### データ駆動テスト
 
-`where:`ブロックを使用したパラメータ化テストの場合、イテレーション名が使用されます:
+`where:`ブロックを使用したパラメータ化テストの場合、Spockはイテレーション名を使用します:
 
 ```groovy
 @DataSet
@@ -244,13 +235,13 @@ def 'should process #status order'() {
 
 **`@DatabaseTest`を使用した簡素化アプローチ（推奨）**:
 
-`@DatabaseTest`アノテーションは自動的に`DatabaseTestExtension`を登録し、`dbTesterRegistry`という名前のプロパティを検索してレジストリを発見します:
+`@DatabaseTest`アノテーションは自動的に`DatabaseTestExtension`を登録します。Specificationクラスは`DatabaseTestSupport`インターフェースを実装する必要があります:
 
 ```kotlin
 @DatabaseTest
-class UserRepositorySpec : AnnotationSpec() {
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
 
     @BeforeAll
@@ -273,17 +264,17 @@ class UserRepositorySpec : AnnotationSpec() {
 `init`ブロックで拡張機能を登録します。Kotest 6では`extensions()`メソッドがfinalになり、オーバーライドできません:
 
 ```kotlin
-class UserRepositorySpec : AnnotationSpec() {
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    private val registry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
 
     init {
-        extensions(DatabaseTestExtension(registryProvider = { registry }))
+        extensions(DatabaseTestExtension())
     }
 
     @BeforeAll
     fun setupSpec() {
-        registry.registerDefault(dataSource)
+        dbTesterRegistry.registerDefault(dataSource)
     }
 
     @Test
@@ -295,16 +286,24 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
+### DatabaseTestSupportインターフェース
+
+`DatabaseTestSupport`インターフェースはデータベーステストのコントラクトを提供します:
+
+| プロパティ | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `dbTesterRegistry` | `DataSourceRegistry` | Yes | データソース登録 |
+| `dbTesterConfiguration` | `Configuration` | No | カスタム設定（デフォルトは`Configuration.defaults()`） |
+
 ### DataSource登録
 
-**規約ベースの発見（推奨）**:
-
-`@DatabaseTest`を使用する場合、拡張機能は`dbTesterRegistry`という名前のプロパティを検索してレジストリを発見します:
+`DatabaseTestSupport`インターフェースを実装し、`dbTesterRegistry`をオーバーライドします:
 
 ```kotlin
 @DatabaseTest
-class UserRepositorySpec : AnnotationSpec() {
-    val dbTesterRegistry = DataSourceRegistry()
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
+
+    override val dbTesterRegistry = DataSourceRegistry()
 
     @BeforeAll
     fun setupSpec() {
@@ -314,90 +313,21 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-**明示的なプロバイダー**:
-
-拡張機能は遅延バインドされたDataSource登録のために`registryProvider`ラムダを受け取ります:
-
-```kotlin
-class UserRepositorySpec : AnnotationSpec() {
-
-    companion object {
-        private var sharedRegistry: DataSourceRegistry? = null
-        private var sharedDataSource: DataSource? = null
-
-        private fun initializeSharedResources() {
-            sharedDataSource = createDataSource()
-            sharedRegistry = DataSourceRegistry().apply {
-                registerDefault(sharedDataSource!!)
-            }
-        }
-
-        fun getDbTesterRegistry(): DataSourceRegistry {
-            if (sharedRegistry == null) {
-                initializeSharedResources()
-            }
-            return sharedRegistry!!
-        }
-    }
-
-    init {
-        extensions(DatabaseTestExtension(registryProvider = { getDbTesterRegistry() }))
-    }
-
-    @BeforeAll
-    fun setupSpec() {
-        if (sharedDataSource == null) {
-            initializeSharedResources()
-        }
-    }
-}
-```
-
-### 予約プロパティ名
-
-| プロパティ名 | 型 | 目的 |
-|--------------|-----|------|
-| `dbTesterRegistry` | `DataSourceRegistry` | データソース登録 |
-| `dbTesterConfiguration` | `Configuration` | カスタム設定 |
-
 ### 設定のカスタマイズ
 
-**規約ベースの発見**:
-
-`@DatabaseTest`を使用する場合、`dbTesterConfiguration`という名前のプロパティを提供します:
+インターフェース実装で`dbTesterConfiguration`をオーバーライドします:
 
 ```kotlin
 @DatabaseTest
-class UserRepositorySpec : AnnotationSpec() {
-    val dbTesterRegistry = DataSourceRegistry()
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    val dbTesterConfiguration = Configuration.builder()
+    override val dbTesterRegistry = DataSourceRegistry()
+
+    override val dbTesterConfiguration = Configuration.builder()
         .conventions(ConventionSettings.builder()
             .dataFormat(DataFormat.TSV)
             .build())
         .build()
-}
-```
-
-**明示的なプロバイダー**:
-
-拡張機能にカスタム`Configuration`を渡します:
-
-```kotlin
-class UserRepositorySpec : AnnotationSpec() {
-
-    init {
-        val config = Configuration.builder()
-            .conventions(ConventionSettings.builder()
-                .dataFormat(DataFormat.TSV)
-                .build())
-            .build()
-
-        extensions(DatabaseTestExtension(
-            registryProvider = { registry },
-            configurationProvider = { config }
-        ))
-    }
 }
 ```
 
@@ -664,9 +594,9 @@ flowchart TD
 
 | フレームワーク | 準備 | 期待 |
 |---------------|------|------|
-| JUnit | `DataSetExecutor` | `ExpectedDataSetVerifier` |
-| Spock | `SpockDataSetExecutor` | `SpockExpectedDataSetVerifier` |
-| Kotest | `KotestDataSetExecutor` | `KotestExpectedDataSetVerifier` |
+| JUnit | `PreparationExecutor` | `ExpectationVerifier` |
+| Spock | `SpockPreparationExecutor` | `SpockExpectationVerifier` |
+| Kotest | `KotestPreparationExecutor` | `KotestExpectationVerifier` |
 
 ### エラーハンドリング
 
@@ -679,8 +609,8 @@ flowchart TD
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [パブリックAPI](03-public-api) - アノテーションの詳細
-- [設定](04-configuration) - 設定オプション
-- [SPI](08-spi) - サービスプロバイダーインターフェース拡張ポイント
-- [エラーハンドリング](09-error-handling) - ライフサイクルエラーハンドリング
+- [概要](overview) - フレームワークの目的と主要概念
+- [パブリックAPI](public-api) - アノテーションの詳細
+- [設定](configuration) - 設定オプション
+- [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント
+- [エラーハンドリング](error-handling) - ライフサイクルエラーハンドリング

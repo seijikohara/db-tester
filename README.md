@@ -9,7 +9,7 @@
   <img src="docs/public/favicon.svg" width="200" alt="DB Tester Logo">
 </div>
 
-A database testing framework for JUnit 6, Spock 2, and Kotest 6. Load CSV test data before tests and verify database state after tests using `@DataSet` and `@ExpectedDataSet` annotations.
+A database testing framework for JUnit 6, Spock 2, and Kotest 6. The framework loads CSV test data before tests and verifies database state after tests using `@DataSet` and `@ExpectedDataSet` annotations.
 
 **[Documentation](https://seijikohara.github.io/db-tester/)** · **[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-bom)** · **[Examples](examples/)**
 
@@ -203,7 +203,7 @@ testImplementation("io.github.seijikohara:db-tester-junit")
 
 ## Spring Boot Integration
 
-Spring Boot starters automatically discover and register `DataSource` beans from the ApplicationContext. No manual registration is required.
+Spring Boot starters automatically discover and register `DataSource` beans from the ApplicationContext. Manual registration is not required.
 
 ### JUnit with Spring Boot
 
@@ -400,7 +400,7 @@ registry.register("secondary", secondaryDataSource);
 
 ## Assertion Output
 
-When verification fails, the framework reports differences in YAML format:
+When verification fails, the framework outputs differences in YAML format:
 
 ```yaml
 summary:

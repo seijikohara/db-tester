@@ -1,8 +1,5 @@
 # DB Tester仕様 - エラーハンドリング
 
-本ドキュメントでは、DB Testerフレームワークのエラーハンドリングとエラー出力について説明します。
-
-
 ## 例外階層
 
 すべてのフレームワーク例外は`DatabaseTesterException`を継承します:
@@ -30,11 +27,11 @@ classDiagram
 
 ## 検証エラー
 
-期待値検証が失敗した場合にスローされます（`@ExpectedDataSet`フェーズ）。
+フレームワークは期待値検証が失敗した場合に`ValidationException`をスローします（`@ExpectedDataSet`フェーズ）。
 
 ### 出力形式
 
-検証エラーは**すべての差異**を収集し、人間が読みやすい要約に続いてYAML詳細を報告します:
+フレームワークは**すべての差異**を収集し、人間が読みやすい要約に続いてYAML詳細を報告します:
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -62,7 +59,7 @@ tables:
           type: "DECIMAL(10,2)"
 ```
 
-出力は（最初の要約行の後）**有効なYAML**であり、CI/CD統合のために標準YAMLライブラリで解析できます。
+出力は（最初の要約行の後）**有効なYAML**です。標準YAMLライブラリがCI/CD統合のためにこの出力を解析できます。
 
 ### 出力構造
 
@@ -100,7 +97,7 @@ tables:
 
 ## データセット読み込みエラー
 
-データセットファイルを読み込めないか解析できない場合にスローされます。
+フレームワークはデータセットファイルを読み込めないか解析できない場合に`DataSetLoadException`をスローします。
 
 ### ディレクトリが見つからない（クラスパス）
 
@@ -168,12 +165,12 @@ Failed to read load order file: /path/to/load-order.txt
 Failed to write load order file: /path/to/load-order.txt
 ```
 
-読み込み順序ファイルの形式と使用方法の詳細については、[データフォーマット - 読み込み順序](05-data-formats#読み込み順序)を参照してください。
+読み込み順序ファイルの形式と使用方法の詳細については、[データフォーマット - 読み込み順序](data-formats#読み込み順序)を参照してください。
 
 
 ## DataSourceエラー
 
-DataSourceの検索が失敗した場合にスローされます。
+フレームワークはDataSourceの検索が失敗した場合に`DataSourceNotFoundException`をスローします。
 
 ### デフォルトDataSourceが登録されていない
 
@@ -206,11 +203,11 @@ registry.register("secondary_db", dataSource);
 
 ## データベース操作エラー
 
-準備フェーズ中にSQL操作が失敗した場合にスローされます。
+フレームワークは準備フェーズ中にSQL操作が失敗した場合に`DatabaseOperationException`をスローします。
 
 ### ラップされたSQL例外
 
-データベース操作エラーは基盤となる`SQLException`をラップします:
+`DatabaseOperationException`は基盤となる`SQLException`をラップします:
 
 ```
 DatabaseOperationException: Failed to execute INSERT on table USERS
@@ -248,7 +245,7 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 
 ## 設定エラー
 
-フレームワーク初期化中にスローされます。
+フレームワークは初期化中に`ConfigurationException`をスローします。
 
 ### 無効な設定
 
@@ -288,8 +285,8 @@ org.example.UserRepositoryTest > shouldCreateUser FAILED
                   type: VARCHAR(255)
                   nullable: false
 
-        at io.github.seijikohara.dbtester.internal.assertion.TableSetComparator.assertEquals(TableSetComparator.java:85)
-        at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectedDataSetVerifier.verify(ExpectedDataSetVerifier.java:42)
+        at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.assertEquals(DataSetComparator.java:85)
+        at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier.verify(ExpectationVerifier.java:42)
 ```
 
 ### Spockエラー出力
@@ -309,12 +306,12 @@ example.UserRepositorySpec > should create user FAILED
                 actual: 1
 
 Condition not satisfied:
-    ExpectedDataSet verification failed
+    Expectation verification failed
 ```
 
 ### テストメソッドコンテキスト
 
-エラーにはコンテキストとしてテストメソッド名が含まれます:
+フレームワークはコンテキストとしてエラーにテストメソッド名を含めます:
 
 ```
 Failed to verify expectation dataset for testUserCreation
@@ -342,7 +339,7 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 
 ## 関連仕様
 
-- [概要](01-overview) - フレームワークの目的と主要概念
-- [パブリックAPI](03-public-api) - 例外クラス
-- [データベース操作](06-database-operations) - 操作失敗
-- [テストフレームワーク](07-test-frameworks) - テストライフサイクルとエラーハンドリング
+- [概要](overview) - フレームワークの目的と主要概念
+- [パブリックAPI](public-api) - 例外クラス
+- [データベース操作](database-operations) - 操作失敗
+- [テストフレームワーク](test-frameworks) - テストライフサイクルとエラーハンドリング

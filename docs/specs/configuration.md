@@ -1,10 +1,8 @@
 # DB Tester Specification - Configuration
 
-This document describes the configuration classes and options available in the DB Tester framework.
-
 ## Configuration Class
 
-Aggregates runtime configuration for the database testing extension.
+Aggregates the runtime configuration for the database testing extension.
 
 **Location**: `io.github.seijikohara.dbtester.api.config.Configuration`
 
@@ -154,7 +152,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 
 ### Directory Resolution
 
-When `baseDirectory` is null (default), datasets are resolved relative to the test class:
+When `baseDirectory` is null (default), the framework resolves datasets relative to the test class:
 
 ```
 src/test/resources/
@@ -365,9 +363,9 @@ Defines how tables from multiple datasets merge.
 Datasets are processed in annotation declaration order:
 
 ```java
-@Preparation(sources = {
-    @DataSet(resourceLocation = "dataset1"),  // Processed first
-    @DataSet(resourceLocation = "dataset2")   // Processed second
+@DataSet(sources = {
+    @DataSetSource(resourceLocation = "dataset1"),  // Processed first
+    @DataSetSource(resourceLocation = "dataset2")   // Processed second
 })
 ```
 
@@ -505,9 +503,9 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Public API](03-public-api) - Annotations and interfaces
-- [Data Formats](05-data-formats) - CSV and TSV file structure
-- [Database Operations](06-database-operations) - Supported operations
-- [Test Frameworks](07-test-frameworks) - JUnit, Spock, and Kotest integration
-- [Error Handling](09-error-handling) - Error messages and exception types
+- [Overview](overview) - Framework purpose and key concepts
+- [Public API](public-api) - Annotations and interfaces
+- [Data Formats](data-formats) - CSV and TSV file structure
+- [Database Operations](database-operations) - Supported operations
+- [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
+- [Error Handling](error-handling) - Error messages and exception types

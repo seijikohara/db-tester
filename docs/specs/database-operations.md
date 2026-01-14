@@ -1,7 +1,5 @@
 # DB Tester Specification - Database Operations
 
-This document describes the database operations supported by the DB Tester framework.
-
 ## Operation Enum
 
 **Location**: `io.github.seijikohara.dbtester.api.operation.Operation`
@@ -11,8 +9,8 @@ This document describes the database operations supported by the DB Tester frame
 | Operation | Description | Use Case |
 |-----------|-------------|----------|
 | `NONE` | No database operation | Read-only verification |
-| `INSERT` | Insert new rows | Empty tables or append |
 | `UPDATE` | Update existing rows by primary key | Modify existing data |
+| `INSERT` | Insert new rows | Empty tables or append |
 | `UPSERT` | Upsert (insert or update) | Mixed insert and update |
 | `DELETE` | Delete specific rows by primary key | Selective removal |
 | `DELETE_ALL` | Delete all rows from tables | Clear without sequence reset |
@@ -34,24 +32,6 @@ Performs no database operation.
 - ExpectedDataSet-only tests where data set data exists from previous tests
 - Manual setup scenarios
 
-### INSERT
-
-Inserts new rows without modifying existing data.
-
-**SQL Generated**: `INSERT INTO table (columns) VALUES (?)`
-
-**Behavior**:
-- Inserts each row from the dataset
-- Fails on duplicate primary key violations
-- Does not affect existing rows
-
-**Use Case**:
-- Appending to tables with existing data
-- Tests requiring specific row additions
-
-**Constraints**:
-- Requires empty target rows or unique keys
-
 ### UPDATE
 
 Updates existing rows identified by primary key.
@@ -70,6 +50,24 @@ Updates existing rows identified by primary key.
 **Requirements**:
 - Tables must have primary keys defined
 - Dataset must include primary key columns
+
+### INSERT
+
+Inserts new rows without modifying existing data.
+
+**SQL Generated**: `INSERT INTO table (columns) VALUES (?)`
+
+**Behavior**:
+- Inserts each row from the dataset
+- Fails on duplicate primary key violations
+- Does not affect existing rows
+
+**Use Case**:
+- Appending to tables with existing data
+- Tests requiring specific row additions
+
+**Constraints**:
+- Requires empty target rows or unique keys
 
 ### UPSERT
 
@@ -249,7 +247,7 @@ This strategy provides the most flexible behavior and is suitable for most use c
 
 #### LOAD_ORDER_FILE
 
-Requires a `load-order.txt` file in the dataset directory. If the file does not exist, a `DataSetLoadException` is thrown.
+Requires a `load-order.txt` file in the dataset directory. If the file does not exist, the framework throws a `DataSetLoadException`.
 
 **Use Case**: When you need explicit control over table ordering and want to guarantee the order is always specified.
 
@@ -278,7 +276,7 @@ void testWithFkOrdering() { }
 
 Tables are sorted in ascending alphabetical order (case-insensitive).
 
-**Use Case**: When table ordering does not matter (no FK constraints) or for deterministic ordering in simple scenarios.
+**Use Case**: When table ordering does not matter (no FK constraints) or for deterministic ordering in scenarios without dependencies.
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
@@ -310,13 +308,13 @@ void testBothPhases() { }
 
 ### Manual Ordering with load-order.txt
 
-The preferred method for controlling table processing order is the `load-order.txt` file. This file specifies the exact order in which tables should be processed.
+The `load-order.txt` file provides the preferred method for controlling table processing order. This file specifies the exact order in which the framework processes tables.
 
-For detailed information about the file format and usage, see [Data Formats - Load Order](05-data-formats#load-order).
+For detailed information about the file format and usage, see [Data Formats - Load Order](data-formats#load-order).
 
 ### Foreign Key Awareness
 
-When no `load-order.txt` file exists, the framework can resolve table dependencies using database metadata:
+When no `load-order.txt` file exists, the framework resolves table dependencies using database metadata:
 
 1. Query `DatabaseMetaData.getExportedKeys()` for each table
 2. Build dependency graph
@@ -334,11 +332,13 @@ When no `load-order.txt` file exists, the framework can resolve table dependenci
 
 ### Order Resolution Priority
 
-The table order is determined by the `TableOrderingStrategy`. When using `AUTO` (the default), the priority is:
+The `TableOrderingStrategy` determines table order. When using `AUTO` (the default), the priority is:
 
 1. **Manual ordering**: `load-order.txt` file in dataset directory
 2. **FK-based ordering**: Automatic resolution using database metadata
 3. **Alphabetical ordering**: Fallback when no other ordering is available
+
+**Note**: Unlike other frameworks, DB Tester does **not** automatically generate the `load-order.txt` file. See [Table Ordering Strategy](#table-ordering-strategy) for details.
 
 ### Circular Dependencies
 
@@ -386,7 +386,7 @@ On exception:
 
 ### Overview
 
-The framework validates all SQL identifiers (table names and column names) before interpolating them into SQL statements. This validation prevents malformed inputs from causing SQL syntax errors or potential security issues.
+The framework validates all SQL identifiers (table names and column names) before interpolating them into SQL statements. This validation prevents malformed inputs from causing SQL syntax errors or security issues.
 
 ### Validation Rules
 
@@ -417,17 +417,17 @@ Identifiers must match the following pattern:
 
 ### Error Handling
 
-When an invalid identifier is detected, an `IllegalArgumentException` is thrown with a descriptive message:
+When the framework detects an invalid identifier, it throws an `IllegalArgumentException` with a descriptive message:
 
 ```
 Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
 ```
 
-This exception is typically wrapped in a `DatabaseOperationException` during database operations.
+The framework wraps this exception in a `DatabaseOperationException` during database operations.
 
 ### Identifier Sources
 
-Identifiers are derived from:
+The framework derives identifiers from:
 
 | Source | Example |
 |--------|---------|
@@ -480,8 +480,8 @@ The framework converts string values from CSV or TSV to appropriate SQL types:
 
 ## Related Specifications
 
-- [Overview](01-overview) - Framework purpose and key concepts
-- [Public API](03-public-api) - Operation enum reference
-- [Data Formats](05-data-formats) - Source file structure
-- [Configuration](04-configuration) - OperationDefaults
-- [Error Handling](09-error-handling) - Database operation errors
+- [Overview](overview) - Framework purpose and key concepts
+- [Public API](public-api) - Operation enum reference
+- [Data Formats](data-formats) - Source file structure
+- [Configuration](configuration) - OperationDefaults
+- [Error Handling](error-handling) - Database operation errors
