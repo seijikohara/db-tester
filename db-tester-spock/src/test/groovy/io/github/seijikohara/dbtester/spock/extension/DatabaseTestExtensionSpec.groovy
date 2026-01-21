@@ -41,4 +41,10 @@ class DatabaseTestExtensionSpec extends Specification {
 		extension1 instanceof IAnnotationDrivenExtension
 		extension2 instanceof IAnnotationDrivenExtension
 	}
+
+	// Note: Tests for visitSpecAnnotation() method are not included because SpecInfo,
+	// FeatureInfo, and MethodInfo are Spock internal classes that cannot be
+	// properly mocked or stubbed with Spock's mocking framework.
+	// The DatabaseTestExtension functionality is tested through integration tests
+	// in the examples module.
 }

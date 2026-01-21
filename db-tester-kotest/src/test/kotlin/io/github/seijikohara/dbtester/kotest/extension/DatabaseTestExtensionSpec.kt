@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.kotest.extension
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
+import io.kotest.assertions.assertSoftly
 import io.kotest.core.extensions.TestCaseExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -34,8 +35,10 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
     @Test
     fun `should create instance with no arguments for annotation-based usage`(): Unit =
         DatabaseTestExtension().let { instance ->
-            instance shouldNotBe null
-            instance.shouldBeInstanceOf<TestCaseExtension>()
+            assertSoftly {
+                instance shouldNotBe null
+                instance.shouldBeInstanceOf<TestCaseExtension>()
+            }
         }
 
     @Test
@@ -47,17 +50,21 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
             registryProvider = registryProvider,
             configurationProvider = { Configuration.defaults() },
         ).let { instance ->
-            instance shouldNotBe null
-            instance.shouldBeInstanceOf<TestCaseExtension>()
+            assertSoftly {
+                instance shouldNotBe null
+                instance.shouldBeInstanceOf<TestCaseExtension>()
+            }
         }
 
     @Test
     fun `should create multiple independent extensions`(): Unit =
         DatabaseTestExtension(registryProvider = registryProvider).let { extension1 ->
             DatabaseTestExtension(registryProvider = registryProvider).let { extension2 ->
-                (extension1 === extension2) shouldBe false
-                extension1.shouldBeInstanceOf<TestCaseExtension>()
-                extension2.shouldBeInstanceOf<TestCaseExtension>()
+                assertSoftly {
+                    (extension1 === extension2) shouldBe false
+                    extension1.shouldBeInstanceOf<TestCaseExtension>()
+                    extension2.shouldBeInstanceOf<TestCaseExtension>()
+                }
             }
         }
 
@@ -67,8 +74,10 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
             DataSourceRegistry().let { registry2 ->
                 DatabaseTestExtension(registryProvider = { registry1 }).let { ext1 ->
                     DatabaseTestExtension(registryProvider = { registry2 }).let { ext2 ->
-                        ext1 shouldNotBe null
-                        ext2 shouldNotBe null
+                        assertSoftly {
+                            ext1 shouldNotBe null
+                            ext2 shouldNotBe null
+                        }
                     }
                 }
             }
@@ -77,8 +86,10 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
     @Test
     fun `should support interface-based property discovery`(): Unit =
         DatabaseTestExtension().let { instance ->
-            instance shouldNotBe null
-            instance.shouldBeInstanceOf<TestCaseExtension>()
+            assertSoftly {
+                instance shouldNotBe null
+                instance.shouldBeInstanceOf<TestCaseExtension>()
+            }
         }
 }
 
@@ -133,8 +144,10 @@ class DatabaseTestAnnotationSpec : AnnotationSpec() {
             .filterIsInstance<Retention>()
             .firstOrNull()
             .let { retention ->
-                retention shouldNotBe null
-                retention?.value shouldBe AnnotationRetention.RUNTIME
+                assertSoftly {
+                    retention shouldNotBe null
+                    retention?.value shouldBe AnnotationRetention.RUNTIME
+                }
             }
 
     @Test
@@ -144,8 +157,10 @@ class DatabaseTestAnnotationSpec : AnnotationSpec() {
             .filterIsInstance<Target>()
             .firstOrNull()
             .let { target ->
-                target shouldNotBe null
-                target?.allowedTargets?.toList()?.contains(AnnotationTarget.CLASS) shouldBe true
+                assertSoftly {
+                    target shouldNotBe null
+                    target?.allowedTargets?.toList()?.contains(AnnotationTarget.CLASS) shouldBe true
+                }
             }
 
     @Test

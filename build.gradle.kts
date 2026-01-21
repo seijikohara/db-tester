@@ -153,8 +153,49 @@ subprojects {
                 html.required = true
             }
         }
+        tasks.withType<JacocoCoverageVerification>().configureEach {
+            violationRules {
+                rule {
+                    limit {
+                        // Minimum instruction coverage ratio (70%)
+                        minimum = BigDecimal("0.70")
+                    }
+                }
+            }
+            // Exclude framework extension classes that cannot be unit tested due to framework constraints
+            // These classes integrate with test framework internals (Spock/Kotest) and are covered
+            // by integration tests in the examples module
+            val excludedModules =
+                setOf(
+                    "db-tester-spock",
+                    "db-tester-spock-spring-boot-starter",
+                    "db-tester-kotest",
+                    "db-tester-kotest-spring-boot-starter",
+                )
+            if (project.name in excludedModules) {
+                classDirectories.setFrom(
+                    classDirectories.files.map {
+                        fileTree(it) {
+                            exclude(
+                                "**/DatabaseTestExtension*.class",
+                                "**/DatabaseTestInterceptor*.class",
+                                "**/SpringBootDatabaseTestExtension*.class",
+                                "**/SpringBootDatabaseTestInterceptor*.class",
+                            )
+                        }
+                    },
+                )
+            }
+            // Exclude examples from coverage verification
+            if (project.path.startsWith(":examples:")) {
+                isEnabled = false
+            }
+        }
         tasks.named<Test>("test") {
             finalizedBy(tasks.named("jacocoTestReport"))
+        }
+        tasks.named("jacocoTestReport") {
+            finalizedBy(tasks.named("jacocoTestCoverageVerification"))
         }
     }
 

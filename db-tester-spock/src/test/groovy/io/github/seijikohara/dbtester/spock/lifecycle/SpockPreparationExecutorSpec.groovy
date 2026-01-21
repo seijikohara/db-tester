@@ -6,9 +6,17 @@ import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.context.TestContext
+import io.github.seijikohara.dbtester.api.dataset.Row
+import io.github.seijikohara.dbtester.api.dataset.Table
+import io.github.seijikohara.dbtester.api.dataset.TableSet
+import io.github.seijikohara.dbtester.api.domain.CellValue
+import io.github.seijikohara.dbtester.api.domain.ColumnName
+import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
+import io.github.seijikohara.dbtester.api.spi.OperationProvider
+import javax.sql.DataSource
 import spock.lang.Specification
 
 /**
@@ -120,6 +128,110 @@ class SpockPreparationExecutorSpec extends Specification {
 		dataSet.tableOrdering() >> TableOrderingStrategy.AUTO
 		dataSet.paths() >> ([] as String[])
 		return dataSet
+	}
+
+	def 'should execute operation when datasets are found'() {
+		given: 'a mock operation provider'
+		def mockOperationProvider = Mock(OperationProvider)
+		def mockDataSource = Mock(DataSource)
+
+		and: 'inject mock provider using reflection'
+		def providerField = SpockPreparationExecutor.getDeclaredField('operationProvider')
+		providerField.accessible = true
+		providerField.set(executor, mockOperationProvider)
+
+		and: 'a context with datasets'
+		def registry = new DataSourceRegistry()
+		registry.registerDefault(mockDataSource)
+		def context = createTestContextWithDatasets(registry)
+
+		and: 'a mock DataSet annotation'
+		def dataSet = createMockDataSet(Operation.CLEAN_INSERT)
+
+		when: 'executing preparation'
+		executor.execute(context, dataSet)
+
+		then: 'operation is executed'
+		1 * mockOperationProvider.execute(Operation.CLEAN_INSERT, _, mockDataSource, TableOrderingStrategy.AUTO, _, _)
+	}
+
+	def 'should handle datasets with different operations'() {
+		given: 'a mock operation provider'
+		def mockOperationProvider = Mock(OperationProvider)
+		def mockDataSource = Mock(DataSource)
+
+		and: 'inject mock provider using reflection'
+		def providerField = SpockPreparationExecutor.getDeclaredField('operationProvider')
+		providerField.accessible = true
+		providerField.set(executor, mockOperationProvider)
+
+		and: 'a context with datasets'
+		def registry = new DataSourceRegistry()
+		registry.registerDefault(mockDataSource)
+		def context = createTestContextWithDatasets(registry)
+
+		and: 'a mock DataSet annotation with specified operation'
+		def dataSet = createMockDataSet(operation)
+
+		when: 'executing preparation'
+		executor.execute(context, dataSet)
+
+		then: 'operation is executed with correct operation type'
+		1 * mockOperationProvider.execute(operation, _, mockDataSource, _, _, _)
+
+		where:
+		operation << [
+			Operation.INSERT,
+			Operation.DELETE_ALL,
+			Operation.TRUNCATE_INSERT
+		]
+	}
+
+	/**
+	 * Creates a TestContext with actual datasets.
+	 *
+	 * @param registry the registry to use
+	 * @return the test context
+	 */
+	private TestContext createTestContextWithDatasets(DataSourceRegistry registry) {
+		def testClass = SampleTestClass
+		def testMethod = SampleTestClass.getMethod('sampleMethod')
+
+		// Create a simple table set
+		def table = Table.of(
+				new TableName('users'),
+				[
+					new ColumnName('id'),
+					new ColumnName('name')
+				],
+				[
+					Row.of([(new ColumnName('id')): new CellValue('1'), (new ColumnName('name')): new CellValue('John')])
+				]
+				)
+		def tableSet = TableSet.of(table)
+
+		def loader = new DataSetLoader() {
+					@Override
+					List loadPreparationDataSets(TestContext ctx) {
+						return [tableSet]
+					}
+
+					@Override
+					List loadExpectationDataSets(TestContext ctx) {
+						return []
+					}
+
+					@Override
+					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
+						return []
+					}
+				}
+		def configuration = Configuration.builder()
+				.conventions(ConventionSettings.standard())
+				.operations(OperationDefaults.standard())
+				.loader(loader)
+				.build()
+		new TestContext(testClass, testMethod, configuration, registry)
 	}
 
 	/**

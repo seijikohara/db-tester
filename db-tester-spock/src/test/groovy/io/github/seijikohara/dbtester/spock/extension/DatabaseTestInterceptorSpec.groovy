@@ -2,8 +2,10 @@ package io.github.seijikohara.dbtester.spock.extension
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
+import org.spockframework.runtime.extension.IMethodInvocation
 import spock.lang.Specification
 
 /**
@@ -128,5 +130,27 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 		then: 'interceptor is created successfully'
 		interceptor != null
+	}
+
+	// Note: Tests for intercept() method are not included because IMethodInvocation
+	// and related Spock internal classes cannot be mocked with Spock's mocking framework.
+	// The DatabaseTestInterceptor functionality is tested through integration tests
+	// in the examples module.
+
+	def 'should get default Configuration when spec does not implement DatabaseTestSupport'() {
+		given: 'a test interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null)
+
+		and: 'a stub invocation with non-DatabaseTestSupport instance'
+		def invocation = Stub(IMethodInvocation) {
+			instance >> new Object()
+		}
+
+		when: 'getConfiguration is called'
+		def configuration = interceptor.getConfiguration(invocation)
+
+		then: 'default configuration is returned'
+		configuration != null
+		configuration == Configuration.defaults()
 	}
 }

@@ -1,16 +1,22 @@
 package io.github.seijikohara.dbtester.junit.jupiter.extension;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -242,10 +248,310 @@ class DatabaseTestExtensionTest {
     }
   }
 
+  /** Tests for the beforeEach(ExtensionContext) method. */
+  @Nested
+  @DisplayName("beforeEach(ExtensionContext) method")
+  class BeforeEachMethod {
+
+    /** Tests for the beforeEach method. */
+    BeforeEachMethod() {}
+
+    /**
+     * Verifies that beforeEach completes without error when no DataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should complete without error when no DataSet annotation")
+    void shouldCompleteWithoutError_whenNoDataSetAnnotation() throws Exception {
+      // Given
+      final var testClass = TestClassWithoutAnnotations.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.beforeEach(mockContext),
+          "should complete without error when no DataSet annotation");
+    }
+
+    /**
+     * Verifies that beforeEach processes method-level DataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should process method-level DataSet annotation")
+    void shouldProcessMethodLevelDataSetAnnotation() throws Exception {
+      // Given
+      final var mockConfiguration = mock(Configuration.class);
+      final var mockLoader = mock(DataSetLoader.class);
+      final var mockRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var testClass = TestClassWithMethodDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("annotatedMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+      when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
+      when(mockContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockConfiguration.loader()).thenReturn(mockLoader);
+      when(mockLoader.loadPreparationDataSets(any())).thenReturn(Collections.emptyList());
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.beforeEach(mockContext),
+          "should process method-level DataSet annotation");
+    }
+
+    /**
+     * Verifies that beforeEach processes class-level DataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should process class-level DataSet annotation")
+    void shouldProcessClassLevelDataSetAnnotation() throws Exception {
+      // Given
+      final var mockConfiguration = mock(Configuration.class);
+      final var mockLoader = mock(DataSetLoader.class);
+      final var mockRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var testClass = TestClassWithClassDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+      when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
+      when(mockContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockConfiguration.loader()).thenReturn(mockLoader);
+      when(mockLoader.loadPreparationDataSets(any())).thenReturn(Collections.emptyList());
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.beforeEach(mockContext), "should process class-level DataSet annotation");
+    }
+  }
+
+  /** Tests for the afterEach(ExtensionContext) method. */
+  @Nested
+  @DisplayName("afterEach(ExtensionContext) method")
+  class AfterEachMethod {
+
+    /** Tests for the afterEach method. */
+    AfterEachMethod() {}
+
+    /**
+     * Verifies that afterEach completes without error when no ExpectedDataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should complete without error when no ExpectedDataSet annotation")
+    void shouldCompleteWithoutError_whenNoExpectedDataSetAnnotation() throws Exception {
+      // Given
+      final var testClass = TestClassWithoutAnnotations.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.afterEach(mockContext),
+          "should complete without error when no ExpectedDataSet annotation");
+    }
+
+    /**
+     * Verifies that afterEach processes method-level ExpectedDataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should process method-level ExpectedDataSet annotation")
+    void shouldProcessMethodLevelExpectedDataSetAnnotation() throws Exception {
+      // Given
+      final var mockConfiguration = mock(Configuration.class);
+      final var mockLoader = mock(DataSetLoader.class);
+      final var mockConventions = ConventionSettings.standard();
+      final var mockRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var testClass = TestClassWithMethodExpectedDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("annotatedMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+      when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
+      when(mockContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockConfiguration.loader()).thenReturn(mockLoader);
+      when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
+          .thenReturn(Collections.emptyList());
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.afterEach(mockContext),
+          "should process method-level ExpectedDataSet annotation");
+    }
+
+    /**
+     * Verifies that afterEach processes class-level ExpectedDataSet annotation.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should process class-level ExpectedDataSet annotation")
+    void shouldProcessClassLevelExpectedDataSetAnnotation() throws Exception {
+      // Given
+      final var mockConfiguration = mock(Configuration.class);
+      final var mockLoader = mock(DataSetLoader.class);
+      final var mockConventions = ConventionSettings.standard();
+      final var mockRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var testClass = TestClassWithClassExpectedDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+      when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
+      when(mockContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockConfiguration.loader()).thenReturn(mockLoader);
+      when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
+          .thenReturn(Collections.emptyList());
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.afterEach(mockContext),
+          "should process class-level ExpectedDataSet annotation");
+    }
+  }
+
+  /** Tests for nested test class context hierarchy. */
+  @Nested
+  @DisplayName("nested test class context hierarchy")
+  class NestedTestClassContextHierarchy {
+
+    /** Tests for nested test class context hierarchy. */
+    NestedTestClassContextHierarchy() {}
+
+    /** Verifies that getRegistry finds top-level class through parent hierarchy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should find top-level class through parent hierarchy")
+    void shouldFindTopLevelClassThroughParentHierarchy() {
+      // Given
+      final var existingRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var parentContext = mock(ExtensionContext.class);
+
+      when(mockContext.getTestClass()).thenReturn(Optional.of(NestedTestClass.class));
+      doReturn(NestedTestClass.class).when(mockContext).getRequiredTestClass();
+      when(mockContext.getParent()).thenReturn(Optional.of(parentContext));
+      when(parentContext.getTestClass()).thenReturn(Optional.of(OuterTestClass.class));
+      doReturn(OuterTestClass.class).when(parentContext).getRequiredTestClass();
+      when(parentContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(existingRegistry);
+
+      // When
+      final var result = DatabaseTestExtension.getRegistry(mockContext);
+
+      // Then
+      assertSame(existingRegistry, result, "should return registry from top-level class");
+    }
+  }
+
   /** Test class for testing. */
   static class TestClass {
     /** Test constructor. */
     TestClass() {}
+  }
+
+  /** Test class without annotations. */
+  static class TestClassWithoutAnnotations {
+    /** Test constructor. */
+    TestClassWithoutAnnotations() {}
+
+    /** Test method without annotations. */
+    void testMethod() {}
+  }
+
+  /** Test class with method-level DataSet annotation. */
+  static class TestClassWithMethodDataSet {
+    /** Test constructor. */
+    TestClassWithMethodDataSet() {}
+
+    /** Test method with DataSet annotation. */
+    @DataSet
+    void annotatedMethod() {}
+  }
+
+  /** Test class with class-level DataSet annotation. */
+  @DataSet
+  static class TestClassWithClassDataSet {
+    /** Test constructor. */
+    TestClassWithClassDataSet() {}
+
+    /** Test method without annotation. */
+    void testMethod() {}
+  }
+
+  /** Test class with method-level ExpectedDataSet annotation. */
+  static class TestClassWithMethodExpectedDataSet {
+    /** Test constructor. */
+    TestClassWithMethodExpectedDataSet() {}
+
+    /** Test method with ExpectedDataSet annotation. */
+    @ExpectedDataSet
+    void annotatedMethod() {}
+  }
+
+  /** Test class with class-level ExpectedDataSet annotation. */
+  @ExpectedDataSet
+  static class TestClassWithClassExpectedDataSet {
+    /** Test constructor. */
+    TestClassWithClassExpectedDataSet() {}
+
+    /** Test method without annotation. */
+    void testMethod() {}
+  }
+
+  /** Outer test class for nested test scenarios. */
+  static class OuterTestClass {
+    /** Test constructor. */
+    OuterTestClass() {}
+  }
+
+  /** Nested test class for testing context hierarchy. */
+  static class NestedTestClass {
+    /** Test constructor. */
+    NestedTestClass() {}
   }
 
   /** Test class with ExtensionContext parameter. */
