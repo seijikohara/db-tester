@@ -1,6 +1,7 @@
 # DB Tester
 
 [![Test](https://github.com/seijikohara/db-tester/actions/workflows/test.yml/badge.svg)](https://github.com/seijikohara/db-tester/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/seijikohara/db-tester/graph/badge.svg)](https://codecov.io/gh/seijikohara/db-tester)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/Docs-VitePress-646cff.svg)](https://seijikohara.github.io/db-tester/)
