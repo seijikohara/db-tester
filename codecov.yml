@@ -1,0 +1,28 @@
+# Codecov configuration
+# https://docs.codecov.com/docs/codecov-yaml
+
+coverage:
+  status:
+    project:
+      default:
+        target: 70%
+    patch:
+      default:
+        target: 70%
+
+# Path fixes for multi-module Gradle project
+# JaCoCo reports contain paths like: io/github/seijikohara/dbtester/...
+# Actual source files are in: <module>/src/main/java/io/github/seijikohara/dbtester/...
+fixes:
+  - "io/github/seijikohara/dbtester/api/::db-tester-api/src/main/java/io/github/seijikohara/dbtester/api/"
+  - "io/github/seijikohara/dbtester/internal/::db-tester-core/src/main/java/io/github/seijikohara/dbtester/internal/"
+  - "io/github/seijikohara/dbtester/junit/::db-tester-junit/src/main/java/io/github/seijikohara/dbtester/junit/"
+  - "io/github/seijikohara/dbtester/spock/::db-tester-spock/src/main/groovy/io/github/seijikohara/dbtester/spock/"
+  - "io/github/seijikohara/dbtester/kotest/::db-tester-kotest/src/main/kotlin/io/github/seijikohara/dbtester/kotest/"
+  - "io/github/seijikohara/dbtester/spring/autoconfigure/junit/::db-tester-junit-spring-boot-starter/src/main/java/io/github/seijikohara/dbtester/spring/autoconfigure/junit/"
+  - "io/github/seijikohara/dbtester/spring/autoconfigure/spock/::db-tester-spock-spring-boot-starter/src/main/groovy/io/github/seijikohara/dbtester/spring/autoconfigure/spock/"
+  - "io/github/seijikohara/dbtester/spring/autoconfigure/kotest/::db-tester-kotest-spring-boot-starter/src/main/kotlin/io/github/seijikohara/dbtester/spring/autoconfigure/kotest/"
+
+# Ignore example modules from coverage
+ignore:
+  - "examples/**/*"
