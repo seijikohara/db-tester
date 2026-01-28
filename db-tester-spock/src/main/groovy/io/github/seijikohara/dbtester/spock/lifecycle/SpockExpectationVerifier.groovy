@@ -165,8 +165,10 @@ class SpockExpectationVerifier {
 			log.debug('Using column strategies for: {}', columnStrategies.keySet())
 		}
 
+		def operationDefaults = context.configuration().operations()
+
 		try {
-			expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering)
+			expectationProvider.verifyExpectation(tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering, operationDefaults)
 
 			log.info('Expectation validation completed successfully for {}: {} tables',
 					context.testMethod().name,

@@ -197,6 +197,8 @@ class KotestExpectationVerifier {
                 logger.debug("Using column strategies for: {}", columnStrategies.keys)
             }
 
+            val operationDefaults = context.configuration().operations()
+
             runCatching {
                 expectationProvider.verifyExpectation(
                     tableSet,
@@ -204,6 +206,7 @@ class KotestExpectationVerifier {
                     excludeColumns,
                     columnStrategies,
                     rowOrdering,
+                    operationDefaults,
                 )
             }.onSuccess {
                 logger.info(

@@ -166,7 +166,7 @@ class SpockExpectationVerifierSpec extends Specification {
 		verifier.verify(context, expectedDataSet)
 
 		then: 'verification is executed'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, _)
+		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, _, _)
 	}
 
 	def 'should use annotation retry count when specified'() {
@@ -194,7 +194,7 @@ class SpockExpectationVerifierSpec extends Specification {
 		verifier.verify(context, expectedDataSet)
 
 		then: 'verification is executed'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, RowOrdering.ORDERED)
+		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, RowOrdering.ORDERED, _)
 	}
 
 	def 'should retry and succeed on validation exception'() {
@@ -219,7 +219,7 @@ class SpockExpectationVerifierSpec extends Specification {
 		expectedDataSet.retryDelayMillis() >> 10
 		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
 
-		mockExpectationProvider.verifyExpectation(_, _, _, _, _) >> {
+		mockExpectationProvider.verifyExpectation(_, _, _, _, _, _) >> {
 			callCount++
 			if (callCount == 1) {
 				throw new ValidationException('First attempt failed')
@@ -255,7 +255,7 @@ class SpockExpectationVerifierSpec extends Specification {
 		expectedDataSet.retryDelayMillis() >> 10
 		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
 
-		mockExpectationProvider.verifyExpectation(_, _, _, _, _) >> {
+		mockExpectationProvider.verifyExpectation(_, _, _, _, _, _) >> {
 			throw new ValidationException('Always fails')
 		}
 
@@ -291,7 +291,7 @@ class SpockExpectationVerifierSpec extends Specification {
 		verifier.verify(context, expectedDataSet)
 
 		then: 'verification is executed with exclusions'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, { it.contains('CREATED_AT') }, _, _)
+		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, { it.contains('CREATED_AT') }, _, _, _)
 	}
 
 	/**

@@ -285,6 +285,84 @@ public final class ExpectationVerifier {
   }
 
   /**
+   * Verifies database state matches expected dataset with operation defaults.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map,
+   * RowOrdering)} with operation defaults support. The operation defaults contain comparison
+   * settings such as the floating-point epsilon for numeric comparisons.
+   *
+   * <p>This method creates a new comparator with the specified operation defaults for each
+   * verification to ensure the correct epsilon is used.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison, or null/empty for no exclusions
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
+   * @param operationDefaults the operation defaults containing comparison settings
+   * @throws AssertionError if verification fails
+   */
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final @Nullable Collection<String> excludeColumns,
+      final @Nullable Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering,
+      final OperationDefaults operationDefaults) {
+    logger.debug(
+        "Verifying expectation for {} tables with {} ordering and epsilon {}",
+        expectedTableSet.getTables().size(),
+        rowOrdering,
+        operationDefaults.floatingPointEpsilon());
+
+    final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
+    final var effectiveColumnStrategies =
+        columnStrategies != null ? columnStrategies : Map.<String, ColumnStrategyMapping>of();
+
+    // Create a comparator with the specified operation defaults
+    final var effectiveComparator = new DataSetComparator(operationDefaults);
+
+    if (!normalizedExcludeColumns.isEmpty()) {
+      logger.debug("Excluding columns from verification: {}", normalizedExcludeColumns);
+    }
+
+    if (!effectiveColumnStrategies.isEmpty()) {
+      logger.debug("Using column strategies for: {}", effectiveColumnStrategies.keySet());
+    }
+
+    expectedTableSet
+        .getTables()
+        .forEach(
+            expectedTable -> {
+              final var tableName = expectedTable.getName().value();
+              final var expectedColumns = expectedTable.getColumns();
+
+              logger.trace(
+                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+
+              final var actualTable =
+                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+
+              logger.trace(
+                  "Comparing table {}: expected {} rows, actual {} rows ({})",
+                  tableName,
+                  expectedTable.getRowCount(),
+                  actualTable.getRowCount(),
+                  rowOrdering);
+
+              effectiveComparator.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  normalizedExcludeColumns,
+                  effectiveColumnStrategies,
+                  rowOrdering);
+            });
+
+    logger.debug(
+        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+  }
+
+  /**
    * Normalizes exclude column names for case-insensitive matching.
    *
    * @param excludeColumns the column names to normalize, may be null or empty

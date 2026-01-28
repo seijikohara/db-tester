@@ -188,9 +188,11 @@ public final class ExpectationVerifier {
       logger.debug("Using column strategies for: {}", columnStrategies.keySet());
     }
 
+    final var operationDefaults = context.configuration().operations();
+
     try {
       expectationProvider.verifyExpectation(
-          tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering);
+          tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering, operationDefaults);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",
