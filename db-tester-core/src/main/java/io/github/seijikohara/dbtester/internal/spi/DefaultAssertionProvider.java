@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.spi;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.TableName;
@@ -31,8 +32,16 @@ public final class DefaultAssertionProvider implements AssertionProvider {
 
   /** Creates a new instance with default comparator and table reader. */
   public DefaultAssertionProvider() {
-    this.comparator = new DataSetComparator();
-    this.tableReader = new TableReader();
+    this(OperationDefaults.standard());
+  }
+
+  /**
+   * Creates a new instance with specified operation defaults.
+   *
+   * @param operationDefaults the operation defaults to use
+   */
+  public DefaultAssertionProvider(final OperationDefaults operationDefaults) {
+    this(new DataSetComparator(operationDefaults), new TableReader());
   }
 
   /**

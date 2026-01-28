@@ -19,18 +19,25 @@ import org.jspecify.annotations.Nullable;
  *
  * // Customizing with builder
  * var defaults = OperationDefaults.builder()
- *     .preparation(Operation.TRUNCATE_INSERT)
- *     .expectation(Operation.NONE)
- *     .build();
+ * .preparation(Operation.TRUNCATE_INSERT)
+ * .expectation(Operation.NONE)
+ * .floatingPointEpsilon(1e-9)
+ * .build();
  * }</pre>
  */
 public final class OperationDefaults {
+
+  /** The default epsilon value used for floating-point comparisons. */
+  public static final double DEFAULT_FLOATING_POINT_EPSILON = 1e-6;
 
   /** The default operation executed before a test runs. */
   private final Operation preparation;
 
   /** The default operation executed after a test finishes. */
   private final Operation expectation;
+
+  /** The epsilon value used for floating-point comparisons. */
+  private final double floatingPointEpsilon;
 
   /**
    * Creates a new instance from the builder.
@@ -40,6 +47,7 @@ public final class OperationDefaults {
   private OperationDefaults(final Builder builder) {
     this.preparation = builder.preparation;
     this.expectation = builder.expectation;
+    this.floatingPointEpsilon = builder.floatingPointEpsilon;
   }
 
   /**
@@ -52,7 +60,8 @@ public final class OperationDefaults {
   }
 
   /**
-   * Returns an instance initialised with {@link Operation#CLEAN_INSERT} and {@link Operation#NONE}.
+   * Returns an instance initialised with {@link Operation#CLEAN_INSERT}, {@link Operation#NONE} and
+   * the default floating-point epsilon.
    *
    * @return defaults using {@code CLEAN_INSERT} for preparation and {@code NONE} for verification
    */
@@ -79,6 +88,15 @@ public final class OperationDefaults {
   }
 
   /**
+   * Returns the epsilon value used for floating-point comparisons.
+   *
+   * @return the floating-point epsilon
+   */
+  public double floatingPointEpsilon() {
+    return floatingPointEpsilon;
+  }
+
+  /**
    * Creates a new OperationDefaults with the specified preparation operation.
    *
    * @param preparation the preparation operation
@@ -99,12 +117,25 @@ public final class OperationDefaults {
   }
 
   /**
+   * Creates a new OperationDefaults with the specified epsilon value.
+   *
+   * @param floatingPointEpsilon the epsilon value
+   * @return a new OperationDefaults with the specified epsilon
+   */
+  public OperationDefaults withFloatingPointEpsilon(final double floatingPointEpsilon) {
+    return toBuilder().floatingPointEpsilon(floatingPointEpsilon).build();
+  }
+
+  /**
    * Creates a new builder initialized with the values from this instance.
    *
    * @return a new builder with values copied from this instance
    */
   public Builder toBuilder() {
-    return new Builder().preparation(this.preparation).expectation(this.expectation);
+    return new Builder()
+        .preparation(this.preparation)
+        .expectation(this.expectation)
+        .floatingPointEpsilon(this.floatingPointEpsilon);
   }
 
   @Override
@@ -115,17 +146,25 @@ public final class OperationDefaults {
     if (!(obj instanceof OperationDefaults other)) {
       return false;
     }
-    return preparation == other.preparation && expectation == other.expectation;
+    return preparation == other.preparation
+        && expectation == other.expectation
+        && Double.compare(floatingPointEpsilon, other.floatingPointEpsilon) == 0;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(preparation, expectation);
+    return Objects.hash(preparation, expectation, floatingPointEpsilon);
   }
 
   @Override
   public String toString() {
-    return "OperationDefaults[preparation=" + preparation + ", expectation=" + expectation + ']';
+    return "OperationDefaults[preparation="
+        + preparation
+        + ", expectation="
+        + expectation
+        + ", floatingPointEpsilon="
+        + floatingPointEpsilon
+        + ']';
   }
 
   /** Builder for constructing {@link OperationDefaults} instances. */
@@ -136,6 +175,9 @@ public final class OperationDefaults {
 
     /** The default operation executed after a test finishes. */
     private Operation expectation = Operation.NONE;
+
+    /** The default epsilon value used for floating-point comparisons. */
+    private double floatingPointEpsilon = DEFAULT_FLOATING_POINT_EPSILON;
 
     /** Creates a new builder with default values. */
     public Builder() {}
@@ -159,6 +201,17 @@ public final class OperationDefaults {
      */
     public Builder expectation(final Operation expectation) {
       this.expectation = Objects.requireNonNull(expectation, "expectation");
+      return this;
+    }
+
+    /**
+     * Sets the epsilon value used for floating-point comparisons.
+     *
+     * @param floatingPointEpsilon the epsilon value
+     * @return this builder
+     */
+    public Builder floatingPointEpsilon(final double floatingPointEpsilon) {
+      this.floatingPointEpsilon = floatingPointEpsilon;
       return this;
     }
 

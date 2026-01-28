@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
@@ -43,8 +44,18 @@ public final class ExpectationVerifier {
 
   /** Creates a new expectation verifier with default dependencies. */
   public ExpectationVerifier() {
-    this.tableReader = new TableReader();
-    this.comparator = new DataSetComparator();
+    this(new TableReader(), OperationDefaults.standard());
+  }
+
+  /**
+   * Creates a new expectation verifier with specified dependencies.
+   *
+   * @param tableReader the table reader
+   * @param operationDefaults the operation defaults for comparison
+   */
+  public ExpectationVerifier(
+      final TableReader tableReader, final OperationDefaults operationDefaults) {
+    this(tableReader, new DataSetComparator(operationDefaults));
   }
 
   /**

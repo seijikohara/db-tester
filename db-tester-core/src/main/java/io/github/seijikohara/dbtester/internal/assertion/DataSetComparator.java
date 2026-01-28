@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
@@ -54,9 +55,21 @@ public class DataSetComparator {
   /** Pattern for matching trailing zeros in timestamps. */
   private static final Pattern TRAILING_ZEROS_PATTERN = Pattern.compile("\\.0+$");
 
-  /** Creates a new dataset comparator. */
+  /** The operation defaults containing comparison settings. */
+  private final OperationDefaults operationDefaults;
+
+  /**
+   * Creates a new dataset comparator with the specified operation defaults.
+   *
+   * @param operationDefaults the operation defaults to use
+   */
+  public DataSetComparator(final OperationDefaults operationDefaults) {
+    this.operationDefaults = Objects.requireNonNull(operationDefaults, "operationDefaults");
+  }
+
+  /** Creates a new dataset comparator with standard operation defaults. */
   public DataSetComparator() {
-    // Default constructor
+    this(OperationDefaults.standard());
   }
 
   /**
@@ -1035,7 +1048,7 @@ public class DataSetComparator {
     }
 
     // Use relative epsilon for comparison
-    final double epsilon = 1e-6;
+    final double epsilon = operationDefaults.floatingPointEpsilon();
     final double diff = Math.abs(expected - actual);
     final double maxVal = Math.max(Math.abs(expected), Math.abs(actual));
 
