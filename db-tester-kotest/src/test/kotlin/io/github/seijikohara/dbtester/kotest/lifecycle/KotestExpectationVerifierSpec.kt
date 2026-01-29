@@ -94,6 +94,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                 any(),
                 any(),
                 any(),
+                any(),
             )
         }
     }
@@ -131,6 +132,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                 any(),
                 any(),
                 RowOrdering.ORDERED,
+                any(),
             )
         }
     }
@@ -142,7 +144,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
         val mockDataSource = mockk<DataSource>()
         var callCount = 0
 
-        every { mockExpectationProvider.verifyExpectation(any(), any(), any(), any(), any()) } answers {
+        every { mockExpectationProvider.verifyExpectation(any(), any(), any(), any(), any(), any()) } answers {
             callCount++
             if (callCount == 1) {
                 throw ValidationException("First attempt failed")
@@ -178,7 +180,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
         val mockExpectationProvider = mockk<ExpectationProvider>()
         val mockDataSource = mockk<DataSource>()
 
-        every { mockExpectationProvider.verifyExpectation(any(), any(), any(), any(), any()) } throws
+        every { mockExpectationProvider.verifyExpectation(any(), any(), any(), any(), any(), any()) } throws
             ValidationException("Always fails")
 
         // Inject mock provider using reflection
@@ -236,6 +238,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                 match { it.contains("CREATED_AT") },
                 any(),
                 any(),
+                any(),
             )
         }
     }
@@ -272,6 +275,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                 mockDataSource,
                 any(),
                 match { it.containsKey("AMOUNT") },
+                any(),
                 any(),
             )
         }
@@ -310,6 +314,7 @@ class KotestExpectationVerifierSpec : AnnotationSpec() {
                 any(),
                 any(),
                 RowOrdering.UNORDERED,
+                any(),
             )
         }
     }

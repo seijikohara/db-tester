@@ -15,6 +15,7 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.Row;
@@ -153,6 +154,7 @@ class ExpectationVerifierTest {
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockConfiguration.operations()).thenReturn(OperationDefaults.standard());
       when(mockLoader.loadExpectationDataSetsWithExclusions(any(TestContext.class)))
           .thenReturn(List.of(expectedTableSet));
       when(mockConventions.retryCount()).thenReturn(0);
@@ -179,7 +181,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
     }
 
     /**
@@ -212,6 +215,7 @@ class ExpectationVerifierTest {
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockConfiguration.operations()).thenReturn(OperationDefaults.standard());
       when(mockLoader.loadExpectationDataSetsWithExclusions(any(TestContext.class)))
           .thenReturn(List.of(expectedTableSet));
       when(mockConventions.retryCount()).thenReturn(5);
@@ -237,7 +241,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
     }
 
     /**
@@ -270,6 +275,7 @@ class ExpectationVerifierTest {
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockConfiguration.operations()).thenReturn(OperationDefaults.standard());
       when(mockLoader.loadExpectationDataSetsWithExclusions(any(TestContext.class)))
           .thenReturn(List.of(expectedTableSet));
       when(mockConventions.retryCount()).thenReturn(2);
@@ -284,7 +290,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
 
       final Field providerField = ExpectationVerifier.class.getDeclaredField("expectationProvider");
       providerField.setAccessible(true);
@@ -306,7 +313,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
     }
 
     /**
@@ -339,6 +347,7 @@ class ExpectationVerifierTest {
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockConfiguration.operations()).thenReturn(OperationDefaults.standard());
       when(mockLoader.loadExpectationDataSetsWithExclusions(any(TestContext.class)))
           .thenReturn(List.of(expectedTableSet));
       when(mockConventions.retryCount()).thenReturn(1);
@@ -352,7 +361,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
 
       final Field providerField = ExpectationVerifier.class.getDeclaredField("expectationProvider");
       providerField.setAccessible(true);
@@ -377,7 +387,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
     }
 
     /**
@@ -418,6 +429,7 @@ class ExpectationVerifierTest {
 
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockConfiguration.operations()).thenReturn(OperationDefaults.standard());
       when(mockLoader.loadExpectationDataSetsWithExclusions(any(TestContext.class)))
           .thenReturn(List.of(expectedTableSet));
       when(mockConventions.retryCount()).thenReturn(0);
@@ -443,7 +455,8 @@ class ExpectationVerifierTest {
               any(DataSource.class),
               any(Collection.class),
               any(Map.class),
-              any(RowOrdering.class));
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
     }
   }
 

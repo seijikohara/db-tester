@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.lang.System.Logger;
@@ -174,5 +175,47 @@ public interface ExpectationProvider {
               + "DataSource, Collection, Map, RowOrdering) to support unordered comparison.");
     }
     verifyExpectation(expectedTableSet, dataSource, excludeColumns, columnStrategies);
+  }
+
+  /**
+   * Verifies that the database state matches the expected dataset with operation defaults.
+   *
+   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map,
+   * RowOrdering)} with operation defaults support. The operation defaults contain comparison
+   * settings such as the floating-point epsilon for numeric comparisons.
+   *
+   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
+   * Collection, Map, RowOrdering)}. Implementations should override this method to support
+   * operation defaults.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
+   * @param operationDefaults the operation defaults containing comparison settings
+   * @throws AssertionError if verification fails
+   * @see OperationDefaults
+   */
+  default void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final Collection<String> excludeColumns,
+      final Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering,
+      final OperationDefaults operationDefaults) {
+    // Default implementation ignores operation defaults for backward compatibility.
+    // Implementations should override this method to support operation defaults.
+    if (operationDefaults != null
+        && operationDefaults.floatingPointEpsilon()
+            != OperationDefaults.DEFAULT_FLOATING_POINT_EPSILON) {
+      LOGGER.log(
+          Level.WARNING,
+          "Custom floating-point epsilon specified but current ExpectationProvider does not "
+              + "support it. Using default epsilon. Override verifyExpectation(TableSet, "
+              + "DataSource, Collection, Map, RowOrdering, OperationDefaults) to support "
+              + "custom epsilon.");
+    }
+    verifyExpectation(expectedTableSet, dataSource, excludeColumns, columnStrategies, rowOrdering);
   }
 }
