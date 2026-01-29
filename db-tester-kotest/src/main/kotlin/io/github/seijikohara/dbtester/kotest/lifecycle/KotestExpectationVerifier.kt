@@ -216,12 +216,16 @@ class KotestExpectationVerifier {
                 )
             }.onFailure { e ->
                 when (e) {
-                    is ValidationException ->
+                    is ValidationException -> {
                         throw ValidationException(
                             "Failed to verify expectation dataset for $methodName",
                             e,
                         )
-                    else -> throw e
+                    }
+
+                    else -> {
+                        throw e
+                    }
                 }
             }
         }

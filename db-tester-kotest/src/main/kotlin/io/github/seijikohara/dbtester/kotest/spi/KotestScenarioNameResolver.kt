@@ -52,11 +52,15 @@ class KotestScenarioNameResolver : ScenarioNameResolver {
      */
     override fun canResolve(testMethod: Method): Boolean =
         when {
-            AnnotationSpec::class.java.isAssignableFrom(testMethod.declaringClass) -> true
-            else ->
+            AnnotationSpec::class.java.isAssignableFrom(testMethod.declaringClass) -> {
+                true
+            }
+
+            else -> {
                 testMethod.annotations.any { annotation ->
                     annotation.annotationClass.qualifiedName == "io.kotest.core.spec.style.AnnotationSpec\$Test"
                 }
+            }
         }
 
     /**
