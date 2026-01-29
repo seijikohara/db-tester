@@ -6,8 +6,13 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.OperationDefaults;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.internal.assertion.ExpectationVerifier;
+import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -93,6 +98,62 @@ class DefaultExpectationProviderTest {
 
       // Then
       verify(mockExpectationVerifier).verifyExpectation(expectedDataSet, dataSource);
+    }
+  }
+
+  /**
+   * Tests for the verifyExpectation(TableSet, DataSource, Collection, Map, RowOrdering,
+   * OperationDefaults) method.
+   */
+  @Nested
+  @DisplayName(
+      "verifyExpectation(TableSet, DataSource, Collection, Map, RowOrdering, OperationDefaults)"
+          + " method")
+  class VerifyExpectationWithOperationDefaultsMethod {
+
+    /** Tests for the verifyExpectation method with OperationDefaults. */
+    VerifyExpectationWithOperationDefaultsMethod() {}
+
+    /** Verifies that verifyExpectation delegates to expectation verifier with all arguments. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should delegate to expectation verifier when called with operation defaults")
+    void shouldDelegateToExpectationVerifier_whenCalledWithOperationDefaults() {
+      // Given
+      final var expectedDataSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      final var excludeColumns = List.of("CREATED_AT");
+      final Map<String, ColumnStrategyMapping> columnStrategies = Map.of();
+      final var rowOrdering = RowOrdering.ORDERED;
+      final var operationDefaults = OperationDefaults.standard();
+      doNothing()
+          .when(mockExpectationVerifier)
+          .verifyExpectation(
+              any(TableSet.class),
+              any(DataSource.class),
+              any(),
+              any(),
+              any(RowOrdering.class),
+              any(OperationDefaults.class));
+
+      // When
+      provider.verifyExpectation(
+          expectedDataSet,
+          dataSource,
+          excludeColumns,
+          columnStrategies,
+          rowOrdering,
+          operationDefaults);
+
+      // Then
+      verify(mockExpectationVerifier)
+          .verifyExpectation(
+              expectedDataSet,
+              dataSource,
+              excludeColumns,
+              columnStrategies,
+              rowOrdering,
+              operationDefaults);
     }
   }
 }

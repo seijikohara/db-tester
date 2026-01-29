@@ -266,13 +266,14 @@ static void setup(ExtensionContext context) {
 |------------|-----|-----------|------|
 | `preparation` | `Operation` | `CLEAN_INSERT` | テスト実行前に実行されるデフォルト操作 |
 | `expectation` | `Operation` | `NONE` | テスト終了後に実行されるデフォルト操作 |
+| `floatingPointEpsilon` | `double` | `1e-6` | 浮動小数点比較のイプシロン値 |
 
 ### ファクトリメソッド
 
 | メソッド | 説明 |
 |----------|------|
 | `builder()` | OperationDefaultsインスタンス構築用の新しいビルダーを作成 |
-| `standard()` | 準備に`CLEAN_INSERT`、期待に`NONE`のデフォルトを作成 |
+| `standard()` | 準備に`CLEAN_INSERT`、期待に`NONE`、イプシロンに`1e-6`のデフォルトを作成 |
 
 ### インスタンスメソッド
 
@@ -286,6 +287,7 @@ static void setup(ExtensionContext context) {
 |----------|------|
 | `preparation(Operation)` | 準備フェーズのデフォルト操作を設定 |
 | `expectation(Operation)` | 期待フェーズのデフォルト操作を設定 |
+| `floatingPointEpsilon(double)` | 浮動小数点比較のイプシロン値を設定 |
 | `build()` | 新しいOperationDefaultsインスタンスをビルド |
 
 ### Withメソッド（Fluent Copy）
@@ -294,6 +296,7 @@ static void setup(ExtensionContext context) {
 |----------|------|
 | `withPreparation(Operation)` | 指定した準備操作でコピーを作成 |
 | `withExpectation(Operation)` | 指定した期待操作でコピーを作成 |
+| `withFloatingPointEpsilon(double)` | 指定した浮動小数点イプシロンでコピーを作成 |
 
 ## DataFormat
 

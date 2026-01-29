@@ -283,13 +283,14 @@ Defines default database operations for preparation and expectation phases.
 |-------|------|---------|-------------|
 | `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before test runs |
 | `expectation` | `Operation` | `NONE` | Default operation executed after test completes |
+| `floatingPointEpsilon` | `double` | `1e-6` | Epsilon value for floating-point comparisons |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
 | `builder()` | Creates a new builder for constructing OperationDefaults instances |
-| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation and `NONE` for expectation |
+| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation, `NONE` for expectation, and `1e-6` for epsilon |
 
 ### Instance Methods
 
@@ -303,6 +304,7 @@ Defines default database operations for preparation and expectation phases.
 |--------|-------------|
 | `preparation(Operation)` | Sets the default operation for preparation phase |
 | `expectation(Operation)` | Sets the default operation for expectation phase |
+| `floatingPointEpsilon(double)` | Sets the epsilon value for floating-point comparisons |
 | `build()` | Builds a new OperationDefaults instance |
 
 ### With Methods (Fluent Copy)
@@ -311,6 +313,7 @@ Defines default database operations for preparation and expectation phases.
 |--------|-------------|
 | `withPreparation(Operation)` | Creates copy with specified preparation operation |
 | `withExpectation(Operation)` | Creates copy with specified expectation operation |
+| `withFloatingPointEpsilon(double)` | Creates copy with specified floating-point epsilon |
 
 ## DataFormat
 
