@@ -106,9 +106,13 @@ class DatabaseTestExtension(
                 findDataSet(testCase, method) to findExpectedDataSet(testCase, method)
             }.let { (dataSet, expectedDataSet) ->
                 when {
-                    dataSet != null || expectedDataSet != null ->
+                    dataSet != null || expectedDataSet != null -> {
                         executeWithAnnotations(testCase, execute, dataSet, expectedDataSet)
-                    else -> execute(testCase)
+                    }
+
+                    else -> {
+                        execute(testCase)
+                    }
                 }
             }
 

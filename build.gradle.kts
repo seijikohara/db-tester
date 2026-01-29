@@ -460,8 +460,11 @@ subprojects.filter { it.name in groovyModules }.forEach { subproject ->
                     }.mapNotNull { (file: File, relativePath: String) ->
                         val content = file.readText()
                         when {
-                            !classPattern.containsMatchIn(content) -> null // No class definition
+                            !classPattern.containsMatchIn(content) -> null
+
+                            // No class definition
                             !javadocPattern.containsMatchIn(content) -> "Missing class-level Javadoc: $relativePath"
+
                             else -> null
                         }
                     }.sorted()

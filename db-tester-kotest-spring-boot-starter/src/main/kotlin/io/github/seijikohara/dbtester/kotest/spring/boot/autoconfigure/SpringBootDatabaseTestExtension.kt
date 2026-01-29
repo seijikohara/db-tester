@@ -88,7 +88,7 @@ class SpringBootDatabaseTestExtension :
      */
     private fun initializeFromSpec(spec: Spec): Unit =
         when (delegate) {
-            null ->
+            null -> {
                 getApplicationContext(spec).also { applicationContext = it }.let { context ->
                     registerConfigurationFromContext(context)
                     registerDataSourcesFromContext(context)
@@ -98,7 +98,11 @@ class SpringBootDatabaseTestExtension :
                             configurationProvider = { configuration ?: Configuration.defaults() },
                         )
                 }
-            else -> Unit
+            }
+
+            else -> {
+                Unit
+            }
         }
 
     /**
@@ -124,7 +128,10 @@ class SpringBootDatabaseTestExtension :
                 configuration = applicationContext.getBean("dbTesterConfiguration", Configuration::class.java)
                 logger.debug("Registered Spring-managed Configuration with database testing framework")
             }
-            else -> logger.debug("Configuration bean not found in ApplicationContext, using default configuration")
+
+            else -> {
+                logger.debug("Configuration bean not found in ApplicationContext, using default configuration")
+            }
         }
 
     /**
@@ -138,12 +145,14 @@ class SpringBootDatabaseTestExtension :
                 registry = applicationContext.getBean("dbTesterDataSourceRegistry", DataSourceRegistry::class.java)
                 logger.debug("Using Spring-managed DataSourceRegistry")
             }
+
             applicationContext.containsBean("dataSourceRegistrar") -> {
                 registry = DataSourceRegistry()
                 logger.info("Automatically registering Spring DataSources with database testing framework")
                 applicationContext.getBean(DataSourceRegistrar::class.java).registerAll(registry!!)
                 logger.info("Automatic DataSource registration completed")
             }
+
             else -> {
                 registry = DataSourceRegistry()
                 logger.debug("DataSourceRegistrar bean not found, using empty registry")

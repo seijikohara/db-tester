@@ -60,8 +60,11 @@ class DataSourceRegistrar(
      */
     fun registerAll(registry: DataSourceRegistry): Unit =
         when {
-            !properties.isAutoRegisterDataSources -> logger.debug("Auto-registration disabled")
-            else ->
+            !properties.isAutoRegisterDataSources -> {
+                logger.debug("Auto-registration disabled")
+            }
+
+            else -> {
                 requireApplicationContext().let { context ->
                     context
                         .getBeansOfType(DataSource::class.java)
@@ -76,6 +79,7 @@ class DataSourceRegistrar(
                         }
                         ?: logger.debug("No DataSource beans found")
                 }
+            }
         }
 
     /**
