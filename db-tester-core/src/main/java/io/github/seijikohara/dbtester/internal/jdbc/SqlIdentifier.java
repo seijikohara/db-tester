@@ -3,19 +3,15 @@ package io.github.seijikohara.dbtester.internal.jdbc;
 import java.util.regex.Pattern;
 
 /**
- * Validates and quotes SQL identifiers to prevent SQL injection.
+ * Validates SQL identifiers to prevent SQL injection.
  *
  * <p>This utility class provides methods to validate table names and column names before
  * interpolating them into SQL statements. While the framework primarily receives identifiers from
  * trusted test code, validation prevents accidental SQL injection from malformed inputs.
  *
- * <p>The class supports two approaches:
- *
- * <ul>
- *   <li><strong>Validation</strong>: Ensures identifiers match a safe pattern (alphanumeric and
- *       underscore only)
- *   <li><strong>Quoting</strong>: Escapes identifiers using standard SQL double-quote syntax
- * </ul>
+ * <p>Identifiers must match a safe pattern: start with a letter or underscore, contain only
+ * letters, digits, and underscores, and optionally include a schema prefix (e.g., {@code
+ * schema.table}).
  *
  * <p>This class is stateless and thread-safe.
  */
