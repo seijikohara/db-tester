@@ -42,7 +42,7 @@ The GitHub Actions workflow provides:
 
 See [publishing.md](publishing.md#option-1-github-actions-release-recommended) for one-time setup:
 - GitHub Environment (`maven-central`) with required reviewers
-- GitHub Secrets (`GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`, `GPG_KEY_ID`, `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_TOKEN`)
+- GitHub Secrets (`GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`, `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_TOKEN`)
 
 ### Release Process
 

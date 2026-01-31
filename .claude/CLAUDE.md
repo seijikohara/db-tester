@@ -38,9 +38,9 @@ See @README.md for project details.
 
 ## Documentation
 
-- Technical Specifications: @docs/specs/01-overview.md
-- Architecture: @docs/specs/02-architecture.md
-- Public API: @docs/specs/03-public-api.md
+- Technical Specifications: @docs/specs/overview.md
+- Architecture: @docs/specs/architecture.md
+- Public API: @docs/specs/public-api.md
 - Code Style Guides: [.claude/rules/](.claude/rules/)
 
 ## Git Workflow
