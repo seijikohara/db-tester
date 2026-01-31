@@ -281,7 +281,7 @@ db-tester.convention.expectation-suffix=/expected
 db-tester.operation.preparation=CLEAN_INSERT
 ```
 
-See the [Configuration](https://seijikohara.github.io/db-tester/specs/04-configuration) documentation for all options.
+See the [Configuration](https://seijikohara.github.io/db-tester/configuration) documentation for all options.
 
 ---
 

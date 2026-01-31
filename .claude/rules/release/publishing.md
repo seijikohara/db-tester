@@ -8,7 +8,9 @@ The following modules are published to Maven Central:
 
 | Module | Artifact ID | Description |
 |--------|-------------|-------------|
-| `db-tester-core` | `db-tester-core` | Public API and pure JDBC implementation |
+| `db-tester-api` | `db-tester-api` | Public API (annotations, configuration, SPI) |
+| `db-tester-core` | `db-tester-core` | Internal implementation (SPI providers, JDBC operations) |
+| `db-tester-spring-support` | `db-tester-spring-support` | Common Spring utilities |
 | `db-tester-junit` | `db-tester-junit` | JUnit extension |
 | `db-tester-spock` | `db-tester-spock` | Spock extension |
 | `db-tester-kotest` | `db-tester-kotest` | Kotest AnnotationSpec extension |
@@ -115,7 +117,6 @@ Alternatively, set as environment variables (for CI):
 ```bash
 export ORG_GRADLE_PROJECT_mavenCentralUsername="your-username"
 export ORG_GRADLE_PROJECT_mavenCentralPassword="your-token"
-export ORG_GRADLE_PROJECT_signingInMemoryKeyId="ABCD1234"
 export ORG_GRADLE_PROJECT_signingInMemoryKeyPassword="your-passphrase"
 export ORG_GRADLE_PROJECT_signingInMemoryKey="$(gpg --armor --export-secret-keys ABCD1234)"
 ```
@@ -151,7 +152,6 @@ The recommended way to release is using the GitHub Actions workflow, which provi
    |--------|-------------|
    | `GPG_PRIVATE_KEY` | GPG private key (ASCII armor format: `gpg --armor --export-secret-keys KEY_ID`) |
    | `GPG_PASSPHRASE` | GPG key passphrase |
-   | `GPG_KEY_ID` | GPG key ID (short format, e.g., `ABCD1234`) |
    | `MAVEN_CENTRAL_USERNAME` | Maven Central username from step 2 |
    | `MAVEN_CENTRAL_TOKEN` | Maven Central token from step 2 |
 

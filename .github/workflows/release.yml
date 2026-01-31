@@ -94,7 +94,6 @@ jobs:
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
         run: |
           # Check if secrets are set (without importing the key)
           if [[ -z "$GPG_PRIVATE_KEY" ]]; then
@@ -103,10 +102,6 @@ jobs:
           fi
           if [[ -z "$GPG_PASSPHRASE" ]]; then
             echo "::error::GPG_PASSPHRASE secret is not set"
-            exit 1
-          fi
-          if [[ -z "$GPG_KEY_ID" ]]; then
-            echo "::error::GPG_KEY_ID secret is not set"
             exit 1
           fi
           echo "✅ All GPG secrets are configured"
