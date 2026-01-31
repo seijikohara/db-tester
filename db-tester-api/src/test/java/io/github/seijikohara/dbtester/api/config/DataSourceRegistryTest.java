@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.config;
 
 import static java.util.Objects.requireNonNull;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -9,10 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import io.github.seijikohara.dbtester.api.exception.DataSourceNotFoundException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -376,6 +384,182 @@ class DataSourceRegistryTest {
 
       assertNotNull(newRegistry);
       assertFalse(newRegistry.hasDefault());
+    }
+  }
+
+  /** Tests for concurrent access to DataSourceRegistry. */
+  @Nested
+  @DisplayName("concurrency")
+  class ConcurrencyTest {
+
+    /** Tests for concurrent access to DataSourceRegistry. */
+    ConcurrencyTest() {}
+
+    /** Thread count for concurrent tests. */
+    private static final int THREAD_COUNT = 16;
+
+    /**
+     * Verifies that concurrent registerDefault calls do not throw exceptions.
+     *
+     * @throws InterruptedException if the latch or executor is interrupted
+     */
+    @RepeatedTest(10)
+    @Tag("normal")
+    @DisplayName("concurrent registerDefault calls complete without error")
+    void shouldCompleteWithoutError_whenRegisterDefaultCalledConcurrently()
+        throws InterruptedException {
+      // Given
+      final var latch = new CountDownLatch(1);
+      final var executor = Executors.newFixedThreadPool(THREAD_COUNT);
+
+      try {
+        // When
+        final var futures =
+            IntStream.range(0, THREAD_COUNT)
+                .mapToObj(
+                    i ->
+                        executor.submit(
+                            () -> {
+                              awaitLatch(latch);
+                              registry.registerDefault(mock(DataSource.class));
+                            }))
+                .toList();
+        latch.countDown();
+        awaitAllFutures(futures);
+        executor.shutdown();
+        final var completed = executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        // Then
+        assertTrue(completed, "all threads should complete within timeout");
+        assertTrue(registry.hasDefault(), "default data source should be registered");
+      } finally {
+        shutdownExecutor(executor);
+      }
+    }
+
+    /**
+     * Verifies that concurrent register and get calls do not throw unexpected exceptions.
+     *
+     * @throws InterruptedException if the latch or executor is interrupted
+     */
+    @RepeatedTest(10)
+    @Tag("normal")
+    @DisplayName("concurrent register and get calls complete without error")
+    void shouldCompleteWithoutError_whenRegisterAndGetCalledConcurrently()
+        throws InterruptedException {
+      // Given
+      final var latch = new CountDownLatch(1);
+      final var executor = Executors.newFixedThreadPool(THREAD_COUNT);
+      registry.registerDefault(mock(DataSource.class));
+
+      try {
+        // When
+        final var futures =
+            IntStream.range(0, THREAD_COUNT)
+                .mapToObj(
+                    i ->
+                        executor.submit(
+                            () -> {
+                              awaitLatch(latch);
+                              final var name = "db" + i;
+                              registry.register(name, mock(DataSource.class));
+                              assertDoesNotThrow(
+                                  () -> registry.get(name),
+                                  "get should not throw for registered data source");
+                            }))
+                .toList();
+        latch.countDown();
+        awaitAllFutures(futures);
+        executor.shutdown();
+        final var completed = executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        // Then
+        assertTrue(completed, "all threads should complete within timeout");
+      } finally {
+        shutdownExecutor(executor);
+      }
+    }
+
+    /**
+     * Verifies that concurrent register and clear calls do not throw unexpected exceptions.
+     *
+     * @throws InterruptedException if the latch or executor is interrupted
+     */
+    @RepeatedTest(10)
+    @Tag("normal")
+    @DisplayName("concurrent register and clear calls complete without error")
+    void shouldCompleteWithoutError_whenRegisterAndClearCalledConcurrently()
+        throws InterruptedException {
+      // Given
+      final var latch = new CountDownLatch(1);
+      final var executor = Executors.newFixedThreadPool(THREAD_COUNT);
+
+      try {
+        // When
+        final var futures =
+            IntStream.range(0, THREAD_COUNT)
+                .mapToObj(
+                    i ->
+                        executor.submit(
+                            () -> {
+                              awaitLatch(latch);
+                              if (i % 2 == 0) {
+                                registry.register("db" + i, mock(DataSource.class));
+                              } else {
+                                registry.clear();
+                              }
+                            }))
+                .toList();
+        latch.countDown();
+        awaitAllFutures(futures);
+        executor.shutdown();
+        final var completed = executor.awaitTermination(10, TimeUnit.SECONDS);
+
+        // Then
+        assertTrue(completed, "all threads should complete within timeout");
+      } finally {
+        shutdownExecutor(executor);
+      }
+    }
+
+    /**
+     * Awaits completion of all futures, ignoring exceptions.
+     *
+     * @param futures the futures to await
+     */
+    private void awaitAllFutures(final java.util.List<? extends Future<?>> futures) {
+      futures.forEach(
+          future -> {
+            try {
+              future.get(10, TimeUnit.SECONDS);
+            } catch (final Exception ignored) {
+              // Exceptions from individual tasks are acceptable in concurrency tests
+            }
+          });
+    }
+
+    /**
+     * Awaits the countdown latch, wrapping InterruptedException.
+     *
+     * @param latch the latch to await
+     */
+    private void awaitLatch(final CountDownLatch latch) {
+      try {
+        latch.await();
+      } catch (final InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
+
+    /**
+     * Shuts down the executor service forcefully if still running.
+     *
+     * @param executor the executor service to shut down
+     */
+    private void shutdownExecutor(final ExecutorService executor) {
+      if (!executor.isShutdown()) {
+        executor.shutdownNow();
+      }
     }
   }
 }
