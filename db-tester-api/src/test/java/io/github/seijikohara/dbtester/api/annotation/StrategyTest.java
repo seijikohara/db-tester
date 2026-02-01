@@ -18,13 +18,13 @@ class StrategyTest {
   /** Tests for Strategy enum. */
   StrategyTest() {}
 
-  /** Tests for toComparisonStrategy method. */
+  /** Tests for toComparisonStrategy(String) with non-REGEX strategies (pattern is ignored). */
   @Nested
-  @DisplayName("toComparisonStrategy()")
-  class ToComparisonStrategyTests {
+  @DisplayName("toComparisonStrategy(String) for non-REGEX strategies")
+  class ToComparisonStrategyNonRegexTests {
 
-    /** Tests for toComparisonStrategy method. */
-    ToComparisonStrategyTests() {}
+    /** Tests for toComparisonStrategy with non-REGEX strategies. */
+    ToComparisonStrategyNonRegexTests() {}
 
     /** Verifies that STRICT converts to ComparisonStrategy.STRICT. */
     @Test
@@ -32,7 +32,7 @@ class StrategyTest {
     @DisplayName("should convert STRICT to ComparisonStrategy.STRICT")
     void shouldConvertStrict_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.STRICT.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.STRICT.toComparisonStrategy("");
 
       // Then
       assertSame(ComparisonStrategy.STRICT, result, "should be STRICT strategy");
@@ -45,7 +45,7 @@ class StrategyTest {
     @DisplayName("should convert IGNORE to ComparisonStrategy.IGNORE")
     void shouldConvertIgnore_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.IGNORE.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.IGNORE.toComparisonStrategy("");
 
       // Then
       assertSame(ComparisonStrategy.IGNORE, result, "should be IGNORE strategy");
@@ -58,7 +58,7 @@ class StrategyTest {
     @DisplayName("should convert NUMERIC to ComparisonStrategy.NUMERIC")
     void shouldConvertNumeric_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.NUMERIC.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.NUMERIC.toComparisonStrategy("");
 
       // Then
       assertSame(ComparisonStrategy.NUMERIC, result, "should be NUMERIC strategy");
@@ -71,7 +71,7 @@ class StrategyTest {
     @DisplayName("should convert CASE_INSENSITIVE to ComparisonStrategy.CASE_INSENSITIVE")
     void shouldConvertCaseInsensitive_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.CASE_INSENSITIVE.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.CASE_INSENSITIVE.toComparisonStrategy("");
 
       // Then
       assertSame(
@@ -88,7 +88,7 @@ class StrategyTest {
     @DisplayName("should convert TIMESTAMP_FLEXIBLE to ComparisonStrategy.TIMESTAMP_FLEXIBLE")
     void shouldConvertTimestampFlexible_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.TIMESTAMP_FLEXIBLE.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.TIMESTAMP_FLEXIBLE.toComparisonStrategy("");
 
       // Then
       assertSame(
@@ -105,29 +105,11 @@ class StrategyTest {
     @DisplayName("should convert NOT_NULL to ComparisonStrategy.NOT_NULL")
     void shouldConvertNotNull_toComparisonStrategy() {
       // When
-      final ComparisonStrategy result = Strategy.NOT_NULL.toComparisonStrategy();
+      final ComparisonStrategy result = Strategy.NOT_NULL.toComparisonStrategy("");
 
       // Then
       assertSame(ComparisonStrategy.NOT_NULL, result, "should be NOT_NULL strategy");
       assertEquals(ComparisonStrategy.Type.NOT_NULL, result.getType(), "should have NOT_NULL type");
-    }
-
-    /** Verifies that REGEX throws exception without pattern. */
-    @Test
-    @Tag("error")
-    @DisplayName("should throw IllegalStateException when REGEX called without pattern")
-    void shouldThrowException_whenRegexCalledWithoutPattern() {
-      // When & Then
-      final IllegalStateException exception =
-          assertThrows(
-              IllegalStateException.class,
-              () -> Strategy.REGEX.toComparisonStrategy(),
-              "should throw IllegalStateException");
-
-      final String message = exception.getMessage();
-      assertTrue(
-          message != null && message.contains("pattern"),
-          "exception message should mention pattern requirement");
     }
   }
 
