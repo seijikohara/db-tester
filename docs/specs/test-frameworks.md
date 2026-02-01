@@ -121,6 +121,10 @@ class UserRepositoryTest {
 }
 ```
 
+### Test Failure Behavior
+
+When a test method throws an exception, `@ExpectedDataSet` verification is skipped. The database state is unpredictable after a test failure, so verification results would be misleading. This behavior is consistent across all framework integrations (JUnit, Spock, Kotest).
+
 ## Spock Integration
 
 ### Module

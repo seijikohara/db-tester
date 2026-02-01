@@ -367,6 +367,7 @@ class DatabaseTestExtensionTest {
       final var testClass = TestClassWithoutAnnotations.class;
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
+      when(mockContext.getExecutionException()).thenReturn(Optional.empty());
       doReturn(testClass).when(mockContext).getRequiredTestClass();
       doReturn(testMethod).when(mockContext).getRequiredTestMethod();
 
@@ -374,6 +375,30 @@ class DatabaseTestExtensionTest {
       assertDoesNotThrow(
           () -> extension.afterEach(mockContext),
           "should complete without error when no ExpectedDataSet annotation");
+    }
+
+    /**
+     * Verifies that afterEach skips verification when test threw an exception.
+     *
+     * @throws Exception if reflection fails
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should skip verification when test threw an exception")
+    void shouldSkipVerification_whenTestThrewException() throws Exception {
+      // Given
+      final var testClass = TestClassWithMethodExpectedDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("annotatedMethod");
+
+      when(mockContext.getExecutionException())
+          .thenReturn(Optional.of(new RuntimeException("test failure")));
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> extension.afterEach(mockContext),
+          "should skip verification when test threw an exception");
     }
 
     /**
@@ -394,6 +419,7 @@ class DatabaseTestExtensionTest {
       final var testClass = TestClassWithMethodExpectedDataSet.class;
       final var testMethod = testClass.getDeclaredMethod("annotatedMethod");
 
+      when(mockContext.getExecutionException()).thenReturn(Optional.empty());
       doReturn(testClass).when(mockContext).getRequiredTestClass();
       doReturn(testMethod).when(mockContext).getRequiredTestMethod();
       when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
@@ -431,6 +457,7 @@ class DatabaseTestExtensionTest {
       final var testClass = TestClassWithClassExpectedDataSet.class;
       final var testMethod = testClass.getDeclaredMethod("testMethod");
 
+      when(mockContext.getExecutionException()).thenReturn(Optional.empty());
       doReturn(testClass).when(mockContext).getRequiredTestClass();
       doReturn(testMethod).when(mockContext).getRequiredTestMethod();
       when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
