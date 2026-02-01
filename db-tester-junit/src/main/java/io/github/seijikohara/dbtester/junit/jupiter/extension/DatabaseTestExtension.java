@@ -129,10 +129,21 @@ public class DatabaseTestExtension
    * executes the expectation phase by loading expected datasets and comparing them with the actual
    * database state.
    *
+   * <p>If the test method threw an exception, the expectation verification is skipped because the
+   * database state is unpredictable after a test failure. This behavior is consistent with Spock
+   * and Kotest integrations.
+   *
    * @param context the current extension context
    */
   @Override
   public void afterEach(final ExtensionContext context) {
+    if (context.getExecutionException().isPresent()) {
+      logger.debug(
+          "Skipping @ExpectedDataSet verification for {}.{}() because the test threw an exception",
+          context.getRequiredTestClass().getSimpleName(),
+          context.getRequiredTestMethod().getName());
+      return;
+    }
     Optional.ofNullable(findExpectedDataSet(context))
         .ifPresent(
             expectedDataSet -> {
