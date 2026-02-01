@@ -361,7 +361,11 @@ DB Tester requires `AnnotationSpec` style for Kotest integration because:
 The Spring Boot extension performs these steps automatically:
 1. Detects the Spring `ApplicationContext`
 2. Finds `DataSource` beans
-3. Registers the beans with `DataSourceRegistry`
+3. Resolves the default `DataSource` using the following priority:
+   1. Single `DataSource` bean (automatic default)
+   2. `@Primary`-annotated `DataSource`
+   3. `DataSource` bean named `"dataSource"`
+4. Registers all beans with `DataSourceRegistry`
 
 ```java
 @SpringBootTest
