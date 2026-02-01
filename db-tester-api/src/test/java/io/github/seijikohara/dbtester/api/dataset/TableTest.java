@@ -1,12 +1,15 @@
 package io.github.seijikohara.dbtester.api.dataset;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
@@ -97,6 +100,109 @@ class TableTest {
 
       assertNotNull(table);
       assertTrue(table.getColumns().isEmpty());
+    }
+  }
+
+  /** Tests for ofValues(String, List, List) factory method. */
+  @Nested
+  @DisplayName("ofValues(String, List<String>, List<List<?>>)")
+  class OfValuesTest {
+
+    /** Tests for ofValues factory method. */
+    OfValuesTest() {}
+
+    /** Verifies that ofValues creates Table with valid input. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should create table when valid input provided")
+    void shouldCreateTable_whenValidInputProvided() {
+      // Given
+      final var columns = List.of("ID", "NAME", "AGE");
+      final List<List<? /* @Nullable */>> rows =
+          List.of(List.of(1, "Alice", 30), List.of(2, "Bob", 25));
+
+      // When
+      final var table = Table.ofValues("USERS", columns, rows);
+
+      // Then
+      assertAll(
+          "table should contain correct structure and data",
+          () -> assertEquals("USERS", table.getName().value(), "should have correct table name"),
+          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
+          () -> assertEquals("ID", table.getColumns().get(0).value(), "first column should be ID"),
+          () ->
+              assertEquals(
+                  "NAME", table.getColumns().get(1).value(), "second column should be NAME"),
+          () ->
+              assertEquals("AGE", table.getColumns().get(2).value(), "third column should be AGE"),
+          () -> assertEquals(2, table.getRowCount(), "should have 2 rows"));
+    }
+
+    /** Verifies that ofValues handles null values in rows. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should map null values to CellValue.NULL")
+    void shouldHandleNullValues_whenNullInRow() {
+      // Given
+      final var columns = List.of("ID", "NAME");
+      final var rowWithNull = new ArrayList<>();
+      rowWithNull.add(1);
+      rowWithNull.add(null);
+      final List<List<? /* @Nullable */>> rows = List.of(rowWithNull);
+
+      // When
+      final var table = Table.ofValues("USERS", columns, rows);
+
+      // Then
+      final var row = table.getRows().get(0);
+      assertAll(
+          "row should handle null value correctly",
+          () ->
+              assertEquals(
+                  new CellValue(1), row.getValue(new ColumnName("ID")), "should have ID value"),
+          () ->
+              assertEquals(
+                  CellValue.NULL,
+                  row.getValue(new ColumnName("NAME")),
+                  "should have NULL for NAME"));
+    }
+
+    /** Verifies that ofValues throws exception when row size mismatches column count. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when row size mismatches column count")
+    void shouldThrowException_whenRowSizeMismatch() {
+      // Given
+      final var columns = List.of("ID", "NAME");
+      final List<List<? /* @Nullable */>> rows = List.of(List.of(1)); // Only 1 value for 2 columns
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> Table.ofValues("USERS", columns, rows),
+              "should throw IllegalArgumentException");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("does not match"),
+          "exception should mention size mismatch");
+    }
+
+    /** Verifies that ofValues creates empty table when no rows provided. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should create empty table when no rows provided")
+    void shouldCreateEmptyTable_whenNoRowsProvided() {
+      // When
+      final var table = Table.ofValues("EMPTY", List.of("ID"), List.of());
+
+      // Then
+      assertAll(
+          "empty table should have correct structure",
+          () -> assertEquals("EMPTY", table.getName().value(), "should have correct table name"),
+          () -> assertEquals(1, table.getColumns().size(), "should have 1 column"),
+          () -> assertEquals(0, table.getRowCount(), "should have 0 rows"),
+          () -> assertTrue(table.getRows().isEmpty(), "rows should be empty"));
     }
   }
 

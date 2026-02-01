@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.api.dataset;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents the structure and data of a single database table.
@@ -44,6 +45,38 @@ public interface Table {
   static Table of(final String name, final List<String> columns, final List<Row> rows) {
     return new SimpleTable(
         new TableName(name), columns.stream().map(ColumnName::new).toList(), List.copyOf(rows));
+  }
+
+  /**
+   * Creates a new table from raw values without requiring explicit {@code ColumnName} or {@code
+   * CellValue} wrapping.
+   *
+   * <p>This convenience method reduces boilerplate when constructing tables programmatically. Each
+   * inner list represents a row, with values corresponding positionally to the column names. Null
+   * values are mapped to {@link io.github.seijikohara.dbtester.api.domain.CellValue#NULL}.
+   *
+   * <p>Example usage:
+   *
+   * <pre>{@code
+   * var table = Table.ofValues("USERS",
+   *     List.of("ID", "NAME", "AGE"),
+   *     List.of(
+   *         List.of(1, "Alice", 30),
+   *         List.of(2, "Bob", 25)));
+   * }</pre>
+   *
+   * @param name the table name
+   * @param columns the column names in declaration order
+   * @param rows list of rows, each row is a list of raw values corresponding to columns
+   * @return a new immutable table instance
+   * @throws IllegalArgumentException if any row has a different number of values than columns
+   */
+  static Table ofValues(
+      final String name,
+      final List<String> columns,
+      final List<List<? extends @Nullable Object>> rows) {
+    final var tableRows = rows.stream().map(values -> Row.of(columns, values)).toList();
+    return of(name, columns, tableRows);
   }
 
   /**

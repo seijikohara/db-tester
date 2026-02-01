@@ -247,6 +247,7 @@ Represents the structure and data of a database table.
 |--------|-------------|-------------|
 | `of(TableName, List<ColumnName>, List<Row>)` | `Table` | Creates a table with type-safe names |
 | `of(String, List<String>, List<Row>)` | `Table` | Creates a table with string names (convenience) |
+| `ofValues(String, List<String>, List<List<?>>)` | `Table` | Creates a table from raw values without wrapping (convenience) |
 
 **Instance Methods**:
 
@@ -274,6 +275,7 @@ Represents a single database record.
 | Method | Return Type | Description |
 |--------|-------------|-------------|
 | `of(Map<ColumnName, CellValue>)` | `Row` | Creates a row with the specified column-value pairs |
+| `of(List<String>, List<?>)` | `Row` | Creates a row by pairing column names with raw values (convenience) |
 
 **Instance Methods**:
 

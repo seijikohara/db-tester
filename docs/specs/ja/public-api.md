@@ -254,6 +254,7 @@ void testWithColumnStrategies() { }
 |----------|---------|------|
 | `of(TableName, List<ColumnName>, List<Row>)` | `Table` | 型安全な名前でテーブルを作成します |
 | `of(String, List<String>, List<Row>)` | `Table` | 文字列名でテーブルを作成します（簡易版） |
+| `ofValues(String, List<String>, List<List<?>>)` | `Table` | 生の値からテーブルを作成します（ラッピング不要の簡易版） |
 
 **インスタンスメソッド**:
 
@@ -282,6 +283,7 @@ void testWithColumnStrategies() { }
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
 | `of(Map<ColumnName, CellValue>)` | `Row` | 指定されたカラム値ペアで行を作成します |
+| `of(List<String>, List<?>)` | `Row` | カラム名と生の値をペアにして行を作成します（簡易版） |
 
 **インスタンスメソッド**:
 

@@ -482,6 +482,41 @@ final class ProgrammaticAssertionApiTest {
   }
 
   /**
+   * Demonstrates concise table construction using {@link Table#ofValues}.
+   *
+   * <p>This test shows the convenience factory method that eliminates boilerplate from {@code
+   * ColumnName} and {@code CellValue} wrapping. Compare with {@link
+   * #shouldValidateQueryResultsUsingAssertEqualsByQuery()} which uses the verbose API.
+   *
+   * @throws Exception if test fails
+   */
+  @Test
+  @Tag("normal")
+  @DisplayName("should demonstrate concise table construction using Table.ofValues")
+  @DataSet
+  void shouldDemonstrateConciseTableConstructionUsingOfValues() throws Exception {
+    // Given
+    logger.info("Running Table.ofValues demonstration");
+
+    // When & Then
+    // Build expected table concisely using ofValues
+    final var expectedTable =
+        Table.ofValues(
+            "QUERY_RESULT",
+            List.of("ID", "COLUMN1", "COLUMN2"),
+            List.of(List.of(1, "Value1", 100), List.of(2, "Value2", 200)));
+
+    // Use DatabaseAssertion.assertEqualsByQuery to validate query results
+    DatabaseAssertion.assertEqualsByQuery(
+        expectedTable,
+        dataSource,
+        "QUERY_RESULT",
+        "SELECT ID, COLUMN1, COLUMN2 FROM TABLE1 WHERE ID IN (1, 2) ORDER BY ID");
+
+    logger.info("Table.ofValues demonstration completed");
+  }
+
+  /**
    * Demonstrates using {@link DatabaseAssertion#assertEqualsByQuery} with TableSet for multi-table
    * scenarios.
    *
