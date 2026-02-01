@@ -206,6 +206,12 @@ testImplementation("io.github.seijikohara:db-tester-junit")
 
 Spring Boot starters automatically discover and register `DataSource` beans from the ApplicationContext. Manual registration is not required.
 
+**Default DataSource resolution priority** (for multiple DataSource beans):
+
+1. Single `DataSource` bean (automatic default)
+2. `@Primary`-annotated `DataSource`
+3. `DataSource` bean named `"dataSource"`
+
 ### JUnit with Spring Boot
 
 ```java
@@ -300,6 +306,12 @@ shouldDeleteUser,1,delete_me,delete@example.com
 
 Each test method loads only rows matching its name.
 
+**Behavior details**:
+
+- CSV files without a `[Scenario]` column load all rows for every test
+- By default, the test method name is used as the scenario name for filtering
+- Override with `@DataSetSource(scenarioNames = {"scenario1", "scenario2"})` to load rows matching any of the specified scenarios (OR filter)
+
 ### Custom Resource Location
 
 Specify explicit resource locations instead of convention-based discovery:
@@ -349,6 +361,45 @@ db-tester.convention.global-exclude-columns=CREATED_AT,UPDATED_AT,VERSION
 ```
 
 Column names are case-insensitive. Per-dataset exclusions are combined with global exclusions.
+
+### Column Comparison Strategies
+
+Override the default strict comparison for specific columns using `@ColumnStrategy`:
+
+| Strategy | Description |
+|----------|-------------|
+| `STRICT` | Exact match using `equals()` (default) |
+| `IGNORE` | Skip comparison entirely |
+| `NUMERIC` | Type-aware numeric comparison |
+| `CASE_INSENSITIVE` | Case-insensitive string comparison |
+| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
+| `NOT_NULL` | Verifies value is not null |
+| `REGEX` | Pattern matching (requires `pattern` attribute) |
+
+**Per-dataset strategy** via `@DataSetSource.columnStrategies`:
+
+```java
+@Test
+@DataSet
+@ExpectedDataSet(sources = @DataSetSource(
+    columnStrategies = {
+        @ColumnStrategy(name = "CREATED_AT", strategy = Strategy.TIMESTAMP_FLEXIBLE),
+        @ColumnStrategy(name = "EMAIL", strategy = Strategy.REGEX, pattern = ".*@example\\.com")
+    }
+))
+void testWithColumnStrategies() {
+    userRepository.create(new User("john", "john@example.com"));
+}
+```
+
+**Spring Boot configuration**:
+
+```properties
+db-tester.convention.column-strategies[0].column-name=CREATED_AT
+db-tester.convention.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
+```
+
+Column names in strategies are case-insensitive. Annotation-level strategies override global strategies. Excluded columns take precedence over strategies.
 
 ---
 

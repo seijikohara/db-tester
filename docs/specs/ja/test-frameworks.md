@@ -364,7 +364,11 @@ DB TesterはKotest統合に`AnnotationSpec`スタイルを必要とします:
 Spring Boot拡張機能は自動的に以下を実行します:
 1. Spring `ApplicationContext`を検出
 2. `DataSource` Beanを検索
-3. `DataSourceRegistry`に登録
+3. デフォルト`DataSource`を以下の優先順位で解決:
+   1. 単一の`DataSource` Bean（自動的にデフォルト）
+   2. `@Primary`アノテーション付き`DataSource`
+   3. `"dataSource"`という名前の`DataSource` Bean
+4. すべてのBeanを`DataSourceRegistry`に登録
 
 ```java
 @SpringBootTest
