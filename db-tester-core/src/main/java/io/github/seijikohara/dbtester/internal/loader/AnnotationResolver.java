@@ -180,10 +180,19 @@ public final class AnnotationResolver {
    *
    * @param columnStrategy the column strategy annotation
    * @return the corresponding ColumnStrategyMapping
+   * @throws IllegalArgumentException if REGEX strategy is used with an empty pattern
    */
   private ColumnStrategyMapping toColumnStrategyMapping(final ColumnStrategy columnStrategy) {
-    final var strategy = columnStrategy.strategy().toComparisonStrategy(columnStrategy.pattern());
-    return ColumnStrategyMapping.of(columnStrategy.name(), strategy);
+    try {
+      final var strategy = columnStrategy.strategy().toComparisonStrategy(columnStrategy.pattern());
+      return ColumnStrategyMapping.of(columnStrategy.name(), strategy);
+    } catch (final IllegalArgumentException e) {
+      throw new IllegalArgumentException(
+          String.format(
+              "@ColumnStrategy for column '%s' uses %s strategy but pattern is empty",
+              columnStrategy.name(), columnStrategy.strategy()),
+          e);
+    }
   }
 
   /**

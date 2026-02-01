@@ -99,13 +99,13 @@ public enum Strategy {
   /**
    * Converts this annotation strategy to the corresponding runtime {@link ComparisonStrategy}.
    *
-   * <p>For {@link #REGEX} strategy, use {@link #toComparisonStrategy(String)} instead to provide
-   * the pattern.
+   * <p>This method handles all strategies except {@link #REGEX}. For REGEX, use {@link
+   * #toComparisonStrategy(String)} with a pattern.
    *
    * @return the corresponding ComparisonStrategy instance
-   * @throws IllegalStateException if called on REGEX without a pattern (use the overloaded method)
+   * @throws IllegalStateException if called on REGEX (REGEX requires a pattern)
    */
-  public ComparisonStrategy toComparisonStrategy() {
+  private ComparisonStrategy toComparisonStrategy() {
     return switch (this) {
       case STRICT -> ComparisonStrategy.STRICT;
       case IGNORE -> ComparisonStrategy.IGNORE;

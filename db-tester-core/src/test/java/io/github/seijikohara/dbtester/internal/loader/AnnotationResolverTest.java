@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy;
@@ -692,6 +693,35 @@ class AnnotationResolverTest {
     }
 
     /**
+     * Verifies that resolveColumnStrategies throws exception with column name when REGEX has empty
+     * pattern.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception with column name when REGEX pattern is empty")
+    void shouldThrowExceptionWithColumnName_whenRegexPatternIsEmpty() throws NoSuchMethodException {
+      // Given
+      final var testMethod = TestClassWithRegexEmptyPattern.class.getDeclaredMethod("testMethod");
+      final var annotation = testMethod.getAnnotation(ExpectedDataSet.class).sources()[0];
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> resolver.resolveColumnStrategies(annotation),
+              "should throw IllegalArgumentException");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("EMAIL"),
+          "exception message should contain column name 'EMAIL'");
+      assertTrue(
+          message != null && message.contains("REGEX"),
+          "exception message should mention REGEX strategy");
+    }
+
+    /**
      * Verifies that resolveColumnStrategies handles REGEX strategy with pattern.
      *
      * @throws NoSuchMethodException if method cannot be found
@@ -795,6 +825,19 @@ class AnnotationResolverTest {
                 columnStrategies = {
                   @ColumnStrategy(name = "lowercase_column", strategy = Strategy.STRICT)
                 }))
+    void testMethod() {}
+  }
+
+  /** Test class with REGEX strategy and empty pattern. */
+  static class TestClassWithRegexEmptyPattern {
+    /** Test constructor. */
+    TestClassWithRegexEmptyPattern() {}
+
+    /** Test method. */
+    @ExpectedDataSet(
+        sources =
+            @DataSetSource(
+                columnStrategies = {@ColumnStrategy(name = "EMAIL", strategy = Strategy.REGEX)}))
     void testMethod() {}
   }
 
