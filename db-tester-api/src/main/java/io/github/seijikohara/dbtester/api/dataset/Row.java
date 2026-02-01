@@ -2,7 +2,11 @@ package io.github.seijikohara.dbtester.api.dataset;
 
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a single logical row within a {@link Table}.
@@ -27,6 +31,36 @@ public interface Row {
    */
   static Row of(final Map<ColumnName, CellValue> values) {
     return new SimpleRow(Map.copyOf(values));
+  }
+
+  /**
+   * Creates a new row by pairing column names with raw values.
+   *
+   * <p>Each column name is paired with the value at the same index. Null values in the values list
+   * are mapped to {@link CellValue#NULL}.
+   *
+   * @param columns the column names as strings
+   * @param values the raw values corresponding to each column
+   * @return a new immutable row instance
+   * @throws IllegalArgumentException if columns and values have different sizes
+   */
+  static Row of(final List<String> columns, final List<? extends @Nullable Object> values) {
+    if (columns.size() != values.size()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Column count (%d) does not match value count (%d)", columns.size(), values.size()));
+    }
+    final var map =
+        IntStream.range(0, columns.size())
+            .boxed()
+            .collect(
+                Collectors.toUnmodifiableMap(
+                    i -> new ColumnName(columns.get(i)),
+                    i -> {
+                      final var val = values.get(i);
+                      return val == null ? CellValue.NULL : new CellValue(val);
+                    }));
+    return new SimpleRow(map);
   }
 
   /**
