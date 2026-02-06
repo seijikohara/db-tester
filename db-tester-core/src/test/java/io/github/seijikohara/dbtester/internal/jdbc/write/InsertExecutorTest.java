@@ -1,9 +1,14 @@
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,11 +19,13 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,6 +212,363 @@ class InsertExecutorTest {
       // Then
       verify(parameterBinder).bindRow(eq(statement), eq(row), any());
       verify(statement).executeUpdate();
+    }
+
+    /**
+     * Verifies that insertRow throws exception when prepareStatement fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when prepareStatement fails")
+    void shouldThrowException_whenPrepareStatementFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var cause = new SQLException("Connection refused");
+
+      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(connection.prepareStatement(anyString())).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.insertRow(table, row, connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that insertRow throws exception when executeUpdate fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when executeUpdate fails")
+    void shouldThrowException_whenExecuteUpdateFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var cause = new SQLException("Duplicate key");
+
+      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeUpdate()).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.insertRow(table, row, connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that insertRow throws exception when setQueryTimeout fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when setQueryTimeout fails")
+    void shouldThrowException_whenSetQueryTimeoutFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var timeout = Duration.ofSeconds(30);
+      final var cause = new SQLException("Timeout not supported");
+
+      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      doThrow(cause).when(statement).setQueryTimeout(anyInt());
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.insertRow(table, row, connection, timeout));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+  }
+
+  /** Tests for SQLException handling in execute method. */
+  @Nested
+  @DisplayName("execute SQLException handling")
+  class ExecuteSqlExceptionHandling {
+
+    /** Tests for SQLException handling. */
+    ExecuteSqlExceptionHandling() {}
+
+    /**
+     * Verifies that execute throws exception when prepareStatement for metadata fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when metadata prepareStatement fails")
+    void shouldThrowException_whenMetadataPrepareStatementFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Connection lost");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement(anyString())).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that execute throws exception when executeQuery for metadata fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when metadata executeQuery fails")
+    void shouldThrowException_whenMetadataExecuteQueryFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Query execution failed");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement(anyString())).thenReturn(metadataStatement);
+      when(metadataStatement.executeQuery()).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that execute throws exception when getMetaData fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when getMetaData fails")
+    void shouldThrowException_whenGetMetaDataFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Metadata unavailable");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement(anyString())).thenReturn(metadataStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that execute throws exception when executeBatch fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when executeBatch fails")
+    void shouldThrowException_whenExecuteBatchFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Batch execution failed");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+      when(insertStatement.executeBatch()).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that execute throws exception when addBatch fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when addBatch fails")
+    void shouldThrowException_whenAddBatchFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Batch add failed");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+      doThrow(cause).when(insertStatement).addBatch();
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that execute throws exception when setQueryTimeout fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when execute setQueryTimeout fails")
+    void shouldThrowException_whenExecuteSetQueryTimeoutFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var columnName = new ColumnName("ID");
+      final var timeout = Duration.ofSeconds(30);
+      final var cause = new SQLException("Timeout not supported");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+      doThrow(cause).when(insertStatement).setQueryTimeout(anyInt());
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.execute(List.of(table), connection, timeout));
+
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies exception message contains useful context.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should include context in exception message")
+    void shouldIncludeContext_whenExceptionThrown() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+      final var cause = new SQLException("Connection refused");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement(anyString())).thenThrow(cause);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class, () -> executor.execute(List.of(table), connection));
+
+      assertTrue(
+          exception.getMessage() != null && !exception.getMessage().isEmpty(),
+          "exception message should not be empty");
     }
   }
 }

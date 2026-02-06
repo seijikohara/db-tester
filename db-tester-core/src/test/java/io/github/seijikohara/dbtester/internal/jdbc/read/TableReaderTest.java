@@ -5,7 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -470,6 +472,209 @@ class TableReaderTest {
       // Then
       assertEquals(1, result.getRows().size(), "should have 1 row");
       verify(typeConverter).convert(mockBlob);
+    }
+
+    /**
+     * Verifies that exception is thrown when prepareStatement fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when prepareStatement fails")
+    void shouldThrowException_whenPrepareStatementFails() throws SQLException {
+      // Given
+      when(connection.prepareStatement(anyString())).thenThrow(new SQLException("Statement error"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.executeQuery(dataSource, "SELECT * FROM USERS", "USERS"),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "prepareStatement exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+
+    /**
+     * Verifies that exception is thrown when executeQuery fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when executeQuery on statement fails")
+    void shouldThrowException_whenExecuteQueryOnStatementFails() throws SQLException {
+      // Given
+      when(statement.executeQuery()).thenThrow(new SQLException("Query failed"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.executeQuery(dataSource, "SELECT * FROM USERS", "USERS"),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "executeQuery exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+
+    /**
+     * Verifies that exception is thrown when getMetaData fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when getMetaData fails")
+    void shouldThrowException_whenGetMetaDataFails() throws SQLException {
+      // Given
+      when(resultSet.getMetaData()).thenThrow(new SQLException("Metadata error"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.executeQuery(dataSource, "SELECT * FROM USERS", "USERS"),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "getMetaData exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+
+    /**
+     * Verifies that exception is thrown when getColumnCount fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when getColumnCount fails")
+    void shouldThrowException_whenGetColumnCountFails() throws SQLException {
+      // Given
+      when(metaData.getColumnCount()).thenThrow(new SQLException("Column count error"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.executeQuery(dataSource, "SELECT * FROM USERS", "USERS"),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "getColumnCount exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+
+    /**
+     * Verifies that exception is thrown when resultSet.next fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when resultSet.next fails")
+    void shouldThrowException_whenResultSetNextFails() throws SQLException {
+      // Given
+      when(metaData.getColumnCount()).thenReturn(1);
+      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(resultSet.next()).thenThrow(new SQLException("Cursor error"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.executeQuery(dataSource, "SELECT * FROM USERS", "USERS"),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "resultSet.next exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+
+    /**
+     * Verifies that exception is thrown when setQueryTimeout fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when setQueryTimeout fails")
+    void shouldThrowException_whenSetQueryTimeoutFails() throws SQLException {
+      // Given
+      doThrow(new SQLException("Timeout not supported")).when(statement).setQueryTimeout(anyInt());
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.fetchTable(dataSource, "USERS", java.time.Duration.ofSeconds(30)),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertAll(
+          "setQueryTimeout exception",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("Failed to execute query"),
+                  "exception message should indicate query failure"));
+    }
+  }
+
+  /** Tests for SQLException error handling in fetchTableSet method. */
+  @Nested
+  @DisplayName("fetchTableSet SQLException handling")
+  class FetchTableSetSqlExceptionHandling {
+
+    /** Tests for SQLException handling in fetchTableSet. */
+    FetchTableSetSqlExceptionHandling() {}
+
+    /**
+     * Verifies that exception is thrown when connection fails for one table.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when connection fails during fetchTableSet")
+    void shouldThrowException_whenConnectionFailsDuringFetchTableSet() throws SQLException {
+      // Given
+      when(dataSource.getConnection()).thenThrow(new SQLException("Connection pool exhausted"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () -> reader.fetchTableSet(dataSource, List.of("USERS", "PRODUCTS")),
+              "should throw DatabaseTesterException");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("Failed to execute query"),
+          "exception message should indicate query failure");
     }
   }
 }
