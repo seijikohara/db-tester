@@ -83,6 +83,72 @@ class DataFormatTest {
     }
   }
 
+  /** Tests for the JSON format. */
+  @Nested
+  @DisplayName("JSON format")
+  class JsonFormat {
+
+    /** Tests for the JSON format. */
+    JsonFormat() {}
+
+    /** Verifies that JSON format has correct extension. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have .json extension")
+    void shouldHaveJsonExtension() {
+      // When
+      final var extension = DataFormat.JSON.getExtension();
+
+      // Then
+      assertEquals(".json", extension, "JSON extension should be .json");
+    }
+
+    /** Verifies that JSON format name is JSON. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have name JSON")
+    void shouldHaveNameJson() {
+      // When
+      final var name = DataFormat.JSON.name();
+
+      // Then
+      assertEquals("JSON", name, "name should be JSON");
+    }
+  }
+
+  /** Tests for the YAML format. */
+  @Nested
+  @DisplayName("YAML format")
+  class YamlFormat {
+
+    /** Tests for the YAML format. */
+    YamlFormat() {}
+
+    /** Verifies that YAML format has correct extension. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have .yaml extension")
+    void shouldHaveYamlExtension() {
+      // When
+      final var extension = DataFormat.YAML.getExtension();
+
+      // Then
+      assertEquals(".yaml", extension, "YAML extension should be .yaml");
+    }
+
+    /** Verifies that YAML format name is YAML. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have name YAML")
+    void shouldHaveNameYaml() {
+      // When
+      final var name = DataFormat.YAML.name();
+
+      // Then
+      assertEquals("YAML", name, "name should be YAML");
+    }
+  }
+
   /** Tests for enum values. */
   @Nested
   @DisplayName("values() method")
@@ -103,9 +169,11 @@ class DataFormatTest {
       assertAll(
           "should have all formats",
           () -> assertNotNull(values, "values should not be null"),
-          () -> assertEquals(2, values.length, "should have two formats"),
+          () -> assertEquals(4, values.length, "should have four formats"),
           () -> assertEquals(DataFormat.CSV, values[0], "first should be CSV"),
-          () -> assertEquals(DataFormat.TSV, values[1], "second should be TSV"));
+          () -> assertEquals(DataFormat.TSV, values[1], "second should be TSV"),
+          () -> assertEquals(DataFormat.JSON, values[2], "third should be JSON"),
+          () -> assertEquals(DataFormat.YAML, values[3], "fourth should be YAML"));
     }
   }
 
@@ -139,6 +207,30 @@ class DataFormatTest {
 
       // Then
       assertEquals(DataFormat.TSV, format, "should return TSV");
+    }
+
+    /** Verifies that valueOf returns correct format for JSON. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return JSON for valueOf(\"JSON\")")
+    void shouldReturnJsonForValueOfJson() {
+      // When
+      final var format = DataFormat.valueOf("JSON");
+
+      // Then
+      assertEquals(DataFormat.JSON, format, "should return JSON");
+    }
+
+    /** Verifies that valueOf returns correct format for YAML. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return YAML for valueOf(\"YAML\")")
+    void shouldReturnYamlForValueOfYaml() {
+      // When
+      final var format = DataFormat.valueOf("YAML");
+
+      // Then
+      assertEquals(DataFormat.YAML, format, "should return YAML");
     }
   }
 

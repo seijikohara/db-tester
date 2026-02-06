@@ -25,7 +25,23 @@ public enum DataFormat {
    *
    * <p>Files with the {@code .tsv} extension. Fields are separated by tabs.
    */
-  TSV(".tsv");
+  TSV(".tsv"),
+
+  /**
+   * JavaScript Object Notation format.
+   *
+   * <p>Files with the {@code .json} extension. Each file contains an array of objects representing
+   * table rows.
+   */
+  JSON(".json"),
+
+  /**
+   * YAML Ain't Markup Language format.
+   *
+   * <p>Files with the {@code .yaml} extension. Each file contains a list of mappings representing
+   * table rows.
+   */
+  YAML(".yaml");
 
   /** The file extension associated with this format (including the leading dot). */
   private final String extension;
