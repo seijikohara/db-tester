@@ -35,6 +35,7 @@ export const ja: LocaleSpecificConfig<DefaultTheme.Config> = {
           { text: 'テストフレームワーク', link: '/ja/test-frameworks' },
           { text: 'SPI', link: '/ja/spi' },
           { text: 'エラーハンドリング', link: '/ja/error-handling' },
+          { text: 'トラブルシューティング', link: '/ja/troubleshooting' },
         ],
       },
       {
