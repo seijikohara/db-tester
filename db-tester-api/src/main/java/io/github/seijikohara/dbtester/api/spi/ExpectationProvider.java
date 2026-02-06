@@ -4,11 +4,10 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
-import java.lang.System.Logger;
-import java.lang.System.Logger.Level;
 import java.util.Collection;
 import java.util.Map;
 import javax.sql.DataSource;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service Provider Interface for verifying database state against expected datasets.
@@ -35,8 +34,15 @@ import javax.sql.DataSource;
  */
 public interface ExpectationProvider {
 
-  /** Logger for warning messages about unsupported features in default implementations. */
-  Logger LOGGER = System.getLogger(ExpectationProvider.class.getName());
+  /**
+   * Logs a warning message about unsupported features.
+   *
+   * @param message the warning message to log
+   * @param args the message arguments
+   */
+  private static void logWarning(final String message, final Object... args) {
+    LoggerFactory.getLogger(ExpectationProvider.class).warn(message, args);
+  }
 
   /**
    * Verifies that the database state matches the expected dataset.
@@ -80,10 +86,9 @@ public interface ExpectationProvider {
     // Default implementation delegates to the basic verifyExpectation method.
     // Implementations should override this method to support column exclusion.
     if (excludeColumns != null && !excludeColumns.isEmpty()) {
-      LOGGER.log(
-          Level.WARNING,
+      logWarning(
           "Column exclusions specified but current ExpectationProvider does not support them. "
-              + "Exclusions will be ignored: {0}. Override verifyExpectation(TableSet, DataSource, "
+              + "Exclusions will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
               + "Collection) to support column exclusion.",
           excludeColumns);
     }
@@ -130,10 +135,9 @@ public interface ExpectationProvider {
     // Default implementation ignores column strategies for backward compatibility.
     // Implementations should override this method to support column strategies.
     if (columnStrategies != null && !columnStrategies.isEmpty()) {
-      LOGGER.log(
-          Level.WARNING,
+      logWarning(
           "Column strategies specified but current ExpectationProvider does not support them. "
-              + "Strategies will be ignored: {0}. Override verifyExpectation(TableSet, DataSource, "
+              + "Strategies will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
               + "Collection, Map) to support column strategies.",
           columnStrategies.keySet());
     }
@@ -168,8 +172,7 @@ public interface ExpectationProvider {
     // Default implementation ignores row ordering for backward compatibility.
     // Implementations should override this method to support unordered comparison.
     if (rowOrdering == RowOrdering.UNORDERED) {
-      LOGGER.log(
-          Level.WARNING,
+      logWarning(
           "Unordered row comparison requested but current ExpectationProvider does not support it. "
               + "Falling back to ordered comparison. Override verifyExpectation(TableSet, "
               + "DataSource, Collection, Map, RowOrdering) to support unordered comparison.");
@@ -209,8 +212,7 @@ public interface ExpectationProvider {
     if (operationDefaults != null
         && operationDefaults.floatingPointEpsilon()
             != OperationDefaults.DEFAULT_FLOATING_POINT_EPSILON) {
-      LOGGER.log(
-          Level.WARNING,
+      logWarning(
           "Custom floating-point epsilon specified but current ExpectationProvider does not "
               + "support it. Using default epsilon. Override verifyExpectation(TableSet, "
               + "DataSource, Collection, Map, RowOrdering, OperationDefaults) to support "
