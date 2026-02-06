@@ -1,9 +1,13 @@
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,9 +18,11 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -261,6 +267,292 @@ class UpdateExecutorTest {
       // Then
       assertFalse(result, "should return false when no update columns");
       verify(connection, never()).prepareStatement(anyString());
+    }
+  }
+
+  /** Tests for SQLException error handling in execute method. */
+  @Nested
+  @DisplayName("execute SQLException handling")
+  class ExecuteSqlExceptionHandling {
+
+    /** Tests for SQLException handling. */
+    ExecuteSqlExceptionHandling() {}
+
+    /**
+     * Verifies that exception is thrown when prepareStatement fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when prepareStatement fails")
+    void shouldThrowException_whenPrepareStatementFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString()))
+          .thenThrow(new SQLException("Connection closed"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.execute(List.of(table), connection),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that exception is thrown when addBatch fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when addBatch fails")
+    void shouldThrowException_whenAddBatchFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
+      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      doThrow(new SQLException("Batch error")).when(statement).addBatch();
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.execute(List.of(table), connection),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that exception is thrown when executeBatch fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when executeBatch fails")
+    void shouldThrowException_whenExecuteBatchFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
+      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeBatch()).thenThrow(new SQLException("Execute batch failed"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.execute(List.of(table), connection),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that exception is thrown when setQueryTimeout fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when setQueryTimeout fails")
+    void shouldThrowException_whenSetQueryTimeoutFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var table = mock(Table.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.getRows()).thenReturn(List.of(row));
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      doThrow(new SQLException("Timeout not supported")).when(statement).setQueryTimeout(anyInt());
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.execute(List.of(table), connection, Duration.ofSeconds(30)),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+  }
+
+  /** Tests for SQLException error handling in tryUpdateRow method. */
+  @Nested
+  @DisplayName("tryUpdateRow SQLException handling")
+  class TryUpdateRowSqlExceptionHandling {
+
+    /** Tests for SQLException handling in tryUpdateRow. */
+    TryUpdateRowSqlExceptionHandling() {}
+
+    /**
+     * Verifies that exception is thrown when prepareStatement fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when prepareStatement fails")
+    void shouldThrowException_whenPrepareStatementFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString()))
+          .thenThrow(new SQLException("Connection closed"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.tryUpdateRow("USERS", pkColumn, List.of(nameColumn), row, connection),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that exception is thrown when executeUpdate fails.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw DatabaseOperationException when executeUpdate fails")
+    void shouldThrowException_whenExecuteUpdateFails() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
+      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      when(statement.executeUpdate()).thenThrow(new SQLException("Update failed"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.tryUpdateRow("USERS", pkColumn, List.of(nameColumn), row, connection),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
+    }
+
+    /**
+     * Verifies that exception message includes context information.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should include context in exception message")
+    void shouldIncludeContext_whenExceptionThrown() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenThrow(new SQLException("Test error"));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () -> executor.tryUpdateRow("USERS", pkColumn, List.of(nameColumn), row, connection),
+              "should throw DatabaseOperationException");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && !message.isEmpty(), "exception message should not be null or empty");
+    }
+
+    /**
+     * Verifies that exception is thrown when setQueryTimeout fails in tryUpdateRow.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName(
+        "should throw DatabaseOperationException when setQueryTimeout fails in tryUpdateRow")
+    void shouldThrowException_whenSetQueryTimeoutFailsInTryUpdateRow() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var statement = mock(PreparedStatement.class);
+      final var row = mock(Row.class);
+      final var pkColumn = new ColumnName("ID");
+      final var nameColumn = new ColumnName("NAME");
+
+      when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
+          .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
+      when(connection.prepareStatement(anyString())).thenReturn(statement);
+      doThrow(new SQLException("Timeout not supported")).when(statement).setQueryTimeout(anyInt());
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseOperationException.class,
+              () ->
+                  executor.tryUpdateRow(
+                      "USERS",
+                      pkColumn,
+                      List.of(nameColumn),
+                      row,
+                      connection,
+                      Duration.ofSeconds(30)),
+              "should throw DatabaseOperationException");
+      assertInstanceOf(SQLException.class, exception.getCause(), "cause should be SQLException");
     }
   }
 }
