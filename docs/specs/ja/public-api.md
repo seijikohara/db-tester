@@ -1,3 +1,8 @@
+---
+title: "パブリックAPI - DB Tester"
+description: "DB Testerのアノテーション、設定、インターフェースの包括的APIリファレンス。"
+---
+
 # DB Tester仕様 - パブリックAPI
 
 ## アノテーション

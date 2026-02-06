@@ -1,3 +1,8 @@
+---
+title: "Configuration - DB Tester"
+description: "Configure DataSource registration, database operations, and comparison strategies."
+---
+
 # DB Tester Specification - Configuration
 
 ## Configuration Class

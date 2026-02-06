@@ -1,3 +1,7 @@
+---
+title: "SPI - DB Tester"
+description: "カスタムSPI実装によるDB Testerの拡張方法。"
+---
 # DB Tester仕様 - サービスプロバイダーインターフェース（SPI）
 
 ## SPI概要

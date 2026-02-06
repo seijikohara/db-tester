@@ -1,3 +1,8 @@
+---
+title: "設定 - DB Tester"
+description: "DataSource登録、データベース操作、比較戦略の設定方法。"
+---
+
 # DB Tester仕様 - 設定
 
 ## Configurationクラス

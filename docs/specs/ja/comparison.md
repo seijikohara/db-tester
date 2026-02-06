@@ -1,3 +1,7 @@
+---
+title: "フレームワーク比較 - DB Tester"
+description: "DB TesterとDBUnitなど他フレームワークとの比較。"
+---
 # フレームワーク比較
 
 このページでは、DB TesterとJava/JVMエコシステムの他のデータベーステスティングフレームワークを詳細に比較します。

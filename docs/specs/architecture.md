@@ -1,3 +1,8 @@
+---
+title: "Architecture - DB Tester"
+description: "Explore DB Tester's modular architecture, extension points, and core components."
+---
+
 # DB Tester Specification - Architecture
 
 ## Module Structure

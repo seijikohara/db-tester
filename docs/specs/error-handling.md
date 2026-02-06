@@ -1,3 +1,8 @@
+---
+title: "Error Handling - DB Tester"
+description: "Error handling strategies, exception types, and troubleshooting."
+---
+
 # DB Tester Specification - Error Handling
 
 ## Exception Hierarchy
