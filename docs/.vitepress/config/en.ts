@@ -35,6 +35,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
           { text: 'Test Frameworks', link: '/test-frameworks' },
           { text: 'SPI', link: '/spi' },
           { text: 'Error Handling', link: '/error-handling' },
+          { text: 'Troubleshooting', link: '/troubleshooting' },
         ],
       },
       {
