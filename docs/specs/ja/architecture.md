@@ -1,3 +1,8 @@
+---
+title: "アーキテクチャ - DB Tester"
+description: "DB Testerのモジュラーアーキテクチャ、拡張ポイント、コアコンポーネントの解説。"
+---
+
 # DB Tester仕様 - アーキテクチャ
 
 ## モジュール構造

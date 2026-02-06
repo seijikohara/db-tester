@@ -1,3 +1,8 @@
+---
+title: "Framework Comparison - DB Tester"
+description: "Compare DB Tester with DBUnit and other database testing frameworks."
+---
+
 # Framework Comparison
 
 This page compares DB Tester with other database testing frameworks in the Java/JVM ecosystem.

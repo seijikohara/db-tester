@@ -1,3 +1,8 @@
+---
+title: "Test Frameworks - DB Tester"
+description: "Integrate DB Tester with JUnit, Spock, and Kotest using framework-specific extensions."
+---
+
 # DB Tester Specification - Test Framework Integration
 
 ## JUnit Integration

@@ -1,3 +1,8 @@
+---
+title: "Data Formats - DB Tester"
+description: "Learn about CSV and TSV data formats, value syntax, and special handling."
+---
+
 # DB Tester Specification - Data Formats
 
 ## Supported Formats

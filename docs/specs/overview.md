@@ -1,3 +1,8 @@
+---
+title: "Overview - DB Tester"
+description: "Learn about DB Tester's architecture, key concepts, and annotation-driven database testing."
+---
+
 # DB Tester Specification - Overview
 
 ## Purpose

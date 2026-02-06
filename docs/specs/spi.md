@@ -1,3 +1,8 @@
+---
+title: "SPI - DB Tester"
+description: "Extend DB Tester with custom SPI implementations for data formats and operations."
+---
+
 # DB Tester Specification - Service Provider Interface (SPI)
 
 ## SPI Overview

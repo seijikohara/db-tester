@@ -1,3 +1,8 @@
+---
+title: "Public API Reference - DB Tester"
+description: "Comprehensive API reference for DB Tester annotations, configuration, and interfaces."
+---
+
 # DB Tester Specification - Public API
 
 ## Annotations
