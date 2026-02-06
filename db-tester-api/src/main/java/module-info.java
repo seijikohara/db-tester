@@ -9,6 +9,7 @@ module io.github.seijikohara.dbtester.api {
   // Required modules (transitive because DataSource and @Nullable are part of our public API)
   requires transitive java.sql;
   requires transitive org.jspecify;
+  requires static org.slf4j;
 
   // Export public API packages
   exports io.github.seijikohara.dbtester.api.annotation;
