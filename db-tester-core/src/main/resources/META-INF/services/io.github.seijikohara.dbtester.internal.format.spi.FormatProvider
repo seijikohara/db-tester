@@ -1,2 +1,4 @@
 io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
 io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider
+io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider
+io.github.seijikohara.dbtester.internal.format.yaml.YamlFormatProvider

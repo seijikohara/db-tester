@@ -34,5 +34,7 @@ module io.github.seijikohara.dbtester.core {
   // Internal format providers
   provides io.github.seijikohara.dbtester.internal.format.spi.FormatProvider with
       io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider,
-      io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider;
+      io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider,
+      io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider,
+      io.github.seijikohara.dbtester.internal.format.yaml.YamlFormatProvider;
 }
