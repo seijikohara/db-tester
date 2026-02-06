@@ -6,24 +6,19 @@ import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.Row
-import io.github.seijikohara.dbtester.api.dataset.Table
-import io.github.seijikohara.dbtester.api.dataset.TableSet
-import io.github.seijikohara.dbtester.api.domain.CellValue
-import io.github.seijikohara.dbtester.api.domain.ColumnName
-import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
-import io.github.seijikohara.dbtester.api.spi.OperationProvider
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport
 import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.verify
-import javax.sql.DataSource
 
 /**
  * Unit tests for [KotestPreparationExecutor].
@@ -32,15 +27,22 @@ import javax.sql.DataSource
  * and applies datasets before test execution.
  */
 class KotestPreparationExecutorSpec : AnnotationSpec() {
+    /** Mock preparation support. */
+    private lateinit var mockSupport: PreparationSupport
+
     /** The executor under test. */
     private lateinit var executor: KotestPreparationExecutor
 
     @BeforeEach
-    fun setup(): Unit = run { executor = KotestPreparationExecutor() }
+    fun setup(): Unit =
+        run {
+            mockSupport = mockk(relaxed = true)
+            executor = KotestPreparationExecutor(mockSupport)
+        }
 
     @Test
     fun `should create instance`(): Unit =
-        KotestPreparationExecutor().let { instance ->
+        KotestPreparationExecutor(mockSupport).let { instance ->
             instance shouldNotBe null
         }
 
@@ -56,42 +58,24 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
 
     @Test
     fun `should create multiple independent executors`(): Unit =
-        KotestPreparationExecutor().let { executor1 ->
-            KotestPreparationExecutor().let { executor2 ->
+        KotestPreparationExecutor(mockSupport).let { executor1 ->
+            KotestPreparationExecutor(mockSupport).let { executor2 ->
                 (executor1 === executor2) shouldBe false
             }
         }
 
     @Test
-    fun `should execute operation when datasets are found`() {
-        // Given: a mock operation provider
-        val mockOperationProvider = mockk<OperationProvider>(relaxed = true)
-        val mockDataSource = mockk<DataSource>()
-
-        // Inject mock provider using reflection
-        injectOperationProvider(executor, mockOperationProvider)
-
-        // Given: a context with datasets
-        val registry = DataSourceRegistry()
-        registry.registerDefault(mockDataSource)
-        val context = createTestContextWithDatasets(registry)
-
-        // Given: a mock DataSet annotation
+    fun `should delegate to preparation support`() {
+        // Given: a context and data set
+        val context = createTestContextWithEmptyDatasets()
         val dataSet = createMockDataSet(Operation.CLEAN_INSERT)
 
         // When: executing preparation
         executor.execute(context, dataSet)
 
-        // Then: operation is executed
+        // Then: support is called
         verify(exactly = 1) {
-            mockOperationProvider.execute(
-                Operation.CLEAN_INSERT,
-                any(),
-                mockDataSource,
-                TableOrderingStrategy.AUTO,
-                any(),
-                any(),
-            )
+            mockSupport.execute(context, dataSet)
         }
     }
 
@@ -112,34 +96,16 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
 
     @Test
     fun `should handle null query timeout from conventions`() {
-        // Given: a mock operation provider
-        val mockOperationProvider = mockk<OperationProvider>(relaxed = true)
-        val mockDataSource = mockk<DataSource>()
-
-        // Inject mock provider using reflection
-        injectOperationProvider(executor, mockOperationProvider)
-
-        // Given: a context with datasets and null query timeout
-        val registry = DataSourceRegistry()
-        registry.registerDefault(mockDataSource)
-        val context = createTestContextWithDatasets(registry, queryTimeout = null)
-
-        // Given: a mock DataSet annotation
+        // Given: a context with null query timeout
+        val context = createTestContextWithDatasets(queryTimeout = null)
         val dataSet = createMockDataSet(Operation.CLEAN_INSERT)
 
         // When: executing preparation
         executor.execute(context, dataSet)
 
-        // Then: operation is executed with null timeout
+        // Then: support is called
         verify(exactly = 1) {
-            mockOperationProvider.execute(
-                Operation.CLEAN_INSERT,
-                any(),
-                mockDataSource,
-                TableOrderingStrategy.AUTO,
-                any(),
-                null,
-            )
+            mockSupport.execute(context, dataSet)
         }
     }
 
@@ -149,51 +115,17 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
      * @param operation the operation to test
      */
     private fun testOperationType(operation: Operation) {
-        // Given: a mock operation provider
-        val mockOperationProvider = mockk<OperationProvider>(relaxed = true)
-        val mockDataSource = mockk<DataSource>()
-
-        // Create a fresh executor and inject mock provider
-        val testExecutor = KotestPreparationExecutor()
-        injectOperationProvider(testExecutor, mockOperationProvider)
-
-        // Given: a context with datasets
-        val registry = DataSourceRegistry()
-        registry.registerDefault(mockDataSource)
-        val context = createTestContextWithDatasets(registry)
-
-        // Given: a mock DataSet annotation with specified operation
+        // Given: a context and data set with specified operation
+        val context = createTestContextWithEmptyDatasets()
         val dataSet = createMockDataSet(operation)
 
         // When: executing preparation
-        testExecutor.execute(context, dataSet)
+        executor.execute(context, dataSet)
 
-        // Then: operation is executed with correct operation type
+        // Then: support is called with correct data set
         verify(exactly = 1) {
-            mockOperationProvider.execute(
-                operation,
-                any(),
-                mockDataSource,
-                any(),
-                any(),
-                any(),
-            )
+            mockSupport.execute(context, dataSet)
         }
-    }
-
-    /**
-     * Injects a mock OperationProvider into the executor using reflection.
-     *
-     * @param executor the executor to inject into
-     * @param mockProvider the mock provider to inject
-     */
-    private fun injectOperationProvider(
-        executor: KotestPreparationExecutor,
-        mockProvider: OperationProvider,
-    ) {
-        val providerField = KotestPreparationExecutor::class.java.getDeclaredField("operationProvider")
-        providerField.isAccessible = true
-        providerField.set(executor, mockProvider)
     }
 
     /**
@@ -226,43 +158,19 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
         }
 
     /**
-     * Creates a TestContext with actual datasets.
+     * Creates a TestContext with configuration.
      *
-     * @param registry the registry to use
      * @param queryTimeout whether to include query timeout (null for no timeout)
      * @return the test context
      */
-    private fun createTestContextWithDatasets(
-        registry: DataSourceRegistry,
-        queryTimeout: java.time.Duration? = java.time.Duration.ofSeconds(30),
-    ): TestContext =
+    private fun createTestContextWithDatasets(queryTimeout: java.time.Duration? = java.time.Duration.ofSeconds(30)): TestContext =
         SampleTestClass::class.java.let { testClass ->
             testClass.getMethod("sampleMethod").let { testMethod ->
-                // Create a simple table set
-                val table =
-                    Table.of(
-                        TableName("users"),
-                        listOf(ColumnName("id"), ColumnName("name")),
-                        listOf(
-                            Row.of(
-                                mapOf(
-                                    ColumnName("id") to CellValue("1"),
-                                    ColumnName("name") to CellValue("John"),
-                                ),
-                            ),
-                        ),
-                    )
-                val tableSet = TableSet.of(table)
-
                 val loader =
-                    object : DataSetLoader {
-                        override fun loadPreparationDataSets(context: TestContext): List<TableSet> = listOf(tableSet)
-
-                        override fun loadExpectationDataSets(context: TestContext): List<TableSet> = emptyList()
-
-                        override fun loadExpectationDataSetsWithExclusions(
-                            context: TestContext,
-                        ): List<io.github.seijikohara.dbtester.api.loader.ExpectedTableSet> = emptyList()
+                    mockk<DataSetLoader>().also { loader ->
+                        every { loader.loadPreparationDataSets(any()) } returns emptyList()
+                        every { loader.loadExpectationDataSets(any()) } returns emptyList()
+                        every { loader.loadExpectationDataSetsWithExclusions(any()) } returns emptyList()
                     }
 
                 val conventionsBuilder = ConventionSettings.builder()
@@ -279,7 +187,7 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
                         .loader(loader)
                         .build()
 
-                TestContext(testClass, testMethod, configuration, registry)
+                TestContext(testClass, testMethod, configuration, DataSourceRegistry())
             }
         }
 

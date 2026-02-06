@@ -1,30 +1,24 @@
 package io.github.seijikohara.dbtester.kotest.lifecycle
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.TableSet
-import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
-import io.github.seijikohara.dbtester.api.spi.OperationProvider
-import org.slf4j.LoggerFactory
-import java.time.Duration
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport
 import java.util.ServiceLoader
 
 /**
  * Executes the preparation phase of database testing.
  *
- * This class loads datasets according to the [DataSet] annotation and applies them to
- * the database using the configured operation.
+ * This class delegates to [PreparationSupport] for the actual preparation logic. It
+ * provides a Kotest-specific facade for backward compatibility and framework-specific customization.
+ *
+ * @property support the preparation support
+ * @see PreparationSupport
  */
-class KotestPreparationExecutor {
-    /** Companion object containing class-level logger. */
-    companion object {
-        private val logger = LoggerFactory.getLogger(KotestPreparationExecutor::class.java)
-    }
-
-    private val operationProvider: OperationProvider =
-        ServiceLoader.load(OperationProvider::class.java).findFirst().orElseThrow()
+class KotestPreparationExecutor internal constructor(
+    private val support: PreparationSupport,
+) {
+    /** Creates a new preparation executor with a support loaded via ServiceLoader. */
+    constructor() : this(loadPreparationSupport())
 
     /**
      * Executes the preparation phase.
@@ -38,64 +32,18 @@ class KotestPreparationExecutor {
     fun execute(
         context: TestContext,
         dataSet: DataSet,
-    ): Unit =
-        logger
-            .debug(
-                "Executing preparation for test: {}.{}",
-                context.testClass().simpleName,
-                context.testMethod().name,
-            ).let {
-                context
-                    .configuration()
-                    .loader()
-                    .loadPreparationDataSets(context)
-                    .takeIf { tableSets -> tableSets.isNotEmpty() }
-                    ?.also { tableSets ->
-                        tableSets.forEach { tableSet ->
-                            executeTableSet(context, tableSet, dataSet.operation, dataSet.tableOrdering)
-                        }
-                    }
-                    ?: logger.debug("No preparation datasets found")
-            }
+    ): Unit = support.execute(context, dataSet)
 
-    /**
-     * Executes a single TableSet against the database.
-     *
-     * This method resolves the DataSource from either the TableSet itself or falls back to the
-     * default registry. It then delegates to the operation executor to apply the TableSet using the
-     * specified operation.
-     *
-     * @param context the test context providing access to the data source registry
-     * @param tableSet the TableSet to execute containing tables and optional data source
-     * @param operation the database operation to perform (CLEAN_INSERT, INSERT, etc.)
-     * @param tableOrderingStrategy the strategy for determining table processing order
-     */
-    private fun executeTableSet(
-        context: TestContext,
-        tableSet: TableSet,
-        operation: Operation,
-        tableOrderingStrategy: TableOrderingStrategy,
-    ) {
-        val dataSource = tableSet.dataSource.orElseGet { context.registry().get("") }
-        val conventions = context.configuration().conventions()
-        val transactionMode: TransactionMode = conventions.transactionMode()
-        val queryTimeout: Duration? = conventions.queryTimeout()
-
-        logger.debug(
-            "Applying {} operation with dataset using {} table ordering (transactionMode={}, timeout={})",
-            operation,
-            tableOrderingStrategy,
-            transactionMode,
-            queryTimeout,
-        )
-
-        operationProvider.execute(
-            operation,
-            tableSet,
-            dataSource,
-            tableOrderingStrategy,
-            transactionMode,
-            queryTimeout,
-        )
+    /** Companion object containing factory methods. */
+    companion object {
+        private fun loadPreparationSupport(): PreparationSupport =
+            ServiceLoader
+                .load(PreparationSupport::class.java)
+                .findFirst()
+                .orElseThrow {
+                    IllegalStateException(
+                        "No PreparationSupport implementation found. Ensure db-tester-core is on the classpath.",
+                    )
+                }
     }
 }

@@ -230,7 +230,7 @@ subprojects.filter { it.name in javaModules }.forEach { subproject ->
 
         extensions.configure<SpotlessExtension> {
             java {
-                googleJavaFormat()
+                googleJavaFormat("1.34.0")
             }
         }
 

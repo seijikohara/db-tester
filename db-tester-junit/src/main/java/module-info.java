@@ -18,6 +18,10 @@ module io.github.seijikohara.dbtester.junit {
   requires org.jspecify;
   requires static org.slf4j;
 
+  // SPI service consumers
+  uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
+  uses io.github.seijikohara.dbtester.api.spi.PreparationSupport;
+
   // SPI service providers
   provides io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver with
       io.github.seijikohara.dbtester.junit.jupiter.spi.JUnitScenarioNameResolver;

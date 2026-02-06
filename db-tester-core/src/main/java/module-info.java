@@ -26,10 +26,14 @@ module io.github.seijikohara.dbtester.core {
       io.github.seijikohara.dbtester.internal.spi.DefaultAssertionProvider;
   provides io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider with
       io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider;
-  provides io.github.seijikohara.dbtester.api.spi.OperationProvider with
-      io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
   provides io.github.seijikohara.dbtester.api.spi.ExpectationProvider with
       io.github.seijikohara.dbtester.internal.spi.DefaultExpectationProvider;
+  provides io.github.seijikohara.dbtester.api.spi.ExpectationSupport with
+      io.github.seijikohara.dbtester.internal.lifecycle.DefaultExpectationSupport;
+  provides io.github.seijikohara.dbtester.api.spi.OperationProvider with
+      io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
+  provides io.github.seijikohara.dbtester.api.spi.PreparationSupport with
+      io.github.seijikohara.dbtester.internal.lifecycle.DefaultPreparationSupport;
 
   // Internal format providers
   provides io.github.seijikohara.dbtester.internal.format.spi.FormatProvider with
