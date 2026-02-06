@@ -11,7 +11,7 @@ hero:
   actions:
     - theme: brand
       text: はじめる
-      link: /ja/overview
+      link: /ja/getting-started
     - theme: alt
       text: GitHubで見る
       link: https://github.com/seijikohara/db-tester

@@ -15,6 +15,7 @@ export const ja: LocaleSpecificConfig<DefaultTheme.Config> = {
       {
         text: 'はじめに',
         items: [
+          { text: 'はじめに', link: '/ja/getting-started' },
           { text: '概要', link: '/ja/overview' },
           { text: 'アーキテクチャ', link: '/ja/architecture' },
         ],
