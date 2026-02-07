@@ -33,5 +33,6 @@ module io.github.seijikohara.dbtester.api {
   uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
   uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
   uses io.github.seijikohara.dbtester.api.spi.PreparationSupport;
+  uses io.github.seijikohara.dbtester.api.spi.TypeHandler;
   uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 }

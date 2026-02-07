@@ -1,0 +1,3 @@
+io.github.seijikohara.dbtester.internal.jdbc.type.UuidTypeHandler
+io.github.seijikohara.dbtester.internal.jdbc.type.JsonTypeHandler
+io.github.seijikohara.dbtester.internal.jdbc.type.ArrayTypeHandler

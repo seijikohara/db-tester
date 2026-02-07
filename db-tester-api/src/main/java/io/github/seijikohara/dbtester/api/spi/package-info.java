@@ -14,6 +14,7 @@
  *       execution
  *   <li>{@link io.github.seijikohara.dbtester.api.spi.ExpectationProvider} - Expectation
  *       verification
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.TypeHandler} - Custom database type handling
  * </ul>
  */
 @NullMarked
