@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.api.domain;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -12,6 +13,7 @@ import java.time.temporal.ChronoField;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
@@ -29,8 +31,12 @@ import org.jspecify.annotations.Nullable;
  *   <li>{@link #NUMERIC} - Type-aware numeric comparison (handles precision differences)
  *   <li>{@link #CASE_INSENSITIVE} - Case-insensitive string comparison
  *   <li>{@link #TIMESTAMP_FLEXIBLE} - Flexible timestamp comparison (ignores sub-second precision)
+ *   <li>{@link #DATE_FLEXIBLE} - Flexible date comparison (handles multiple date formats)
+ *   <li>{@link #JSON_EQUIVALENT} - JSON structural comparison (ignores key order and whitespace)
  *   <li>{@link #NOT_NULL} - Only verify the value is not null
  *   <li>{@link #regex(String)} - Match against a regular expression pattern
+ *   <li>{@link #contains()} - Substring containment check
+ *   <li>{@link #range(double, double)} - Numeric range verification
  * </ul>
  *
  * @see Column
@@ -38,17 +44,17 @@ import org.jspecify.annotations.Nullable;
 public final class ComparisonStrategy {
 
   /** Exact match using equals(). This is the default strategy. */
-  public static final ComparisonStrategy STRICT = new ComparisonStrategy(Type.STRICT, null);
+  public static final ComparisonStrategy STRICT = new ComparisonStrategy(Type.STRICT, null, null);
 
   /** Skip comparison entirely. Useful for auto-generated columns. */
-  public static final ComparisonStrategy IGNORE = new ComparisonStrategy(Type.IGNORE, null);
+  public static final ComparisonStrategy IGNORE = new ComparisonStrategy(Type.IGNORE, null, null);
 
   /** Type-aware numeric comparison. Handles Integer vs Long, precision differences, etc. */
-  public static final ComparisonStrategy NUMERIC = new ComparisonStrategy(Type.NUMERIC, null);
+  public static final ComparisonStrategy NUMERIC = new ComparisonStrategy(Type.NUMERIC, null, null);
 
   /** Case-insensitive string comparison. */
   public static final ComparisonStrategy CASE_INSENSITIVE =
-      new ComparisonStrategy(Type.CASE_INSENSITIVE, null);
+      new ComparisonStrategy(Type.CASE_INSENSITIVE, null, null);
 
   /**
    * Flexible timestamp comparison. Converts timestamps to UTC and ignores sub-second precision.
@@ -58,10 +64,36 @@ public final class ComparisonStrategy {
    * considered equal because they represent the same instant in time.
    */
   public static final ComparisonStrategy TIMESTAMP_FLEXIBLE =
-      new ComparisonStrategy(Type.TIMESTAMP_FLEXIBLE, null);
+      new ComparisonStrategy(Type.TIMESTAMP_FLEXIBLE, null, null);
+
+  /**
+   * Flexible date comparison. Handles multiple date formats.
+   *
+   * <p>This strategy parses date strings in various formats (ISO-8601, SQL date, slashed formats)
+   * and compares the resulting dates. For example, "2024-01-15" and "2024/01/15" are considered
+   * equal.
+   */
+  public static final ComparisonStrategy DATE_FLEXIBLE =
+      new ComparisonStrategy(Type.DATE_FLEXIBLE, null, null);
+
+  /**
+   * JSON structural equivalence comparison.
+   *
+   * <p>This strategy compares JSON values by their structure rather than their string
+   * representation. Key order in objects is ignored, and insignificant whitespace differences are
+   * normalized. For example, {@code {"b":2,"a":1}} and {@code {"a": 1, "b": 2}} are considered
+   * equal.
+   */
+  public static final ComparisonStrategy JSON_EQUIVALENT =
+      new ComparisonStrategy(Type.JSON_EQUIVALENT, null, null);
 
   /** Only verify the value is not null. Useful for auto-generated values. */
-  public static final ComparisonStrategy NOT_NULL = new ComparisonStrategy(Type.NOT_NULL, null);
+  public static final ComparisonStrategy NOT_NULL =
+      new ComparisonStrategy(Type.NOT_NULL, null, null);
+
+  /** Pattern for parsing RANGE options in format "min=N,max=M". */
+  private static final Pattern RANGE_OPTIONS_PATTERN =
+      Pattern.compile("min\\s*=\\s*([\\d.eE+\\-]+)\\s*,\\s*max\\s*=\\s*([\\d.eE+\\-]+)");
 
   /** The strategy type. */
   private final Type type;
@@ -69,15 +101,21 @@ public final class ComparisonStrategy {
   /** The regex pattern for REGEX type, null otherwise. */
   private final @Nullable Pattern pattern;
 
+  /** The strategy-specific options string, null when not applicable. */
+  private final @Nullable String options;
+
   /**
    * Creates a comparison strategy.
    *
    * @param type the strategy type
    * @param pattern the regex pattern (for REGEX type only)
+   * @param options the strategy-specific options string
    */
-  private ComparisonStrategy(final Type type, final @Nullable Pattern pattern) {
+  private ComparisonStrategy(
+      final Type type, final @Nullable Pattern pattern, final @Nullable String options) {
     this.type = type;
     this.pattern = pattern;
+    this.options = options;
   }
 
   /**
@@ -90,7 +128,67 @@ public final class ComparisonStrategy {
    * @throws java.util.regex.PatternSyntaxException if the regex is invalid
    */
   public static ComparisonStrategy regex(final String regex) {
-    return new ComparisonStrategy(Type.REGEX, Pattern.compile(regex));
+    return new ComparisonStrategy(Type.REGEX, Pattern.compile(regex), null);
+  }
+
+  /**
+   * Creates a CONTAINS comparison strategy without a specific substring.
+   *
+   * <p>The expected value is checked as a substring of the actual value.
+   *
+   * @return a new CONTAINS comparison strategy
+   */
+  public static ComparisonStrategy contains() {
+    return new ComparisonStrategy(Type.CONTAINS, null, null);
+  }
+
+  /**
+   * Creates a CONTAINS comparison strategy with a specific substring.
+   *
+   * <p>The actual value must contain the specified substring.
+   *
+   * @param substring the substring to search for in the actual value
+   * @return a new CONTAINS comparison strategy
+   */
+  public static ComparisonStrategy contains(final String substring) {
+    return new ComparisonStrategy(Type.CONTAINS, null, substring);
+  }
+
+  /**
+   * Creates a RANGE comparison strategy from an options string.
+   *
+   * <p>The options string must be in the format {@code "min=N,max=M"} where N and M are numeric
+   * values. Both min and max are inclusive.
+   *
+   * @param rangeOptions the range options string (e.g., "min=100,max=200")
+   * @return a new RANGE comparison strategy
+   * @throws IllegalArgumentException if the options string format is invalid
+   */
+  public static ComparisonStrategy range(final String rangeOptions) {
+    final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(rangeOptions.trim());
+    if (!matcher.matches()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid RANGE options format: '%s'. Expected format: 'min=N,max=M'", rangeOptions));
+    }
+    return new ComparisonStrategy(Type.RANGE, null, rangeOptions.trim());
+  }
+
+  /**
+   * Creates a RANGE comparison strategy with explicit min and max values.
+   *
+   * @param min the minimum value (inclusive)
+   * @param max the maximum value (inclusive)
+   * @return a new RANGE comparison strategy
+   * @throws IllegalArgumentException if min is greater than max
+   */
+  public static ComparisonStrategy range(final double min, final double max) {
+    if (min > max) {
+      throw new IllegalArgumentException(
+          String.format("min (%s) must not be greater than max (%s)", min, max));
+    }
+    final var rangeOptions = String.format("min=%s,max=%s", min, max);
+    return new ComparisonStrategy(Type.RANGE, null, rangeOptions);
   }
 
   /**
@@ -109,6 +207,15 @@ public final class ComparisonStrategy {
    */
   public Optional<Pattern> getPattern() {
     return Optional.ofNullable(pattern);
+  }
+
+  /**
+   * Returns the strategy-specific options string.
+   *
+   * @return the options, or empty if not applicable
+   */
+  public Optional<String> getOptions() {
+    return Optional.ofNullable(options);
   }
 
   /**
@@ -143,10 +250,16 @@ public final class ComparisonStrategy {
       case NUMERIC -> compareNumeric(expected, actual);
       case CASE_INSENSITIVE -> compareCaseInsensitive(expected, actual);
       case TIMESTAMP_FLEXIBLE -> compareTimestamp(expected, actual);
+      case DATE_FLEXIBLE -> compareDateFlexible(expected, actual);
+      case JSON_EQUIVALENT -> compareJsonEquivalent(expected, actual);
       case NOT_NULL -> actual != null;
       case REGEX -> matchesRegex(actual);
+      case CONTAINS -> matchesContains(expected, actual);
+      case RANGE -> matchesRange(actual);
     };
   }
+
+  // ========== Numeric comparison ==========
 
   /**
    * Compares two values numerically.
@@ -204,6 +317,8 @@ public final class ComparisonStrategy {
     return Optional.empty();
   }
 
+  // ========== Case-insensitive comparison ==========
+
   /**
    * Compares two values case-insensitively.
    *
@@ -216,6 +331,8 @@ public final class ComparisonStrategy {
     return compareNullable(
         expected, actual, (exp, act) -> exp.toString().equalsIgnoreCase(act.toString()));
   }
+
+  // ========== Timestamp comparison ==========
 
   /**
    * Compares two timestamp values with flexible precision.
@@ -319,6 +436,206 @@ public final class ComparisonStrategy {
           .optionalEnd()
           .toFormatter();
 
+  // ========== Date flexible comparison ==========
+
+  /**
+   * Compares two date values with format flexibility.
+   *
+   * <p>Supports ISO-8601 (yyyy-MM-dd), slashed (yyyy/MM/dd), and SQL date formats. Both values are
+   * parsed to {@link LocalDate} and compared.
+   *
+   * @param expected the expected value
+   * @param actual the actual value
+   * @return {@code true} if both values represent the same date, {@code false} otherwise
+   */
+  private boolean compareDateFlexible(
+      final @Nullable Object expected, final @Nullable Object actual) {
+    return compareNullable(
+        expected,
+        actual,
+        (exp, act) -> {
+          final var expectedDate = parseToLocalDate(exp.toString());
+          final var actualDate = parseToLocalDate(act.toString());
+          return expectedDate.equals(actualDate);
+        });
+  }
+
+  /** Pattern for slash-separated date format (yyyy/MM/dd). */
+  private static final DateTimeFormatter SLASH_DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+  /** Pattern for dot-separated date format (yyyy.MM.dd). */
+  private static final DateTimeFormatter DOT_DATE_FORMATTER =
+      DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+  /**
+   * Parses a date string to a LocalDate using multiple format attempts.
+   *
+   * <p>Tries the following formats in order: ISO-8601 (yyyy-MM-dd), slashed (yyyy/MM/dd), dot
+   * (yyyy.MM.dd). If a timestamp format is detected (contains 'T' or space followed by time), the
+   * date portion is extracted first.
+   *
+   * @param dateStr the date string to parse
+   * @return the parsed LocalDate, or a sentinel value if parsing fails
+   */
+  private Object parseToLocalDate(final String dateStr) {
+    final var trimmed = dateStr.trim();
+
+    // Extract date portion from timestamp if needed
+    final var datePart = extractDatePortion(trimmed);
+
+    // Try ISO-8601 format (yyyy-MM-dd)
+    try {
+      return LocalDate.parse(datePart, DateTimeFormatter.ISO_LOCAL_DATE);
+    } catch (final DateTimeParseException ignored) {
+      // Continue to next format
+    }
+
+    // Try slashed format (yyyy/MM/dd)
+    try {
+      return LocalDate.parse(datePart, SLASH_DATE_FORMATTER);
+    } catch (final DateTimeParseException ignored) {
+      // Continue to next format
+    }
+
+    // Try dot format (yyyy.MM.dd)
+    try {
+      return LocalDate.parse(datePart, DOT_DATE_FORMATTER);
+    } catch (final DateTimeParseException ignored) {
+      // Parsing failed
+    }
+
+    return dateStr;
+  }
+
+  /**
+   * Extracts the date portion from a timestamp string.
+   *
+   * @param value the timestamp or date string
+   * @return the date portion only
+   */
+  private String extractDatePortion(final String value) {
+    // Handle ISO format with T separator
+    final var tIndex = value.indexOf('T');
+    if (tIndex > 0) {
+      return value.substring(0, tIndex);
+    }
+    // Handle SQL format with space separator (only if time-like pattern follows)
+    final var spaceIndex = value.indexOf(' ');
+    if (spaceIndex > 0 && spaceIndex < value.length() - 1) {
+      final var afterSpace = value.charAt(spaceIndex + 1);
+      if (afterSpace >= '0' && afterSpace <= '9') {
+        return value.substring(0, spaceIndex);
+      }
+    }
+    return value;
+  }
+
+  // ========== JSON equivalent comparison ==========
+
+  /**
+   * Compares two JSON values by structural equivalence.
+   *
+   * <p>Object key order and insignificant whitespace are ignored. Values are normalized before
+   * comparison by parsing and re-serializing with sorted keys.
+   *
+   * @param expected the expected value
+   * @param actual the actual value
+   * @return {@code true} if the JSON structures are equivalent, {@code false} otherwise
+   */
+  private boolean compareJsonEquivalent(
+      final @Nullable Object expected, final @Nullable Object actual) {
+    return compareNullable(
+        expected,
+        actual,
+        (exp, act) -> {
+          final var expStr = exp.toString();
+          final var actStr = act.toString();
+          if (JsonNormalizer.looksLikeJson(expStr) && JsonNormalizer.looksLikeJson(actStr)) {
+            return JsonNormalizer.normalize(expStr).equals(JsonNormalizer.normalize(actStr));
+          }
+          return Objects.equals(expStr, actStr);
+        });
+  }
+
+  // ========== Contains comparison ==========
+
+  /**
+   * Checks if the actual value contains the expected value (or the configured substring).
+   *
+   * <p>If an options string is configured, the actual value is checked for that substring.
+   * Otherwise, the expected value is used as the substring to find in the actual value.
+   *
+   * @param expected the expected value
+   * @param actual the actual value
+   * @return {@code true} if the actual value contains the substring, {@code false} otherwise
+   */
+  private boolean matchesContains(final @Nullable Object expected, final @Nullable Object actual) {
+    if (actual == null) {
+      return false;
+    }
+    final var actualStr = actual.toString();
+    if (options != null && !options.isEmpty()) {
+      return actualStr.contains(options);
+    }
+    if (expected == null) {
+      return false;
+    }
+    return actualStr.contains(expected.toString());
+  }
+
+  // ========== Range comparison ==========
+
+  /**
+   * Checks if the actual value falls within the configured numeric range.
+   *
+   * @param actual the actual value
+   * @return {@code true} if the value is within range (inclusive), {@code false} otherwise
+   */
+  private boolean matchesRange(final @Nullable Object actual) {
+    if (actual == null || options == null) {
+      return false;
+    }
+    final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(options);
+    if (!matcher.matches()) {
+      return false;
+    }
+    try {
+      final var min = new BigDecimal(matcher.group(1));
+      final var max = new BigDecimal(matcher.group(2));
+      final var actualValue = toBigDecimalFromObject(actual);
+      return actualValue.map(v -> v.compareTo(min) >= 0 && v.compareTo(max) <= 0).orElse(false);
+    } catch (final NumberFormatException e) {
+      return false;
+    }
+  }
+
+  /**
+   * Converts an object to BigDecimal if possible.
+   *
+   * @param value the value to convert
+   * @return the BigDecimal, or empty if not convertible
+   */
+  private Optional<BigDecimal> toBigDecimalFromObject(final Object value) {
+    if (value instanceof Number num) {
+      try {
+        return Optional.of(new BigDecimal(num.toString()));
+      } catch (final NumberFormatException e) {
+        return Optional.empty();
+      }
+    }
+    if (value instanceof String str) {
+      try {
+        return Optional.of(new BigDecimal(str.trim()));
+      } catch (final NumberFormatException e) {
+        return Optional.empty();
+      }
+    }
+    return Optional.empty();
+  }
+
+  // ========== Regex comparison ==========
+
   /**
    * Matches the actual value against the regex pattern.
    *
@@ -330,6 +647,8 @@ public final class ComparisonStrategy {
         .flatMap(p -> Optional.ofNullable(actual).map(a -> p.matcher(a.toString()).matches()))
         .orElse(false);
   }
+
+  // ========== Null-safe comparison utility ==========
 
   /**
    * Compares two nullable values using the provided comparator function.
@@ -353,6 +672,8 @@ public final class ComparisonStrategy {
         .orElseGet(() -> actual == null);
   }
 
+  // ========== Object methods ==========
+
   @Override
   public boolean equals(final @Nullable Object obj) {
     if (this == obj) {
@@ -366,20 +687,24 @@ public final class ComparisonStrategy {
     }
     final var thisPattern = Optional.ofNullable(pattern).map(Pattern::pattern);
     final var otherPattern = Optional.ofNullable(other.pattern).map(Pattern::pattern);
-    return thisPattern.equals(otherPattern);
+    return thisPattern.equals(otherPattern) && Objects.equals(options, other.options);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, Optional.ofNullable(pattern).map(Pattern::pattern).orElse(null));
+    return Objects.hash(
+        type, Optional.ofNullable(pattern).map(Pattern::pattern).orElse(null), options);
   }
 
   @Override
   public String toString() {
-    return Optional.ofNullable(pattern)
-        .filter(p -> type == Type.REGEX)
-        .map(p -> String.format("ComparisonStrategy[REGEX:%s]", p.pattern()))
-        .orElseGet(() -> String.format("ComparisonStrategy[%s]", type));
+    if (pattern != null && type == Type.REGEX) {
+      return String.format("ComparisonStrategy[REGEX:%s]", pattern.pattern());
+    }
+    if (options != null) {
+      return String.format("ComparisonStrategy[%s:%s]", type, options);
+    }
+    return String.format("ComparisonStrategy[%s]", type);
   }
 
   /** Enum defining the available comparison strategy types. */
@@ -399,10 +724,22 @@ public final class ComparisonStrategy {
     /** Flexible timestamp comparison. */
     TIMESTAMP_FLEXIBLE,
 
+    /** Flexible date comparison. */
+    DATE_FLEXIBLE,
+
+    /** JSON structural equivalence comparison. */
+    JSON_EQUIVALENT,
+
     /** Only verify the value is not null. */
     NOT_NULL,
 
     /** Match against a regular expression. */
-    REGEX
+    REGEX,
+
+    /** Substring containment check. */
+    CONTAINS,
+
+    /** Numeric range verification. */
+    RANGE
   }
 }

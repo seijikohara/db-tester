@@ -136,4 +136,59 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
   public static ColumnStrategyMapping regex(final String columnName, final String pattern) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.regex(pattern));
   }
+
+  /**
+   * Creates a ColumnStrategyMapping for flexible date comparison.
+   *
+   * @param columnName the column name for date comparison
+   * @return a new ColumnStrategyMapping with DATE_FLEXIBLE strategy
+   */
+  public static ColumnStrategyMapping dateFlexible(final String columnName) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.DATE_FLEXIBLE);
+  }
+
+  /**
+   * Creates a ColumnStrategyMapping for JSON structural equivalence comparison.
+   *
+   * @param columnName the column name for JSON comparison
+   * @return a new ColumnStrategyMapping with JSON_EQUIVALENT strategy
+   */
+  public static ColumnStrategyMapping jsonEquivalent(final String columnName) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.JSON_EQUIVALENT);
+  }
+
+  /**
+   * Creates a ColumnStrategyMapping for substring containment check.
+   *
+   * @param columnName the column name for containment check
+   * @return a new ColumnStrategyMapping with CONTAINS strategy
+   */
+  public static ColumnStrategyMapping contains(final String columnName) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains());
+  }
+
+  /**
+   * Creates a ColumnStrategyMapping for substring containment check with a specific substring.
+   *
+   * @param columnName the column name for containment check
+   * @param substring the substring to search for
+   * @return a new ColumnStrategyMapping with CONTAINS strategy
+   */
+  public static ColumnStrategyMapping contains(final String columnName, final String substring) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains(substring));
+  }
+
+  /**
+   * Creates a ColumnStrategyMapping for numeric range verification.
+   *
+   * @param columnName the column name for range check
+   * @param min the minimum value (inclusive)
+   * @param max the maximum value (inclusive)
+   * @return a new ColumnStrategyMapping with RANGE strategy
+   * @throws IllegalArgumentException if min is greater than max
+   */
+  public static ColumnStrategyMapping range(
+      final String columnName, final double min, final double max) {
+    return new ColumnStrategyMapping(columnName, ComparisonStrategy.range(min, max));
+  }
 }

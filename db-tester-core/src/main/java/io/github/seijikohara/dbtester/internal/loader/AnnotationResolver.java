@@ -184,12 +184,15 @@ public final class AnnotationResolver {
    */
   private ColumnStrategyMapping toColumnStrategyMapping(final ColumnStrategy columnStrategy) {
     try {
-      final var strategy = columnStrategy.strategy().toComparisonStrategy(columnStrategy.pattern());
+      final var strategy =
+          columnStrategy
+              .strategy()
+              .toComparisonStrategy(columnStrategy.pattern(), columnStrategy.options());
       return ColumnStrategyMapping.of(columnStrategy.name(), strategy);
     } catch (final IllegalArgumentException e) {
       throw new IllegalArgumentException(
           String.format(
-              "@ColumnStrategy for column '%s' uses %s strategy but pattern is empty",
+              "@ColumnStrategy for column '%s' uses %s strategy with invalid configuration",
               columnStrategy.name(), columnStrategy.strategy()),
           e);
     }
