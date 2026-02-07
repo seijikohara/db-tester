@@ -111,6 +111,50 @@ class StrategyTest {
       assertSame(ComparisonStrategy.NOT_NULL, result, "should be NOT_NULL strategy");
       assertEquals(ComparisonStrategy.Type.NOT_NULL, result.getType(), "should have NOT_NULL type");
     }
+
+    /** Verifies that DATE_FLEXIBLE converts to ComparisonStrategy.DATE_FLEXIBLE. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert DATE_FLEXIBLE to ComparisonStrategy.DATE_FLEXIBLE")
+    void shouldConvertDateFlexible_toComparisonStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.DATE_FLEXIBLE.toComparisonStrategy("");
+
+      // Then
+      assertSame(ComparisonStrategy.DATE_FLEXIBLE, result, "should be DATE_FLEXIBLE strategy");
+      assertEquals(
+          ComparisonStrategy.Type.DATE_FLEXIBLE,
+          result.getType(),
+          "should have DATE_FLEXIBLE type");
+    }
+
+    /** Verifies that JSON_EQUIVALENT converts to ComparisonStrategy.JSON_EQUIVALENT. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert JSON_EQUIVALENT to ComparisonStrategy.JSON_EQUIVALENT")
+    void shouldConvertJsonEquivalent_toComparisonStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.JSON_EQUIVALENT.toComparisonStrategy("");
+
+      // Then
+      assertSame(ComparisonStrategy.JSON_EQUIVALENT, result, "should be JSON_EQUIVALENT strategy");
+      assertEquals(
+          ComparisonStrategy.Type.JSON_EQUIVALENT,
+          result.getType(),
+          "should have JSON_EQUIVALENT type");
+    }
+
+    /** Verifies that CONTAINS without options converts to default CONTAINS strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert CONTAINS to ComparisonStrategy.contains()")
+    void shouldConvertContains_toComparisonStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("");
+
+      // Then
+      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
+    }
   }
 
   /** Tests for toComparisonStrategy(String) method. */
@@ -180,6 +224,99 @@ class StrategyTest {
     }
   }
 
+  /** Tests for toComparisonStrategy(String, String) with options. */
+  @Nested
+  @DisplayName("toComparisonStrategy(String, String)")
+  class ToComparisonStrategyWithOptionsTests {
+
+    /** Tests for toComparisonStrategy with pattern and options. */
+    ToComparisonStrategyWithOptionsTests() {}
+
+    /** Verifies that CONTAINS with options creates contains strategy with substring. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert CONTAINS with options to contains strategy with substring")
+    void shouldConvertContainsWithOptions_toContainsStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("", "hello");
+
+      // Then
+      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
+      assertTrue(result.getOptions().isPresent(), "should have options");
+      assertEquals("hello", result.getOptions().get(), "should have correct options");
+    }
+
+    /** Verifies that CONTAINS without options creates default contains strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert CONTAINS without options to default contains strategy")
+    void shouldConvertContainsWithoutOptions_toDefaultContainsStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("", "");
+
+      // Then
+      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
+    }
+
+    /** Verifies that RANGE with valid options creates range strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert RANGE with options to range strategy")
+    void shouldConvertRangeWithOptions_toRangeStrategy() {
+      // When
+      final ComparisonStrategy result = Strategy.RANGE.toComparisonStrategy("", "min=0,max=100");
+
+      // Then
+      assertEquals(ComparisonStrategy.Type.RANGE, result.getType(), "should have RANGE type");
+      assertTrue(result.getOptions().isPresent(), "should have options");
+      assertEquals("min=0,max=100", result.getOptions().get(), "should have correct options");
+    }
+
+    /** Verifies that RANGE with empty options throws exception. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw IllegalArgumentException when RANGE options are empty")
+    void shouldThrowException_whenRangeOptionsAreEmpty() {
+      // When & Then
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> Strategy.RANGE.toComparisonStrategy("", ""),
+          "should throw IllegalArgumentException for empty options");
+    }
+
+    /** Verifies that RANGE with null options throws exception. */
+    @SuppressWarnings("NullAway")
+    @Test
+    @Tag("error")
+    @DisplayName("should throw IllegalArgumentException when RANGE options are null")
+    void shouldThrowException_whenRangeOptionsAreNull() {
+      // When & Then
+      final String nullOptions = null;
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> Strategy.RANGE.toComparisonStrategy("", nullOptions),
+          "should throw IllegalArgumentException for null options");
+    }
+
+    /** Verifies that REGEX still works with pattern in two-argument overload. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should convert REGEX with pattern in two-argument overload")
+    void shouldConvertRegex_toComparisonStrategyWithPatternAndOptions() {
+      // Given
+      final var pattern = "\\d{3}-\\d{4}";
+
+      // When
+      final ComparisonStrategy result = Strategy.REGEX.toComparisonStrategy(pattern, "");
+
+      // Then
+      assertEquals(ComparisonStrategy.Type.REGEX, result.getType(), "should have REGEX type");
+      assertTrue(result.getPattern().isPresent(), "should have pattern");
+      assertEquals(
+          pattern, result.getPattern().get().pattern(), "should have correct pattern string");
+    }
+  }
+
   /** Tests for enum values coverage. */
   @Nested
   @DisplayName("enum coverage")
@@ -197,7 +334,7 @@ class StrategyTest {
       final Strategy[] values = Strategy.values();
 
       // Then
-      assertEquals(7, values.length, "should have 7 strategy values");
+      assertEquals(11, values.length, "should have 11 strategy values");
     }
 
     /** Verifies valueOf works correctly. */
@@ -219,6 +356,16 @@ class StrategyTest {
           "should resolve TIMESTAMP_FLEXIBLE");
       assertEquals(Strategy.NOT_NULL, Strategy.valueOf("NOT_NULL"), "should resolve NOT_NULL");
       assertEquals(Strategy.REGEX, Strategy.valueOf("REGEX"), "should resolve REGEX");
+      assertEquals(
+          Strategy.DATE_FLEXIBLE,
+          Strategy.valueOf("DATE_FLEXIBLE"),
+          "should resolve DATE_FLEXIBLE");
+      assertEquals(
+          Strategy.JSON_EQUIVALENT,
+          Strategy.valueOf("JSON_EQUIVALENT"),
+          "should resolve JSON_EQUIVALENT");
+      assertEquals(Strategy.CONTAINS, Strategy.valueOf("CONTAINS"), "should resolve CONTAINS");
+      assertEquals(Strategy.RANGE, Strategy.valueOf("RANGE"), "should resolve RANGE");
     }
   }
 }

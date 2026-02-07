@@ -94,16 +94,59 @@ public enum Strategy {
    *
    * @see ComparisonStrategy#regex(String)
    */
-  REGEX;
+  REGEX,
+
+  /**
+   * Flexible date comparison across multiple formats.
+   *
+   * <p>Parses date values in ISO-8601 (yyyy-MM-dd), slashed (yyyy/MM/dd), and dot (yyyy.MM.dd)
+   * formats and compares the resulting dates. Extracts the date portion from timestamp strings if
+   * needed.
+   *
+   * @see ComparisonStrategy#DATE_FLEXIBLE
+   */
+  DATE_FLEXIBLE,
+
+  /**
+   * JSON structural equivalence comparison.
+   *
+   * <p>Compares JSON values by their structure, ignoring key order in objects and insignificant
+   * whitespace. For example, {@code {"b":2,"a":1}} and {@code {"a":1,"b":2}} are considered equal.
+   *
+   * @see ComparisonStrategy#JSON_EQUIVALENT
+   */
+  JSON_EQUIVALENT,
+
+  /**
+   * Substring containment verification.
+   *
+   * <p>Checks whether the actual value contains the expected value as a substring. When {@link
+   * ColumnStrategy#options()} is specified, the options value is used as the substring to search
+   * for instead of the expected value.
+   *
+   * @see ComparisonStrategy#contains()
+   */
+  CONTAINS,
+
+  /**
+   * Numeric range verification.
+   *
+   * <p>Checks whether the actual numeric value falls within the range specified in {@link
+   * ColumnStrategy#options()}. The options must be in the format {@code "min=N,max=M"} where N and
+   * M are numeric values. Both bounds are inclusive.
+   *
+   * @see ComparisonStrategy#range(String)
+   */
+  RANGE;
 
   /**
    * Converts this annotation strategy to the corresponding runtime {@link ComparisonStrategy}.
    *
-   * <p>This method handles all strategies except {@link #REGEX}. For REGEX, use {@link
-   * #toComparisonStrategy(String)} with a pattern.
+   * <p>This method handles strategies that require no additional parameters. For strategies
+   * requiring a pattern or options, use {@link #toComparisonStrategy(String, String)}.
    *
    * @return the corresponding ComparisonStrategy instance
-   * @throws IllegalStateException if called on REGEX (REGEX requires a pattern)
+   * @throws IllegalStateException if called on a strategy that requires parameters
    */
   private ComparisonStrategy toComparisonStrategy() {
     return switch (this) {
@@ -112,10 +155,18 @@ public enum Strategy {
       case NUMERIC -> ComparisonStrategy.NUMERIC;
       case CASE_INSENSITIVE -> ComparisonStrategy.CASE_INSENSITIVE;
       case TIMESTAMP_FLEXIBLE -> ComparisonStrategy.TIMESTAMP_FLEXIBLE;
+      case DATE_FLEXIBLE -> ComparisonStrategy.DATE_FLEXIBLE;
+      case JSON_EQUIVALENT -> ComparisonStrategy.JSON_EQUIVALENT;
       case NOT_NULL -> ComparisonStrategy.NOT_NULL;
+      case CONTAINS -> ComparisonStrategy.contains();
       case REGEX ->
           throw new IllegalStateException(
-              "REGEX strategy requires a pattern. Use toComparisonStrategy(String pattern) instead.");
+              "REGEX strategy requires a pattern. "
+                  + "Use toComparisonStrategy(String, String) instead.");
+      case RANGE ->
+          throw new IllegalStateException(
+              "RANGE strategy requires options. "
+                  + "Use toComparisonStrategy(String, String) instead.");
     };
   }
 
@@ -124,18 +175,46 @@ public enum Strategy {
    * an optional pattern.
    *
    * <p>The pattern parameter is only used for {@link #REGEX} strategy; for other strategies it is
-   * ignored.
+   * ignored. This method delegates to {@link #toComparisonStrategy(String, String)} with an empty
+   * options string.
    *
    * @param pattern the regex pattern for REGEX strategy, may be empty for non-REGEX strategies
    * @return the corresponding ComparisonStrategy instance
    * @throws IllegalArgumentException if REGEX strategy is used with an empty pattern
    */
   public ComparisonStrategy toComparisonStrategy(final String pattern) {
+    return toComparisonStrategy(pattern, "");
+  }
+
+  /**
+   * Converts this annotation strategy to the corresponding runtime {@link ComparisonStrategy} with
+   * pattern and options parameters.
+   *
+   * <p>The pattern parameter is used for {@link #REGEX} strategy. The options parameter is used for
+   * {@link #CONTAINS} and {@link #RANGE} strategies.
+   *
+   * @param pattern the regex pattern for REGEX strategy, may be empty for non-REGEX strategies
+   * @param options the strategy-specific options, may be empty
+   * @return the corresponding ComparisonStrategy instance
+   * @throws IllegalArgumentException if REGEX strategy is used with an empty pattern, or RANGE
+   *     strategy is used with empty or invalid options
+   */
+  public ComparisonStrategy toComparisonStrategy(final String pattern, final String options) {
     if (this == REGEX) {
       if (pattern == null || pattern.isEmpty()) {
         throw new IllegalArgumentException("REGEX strategy requires a non-empty pattern");
       }
       return ComparisonStrategy.regex(pattern);
+    }
+    if (this == CONTAINS && options != null && !options.isEmpty()) {
+      return ComparisonStrategy.contains(options);
+    }
+    if (this == RANGE) {
+      if (options == null || options.isEmpty()) {
+        throw new IllegalArgumentException(
+            "RANGE strategy requires options in format 'min=N,max=M'");
+      }
+      return ComparisonStrategy.range(options);
     }
     return toComparisonStrategy();
   }
