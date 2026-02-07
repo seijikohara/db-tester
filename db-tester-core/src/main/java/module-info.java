@@ -35,6 +35,13 @@ module io.github.seijikohara.dbtester.core {
   provides io.github.seijikohara.dbtester.api.spi.PreparationSupport with
       io.github.seijikohara.dbtester.internal.lifecycle.DefaultPreparationSupport;
 
+  // Export providers
+  provides io.github.seijikohara.dbtester.api.spi.ExportProvider with
+      io.github.seijikohara.dbtester.internal.export.DelimitedExportProvider.Csv,
+      io.github.seijikohara.dbtester.internal.export.DelimitedExportProvider.Tsv,
+      io.github.seijikohara.dbtester.internal.export.JsonExportProvider,
+      io.github.seijikohara.dbtester.internal.export.YamlExportProvider;
+
   // Internal format providers
   provides io.github.seijikohara.dbtester.internal.format.spi.FormatProvider with
       io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider,

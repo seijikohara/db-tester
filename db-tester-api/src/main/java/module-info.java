@@ -19,6 +19,7 @@ module io.github.seijikohara.dbtester.api {
   exports io.github.seijikohara.dbtester.api.dataset;
   exports io.github.seijikohara.dbtester.api.domain;
   exports io.github.seijikohara.dbtester.api.exception;
+  exports io.github.seijikohara.dbtester.api.export;
   exports io.github.seijikohara.dbtester.api.loader;
   exports io.github.seijikohara.dbtester.api.operation;
   exports io.github.seijikohara.dbtester.api.scenario;
@@ -27,6 +28,7 @@ module io.github.seijikohara.dbtester.api {
   // SPI for implementations
   uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
   uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
+  uses io.github.seijikohara.dbtester.api.spi.ExportProvider;
   uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
   uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
   uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
