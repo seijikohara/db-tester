@@ -6,17 +6,10 @@ import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.Row
-import io.github.seijikohara.dbtester.api.dataset.Table
-import io.github.seijikohara.dbtester.api.dataset.TableSet
-import io.github.seijikohara.dbtester.api.domain.CellValue
-import io.github.seijikohara.dbtester.api.domain.ColumnName
-import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
-import io.github.seijikohara.dbtester.api.spi.OperationProvider
-import javax.sql.DataSource
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport
 import spock.lang.Specification
 
 /**
@@ -27,16 +20,20 @@ import spock.lang.Specification
  */
 class SpockPreparationExecutorSpec extends Specification {
 
+	/** Mock preparation support for tests. */
+	PreparationSupport mockSupport
+
 	/** The executor under test. */
 	SpockPreparationExecutor executor
 
 	def setup() {
-		executor = new SpockPreparationExecutor()
+		mockSupport = Mock(PreparationSupport)
+		executor = new SpockPreparationExecutor(mockSupport)
 	}
 
 	def 'should create instance'() {
 		when: 'creating a new instance'
-		def instance = new SpockPreparationExecutor()
+		def instance = new SpockPreparationExecutor(mockSupport)
 
 		then: 'instance is created successfully'
 		instance != null
@@ -82,11 +79,44 @@ class SpockPreparationExecutorSpec extends Specification {
 
 	def 'should create multiple independent executors'() {
 		when: 'creating multiple executors'
-		def executor1 = new SpockPreparationExecutor()
-		def executor2 = new SpockPreparationExecutor()
+		def executor1 = new SpockPreparationExecutor(mockSupport)
+		def executor2 = new SpockPreparationExecutor(mockSupport)
 
 		then: 'executors are independent'
 		!executor1.is(executor2)
+	}
+
+	def 'should delegate to preparation support'() {
+		given: 'a context and data set'
+		def context = createTestContextWithEmptyDatasets()
+		def dataSet = createMockDataSet(Operation.CLEAN_INSERT)
+
+		when: 'executing preparation'
+		executor.execute(context, dataSet)
+
+		then: 'support is called'
+		1 * mockSupport.execute(context, dataSet)
+	}
+
+	def 'should handle datasets with different operations'() {
+		given: 'a context with datasets'
+		def context = createTestContextWithEmptyDatasets()
+
+		and: 'a mock DataSet annotation with specified operation'
+		def dataSet = createMockDataSet(operation)
+
+		when: 'executing preparation'
+		executor.execute(context, dataSet)
+
+		then: 'operation is executed with correct operation type'
+		1 * mockSupport.execute(context, dataSet)
+
+		where:
+		operation << [
+			Operation.INSERT,
+			Operation.DELETE_ALL,
+			Operation.TRUNCATE_INSERT
+		]
 	}
 
 	/**
@@ -106,7 +136,22 @@ class SpockPreparationExecutorSpec extends Specification {
 	private TestContext createTestContextWithEmptyDatasets() {
 		def testClass = SampleTestClass
 		def testMethod = SampleTestClass.getMethod('sampleMethod')
-		def loader = { ctx -> [] } as DataSetLoader
+		def loader = new DataSetLoader() {
+					@Override
+					List loadPreparationDataSets(TestContext ctx) {
+						return []
+					}
+
+					@Override
+					List loadExpectationDataSets(TestContext ctx) {
+						return []
+					}
+
+					@Override
+					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
+						return []
+					}
+				}
 		def configuration = Configuration.builder()
 				.conventions(ConventionSettings.standard())
 				.operations(OperationDefaults.standard())
@@ -126,112 +171,8 @@ class SpockPreparationExecutorSpec extends Specification {
 		def dataSet = Mock(DataSet)
 		dataSet.operation() >> operation
 		dataSet.tableOrdering() >> TableOrderingStrategy.AUTO
-		dataSet.paths() >> ([] as String[])
+		dataSet.sources() >> ([] as String[])
 		return dataSet
-	}
-
-	def 'should execute operation when datasets are found'() {
-		given: 'a mock operation provider'
-		def mockOperationProvider = Mock(OperationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockPreparationExecutor.getDeclaredField('operationProvider')
-		providerField.accessible = true
-		providerField.set(executor, mockOperationProvider)
-
-		and: 'a context with datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithDatasets(registry)
-
-		and: 'a mock DataSet annotation'
-		def dataSet = createMockDataSet(Operation.CLEAN_INSERT)
-
-		when: 'executing preparation'
-		executor.execute(context, dataSet)
-
-		then: 'operation is executed'
-		1 * mockOperationProvider.execute(Operation.CLEAN_INSERT, _, mockDataSource, TableOrderingStrategy.AUTO, _, _)
-	}
-
-	def 'should handle datasets with different operations'() {
-		given: 'a mock operation provider'
-		def mockOperationProvider = Mock(OperationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockPreparationExecutor.getDeclaredField('operationProvider')
-		providerField.accessible = true
-		providerField.set(executor, mockOperationProvider)
-
-		and: 'a context with datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithDatasets(registry)
-
-		and: 'a mock DataSet annotation with specified operation'
-		def dataSet = createMockDataSet(operation)
-
-		when: 'executing preparation'
-		executor.execute(context, dataSet)
-
-		then: 'operation is executed with correct operation type'
-		1 * mockOperationProvider.execute(operation, _, mockDataSource, _, _, _)
-
-		where:
-		operation << [
-			Operation.INSERT,
-			Operation.DELETE_ALL,
-			Operation.TRUNCATE_INSERT
-		]
-	}
-
-	/**
-	 * Creates a TestContext with actual datasets.
-	 *
-	 * @param registry the registry to use
-	 * @return the test context
-	 */
-	private TestContext createTestContextWithDatasets(DataSourceRegistry registry) {
-		def testClass = SampleTestClass
-		def testMethod = SampleTestClass.getMethod('sampleMethod')
-
-		// Create a simple table set
-		def table = Table.of(
-				new TableName('users'),
-				[
-					new ColumnName('id'),
-					new ColumnName('name')
-				],
-				[
-					Row.of([(new ColumnName('id')): new CellValue('1'), (new ColumnName('name')): new CellValue('John')])
-				]
-				)
-		def tableSet = TableSet.of(table)
-
-		def loader = new DataSetLoader() {
-					@Override
-					List loadPreparationDataSets(TestContext ctx) {
-						return [tableSet]
-					}
-
-					@Override
-					List loadExpectationDataSets(TestContext ctx) {
-						return []
-					}
-
-					@Override
-					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
-						return []
-					}
-				}
-		def configuration = Configuration.builder()
-				.conventions(ConventionSettings.standard())
-				.operations(OperationDefaults.standard())
-				.loader(loader)
-				.build()
-		new TestContext(testClass, testMethod, configuration, registry)
 	}
 
 	/**

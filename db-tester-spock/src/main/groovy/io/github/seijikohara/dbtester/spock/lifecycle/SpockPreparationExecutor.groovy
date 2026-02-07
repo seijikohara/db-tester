@@ -1,78 +1,53 @@
 package io.github.seijikohara.dbtester.spock.lifecycle
 
-import groovy.util.logging.Slf4j
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.TableSet
-import io.github.seijikohara.dbtester.api.operation.Operation
-import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
-import io.github.seijikohara.dbtester.api.spi.OperationProvider
-import java.time.Duration
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport
 
 /**
  * Executes the preparation phase of database testing for Spock specifications.
  *
- * <p>This class loads datasets according to the {@link DataSet} annotation and applies them
- * to the database using the configured operation.
+ * <p>This class delegates to {@link PreparationSupport} for the actual preparation logic. It
+ * provides a Spock-specific facade for backward compatibility and framework-specific customization.
+ *
+ * @see PreparationSupport
  */
-@Slf4j
 class SpockPreparationExecutor {
 
-	/** Provider for database operations. */
-	private final OperationProvider operationProvider = ServiceLoader.load(OperationProvider).findFirst().orElseThrow()
+	/** The preparation support. */
+	private final PreparationSupport support
+
+	/** Creates a new preparation executor. */
+	SpockPreparationExecutor() {
+		this.support = ServiceLoader.load(PreparationSupport).findFirst()
+				.orElseThrow {
+					-> new IllegalStateException(
+					'No PreparationSupport implementation found. Ensure db-tester-core is on the classpath.')
+				}
+	}
+
+	/**
+	 * Creates a new preparation executor with the specified support.
+	 *
+	 * @param support the preparation support
+	 */
+	SpockPreparationExecutor(PreparationSupport support) {
+		this.support = Objects.requireNonNull(support, 'support must not be null')
+	}
 
 	/**
 	 * Executes the preparation phase.
 	 *
-	 * @param context the test context
-	 * @param dataSet the data set annotation
+	 * <p>Loads the datasets specified in the {@link DataSet} annotation (or resolved via conventions)
+	 * and applies them to the database using the configured operation.
+	 *
+	 * @param context the test context containing configuration and registry
+	 * @param dataSet the DataSet annotation specifying the operation to perform
 	 */
 	void execute(TestContext context, DataSet dataSet) {
 		Objects.requireNonNull(context, 'context must not be null')
 		Objects.requireNonNull(dataSet, 'dataSet must not be null')
 
-		log.debug('Executing preparation for test: {}.{}',
-				context.testClass().simpleName,
-				context.testMethod().name)
-
-		List<TableSet> tableSets = context.configuration().loader().loadPreparationDataSets(context)
-
-		if (tableSets.empty) {
-			log.debug('No preparation datasets found')
-			return
-		}
-
-		def operation = dataSet.operation()
-		def tableOrderingStrategy = dataSet.tableOrdering()
-
-		tableSets.each { tableSet ->
-			executeTableSet(context, tableSet, operation, tableOrderingStrategy)
-		}
-	}
-
-	/**
-	 * Executes a single table set against the database.
-	 *
-	 * <p>This method resolves the DataSource from either the table set itself or falls back
-	 * to the default registry. It then delegates to the operation executor to apply the table set
-	 * using the specified operation.
-	 *
-	 * @param context the test context providing access to the data source registry
-	 * @param tableSet the table set to execute containing tables and optional data source
-	 * @param operation the database operation to perform
-	 * @param tableOrderingStrategy the strategy for determining table processing order
-	 */
-	private void executeTableSet(TestContext context, TableSet tableSet, Operation operation, TableOrderingStrategy tableOrderingStrategy) {
-		def dataSource = tableSet.dataSource
-				.orElseGet { -> context.registry().get('') }
-		def conventions = context.configuration().conventions()
-		TransactionMode transactionMode = conventions.transactionMode()
-		Duration queryTimeout = conventions.queryTimeout()
-
-		log.debug('Applying {} operation with dataset using {} table ordering (transactionMode={}, timeout={})',
-				operation, tableOrderingStrategy, transactionMode, queryTimeout)
-
-		operationProvider.execute(operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout)
+		support.execute(context, dataSet)
 	}
 }

@@ -27,7 +27,9 @@ module io.github.seijikohara.dbtester.api {
   // SPI for implementations
   uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
   uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
-  uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
   uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
+  uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
+  uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
+  uses io.github.seijikohara.dbtester.api.spi.PreparationSupport;
   uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
 }

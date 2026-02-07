@@ -7,17 +7,10 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.context.TestContext
-import io.github.seijikohara.dbtester.api.dataset.Row
-import io.github.seijikohara.dbtester.api.dataset.Table
-import io.github.seijikohara.dbtester.api.dataset.TableSet
-import io.github.seijikohara.dbtester.api.domain.CellValue
-import io.github.seijikohara.dbtester.api.domain.ColumnName
-import io.github.seijikohara.dbtester.api.domain.TableName
 import io.github.seijikohara.dbtester.api.exception.ValidationException
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
-import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet
-import io.github.seijikohara.dbtester.api.spi.ExpectationProvider
-import javax.sql.DataSource
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy
+import io.github.seijikohara.dbtester.api.spi.ExpectationSupport
 import spock.lang.Specification
 
 /**
@@ -28,16 +21,20 @@ import spock.lang.Specification
  */
 class SpockExpectationVerifierSpec extends Specification {
 
+	/** Mock expectation support for tests. */
+	ExpectationSupport mockSupport
+
 	/** The verifier under test. */
 	SpockExpectationVerifier verifier
 
 	def setup() {
-		verifier = new SpockExpectationVerifier()
+		mockSupport = Mock(ExpectationSupport)
+		verifier = new SpockExpectationVerifier(mockSupport)
 	}
 
 	def 'should create instance'() {
 		when: 'creating a new instance'
-		def instance = new SpockExpectationVerifier()
+		def instance = new SpockExpectationVerifier(mockSupport)
 
 		then: 'instance is created successfully'
 		instance != null
@@ -83,11 +80,90 @@ class SpockExpectationVerifierSpec extends Specification {
 
 	def 'should create multiple independent verifiers'() {
 		when: 'creating multiple verifiers'
-		def verifier1 = new SpockExpectationVerifier()
-		def verifier2 = new SpockExpectationVerifier()
+		def verifier1 = new SpockExpectationVerifier(mockSupport)
+		def verifier2 = new SpockExpectationVerifier(mockSupport)
 
 		then: 'verifiers are independent'
 		!verifier1.is(verifier2)
+	}
+
+	def 'should delegate to expectation support'() {
+		given: 'a context and expected data set'
+		def context = createTestContextWithEmptyDatasets()
+		def expectedDataSet = createMockExpectedDataSet()
+
+		when: 'verifying expectation'
+		verifier.verify(context, expectedDataSet)
+
+		then: 'support is called'
+		1 * mockSupport.verify(context, expectedDataSet)
+	}
+
+	def 'should propagate validation exception from support'() {
+		given: 'a context and expected data set'
+		def context = createTestContextWithEmptyDatasets()
+		def expectedDataSet = createMockExpectedDataSet()
+
+		mockSupport.verify(_, _) >> {
+			throw new ValidationException('Verification failed')
+		}
+
+		when: 'verifying expectation'
+		verifier.verify(context, expectedDataSet)
+
+		then: 'ValidationException is thrown'
+		thrown(ValidationException)
+	}
+
+	def 'should handle ordered row verification'() {
+		given: 'a context and expected data set with ordered rows'
+		def context = createTestContextWithEmptyDatasets()
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.retryCount() >> 0
+		expectedDataSet.retryDelayMillis() >> -1
+		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
+		expectedDataSet.sources() >> ([] as String[])
+		expectedDataSet.tableOrdering() >> TableOrderingStrategy.AUTO
+
+		when: 'verifying expectation'
+		verifier.verify(context, expectedDataSet)
+
+		then: 'support is called with the expected data set'
+		1 * mockSupport.verify(context, expectedDataSet)
+	}
+
+	def 'should handle unordered row verification'() {
+		given: 'a context and expected data set with unordered rows'
+		def context = createTestContextWithEmptyDatasets()
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.retryCount() >> 0
+		expectedDataSet.retryDelayMillis() >> -1
+		expectedDataSet.rowOrdering() >> RowOrdering.UNORDERED
+		expectedDataSet.sources() >> ([] as String[])
+		expectedDataSet.tableOrdering() >> TableOrderingStrategy.AUTO
+
+		when: 'verifying expectation'
+		verifier.verify(context, expectedDataSet)
+
+		then: 'support is called with the expected data set'
+		1 * mockSupport.verify(context, expectedDataSet)
+	}
+
+	def 'should handle retry count settings'() {
+		given: 'a context and expected data set with retry settings'
+		def context = createTestContextWithEmptyDatasets()
+		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.retryCount() >> 3
+		expectedDataSet.retryDelayMillis() >> 100
+		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
+		expectedDataSet.sources() >> ([] as String[])
+		expectedDataSet.tableOrdering() >> TableOrderingStrategy.AUTO
+
+		when: 'verifying expectation'
+		verifier.verify(context, expectedDataSet)
+
+		then: 'support is called with the expected data set (retry logic is handled by support)'
+		1 * mockSupport.verify(context, expectedDataSet)
 	}
 
 	/**
@@ -139,255 +215,12 @@ class SpockExpectationVerifierSpec extends Specification {
 	 */
 	private ExpectedDataSet createMockExpectedDataSet() {
 		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.paths() >> ([] as String[])
-		expectedDataSet.columns() >> ([] as String[])
-		return expectedDataSet
-	}
-
-	def 'should verify expectation when datasets are found'() {
-		given: 'a mock expectation provider'
-		def mockExpectationProvider = Mock(ExpectationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockExpectationVerifier.getDeclaredField('expectationProvider')
-		providerField.accessible = true
-		providerField.set(verifier, mockExpectationProvider)
-
-		and: 'a context with expected datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithExpectedDatasets(registry)
-
-		and: 'a mock ExpectedDataSet annotation'
-		def expectedDataSet = createMockExpectedDataSet()
-
-		when: 'verifying expectation'
-		verifier.verify(context, expectedDataSet)
-
-		then: 'verification is executed'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, _, _)
-	}
-
-	def 'should use annotation retry count when specified'() {
-		given: 'a mock expectation provider'
-		def mockExpectationProvider = Mock(ExpectationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockExpectationVerifier.getDeclaredField('expectationProvider')
-		providerField.accessible = true
-		providerField.set(verifier, mockExpectationProvider)
-
-		and: 'a context with expected datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithExpectedDatasets(registry)
-
-		and: 'a mock ExpectedDataSet annotation with retry settings'
-		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.retryCount() >> 2
-		expectedDataSet.retryDelayMillis() >> 10
-		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
-
-		when: 'verifying expectation'
-		verifier.verify(context, expectedDataSet)
-
-		then: 'verification is executed'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, _, _, RowOrdering.ORDERED, _)
-	}
-
-	def 'should retry and succeed on validation exception'() {
-		given: 'a mock expectation provider that fails first then succeeds'
-		def mockExpectationProvider = Mock(ExpectationProvider)
-		def mockDataSource = Mock(DataSource)
-		def callCount = 0
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockExpectationVerifier.getDeclaredField('expectationProvider')
-		providerField.accessible = true
-		providerField.set(verifier, mockExpectationProvider)
-
-		and: 'a context with expected datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithExpectedDatasets(registry)
-
-		and: 'a mock ExpectedDataSet annotation with retry settings'
-		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.retryCount() >> 2
-		expectedDataSet.retryDelayMillis() >> 10
-		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
-
-		mockExpectationProvider.verifyExpectation(_, _, _, _, _, _) >> {
-			callCount++
-			if (callCount == 1) {
-				throw new ValidationException('First attempt failed')
-			}
-		}
-
-		when: 'verifying expectation'
-		verifier.verify(context, expectedDataSet)
-
-		then: 'verification succeeds after retry'
-		noExceptionThrown()
-		callCount == 2
-	}
-
-	def 'should throw exception after all retries exhausted'() {
-		given: 'a mock expectation provider that always fails'
-		def mockExpectationProvider = Mock(ExpectationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockExpectationVerifier.getDeclaredField('expectationProvider')
-		providerField.accessible = true
-		providerField.set(verifier, mockExpectationProvider)
-
-		and: 'a context with expected datasets'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithExpectedDatasets(registry)
-
-		and: 'a mock ExpectedDataSet annotation with retry settings'
-		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.retryCount() >> 1
-		expectedDataSet.retryDelayMillis() >> 10
-		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
-
-		mockExpectationProvider.verifyExpectation(_, _, _, _, _, _) >> {
-			throw new ValidationException('Always fails')
-		}
-
-		when: 'verifying expectation'
-		verifier.verify(context, expectedDataSet)
-
-		then: 'ValidationException is thrown'
-		thrown(ValidationException)
-	}
-
-	def 'should handle exclusions and column strategies'() {
-		given: 'a mock expectation provider'
-		def mockExpectationProvider = Mock(ExpectationProvider)
-		def mockDataSource = Mock(DataSource)
-
-		and: 'inject mock provider using reflection'
-		def providerField = SpockExpectationVerifier.getDeclaredField('expectationProvider')
-		providerField.accessible = true
-		providerField.set(verifier, mockExpectationProvider)
-
-		and: 'a context with expected datasets having exclusions'
-		def registry = new DataSourceRegistry()
-		registry.registerDefault(mockDataSource)
-		def context = createTestContextWithExclusions(registry)
-
-		and: 'a mock ExpectedDataSet annotation'
-		def expectedDataSet = Mock(ExpectedDataSet)
+		expectedDataSet.sources() >> ([] as String[])
+		expectedDataSet.tableOrdering() >> TableOrderingStrategy.AUTO
 		expectedDataSet.retryCount() >> 0
 		expectedDataSet.retryDelayMillis() >> -1
 		expectedDataSet.rowOrdering() >> RowOrdering.ORDERED
-
-		when: 'verifying expectation'
-		verifier.verify(context, expectedDataSet)
-
-		then: 'verification is executed with exclusions'
-		1 * mockExpectationProvider.verifyExpectation(_, mockDataSource, { it.contains('CREATED_AT') }, _, _, _)
-	}
-
-	/**
-	 * Creates a TestContext with expected datasets.
-	 *
-	 * @param registry the registry to use
-	 * @return the test context
-	 */
-	private TestContext createTestContextWithExpectedDatasets(DataSourceRegistry registry) {
-		def testClass = SampleTestClass
-		def testMethod = SampleTestClass.getMethod('sampleMethod')
-
-		// Create a simple table set
-		def table = Table.of(
-				new TableName('users'),
-				[
-					new ColumnName('id'),
-					new ColumnName('name')
-				],
-				[
-					Row.of([(new ColumnName('id')): new CellValue('1'), (new ColumnName('name')): new CellValue('John')])
-				]
-				)
-		def tableSet = TableSet.of(table)
-		def expectedTableSet = new ExpectedTableSet(tableSet, [] as Set, [:])
-
-		def loader = new DataSetLoader() {
-					@Override
-					List loadPreparationDataSets(TestContext ctx) {
-						return []
-					}
-
-					@Override
-					List loadExpectationDataSets(TestContext ctx) {
-						return [tableSet]
-					}
-
-					@Override
-					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
-						return [expectedTableSet]
-					}
-				}
-		def configuration = Configuration.builder()
-				.conventions(ConventionSettings.standard())
-				.operations(OperationDefaults.standard())
-				.loader(loader)
-				.build()
-		new TestContext(testClass, testMethod, configuration, registry)
-	}
-
-	/**
-	 * Creates a TestContext with exclusions.
-	 *
-	 * @param registry the registry to use
-	 * @return the test context
-	 */
-	private TestContext createTestContextWithExclusions(DataSourceRegistry registry) {
-		def testClass = SampleTestClass
-		def testMethod = SampleTestClass.getMethod('sampleMethod')
-
-		def table = Table.of(
-				new TableName('users'),
-				[
-					new ColumnName('id'),
-					new ColumnName('name'),
-					new ColumnName('created_at')
-				],
-				[
-					Row.of([(new ColumnName('id')): new CellValue('1'), (new ColumnName('name')): new CellValue('John')])
-				]
-				)
-		def tableSet = TableSet.of(table)
-		def expectedTableSet = new ExpectedTableSet(tableSet, ['CREATED_AT'] as Set, [:])
-
-		def loader = new DataSetLoader() {
-					@Override
-					List loadPreparationDataSets(TestContext ctx) {
-						return []
-					}
-
-					@Override
-					List loadExpectationDataSets(TestContext ctx) {
-						return [tableSet]
-					}
-
-					@Override
-					List loadExpectationDataSetsWithExclusions(TestContext ctx) {
-						return [expectedTableSet]
-					}
-				}
-		def configuration = Configuration.builder()
-				.conventions(ConventionSettings.standard())
-				.operations(OperationDefaults.standard())
-				.loader(loader)
-				.build()
-		new TestContext(testClass, testMethod, configuration, registry)
+		return expectedDataSet
 	}
 
 	/**

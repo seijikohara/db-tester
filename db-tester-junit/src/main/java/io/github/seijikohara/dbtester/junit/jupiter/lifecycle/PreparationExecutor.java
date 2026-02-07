@@ -2,33 +2,41 @@ package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.context.TestContext;
-import io.github.seijikohara.dbtester.api.dataset.TableSet;
-import io.github.seijikohara.dbtester.api.operation.Operation;
-import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
-import io.github.seijikohara.dbtester.api.spi.OperationProvider;
-import java.time.Duration;
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport;
 import java.util.ServiceLoader;
-import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Executes the preparation phase of database testing.
  *
- * <p>This class loads datasets according to the {@link DataSet} annotation and applies them to the
- * database using the configured operation.
+ * <p>This class delegates to {@link PreparationSupport} for the actual preparation logic. It
+ * provides a JUnit-specific facade for backward compatibility and framework-specific customization.
+ *
+ * @see PreparationSupport
  */
 public final class PreparationExecutor {
 
-  /** Logger for tracking preparation execution. */
-  private static final Logger logger = LoggerFactory.getLogger(PreparationExecutor.class);
-
-  /** The operation provider for database operations. */
-  private final OperationProvider operationProvider;
+  /** The preparation support for database operations. */
+  private final PreparationSupport support;
 
   /** Creates a new preparation executor. */
   public PreparationExecutor() {
-    this.operationProvider = ServiceLoader.load(OperationProvider.class).findFirst().orElseThrow();
+    this.support =
+        ServiceLoader.load(PreparationSupport.class)
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        "No PreparationSupport implementation found. "
+                            + "Ensure db-tester-core is on the classpath."));
+  }
+
+  /**
+   * Creates a new preparation executor with the specified support.
+   *
+   * @param support the preparation support
+   */
+  PreparationExecutor(final PreparationSupport support) {
+    this.support = support;
   }
 
   /**
@@ -41,54 +49,6 @@ public final class PreparationExecutor {
    * @param dataSet the DataSet annotation specifying the operation to perform
    */
   public void execute(final TestContext context, final DataSet dataSet) {
-    logger.debug(
-        "Executing preparation for test: {}.{}",
-        context.testClass().getSimpleName(),
-        context.testMethod().getName());
-
-    final var tableSets = context.configuration().loader().loadPreparationDataSets(context);
-
-    if (tableSets.isEmpty()) {
-      logger.debug("No preparation datasets found");
-      return;
-    }
-
-    final var operation = dataSet.operation();
-    final var tableOrderingStrategy = dataSet.tableOrdering();
-    tableSets.forEach(
-        tableSet -> executeTableSet(context, tableSet, operation, tableOrderingStrategy));
-  }
-
-  /**
-   * Executes a single TableSet against the database.
-   *
-   * <p>This method resolves the DataSource from either the TableSet itself or falls back to the
-   * default registry. It then delegates to the operation executor to apply the TableSet using the
-   * specified operation.
-   *
-   * @param context the test context providing access to the data source registry
-   * @param tableSet the TableSet to execute containing tables and optional data source
-   * @param operation the database operation to perform (CLEAN_INSERT, INSERT, etc.)
-   * @param tableOrderingStrategy the strategy for determining table processing order
-   */
-  private void executeTableSet(
-      final TestContext context,
-      final TableSet tableSet,
-      final Operation operation,
-      final TableOrderingStrategy tableOrderingStrategy) {
-    final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
-    final var conventions = context.configuration().conventions();
-    final var transactionMode = conventions.transactionMode();
-    final @Nullable Duration queryTimeout = conventions.queryTimeout();
-
-    logger.debug(
-        "Applying {} operation with TableSet using {} table ordering (transactionMode={}, timeout={})",
-        operation,
-        tableOrderingStrategy,
-        transactionMode,
-        queryTimeout);
-
-    operationProvider.execute(
-        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout);
+    support.execute(context, dataSet);
   }
 }
