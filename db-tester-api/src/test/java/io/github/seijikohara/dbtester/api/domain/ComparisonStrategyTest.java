@@ -710,6 +710,23 @@ class ComparisonStrategyTest {
           "should not match arrays with different order");
     }
 
+    /** Verifies that JSON_EQUIVALENT distinguishes string values from literals. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should distinguish string values from boolean and number literals")
+    void shouldDistinguishStringFromLiteral_whenValueTypeDiffers() {
+      // When & Then
+      assertFalse(
+          ComparisonStrategy.JSON_EQUIVALENT.matches("{\"value\":\"true\"}", "{\"value\":true}"),
+          "should not match string \"true\" with boolean true");
+      assertFalse(
+          ComparisonStrategy.JSON_EQUIVALENT.matches("{\"value\":\"123\"}", "{\"value\":123}"),
+          "should not match string \"123\" with number 123");
+      assertFalse(
+          ComparisonStrategy.JSON_EQUIVALENT.matches("{\"value\":\"null\"}", "{\"value\":null}"),
+          "should not match string \"null\" with null literal");
+    }
+
     /** Verifies that JSON_EQUIVALENT handles null values. */
     @Test
     @Tag("edge-case")
@@ -898,6 +915,18 @@ class ComparisonStrategyTest {
           IllegalArgumentException.class,
           () -> ComparisonStrategy.range(200.0, 100.0),
           "should throw when min > max");
+    }
+
+    /** Verifies that RANGE from options string throws when min is greater than max. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw when options string has min greater than max")
+    void shouldThrowException_whenOptionsStringHasMinGreaterThanMax() {
+      // When & Then
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> ComparisonStrategy.range("min=200,max=100"),
+          "should throw when options string has min > max");
     }
 
     /** Verifies that RANGE has correct type. */

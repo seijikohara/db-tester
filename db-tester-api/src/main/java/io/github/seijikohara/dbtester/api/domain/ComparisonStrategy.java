@@ -165,13 +165,28 @@ public final class ComparisonStrategy {
    * @throws IllegalArgumentException if the options string format is invalid
    */
   public static ComparisonStrategy range(final String rangeOptions) {
-    final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(rangeOptions.trim());
+    final var trimmed = rangeOptions.trim();
+    final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(trimmed);
     if (!matcher.matches()) {
       throw new IllegalArgumentException(
           String.format(
               "Invalid RANGE options format: '%s'. Expected format: 'min=N,max=M'", rangeOptions));
     }
-    return new ComparisonStrategy(Type.RANGE, null, rangeOptions.trim());
+    try {
+      final var min = new BigDecimal(matcher.group(1));
+      final var max = new BigDecimal(matcher.group(2));
+      if (min.compareTo(max) > 0) {
+        throw new IllegalArgumentException(
+            String.format("min (%s) must not be greater than max (%s)", min, max));
+      }
+    } catch (final NumberFormatException e) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Invalid numeric values in RANGE options: '%s'. Expected format: 'min=N,max=M'",
+              rangeOptions),
+          e);
+    }
+    return new ComparisonStrategy(Type.RANGE, null, trimmed);
   }
 
   /**

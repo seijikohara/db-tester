@@ -15,14 +15,31 @@ import java.util.TreeMap;
  * <p>This implementation uses a minimal recursive descent parser without external JSON library
  * dependencies. It handles standard JSON types: objects, arrays, strings, numbers, booleans, and
  * null.
+ *
+ * <p>Limitations:
+ *
+ * <ul>
+ *   <li>Maximum nesting depth of {@value #MAX_NESTING_DEPTH} levels
+ *   <li>Maximum input length of {@value #MAX_INPUT_LENGTH} characters
+ *   <li>Unicode surrogate pairs in JSON unicode escapes are handled correctly
+ * </ul>
  */
 final class JsonNormalizer {
+
+  /** Maximum allowed nesting depth for JSON structures. */
+  static final int MAX_NESTING_DEPTH = 128;
+
+  /** Maximum allowed input length in characters (1 MB of UTF-16). */
+  static final int MAX_INPUT_LENGTH = 1_048_576;
 
   /** The JSON input string. */
   private final String input;
 
   /** Current position in the input string. */
   private int pos;
+
+  /** Current nesting depth for recursion protection. */
+  private int depth;
 
   /**
    * Creates a new JSON normalizer for the specified input.
@@ -32,17 +49,25 @@ final class JsonNormalizer {
   private JsonNormalizer(final String input) {
     this.input = input;
     this.pos = 0;
+    this.depth = 0;
   }
 
   /**
    * Normalizes a JSON string by sorting object keys and removing insignificant whitespace.
    *
+   * <p>Returns the original string unchanged if the input exceeds {@value #MAX_INPUT_LENGTH}
+   * characters or if parsing fails.
+   *
    * @param json the JSON string to normalize
    * @return the normalized JSON string, or the original string if parsing fails
    */
   static String normalize(final String json) {
+    final var trimmed = json.trim();
+    if (trimmed.length() > MAX_INPUT_LENGTH) {
+      return json;
+    }
     try {
-      final var normalizer = new JsonNormalizer(json.trim());
+      final var normalizer = new JsonNormalizer(trimmed);
       final var value = normalizer.parseValue();
       normalizer.skipWhitespace();
       if (normalizer.pos != normalizer.input.length()) {
@@ -69,7 +94,11 @@ final class JsonNormalizer {
   /**
    * Parses a JSON value.
    *
-   * @return the parsed value (Map, List, String, Number, Boolean, or null represented as string)
+   * <p>JSON string values are wrapped in {@link JsonString} to distinguish them from literal values
+   * (numbers, booleans, null) during serialization.
+   *
+   * @return the parsed value (Map, List, JsonString, or String for literals)
+   * @throws JsonParseException if nesting depth exceeds {@value #MAX_NESTING_DEPTH}
    */
   private Object parseValue() {
     skipWhitespace();
@@ -78,9 +107,15 @@ final class JsonNormalizer {
     }
     final var ch = input.charAt(pos);
     return switch (ch) {
-      case '{' -> parseObject();
-      case '[' -> parseArray();
-      case '"' -> parseString();
+      case '{' -> {
+        checkDepth();
+        yield parseObject();
+      }
+      case '[' -> {
+        checkDepth();
+        yield parseArray();
+      }
+      case '"' -> new JsonString(parseString());
       case 't', 'f' -> parseBoolean();
       case 'n' -> parseNull();
       default -> {
@@ -94,6 +129,19 @@ final class JsonNormalizer {
   }
 
   /**
+   * Checks and increments the nesting depth.
+   *
+   * @throws JsonParseException if the maximum nesting depth is exceeded
+   */
+  private void checkDepth() {
+    depth++;
+    if (depth > MAX_NESTING_DEPTH) {
+      throw new JsonParseException(
+          String.format("Maximum nesting depth of %d exceeded", MAX_NESTING_DEPTH));
+    }
+  }
+
+  /**
    * Parses a JSON object.
    *
    * @return a TreeMap with sorted keys
@@ -104,6 +152,7 @@ final class JsonNormalizer {
     skipWhitespace();
     if (pos < input.length() && input.charAt(pos) == '}') {
       pos++;
+      depth--;
       return map;
     }
     while (pos < input.length()) {
@@ -121,6 +170,7 @@ final class JsonNormalizer {
       }
     }
     expect('}');
+    depth--;
     return map;
   }
 
@@ -135,6 +185,7 @@ final class JsonNormalizer {
     skipWhitespace();
     if (pos < input.length() && input.charAt(pos) == ']') {
       pos++;
+      depth--;
       return list;
     }
     while (pos < input.length()) {
@@ -147,11 +198,14 @@ final class JsonNormalizer {
       }
     }
     expect(']');
+    depth--;
     return list;
   }
 
   /**
    * Parses a JSON string.
+   *
+   * <p>Handles all JSON escape sequences including Unicode escapes with surrogate pairs.
    *
    * @return the parsed string value
    */
@@ -178,12 +232,27 @@ final class JsonNormalizer {
           case 'r' -> sb.append('\r');
           case 't' -> sb.append('\t');
           case 'u' -> {
-            if (pos + 4 >= input.length()) {
-              throw new JsonParseException("Invalid unicode escape");
+            final var codeUnit = parseUnicodeEscape();
+            if (Character.isHighSurrogate(codeUnit)) {
+              // Expect low surrogate pair
+              if (pos + 1 < input.length()
+                  && input.charAt(pos + 1) == '\\'
+                  && pos + 2 < input.length()
+                  && input.charAt(pos + 2) == 'u') {
+                pos += 2; // skip backslash-u prefix
+                final var lowSurrogate = parseUnicodeEscape();
+                if (Character.isLowSurrogate(lowSurrogate)) {
+                  sb.appendCodePoint(Character.toCodePoint(codeUnit, lowSurrogate));
+                } else {
+                  sb.append(codeUnit);
+                  sb.append(lowSurrogate);
+                }
+              } else {
+                sb.append(codeUnit);
+              }
+            } else {
+              sb.append(codeUnit);
             }
-            final var hex = input.substring(pos + 1, pos + 5);
-            sb.append((char) Integer.parseInt(hex, 16));
-            pos += 4;
           }
           default ->
               throw new JsonParseException(String.format("Invalid escape character: %c", escaped));
@@ -194,6 +263,28 @@ final class JsonNormalizer {
       pos++;
     }
     throw new JsonParseException("Unterminated string");
+  }
+
+  /**
+   * Parses a four-digit Unicode escape sequence.
+   *
+   * <p>Assumes the parser is positioned after the 'u' character. Advances the position by 4
+   * characters.
+   *
+   * @return the parsed Unicode code unit
+   * @throws JsonParseException if the escape sequence is invalid
+   */
+  private char parseUnicodeEscape() {
+    if (pos + 4 >= input.length()) {
+      throw new JsonParseException("Invalid unicode escape");
+    }
+    final var hex = input.substring(pos + 1, pos + 5);
+    pos += 4;
+    try {
+      return (char) Integer.parseInt(hex, 16);
+    } catch (final NumberFormatException e) {
+      throw new JsonParseException(String.format("Invalid unicode escape: \\u%s", hex));
+    }
   }
 
   /**
@@ -279,6 +370,9 @@ final class JsonNormalizer {
   /**
    * Serializes a parsed JSON value to a normalized string with sorted object keys.
    *
+   * <p>{@link JsonString} instances are serialized as quoted strings. Plain {@link String} values
+   * represent JSON literals (numbers, booleans, null) and are serialized without quotes.
+   *
    * @param value the parsed value
    * @return the serialized JSON string
    */
@@ -287,23 +381,8 @@ final class JsonNormalizer {
     return switch (value) {
       case Map<?, ?> map -> serializeObject((Map<String, Object>) map);
       case List<?> list -> serializeArray(list);
-      case String str -> {
-        // Check if this is a literal (number, boolean, null) or a string value
-        if ("null".equals(str) || "true".equals(str) || "false".equals(str)) {
-          yield str;
-        }
-        // Check if it looks like a number (parsed from parseNumber)
-        if (!str.isEmpty()
-            && (str.charAt(0) == '-' || (str.charAt(0) >= '0' && str.charAt(0) <= '9'))) {
-          try {
-            Double.parseDouble(str);
-            yield str;
-          } catch (final NumberFormatException e) {
-            // Not a number, serialize as string
-          }
-        }
-        yield escapeString(str);
-      }
+      case JsonString jsonStr -> escapeString(jsonStr.value());
+      case String str -> str;
       default -> value.toString();
     };
   }
@@ -380,6 +459,16 @@ final class JsonNormalizer {
     sb.append("\"");
     return sb.toString();
   }
+
+  /**
+   * Wrapper for JSON string values to distinguish them from JSON literals during serialization.
+   *
+   * <p>JSON string values (parsed from quoted strings) are wrapped in this record, while literal
+   * values (numbers, booleans, null) remain as plain {@link String} instances.
+   *
+   * @param value the string value
+   */
+  private record JsonString(String value) {}
 
   /** Exception thrown when JSON parsing fails. */
   private static final class JsonParseException extends RuntimeException {
