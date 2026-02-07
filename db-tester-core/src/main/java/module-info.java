@@ -19,6 +19,7 @@ module io.github.seijikohara.dbtester.core {
 
   // Internal SPI uses
   uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
+  uses io.github.seijikohara.dbtester.api.spi.TypeHandler;
   uses io.github.seijikohara.dbtester.internal.format.spi.FormatProvider;
 
   // SPI implementations for API module
@@ -48,4 +49,10 @@ module io.github.seijikohara.dbtester.core {
       io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider,
       io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider,
       io.github.seijikohara.dbtester.internal.format.yaml.YamlFormatProvider;
+
+  // Type handlers for database-specific types
+  provides io.github.seijikohara.dbtester.api.spi.TypeHandler with
+      io.github.seijikohara.dbtester.internal.jdbc.type.UuidTypeHandler,
+      io.github.seijikohara.dbtester.internal.jdbc.type.JsonTypeHandler,
+      io.github.seijikohara.dbtester.internal.jdbc.type.ArrayTypeHandler;
 }
