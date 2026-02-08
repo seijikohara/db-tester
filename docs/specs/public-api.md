@@ -170,6 +170,16 @@ Configures the comparison strategy for a column during expectation verification.
 | `name` | `String` | (required) | Column name (case-insensitive) |
 | `strategy` | `Strategy` | `STRICT` | Comparison strategy to use |
 | `pattern` | `String` | `""` | Regex pattern for `REGEX` strategy |
+| `options` | `String` | `""` | Strategy-specific options (see below) |
+
+**Options Attribute**:
+
+The `options` attribute provides configuration for parameterized strategies:
+
+| Strategy | Options Format | Example |
+|----------|---------------|---------|
+| `RANGE` | `"min=N,max=M"` (N, M: numeric, both inclusive) | `"min=100,max=200"` |
+| `CONTAINS` | Substring to search for (optional; if empty, uses expected value) | `"expected-substring"` |
 
 ### Strategy
 
@@ -179,15 +189,33 @@ Enum defining comparison strategy types for use in `@ColumnStrategy` annotations
 
 **Values**:
 
-| Value | Description |
-|-------|-------------|
-| `STRICT` | Exact match using `equals()` (default) |
-| `IGNORE` | Skip comparison entirely |
-| `NUMERIC` | Type-aware numeric comparison |
-| `CASE_INSENSITIVE` | Case-insensitive string comparison |
-| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
-| `NOT_NULL` | Verifies value is not null |
-| `REGEX` | Pattern matching (requires `pattern` attribute) |
+| Value | Description | Required Attribute |
+|-------|-------------|-------------------|
+| `STRICT` | Exact match using `equals()` (default) | — |
+| `IGNORE` | Skip comparison entirely | — |
+| `NUMERIC` | Type-aware numeric comparison | — |
+| `CASE_INSENSITIVE` | Case-insensitive string comparison | — |
+| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision | — |
+| `NOT_NULL` | Verifies value is not null | — |
+| `REGEX` | Pattern matching using regular expressions | `pattern` |
+| `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601, slashed, dot) | — |
+| `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) | — |
+| `CONTAINS` | Substring containment check | `options` (optional) |
+| `RANGE` | Numeric range verification (inclusive bounds) | `options` |
+
+**Examples with New Strategies**:
+
+```java
+@ExpectedDataSet(sources = @DataSetSource(
+    columnStrategies = {
+        @ColumnStrategy(name = "BIRTH_DATE", strategy = Strategy.DATE_FLEXIBLE),
+        @ColumnStrategy(name = "METADATA", strategy = Strategy.JSON_EQUIVALENT),
+        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS),
+        @ColumnStrategy(name = "PRICE", strategy = Strategy.RANGE, options = "min=100,max=200")
+    }
+))
+void testWithExtendedStrategies() { }
+```
 
 ### RowOrdering
 
@@ -433,6 +461,11 @@ Represents programmatic column comparison strategy configuration.
 | `timestampFlexible(String)` | Creates mapping with TIMESTAMP_FLEXIBLE strategy |
 | `notNull(String)` | Creates mapping with NOT_NULL strategy |
 | `regex(String, String)` | Creates mapping with REGEX strategy and pattern |
+| `dateFlexible(String)` | Creates mapping with DATE_FLEXIBLE strategy |
+| `jsonEquivalent(String)` | Creates mapping with JSON_EQUIVALENT strategy |
+| `contains(String)` | Creates mapping with CONTAINS strategy (uses expected value) |
+| `contains(String, String)` | Creates mapping with CONTAINS strategy and specific substring |
+| `range(String, double, double)` | Creates mapping with RANGE strategy and min/max bounds |
 
 **Example**:
 
@@ -441,7 +474,11 @@ Represents programmatic column comparison strategy configuration.
 var strategies = List.of(
     ColumnStrategyMapping.ignore("CREATED_AT"),
     ColumnStrategyMapping.caseInsensitive("EMAIL"),
-    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}")
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"),
+    ColumnStrategyMapping.dateFlexible("BIRTH_DATE"),
+    ColumnStrategyMapping.jsonEquivalent("METADATA"),
+    ColumnStrategyMapping.contains("DESCRIPTION"),
+    ColumnStrategyMapping.range("PRICE", 100.0, 200.0)
 );
 
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strategies);
@@ -462,14 +499,19 @@ Defines value comparison behavior during assertion.
 | `NUMERIC` | Type-aware numeric comparison using BigDecimal |
 | `CASE_INSENSITIVE` | Case-insensitive string comparison |
 | `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
+| `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601 `yyyy-MM-dd`, slashed `yyyy/MM/dd`, dot `yyyy.MM.dd`) |
+| `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) |
 | `NOT_NULL` | Verifies value is not null |
-| `REGEX` | Pattern matching using regular expressions |
 
 **Factory Methods**:
 
 | Method | Description |
 |--------|-------------|
 | `regex(String)` | Creates regex pattern matcher with the specified pattern |
+| `contains()` | Creates substring containment check using expected value |
+| `contains(String)` | Creates substring containment check with specific substring |
+| `range(double, double)` | Creates numeric range check with min and max bounds |
+| `range(String)` | Creates numeric range check from options string (`"min=N,max=M"`) |
 
 **Comparison Behavior**:
 
@@ -480,8 +522,12 @@ Defines value comparison behavior during assertion.
 | `NUMERIC` | true | false | false | BigDecimal comparison |
 | `CASE_INSENSITIVE` | true | false | false | equalsIgnoreCase() |
 | `TIMESTAMP_FLEXIBLE` | true | false | false | UTC epoch comparison |
+| `DATE_FLEXIBLE` | true | false | false | LocalDate comparison |
+| `JSON_EQUIVALENT` | true | false | false | Normalized JSON comparison |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
+| `CONTAINS` | false | false | false | String.contains() |
+| `RANGE` | false | false | false | min <= value <= max |
 
 ## Assertion API
 
@@ -655,6 +701,45 @@ Indicates assertion or validation failure.
 - Column value mismatches
 
 **Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](error-handling#validation-errors) for format details.
+
+## Default Values Reference
+
+This table lists the default values for all configurable attributes.
+
+### Annotation Attribute Defaults
+
+| Annotation | Attribute | Default | Meaning |
+|------------|-----------|---------|---------|
+| `@DataSet` | `sources` | `{}` | Convention-based discovery |
+| `@DataSet` | `operation` | `CLEAN_INSERT` | Delete all rows then insert |
+| `@DataSet` | `tableOrdering` | `AUTO` | Automatic ordering |
+| `@ExpectedDataSet` | `sources` | `{}` | Convention-based discovery |
+| `@ExpectedDataSet` | `tableOrdering` | `AUTO` | Automatic ordering |
+| `@ExpectedDataSet` | `rowOrdering` | `ORDERED` | Positional row comparison |
+| `@ExpectedDataSet` | `retryCount` | `-1` | Use global setting |
+| `@ExpectedDataSet` | `retryDelayMillis` | `-1` | Use global setting |
+| `@DataSetSource` | `resourceLocation` | `""` | Convention-based discovery |
+| `@DataSetSource` | `dataSourceName` | `""` | Default DataSource |
+| `@DataSetSource` | `scenarioNames` | `{}` | Use test method name |
+| `@DataSetSource` | `excludeColumns` | `{}` | No exclusions |
+| `@DataSetSource` | `columnStrategies` | `{}` | Default STRICT for all columns |
+| `@ColumnStrategy` | `strategy` | `STRICT` | Exact match |
+| `@ColumnStrategy` | `pattern` | `""` | No pattern |
+| `@ColumnStrategy` | `options` | `""` | No options |
+
+**Magic Value: `-1`**
+
+Attributes with a default of `-1` delegate to the global configuration in `OperationDefaults`. This allows test-level overrides while maintaining consistent defaults across the test suite. A value of `0` or higher uses the specified value directly.
+
+## Column Comparison Precedence
+
+When verifying expected database state, column comparison follows this precedence order:
+
+1. **`excludeColumns`**: Columns listed in `excludeColumns` are skipped entirely. No comparison occurs for these columns.
+2. **`columnStrategies`**: Columns with a `@ColumnStrategy` annotation use the specified strategy.
+3. **`STRICT` (default)**: All remaining columns use exact match comparison.
+
+Annotation-level `columnStrategies` override global strategies configured in `ConventionSettings`. Global exclusions from `ConventionSettings` are combined with per-dataset `excludeColumns`.
 
 ## Related Specifications
 

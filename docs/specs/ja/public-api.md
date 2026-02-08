@@ -173,6 +173,16 @@ void testWithColumnStrategies() { }
 | `name` | `String` | (必須) | カラム名（大文字小文字を区別しない） |
 | `strategy` | `Strategy` | `STRICT` | 使用する比較戦略 |
 | `pattern` | `String` | `""` | `REGEX`戦略用の正規表現パターン |
+| `options` | `String` | `""` | 戦略固有のオプション（下記参照） |
+
+**options属性**:
+
+`options`属性はパラメータ化された戦略に設定を提供します：
+
+| 戦略 | オプション形式 | 例 |
+|------|---------------|-----|
+| `RANGE` | `"min=N,max=M"`（N, M: 数値、両端を含む） | `"min=100,max=200"` |
+| `CONTAINS` | 検索する部分文字列（任意。空の場合は期待値を使用） | `"expected-substring"` |
 
 
 ### Strategy
@@ -183,15 +193,33 @@ void testWithColumnStrategies() { }
 
 **値**:
 
-| 値 | 説明 |
-|-----|------|
-| `STRICT` | `equals()`を使用した完全一致（デフォルト） |
-| `IGNORE` | 比較を完全にスキップ |
-| `NUMERIC` | 型を考慮した数値比較 |
-| `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 |
-| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 |
-| `NOT_NULL` | 値がnullでないことを検証 |
-| `REGEX` | パターンマッチング（`pattern`属性が必要） |
+| 値 | 説明 | 必須属性 |
+|-----|------|---------|
+| `STRICT` | `equals()`を使用した完全一致（デフォルト） | — |
+| `IGNORE` | 比較を完全にスキップ | — |
+| `NUMERIC` | 型を考慮した数値比較 | — |
+| `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 | — |
+| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 | — |
+| `NOT_NULL` | 値がnullでないことを検証 | — |
+| `REGEX` | 正規表現を使用したパターンマッチング | `pattern` |
+| `DATE_FLEXIBLE` | 複数形式の日付比較（ISO-8601、スラッシュ区切り、ドット区切り） | — |
+| `JSON_EQUIVALENT` | JSON構造比較（キー順序と空白を無視） | — |
+| `CONTAINS` | 部分文字列包含チェック | `options`（任意） |
+| `RANGE` | 数値範囲検証（両端を含む） | `options` |
+
+**新しい戦略の使用例**:
+
+```java
+@ExpectedDataSet(sources = @DataSetSource(
+    columnStrategies = {
+        @ColumnStrategy(name = "BIRTH_DATE", strategy = Strategy.DATE_FLEXIBLE),
+        @ColumnStrategy(name = "METADATA", strategy = Strategy.JSON_EQUIVALENT),
+        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS),
+        @ColumnStrategy(name = "PRICE", strategy = Strategy.RANGE, options = "min=100,max=200")
+    }
+))
+void testWithExtendedStrategies() { }
+```
 
 
 ### RowOrdering
@@ -449,6 +477,11 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `timestampFlexible(String)` | TIMESTAMP_FLEXIBLE戦略でマッピングを作成 |
 | `notNull(String)` | NOT_NULL戦略でマッピングを作成 |
 | `regex(String, String)` | REGEX戦略でマッピングを作成（パターン付き） |
+| `dateFlexible(String)` | DATE_FLEXIBLE戦略でマッピングを作成 |
+| `jsonEquivalent(String)` | JSON_EQUIVALENT戦略でマッピングを作成 |
+| `contains(String)` | CONTAINS戦略でマッピングを作成（期待値を使用） |
+| `contains(String, String)` | CONTAINS戦略でマッピングを作成（部分文字列指定） |
+| `range(String, double, double)` | RANGE戦略でマッピングを作成（最小値・最大値指定） |
 
 **例**:
 
@@ -457,7 +490,11 @@ JDBCから取得したデータベースカラムメタデータを表します�
 var strategies = List.of(
     ColumnStrategyMapping.ignore("CREATED_AT"),
     ColumnStrategyMapping.caseInsensitive("EMAIL"),
-    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}")
+    ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"),
+    ColumnStrategyMapping.dateFlexible("BIRTH_DATE"),
+    ColumnStrategyMapping.jsonEquivalent("METADATA"),
+    ColumnStrategyMapping.contains("DESCRIPTION"),
+    ColumnStrategyMapping.range("PRICE", 100.0, 200.0)
 );
 
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strategies);
@@ -479,14 +516,19 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `NUMERIC` | BigDecimalを使用した型を考慮した数値比較 |
 | `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 |
 | `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 |
+| `DATE_FLEXIBLE` | 複数形式の日付比較（ISO-8601 `yyyy-MM-dd`、スラッシュ `yyyy/MM/dd`、ドット `yyyy.MM.dd`） |
+| `JSON_EQUIVALENT` | JSON構造比較（キー順序と空白を無視） |
 | `NOT_NULL` | 値がnullでないことを検証 |
-| `REGEX` | 正規表現を使用したパターンマッチング |
 
 **ファクトリメソッド**:
 
 | メソッド | 説明 |
 |----------|------|
 | `regex(String)` | 正規表現パターンマッチャーを作成 |
+| `contains()` | 部分文字列包含チェックを作成（期待値を使用） |
+| `contains(String)` | 部分文字列包含チェックを作成（部分文字列を指定） |
+| `range(double, double)` | 数値範囲チェックを作成（最小値・最大値を指定） |
+| `range(String)` | オプション文字列から数値範囲チェックを作成（`"min=N,max=M"`） |
 
 **比較動作**:
 
@@ -497,8 +539,12 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `NUMERIC` | true | false | false | BigDecimal比較 |
 | `CASE_INSENSITIVE` | true | false | false | equalsIgnoreCase() |
 | `TIMESTAMP_FLEXIBLE` | true | false | false | UTCエポック比較 |
+| `DATE_FLEXIBLE` | true | false | false | LocalDate比較 |
+| `JSON_EQUIVALENT` | true | false | false | 正規化JSON比較 |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
+| `CONTAINS` | false | false | false | String.contains() |
+| `RANGE` | false | false | false | min <= value <= max |
 
 
 ## アサーションAPI
@@ -680,6 +726,45 @@ classDiagram
 
 **出力形式**: 検証エラーは人間が読みやすい要約に続いてYAML詳細を出力します。形式の詳細は[エラーハンドリング - 検証エラー](error-handling#検証エラー)を参照してください。
 
+
+## デフォルト値リファレンス
+
+すべての設定可能な属性のデフォルト値を一覧にしています。
+
+### アノテーション属性のデフォルト値
+
+| アノテーション | 属性 | デフォルト | 意味 |
+|---------------|------|-----------|------|
+| `@DataSet` | `sources` | `{}` | 規約ベースの検出 |
+| `@DataSet` | `operation` | `CLEAN_INSERT` | 全行削除後に挿入 |
+| `@DataSet` | `tableOrdering` | `AUTO` | 自動順序決定 |
+| `@ExpectedDataSet` | `sources` | `{}` | 規約ベースの検出 |
+| `@ExpectedDataSet` | `tableOrdering` | `AUTO` | 自動順序決定 |
+| `@ExpectedDataSet` | `rowOrdering` | `ORDERED` | 位置ベースの行比較 |
+| `@ExpectedDataSet` | `retryCount` | `-1` | グローバル設定を使用 |
+| `@ExpectedDataSet` | `retryDelayMillis` | `-1` | グローバル設定を使用 |
+| `@DataSetSource` | `resourceLocation` | `""` | 規約ベースの検出 |
+| `@DataSetSource` | `dataSourceName` | `""` | デフォルトDataSource |
+| `@DataSetSource` | `scenarioNames` | `{}` | テストメソッド名を使用 |
+| `@DataSetSource` | `excludeColumns` | `{}` | 除外なし |
+| `@DataSetSource` | `columnStrategies` | `{}` | 全カラムにデフォルトSTRICT |
+| `@ColumnStrategy` | `strategy` | `STRICT` | 完全一致 |
+| `@ColumnStrategy` | `pattern` | `""` | パターンなし |
+| `@ColumnStrategy` | `options` | `""` | オプションなし |
+
+**マジックバリュー: `-1`**
+
+デフォルト値が`-1`の属性は、`OperationDefaults`のグローバル設定に委譲します。テストスイート全体で一貫したデフォルト値を維持しながら、テストレベルでのオーバーライドが可能です。`0`以上の値を指定すると、その値が直接使用されます。
+
+## カラム比較の優先順位
+
+期待データベース状態の検証時、カラム比較は以下の優先順位に従います：
+
+1. **`excludeColumns`**: `excludeColumns`に記載されたカラムは完全にスキップされます。比較は行われません。
+2. **`columnStrategies`**: `@ColumnStrategy`アノテーションが設定されたカラムは指定された戦略を使用します。
+3. **`STRICT`（デフォルト）**: 残りのすべてのカラムは完全一致比較を使用します。
+
+アノテーションレベルの`columnStrategies`は`ConventionSettings`で設定されたグローバル戦略をオーバーライドします。`ConventionSettings`のグローバル除外はデータセットごとの`excludeColumns`と結合されます。
 
 ## 関連仕様
 
