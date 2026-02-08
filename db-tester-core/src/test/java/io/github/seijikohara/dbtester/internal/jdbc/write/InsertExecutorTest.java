@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +29,7 @@ import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -569,6 +571,165 @@ class InsertExecutorTest {
       assertTrue(
           exception.getMessage() != null && !exception.getMessage().isEmpty(),
           "exception message should not be empty");
+    }
+  }
+
+  /** Tests for the execute() method with batch size control. */
+  @Nested
+  @DisplayName("execute(List, Connection, Duration, int) method")
+  class ExecuteWithBatchSizeMethod {
+
+    /** Tests for the execute method with batch size. */
+    ExecuteWithBatchSizeMethod() {}
+
+    /**
+     * Verifies that execute flushes batch every N rows when batchSize is positive.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should flush batch every N rows when batchSize is positive")
+    void shouldFlushBatchEveryNRows_whenBatchSizeIsPositive() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+
+      final var rows =
+          IntStream.range(0, 5)
+              .mapToObj(
+                  i -> {
+                    final var row = mock(Row.class);
+                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    return row;
+                  })
+              .toList();
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(rows);
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+
+      // When: 5 rows with batchSize=2 → flush at rows 2, 4, then remainder at 5
+      executor.execute(List.of(table), connection, null, 2);
+
+      // Then: 3 executeBatch calls (at index 1, 3, and final remainder)
+      verify(insertStatement, times(5)).addBatch();
+      verify(insertStatement, times(3)).executeBatch();
+    }
+
+    /**
+     * Verifies that execute uses single batch when batchSize is zero.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use single batch when batchSize is zero")
+    void shouldUseSingleBatch_whenBatchSizeIsZero() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+
+      final var rows =
+          IntStream.range(0, 3)
+              .mapToObj(
+                  i -> {
+                    final var row = mock(Row.class);
+                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    return row;
+                  })
+              .toList();
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(rows);
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+
+      // When: batchSize=0 → single batch
+      executor.execute(List.of(table), connection, null, 0);
+
+      // Then: 1 executeBatch call
+      verify(insertStatement, times(3)).addBatch();
+      verify(insertStatement, times(1)).executeBatch();
+    }
+
+    /**
+     * Verifies that execute flushes exactly once when rows are evenly divisible by batchSize.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should flush exactly when rows are evenly divisible by batchSize")
+    void shouldFlushExactly_whenRowsEvenlyDivisibleByBatchSize() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+
+      final var rows =
+          IntStream.range(0, 4)
+              .mapToObj(
+                  i -> {
+                    final var row = mock(Row.class);
+                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    return row;
+                  })
+              .toList();
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(rows);
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+
+      // When: 4 rows with batchSize=2 → flush at rows 2 and 4 (no remainder)
+      executor.execute(List.of(table), connection, null, 2);
+
+      // Then: 2 executeBatch calls (at index 1 and 3)
+      verify(insertStatement, times(4)).addBatch();
+      verify(insertStatement, times(2)).executeBatch();
     }
   }
 }
