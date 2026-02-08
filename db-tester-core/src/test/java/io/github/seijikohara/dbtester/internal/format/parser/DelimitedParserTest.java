@@ -10,8 +10,11 @@ import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -374,6 +377,390 @@ class DelimitedParserTest {
         throws IOException {
       final var content = String.join("\n", lines);
       Files.writeString(dir.resolve(fileName), content);
+    }
+  }
+
+  /** Tests for UTF-8 special character handling. */
+  @Nested
+  @DisplayName("special character handling")
+  class SpecialCharacterTests {
+
+    /** Tests for special character handling. */
+    SpecialCharacterTests() {}
+
+    /**
+     * Verifies that parse handles Japanese characters.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle Japanese characters when UTF-8 data provided")
+    void shouldHandleJapaneseCharacters_whenUtf8DataProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME,DESCRIPTION", "1,田中太郎,日本語テスト");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var nameValue = row.getValue(new ColumnName("NAME"));
+      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      assertNotNull(nameValue.value(), "NAME value should not be null");
+      assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
+      final var nameStr = nameValue.value().toString();
+      final var descStr = descValue.value().toString();
+      assertAll(
+          "row should contain Japanese characters",
+          () -> assertEquals("田中太郎", nameStr, "should preserve Japanese name"),
+          () -> assertEquals("日本語テスト", descStr, "should preserve Japanese description"));
+    }
+
+    /**
+     * Verifies that parse handles accented characters.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle accented characters when Latin extended data provided")
+    void shouldHandleAccentedCharacters_whenLatinExtendedDataProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME,CITY", "1,café,Zürich", "2,naïve,São Paulo");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var rows = table.getRows();
+      final var row1Name = rows.getFirst().getValue(new ColumnName("NAME"));
+      final var row1City = rows.getFirst().getValue(new ColumnName("CITY"));
+      final var row2City = rows.get(1).getValue(new ColumnName("CITY"));
+      assertNotNull(row1Name.value(), "first row NAME value should not be null");
+      assertNotNull(row1City.value(), "first row CITY value should not be null");
+      assertNotNull(row2City.value(), "second row CITY value should not be null");
+      final var nameStr = row1Name.value().toString();
+      final var cityStr1 = row1City.value().toString();
+      final var cityStr2 = row2City.value().toString();
+      assertAll(
+          "rows should contain accented characters",
+          () -> assertEquals("café", nameStr, "should preserve accented name"),
+          () -> assertEquals("Zürich", cityStr1, "should preserve accented city"),
+          () -> assertEquals("São Paulo", cityStr2, "should preserve Portuguese city name"));
+    }
+
+    /**
+     * Verifies that parse handles Chinese characters.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle Chinese characters when CJK data provided")
+    void shouldHandleChineseCharacters_whenCjkDataProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME", "1,张伟", "2,李四");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      assertEquals(2, table.getRowCount(), "should have 2 rows");
+      final var nameValue = table.getRows().getFirst().getValue(new ColumnName("NAME"));
+      assertNotNull(nameValue.value(), "NAME value should not be null");
+      assertEquals("张伟", nameValue.value().toString(), "should preserve Chinese name");
+    }
+
+    /**
+     * Verifies that parse handles emoji characters.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle emoji characters when emoji data provided")
+    void shouldHandleEmojiCharacters_whenEmojiDataProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      Files.writeString(
+          tempDir.resolve("data.csv"), "ID,STATUS\n1,✅ done\n2,❌ failed", StandardCharsets.UTF_8);
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var statusValue = table.getRows().getFirst().getValue(new ColumnName("STATUS"));
+      assertNotNull(statusValue.value(), "STATUS value should not be null");
+      assertEquals("✅ done", statusValue.value().toString(), "should preserve emoji characters");
+    }
+  }
+
+  /** Tests for quoted field handling. */
+  @Nested
+  @DisplayName("quoted field handling")
+  class QuotedFieldTests {
+
+    /** Tests for quoted field handling. */
+    QuotedFieldTests() {}
+
+    /**
+     * Verifies that parse handles escaped double quotes.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle escaped double quotes when doubled quotes exist")
+    void shouldHandleEscapedDoubleQuotes_whenDoubledQuotesExist(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,DESCRIPTION", "1,\"John \"\"IT Manager\"\" Smith\"");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
+      assertEquals(
+          "John \"IT Manager\" Smith",
+          descValue.value().toString(),
+          "should unescape doubled quotes");
+    }
+
+    /**
+     * Verifies that parse handles newlines within quoted fields.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle newlines within quoted fields")
+    void shouldHandleNewlines_withinQuotedFields(final @TempDir Path tempDir) throws IOException {
+      // Given
+      Files.writeString(tempDir.resolve("data.csv"), "ID,DESCRIPTION\n1,\"Line1\nLine2\"");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
+      assertEquals(
+          "Line1\nLine2",
+          descValue.value().toString(),
+          "should preserve newlines within quoted fields");
+    }
+
+    /**
+     * Verifies that parse handles quoted fields containing only whitespace.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle quoted whitespace fields")
+    void shouldHandleQuotedWhitespace_whenWhitespaceInQuotes(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,VALUE", "1,\"  \"");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var cellValue = row.getValue(new ColumnName("VALUE"));
+      assertNotNull(cellValue.value(), "VALUE value should not be null");
+      assertEquals(
+          "  ", cellValue.value().toString(), "should preserve whitespace in quoted fields");
+    }
+  }
+
+  /** Tests for large dataset processing. */
+  @Nested
+  @DisplayName("large dataset processing")
+  class LargeDatasetTests {
+
+    /** Tests for large dataset processing. */
+    LargeDatasetTests() {}
+
+    /**
+     * Verifies that parse handles 1000-row dataset.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should handle 1000-row dataset when large file provided")
+    void shouldHandle1000RowDataset_whenLargeFileProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      final var header = "ID,NAME,EMAIL,AMOUNT";
+      final var rows =
+          IntStream.rangeClosed(1, 1000)
+              .mapToObj(
+                  i ->
+                      String.format(
+                          "%d,User%d,user%d@example.com,%d.%02d", i, i, i, i * 10, i % 100))
+              .collect(Collectors.joining("\n"));
+      Files.writeString(tempDir.resolve("large.csv"), header + "\n" + rows);
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      assertAll(
+          "large dataset should be parsed correctly",
+          () -> assertEquals(1000, table.getRowCount(), "should have 1000 rows"),
+          () -> assertEquals(4, table.getColumns().size(), "should have 4 columns"));
+    }
+
+    /**
+     * Verifies that parse handles multiple tables with many rows.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should handle multiple large tables when several files provided")
+    void shouldHandleMultipleLargeTables_whenSeveralFilesProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      final var header = "ID,VALUE";
+      final var rows =
+          IntStream.rangeClosed(1, 500)
+              .mapToObj(i -> String.format("%d,Value%d", i, i))
+              .collect(Collectors.joining("\n"));
+      Files.writeString(tempDir.resolve("table_a.csv"), header + "\n" + rows);
+      Files.writeString(tempDir.resolve("table_b.csv"), header + "\n" + rows);
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      assertAll(
+          "multiple tables should be parsed",
+          () -> assertEquals(2, result.getTables().size(), "should have 2 tables"),
+          () ->
+              assertEquals(
+                  500,
+                  result.getTables().getFirst().getRowCount(),
+                  "first table should have 500 rows"),
+          () ->
+              assertEquals(
+                  500,
+                  result.getTables().get(1).getRowCount(),
+                  "second table should have 500 rows"));
+    }
+  }
+
+  /** Tests for malformed CSV handling. */
+  @Nested
+  @DisplayName("malformed CSV handling")
+  class MalformedCsvTests {
+
+    /** Tests for malformed CSV handling. */
+    MalformedCsvTests() {}
+
+    /**
+     * Verifies that parse handles header-only file as empty table.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should return empty table when file has header only")
+    void shouldReturnEmptyTable_whenFileHasHeaderOnly(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME,EMAIL");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      assertAll(
+          "table should have header but no rows",
+          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
+          () -> assertEquals(0, table.getRowCount(), "should have 0 rows"));
+    }
+
+    /**
+     * Verifies that parse handles rows with fewer columns than header.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should handle rows with fewer columns when column count differs")
+    void shouldHandleRowsWithFewerColumns_whenColumnCountDiffers(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME,EMAIL", "1,John");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      assertEquals(
+          CellValue.NULL, row.getValue(new ColumnName("EMAIL")), "missing column should be NULL");
+    }
+
+    /**
+     * Verifies that parse handles rows with more columns than header.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should ignore extra columns when row has more columns than header")
+    void shouldIgnoreExtraColumns_whenRowHasMoreColumnsThanHeader(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "data.csv", "ID,NAME", "1,John,extra_value,another_extra");
+
+      // When
+      final var result = parser.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var nameValue = table.getRows().getFirst().getValue(new ColumnName("NAME"));
+      assertNotNull(nameValue.value(), "NAME value should not be null");
+      final var nameStr = nameValue.value().toString();
+      assertAll(
+          "table should only have header columns",
+          () -> assertEquals(2, table.getColumns().size(), "should have 2 columns"),
+          () -> assertEquals("John", nameStr, "should have correct NAME value"));
     }
   }
 
