@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
+import io.github.seijikohara.dbtester.internal.template.TemplateProcessor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -159,10 +160,11 @@ public final class DelimitedParser {
       final var columnNames = parseColumnNames(headerRow);
 
       // Remaining rows are data - convert iterator to stream
+      final var templateProcessor = new TemplateProcessor();
       final var rows =
           toStream(iterator)
               .filter(Predicate.not(this::isEmptyRow))
-              .map(values -> createRow(columnNames, values))
+              .map(values -> createRow(columnNames, values, templateProcessor))
               .toList();
 
       logger.debug(
@@ -228,16 +230,20 @@ public final class DelimitedParser {
    *
    * @param columnNames the column names
    * @param values the values array
+   * @param templateProcessor the template processor for resolving expressions
    * @return the created row
    */
-  private Row createRow(final List<ColumnName> columnNames, final String[] values) {
+  private Row createRow(
+      final List<ColumnName> columnNames,
+      final String[] values,
+      final TemplateProcessor templateProcessor) {
     final var rowValues =
         IntStream.range(0, columnNames.size())
             .boxed()
             .collect(
                 Collectors.toMap(
                     columnNames::get,
-                    i -> toCellValue(i < values.length ? values[i] : null),
+                    i -> toCellValue(i < values.length ? values[i] : null, templateProcessor),
                     (existing, replacement) -> existing,
                     LinkedHashMap::new));
 
@@ -247,14 +253,18 @@ public final class DelimitedParser {
   /**
    * Converts a raw string value to a CellValue.
    *
-   * <p>Empty or null strings are converted to {@link CellValue#NULL}.
+   * <p>Empty or null strings are converted to {@link CellValue#NULL}. Template expressions ({@code
+   * ${...}}) are resolved before creating the CellValue.
    *
    * @param rawValue the raw string value
+   * @param templateProcessor the template processor for resolving expressions
    * @return the CellValue
    */
-  private CellValue toCellValue(final @Nullable String rawValue) {
+  private CellValue toCellValue(
+      final @Nullable String rawValue, final TemplateProcessor templateProcessor) {
     return Optional.ofNullable(rawValue)
         .filter(Predicate.not(String::isEmpty))
+        .map(templateProcessor::process)
         .map(CellValue::new)
         .orElse(CellValue.NULL);
   }
