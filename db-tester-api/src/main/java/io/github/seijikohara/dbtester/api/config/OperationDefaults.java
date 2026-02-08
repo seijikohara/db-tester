@@ -39,6 +39,9 @@ public final class OperationDefaults {
   /** The epsilon value used for floating-point comparisons. */
   private final double floatingPointEpsilon;
 
+  /** The number of rows per batch for INSERT operations. Zero means all rows in a single batch. */
+  private final int batchSize;
+
   /**
    * Creates a new instance from the builder.
    *
@@ -48,6 +51,7 @@ public final class OperationDefaults {
     this.preparation = builder.preparation;
     this.expectation = builder.expectation;
     this.floatingPointEpsilon = builder.floatingPointEpsilon;
+    this.batchSize = builder.batchSize;
   }
 
   /**
@@ -97,6 +101,19 @@ public final class OperationDefaults {
   }
 
   /**
+   * Returns the number of rows per batch for INSERT operations.
+   *
+   * <p>A value of zero means all rows are added to a single batch before execution (the default
+   * behavior). A positive value causes the executor to flush the batch every N rows, reducing
+   * memory usage for large datasets.
+   *
+   * @return the batch size, or zero for single-batch execution
+   */
+  public int batchSize() {
+    return batchSize;
+  }
+
+  /**
    * Creates a new OperationDefaults with the specified preparation operation.
    *
    * @param preparation the preparation operation
@@ -127,6 +144,16 @@ public final class OperationDefaults {
   }
 
   /**
+   * Creates a new OperationDefaults with the specified batch size.
+   *
+   * @param batchSize the batch size
+   * @return a new OperationDefaults with the specified batch size
+   */
+  public OperationDefaults withBatchSize(final int batchSize) {
+    return toBuilder().batchSize(batchSize).build();
+  }
+
+  /**
    * Creates a new builder initialized with the values from this instance.
    *
    * @return a new builder with values copied from this instance
@@ -135,7 +162,8 @@ public final class OperationDefaults {
     return new Builder()
         .preparation(this.preparation)
         .expectation(this.expectation)
-        .floatingPointEpsilon(this.floatingPointEpsilon);
+        .floatingPointEpsilon(this.floatingPointEpsilon)
+        .batchSize(this.batchSize);
   }
 
   @Override
@@ -148,12 +176,13 @@ public final class OperationDefaults {
     }
     return preparation == other.preparation
         && expectation == other.expectation
-        && Double.compare(floatingPointEpsilon, other.floatingPointEpsilon) == 0;
+        && Double.compare(floatingPointEpsilon, other.floatingPointEpsilon) == 0
+        && batchSize == other.batchSize;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(preparation, expectation, floatingPointEpsilon);
+    return Objects.hash(preparation, expectation, floatingPointEpsilon, batchSize);
   }
 
   @Override
@@ -164,6 +193,8 @@ public final class OperationDefaults {
         + expectation
         + ", floatingPointEpsilon="
         + floatingPointEpsilon
+        + ", batchSize="
+        + batchSize
         + ']';
   }
 
@@ -178,6 +209,9 @@ public final class OperationDefaults {
 
     /** The default epsilon value used for floating-point comparisons. */
     private double floatingPointEpsilon = DEFAULT_FLOATING_POINT_EPSILON;
+
+    /** The number of rows per batch for INSERT operations. */
+    private int batchSize;
 
     /** Creates a new builder with default values. */
     public Builder() {}
@@ -212,6 +246,25 @@ public final class OperationDefaults {
      */
     public Builder floatingPointEpsilon(final double floatingPointEpsilon) {
       this.floatingPointEpsilon = floatingPointEpsilon;
+      return this;
+    }
+
+    /**
+     * Sets the number of rows per batch for INSERT operations.
+     *
+     * <p>A value of zero means all rows are added to a single batch (default). A positive value
+     * causes the executor to flush the batch every N rows.
+     *
+     * @param batchSize the batch size (zero or positive)
+     * @return this builder
+     * @throws IllegalArgumentException if batchSize is negative
+     */
+    public Builder batchSize(final int batchSize) {
+      if (batchSize < 0) {
+        throw new IllegalArgumentException(
+            String.format("batchSize must be zero or positive, but was: %d", batchSize));
+      }
+      this.batchSize = batchSize;
       return this;
     }
 

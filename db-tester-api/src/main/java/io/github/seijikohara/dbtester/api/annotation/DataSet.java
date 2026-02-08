@@ -56,4 +56,18 @@ public @interface DataSet {
    * @see TableOrderingStrategy
    */
   TableOrderingStrategy tableOrdering() default TableOrderingStrategy.AUTO;
+
+  /**
+   * Specifies the number of rows per batch for INSERT operations.
+   *
+   * <p>When set to a positive value, the executor flushes the JDBC batch every N rows instead of
+   * accumulating all rows before execution. This reduces memory usage for large datasets.
+   *
+   * <p>A value of {@code -1} means the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.OperationDefaults#batchSize()} is used. A value of
+   * {@code 0} means all rows are added to a single batch (default behavior).
+   *
+   * @return the batch size, or {@code -1} to use the global setting
+   */
+  int batchSize() default -1;
 }

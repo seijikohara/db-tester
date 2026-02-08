@@ -149,13 +149,38 @@ public final class OperationExecutor {
       final TableOrderingStrategy tableOrderingStrategy,
       final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout) {
+    execute(
+        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout, 0);
+  }
+
+  /**
+   * Executes a database operation on the given dataset with batch size control.
+   *
+   * @param operation the operation to execute
+   * @param tableSet the dataset to operate on
+   * @param dataSource the data source
+   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param transactionMode the transaction behavior mode
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
+   * @throws DatabaseTesterException if the operation fails
+   */
+  public void execute(
+      final Operation operation,
+      final TableSet tableSet,
+      final DataSource dataSource,
+      final TableOrderingStrategy tableOrderingStrategy,
+      final TransactionMode transactionMode,
+      final @Nullable Duration queryTimeout,
+      final int batchSize) {
     logger.debug(
-        "Executing operation {} on dataset with {} tables using strategy {} (transactionMode={}, timeout={})",
+        "Executing operation {} on dataset with {} tables using strategy {} (transactionMode={}, timeout={}, batchSize={})",
         operation,
         tableSet.getTables().size(),
         tableOrderingStrategy,
         transactionMode,
-        queryTimeout);
+        queryTimeout,
+        batchSize);
 
     try (final var connectionResource = open(dataSource::getConnection)) {
       final var connection = connectionResource.value();
@@ -163,7 +188,8 @@ public final class OperationExecutor {
 
       try {
         configureTransaction(connection, transactionMode);
-        executeOperation(operation, tableSet, connection, tableOrderingStrategy, queryTimeout);
+        executeOperation(
+            operation, tableSet, connection, tableOrderingStrategy, queryTimeout, batchSize);
         commitIfRequired(connection, transactionMode);
         logger.debug("Successfully executed operation {}", operation);
       } catch (final DatabaseOperationException e) {
@@ -267,13 +293,34 @@ public final class OperationExecutor {
       final Connection connection,
       final TableOrderingStrategy tableOrderingStrategy,
       final @Nullable Duration queryTimeout) {
+    executeOperation(operation, tableSet, connection, tableOrderingStrategy, queryTimeout, 0);
+  }
+
+  /**
+   * Executes the specified operation with batch size control.
+   *
+   * @param operation the operation to execute
+   * @param tableSet the dataset to operate on
+   * @param connection the database connection
+   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param queryTimeout the query timeout, or null for no timeout
+   * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
+   * @throws DatabaseOperationException if a database error occurs
+   */
+  void executeOperation(
+      final Operation operation,
+      final TableSet tableSet,
+      final Connection connection,
+      final TableOrderingStrategy tableOrderingStrategy,
+      final @Nullable Duration queryTimeout,
+      final int batchSize) {
     final var tables = resolveTableOrder(tableSet.getTables(), connection, tableOrderingStrategy);
 
     switch (operation) {
       case NONE -> {
         // Do nothing
       }
-      case INSERT -> insertExecutor.execute(tables, connection, queryTimeout);
+      case INSERT -> insertExecutor.execute(tables, connection, queryTimeout, batchSize);
       case UPDATE -> updateExecutor.execute(tables, connection, queryTimeout);
       case DELETE -> deleteExecutor.execute(tables, connection, queryTimeout);
       case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection, queryTimeout);
@@ -281,11 +328,11 @@ public final class OperationExecutor {
       case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection, queryTimeout);
       case CLEAN_INSERT -> {
         deleteExecutor.executeDeleteAll(tables.reversed(), connection, queryTimeout);
-        insertExecutor.execute(tables, connection, queryTimeout);
+        insertExecutor.execute(tables, connection, queryTimeout, batchSize);
       }
       case TRUNCATE_INSERT -> {
         truncateExecutor.execute(tables.reversed(), connection, queryTimeout);
-        insertExecutor.execute(tables, connection, queryTimeout);
+        insertExecutor.execute(tables, connection, queryTimeout, batchSize);
       }
     }
   }

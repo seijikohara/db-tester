@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.api.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.operation.Operation;
@@ -302,6 +303,84 @@ class OperationDefaultsTest {
       assertTrue(result.contains("OperationDefaults"));
       assertTrue(result.contains("preparation"));
       assertTrue(result.contains("CLEAN_INSERT"));
+    }
+  }
+
+  /** Tests for batchSize(). */
+  @Nested
+  @DisplayName("batchSize()")
+  class BatchSizeTest {
+
+    /** Tests for batchSize. */
+    BatchSizeTest() {}
+
+    /** Verifies that standard defaults have batchSize zero. */
+    @Test
+    @Tag("normal")
+    @DisplayName("standard defaults have batchSize zero")
+    void standardDefaultsHaveBatchSizeZero() {
+      final var defaults = OperationDefaults.standard();
+
+      assertEquals(0, defaults.batchSize(), "default batchSize should be zero");
+    }
+
+    /** Verifies that builder sets batchSize. */
+    @Test
+    @Tag("normal")
+    @DisplayName("builder sets batchSize")
+    void builderSetsBatchSize() {
+      final var defaults = OperationDefaults.builder().batchSize(100).build();
+
+      assertEquals(100, defaults.batchSize(), "batchSize should be 100");
+    }
+
+    /** Verifies that builder rejects negative batchSize. */
+    @Test
+    @Tag("error")
+    @DisplayName("builder rejects negative batchSize")
+    void builderRejectsNegativeBatchSize() {
+      final var builder = OperationDefaults.builder();
+
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> builder.batchSize(-1),
+          "should reject negative batchSize");
+    }
+
+    /** Verifies that withBatchSize creates new instance. */
+    @Test
+    @Tag("normal")
+    @DisplayName("withBatchSize creates new instance")
+    void withBatchSizeCreatesNewInstance() {
+      final var original = OperationDefaults.standard();
+      final var modified = original.withBatchSize(50);
+
+      assertNotEquals(original, modified, "should be different instances");
+      assertEquals(0, original.batchSize(), "original should remain zero");
+      assertEquals(50, modified.batchSize(), "modified should have batchSize 50");
+    }
+
+    /** Verifies that toBuilder preserves batchSize. */
+    @Test
+    @Tag("normal")
+    @DisplayName("toBuilder preserves batchSize")
+    void toBuilderPreservesBatchSize() {
+      final var original = OperationDefaults.builder().batchSize(200).build();
+      final var rebuilt = original.toBuilder().build();
+
+      assertEquals(original, rebuilt, "rebuilt should equal original");
+      assertEquals(200, rebuilt.batchSize(), "rebuilt should preserve batchSize");
+    }
+
+    /** Verifies that different batchSize affects equals. */
+    @Test
+    @Tag("normal")
+    @DisplayName("different batchSize affects equals")
+    void differentBatchSizeAffectsEquals() {
+      final var defaults1 = OperationDefaults.standard();
+      final var defaults2 = OperationDefaults.builder().batchSize(100).build();
+
+      assertNotEquals(defaults1, defaults2, "different batchSize should not be equal");
     }
   }
 }

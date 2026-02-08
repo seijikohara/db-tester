@@ -110,8 +110,34 @@ public final class DefaultPreparationSupport implements PreparationSupport {
     final var conventions = context.configuration().conventions();
     final var transactionMode = conventions.transactionMode();
     final var queryTimeout = conventions.queryTimeout();
+    final var batchSize = resolveBatchSize(dataSet, context);
 
     operationProvider.execute(
-        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout);
+        operation,
+        tableSet,
+        dataSource,
+        tableOrderingStrategy,
+        transactionMode,
+        queryTimeout,
+        batchSize);
+  }
+
+  /**
+   * Resolves the effective batch size from the annotation and global defaults.
+   *
+   * <p>If the annotation specifies a non-negative value, that value is used directly. If the
+   * annotation value is {@code -1} (the default), the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.OperationDefaults#batchSize()} is used.
+   *
+   * @param dataSet the DataSet annotation
+   * @param context the test context
+   * @return the effective batch size (zero or positive)
+   */
+  private int resolveBatchSize(final DataSet dataSet, final TestContext context) {
+    final var annotationBatchSize = dataSet.batchSize();
+    if (annotationBatchSize >= 0) {
+      return annotationBatchSize;
+    }
+    return context.configuration().operations().batchSize();
   }
 }

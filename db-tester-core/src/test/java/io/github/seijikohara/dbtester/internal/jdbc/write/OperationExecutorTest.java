@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.internal.jdbc.write;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
@@ -172,7 +173,7 @@ class OperationExecutorTest {
       when(dataSet.getTables()).thenReturn(List.of(table));
       doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
           .when(insertExecutor)
-          .execute(any(), any(), any());
+          .execute(any(), any(), any(), anyInt());
 
       // When & Then
       assertThrows(
@@ -239,7 +240,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -379,7 +380,7 @@ class OperationExecutorTest {
 
       // Then
       verify(deleteExecutor).executeDeleteAll(eq(tables.reversed()), eq(connection), isNull());
-      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -404,7 +405,7 @@ class OperationExecutorTest {
 
       // Then
       verify(truncateExecutor).execute(eq(tables.reversed()), eq(connection), isNull());
-      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(0));
     }
   }
 
@@ -438,7 +439,7 @@ class OperationExecutorTest {
 
       // Then - tableOrderResolver should not be called for single table
       verify(tableOrderResolver, never()).resolveOrder(any(), any(), any());
-      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -464,7 +465,7 @@ class OperationExecutorTest {
 
       // Then - tableOrderResolver should not be called for LOAD_ORDER_FILE
       verify(tableOrderResolver, never()).resolveOrder(any(), any(), any());
-      verify(insertExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -492,7 +493,8 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then - verify insert is called (with sorted order, but we verify the sorted list)
-      verify(insertExecutor).execute(eq(List.of(tableA, tableB, tableC)), eq(connection), isNull());
+      verify(insertExecutor)
+          .execute(eq(List.of(tableA, tableB, tableC)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -526,7 +528,7 @@ class OperationExecutorTest {
       // Then - verify insert is called with reordered tables (B, A)
       verify(tableOrderResolver)
           .resolveOrder(List.of(tableNameA, tableNameB), connection, "PUBLIC");
-      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -558,7 +560,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.FOREIGN_KEY);
 
       // Then - verify insert is called with original order
-      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -591,7 +593,7 @@ class OperationExecutorTest {
           Operation.INSERT, dataSet, connection, TableOrderingStrategy.FOREIGN_KEY);
 
       // Then - verify insert is called with original order (fallback)
-      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -622,7 +624,7 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with reordered tables
-      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableB, tableA)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -654,7 +656,7 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with original order (fallback)
-      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull(), eq(0));
     }
 
     /**
@@ -685,7 +687,99 @@ class OperationExecutorTest {
       executor.executeOperation(Operation.INSERT, dataSet, connection, TableOrderingStrategy.AUTO);
 
       // Then - verify insert is called with original order
-      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(List.of(tableA, tableB)), eq(connection), isNull(), eq(0));
+    }
+  }
+
+  /** Tests for batch size propagation. */
+  @Nested
+  @DisplayName("batch size propagation tests")
+  class BatchSizePropagationTests {
+
+    /** Tests for batch size propagation. */
+    BatchSizePropagationTests() {}
+
+    /**
+     * Verifies that batchSize is passed to insert executor for INSERT operation.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass batchSize to insert executor for INSERT operation")
+    void shouldPassBatchSize_whenInsertOperation() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var dataSet = mock(TableSet.class);
+      final var tables = List.<Table>of();
+      when(dataSet.getTables()).thenReturn(tables);
+
+      // When
+      executor.executeOperation(
+          Operation.INSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL, null, 100);
+
+      // Then
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(100));
+    }
+
+    /**
+     * Verifies that batchSize is passed to insert executor for CLEAN_INSERT operation.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass batchSize to insert executor for CLEAN_INSERT operation")
+    void shouldPassBatchSize_whenCleanInsertOperation() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var dataSet = mock(TableSet.class);
+      final var table = mock(Table.class);
+      final var tables = List.of(table);
+      when(dataSet.getTables()).thenReturn(tables);
+
+      // When
+      executor.executeOperation(
+          Operation.CLEAN_INSERT,
+          dataSet,
+          connection,
+          TableOrderingStrategy.ALPHABETICAL,
+          null,
+          50);
+
+      // Then
+      verify(deleteExecutor).executeDeleteAll(eq(tables.reversed()), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(50));
+    }
+
+    /**
+     * Verifies that batchSize is passed to insert executor for TRUNCATE_INSERT operation.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass batchSize to insert executor for TRUNCATE_INSERT operation")
+    void shouldPassBatchSize_whenTruncateInsertOperation() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var dataSet = mock(TableSet.class);
+      final var table = mock(Table.class);
+      final var tables = List.of(table);
+      when(dataSet.getTables()).thenReturn(tables);
+
+      // When
+      executor.executeOperation(
+          Operation.TRUNCATE_INSERT,
+          dataSet,
+          connection,
+          TableOrderingStrategy.ALPHABETICAL,
+          null,
+          75);
+
+      // Then
+      verify(truncateExecutor).execute(eq(tables.reversed()), eq(connection), isNull());
+      verify(insertExecutor).execute(eq(tables), eq(connection), isNull(), eq(75));
     }
   }
 }
