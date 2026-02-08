@@ -11,6 +11,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Resolves directory locations for dataset files.
@@ -40,6 +42,9 @@ import org.jspecify.annotations.Nullable;
  */
 record DirectoryResolver(Class<?> testClass) {
 
+  /** Logger for this class. */
+  private static final Logger logger = LoggerFactory.getLogger(DirectoryResolver.class);
+
   /** Prefix for classpath-based resource locations. */
   private static final String CLASSPATH_PREFIX = "classpath:";
 
@@ -56,8 +61,14 @@ record DirectoryResolver(Class<?> testClass) {
    * @throws DataSetLoadException if the directory cannot be found or is invalid
    */
   Path resolveDirectory(final @Nullable String resourceLocation, final @Nullable String suffix) {
+    logger.debug("Resolving dataset directory");
+    logger.debug("  Test class: {}", testClass.getName());
+    logger.debug("  Resource location: {}", resourceLocation);
+    logger.debug("  Suffix: {}", suffix);
     final var effectiveLocation = determineEffectiveLocation(resourceLocation, suffix);
-    return createDirectoryFromLocation(effectiveLocation);
+    final var directory = createDirectoryFromLocation(effectiveLocation);
+    logger.debug("  Resolved path: {}", directory);
+    return directory;
   }
 
   /**

@@ -122,10 +122,18 @@ public final class ScenarioFilter {
    * @return filtered list of rows
    */
   public List<Row> filterRows(final List<Row> rows, final @Nullable ColumnName scenarioColumn) {
-    return Optional.ofNullable(scenarioColumn)
-        .filter(column -> isActive())
-        .map(column -> rows.stream().filter(row -> shouldIncludeRow(row, column)).toList())
-        .orElse(rows);
+    final var filtered =
+        Optional.ofNullable(scenarioColumn)
+            .filter(column -> isActive())
+            .map(column -> rows.stream().filter(row -> shouldIncludeRow(row, column)).toList())
+            .orElse(rows);
+    if (isActive() && scenarioColumn != null) {
+      logger.debug("Applying scenario filter");
+      logger.debug("  Scenario names: {}", scenarioNames);
+      logger.debug("  Total rows before filter: {}", rows.size());
+      logger.debug("  Total rows after filter: {}", filtered.size());
+    }
+    return filtered;
   }
 
   /**

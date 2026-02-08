@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Comparator for TableSet and Table objects.
@@ -41,6 +43,9 @@ import org.jspecify.annotations.Nullable;
  * by table and provides clear expected/actual values.
  */
 public class DataSetComparator {
+
+  /** Logger for this class. */
+  private static final Logger logger = LoggerFactory.getLogger(DataSetComparator.class);
 
   /** Set of string representations for boolean true values. */
   private static final Set<String> TRUE_VALUES = Set.of("1", "true", "yes", "y");
@@ -145,6 +150,12 @@ public class DataSetComparator {
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
+
+    logger.debug(
+        "Comparing table '{}': expected {} rows, actual {} rows",
+        tableName,
+        expectedRows.size(),
+        actualRows.size());
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
     compareRowPairs(tableName, expectedRows, actualRows, result, this::compareRows);
@@ -265,6 +276,12 @@ public class DataSetComparator {
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
 
+    if (!ignoreSet.isEmpty()) {
+      logger.debug("Excluding columns from comparison");
+      logger.debug("  Table: {}", tableName);
+      logger.debug("  Excluded: {}", ignoreSet);
+    }
+
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
 
     compareRowPairs(
@@ -304,6 +321,19 @@ public class DataSetComparator {
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
+
+    if (!ignoreSet.isEmpty()) {
+      logger.debug("Excluding columns from comparison");
+      logger.debug("  Table: {}", tableName);
+      logger.debug("  Excluded: {}", ignoreSet);
+    }
+    if (!columnStrategies.isEmpty()) {
+      logger.debug("Applying comparison strategies");
+      logger.debug("  Table: {}", tableName);
+      columnStrategies.forEach(
+          (columnName, mapping) ->
+              logger.debug("  {}: {}", columnName, mapping.strategy().getType()));
+    }
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
 
@@ -401,6 +431,19 @@ public class DataSetComparator {
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
+
+    if (!ignoreSet.isEmpty()) {
+      logger.debug("Excluding columns from comparison");
+      logger.debug("  Table: {}", tableName);
+      logger.debug("  Excluded: {}", ignoreSet);
+    }
+    if (!columnStrategies.isEmpty()) {
+      logger.debug("Applying comparison strategies");
+      logger.debug("  Table: {}", tableName);
+      columnStrategies.forEach(
+          (columnName, mapping) ->
+              logger.debug("  {}: {}", columnName, mapping.strategy().getType()));
+    }
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
 
