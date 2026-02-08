@@ -12,6 +12,7 @@ module io.github.seijikohara.dbtester.core {
   requires transitive java.sql;
   requires transitive org.jspecify;
   requires static org.slf4j;
+  requires static net.datafaker;
   requires com.fasterxml.jackson.core;
   requires com.fasterxml.jackson.databind;
   requires com.fasterxml.jackson.dataformat.csv;

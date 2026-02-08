@@ -17,6 +17,9 @@ dependencies {
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.dataformat.csv)
     implementation(libs.jackson.dataformat.yaml)
+
+    // Test data generation (optional runtime dependency - users opt in)
+    compileOnly(libs.datafaker)
 }
 
 testing {
@@ -26,6 +29,7 @@ testing {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.junit.jupiter)
+                implementation(libs.datafaker)
                 runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
             }
