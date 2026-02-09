@@ -52,7 +52,7 @@ class ConventionSettingsTest {
                   "scenarioMarker should be default"),
           () ->
               assertEquals(
-                  DataFormat.CSV, settings.dataFormat(), "dataFormat should be CSV by default"),
+                  DataFormat.AUTO, settings.dataFormat(), "dataFormat should be AUTO by default"),
           () ->
               assertEquals(
                   TableMergeStrategy.UNION_ALL,

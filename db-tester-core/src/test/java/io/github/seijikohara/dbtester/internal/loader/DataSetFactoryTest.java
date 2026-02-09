@@ -228,6 +228,99 @@ class DataSetFactoryTest {
     }
   }
 
+  /** Tests for AUTO format in createTableSet() method. */
+  @Nested
+  @DisplayName("createTableSet() with AUTO format")
+  class CreateDataSetAutoFormatMethod {
+
+    /** Tests for AUTO format in createDataSet. */
+    CreateDataSetAutoFormatMethod() {}
+
+    /**
+     * Verifies that createTableSet with AUTO loads CSV files.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load CSV files when AUTO format used")
+    void shouldLoadCsvFiles_whenAutoFormatUsed(final @TempDir Path tempDir) throws IOException {
+      // Given
+      final var factory = new DataSetFactory();
+      createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
+      final var scenarioMarker = new ScenarioMarker("SCENARIO");
+
+      // When
+      final var dataSet =
+          factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.AUTO, null);
+
+      // Then
+      assertAll(
+          "AUTO should load CSV files",
+          () -> assertNotNull(dataSet, "data set should not be null"),
+          () -> assertEquals(1, dataSet.getTables().size(), "should have one table"));
+    }
+
+    /**
+     * Verifies that createTableSet with AUTO loads mixed format files.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load mixed format files when AUTO format used")
+    void shouldLoadMixedFormats_whenAutoFormatUsed(final @TempDir Path tempDir) throws IOException {
+      // Given
+      final var factory = new DataSetFactory();
+      createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
+      Files.writeString(tempDir.resolve("TABLE2.json"), "[{\"COL1\": \"B\"}]");
+      final var scenarioMarker = new ScenarioMarker("SCENARIO");
+
+      // When
+      final var dataSet =
+          factory.createTableSet(tempDir, List.of(), scenarioMarker, DataFormat.AUTO, null);
+
+      // Then
+      assertAll(
+          "AUTO should load mixed formats",
+          () -> assertNotNull(dataSet, "data set should not be null"),
+          () -> assertEquals(2, dataSet.getTables().size(), "should have two tables"));
+    }
+
+    /**
+     * Verifies that createTableSet with AUTO throws exception for table name conflict.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when table name conflict with AUTO format")
+    void shouldThrowException_whenTableNameConflictWithAutoFormat(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      final var factory = new DataSetFactory();
+      createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
+      Files.writeString(tempDir.resolve("TABLE1.json"), "[{\"COL1\": \"A\"}]");
+      final var scenarioMarker = new ScenarioMarker("SCENARIO");
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DataSetLoadException.class,
+              () ->
+                  factory.createTableSet(
+                      tempDir, List.of(), scenarioMarker, DataFormat.AUTO, null));
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("Table name conflict"),
+          "exception should mention table name conflict");
+    }
+  }
+
   /**
    * Creates a CSV file with the specified content.
    *

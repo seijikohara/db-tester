@@ -41,7 +41,7 @@ class ConventionSettingsTest {
       assertNull(settings.baseDirectory());
       assertEquals(ConventionSettings.DEFAULT_EXPECTATION_SUFFIX, settings.expectationSuffix());
       assertEquals(ConventionSettings.DEFAULT_SCENARIO_MARKER, settings.scenarioMarker());
-      assertEquals(DataFormat.CSV, settings.dataFormat());
+      assertEquals(DataFormat.AUTO, settings.dataFormat());
       assertEquals(TableMergeStrategy.UNION_ALL, settings.tableMergeStrategy());
       assertEquals(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, settings.loadOrderFileName());
       assertTrue(settings.globalExcludeColumns().isEmpty());
@@ -508,7 +508,7 @@ class ConventionSettingsTest {
       assertNotNull(result);
       assertTrue(result.contains("ConventionSettings"));
       assertTrue(result.contains("dataFormat"));
-      assertTrue(result.contains("CSV"));
+      assertTrue(result.contains("AUTO"));
     }
   }
 
