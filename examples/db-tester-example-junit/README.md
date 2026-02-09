@@ -48,7 +48,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `DataFormatTest` | CSV, TSV, JSON, and YAML format support |
 | `TableMergeStrategyTest` | FIRST, LAST, UNION, UNION_ALL strategies |
 | `TableOrderingStrategiesTest` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
-| `ComparisonStrategyTest` | STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE comparisons |
+| `ComparisonStrategyTest` | All comparison strategies (STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, CONTAINS, RANGE, NOT_NULL, REGEX) |
 | `ComprehensiveDataTypesTest` | Various SQL data types support |
 | `CustomExpectationPathsTest` | Custom resource path configuration |
 | `CustomQueryValidationTest` | Custom SQL query validation |

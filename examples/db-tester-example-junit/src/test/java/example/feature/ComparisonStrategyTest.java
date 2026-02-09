@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
@@ -44,8 +45,12 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link ComparisonStrategy#NUMERIC} - Type-aware numeric comparison
  *   <li>{@link ComparisonStrategy#CASE_INSENSITIVE} - Case-insensitive string comparison
  *   <li>{@link ComparisonStrategy#TIMESTAMP_FLEXIBLE} - Flexible timestamp comparison
+ *   <li>{@link ComparisonStrategy#DATE_FLEXIBLE} - Flexible date format comparison
+ *   <li>{@link ComparisonStrategy#JSON_EQUIVALENT} - JSON structural comparison
  *   <li>{@link ComparisonStrategy#NOT_NULL} - Only verify the value is not null
  *   <li>{@link ComparisonStrategy#regex(String)} - Match against a regular expression
+ *   <li>{@link ComparisonStrategy#contains()} - Substring containment check
+ *   <li>{@link ComparisonStrategy#range(double, double)} - Numeric range verification
  * </ul>
  *
  * <p>ComparisonStrategy is used with programmatic assertions via {@link DatabaseAssertion} by
@@ -344,6 +349,274 @@ final class ComparisonStrategyTest {
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
       logger.info("NOT_NULL strategy null value test completed");
+    }
+  }
+
+  /** Tests for TIMESTAMP_FLEXIBLE comparison strategy. */
+  @Nested
+  @DisplayName("TIMESTAMP_FLEXIBLE Strategy Tests")
+  class TimestampFlexibleStrategyTests {
+
+    /** Creates TimestampFlexibleStrategyTests instance. */
+    TimestampFlexibleStrategyTests() {}
+
+    /** Verifies TIMESTAMP_FLEXIBLE strategy matches timestamps with different precision. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match timestamps with different sub-second precision")
+    void shouldMatchTimestampsWithDifferentPrecision() {
+      // Given
+      logger.info("Testing TIMESTAMP_FLEXIBLE strategy with different precision");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00.000");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.timestampFlexible("TIMESTAMP")));
+      logger.info("TIMESTAMP_FLEXIBLE precision test completed");
+    }
+
+    /** Verifies TIMESTAMP_FLEXIBLE strategy fails when dates differ. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when timestamp dates differ")
+    void shouldFailWhenTimestampDatesDiffer() {
+      // Given
+      logger.info("Testing TIMESTAMP_FLEXIBLE strategy with different dates");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-07-15T10:30:00");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.timestampFlexible("TIMESTAMP")));
+      logger.info("TIMESTAMP_FLEXIBLE date mismatch test completed");
+    }
+  }
+
+  /** Tests for DATE_FLEXIBLE comparison strategy. */
+  @Nested
+  @DisplayName("DATE_FLEXIBLE Strategy Tests")
+  class DateFlexibleStrategyTests {
+
+    /** Creates DateFlexibleStrategyTests instance. */
+    DateFlexibleStrategyTests() {}
+
+    /** Verifies DATE_FLEXIBLE strategy matches dates in different formats. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match dates in different formats")
+    void shouldMatchDatesInDifferentFormats() {
+      // Given
+      logger.info("Testing DATE_FLEXIBLE strategy with different formats");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024-06-15");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024/06/15");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.dateFlexible("BIRTH_DATE")));
+      logger.info("DATE_FLEXIBLE format test completed");
+    }
+
+    /** Verifies DATE_FLEXIBLE strategy fails when dates differ. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when dates differ")
+    void shouldFailWhenDatesDiffer() {
+      // Given
+      logger.info("Testing DATE_FLEXIBLE strategy with different dates");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024-06-15");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024-07-20");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.dateFlexible("BIRTH_DATE")));
+      logger.info("DATE_FLEXIBLE mismatch test completed");
+    }
+  }
+
+  /** Tests for JSON_EQUIVALENT comparison strategy. */
+  @Nested
+  @DisplayName("JSON_EQUIVALENT Strategy Tests")
+  class JsonEquivalentStrategyTests {
+
+    /** Creates JsonEquivalentStrategyTests instance. */
+    JsonEquivalentStrategyTests() {}
+
+    /** Verifies JSON_EQUIVALENT strategy ignores key order and whitespace. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match JSON with different key order")
+    void shouldMatchJsonWithDifferentKeyOrder() {
+      // Given
+      logger.info("Testing JSON_EQUIVALENT strategy with different key order");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"name\": \"Alice\", \"age\": 30}");
+      final var actualTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"age\": 30, \"name\": \"Alice\"}");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
+      logger.info("JSON_EQUIVALENT key order test completed");
+    }
+
+    /** Verifies JSON_EQUIVALENT strategy fails when JSON values differ. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when JSON values differ")
+    void shouldFailWhenJsonValuesDiffer() {
+      // Given
+      logger.info("Testing JSON_EQUIVALENT strategy with different values");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"name\": \"Alice\", \"age\": 30}");
+      final var actualTable =
+          createTable(
+              "COMPARISON_TEST", List.of("ID", "METADATA"), 1, "{\"name\": \"Bob\", \"age\": 25}");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
+      logger.info("JSON_EQUIVALENT mismatch test completed");
+    }
+  }
+
+  /** Tests for CONTAINS comparison strategy. */
+  @Nested
+  @DisplayName("CONTAINS Strategy Tests")
+  class ContainsStrategyTests {
+
+    /** Creates ContainsStrategyTests instance. */
+    ContainsStrategyTests() {}
+
+    /** Verifies CONTAINS strategy matches when actual contains expected substring. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when actual contains expected value as substring")
+    void shouldPassWhenActualContainsExpectedSubstring() {
+      // Given
+      logger.info("Testing CONTAINS strategy");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "important");
+      final var actualTable =
+          createTable(
+              "COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "This is an important message");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.contains("DESCRIPTION")));
+      logger.info("CONTAINS strategy test completed");
+    }
+
+    /** Verifies CONTAINS strategy fails when substring not found. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when actual does not contain expected substring")
+    void shouldFailWhenSubstringNotFound() {
+      // Given
+      logger.info("Testing CONTAINS strategy with missing substring");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "missing");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "This is a message");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.contains("DESCRIPTION")));
+      logger.info("CONTAINS strategy mismatch test completed");
+    }
+  }
+
+  /** Tests for RANGE comparison strategy. */
+  @Nested
+  @DisplayName("RANGE Strategy Tests")
+  class RangeStrategyTests {
+
+    /** Creates RangeStrategyTests instance. */
+    RangeStrategyTests() {}
+
+    /** Verifies RANGE strategy passes when value is within range. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when value is within specified range")
+    void shouldPassWhenValueIsWithinRange() {
+      // Given
+      logger.info("Testing RANGE strategy with value in range");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, "ignored");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("75.50"));
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.range("AMOUNT", 0.0, 100.0)));
+      logger.info("RANGE strategy in-range test completed");
+    }
+
+    /** Verifies RANGE strategy fails when value is outside range. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when value is outside specified range")
+    void shouldFailWhenValueIsOutsideRange() {
+      // Given
+      logger.info("Testing RANGE strategy with value out of range");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, "ignored");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("150.00"));
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.range("AMOUNT", 0.0, 100.0)));
+      logger.info("RANGE strategy out-of-range test completed");
     }
   }
 
