@@ -1,7 +1,9 @@
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -183,6 +185,89 @@ class OperationExecutorTest {
                   Operation.INSERT, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL));
       verify(connection).rollback();
       verify(connection, never()).commit();
+    }
+
+    /**
+     * Verifies that rollback failure adds suppressed exception to original exception.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should add suppressed exception when rollback fails after operation failure")
+    void shouldAddSuppressedException_whenRollbackFailsAfterOperationFailure() throws SQLException {
+      // Given
+      final var dataSource = mock(DataSource.class);
+      final var connection = mock(Connection.class);
+      final var dataSet = mock(TableSet.class);
+      final var table = mock(Table.class);
+
+      when(dataSource.getConnection()).thenReturn(connection);
+      when(dataSet.getTables()).thenReturn(List.of(table));
+      doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
+          .when(insertExecutor)
+          .execute(any(), any(), any(), anyInt());
+      doThrow(new SQLException("Rollback failed")).when(connection).rollback();
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () ->
+                  executor.execute(
+                      Operation.INSERT, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL));
+
+      assertAll(
+          "original exception should contain suppressed rollback exception",
+          () ->
+              assertTrue(
+                  exception.getMessage() != null
+                      && exception.getMessage().contains("Insert failed"),
+                  "should preserve original exception message"),
+          () ->
+              assertTrue(
+                  exception.getSuppressed().length > 0,
+                  "should have suppressed exception from rollback failure"));
+    }
+
+    /**
+     * Verifies that restoreAutoCommit failure does not mask original exception.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should not mask exception when restoreAutoCommit fails after operation failure")
+    void shouldNotMaskException_whenRestoreAutoCommitFailsAfterOperationFailure()
+        throws SQLException {
+      // Given
+      final var dataSource = mock(DataSource.class);
+      final var connection = mock(Connection.class);
+      final var dataSet = mock(TableSet.class);
+      final var table = mock(Table.class);
+
+      when(dataSource.getConnection()).thenReturn(connection);
+      when(connection.getAutoCommit()).thenReturn(true);
+      when(dataSet.getTables()).thenReturn(List.of(table));
+      doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
+          .when(insertExecutor)
+          .execute(any(), any(), any(), anyInt());
+      // restoreAutoCommit calls setAutoCommit(originalValue) - make it fail
+      doThrow(new SQLException("AutoCommit restore failed"))
+          .when(connection)
+          .setAutoCommit(eq(true));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DatabaseTesterException.class,
+              () ->
+                  executor.execute(
+                      Operation.INSERT, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL));
+
+      assertTrue(
+          exception.getMessage() != null && exception.getMessage().contains("Insert failed"),
+          "original exception should not be masked by restoreAutoCommit failure");
     }
   }
 
