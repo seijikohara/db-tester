@@ -193,7 +193,11 @@ public final class OperationExecutor {
         commitIfRequired(connection, transactionMode);
         logger.debug("Successfully executed operation {}", operation);
       } catch (final DatabaseOperationException e) {
-        rollbackIfRequired(connection, transactionMode);
+        try {
+          rollbackIfRequired(connection, transactionMode);
+        } catch (final DatabaseOperationException rollbackException) {
+          e.addSuppressed(rollbackException);
+        }
         throw e;
       } finally {
         restoreAutoCommit(connection, originalAutoCommit, transactionMode);
@@ -256,7 +260,11 @@ public final class OperationExecutor {
       final boolean originalAutoCommit,
       final TransactionMode transactionMode) {
     if (transactionMode != TransactionMode.NONE) {
-      run(() -> connection.setAutoCommit(originalAutoCommit));
+      try {
+        run(() -> connection.setAutoCommit(originalAutoCommit));
+      } catch (final DatabaseOperationException e) {
+        logger.warn("Failed to restore autoCommit to {}: {}", originalAutoCommit, e.getMessage());
+      }
     }
   }
 
