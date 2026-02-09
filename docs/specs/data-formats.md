@@ -152,6 +152,64 @@ void testMultipleScenarios() { }
 
 The framework includes rows matching any of the specified scenarios.
 
+### Scenario Filtering in JSON
+
+Include the scenario marker as the first key in each JSON object:
+
+```json
+[
+  {"[Scenario]": "testCreate", "id": 1, "name": "Alice", "email": "alice@example.com"},
+  {"[Scenario]": "testCreate", "id": 2, "name": "Bob", "email": "bob@example.com"},
+  {"[Scenario]": "testUpdate", "id": 3, "name": "Charlie", "email": "charlie@example.com"},
+  {"[Scenario]": "testDelete", "id": 4, "name": "Diana", "email": "diana@example.com"}
+]
+```
+
+For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
+
+### Scenario Filtering in YAML
+
+Include the scenario marker as the first key in each YAML mapping:
+
+```yaml
+- "[Scenario]": testCreate
+  id: 1
+  name: Alice
+  email: alice@example.com
+- "[Scenario]": testCreate
+  id: 2
+  name: Bob
+  email: bob@example.com
+- "[Scenario]": testUpdate
+  id: 3
+  name: Charlie
+  email: charlie@example.com
+- "[Scenario]": testDelete
+  id: 4
+  name: Diana
+  email: diana@example.com
+```
+
+For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
+
+### Empty Scenario Values
+
+Rows with empty, blank, or null scenario values are always included regardless of the active scenario filter. This applies to all formats (CSV, TSV, JSON, YAML).
+
+```csv
+[Scenario],id,name
+testCreate,1,Alice
+,2,Bob
+testCreate,3,Charlie
+```
+
+For test method `testCreate`, rows 1, 2, and 3 are all included:
+
+- Row 1 and 3: match the scenario name `testCreate`
+- Row 2: included because the scenario value is empty (shared data)
+
+This behavior is useful for common reference data that every scenario requires.
+
 ## Special Values
 
 ### NULL Values
