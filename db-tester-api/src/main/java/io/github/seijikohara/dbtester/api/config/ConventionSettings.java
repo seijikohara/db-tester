@@ -128,7 +128,7 @@ public final class ConventionSettings {
    * Creates a convention instance populated with the framework defaults.
    *
    * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
-   *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, CSV format, UNION_ALL merge strategy,
+   *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, AUTO format, UNION_ALL merge strategy,
    *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, no global exclude columns, no
    *     global column strategies, ORDERED row ordering, no query timeout, no retry, and
    *     SINGLE_TRANSACTION transaction mode
@@ -494,7 +494,7 @@ public final class ConventionSettings {
     private String scenarioMarker = DEFAULT_SCENARIO_MARKER;
 
     /** The data format to use when loading dataset files. */
-    private DataFormat dataFormat = DataFormat.CSV;
+    private DataFormat dataFormat = DataFormat.AUTO;
 
     /** The strategy for merging tables. */
     private TableMergeStrategy tableMergeStrategy = TableMergeStrategy.UNION_ALL;

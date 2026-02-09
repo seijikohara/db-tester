@@ -207,6 +207,11 @@ public final class DataSetExporter {
    * @throws DatabaseTesterException if no provider is found for the format
    */
   private static ExportProvider findProvider(final DataFormat format) {
+    if (format == DataFormat.AUTO) {
+      throw new IllegalArgumentException(
+          "AUTO format cannot be used for export."
+              + " Specify a concrete format: CSV, TSV, JSON, or YAML.");
+    }
     return ServiceLoader.load(ExportProvider.class).stream()
         .map(ServiceLoader.Provider::get)
         .filter(provider -> provider.supportedFormat() == format)
