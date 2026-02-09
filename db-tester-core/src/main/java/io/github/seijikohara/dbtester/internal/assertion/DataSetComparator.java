@@ -271,7 +271,7 @@ public class DataSetComparator {
   public void assertEqualsIgnoreColumns(
       final Table expected, final Table actual, final Collection<String> ignoreColumnNames) {
     final var result = new ComparisonResult();
-    final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
@@ -317,7 +317,7 @@ public class DataSetComparator {
       final Collection<String> ignoreColumnNames,
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     final var result = new ComparisonResult();
-    final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
@@ -427,7 +427,7 @@ public class DataSetComparator {
       final Collection<String> ignoreColumnNames,
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     final var result = new ComparisonResult();
-    final var ignoreSet = Set.copyOf(ignoreColumnNames);
+    final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
     final var tableName = expected.getName().value();
     final var expectedRows = expected.getRows();
     final var actualRows = actual.getRows();
@@ -682,7 +682,7 @@ public class DataSetComparator {
       final ComparisonResult result) {
     final var columnsToCompare =
         expected.getValues().keySet().stream()
-            .filter(columnName -> !ignoreSet.contains(columnName.value()))
+            .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
             .collect(Collectors.toSet());
     compareRowColumns(tableName, rowIndex, expected, actual, columnsToCompare, result);
   }
@@ -1136,5 +1136,17 @@ public class DataSetComparator {
    */
   private @Nullable Object extractValueOrNull(final @Nullable CellValue dataValue) {
     return Optional.ofNullable(dataValue).map(CellValue::value).orElse(null);
+  }
+
+  /**
+   * Normalizes column names to uppercase for case-insensitive comparison.
+   *
+   * @param columnNames the column names to normalize
+   * @return an immutable set of uppercase column names
+   */
+  private static Set<String> normalizeColumnNames(final Collection<String> columnNames) {
+    return columnNames.stream()
+        .map(name -> name.toUpperCase(Locale.ROOT))
+        .collect(Collectors.toUnmodifiableSet());
   }
 }
