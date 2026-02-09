@@ -1,6 +1,6 @@
 # DB Tester
 
-A database testing framework for JUnit, Spock, and Kotest with CSV-based test data management.
+A database testing framework for JUnit, Spock, and Kotest with multi-format test data management (CSV, TSV, JSON, YAML).
 
 ## Project Overview
 
@@ -10,6 +10,7 @@ See @README.md for project details.
 
 - `db-tester-api` - Public API (annotations, configuration, SPI)
 - `db-tester-core` - Internal implementation (SPI providers, JDBC operations)
+- `db-tester-spring-support` - Common Spring utilities for DataSource registration
 - `db-tester-junit` - JUnit extension
 - `db-tester-spock` - Spock extension
 - `db-tester-kotest` - Kotest AnnotationSpec extension

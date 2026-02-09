@@ -405,7 +405,7 @@ Identifiers must match the following pattern:
 
 | Example | Description |
 |---------|-------------|
-| `USERS` | Simple uppercase name |
+| `USERS` | Standard uppercase name |
 | `user_accounts` | Lowercase with underscores |
 | `_temp_table` | Starting with underscore |
 | `public.users` | Schema-qualified name |
@@ -436,8 +436,8 @@ The framework derives identifiers from:
 
 | Source | Example |
 |--------|---------|
-| CSV/TSV filename | `USERS.csv` → table `USERS` |
-| CSV/TSV header row | `ID,NAME,EMAIL` → columns |
+| Dataset filename | `USERS.csv` → table `USERS` |
+| CSV/TSV header row or JSON/YAML keys | `ID,NAME,EMAIL` → columns |
 | `@DataSetSource` attributes | Custom paths and names |
 
 Ensure all data files follow the naming conventions to avoid validation errors.
@@ -446,7 +446,7 @@ Ensure all data files follow the naming conventions to avoid validation errors.
 
 ### String to SQL Type
 
-The framework converts string values from CSV or TSV to appropriate SQL types:
+The framework converts string values from dataset files to appropriate SQL types:
 
 | Target SQL Type | Conversion Method |
 |-----------------|-------------------|

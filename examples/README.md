@@ -6,9 +6,9 @@ This directory contains example tests demonstrating the features of the DB Teste
 
 - **Convention-Based Testing** - CSV file resolution based on test class and method names
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
-- **Data Formats** - CSV and TSV file format support
+- **Data Formats** - CSV, TSV, JSON, and YAML file format support
 - **Table Merge Strategies** - FIRST, LAST, UNION, UNION_ALL merge behaviors
-- **Comparison Strategies** - STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, NOT_NULL, REGEX comparisons
+- **Comparison Strategies** - STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, CONTAINS, RANGE comparisons
 - **Property-Based Configuration** - Spring Boot property binding for DB Tester settings
 
 ## Prerequisites
@@ -48,6 +48,41 @@ This directory contains example tests demonstrating the features of the DB Teste
 ```bash
 ./gradlew :examples:db-tester-example-junit:test --info
 ```
+
+## Feature Coverage (JUnit Examples)
+
+| Feature | Test Class |
+|---------|-----------|
+| Convention-based data loading | `MinimalExampleTest` |
+| Nested class conventions | `NestedConventionTest` |
+| Scenario filtering | `ScenarioFilteringTest` |
+| CSV format | `DataFormatTest` (CsvFormatTest) |
+| TSV format | `DataFormatTest` (TsvFormatTest) |
+| JSON format | `DataFormatTest` (JsonFormatTest) |
+| YAML format | `DataFormatTest` (YamlFormatTest) |
+| All database operations | `OperationVariationsTest` |
+| Batch size configuration | `OperationVariationsTest` (shouldUseBatchInsertOperation) |
+| Column comparison strategies | `ColumnStrategyAnnotationTest` |
+| Programmatic assertions | `ComparisonStrategyTest` |
+| Partial column validation | `PartialColumnValidationTest` |
+| Custom expectation paths | `CustomExpectationPathsTest` |
+| Custom query validation | `CustomQueryValidationTest` |
+| Table merge strategies | `TableMergeStrategyTest` |
+| Table ordering strategies | `TableOrderingStrategiesTest` |
+| Multiple DataSources | `MultipleDataSourceTest` |
+| Annotation configuration | `AnnotationConfigurationTest` |
+| Configuration customization | `ConfigurationCustomizationTest` |
+| Annotation inheritance | `InheritedAnnotationTest` |
+| Null and empty values | `NullAndEmptyValuesTest` |
+| Comprehensive data types | `ComprehensiveDataTypesTest` |
+| Error handling | `ErrorHandlingTest` |
+| Template expressions (UUID) | `TemplateExpressionTest` (UuidExpressionTest) |
+| Template expressions (Sequence) | `TemplateExpressionTest` (SequenceExpressionTest) |
+| Template expressions (Timestamp) | `TemplateExpressionTest` (TimestampExpressionTest) |
+| Template expressions (Datafaker) | `TemplateExpressionTest` (FakerExpressionTest) |
+| Dataset export (CSV, JSON, YAML) | `DataSetExportTest` |
+| Export configuration | `DataSetExportTest` (CustomConfigTests) |
+| Programmatic assertion API | `ProgrammaticAssertionApiTest` |
 
 ## Related Modules
 

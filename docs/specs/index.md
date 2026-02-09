@@ -35,7 +35,7 @@ features:
   - icon:
       src: /icons/data-formats.svg
     title: Flexible Data Formats
-    details: CSV and TSV support with scenario filtering for sharing datasets across multiple tests.
+    details: CSV, TSV, JSON, and YAML support with scenario filtering for sharing datasets across multiple tests.
   - icon:
       src: /icons/database.svg
     title: Database Operations

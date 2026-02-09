@@ -22,6 +22,7 @@ Declares the datasets to apply before a test method executes.
 | `sources` | `DataSetSource[]` | `{}` | Dataset sources to execute; empty triggers convention-based discovery |
 | `operation` | `Operation` | `CLEAN_INSERT` | Database operation to apply |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
+| `batchSize` | `int` | `-1` | Rows per batch for INSERT operations; `-1` uses global setting, `0` uses single batch |
 
 **Annotation Inheritance**:
 
@@ -622,6 +623,123 @@ if (!failures.isEmpty()) {
 }
 ```
 
+## Export API
+
+### DataSetExporter
+
+Static facade for exporting database content to files. This utility class delegates to format-specific implementations loaded via the `ExportProvider` SPI.
+
+**Location**: `io.github.seijikohara.dbtester.api.export.DataSetExporter`
+
+**Type**: Utility class (non-instantiable, static methods only)
+
+**Static Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `export(DataSource, List<String>, Path, DataFormat)` | Exports tables to files in the specified format with default configuration |
+| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | Exports tables to files with custom configuration |
+| `exportQuery(DataSource, String, String, Path, DataFormat)` | Exports SQL query results to a file with default configuration |
+| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | Exports SQL query results to a file with custom configuration |
+| `csv(DataSource, List<String>, Path)` | Exports tables to CSV files (convenience method) |
+| `tsv(DataSource, List<String>, Path)` | Exports tables to TSV files (convenience method) |
+| `json(DataSource, List<String>, Path)` | Exports tables to JSON files (convenience method) |
+| `yaml(DataSource, List<String>, Path)` | Exports tables to YAML files (convenience method) |
+
+**Example**:
+
+```java
+// Export tables to CSV files
+DataSetExporter.csv(dataSource, List.of("USERS", "ORDERS"), Paths.get("export"));
+
+// Export with custom configuration
+var config = ExportConfiguration.builder()
+    .lobHandling(LobHandling.OMIT)
+    .writeLoadOrderFile(true)
+    .build();
+DataSetExporter.export(dataSource, List.of("USERS"), Paths.get("export"), DataFormat.JSON, config);
+
+// Export query result
+DataSetExporter.exportQuery(
+    dataSource,
+    "SELECT * FROM USERS WHERE active = true",
+    "ACTIVE_USERS",
+    Paths.get("export"),
+    DataFormat.CSV);
+```
+
+### ExportConfiguration
+
+Configuration for data export operations.
+
+**Location**: `io.github.seijikohara.dbtester.api.export.ExportConfiguration`
+
+**Factory Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `defaults()` | `ExportConfiguration` | Creates a configuration with default values |
+| `builder()` | `Builder` | Creates a new builder for custom configuration |
+
+**Configuration Properties**:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `nullValue` | `String` | `""` | String representation for null values in delimited formats |
+| `dateFormatter` | `DateTimeFormatter` | `ISO_LOCAL_DATE` | Formatter for date values (`yyyy-MM-dd`) |
+| `timeFormatter` | `DateTimeFormatter` | `ISO_LOCAL_TIME` | Formatter for time values (`HH:mm:ss`) |
+| `timestampFormatter` | `DateTimeFormatter` | `yyyy-MM-dd HH:mm:ss` | Formatter for timestamp values |
+| `lobHandling` | `LobHandling` | `BASE64` | Handling strategy for LOB columns |
+| `writeLoadOrderFile` | `boolean` | `false` | Whether to generate a load order file |
+| `loadOrderFileName` | `String` | `load-order.txt` | Name of the load order file |
+
+**Example**:
+
+```java
+// Using defaults
+var config = ExportConfiguration.defaults();
+
+// Custom configuration
+var config = ExportConfiguration.builder()
+    .nullValue("NULL")
+    .lobHandling(LobHandling.OMIT)
+    .writeLoadOrderFile(true)
+    .build();
+```
+
+### LobHandling
+
+Enum defining how LOB (Large Object) columns are handled during export.
+
+**Location**: `io.github.seijikohara.dbtester.api.export.LobHandling`
+
+**Values**:
+
+| Value | Description |
+|-------|-------------|
+| `BASE64` | Exports LOB values as Base64-encoded strings with `[BASE64]` prefix. Supports round-trip export and import. |
+| `OMIT` | Excludes LOB columns from export. Use when binary data is not needed or to reduce file size. |
+
+### ExportProvider (SPI)
+
+SPI for implementing format-specific export logic.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.ExportProvider`
+
+**Type**: `interface`
+
+**Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `supportedFormat()` | `DataFormat` | Returns the data format this provider handles |
+| `export(DataSource, List<String>, Path, ExportConfiguration)` | `void` | Exports tables to files |
+| `exportQuery(DataSource, String, String, Path, ExportConfiguration)` | `void` | Exports SQL query results to a file |
+
+**Discovery**: Providers are discovered via `java.util.ServiceLoader`. Register implementations in `META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`.
+
+**Thread Safety**: Implementations must be thread-safe and stateless.
+
 ## Exceptions
 
 All exceptions extend `DatabaseTesterException`.
@@ -669,7 +787,7 @@ Indicates failure to load dataset files.
 
 - File not found
 - Invalid file format
-- Parse errors in CSV or TSV content
+- Parse errors in CSV, TSV, JSON, or YAML content
 
 ### DataSourceNotFoundException
 
@@ -713,6 +831,7 @@ This table lists the default values for all configurable attributes.
 | `@DataSet` | `sources` | `{}` | Convention-based discovery |
 | `@DataSet` | `operation` | `CLEAN_INSERT` | Delete all rows then insert |
 | `@DataSet` | `tableOrdering` | `AUTO` | Automatic ordering |
+| `@DataSet` | `batchSize` | `-1` | Use global setting |
 | `@ExpectedDataSet` | `sources` | `{}` | Convention-based discovery |
 | `@ExpectedDataSet` | `tableOrdering` | `AUTO` | Automatic ordering |
 | `@ExpectedDataSet` | `rowOrdering` | `ORDERED` | Positional row comparison |

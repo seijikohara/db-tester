@@ -1,18 +1,20 @@
 ---
 title: "Data Formats - DB Tester"
-description: "Learn about CSV and TSV data formats, value syntax, and special handling."
+description: "Learn about CSV, TSV, JSON, and YAML data formats, value syntax, and special handling."
 ---
 
 # DB Tester Specification - Data Formats
 
 ## Supported Formats
 
-The framework supports two delimited text formats for dataset files:
+The framework supports four data formats: two delimited text formats (CSV, TSV) and two structured formats (JSON, YAML).
 
 | Format | Extension | Delimiter | Default |
 |--------|-----------|-----------|---------|
 | CSV | `.csv` | Comma (`,`) | Yes |
 | TSV | `.tsv` | Tab (`\t`) | No |
+| JSON | `.json` | — | No |
+| YAML | `.yaml` | — | No |
 
 ### Format Selection
 
@@ -64,6 +66,36 @@ order_id	user_id	amount	status
 1001	1	99.99	PENDING
 1002	2	149.50	COMPLETED
 ```
+
+### Example JSON
+
+File: `USERS.json`
+
+```json
+[
+  {"id": 1, "name": "Alice", "email": "alice@example.com", "created_at": "2024-01-01 00:00:00"},
+  {"id": 2, "name": "Bob", "email": "bob@example.com", "created_at": "2024-01-02 00:00:00"}
+]
+```
+
+Each JSON file contains an array of objects. Each object represents a row, with key-value pairs representing column-value mappings.
+
+### Example YAML
+
+File: `USERS.yaml`
+
+```yaml
+- id: 1
+  name: Alice
+  email: alice@example.com
+  created_at: "2024-01-01 00:00:00"
+- id: 2
+  name: Bob
+  email: bob@example.com
+  created_at: "2024-01-02 00:00:00"
+```
+
+Each YAML file contains a list of mappings. Each mapping represents a row, with key-value pairs representing column-value mappings.
 
 ## Scenario Filtering
 
@@ -326,6 +358,31 @@ Follows RFC 4180 with extensions:
 | Quote character | Double quote (`"`) |
 | Escape sequence | `""` for embedded quotes |
 | Newline handling | CRLF and LF supported |
+
+### JSON Parsing
+
+The framework uses Jackson `ObjectMapper` to parse JSON files.
+
+| Rule | Description |
+|------|-------------|
+| Structure | Array of objects |
+| Column order | Determined by key order of the first object |
+| Null handling | JSON `null` maps to SQL NULL |
+| Value conversion | All non-null values are converted to strings |
+| Scenario filtering | Supported; include the scenario marker as the first key in each object |
+
+### YAML Parsing
+
+The framework uses Jackson YAML module (`YAMLMapper`) to parse YAML files.
+
+| Rule | Description |
+|------|-------------|
+| Structure | List of mappings |
+| Column order | Determined by key order of the first mapping |
+| Null handling | YAML `null` or `~` maps to SQL NULL |
+| Value conversion | All non-null values are converted to strings |
+| Comments | Supported and ignored during parsing |
+| Scenario filtering | Supported; include the scenario marker as the first key in each mapping |
 
 ### Header Row Requirements
 

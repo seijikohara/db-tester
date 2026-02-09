@@ -197,6 +197,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
     @ExpectedDataSet
     def 'should create user'() { }
 }
+```
 
 ### Feature Method Naming
 
@@ -433,7 +434,7 @@ db-tester.enabled=true
 # Auto-register DataSource beans (default: true)
 db-tester.auto-register-data-sources=true
 
-# Data format (CSV or TSV)
+# Data format (CSV, TSV, JSON, or YAML)
 db-tester.convention.data-format=CSV
 
 # Expectation directory suffix
@@ -612,7 +613,7 @@ flowchart TD
 | Phase | Error Type | Behavior |
 |-------|------------|----------|
 | DataSet | `DatabaseOperationException` | Test fails before execution |
-| Test | Any exception | ExpectedDataSet still runs |
+| Test | Any exception | ExpectedDataSet is skipped |
 | ExpectedDataSet | `ValidationException` | Test fails with comparison details |
 
 ## Related Specifications

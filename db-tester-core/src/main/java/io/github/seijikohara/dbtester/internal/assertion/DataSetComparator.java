@@ -469,13 +469,10 @@ public class DataSetComparator {
               }
             });
 
-    // Report any unmatched actual rows (extra rows)
+    // Report any unmatched actual rows (extra rows in database)
     unmatchedActualIndices.forEach(
         actualIndex ->
-            result.addRowCountMismatch(
-                tableName,
-                expectedRows.size() - unmatchedActualIndices.size(),
-                actualRows.size() - unmatchedActualIndices.size() + 1));
+            reportUnmatchedActualRow(tableName, actualIndex, actualRows.get(actualIndex), result));
 
     result.assertNoDifferences();
   }
@@ -559,6 +556,33 @@ public class DataSetComparator {
                     columnName.value(),
                     extractValueOrNull(expectedValue),
                     "[no matching row]"));
+  }
+
+  /**
+   * Reports an unmatched actual row by adding value mismatches for all columns.
+   *
+   * <p>This indicates an extra row in the database that has no corresponding expected row.
+   *
+   * @param tableName the table name
+   * @param actualIndex the actual row index
+   * @param actualRow the unmatched actual row
+   * @param result the result collector
+   */
+  private void reportUnmatchedActualRow(
+      final String tableName,
+      final int actualIndex,
+      final Row actualRow,
+      final ComparisonResult result) {
+    actualRow
+        .getValues()
+        .forEach(
+            (columnName, actualValue) ->
+                result.addValueMismatch(
+                    tableName,
+                    actualIndex,
+                    columnName.value(),
+                    "[no matching row]",
+                    extractValueOrNull(actualValue)));
   }
 
   /**

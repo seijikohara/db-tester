@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -742,5 +743,161 @@ class DataSetComparatorTest {
           exception.getMessage().contains("NAME"),
           "exception message should mention the differing column");
     }
+  }
+
+  /** Tests for the assertEqualsUnorderedWithStrategies(Table, Table, Collection, Map) method. */
+  @Nested
+  @DisplayName("assertEqualsUnorderedWithStrategies(Table, Table, Collection, Map) method")
+  class AssertEqualsUnorderedWithStrategiesMethod {
+
+    /** Tests for the assertEqualsUnorderedWithStrategies method. */
+    AssertEqualsUnorderedWithStrategiesMethod() {}
+
+    /** Verifies that unordered comparison passes when rows match in different order. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass when rows match in different order")
+    void shouldPass_whenRowsMatchInDifferentOrder() {
+      // Given
+      final var expected =
+          createTableWithRows(
+              "USERS", List.of("ID", "NAME"), List.of(List.of("1", "Alice"), List.of("2", "Bob")));
+      final var actual =
+          createTableWithRows(
+              "USERS", List.of("ID", "NAME"), List.of(List.of("2", "Bob"), List.of("1", "Alice")));
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              comparator.assertEqualsUnorderedWithStrategies(expected, actual, Set.of(), Map.of()),
+          "should not throw when rows match regardless of order");
+    }
+
+    /** Verifies that unmatched actual rows are reported with cell values. */
+    @Test
+    @Tag("error")
+    @DisplayName("should report unmatched actual rows when actual has extra rows")
+    void shouldReportUnmatchedActualRows_whenActualHasExtraRows() {
+      // Given
+      final var expected =
+          createTableWithRows("USERS", List.of("ID", "NAME"), List.of(List.of("1", "Alice")));
+      final var actual =
+          createTableWithRows(
+              "USERS", List.of("ID", "NAME"), List.of(List.of("1", "Alice"), List.of("2", "Bob")));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsUnorderedWithStrategies(
+                      expected, actual, Set.of(), Map.of()));
+
+      final var message = exception.getMessage();
+      assertAll(
+          "should report extra actual row details",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("[no matching row]"),
+                  "should report unmatched actual row"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("row_count"),
+                  "should report row count mismatch"));
+    }
+
+    /** Verifies that unmatched expected rows are reported when no match found. */
+    @Test
+    @Tag("error")
+    @DisplayName("should report unmatched expected rows when no match found")
+    void shouldReportUnmatchedExpectedRows_whenNoMatchFound() {
+      // Given
+      final var expected =
+          createTableWithRows(
+              "USERS", List.of("ID", "NAME"), List.of(List.of("1", "Alice"), List.of("2", "Bob")));
+      final var actual =
+          createTableWithRows(
+              "USERS",
+              List.of("ID", "NAME"),
+              List.of(List.of("1", "Alice"), List.of("3", "Charlie")));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsUnorderedWithStrategies(
+                      expected, actual, Set.of(), Map.of()));
+
+      final var message = exception.getMessage();
+      assertAll(
+          "should report both unmatched expected and actual rows",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("[no matching row]"),
+                  "should contain no matching row marker"));
+    }
+
+    /** Verifies that both expected and actual mismatches are reported when rows differ. */
+    @Test
+    @Tag("error")
+    @DisplayName("should report both mismatches when expected and actual rows completely differ")
+    void shouldReportBothMismatches_whenExpectedAndActualHaveUnmatchedRows() {
+      // Given
+      final var expected =
+          createTableWithRows(
+              "USERS", List.of("ID", "NAME"), List.of(List.of("1", "Alice"), List.of("2", "Bob")));
+      final var actual =
+          createTableWithRows(
+              "USERS",
+              List.of("ID", "NAME"),
+              List.of(List.of("3", "Charlie"), List.of("4", "Diana")));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsUnorderedWithStrategies(
+                      expected, actual, Set.of(), Map.of()));
+
+      final var message = exception.getMessage();
+      assertAll(
+          "should report mismatches in both directions",
+          () -> assertNotNull(message, "exception message should not be null"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("[no matching row]"),
+                  "should contain no matching row markers"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("USERS"), "should mention the table name"));
+    }
+  }
+
+  /**
+   * Creates a Table with multiple rows and multiple columns.
+   *
+   * @param tableName the table name
+   * @param columnNames the column names
+   * @param rowsData the values for each row (list of lists)
+   * @return the created Table
+   */
+  private static Table createTableWithRows(
+      final String tableName, final List<String> columnNames, final List<List<String>> rowsData) {
+    final var columns = columnNames.stream().map(ColumnName::new).toList();
+    final var rows =
+        rowsData.stream()
+            .map(
+                values -> {
+                  final var map = new java.util.LinkedHashMap<ColumnName, CellValue>();
+                  IntStream.range(0, columns.size())
+                      .forEach(i -> map.put(columns.get(i), new CellValue(values.get(i))));
+                  return (Row) new SimpleRow(map);
+                })
+            .toList();
+    return new SimpleTable(new TableName(tableName), columns, rows);
   }
 }

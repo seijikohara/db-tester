@@ -120,7 +120,7 @@ db-tester:
 | `db-tester.convention.base-directory` | Base directory for datasets | `null` (classpath) |
 | `db-tester.convention.expectation-suffix` | Suffix for expectation datasets | `/expected` |
 | `db-tester.convention.scenario-marker` | Column name for scenario filtering | `[Scenario]` |
-| `db-tester.convention.data-format` | Dataset file format (`CSV`, `TSV`) | `CSV` |
+| `db-tester.convention.data-format` | Dataset file format (`CSV`, `TSV`, `JSON`, `YAML`) | `CSV` |
 | `db-tester.convention.table-merge-strategy` | Table merge strategy | `UNION_ALL` |
 | `db-tester.operation.preparation` | Default preparation operation | `CLEAN_INSERT` |
 | `db-tester.operation.expectation` | Default expectation operation | `NONE` |
@@ -161,6 +161,7 @@ static void setup(ExtensionContext context) {
 |--------|-------------|
 | [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
 | [`db-tester-core`](../db-tester-core/) | Internal implementation (loaded at runtime) |
+| [`db-tester-spring-support`](../db-tester-spring-support/) | Common Spring utilities for DataSource registration |
 | [`db-tester-junit`](../db-tester-junit/) | JUnit integration (base module) |
 
 ## Documentation

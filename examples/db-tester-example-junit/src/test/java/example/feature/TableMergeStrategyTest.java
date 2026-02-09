@@ -7,18 +7,12 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
-import io.github.seijikohara.dbtester.api.config.DataFormat;
-import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -137,21 +131,7 @@ final class TableMergeStrategyTest {
       final var config =
           Configuration.builder()
               .conventions(
-                  ConventionSettings.builder()
-                      .baseDirectory(null)
-                      .expectationSuffix("/expected")
-                      .scenarioMarker("[Scenario]")
-                      .dataFormat(DataFormat.CSV)
-                      .tableMergeStrategy(TableMergeStrategy.FIRST) // FIRST strategy
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                      .build())
+                  ConventionSettings.builder().tableMergeStrategy(TableMergeStrategy.FIRST).build())
               .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
@@ -237,21 +217,7 @@ final class TableMergeStrategyTest {
       final var config =
           Configuration.builder()
               .conventions(
-                  ConventionSettings.builder()
-                      .baseDirectory(null)
-                      .expectationSuffix("/expected")
-                      .scenarioMarker("[Scenario]")
-                      .dataFormat(DataFormat.CSV)
-                      .tableMergeStrategy(TableMergeStrategy.LAST) // LAST strategy
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                      .build())
+                  ConventionSettings.builder().tableMergeStrategy(TableMergeStrategy.LAST).build())
               .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
@@ -337,21 +303,7 @@ final class TableMergeStrategyTest {
       final var config =
           Configuration.builder()
               .conventions(
-                  ConventionSettings.builder()
-                      .baseDirectory(null)
-                      .expectationSuffix("/expected")
-                      .scenarioMarker("[Scenario]")
-                      .dataFormat(DataFormat.CSV)
-                      .tableMergeStrategy(TableMergeStrategy.UNION) // UNION strategy
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                      .build())
+                  ConventionSettings.builder().tableMergeStrategy(TableMergeStrategy.UNION).build())
               .build();
       DatabaseTestExtension.setConfiguration(context, config);
 
@@ -434,24 +386,12 @@ final class TableMergeStrategyTest {
     static void setupDatabase(final ExtensionContext context) throws Exception {
       logger.info("Setting up database for UNION_ALL merge strategy test");
 
+      // UNION_ALL is the default strategy, but we explicitly configure it for clarity
       final var config =
           Configuration.builder()
               .conventions(
                   ConventionSettings.builder()
-                      .baseDirectory(null)
-                      .expectationSuffix("/expected")
-                      .scenarioMarker("[Scenario]")
-                      .dataFormat(DataFormat.CSV)
-                      .tableMergeStrategy(
-                          TableMergeStrategy.UNION_ALL) // UNION_ALL strategy (default)
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
+                      .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
                       .build())
               .build();
       DatabaseTestExtension.setConfiguration(context, config);

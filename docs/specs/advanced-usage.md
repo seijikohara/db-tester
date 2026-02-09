@@ -16,9 +16,9 @@ to insert parent records before child records.
 
 | Strategy | Description |
 |----------|-------------|
-| `AUTO` | Processes tables alphabetically (default) |
+| `AUTO` | Cascades through strategies: uses `load-order.txt` if present, then foreign key metadata, then alphabetical order (default) |
 | `FOREIGN_KEY` | Resolves insertion order based on foreign key constraints |
-| `TABLE_ORDERING_FILE` | Uses explicit ordering defined in `table-ordering.txt` |
+| `LOAD_ORDER_FILE` | Uses explicit ordering defined in `load-order.txt` |
 
 ### Example: Parent-Child Tables
 
@@ -50,9 +50,9 @@ ID,USER_ID,AMOUNT,STATUS
 1002,2,149.50,COMPLETED
 ```
 
-### Using table-ordering.txt
+### Using load-order.txt
 
-Create `table-ordering.txt` in the dataset directory to specify insertion order:
+Create `load-order.txt` in the dataset directory to specify insertion order:
 
 ```
 USERS
@@ -62,9 +62,9 @@ ORDER_ITEMS
 
 ```java
 @Test
-@DataSet(tableOrdering = TableOrderingStrategy.TABLE_ORDERING_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 void shouldFollowExplicitTableOrder() throws SQLException {
-    // Tables processed in the order listed in table-ordering.txt
+    // Tables processed in the order listed in load-order.txt
 }
 ```
 
@@ -298,13 +298,13 @@ void shouldProcessAsyncEvent() throws SQLException {
 ### Global Retry Configuration
 
 ```java
-var operations = OperationDefaults.builder()
+var conventions = ConventionSettings.builder()
     .retryCount(3)
     .retryDelay(Duration.ofMillis(200))
     .build();
 
 var config = Configuration.builder()
-    .operations(operations)
+    .conventions(conventions)
     .build();
 ```
 
@@ -459,11 +459,43 @@ void testWithSharedData() { }
 
 Explicit paths are useful for sharing datasets across test classes.
 
+## 9. Template Expressions
+
+CSV dataset values support template expressions that generate dynamic values at load time.
+
+### Supported Expressions
+
+| Expression | Description | Example Output |
+|------------|-------------|----------------|
+| `${uuid}` | Random UUID | `550e8400-e29b-41d4-a716-446655440000` |
+| `${sequence:N}` | Set sequence counter to N and return N | `1` |
+| `${sequence}` | Increment and return next sequence value | `2`, `3`, `4`, ... |
+| `${now}` | Current timestamp in ISO-8601 format | `2024-01-15T10:30:00` |
+| `${now+Xd}` | Relative future date (d=days, h=hours, m=minutes, s=seconds) | `2024-01-22T10:30:00` |
+| `${now-Xd}` | Relative past date | `2024-01-08T10:30:00` |
+| `${faker.xxx.yyy}` | Datafaker expression (optional dependency) | Varies |
+
+### Example CSV
+
+```csv
+ID,NAME,EMAIL,CREATED_AT
+${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
+```
+
+### Datafaker Integration
+
+The `${faker.xxx.yyy}` template requires [Datafaker](https://www.datafaker.net/) as a runtime dependency. Add it to your test dependencies:
+
+```kotlin
+testRuntimeOnly("net.datafaker:datafaker:VERSION")
+```
+
+If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
+
 ## Related Documentation
 
 - [Getting Started](getting-started) - First test setup
-- [Public API](public-api) - Annotation and configuration reference
+- [Public API](public-api) - Annotation, configuration, and comparison strategy reference
 - [Configuration](configuration) - Framework configuration details
-- [Data Formats](data-formats) - CSV and TSV format specification
-- [Comparison](comparison) - Comparison strategy details
+- [Data Formats](data-formats) - Data format specification
 - [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration

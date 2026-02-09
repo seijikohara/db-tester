@@ -192,6 +192,19 @@ class TemplateProcessorTest {
       // Then
       assertEquals("ID-2", result, "should resolve sequence within text");
     }
+
+    /** Verifies that process returns malformed sequence expression unchanged. */
+    @Test
+    @Tag("error")
+    @DisplayName("should return expression unchanged when sequence start value is not a number")
+    void shouldReturnExpressionUnchanged_whenSequenceStartValueIsNotANumber() {
+      // When
+      final var result = processor.process("${sequence:abc}");
+
+      // Then
+      assertEquals(
+          "${sequence:abc}", result, "should return malformed sequence expression unchanged");
+    }
   }
 
   /** Tests for the process() method with UUID expressions. */

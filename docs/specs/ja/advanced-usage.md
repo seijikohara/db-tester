@@ -16,9 +16,9 @@ description: "外部キー、シナリオフィルタリング、比較戦略、
 
 | 戦略 | 説明 |
 |------|------|
-| `AUTO` | テーブルをアルファベット順に処理（デフォルト） |
+| `AUTO` | 戦略をカスケード実行: `load-order.txt`が存在すれば使用、次に外部キーメタデータ、次にアルファベット順（デフォルト） |
 | `FOREIGN_KEY` | 外部キー制約に基づいて挿入順序を解決 |
-| `TABLE_ORDERING_FILE` | `table-ordering.txt` で定義された順序を使用 |
+| `LOAD_ORDER_FILE` | `load-order.txt` で定義された順序を使用 |
 
 ### 例: 親子テーブル
 
@@ -50,9 +50,9 @@ ID,USER_ID,AMOUNT,STATUS
 1002,2,149.50,COMPLETED
 ```
 
-### table-ordering.txt の使用
+### load-order.txt の使用
 
-データセットディレクトリに `table-ordering.txt` を作成して挿入順序を指定します:
+データセットディレクトリに `load-order.txt` を作成して挿入順序を指定します:
 
 ```
 USERS
@@ -62,9 +62,9 @@ ORDER_ITEMS
 
 ```java
 @Test
-@DataSet(tableOrdering = TableOrderingStrategy.TABLE_ORDERING_FILE)
+@DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
 void shouldFollowExplicitTableOrder() throws SQLException {
-    // table-ordering.txt に記載された順序でテーブルを処理
+    // load-order.txt に記載された順序でテーブルを処理
 }
 ```
 
@@ -297,13 +297,13 @@ void shouldProcessAsyncEvent() throws SQLException {
 ### グローバルリトライ設定
 
 ```java
-var operations = OperationDefaults.builder()
+var conventions = ConventionSettings.builder()
     .retryCount(3)
     .retryDelay(Duration.ofMillis(200))
     .build();
 
 var config = Configuration.builder()
-    .operations(operations)
+    .conventions(conventions)
     .build();
 ```
 
@@ -458,11 +458,43 @@ void testWithSharedData() { }
 
 明示的パスは、テストクラス間でデータセットを共有する場合に有用です。
 
+## 9. テンプレート式
+
+CSVデータセットの値は、ロード時に動的な値を生成するテンプレート式をサポートします。
+
+### サポートされる式
+
+| 式 | 説明 | 出力例 |
+|----|------|--------|
+| `${uuid}` | ランダムUUID | `550e8400-e29b-41d4-a716-446655440000` |
+| `${sequence:N}` | シーケンスカウンターをNに設定してNを返す | `1` |
+| `${sequence}` | シーケンスをインクリメントして次の値を返す | `2`, `3`, `4`, ... |
+| `${now}` | ISO-8601形式の現在タイムスタンプ | `2024-01-15T10:30:00` |
+| `${now+Xd}` | 相対的な未来の日付（d=日、h=時間、m=分、s=秒） | `2024-01-22T10:30:00` |
+| `${now-Xd}` | 相対的な過去の日付 | `2024-01-08T10:30:00` |
+| `${faker.xxx.yyy}` | Datafaker式（オプション依存） | 式に依存 |
+
+### CSVの例
+
+```csv
+ID,NAME,EMAIL,CREATED_AT
+${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
+```
+
+### Datafaker統合
+
+`${faker.xxx.yyy}` テンプレートは [Datafaker](https://www.datafaker.net/) をランタイム依存として必要とします。テスト依存に追加してください：
+
+```kotlin
+testRuntimeOnly("net.datafaker:datafaker:VERSION")
+```
+
+Datafakerがクラスパスにない場合、`${faker....}` 式は未処理のまま残されます。
+
 ## 関連ドキュメント
 
 - [はじめに](getting-started) - 初回テストのセットアップ
-- [パブリックAPI](public-api) - アノテーションと設定のリファレンス
+- [パブリックAPI](public-api) - アノテーション、設定、比較戦略のリファレンス
 - [設定](configuration) - フレームワーク設定の詳細
-- [データ形式](data-formats) - CSVとTSVの形式仕様
-- [比較](comparison) - 比較戦略の詳細
+- [データ形式](data-formats) - データフォーマット仕様
 - [テストフレームワーク](test-frameworks) - JUnit、Spock、Kotest連携

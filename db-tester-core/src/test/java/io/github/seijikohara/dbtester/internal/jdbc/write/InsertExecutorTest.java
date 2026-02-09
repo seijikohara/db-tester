@@ -731,5 +731,105 @@ class InsertExecutorTest {
       verify(insertStatement, times(4)).addBatch();
       verify(insertStatement, times(2)).executeBatch();
     }
+
+    /**
+     * Verifies that execute flushes after every row when batchSize is 1.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should flush after every row when batchSize is 1")
+    void shouldFlushAfterEveryRow_whenBatchSizeIsOne() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+
+      final var rows =
+          IntStream.range(0, 3)
+              .mapToObj(
+                  i -> {
+                    final var row = mock(Row.class);
+                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    return row;
+                  })
+              .toList();
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(rows);
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+
+      // When: 3 rows with batchSize=1 → flush after every row
+      executor.execute(List.of(table), connection, null, 1);
+
+      // Then: 3 executeBatch calls (one per row)
+      verify(insertStatement, times(3)).addBatch();
+      verify(insertStatement, times(3)).executeBatch();
+    }
+
+    /**
+     * Verifies that execute uses single batch when batchSize exceeds row count.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should use single batch when batchSize exceeds row count")
+    void shouldUseSingleBatch_whenBatchSizeExceedsRowCount() throws SQLException {
+      // Given
+      final var connection = mock(Connection.class);
+      final var metadataStatement = mock(PreparedStatement.class);
+      final var insertStatement = mock(PreparedStatement.class);
+      final var resultSet = mock(ResultSet.class);
+      final var metaData = mock(ResultSetMetaData.class);
+      final var table = mock(Table.class);
+      final var columnName = new ColumnName("ID");
+
+      final var rows =
+          IntStream.range(0, 3)
+              .mapToObj(
+                  i -> {
+                    final var row = mock(Row.class);
+                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    return row;
+                  })
+              .toList();
+
+      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.getRows()).thenReturn(rows);
+      when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
+      when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
+      when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
+          .thenReturn(metadataStatement);
+      when(connection.prepareStatement("INSERT INTO USERS (ID) VALUES (?)"))
+          .thenReturn(insertStatement);
+      when(metadataStatement.executeQuery()).thenReturn(resultSet);
+      when(resultSet.getMetaData()).thenReturn(metaData);
+      when(metaData.getColumnCount()).thenReturn(0);
+      when(parameterBinder.extractColumnTypes(metaData)).thenReturn(Map.of());
+
+      // When: 3 rows with batchSize=100 → single batch (no intermediate flush)
+      executor.execute(List.of(table), connection, null, 100);
+
+      // Then: 1 executeBatch call (all rows in a single batch, flushed at end)
+      verify(insertStatement, times(3)).addBatch();
+      verify(insertStatement, times(1)).executeBatch();
+    }
   }
 }

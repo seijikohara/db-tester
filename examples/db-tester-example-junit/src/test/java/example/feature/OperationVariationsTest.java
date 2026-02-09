@@ -449,4 +449,43 @@ final class OperationVariationsTest {
     // Then
     logger.info("TRUNCATE_TABLE operation completed");
   }
+
+  /**
+   * Demonstrates batch size configuration for large data insertions.
+   *
+   * <p>The {@code batchSize} attribute controls how many rows are flushed per JDBC batch execution.
+   * Setting {@code batchSize = 2} flushes every 2 rows, reducing memory consumption for large
+   * datasets.
+   *
+   * <p>Batch size values:
+   *
+   * <ul>
+   *   <li>{@code -1} (default): Uses global setting from {@code OperationDefaults.batchSize()}
+   *   <li>{@code 0}: Adds all rows to a single batch
+   *   <li>Positive value: Flushes every N rows
+   * </ul>
+   *
+   * <p>Test flow:
+   *
+   * <ul>
+   *   <li>Preparation: CLEAN_INSERT with batchSize=2 - Inserts 5 rows in batches of 2
+   *   <li>Expectation: Verifies all 5 rows exist
+   * </ul>
+   *
+   * @throws Exception if database operation fails
+   */
+  @Test
+  @Tag("normal")
+  @DisplayName("should use batchSize to control JDBC batch flush interval")
+  @DataSet(operation = Operation.CLEAN_INSERT, batchSize = 2)
+  @ExpectedDataSet
+  void shouldUseBatchInsertOperation() throws Exception {
+    // Given
+    logger.info("Running batch insert operation test with batchSize=2");
+
+    // When - data already loaded via @DataSet with batchSize=2
+
+    // Then - all 5 rows inserted across 3 batch flushes (2 + 2 + 1)
+    logger.info("Batch insert operation completed");
+  }
 }

@@ -1,5 +1,5 @@
 -- DDL for DataFormatTest
--- Tests CSV and TSV data format loading
+-- Tests CSV, TSV, JSON, and YAML data format loading
 
 CREATE TABLE IF NOT EXISTS DATA_FORMAT (
     ID INTEGER PRIMARY KEY,

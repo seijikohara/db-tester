@@ -17,3 +17,8 @@ shouldUseTruncateInsertOperation,1,Laptop,10
 shouldUseTruncateInsertOperation,2,Mouse,5
 shouldUseTruncateInsertOperation,3,Monitor,12
 shouldUseTruncateTableOperation,1,Keyboard,25
+shouldUseBatchInsertOperation,1,Alpha,10
+shouldUseBatchInsertOperation,2,Beta,20
+shouldUseBatchInsertOperation,3,Gamma,30
+shouldUseBatchInsertOperation,4,Delta,40
+shouldUseBatchInsertOperation,5,Epsilon,50

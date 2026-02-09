@@ -8,17 +8,11 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
-import io.github.seijikohara.dbtester.api.config.RowOrdering;
-import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -33,17 +27,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Demonstrates different data format configurations (CSV and TSV).
+ * Demonstrates different data format configurations (CSV, TSV, JSON, and YAML).
  *
  * <p>This test demonstrates:
  *
  * <ul>
  *   <li>Using CSV format (default) with {@link DataFormat#CSV}
  *   <li>Using TSV format with {@link DataFormat#TSV}
+ *   <li>Using JSON format with {@link DataFormat#JSON}
+ *   <li>Using YAML format with {@link DataFormat#YAML}
  *   <li>Configuring data format via {@link ConventionSettings}
  * </ul>
  *
- * <p>CSV files use comma (,) as delimiter, TSV files use tab character as delimiter.
+ * <p>CSV files use comma as delimiter, TSV files use tab character as delimiter. JSON files use
+ * arrays of objects, and YAML files use lists of mappings.
  */
 final class DataFormatTest {
 
@@ -135,22 +132,7 @@ final class DataFormatTest {
       // CSV is the default format, but we explicitly configure it for clarity
       final var csvConfig =
           Configuration.builder()
-              .conventions(
-                  ConventionSettings.builder()
-                      .baseDirectory(null) // classpath-relative
-                      .expectationSuffix("/expected") // default expectation suffix
-                      .scenarioMarker("[Scenario]") // default scenario marker
-                      .dataFormat(DataFormat.CSV) // CSV format
-                      .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                      .build())
+              .conventions(ConventionSettings.builder().dataFormat(DataFormat.CSV).build())
               .build();
       DatabaseTestExtension.setConfiguration(context, csvConfig);
 
@@ -250,22 +232,7 @@ final class DataFormatTest {
       // Configure TSV format
       final var tsvConfig =
           Configuration.builder()
-              .conventions(
-                  ConventionSettings.builder()
-                      .baseDirectory(null) // classpath-relative
-                      .expectationSuffix("/expected") // default expectation suffix
-                      .scenarioMarker("[Scenario]") // default scenario marker
-                      .dataFormat(DataFormat.TSV) // TSV format
-                      .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
-                      .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                      .globalExcludeColumns(Set.of())
-                      .globalColumnStrategies(Map.of())
-                      .rowOrdering(RowOrdering.ORDERED)
-                      .queryTimeout(null)
-                      .retryCount(0)
-                      .retryDelay(Duration.ofMillis(100))
-                      .transactionMode(TransactionMode.SINGLE_TRANSACTION)
-                      .build())
+              .conventions(ConventionSettings.builder().dataFormat(DataFormat.TSV).build())
               .build();
       DatabaseTestExtension.setConfiguration(context, tsvConfig);
 
@@ -327,6 +294,210 @@ final class DataFormatTest {
 
       // Then
       logger.info("TSV format test completed");
+    }
+  }
+
+  /**
+   * Tests JSON format configuration.
+   *
+   * <p>JSON files use arrays of objects:
+   *
+   * <pre>{@code
+   * [
+   *   {"ID": 1, "NAME": "Alice", "DATA_VALUE": 100},
+   *   {"ID": 2, "NAME": "Bob", "DATA_VALUE": 200}
+   * ]
+   * }</pre>
+   */
+  @Nested
+  @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("JsonFormatTest")
+  class JsonFormatTest {
+
+    /** DataSource for JSON format tests. */
+    private static DataSource dataSource;
+
+    /** Creates JsonFormatTest instance. */
+    JsonFormatTest() {}
+
+    /**
+     * Sets up database with JSON format configuration.
+     *
+     * @param context the extension context
+     * @throws Exception if setup fails
+     */
+    @BeforeAll
+    static void setupDatabase(final ExtensionContext context) throws Exception {
+      logger.info("Setting up database for JSON format test");
+
+      // Configure JSON format
+      final var jsonConfig =
+          Configuration.builder()
+              .conventions(ConventionSettings.builder().dataFormat(DataFormat.JSON).build())
+              .build();
+      DatabaseTestExtension.setConfiguration(context, jsonConfig);
+
+      final var registry = DatabaseTestExtension.getRegistry(context);
+      dataSource = createDataSource("DataFormatTest_JSON");
+      registry.registerDefault(dataSource);
+      executeScript(dataSource, "ddl/feature/DataFormatTest.sql");
+
+      logger.info("JSON format test setup completed");
+    }
+
+    /**
+     * Executes SQL against the test database.
+     *
+     * @param sql the SQL to execute
+     */
+    private void executeSql(final String sql) {
+      try (final var connection = dataSource.getConnection();
+          final var statement = connection.createStatement()) {
+        statement.executeUpdate(sql);
+      } catch (final SQLException e) {
+        throw new RuntimeException(String.format("Failed to execute SQL: %s", sql), e);
+      }
+    }
+
+    /**
+     * Verifies that JSON format files are loaded correctly.
+     *
+     * <p>Test flow:
+     *
+     * <ul>
+     *   <li>Preparation: Loads data from JSON file (array of objects)
+     *   <li>Execution: Inserts additional record
+     *   <li>Expectation: Verifies data from expected JSON file
+     * </ul>
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load JSON format data correctly")
+    @DataSet(
+        operation = Operation.INSERT,
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$JsonFormatTest/shouldLoadJsonFormatData/")
+        })
+    @ExpectedDataSet(
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$JsonFormatTest/shouldLoadJsonFormatData/expected/")
+        })
+    void shouldLoadJsonFormatData() {
+      // Given
+      logger.info("Testing JSON format data loading");
+
+      // When
+      executeSql("INSERT INTO DATA_FORMAT (ID, NAME, DATA_VALUE) VALUES (3, 'Charlie', 300)");
+
+      // Then
+      logger.info("JSON format test completed");
+    }
+  }
+
+  /**
+   * Tests YAML format configuration.
+   *
+   * <p>YAML files use lists of mappings:
+   *
+   * <pre>
+   * - ID: 1
+   *   NAME: Alice
+   *   DATA_VALUE: 100
+   * - ID: 2
+   *   NAME: Bob
+   *   DATA_VALUE: 200
+   * </pre>
+   */
+  @Nested
+  @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("YamlFormatTest")
+  class YamlFormatTest {
+
+    /** DataSource for YAML format tests. */
+    private static DataSource dataSource;
+
+    /** Creates YamlFormatTest instance. */
+    YamlFormatTest() {}
+
+    /**
+     * Sets up database with YAML format configuration.
+     *
+     * @param context the extension context
+     * @throws Exception if setup fails
+     */
+    @BeforeAll
+    static void setupDatabase(final ExtensionContext context) throws Exception {
+      logger.info("Setting up database for YAML format test");
+
+      // Configure YAML format
+      final var yamlConfig =
+          Configuration.builder()
+              .conventions(ConventionSettings.builder().dataFormat(DataFormat.YAML).build())
+              .build();
+      DatabaseTestExtension.setConfiguration(context, yamlConfig);
+
+      final var registry = DatabaseTestExtension.getRegistry(context);
+      dataSource = createDataSource("DataFormatTest_YAML");
+      registry.registerDefault(dataSource);
+      executeScript(dataSource, "ddl/feature/DataFormatTest.sql");
+
+      logger.info("YAML format test setup completed");
+    }
+
+    /**
+     * Executes SQL against the test database.
+     *
+     * @param sql the SQL to execute
+     */
+    private void executeSql(final String sql) {
+      try (final var connection = dataSource.getConnection();
+          final var statement = connection.createStatement()) {
+        statement.executeUpdate(sql);
+      } catch (final SQLException e) {
+        throw new RuntimeException(String.format("Failed to execute SQL: %s", sql), e);
+      }
+    }
+
+    /**
+     * Verifies that YAML format files are loaded correctly.
+     *
+     * <p>Test flow:
+     *
+     * <ul>
+     *   <li>Preparation: Loads data from YAML file (list of mappings)
+     *   <li>Execution: Inserts additional record
+     *   <li>Expectation: Verifies data from expected YAML file
+     * </ul>
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load YAML format data correctly")
+    @DataSet(
+        operation = Operation.INSERT,
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$YamlFormatTest/shouldLoadYamlFormatData/")
+        })
+    @ExpectedDataSet(
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$YamlFormatTest/shouldLoadYamlFormatData/expected/")
+        })
+    void shouldLoadYamlFormatData() {
+      // Given
+      logger.info("Testing YAML format data loading");
+
+      // When
+      executeSql("INSERT INTO DATA_FORMAT (ID, NAME, DATA_VALUE) VALUES (3, 'Charlie', 300)");
+
+      // Then
+      logger.info("YAML format test completed");
     }
   }
 }

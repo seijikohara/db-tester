@@ -5,11 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
@@ -166,8 +163,10 @@ class DataSourceRegistrarSupportTest {
       assertAll(
           "single DataSource resolution",
           () -> assertTrue(result.isPresent(), "result should be present"),
-          () -> assertEquals("only", result.get().getKey(), "key should be 'only'"),
-          () -> assertEquals(dataSource, result.get().getValue(), "value should be the DataSource"));
+          () -> assertEquals("only", result.orElseThrow().getKey(), "key should be 'only'"),
+          () ->
+              assertEquals(
+                  dataSource, result.orElseThrow().getValue(), "value should be the DataSource"));
     }
 
     /** Verifies primary DataSource is preferred. */
@@ -191,8 +190,10 @@ class DataSourceRegistrarSupportTest {
       assertAll(
           "primary DataSource resolution",
           () -> assertTrue(result.isPresent(), "result should be present"),
-          () -> assertEquals("primary", result.get().getKey(), "key should be 'primary'"),
-          () -> assertEquals(ds2, result.get().getValue(), "value should be the primary DataSource"));
+          () -> assertEquals("primary", result.orElseThrow().getKey(), "key should be 'primary'"),
+          () ->
+              assertEquals(
+                  ds2, result.orElseThrow().getValue(), "value should be the primary DataSource"));
     }
 
     /** Verifies fallback to "dataSource" bean name. */
@@ -216,9 +217,12 @@ class DataSourceRegistrarSupportTest {
       assertAll(
           "dataSource bean name fallback",
           () -> assertTrue(result.isPresent(), "result should be present"),
-          () -> assertEquals("dataSource", result.get().getKey(), "key should be 'dataSource'"),
           () ->
-              assertEquals(ds1, result.get().getValue(), "value should be the dataSource bean"));
+              assertEquals(
+                  "dataSource", result.orElseThrow().getKey(), "key should be 'dataSource'"),
+          () ->
+              assertEquals(
+                  ds1, result.orElseThrow().getValue(), "value should be the dataSource bean"));
     }
 
     /** Verifies empty when no match. */
@@ -271,7 +275,7 @@ class DataSourceRegistrarSupportTest {
       assertAll(
           "primary DataSource found",
           () -> assertTrue(result.isPresent(), "result should be present"),
-          () -> assertEquals("primary", result.get().getKey(), "key should be 'primary'"));
+          () -> assertEquals("primary", result.orElseThrow().getKey(), "key should be 'primary'"));
     }
 
     /** Verifies empty when no primary. */
@@ -285,7 +289,8 @@ class DataSourceRegistrarSupportTest {
       final Predicate<String> neverPrimary = name -> false;
 
       // When
-      final var result = DataSourceRegistrarSupport.findPrimaryDataSource(dataSources, neverPrimary);
+      final var result =
+          DataSourceRegistrarSupport.findPrimaryDataSource(dataSources, neverPrimary);
 
       // Then
       assertFalse(result.isPresent(), "result should be empty when no primary exists");
@@ -319,8 +324,10 @@ class DataSourceRegistrarSupportTest {
       assertAll(
           "DataSource found by name",
           () -> assertTrue(result.isPresent(), "result should be present"),
-          () -> assertEquals("target", result.get().getKey(), "key should be 'target'"),
-          () -> assertEquals(ds2, result.get().getValue(), "value should be the target DataSource"));
+          () -> assertEquals("target", result.orElseThrow().getKey(), "key should be 'target'"),
+          () ->
+              assertEquals(
+                  ds2, result.orElseThrow().getValue(), "value should be the target DataSource"));
     }
 
     /** Verifies empty when name not found. */

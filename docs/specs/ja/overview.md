@@ -7,7 +7,7 @@ description: "DB Testerのアーキテクチャと主要概念、アノテーシ
 
 ## 目的
 
-DB Testerは、JUnit、Spock、およびKotest向けのデータベーステストフレームワークです。CSV/TSVベースのテストデータファイルを使用し、アノテーション駆動型のデータ準備と状態検証を提供します。
+DB Testerは、JUnit、Spock、およびKotest向けのデータベーステストフレームワークです。CSV、TSV、JSON、YAMLベースのテストデータファイルを使用し、アノテーション駆動型のデータ準備と状態検証を提供します。
 
 本フレームワークは、データベーステストにおける以下の課題を解決します。
 
@@ -17,7 +17,7 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 | 反復的なセットアップコード | 宣言的な`@DataSet`および`@ExpectedDataSet`アノテーション |
 | 複数データベースのテスト | 明示的なバインディングを持つ名前付き`DataSource`レジストリ |
 | テストの分離 | 設定可能なデータベース操作による自動クリーンアップ |
-| データフォーマットの柔軟性 | CSVおよびTSVフォーマットのサポート |
+| データフォーマットの柔軟性 | CSV、TSV、JSON、およびYAMLフォーマットのサポート |
 | 検証の柔軟性 | カラムレベルの比較戦略 |
 
 ## 主要概念
@@ -42,7 +42,7 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 3. 設定可能な比較戦略を使用して期待値と実際の状態を比較
 4. 構造化されたエラーメッセージで差異を報告
 
-利用可能な比較戦略: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `NOT_NULL`, `REGEX`
+利用可能な比較戦略: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`, `CONTAINS`, `RANGE`
 
 ### 規約ベースの検出
 
@@ -152,7 +152,7 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 - [アーキテクチャ](architecture) - モジュール構造と依存関係
 - [パブリックAPI](public-api) - アノテーションと設定クラス
 - [設定](configuration) - 設定オプションと規約
-- [データフォーマット](data-formats) - CSVおよびTSVファイル構造と解析
+- [データフォーマット](data-formats) - CSV、TSV、JSON、およびYAMLファイル構造と解析
 - [データベース操作](database-operations) - サポートされるCRUD操作
 - [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
 - [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント

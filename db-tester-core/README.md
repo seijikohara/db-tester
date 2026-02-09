@@ -7,7 +7,7 @@ This module provides the internal implementation of the DB Tester framework. The
 - **SPI Implementations** - Default providers for operations, assertions, and data loading
 - **Database Operations** - Pure JDBC implementation for database setup and verification
 - **Dataset Loaders** - Convention-based and custom data loading implementations
-- **Format Providers** - CSV and TSV format support with scenario filtering
+- **Format Providers** - CSV, TSV, JSON, and YAML format support with scenario filtering
 
 ## Architecture
 
@@ -70,7 +70,9 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | `internal.format` | Format parsing framework |
 | `internal.format.csv` | CSV format provider implementation |
 | `internal.format.tsv` | TSV format provider implementation |
-| `internal.format.parser` | Delimited text parsing utilities |
+| `internal.format.json` | JSON format provider implementation |
+| `internal.format.yaml` | YAML format provider implementation |
+| `internal.format.parser` | Delimited text and structured format parsing utilities |
 | `internal.format.spi` | Format provider SPI (`FormatProvider`, `FormatRegistry`) |
 | `internal.jdbc` | JDBC utilities, SQL identifier validation, and connection handling |
 | `internal.jdbc.read` | Database read operations (table data retrieval, type conversion) |
@@ -95,7 +97,7 @@ Internal format providers:
 
 | Internal SPI | Implementations |
 |--------------|-----------------|
-| `FormatProvider` | `CsvFormatProvider`, `TsvFormatProvider` |
+| `FormatProvider` | `CsvFormatProvider`, `TsvFormatProvider`, `JsonFormatProvider`, `YamlFormatProvider` |
 
 The framework registers these providers in `META-INF/services/` and loads them via ServiceLoader.
 
@@ -119,7 +121,7 @@ requires io.github.seijikohara.dbtester.core;
 | `OperationExecutor` | Coordinates JDBC operation execution |
 | `TableReader` | Reads table data from database |
 | `SqlIdentifier` | Validates SQL identifiers (table/column names) |
-| `FormatRegistry` | Manages format providers (CSV, TSV) |
+| `FormatRegistry` | Manages format providers (CSV, TSV, JSON, YAML) |
 | `TableSetMerger` | Merges multiple datasets using configured strategy |
 
 ## Related Modules

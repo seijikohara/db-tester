@@ -39,6 +39,9 @@ testing {
                 implementation(libs.oracle.ojdbc17)
                 implementation(libs.postgresql)
 
+                // Datafaker for template expression examples
+                runtimeOnly(libs.datafaker)
+
                 // Logging
                 implementation(platform(libs.slf4j.bom))
                 implementation(libs.slf4j.api)
