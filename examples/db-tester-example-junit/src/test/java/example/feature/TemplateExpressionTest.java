@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @see Strategy
  * @see ColumnStrategy
  */
+@DisplayName("TemplateExpressionTest")
 final class TemplateExpressionTest {
 
   /** Logger instance for test execution logging. */
