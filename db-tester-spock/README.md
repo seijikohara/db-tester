@@ -55,16 +55,15 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
     @Shared
     DataSource dataSource
 
     @Shared
-    DataSourceRegistry dbTesterRegistry
+    DataSourceRegistry dbTesterRegistry = new DataSourceRegistry()
 
     def setupSpec() {
-        dbTesterRegistry = new DataSourceRegistry()
         dbTesterRegistry.registerDefault(dataSource)
     }
 

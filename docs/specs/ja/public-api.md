@@ -22,6 +22,7 @@ description: "DB Testerのアノテーション、設定、インターフェー
 | `sources` | `DataSetSource[]` | `{}` | 実行するデータセット。空の場合は規約ベースの検出を使用 |
 | `operation` | `Operation` | `CLEAN_INSERT` | 適用するデータベース操作 |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | テーブル処理順序を決定する戦略 |
+| `batchSize` | `int` | `-1` | INSERT操作のバッチあたりの行数。`-1`はグローバル設定を使用、`0`は単一バッチ |
 
 **アノテーションの継承**:
 
@@ -641,6 +642,123 @@ if (!failures.isEmpty()) {
 ```
 
 
+## エクスポートAPI
+
+### DataSetExporter
+
+データベースコンテンツをファイルにエクスポートするための静的ファサードです。このユーティリティクラスは`ExportProvider` SPI経由でロードされた形式固有の実装に処理を委譲します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.export.DataSetExporter`
+
+**型**: ユーティリティクラス（インスタンス化不可、静的メソッドのみ）
+
+**静的メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `export(DataSource, List<String>, Path, DataFormat)` | デフォルト設定で指定形式のファイルにテーブルをエクスポート |
+| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | カスタム設定でファイルにテーブルをエクスポート |
+| `exportQuery(DataSource, String, String, Path, DataFormat)` | デフォルト設定でSQLクエリ結果をファイルにエクスポート |
+| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | カスタム設定でSQLクエリ結果をファイルにエクスポート |
+| `csv(DataSource, List<String>, Path)` | CSVファイルにテーブルをエクスポート（簡易メソッド） |
+| `tsv(DataSource, List<String>, Path)` | TSVファイルにテーブルをエクスポート（簡易メソッド） |
+| `json(DataSource, List<String>, Path)` | JSONファイルにテーブルをエクスポート（簡易メソッド） |
+| `yaml(DataSource, List<String>, Path)` | YAMLファイルにテーブルをエクスポート（簡易メソッド） |
+
+**例**:
+
+```java
+// テーブルをCSVファイルにエクスポート
+DataSetExporter.csv(dataSource, List.of("USERS", "ORDERS"), Paths.get("export"));
+
+// カスタム設定でエクスポート
+var config = ExportConfiguration.builder()
+    .lobHandling(LobHandling.OMIT)
+    .writeLoadOrderFile(true)
+    .build();
+DataSetExporter.export(dataSource, List.of("USERS"), Paths.get("export"), DataFormat.JSON, config);
+
+// クエリ結果をエクスポート
+DataSetExporter.exportQuery(
+    dataSource,
+    "SELECT * FROM USERS WHERE active = true",
+    "ACTIVE_USERS",
+    Paths.get("export"),
+    DataFormat.CSV);
+```
+
+### ExportConfiguration
+
+データエクスポート操作の設定です。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.export.ExportConfiguration`
+
+**ファクトリメソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `defaults()` | `ExportConfiguration` | デフォルト値で設定を作成 |
+| `builder()` | `Builder` | カスタム設定用の新しいビルダーを作成 |
+
+**設定プロパティ**:
+
+| プロパティ | 型 | デフォルト | 説明 |
+|-----------|-----|-----------|------|
+| `nullValue` | `String` | `""` | 区切り形式でのnull値の文字列表現 |
+| `dateFormatter` | `DateTimeFormatter` | `ISO_LOCAL_DATE` | 日付値のフォーマッタ（`yyyy-MM-dd`） |
+| `timeFormatter` | `DateTimeFormatter` | `ISO_LOCAL_TIME` | 時刻値のフォーマッタ（`HH:mm:ss`） |
+| `timestampFormatter` | `DateTimeFormatter` | `yyyy-MM-dd HH:mm:ss` | タイムスタンプ値のフォーマッタ |
+| `lobHandling` | `LobHandling` | `BASE64` | LOBカラムの処理戦略 |
+| `writeLoadOrderFile` | `boolean` | `false` | ロード順序ファイルを生成するかどうか |
+| `loadOrderFileName` | `String` | `load-order.txt` | ロード順序ファイルの名前 |
+
+**例**:
+
+```java
+// デフォルト値を使用
+var config = ExportConfiguration.defaults();
+
+// カスタム設定
+var config = ExportConfiguration.builder()
+    .nullValue("NULL")
+    .lobHandling(LobHandling.OMIT)
+    .writeLoadOrderFile(true)
+    .build();
+```
+
+### LobHandling
+
+エクスポート時のLOB（Large Object）カラムの処理方法を定義するenumです。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.export.LobHandling`
+
+**値**:
+
+| 値 | 説明 |
+|-----|------|
+| `BASE64` | LOB値を`[BASE64]`プレフィックス付きのBase64エンコード文字列としてエクスポート。エクスポートとインポートの往復をサポート |
+| `OMIT` | LOBカラムをエクスポートから除外。バイナリデータが不要な場合やファイルサイズを削減する場合に使用 |
+
+### ExportProvider（SPI）
+
+形式固有のエクスポートロジックを実装するためのSPIです。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.spi.ExportProvider`
+
+**型**: `interface`
+
+**メソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `supportedFormat()` | `DataFormat` | このプロバイダーが処理するデータ形式を返す |
+| `export(DataSource, List<String>, Path, ExportConfiguration)` | `void` | テーブルをファイルにエクスポート |
+| `exportQuery(DataSource, String, String, Path, ExportConfiguration)` | `void` | SQLクエリ結果をファイルにエクスポート |
+
+**検出方法**: プロバイダーは`java.util.ServiceLoader`経由で検出されます。`META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`に実装を登録してください。
+
+**スレッドセーフティ**: 実装はスレッドセーフかつステートレスである必要があります。
+
 ## 例外
 
 すべての例外は`DatabaseTesterException`を継承します。
@@ -690,7 +808,7 @@ classDiagram
 
 - ファイルが見つからない
 - 無効なファイル形式
-- CSV/TSVコンテンツのパースエラー
+- CSV、TSV、JSON、またはYAMLコンテンツのパースエラー
 
 
 ### DataSourceNotFoundException
@@ -738,6 +856,7 @@ classDiagram
 | `@DataSet` | `sources` | `{}` | 規約ベースの検出 |
 | `@DataSet` | `operation` | `CLEAN_INSERT` | 全行削除後に挿入 |
 | `@DataSet` | `tableOrdering` | `AUTO` | 自動順序決定 |
+| `@DataSet` | `batchSize` | `-1` | グローバル設定を使用 |
 | `@ExpectedDataSet` | `sources` | `{}` | 規約ベースの検出 |
 | `@ExpectedDataSet` | `tableOrdering` | `AUTO` | 自動順序決定 |
 | `@ExpectedDataSet` | `rowOrdering` | `ORDERED` | 位置ベースの行比較 |

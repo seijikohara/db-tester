@@ -54,7 +54,7 @@ mkdir -p src/test/resources/com/example/UserRepositoryTest
 **症状**:
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
-Supported file extensions: .csv, .tsv
+Supported file extensions: [.csv, .tsv, .json, .yaml]
 ```
 
 **診断**:
@@ -68,6 +68,8 @@ Supported file extensions: .csv, .tsv
 |-----------------|------------------|
 | `DataFormat.CSV` | `.csv` |
 | `DataFormat.TSV` | `.tsv` |
+| `DataFormat.JSON` | `.json` |
+| `DataFormat.YAML` | `.yaml` |
 
 ファイル形式の詳細は[データフォーマット](data-formats)を参照してください。
 
@@ -356,7 +358,7 @@ src/test/resources/
 **カスタム設定**:
 ```java
 Configuration.builder()
-    .conventionSettings(ConventionSettings.builder()
+    .conventions(ConventionSettings.builder()
         .scenarioMarker("[TestCase]")  // カスタムマーカー
         .build())
     .build();
@@ -367,8 +369,11 @@ Configuration.builder()
 **ミス**: `DataFormat.CSV`（デフォルト）で `.tsv` ファイルを使用。
 
 **解決策**:
+`ConventionSettings` でTSV形式を設定:
 ```java
-@DataSet(dataFormat = DataFormat.TSV)
+ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
 またはファイルを `.csv` にリネーム。
@@ -467,6 +472,6 @@ void debugTest() throws SQLException {
 
 - [エラーハンドリング](error-handling) - 例外仕様
 - [設定](configuration) - フレームワーク設定
-- [データフォーマット](data-formats) - CSV/TSV 構造
+- [データフォーマット](data-formats) - データフォーマット構造
 - [データベース操作](database-operations) - 操作タイプ
 - [パブリック API](public-api) - アノテーションリファレンス

@@ -117,7 +117,7 @@ graph TD
 | `assertion` | データセット比較と検証 |
 | `dataset` | TableSet, Table, Row実装 |
 | `domain` | 内部値オブジェクト |
-| `format` | CSV/TSV解析とフォーマットプロバイダー |
+| `format` | CSV、TSV、JSON、およびYAML解析とフォーマットプロバイダー |
 | `jdbc` | JDBC読み取り/書き込み操作 |
 | `loader` | 規約ベースのデータセット読み込み |
 | `scenario` | シナリオフィルタリング実装 |
@@ -175,10 +175,10 @@ flowchart LR
 | 戦略インターフェース | 実装 |
 |---------------------|------|
 | `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
-| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
+| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, CONTAINS, RANGE |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
 | `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |
-| `FormatProvider` | CsvFormatProvider, TsvFormatProvider |
+| `FormatProvider` | CsvFormatProvider, TsvFormatProvider, JsonFormatProvider, YamlFormatProvider |
 
 ## JPMSサポート
 

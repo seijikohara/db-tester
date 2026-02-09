@@ -137,7 +137,7 @@ Hint: Ensure the path points to a directory, not a file.
 
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
-Supported file extensions: .csv, .tsv
+Supported file extensions: [.csv, .tsv, .json, .yaml]
 Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 ```
 

@@ -6,18 +6,11 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
-import io.github.seijikohara.dbtester.api.config.DataFormat;
-import io.github.seijikohara.dbtester.api.config.RowOrdering;
-import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
@@ -78,24 +71,13 @@ final class ConfigurationCustomizationTest {
     logger.info("Setting up H2 in-memory database for ConfigurationCustomizationTest");
 
     // Set custom configuration before registering data source
+    // Only non-default values need to be specified; all other fields use defaults
     final var customConfig =
         Configuration.builder()
             .conventions(
                 ConventionSettings.builder()
-                    .baseDirectory(null) // use classpath-relative resolution
                     .expectationSuffix("/verify") // custom expectation suffix
                     .scenarioMarker("[TestCase]") // custom scenario marker
-                    .dataFormat(DataFormat.CSV) // use CSV format (default)
-                    .tableMergeStrategy(
-                        TableMergeStrategy.UNION_ALL) // use UNION_ALL merge strategy
-                    .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
-                    .globalExcludeColumns(Set.of())
-                    .globalColumnStrategies(Map.of())
-                    .rowOrdering(RowOrdering.ORDERED)
-                    .queryTimeout(null)
-                    .retryCount(0)
-                    .retryDelay(Duration.ofMillis(100))
-                    .transactionMode(TransactionMode.SINGLE_TRANSACTION)
                     .build())
             .build();
     DatabaseTestExtension.setConfiguration(context, customConfig);

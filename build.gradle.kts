@@ -76,6 +76,7 @@ val javaModules =
     setOf(
         "db-tester-api",
         "db-tester-core",
+        "db-tester-spring-support",
         "db-tester-junit",
         "db-tester-junit-spring-boot-starter",
         "db-tester-example-junit",
@@ -102,6 +103,7 @@ val kotlinModules =
 // Only for modules without module-info.java (Spring Boot Starters, Groovy, and Kotlin modules)
 val automaticModuleNames =
     mapOf(
+        "db-tester-spring-support" to "io.github.seijikohara.dbtester.spring.support",
         "db-tester-spock" to "io.github.seijikohara.dbtester.spock",
         "db-tester-kotest" to "io.github.seijikohara.dbtester.kotest",
         "db-tester-junit-spring-boot-starter" to "io.github.seijikohara.dbtester.junit.spring.autoconfigure",

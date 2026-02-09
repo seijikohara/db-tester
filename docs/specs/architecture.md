@@ -116,7 +116,7 @@ Source: [db-tester-api/src/main/java](https://github.com/seijikohara/db-tester/t
 | `assertion` | Dataset comparison and verification |
 | `dataset` | Dataset, Table, Row implementations |
 | `domain` | Internal value objects |
-| `format` | CSV/TSV parsing and format providers |
+| `format` | CSV, TSV, JSON, and YAML parsing and format providers |
 | `jdbc` | JDBC read/write operations |
 | `loader` | Convention-based dataset loading |
 | `scenario` | Scenario filtering implementation |
@@ -174,10 +174,10 @@ Operations and comparison strategies use the strategy pattern:
 | Strategy Interface | Implementations |
 |-------------------|-----------------|
 | `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
-| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX |
+| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, CONTAINS, RANGE |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
 | `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |
-| `FormatProvider` | CsvFormatProvider, TsvFormatProvider |
+| `FormatProvider` | CsvFormatProvider, TsvFormatProvider, JsonFormatProvider, YamlFormatProvider |
 
 ## JPMS Support
 

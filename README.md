@@ -10,7 +10,7 @@
   <img src="docs/public/favicon.svg" width="200" alt="DB Tester Logo">
 </div>
 
-A database testing framework for JUnit 6, Spock 2, and Kotest 6. The framework loads CSV test data before tests and verifies database state after tests using `@DataSet` and `@ExpectedDataSet` annotations.
+A database testing framework for JUnit 6, Spock 2, and Kotest 6. The framework prepares database state from CSV, TSV, JSON, and YAML test data before tests and verifies it after tests using `@DataSet` and `@ExpectedDataSet` annotations.
 
 **[Documentation](https://seijikohara.github.io/db-tester/)** · **[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-bom)** · **[Examples](examples/)**
 
@@ -123,9 +123,17 @@ ID,NAME,EMAIL
 |---------|-------------|
 | Annotation-driven | Declarative test data management with `@DataSet` and `@ExpectedDataSet` |
 | Convention-based | Automatic dataset discovery based on test class package and name |
-| Scenario filtering | Share CSV files across tests using the `[Scenario]` column |
+| Multi-format data | CSV, TSV, JSON, and YAML dataset support |
+| Template expressions | Dynamic values using `${uuid}`, `${sequence}`, `${now}`, `${faker.*}` |
+| 11 comparison strategies | Column-level verification: STRICT, REGEX, DATE_FLEXIBLE, JSON_EQUIVALENT, and more |
+| Dataset export | Export database tables to CSV, TSV, JSON, or YAML via `DataSetExporter` |
+| Scenario filtering | Share dataset files across tests using the `[Scenario]` column |
+| Batch insert | Configurable batch size for large dataset insertion |
+| Retry mechanism | Configurable retry with delay for async operation verification |
+| Programmatic assertion API | `DatabaseAssertion` facade for code-based verification |
 | Spring Boot integration | Automatic DataSource registration from ApplicationContext |
 | Pure JDBC | No ORM or external testing framework dependencies |
+| SPI extensibility | Custom providers for data loading, operations, and export via ServiceLoader |
 
 ---
 
@@ -162,6 +170,7 @@ Select a module based on your test framework:
 | `db-tester-bom` | Bill of Materials for version management |
 | `db-tester-api` | Public API (annotations, configuration, SPI) |
 | `db-tester-core` | Internal implementation |
+| `db-tester-spring-support` | Common Spring utilities for DataSource registration |
 | `db-tester-junit` | JUnit extension |
 | `db-tester-spock` | Spock extension |
 | `db-tester-kotest` | Kotest extension |
@@ -373,8 +382,12 @@ Override the default strict comparison for specific columns using `@ColumnStrate
 | `NUMERIC` | Type-aware numeric comparison |
 | `CASE_INSENSITIVE` | Case-insensitive string comparison |
 | `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision |
+| `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601, slashed, dot) |
+| `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) |
 | `NOT_NULL` | Verifies value is not null |
 | `REGEX` | Pattern matching (requires `pattern` attribute) |
+| `CONTAINS` | Substring containment check (uses `options` for custom substring) |
+| `RANGE` | Numeric range verification (requires `options` with `min=N,max=M`) |
 
 **Per-dataset strategy** via `@DataSetSource.columnStrategies`:
 
@@ -400,6 +413,57 @@ db-tester.convention.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
 ```
 
 Column names in strategies are case-insensitive. Annotation-level strategies override global strategies. Excluded columns take precedence over strategies.
+
+### Template Expressions
+
+Dataset values support template expressions that generate dynamic values at load time:
+
+| Expression | Description | Example Output |
+|------------|-------------|----------------|
+| `${uuid}` | Random UUID | `550e8400-e29b-41d4-a716-446655440000` |
+| `${sequence:N}` | Initialize sequence counter to N | `1` |
+| `${sequence}` | Increment and return next value | `2`, `3`, `4`, ... |
+| `${now}` | Current timestamp (ISO-8601) | `2024-01-15T10:30:00` |
+| `${now+Xd}` | Relative future date (d=days, h=hours, m=minutes, s=seconds) | `2024-01-22T10:30:00` |
+| `${now-Xd}` | Relative past date | `2024-01-08T10:30:00` |
+| `${faker.xxx.yyy}` | Datafaker expression (optional dependency) | Varies |
+
+```csv
+ID,NAME,EMAIL,CREATED_AT
+${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
+```
+
+The `${faker.*}` expressions require [Datafaker](https://www.datafaker.net/) as an optional runtime dependency:
+
+```kotlin
+testRuntimeOnly("net.datafaker:datafaker:VERSION")
+```
+
+If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
+
+See the [Advanced Usage - Template Expressions](https://seijikohara.github.io/db-tester/advanced-usage#_9-template-expressions) documentation for details.
+
+### Dataset Export
+
+Export database tables to files for debugging or creating expected datasets:
+
+```java
+// Export tables to CSV files
+DataSetExporter.csv(dataSource, List.of("USERS", "ORDERS"), Paths.get("export"));
+
+// Export with custom configuration
+var config = ExportConfiguration.builder()
+    .lobHandling(LobHandling.OMIT)
+    .writeLoadOrderFile(true)
+    .build();
+DataSetExporter.export(dataSource, List.of("USERS"), Paths.get("export"), DataFormat.JSON, config);
+
+// Export SQL query results
+DataSetExporter.exportQuery(dataSource, "SELECT * FROM USERS WHERE active = true",
+    "ACTIVE_USERS", Paths.get("export"), DataFormat.CSV);
+```
+
+See the [Public API - Export API](https://seijikohara.github.io/db-tester/public-api#export-api) documentation for full reference.
 
 ---
 
@@ -429,6 +493,8 @@ Column names in strategies are case-insensitive. Annotation-level strategies ove
 |--------|-----------|
 | CSV | `.csv` (default) |
 | TSV | `.tsv` |
+| JSON | `.json` |
+| YAML | `.yaml` |
 
 ```java
 ConventionSettings conventions = ConventionSettings.builder()

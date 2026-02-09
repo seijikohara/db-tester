@@ -272,13 +272,14 @@ static void setup(ExtensionContext context) {
 | `preparation` | `Operation` | `CLEAN_INSERT` | テスト実行前に実行されるデフォルト操作 |
 | `expectation` | `Operation` | `NONE` | テスト終了後に実行されるデフォルト操作 |
 | `floatingPointEpsilon` | `double` | `1e-6` | 浮動小数点比較のイプシロン値 |
+| `batchSize` | `int` | `0` | INSERT操作のバッチあたりの行数。ゼロは単一バッチ |
 
 ### ファクトリメソッド
 
 | メソッド | 説明 |
 |----------|------|
 | `builder()` | OperationDefaultsインスタンス構築用の新しいビルダーを作成 |
-| `standard()` | 準備に`CLEAN_INSERT`、期待に`NONE`、イプシロンに`1e-6`のデフォルトを作成 |
+| `standard()` | 準備に`CLEAN_INSERT`、期待に`NONE`、イプシロンに`1e-6`、バッチサイズに`0`のデフォルトを作成 |
 
 ### インスタンスメソッド
 
@@ -293,6 +294,7 @@ static void setup(ExtensionContext context) {
 | `preparation(Operation)` | 準備フェーズのデフォルト操作を設定 |
 | `expectation(Operation)` | 期待フェーズのデフォルト操作を設定 |
 | `floatingPointEpsilon(double)` | 浮動小数点比較のイプシロン値を設定 |
+| `batchSize(int)` | INSERT操作のバッチあたりの行数を設定（ゼロまたは正の値） |
 | `build()` | 新しいOperationDefaultsインスタンスをビルド |
 
 ### Withメソッド（Fluent Copy）
@@ -302,6 +304,7 @@ static void setup(ExtensionContext context) {
 | `withPreparation(Operation)` | 指定した準備操作でコピーを作成 |
 | `withExpectation(Operation)` | 指定した期待操作でコピーを作成 |
 | `withFloatingPointEpsilon(double)` | 指定した浮動小数点イプシロンでコピーを作成 |
+| `withBatchSize(int)` | 指定したバッチサイズでコピーを作成 |
 
 ## DataFormat
 
@@ -317,6 +320,8 @@ static void setup(ExtensionContext context) {
 |----|--------|---------------------|
 | `CSV` | `.csv` | カンマ（`,`） |
 | `TSV` | `.tsv` | タブ（`\t`） |
+| `JSON` | `.json` | — |
+| `YAML` | `.yaml` | — |
 
 ### メソッド
 
@@ -516,7 +521,7 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 - [概要](overview) - フレームワークの目的と主要概念
 - [パブリックAPI](public-api) - アノテーションとインターフェース
-- [データフォーマット](data-formats) - CSVおよびTSVファイル構造
+- [データフォーマット](data-formats) - CSV、TSV、JSON、およびYAMLファイル構造
 - [データベース操作](database-operations) - サポートされる操作
 - [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
 - [エラーハンドリング](error-handling) - エラーメッセージと例外型

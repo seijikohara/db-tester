@@ -46,7 +46,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `ScenarioFilteringSpec` | CSV row filtering using `[Scenario]` column |
 | `AnnotationConfigurationSpec` | Advanced annotation configuration |
 | `ConfigurationCustomizationSpec` | Framework convention customization |
-| `DataFormatSpec` | CSV and TSV format support |
+| `DataFormatSpec` | CSV, TSV, JSON, and YAML format support |
 | `TableMergeStrategySpec` | FIRST, LAST, UNION, UNION_ALL strategies |
 | `TableOrderingStrategiesSpec` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
 | `ComparisonStrategySpec` | STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE comparisons |

@@ -54,7 +54,7 @@ To customize, configure `baseDirectory` in [Configuration](configuration).
 **Symptom**:
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
-Supported file extensions: .csv, .tsv
+Supported file extensions: [.csv, .tsv, .json, .yaml]
 ```
 
 **Diagnosis**:
@@ -68,6 +68,8 @@ Supported file extensions: .csv, .tsv
 |--------------------|-------------------|
 | `DataFormat.CSV` | `.csv` |
 | `DataFormat.TSV` | `.tsv` |
+| `DataFormat.JSON` | `.json` |
+| `DataFormat.YAML` | `.yaml` |
 
 See [Data Formats](data-formats) for file format details.
 
@@ -355,7 +357,7 @@ src/test/resources/
 **Custom Configuration**:
 ```java
 Configuration.builder()
-    .conventionSettings(ConventionSettings.builder()
+    .conventions(ConventionSettings.builder()
         .scenarioMarker("[TestCase]")  // Custom marker
         .build())
     .build();
@@ -366,8 +368,11 @@ Configuration.builder()
 **Mistake**: Using `.tsv` files with `DataFormat.CSV` (default).
 
 **Solution**:
+Configure TSV format in `ConventionSettings`:
 ```java
-@DataSet(dataFormat = DataFormat.TSV)
+ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
 Or rename files to `.csv`.
@@ -389,7 +394,7 @@ See [Configuration](configuration) for all settings.
 
 ### Table Name Case Sensitivity
 
-**Mistake**: CSV filename case doesn't match table name.
+**Mistake**: CSV filename case does not match table name.
 
 **Example**:
 - Table created as `USERS` (H2 uppercase)
@@ -466,6 +471,6 @@ Use this to identify whether the issue is in:
 
 - [Error Handling](error-handling) - Exception specifications
 - [Configuration](configuration) - Framework settings
-- [Data Formats](data-formats) - CSV/TSV structure
+- [Data Formats](data-formats) - Data format structure
 - [Database Operations](database-operations) - Operation types
 - [Public API](public-api) - Annotation reference

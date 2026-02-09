@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Processes template expressions in CSV cell values.
+ * Processes template expressions in cell values.
  *
  * <p>This class resolves {@code ${...}} expressions in string values. Supported expression types:
  *
@@ -131,9 +131,14 @@ public final class TemplateProcessor {
   private String resolveSequence(final String expression) {
     if (expression.contains(":")) {
       final var parts = expression.split(":", 2);
-      final var startValue = Integer.parseInt(parts[1].trim());
-      sequenceCounter.set(startValue);
-      return String.valueOf(startValue);
+      try {
+        final var startValue = Integer.parseInt(parts[1].trim());
+        sequenceCounter.set(startValue);
+        return String.valueOf(startValue);
+      } catch (final NumberFormatException e) {
+        logger.debug("Invalid sequence start value: {}", parts[1].trim());
+        return String.format("${%s}", expression);
+      }
     }
     return String.valueOf(sequenceCounter.incrementAndGet());
   }

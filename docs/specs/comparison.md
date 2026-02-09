@@ -11,7 +11,7 @@ This page compares DB Tester with other database testing frameworks in the Java/
 
 | Framework | Best For | Trade-offs |
 |-----------|----------|------------|
-| **DB Tester** | Convention-based testing with JUnit 6/Spock 2/Kotest 6 | Limited data formats, newer project |
+| **DB Tester** | Convention-based testing with JUnit 6/Spock 2/Kotest 6 | CSV/TSV/JSON/YAML support, newer project |
 | **DBUnit** | Extensive format support and customization | Verbose configuration, no JUnit 5 |
 | **Database Rider** | Comprehensive annotation-driven testing | Complex dependency tree |
 | **Spring Test DBUnit** | Spring-centric projects | Spring-only, aging project |
@@ -53,8 +53,8 @@ This page compares DB Tester with other database testing frameworks in the Java/
 | TSV | Yes | - | - | - | - | - |
 | Flat XML | - | Yes | Yes | Yes | - | - |
 | Full XML | - | Yes | Yes | Yes | - | - |
-| YAML | - | - | Yes | - | - | - |
-| JSON | - | - | Yes | - | - | - |
+| YAML | Yes | - | Yes | - | - | - |
+| JSON | Yes | - | Yes | - | - | - |
 | Excel (XLS/XLSX) | - | Yes | Yes | Yes | - | - |
 | Java DSL | - | - | Yes | - | Yes | Yes |
 | Kotlin DSL | - | - | - | - | Yes | - |
@@ -62,7 +62,7 @@ This page compares DB Tester with other database testing frameworks in the Java/
 
 **Analysis:**
 - Database Rider supports the most formats (YAML, JSON, XML, CSV, Excel).
-- DB Tester focuses on CSV/TSV for data management.
+- DB Tester supports CSV, TSV, JSON, and YAML for data management.
 - DbSetup and JDBDT prefer programmatic data definition.
 
 ### Configuration Approach
@@ -135,9 +135,9 @@ shouldUpdateUser,1,john,john.updated@example.com
 | Transaction Support | Yes | Yes | Yes | Yes | Yes | - |
 | FK Constraint Handling | Yes | Yes | Yes | Yes | Yes | - |
 | Sequence/Identity Reset | - | Yes | Yes | Yes | - | - |
-| Dataset Export | - | Yes | Yes | - | - | Yes |
-| Replacement/Placeholder | - | Yes | Yes | - | - | - |
-| Scriptable Datasets | - | - | Yes | - | - | - |
+| Dataset Export | Yes | Yes | Yes | - | - | Yes |
+| Replacement/Placeholder | Yes | Yes | Yes | - | - | - |
+| Scriptable Datasets | Yes | - | Yes | - | - | - |
 | Connection Leak Detection | - | - | Yes | - | - | - |
 | SPI Extensibility | Yes | - | - | - | - | - |
 | Logging/Diagnostics | Yes | Yes | Yes | Yes | - | Yes |
@@ -163,7 +163,6 @@ USER:
 
 | Limitation | Impact | Workaround |
 |------------|--------|------------|
-| **No YAML/JSON support** | Cannot use human-friendly formats for complex nested data | Use CSV with clear column naming |
 | **No XML support** | Cannot migrate from existing DBUnit XML datasets | Convert XML to CSV manually or via script |
 | **No Excel support** | Business users cannot maintain test data in spreadsheets | Export Excel to CSV |
 | **No programmatic dataset builder** | Cannot generate dynamic test data in code | Implement custom DataLoader via SPI |
@@ -173,10 +172,6 @@ USER:
 | Limitation | Impact | Alternative |
 |------------|--------|-------------|
 | **No delta assertions** | Cannot verify only the changes made by test | Verify full expected state |
-
-| **No scriptable datasets** | Cannot embed dynamic values in CSV | Prepare data programmatically before each test |
-| **No dataset export** | Cannot capture current DB state for debugging | Use database client tools |
-| **No replacement/placeholder** | Cannot use variables in datasets | Define explicit values per scenario |
 | **No sequence reset** | Cannot reset auto-increment counters | Handle via SQL in @BeforeEach |
 | **No connection leak detection** | Connection leaks may go unnoticed | Use external monitoring tools |
 
@@ -189,7 +184,7 @@ USER:
 | **No CDI integration** | Cannot auto-inject in Jakarta EE | Register DataSource manually |
 | **No Cucumber support** | Cannot use in BDD scenarios | Use Database Rider for BDD |
 | **New project** | Smaller community, less battle-tested | Evaluate thoroughly before production use |
-| **Limited documentation** | Fewer examples and tutorials | Refer to test cases in source code |
+| **Growing documentation** | Expanding examples and specifications | Refer to specifications and example modules |
 
 ### When NOT to Choose DB Tester
 

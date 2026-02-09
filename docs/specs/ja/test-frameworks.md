@@ -197,6 +197,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
     @ExpectedDataSet
     def 'should create user'() { }
 }
+```
 
 ### フィーチャーメソッド命名
 
@@ -435,7 +436,7 @@ db-tester.enabled=true
 # DataSource Beanの自動登録（デフォルト: true）
 db-tester.auto-register-data-sources=true
 
-# データフォーマット（CSVまたはTSV）
+# データフォーマット（CSV、TSV、JSON、またはYAML）
 db-tester.convention.data-format=CSV
 
 # 期待ディレクトリサフィックス
@@ -615,7 +616,7 @@ flowchart TD
 | フェーズ | エラー型 | 動作 |
 |---------|----------|------|
 | 準備 | `DatabaseOperationException` | 実行前にテスト失敗 |
-| テスト | 任意の例外 | ExpectedDataSetは引き続き実行 |
+| テスト | 任意の例外 | ExpectedDataSetはスキップされる |
 | 期待 | `ValidationException` | 比較詳細付きでテスト失敗 |
 
 

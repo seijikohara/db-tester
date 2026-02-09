@@ -35,7 +35,7 @@ features:
   - icon:
       src: /icons/data-formats.svg
     title: 柔軟なデータフォーマット
-    details: CSVとTSVをサポート。シナリオフィルタリングにより複数のテストでデータセットを共有できます。
+    details: CSV、TSV、JSON、およびYAMLをサポート。シナリオフィルタリングにより複数のテストでデータセットを共有できます。
   - icon:
       src: /icons/database.svg
     title: データベース操作

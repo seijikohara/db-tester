@@ -57,9 +57,9 @@ The recommended approach uses the `@DatabaseTest` annotation with convention-bas
 
 ```kotlin
 @DatabaseTest
-class UserRepositorySpec : AnnotationSpec() {
+class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
-    val dbTesterRegistry = DataSourceRegistry()
+    override val dbTesterRegistry = DataSourceRegistry()
     private lateinit var dataSource: DataSource
 
     @BeforeAll

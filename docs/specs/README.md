@@ -12,7 +12,7 @@ This directory contains technical specifications for the DB Tester framework.
 | [architecture.md](architecture) | Module structure and dependencies |
 | [public-api.md](public-api) | Annotations and configuration classes |
 | [configuration.md](configuration) | Configuration options and conventions |
-| [data-formats.md](data-formats) | CSV and TSV file structure and parsing |
+| [data-formats.md](data-formats) | CSV, TSV, JSON, and YAML file structure and parsing |
 | [database-operations.md](database-operations) | Supported operations and execution flow |
 | [test-frameworks.md](test-frameworks) | JUnit, Spock, and Kotest integration |
 | [spi.md](spi) | Service Provider Interface extension points |
@@ -43,6 +43,7 @@ For comprehensive understanding, read the specifications in this order:
 | `db-tester-bom` | Bill of Materials for version management |
 | `db-tester-api` | Public API (annotations, configuration, SPI interfaces) |
 | `db-tester-core` | Core implementation (JDBC operations, format parsing) |
+| `db-tester-spring-support` | Common Spring utilities for DataSource registration |
 | `db-tester-junit` | JUnit Jupiter extension |
 | `db-tester-spock` | Spock extension |
 | `db-tester-kotest` | Kotest AnnotationSpec extension |

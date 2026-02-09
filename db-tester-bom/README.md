@@ -14,6 +14,7 @@ This module provides a Bill of Materials (BOM) for managing consistent versions 
 db-tester-bom (manages versions)
     ├── db-tester-api
     ├── db-tester-core
+    ├── db-tester-spring-support
     ├── db-tester-junit
     ├── db-tester-spock
     ├── db-tester-kotest
@@ -71,6 +72,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 |----------|-------------|
 | [`db-tester-api`](../db-tester-api/) | Public API (annotations, configuration, SPI interfaces) |
 | [`db-tester-core`](../db-tester-core/) | Internal implementation (SPI providers) |
+| [`db-tester-spring-support`](../db-tester-spring-support/) | Common Spring utilities for DataSource registration |
 | [`db-tester-junit`](../db-tester-junit/) | JUnit extension |
 | [`db-tester-spock`](../db-tester-spock/) | Spock extension |
 | [`db-tester-kotest`](../db-tester-kotest/) | Kotest extension |

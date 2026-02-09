@@ -298,8 +298,10 @@ public interface FormatProvider {
 |----------------|-----------|-----------|
 | `CsvFormatProvider` | `.csv` | Comma |
 | `TsvFormatProvider` | `.tsv` | Tab |
+| `JsonFormatProvider` | `.json` | JSON structure |
+| `YamlFormatProvider` | `.yaml` | YAML structure |
 
-This internal SPI does not support external implementation.
+This internal SPI is not part of the public API contract and may change without notice.
 
 
 ## ServiceLoader Registration
@@ -324,6 +326,8 @@ io.github.seijikohara.dbtester.internal.spi.DefaultExpectationProvider
 # META-INF/services/io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
 io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
 io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider
+io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider
+io.github.seijikohara.dbtester.internal.format.yaml.YamlFormatProvider
 ```
 
 **db-tester-junit**:
@@ -441,7 +445,11 @@ com.example.CustomScenarioNameResolver
 
 ### Custom FormatProvider
 
-To support additional file formats (internal SPI):
+::: warning
+FormatProvider is an internal SPI. The interface is not part of the public API contract and may change without notice. Custom implementations depend on internal packages.
+:::
+
+To support additional file formats:
 
 1. Implement `FormatProvider`:
 

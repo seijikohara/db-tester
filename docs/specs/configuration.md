@@ -289,13 +289,14 @@ Defines default database operations for preparation and expectation phases.
 | `preparation` | `Operation` | `CLEAN_INSERT` | Default operation executed before test runs |
 | `expectation` | `Operation` | `NONE` | Default operation executed after test completes |
 | `floatingPointEpsilon` | `double` | `1e-6` | Epsilon value for floating-point comparisons |
+| `batchSize` | `int` | `0` | Number of rows per batch for INSERT operations; zero means single batch |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
 | `builder()` | Creates a new builder for constructing OperationDefaults instances |
-| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation, `NONE` for expectation, and `1e-6` for epsilon |
+| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation, `NONE` for expectation, `1e-6` for epsilon, and `0` for batch size |
 
 ### Instance Methods
 
@@ -310,6 +311,7 @@ Defines default database operations for preparation and expectation phases.
 | `preparation(Operation)` | Sets the default operation for preparation phase |
 | `expectation(Operation)` | Sets the default operation for expectation phase |
 | `floatingPointEpsilon(double)` | Sets the epsilon value for floating-point comparisons |
+| `batchSize(int)` | Sets the number of rows per batch for INSERT operations (zero or positive) |
 | `build()` | Builds a new OperationDefaults instance |
 
 ### With Methods (Fluent Copy)
@@ -319,6 +321,7 @@ Defines default database operations for preparation and expectation phases.
 | `withPreparation(Operation)` | Creates copy with specified preparation operation |
 | `withExpectation(Operation)` | Creates copy with specified expectation operation |
 | `withFloatingPointEpsilon(double)` | Creates copy with specified floating-point epsilon |
+| `withBatchSize(int)` | Creates copy with specified batch size |
 
 ## DataFormat
 
@@ -334,6 +337,8 @@ Defines supported file formats for dataset files.
 |-------|-----------|-----------------|
 | `CSV` | `.csv` | Comma (`,`) |
 | `TSV` | `.tsv` | Tab (`\t`) |
+| `JSON` | `.json` | — |
+| `YAML` | `.yaml` | — |
 
 ### Methods
 
@@ -513,7 +518,7 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 - [Overview](overview) - Framework purpose and key concepts
 - [Public API](public-api) - Annotations and interfaces
-- [Data Formats](data-formats) - CSV and TSV file structure
+- [Data Formats](data-formats) - CSV, TSV, JSON, and YAML file structure
 - [Database Operations](database-operations) - Supported operations
 - [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
 - [Error Handling](error-handling) - Error messages and exception types

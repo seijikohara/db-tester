@@ -12,3 +12,8 @@ shouldUseDeleteOperation,2,Mouse,5,2024-01-01 10:00:00
 shouldUseDeleteOperation,3,Tablet,20,
 shouldUseTruncateInsertOperation,1,Laptop,10,2024-01-01 10:00:00
 shouldUseTruncateInsertOperation,2,Mouse,5,2024-01-01 10:00:00
+shouldUseBatchInsertOperation,1,Alpha,10,2024-01-05 14:00:00
+shouldUseBatchInsertOperation,2,Beta,20,2024-01-05 14:00:00
+shouldUseBatchInsertOperation,3,Gamma,30,2024-01-05 14:00:00
+shouldUseBatchInsertOperation,4,Delta,40,2024-01-05 14:00:00
+shouldUseBatchInsertOperation,5,Epsilon,50,2024-01-05 14:00:00

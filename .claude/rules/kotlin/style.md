@@ -712,7 +712,7 @@ fun createConfiguration(
 
 ```kotlin
 /**
- * Kotest extension for database testing with CSV-based test data management.
+ * Kotest extension for database testing with multi-format test data management.
  *
  * This extension implements [TestCaseExtension] to intercept test execution,
  * handling data preparation before tests and expectation verification after.

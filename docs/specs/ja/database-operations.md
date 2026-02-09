@@ -449,8 +449,8 @@ Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or
 
 | ソース | 例 |
 |--------|-----|
-| CSV/TSVファイル名 | `USERS.csv` → テーブル `USERS` |
-| CSV/TSVヘッダー行 | `ID,NAME,EMAIL` → カラム |
+| データセットファイル名 | `USERS.csv` → テーブル `USERS` |
+| CSV/TSVヘッダー行またはJSON/YAMLキー | `ID,NAME,EMAIL` → カラム |
 | `@DataSetSource`属性 | カスタムパスと名前 |
 
 検証エラーを避けるため、すべてのデータファイルが命名規則に従っていることを確認してください。
@@ -459,7 +459,7 @@ Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or
 
 ### 文字列からSQL型への変換
 
-本フレームワークは、CSV/TSVの文字列値を適切なSQL型に変換します:
+本フレームワークは、データセットファイルの文字列値を適切なSQL型に変換します:
 
 | ターゲットSQL型 | 変換メソッド |
 |-----------------|--------------|
