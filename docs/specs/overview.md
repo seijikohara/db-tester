@@ -7,7 +7,7 @@ description: "Learn about DB Tester's architecture, key concepts, and annotation
 
 ## Purpose
 
-DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification. Test data files use CSV, TSV, JSON, or YAML format.
+DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification. Test data files use CSV, TSV, JSON, or YAML format, with automatic format detection by default.
 
 The framework addresses the following challenges in database testing:
 
@@ -17,7 +17,7 @@ The framework addresses the following challenges in database testing:
 | Repetitive setup code | Declarative `@DataSet` and `@ExpectedDataSet` annotations |
 | Multi-database testing | Named `DataSource` registry with explicit binding |
 | Test isolation | Automatic cleanup via configurable database operations |
-| Data format flexibility | Support for CSV, TSV, JSON, and YAML formats |
+| Data format flexibility | Automatic format detection with support for CSV, TSV, JSON, and YAML formats |
 | Validation flexibility | Column-level comparison strategies |
 
 ## Key Concepts
@@ -77,7 +77,7 @@ The framework minimizes explicit configuration by establishing sensible defaults
 - Dataset location derived from test class package and name
 - ExpectedDataSet suffix defaults to `/expected`
 - Scenario marker column defaults to `[Scenario]`
-- Data format defaults to CSV
+- Data format defaults to `AUTO` (detects all supported formats: CSV, TSV, JSON, YAML)
 - Table ordering strategy defaults to `AUTO`
 - DataSet operation defaults to `CLEAN_INSERT`
 
@@ -152,7 +152,7 @@ The framework uses standard JDBC operations. It supports any JDBC-compliant data
 - [Architecture](architecture) - Module structure and dependencies
 - [Public API](public-api) - Annotations and configuration classes
 - [Configuration](configuration) - Configuration options and conventions
-- [Data Formats](data-formats) - CSV, TSV, JSON, and YAML file structure and parsing
+- [Data Formats](data-formats) - AUTO detection, CSV, TSV, JSON, and YAML file structure and parsing
 - [Database Operations](database-operations) - Supported CRUD operations
 - [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
 - [SPI](spi) - Service Provider Interface extension points

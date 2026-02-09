@@ -142,6 +142,18 @@ Supported file extensions: [.csv, .tsv, .json, .yaml]
 Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 ```
 
+### Table Name Conflict (AUTO Format)
+
+The loader reports this error when `DataFormat.AUTO` detects the same table name in multiple file formats:
+
+```
+Duplicate table name detected in AUTO format mode.
+Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
+Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+```
+
+**Resolution**: Remove duplicate files so each table name appears in only one format, or configure a concrete `DataFormat` in `ConventionSettings`.
+
 ### Empty File
 
 The parser reports this error when a data file is empty:

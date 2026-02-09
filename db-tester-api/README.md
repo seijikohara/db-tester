@@ -95,7 +95,7 @@ module your.module {
 | [`Configuration`](src/main/java/io/github/seijikohara/dbtester/api/config/Configuration.java) | Main framework configuration |
 | [`ConventionSettings`](src/main/java/io/github/seijikohara/dbtester/api/config/ConventionSettings.java) | Dataset resolution conventions |
 | [`DataSourceRegistry`](src/main/java/io/github/seijikohara/dbtester/api/config/DataSourceRegistry.java) | Registry for managing multiple data sources |
-| [`DataFormat`](src/main/java/io/github/seijikohara/dbtester/api/config/DataFormat.java) | Dataset file format (CSV, TSV, JSON, YAML) |
+| [`DataFormat`](src/main/java/io/github/seijikohara/dbtester/api/config/DataFormat.java) | Dataset file format (AUTO, CSV, TSV, JSON, YAML) |
 | [`TableMergeStrategy`](src/main/java/io/github/seijikohara/dbtester/api/config/TableMergeStrategy.java) | Strategy for merging multiple datasets |
 | [`ComparisonStrategy`](src/main/java/io/github/seijikohara/dbtester/api/domain/ComparisonStrategy.java) | Value comparison modes for assertions |
 | [`Operation`](src/main/java/io/github/seijikohara/dbtester/api/operation/Operation.java) | Database operations (CLEAN_INSERT, INSERT, UPDATE) |

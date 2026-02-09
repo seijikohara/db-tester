@@ -46,7 +46,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `AnnotationConfigurationTest` | Advanced annotation configuration |
 | `ColumnStrategyAnnotationTest` | Annotation-based column comparison strategies using `@ColumnStrategy` |
 | `ConfigurationCustomizationTest` | Framework convention customization |
-| `DataFormatTest` | CSV, TSV, JSON, and YAML format support |
+| `DataFormatTest` | AUTO detection, CSV, TSV, JSON, and YAML format support |
 | `DataSetExportTest` | `DataSetExporter` API for exporting database state to CSV, JSON, and YAML files |
 | `TableMergeStrategyTest` | FIRST, LAST, UNION, UNION_ALL strategies |
 | `TableOrderingStrategiesTest` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |

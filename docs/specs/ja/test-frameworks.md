@@ -436,8 +436,8 @@ db-tester.enabled=true
 # DataSource Beanの自動登録（デフォルト: true）
 db-tester.auto-register-data-sources=true
 
-# データフォーマット（CSV、TSV、JSON、またはYAML）
-db-tester.convention.data-format=CSV
+# データフォーマット（AUTO、CSV、TSV、JSON、またはYAML）
+db-tester.convention.data-format=AUTO
 
 # 期待ディレクトリサフィックス
 db-tester.convention.expectation-suffix=/expected

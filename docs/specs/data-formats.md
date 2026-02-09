@@ -1,17 +1,18 @@
 ---
 title: "Data Formats - DB Tester"
-description: "Learn about CSV, TSV, JSON, and YAML data formats, value syntax, and special handling."
+description: "Learn about AUTO format detection, CSV, TSV, JSON, and YAML data formats, value syntax, and special handling."
 ---
 
 # DB Tester Specification - Data Formats
 
 ## Supported Formats
 
-The framework supports four data formats: two delimited text formats (CSV, TSV) and two structured formats (JSON, YAML).
+The framework supports automatic format detection and four data formats: two delimited text formats (CSV, TSV) and two structured formats (JSON, YAML).
 
 | Format | Extension | Delimiter | Default |
 |--------|-----------|-----------|---------|
-| CSV | `.csv` | Comma (`,`) | Yes |
+| AUTO | All supported | — | Yes |
+| CSV | `.csv` | Comma (`,`) | No |
 | TSV | `.tsv` | Tab (`\t`) | No |
 | JSON | `.json` | — | No |
 | YAML | `.yaml` | — | No |
@@ -26,7 +27,64 @@ var conventions = ConventionSettings.builder()
     .build();
 ```
 
-When loading datasets from a directory, the framework processes only files matching the configured extension.
+When using a concrete format (CSV, TSV, JSON, or YAML), the framework processes only files matching the configured extension. When using `AUTO` (the default), the framework processes all supported file extensions.
+
+## Automatic Format Detection
+
+`DataFormat.AUTO` is the default format. It automatically detects and loads all supported file formats (CSV, TSV, JSON, and YAML) from a dataset directory.
+
+### Behavior
+
+When `AUTO` is active:
+
+1. The framework scans the dataset directory for files with any supported extension (`.csv`, `.tsv`, `.json`, `.yaml`)
+2. Each file is parsed according to its extension
+3. Table names are derived from filenames without extensions, as with concrete formats
+
+### Mixed Format Loading
+
+A single dataset directory can contain files in different formats:
+
+```
+src/test/resources/com/example/UserRepositoryTest/
+├── USERS.csv
+├── ORDERS.json
+├── CATEGORIES.yaml
+└── AUDIT_LOG.tsv
+```
+
+Each file is parsed using the appropriate format parser based on its extension.
+
+### Table Name Conflict Detection
+
+If the same table name appears in multiple file formats, the framework throws a `DataSetLoadException`. This prevents ambiguous dataset definitions.
+
+**Example conflict**:
+
+```
+src/test/resources/com/example/UserRepositoryTest/
+├── USERS.csv
+└── USERS.yaml
+```
+
+**Error message**:
+
+```
+Duplicate table name detected in AUTO format mode.
+Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
+Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+```
+
+### Export Restriction
+
+`DataSetExporter` does not support `DataFormat.AUTO` for export operations. Specify a concrete format (CSV, TSV, JSON, or YAML) when exporting. Using `AUTO` throws `IllegalArgumentException`.
+
+### API Details
+
+| Method | AUTO Behavior |
+|--------|---------------|
+| `hasExtension()` | Returns `false` |
+| `getExtension()` | Throws `UnsupportedOperationException` |
 
 ## File Structure
 

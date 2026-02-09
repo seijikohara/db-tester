@@ -141,6 +141,18 @@ Supported file extensions: [.csv, .tsv, .json, .yaml]
 Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 ```
 
+### テーブル名の競合（AUTOフォーマット）
+
+`DataFormat.AUTO`が同一テーブル名を複数のファイル形式で検出した場合:
+
+```
+Duplicate table name detected in AUTO format mode.
+Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
+Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+```
+
+**解決策**: 各テーブル名が1つの形式にのみ存在するように重複ファイルを削除するか、`ConventionSettings`で具体的な`DataFormat`を設定してください。
+
 ### 空のファイル
 
 データファイルが空の場合:

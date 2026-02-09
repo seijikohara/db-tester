@@ -16,6 +16,7 @@ description: "症状・診断・解決のワークフローによる実践的な
 |------|----------|-----------|
 | "Dataset directory not found" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "File is empty" またはパースエラー | データ読み込み | [DataSetLoadException](#datasetloadexception) |
+| "Table name conflict detected" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "Assertion failed: N differences" | 検証 | [ValidationException](#validationexception) |
 | "No default data source registered" | 設定 | [DataSource の問題](#datasource-の問題) |
 | テストの実行が遅い | パフォーマンス | [パフォーマンス最適化](#パフォーマンス最適化) |
@@ -104,6 +105,36 @@ Failed to parse file: /path/to/USERS.csv
 - 値内のカンマをエスケープ: `"value, with comma"`
 - クォートをエスケープ: `"value ""with quotes"""`
 - データに多くのカンマが含まれる場合は TSV 形式を使用
+
+### AUTOモードでのテーブル名競合
+
+**症状**:
+```
+Table name conflict detected in AUTO format mode.
+Table 'USERS' found in multiple formats: [USERS.csv, USERS.yaml]
+Use a specific DataFormat (e.g., DataFormat.CSV) or remove duplicate files.
+```
+
+**診断**:
+1. データセットディレクトリに同一テーブル名で異なる拡張子のファイルが存在しないか確認
+2. 準備データと期待データの両方のディレクトリを確認
+
+**解決策**:
+
+| 方法 | 対応 |
+|------|------|
+| 重複ファイルを削除 | 不要な形式のファイルを削除し、1つの形式のみ残す |
+| 特定の形式を指定 | `ConventionSettings.builder().dataFormat(DataFormat.CSV).build()` で特定の形式を指定 |
+
+例:
+```bash
+# 重複を確認
+ls src/test/resources/com/example/UserTest/
+# USERS.csv  USERS.yaml  ORDERS.json
+
+# 不要な形式を削除
+rm src/test/resources/com/example/UserTest/USERS.yaml
+```
 
 ### 読み込み順序ファイルエラー
 
@@ -366,17 +397,22 @@ Configuration.builder()
 
 ### 拡張子の不一致
 
-**ミス**: `DataFormat.CSV`（デフォルト）で `.tsv` ファイルを使用。
+**ミス**: 特定の`DataFormat`（例: `DataFormat.CSV`）を設定しているのに、別の拡張子のファイルを使用。
+
+**注意**: デフォルトは`DataFormat.AUTO`であり、すべてのサポート形式が自動検出されます。特定の形式を指定している場合のみ、この問題が発生します。
 
 **解決策**:
-`ConventionSettings` でTSV形式を設定:
+
+- `DataFormat.AUTO`（デフォルト）を使用する場合は、すべてのサポート形式が自動的に読み込まれます
+- 特定の形式を指定する場合は、`ConventionSettings` で正しい形式を設定:
+
 ```java
 ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();
 ```
 
-またはファイルを `.csv` にリネーム。
+またはファイルの拡張子を設定に合わせてリネーム。
 
 ### 期待値サフィックスの不一致
 

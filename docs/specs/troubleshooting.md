@@ -16,6 +16,7 @@ Use this checklist to identify your issue category:
 |---------|----------|---------|
 | "Dataset directory not found" | Data Loading | [DataSetLoadException](#datasetloadexception) |
 | "File is empty" or parse errors | Data Loading | [DataSetLoadException](#datasetloadexception) |
+| "Duplicate table name detected in AUTO format mode" | Data Loading | [DataSetLoadException](#datasetloadexception) |
 | "Assertion failed: N differences" | Validation | [ValidationException](#validationexception) |
 | "No default data source registered" | Configuration | [DataSource Issues](#datasource-issues) |
 | Test runs slowly | Performance | [Performance Optimization](#performance-optimization) |
@@ -66,6 +67,7 @@ Supported file extensions: [.csv, .tsv, .json, .yaml]
 
 | dataFormat Setting | Expected Extension |
 |--------------------|-------------------|
+| `DataFormat.AUTO` (default) | `.csv`, `.tsv`, `.json`, `.yaml` |
 | `DataFormat.CSV` | `.csv` |
 | `DataFormat.TSV` | `.tsv` |
 | `DataFormat.JSON` | `.json` |
@@ -104,6 +106,36 @@ Failed to parse file: /path/to/USERS.csv
 - Escape commas in values: `"value, with comma"`
 - Escape quotes: `"value ""with quotes"""`
 - Use TSV format if data contains many commas
+
+### Table Name Conflict in AUTO Format Mode
+
+**Symptom**:
+```
+Duplicate table name detected in AUTO format mode.
+Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
+Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+```
+
+**Diagnosis**:
+When using `DataFormat.AUTO` (the default), the framework loads all supported file formats from the dataset directory. If the same table name appears in multiple files with different extensions, the framework cannot determine which file to use.
+
+**Solution**:
+
+| Approach | Action |
+|----------|--------|
+| Remove duplicates | Keep only one file per table name (e.g., remove `USERS.yaml` if `USERS.csv` exists) |
+| Specify concrete format | Set `DataFormat.CSV`, `DataFormat.TSV`, `DataFormat.JSON`, or `DataFormat.YAML` in `ConventionSettings` |
+
+```java
+// Option 1: Remove the duplicate file from the dataset directory
+
+// Option 2: Specify a concrete format
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.CSV)
+    .build();
+```
+
+See [Data Formats - Automatic Format Detection](data-formats#automatic-format-detection) for details.
 
 ### Load Order File Error
 
@@ -365,17 +397,19 @@ Configuration.builder()
 
 ### Extension Mismatch
 
-**Mistake**: Using `.tsv` files with `DataFormat.CSV` (default).
+**Mistake**: Using unsupported file extensions with a concrete `DataFormat`.
+
+With `DataFormat.AUTO` (the default), the framework accepts all supported extensions (`.csv`, `.tsv`, `.json`, `.yaml`). When a concrete format is configured, only files with the matching extension are loaded.
 
 **Solution**:
-Configure TSV format in `ConventionSettings`:
+Use `DataFormat.AUTO` (default) to load all supported formats, or configure the matching format:
 ```java
 ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();
 ```
 
-Or rename files to `.csv`.
+Or rename files to match the configured format extension.
 
 ### Expectation Suffix Mismatch
 

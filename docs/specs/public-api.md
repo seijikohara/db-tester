@@ -637,10 +637,10 @@ Static facade for exporting database content to files. This utility class delega
 
 | Method | Description |
 |--------|-------------|
-| `export(DataSource, List<String>, Path, DataFormat)` | Exports tables to files in the specified format with default configuration |
-| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | Exports tables to files with custom configuration |
-| `exportQuery(DataSource, String, String, Path, DataFormat)` | Exports SQL query results to a file with default configuration |
-| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | Exports SQL query results to a file with custom configuration |
+| `export(DataSource, List<String>, Path, DataFormat)` | Exports tables to files in the specified format with default configuration; throws `IllegalArgumentException` for `AUTO` |
+| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | Exports tables to files with custom configuration; throws `IllegalArgumentException` for `AUTO` |
+| `exportQuery(DataSource, String, String, Path, DataFormat)` | Exports SQL query results to a file with default configuration; throws `IllegalArgumentException` for `AUTO` |
+| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | Exports SQL query results to a file with custom configuration; throws `IllegalArgumentException` for `AUTO` |
 | `csv(DataSource, List<String>, Path)` | Exports tables to CSV files (convenience method) |
 | `tsv(DataSource, List<String>, Path)` | Exports tables to TSV files (convenience method) |
 | `json(DataSource, List<String>, Path)` | Exports tables to JSON files (convenience method) |
@@ -788,6 +788,7 @@ Indicates failure to load dataset files.
 - File not found
 - Invalid file format
 - Parse errors in CSV, TSV, JSON, or YAML content
+- Table name conflict in `AUTO` format mode (same table name in multiple file formats)
 
 ### DataSourceNotFoundException
 

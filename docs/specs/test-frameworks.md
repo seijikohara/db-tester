@@ -434,8 +434,8 @@ db-tester.enabled=true
 # Auto-register DataSource beans (default: true)
 db-tester.auto-register-data-sources=true
 
-# Data format (CSV, TSV, JSON, or YAML)
-db-tester.convention.data-format=CSV
+# Data format (AUTO, CSV, TSV, JSON, or YAML)
+db-tester.convention.data-format=AUTO
 
 # Expectation directory suffix
 db-tester.convention.expectation-suffix=/expected

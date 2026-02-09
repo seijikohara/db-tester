@@ -95,7 +95,7 @@ static void setup(ExtensionContext context) {
 | `baseDirectory` | `@Nullable String` | `null` | 絶対パスまたは相対ベースパス。nullの場合はクラスパス相対 |
 | `expectationSuffix` | `String` | `"/expected"` | 期待データセット用サブディレクトリ |
 | `scenarioMarker` | `String` | `"[Scenario]"` | シナリオフィルタリング用カラム名 |
-| `dataFormat` | `DataFormat` | `CSV` | データセットファイルのファイル形式 |
+| `dataFormat` | `DataFormat` | `AUTO` | データセットファイルのファイル形式。AUTOはすべてのサポート形式を自動検出 |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | 重複テーブルのマージ戦略 |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | テーブル読み込み順序指定用ファイル名 |
 | `globalExcludeColumns` | `Set<String>` | `Set.of()` | すべての検証から除外するカラム名（大文字小文字を区別しない） |
@@ -316,26 +316,38 @@ static void setup(ExtensionContext context) {
 
 ### 値
 
-| 値 | 拡張子 | フィールド区切り文字 |
-|----|--------|---------------------|
-| `CSV` | `.csv` | カンマ（`,`） |
-| `TSV` | `.tsv` | タブ（`\t`） |
-| `JSON` | `.json` | — |
-| `YAML` | `.yaml` | — |
+| 値 | 拡張子 | フィールド区切り文字 | デフォルト |
+|----|--------|---------------------|-----------|
+| `AUTO` | 全サポート形式 | — | はい |
+| `CSV` | `.csv` | カンマ（`,`） | いいえ |
+| `TSV` | `.tsv` | タブ（`\t`） | いいえ |
+| `JSON` | `.json` | — | いいえ |
+| `YAML` | `.yaml` | — | いいえ |
 
 ### メソッド
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getExtension()` | `String` | ドットを含むファイル拡張子を返す |
+| `getExtension()` | `String` | ドットを含むファイル拡張子を返す。AUTOの場合は`UnsupportedOperationException`をスロー |
+| `hasExtension()` | `boolean` | ファイル拡張子を持つ場合`true`。AUTOは`false`、他は`true` |
 
 ### ファイル検出
 
 ディレクトリからデータセットを読み込む場合:
 
+**AUTOモード（デフォルト）**:
+
+1. すべてのサポート形式（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルをリスト
+2. 各ファイルを拡張子に基づいて適切なパーサーで解析
+3. 同一テーブル名が複数の形式で検出された場合、`DataSetLoadException`をスロー
+
+**特定形式モード**:
+
 1. 設定された形式拡張子に一致するすべてのファイルをリスト
 2. 各ファイルをテーブルとして解析（拡張子を除いたファイル名 = テーブル名）
 3. 他の拡張子のファイルは無視
+
+**エクスポート時の注意**: `DataSetExporter`でAUTOを指定すると`IllegalArgumentException`がスローされます。エクスポート時は具体的な形式（CSV、TSV、JSON、YAML）を指定してください。
 
 
 ## TableMergeStrategy
