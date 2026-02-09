@@ -264,15 +264,54 @@ class AutoFormatResolverTest {
       final var message = exception.getMessage();
       assertNotNull(message, "message should not be null");
       assertAll(
-          "error message should contain supported extensions",
+          "error message should contain diagnostic details",
           () ->
               assertTrue(
-                  message.contains("No supported data files found"),
-                  "should mention no files found"),
+                  message.contains("no supported data files"),
+                  "should mention no supported files found"),
           () ->
               assertTrue(
                   message.contains("Supported file extensions"),
-                  "should mention supported extensions"));
+                  "should mention supported extensions"),
+          () ->
+              assertTrue(
+                  message.contains("Hint: Add at least one data file"),
+                  "should include hint for resolution"),
+          () ->
+              assertTrue(
+                  message.contains("Found files:"), "should list found files for diagnostics"),
+          () -> assertTrue(message.contains("README.txt"), "should list README.txt as found file"),
+          () -> assertTrue(message.contains("notes.md"), "should list notes.md as found file"));
+    }
+
+    /**
+     * Verifies that resolve throws exception with no file listing when directory is empty.
+     *
+     * @param tempDir temporary directory for test files
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception without file listing when directory is empty")
+    void shouldThrowException_whenDirectoryIsEmpty(final @TempDir Path tempDir) {
+      // When & Then
+      final var exception =
+          assertThrows(
+              DataSetLoadException.class,
+              () -> resolver.resolve(tempDir),
+              "should throw DataSetLoadException when directory is empty");
+
+      final var message = exception.getMessage();
+      assertNotNull(message, "message should not be null");
+      assertAll(
+          "error message should not contain found files for empty directory",
+          () ->
+              assertTrue(
+                  message.contains("no supported data files"),
+                  "should mention no supported files found"),
+          () ->
+              assertTrue(
+                  !message.contains("Found files:"),
+                  "should not list found files when directory is empty"));
     }
   }
 

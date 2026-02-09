@@ -54,8 +54,8 @@ class DbTesterProperties {
         /** Column name that identifies scenario markers in dataset files. */
         var scenarioMarker: String = ConventionSettings.DEFAULT_SCENARIO_MARKER
 
-        /** File format for dataset files. Defaults to CSV. */
-        var dataFormat: DataFormat = DataFormat.CSV
+        /** File format for dataset files. Defaults to AUTO. */
+        var dataFormat: DataFormat = DataFormat.AUTO
 
         /** Strategy for merging tables from multiple datasets. Defaults to UNION_ALL. */
         var tableMergeStrategy: TableMergeStrategy = TableMergeStrategy.UNION_ALL

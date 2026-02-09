@@ -167,8 +167,8 @@ public class DbTesterProperties {
      */
     private String scenarioMarker = ConventionSettings.DEFAULT_SCENARIO_MARKER;
 
-    /** File format for dataset files. Defaults to CSV. */
-    private DataFormat dataFormat = DataFormat.CSV;
+    /** File format for dataset files. Defaults to AUTO. */
+    private DataFormat dataFormat = DataFormat.AUTO;
 
     /** Strategy for merging tables from multiple datasets. Defaults to UNION_ALL. */
     private TableMergeStrategy tableMergeStrategy = TableMergeStrategy.UNION_ALL;

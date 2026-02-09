@@ -139,7 +139,10 @@ Hint: Ensure the path points to a directory, not a file.
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
 Supported file extensions: [.csv, .tsv, .json, .yaml]
 Hint: Add at least one data file (for example, TABLE_NAME.csv)...
+Found files: [README.txt, notes.md]
 ```
+
+`Found files`行はディレクトリ内の全ファイルを列挙し、問題の診断に役立ちます。ディレクトリが空の場合、この行は省略されます。
 
 ### テーブル名の競合（AUTOフォーマット）
 

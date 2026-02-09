@@ -56,17 +56,22 @@ mkdir -p src/test/resources/com/example/UserRepositoryTest
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
 Supported file extensions: [.csv, .tsv, .json, .yaml]
+Hint: Add at least one data file (for example, TABLE_NAME.csv)...
+Found files: [README.txt, notes.md]
 ```
 
+`Found files`行はディレクトリ内の全ファイルを列挙し、問題の診断に役立ちます。ディレクトリが空の場合、この行は省略されます。
+
 **診断**:
-1. ファイル拡張子が設定された `dataFormat` と一致しているか確認
-2. ファイルが隠しファイルでないか確認（`.` プレフィックスなし）
-3. ファイルが正しいディレクトリ階層にあるか確認
+1. `Found files`リストで拡張子が正しくないファイルを確認
+2. ファイル拡張子が設定された `dataFormat` と一致しているか確認
+3. ファイルが隠しファイルでないか確認（`.` プレフィックスなし）、正しいディレクトリ階層にあるか確認
 
 **解決策**:
 
 | dataFormat 設定 | 期待される拡張子 |
 |-----------------|------------------|
+| `DataFormat.AUTO`（デフォルト） | `.csv`、`.tsv`、`.json`、`.yaml` |
 | `DataFormat.CSV` | `.csv` |
 | `DataFormat.TSV` | `.tsv` |
 | `DataFormat.JSON` | `.json` |
@@ -111,30 +116,37 @@ Failed to parse file: /path/to/USERS.csv
 **症状**:
 ```
 Table name conflict detected in AUTO format mode.
-Table 'USERS' found in multiple formats: [USERS.csv, USERS.yaml]
-Use a specific DataFormat (e.g., DataFormat.CSV) or remove duplicate files.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
 **診断**:
-1. データセットディレクトリに同一テーブル名で異なる拡張子のファイルが存在しないか確認
-2. 準備データと期待データの両方のディレクトリを確認
+`DataFormat.AUTO`（デフォルト）を使用している場合、フレームワークはデータセットディレクトリからすべてのサポート形式のファイルを読み込みます。同一テーブル名が異なる拡張子のファイルに存在する場合、フレームワークはどのファイルを使用すべきか判断できません。
 
 **解決策**:
 
 | 方法 | 対応 |
 |------|------|
-| 重複ファイルを削除 | 不要な形式のファイルを削除し、1つの形式のみ残す |
-| 特定の形式を指定 | `ConventionSettings.builder().dataFormat(DataFormat.CSV).build()` で特定の形式を指定 |
+| 重複ファイルを削除 | テーブル名ごとに1つのファイルのみ残す（例: `USERS.csv` が存在する場合 `USERS.yaml` を削除） |
+| 特定の形式を指定 | `ConventionSettings` で `DataFormat.CSV`、`DataFormat.TSV`、`DataFormat.JSON`、または `DataFormat.YAML` を設定 |
 
-例:
-```bash
-# 重複を確認
-ls src/test/resources/com/example/UserTest/
-# USERS.csv  USERS.yaml  ORDERS.json
+```java
+// 方法 1: データセットディレクトリから重複ファイルを削除
 
-# 不要な形式を削除
-rm src/test/resources/com/example/UserTest/USERS.yaml
+// 方法 2: 特定の形式を指定
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.CSV)
+    .build();
 ```
+
+[データフォーマット - 自動フォーマット検出](data-formats#自動フォーマット検出)の詳細を参照。
 
 ### 読み込み順序ファイルエラー
 

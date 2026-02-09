@@ -199,7 +199,7 @@ class DbTesterPropertiesTest {
                   "scenarioMarker should default to " + ConventionSettings.DEFAULT_SCENARIO_MARKER),
           () ->
               assertEquals(
-                  DataFormat.CSV, convention.getDataFormat(), "dataFormat should default to CSV"),
+                  DataFormat.AUTO, convention.getDataFormat(), "dataFormat should default to AUTO"),
           () ->
               assertEquals(
                   TableMergeStrategy.UNION_ALL,

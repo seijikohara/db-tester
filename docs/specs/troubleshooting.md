@@ -56,12 +56,16 @@ To customize, configure `baseDirectory` in [Configuration](configuration).
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
 Supported file extensions: [.csv, .tsv, .json, .yaml]
+Hint: Add at least one data file (for example, TABLE_NAME.csv)...
+Found files: [README.txt, notes.md]
 ```
 
+The `Found files` line lists all files in the directory to help diagnose the issue. This line is omitted when the directory is empty.
+
 **Diagnosis**:
-1. Check file extensions match the configured `dataFormat`
-2. Verify files are not hidden (no `.` prefix)
-3. Confirm files are in the correct directory level
+1. Check the `Found files` list for files with incorrect extensions
+2. Verify file extensions match the configured `dataFormat`
+3. Confirm files are not hidden (no `.` prefix) and are in the correct directory level
 
 **Solution**:
 

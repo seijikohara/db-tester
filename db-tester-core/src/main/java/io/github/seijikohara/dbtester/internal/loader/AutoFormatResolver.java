@@ -64,10 +64,8 @@ public final class AutoFormatResolver {
     final var supportedFiles = discoverSupportedFiles(directory);
 
     if (supportedFiles.isEmpty()) {
-      throw new DataSetLoadException(
-          String.format(
-              "No supported data files found in directory: %s%nSupported file extensions: %s",
-              directory.toAbsolutePath(), FormatRegistry.getSupportedExtensions()));
+      final var foundFiles = listAllFileNames(directory);
+      throw new DataSetLoadException(buildNoSupportedFilesMessage(directory, foundFiles));
     }
 
     logger.debug(
@@ -174,6 +172,55 @@ public final class AutoFormatResolver {
   private String extractTableName(final String fileName) {
     final var dotIndex = fileName.lastIndexOf('.');
     return dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+  }
+
+  /**
+   * Lists all regular file names in the directory for diagnostic purposes.
+   *
+   * @param directory the directory to scan
+   * @return sorted list of file names, or empty list if listing fails
+   */
+  private List<String> listAllFileNames(final Path directory) {
+    try (final var paths = Files.list(directory)) {
+      return paths
+          .filter(Files::isRegularFile)
+          .map(path -> path.getFileName().toString())
+          .sorted()
+          .toList();
+    } catch (final IOException e) {
+      logger.debug("Failed to list files for diagnostics: {}", directory, e);
+      return List.of();
+    }
+  }
+
+  /**
+   * Builds a detailed error message when no supported data files are found.
+   *
+   * <p>The message includes the directory path, supported extensions, a hint, and a list of files
+   * actually found in the directory (if any) to help users diagnose the issue.
+   *
+   * @param directory the directory that was scanned
+   * @param foundFiles the list of file names found in the directory
+   * @return the formatted error message
+   */
+  private String buildNoSupportedFilesMessage(final Path directory, final List<String> foundFiles) {
+    final var details = new StringBuilder();
+    details.append(
+        String.format(
+            "Dataset directory exists but contains no supported data files: '%s'",
+            directory.toAbsolutePath()));
+    details.append(System.lineSeparator());
+    details.append(
+        String.format("Supported file extensions: %s", FormatRegistry.getSupportedExtensions()));
+    details.append(System.lineSeparator());
+    details.append("Hint: Add at least one data file (for example, TABLE_NAME.csv)...");
+
+    if (!foundFiles.isEmpty()) {
+      details.append(System.lineSeparator());
+      details.append(String.format("Found files: %s", foundFiles));
+    }
+
+    return details.toString();
   }
 
   /**

@@ -47,11 +47,18 @@ src/test/resources/com/example/UserTest/
 
 ```
 Table name conflict detected in AUTO format mode.
-Table 'USERS' found in multiple formats: [USERS.csv, USERS.yaml]
-Use a specific DataFormat (e.g., DataFormat.CSV) or remove duplicate files.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
-この動作により、意図しないデータの重複を防止します。
+エラーメッセージには競合するすべてのテーブル名と対応するファイルが列挙されるため、問題の特定が容易です。
 
 ### 形式の選択
 
