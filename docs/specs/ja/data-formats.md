@@ -198,6 +198,10 @@ void testMultipleScenarios() { }
 
 シナリオ値が空、空白、またはnullの行は、アクティブなシナリオフィルターに関係なく常に含まれます。これはすべてのフォーマット（CSV、TSV、JSON、YAML）に適用されます。
 
+この動作は、すべてのシナリオで必要な共通参照データに有用です。
+
+#### CSV
+
 ```csv
 [Scenario],id,name
 testCreate,1,Alice
@@ -205,12 +209,34 @@ testCreate,1,Alice
 testCreate,3,Charlie
 ```
 
-テストメソッド`testCreate`の場合、行1、2、3がすべて含まれます:
+#### JSON
+
+```json
+[
+  {"[Scenario]": "testCreate", "id": 1, "name": "Alice"},
+  {"[Scenario]": "", "id": 2, "name": "Bob"},
+  {"[Scenario]": "testCreate", "id": 3, "name": "Charlie"}
+]
+```
+
+#### YAML
+
+```yaml
+- "[Scenario]": testCreate
+  id: 1
+  name: Alice
+- "[Scenario]": ""
+  id: 2
+  name: Bob
+- "[Scenario]": testCreate
+  id: 3
+  name: Charlie
+```
+
+テストメソッド`testCreate`の場合、すべてのフォーマットで行1、2、3がすべて含まれます:
 
 - 行1と3: シナリオ名`testCreate`に一致
 - 行2: シナリオ値が空のため含まれる（共有データ）
-
-この動作は、すべてのシナリオで必要な共通参照データに有用です。
 
 ## 特殊値
 

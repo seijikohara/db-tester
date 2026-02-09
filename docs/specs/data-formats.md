@@ -196,6 +196,10 @@ For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
 
 Rows with empty, blank, or null scenario values are always included regardless of the active scenario filter. This applies to all formats (CSV, TSV, JSON, YAML).
 
+This behavior is useful for common reference data that every scenario requires.
+
+#### CSV
+
 ```csv
 [Scenario],id,name
 testCreate,1,Alice
@@ -203,12 +207,34 @@ testCreate,1,Alice
 testCreate,3,Charlie
 ```
 
-For test method `testCreate`, rows 1, 2, and 3 are all included:
+#### JSON
+
+```json
+[
+  {"[Scenario]": "testCreate", "id": 1, "name": "Alice"},
+  {"[Scenario]": "", "id": 2, "name": "Bob"},
+  {"[Scenario]": "testCreate", "id": 3, "name": "Charlie"}
+]
+```
+
+#### YAML
+
+```yaml
+- "[Scenario]": testCreate
+  id: 1
+  name: Alice
+- "[Scenario]": ""
+  id: 2
+  name: Bob
+- "[Scenario]": testCreate
+  id: 3
+  name: Charlie
+```
+
+For test method `testCreate`, rows 1, 2, and 3 are all included in every format:
 
 - Row 1 and 3: match the scenario name `testCreate`
 - Row 2: included because the scenario value is empty (shared data)
-
-This behavior is useful for common reference data that every scenario requires.
 
 ## Special Values
 
