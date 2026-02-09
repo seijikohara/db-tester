@@ -60,6 +60,17 @@ To resolve, remove duplicate files or specify a concrete format:
 
 エラーメッセージには競合するすべてのテーブル名と対応するファイルが列挙されるため、問題の特定が容易です。
 
+#### エクスポート制限
+
+`DataSetExporter`はエクスポート操作で`DataFormat.AUTO`をサポートしません。エクスポート時には具体的な形式（CSV、TSV、JSON、またはYAML）を指定してください。`AUTO`を使用すると`IllegalArgumentException`がスローされます。
+
+#### API詳細
+
+| メソッド | AUTOの挙動 |
+|---------|------------|
+| `hasExtension()` | `false`を返す |
+| `getExtension()` | `UnsupportedOperationException`をスロー |
+
 ### 形式の選択
 
 特定の形式を指定する場合は、`ConventionSettings`で設定します:
