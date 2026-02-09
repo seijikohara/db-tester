@@ -12,6 +12,7 @@ import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
+import io.github.seijikohara.dbtester.internal.template.TemplateProcessor;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,6 +35,10 @@ import org.slf4j.LoggerFactory;
  *
  * <p>Column order is determined by the first row's key order. Null values in JSON/YAML are
  * converted to {@link CellValue#NULL}. All non-null values are converted to strings.
+ *
+ * <p>Template expressions ({@code ${uuid}}, {@code ${sequence}}, {@code ${now}}, {@code
+ * ${faker.*}}) in cell values are resolved during parsing, consistent with the behavior of {@link
+ * DelimitedParser} for CSV/TSV formats.
  *
  * <p>This class is stateless and thread-safe. Instances can be safely shared between threads.
  *
@@ -143,8 +148,12 @@ public final class StructuredFormatParser {
       // Determine column order from the first row
       final var columnNames = extractColumnNames(rawRows.getFirst());
 
-      // Convert all rows
-      final var rows = rawRows.stream().map(rawRow -> createRow(columnNames, rawRow)).toList();
+      // Convert all rows with template expression processing
+      final var templateProcessor = new TemplateProcessor();
+      final var rows =
+          rawRows.stream()
+              .map(rawRow -> createRow(columnNames, rawRow, templateProcessor))
+              .toList();
 
       logger.debug(
           "Parsed table {} with {} columns and {} rows",
@@ -186,14 +195,18 @@ public final class StructuredFormatParser {
    *
    * @param columnNames the column names
    * @param rawRow the raw row map from JSON/YAML
+   * @param templateProcessor the template processor for resolving expressions
    * @return the created row
    */
-  private Row createRow(final List<ColumnName> columnNames, final Map<String, Object> rawRow) {
+  private Row createRow(
+      final List<ColumnName> columnNames,
+      final Map<String, Object> rawRow,
+      final TemplateProcessor templateProcessor) {
     final var rowValues = new LinkedHashMap<ColumnName, CellValue>();
 
     for (final var columnName : columnNames) {
       final var rawValue = rawRow.get(columnName.value());
-      rowValues.put(columnName, toCellValue(rawValue));
+      rowValues.put(columnName, toCellValue(rawValue, templateProcessor));
     }
 
     return new SimpleRow(rowValues);
@@ -203,15 +216,19 @@ public final class StructuredFormatParser {
    * Converts a raw object value to a CellValue.
    *
    * <p>Null values are converted to {@link CellValue#NULL}. All non-null values are converted to
-   * their string representation.
+   * their string representation. Template expressions ({@code ${...}}) are resolved before creating
+   * the CellValue.
    *
    * @param rawValue the raw object value
+   * @param templateProcessor the template processor for resolving expressions
    * @return the CellValue
    */
-  private CellValue toCellValue(final @Nullable Object rawValue) {
+  private CellValue toCellValue(
+      final @Nullable Object rawValue, final TemplateProcessor templateProcessor) {
     if (rawValue == null) {
       return CellValue.NULL;
     }
-    return new CellValue(rawValue.toString());
+    final var stringValue = rawValue.toString();
+    return new CellValue(templateProcessor.process(stringValue));
   }
 }
