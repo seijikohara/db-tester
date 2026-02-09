@@ -154,6 +154,63 @@ void testMultipleScenarios() { }
 
 指定されたシナリオのいずれかに一致する行が含まれます。
 
+### JSONでのシナリオフィルタリング
+
+各JSONオブジェクトの最初のキーにシナリオマーカーを含めます:
+
+```json
+[
+  {"[Scenario]": "testCreate", "id": 1, "name": "Alice", "email": "alice@example.com"},
+  {"[Scenario]": "testCreate", "id": 2, "name": "Bob", "email": "bob@example.com"},
+  {"[Scenario]": "testUpdate", "id": 3, "name": "Charlie", "email": "charlie@example.com"},
+  {"[Scenario]": "testDelete", "id": 4, "name": "Diana", "email": "diana@example.com"}
+]
+```
+
+テストメソッド`testCreate`の場合、`id` 1と2の行にフィルタリングされます。
+
+### YAMLでのシナリオフィルタリング
+
+各YAMLマッピングの最初のキーにシナリオマーカーを含めます:
+
+```yaml
+- "[Scenario]": testCreate
+  id: 1
+  name: Alice
+  email: alice@example.com
+- "[Scenario]": testCreate
+  id: 2
+  name: Bob
+  email: bob@example.com
+- "[Scenario]": testUpdate
+  id: 3
+  name: Charlie
+  email: charlie@example.com
+- "[Scenario]": testDelete
+  id: 4
+  name: Diana
+  email: diana@example.com
+```
+
+テストメソッド`testCreate`の場合、`id` 1と2の行にフィルタリングされます。
+
+### 空のシナリオ値
+
+シナリオ値が空、空白、またはnullの行は、アクティブなシナリオフィルターに関係なく常に含まれます。これはすべてのフォーマット（CSV、TSV、JSON、YAML）に適用されます。
+
+```csv
+[Scenario],id,name
+testCreate,1,Alice
+,2,Bob
+testCreate,3,Charlie
+```
+
+テストメソッド`testCreate`の場合、行1、2、3がすべて含まれます:
+
+- 行1と3: シナリオ名`testCreate`に一致
+- 行2: シナリオ値が空のため含まれる（共有データ）
+
+この動作は、すべてのシナリオで必要な共通参照データに有用です。
 
 ## 特殊値
 

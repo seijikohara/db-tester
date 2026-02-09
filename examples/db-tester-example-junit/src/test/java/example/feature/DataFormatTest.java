@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
  * <p>CSV files use comma as delimiter, TSV files use tab character as delimiter. JSON files use
  * arrays of objects, and YAML files use lists of mappings.
  */
+@DisplayName("DataFormatTest")
 final class DataFormatTest {
 
   /** Logger instance for test execution logging. */

@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  * <p>Each nested test class configures a different merge strategy and verifies the expected
  * behavior when loading multiple datasets that contain the same table.
  */
+@DisplayName("TableMergeStrategyTest")
 final class TableMergeStrategyTest {
 
   /** Logger instance for test execution logging. */
