@@ -87,17 +87,22 @@ public final class DataSetFactory {
     logger.debug("Creating dataset from directory: {} with format: {}", directory, dataFormat);
 
     validateDirectory(directory);
-    validateDataFilesExist(directory, dataFormat.getExtension());
 
-    final var fileExtension = new FileExtension(dataFormat.getExtension());
-    final var provider = FormatRegistry.getProvider(fileExtension);
+    final TableSet rawTableSet;
+    if (dataFormat == DataFormat.AUTO) {
+      logger.debug("Using AUTO format detection for directory: {}", directory);
+      rawTableSet = new AutoFormatResolver().resolve(directory);
+    } else {
+      validateDataFilesExist(directory, dataFormat.getExtension());
+      final var fileExtension = new FileExtension(dataFormat.getExtension());
+      final var provider = FormatRegistry.getProvider(fileExtension);
+      logger.debug(
+          "Using format provider: {} for extension: {}",
+          provider.getClass().getSimpleName(),
+          fileExtension.value());
+      rawTableSet = provider.parse(directory);
+    }
 
-    logger.debug(
-        "Using format provider: {} for extension: {}",
-        provider.getClass().getSimpleName(),
-        fileExtension.value());
-
-    final var rawTableSet = provider.parse(directory);
     final var filter = new ScenarioFilter(scenarioMarker, scenarioNames);
 
     logger.debug("Applied scenario filter with {} scenario names", scenarioNames.size());
