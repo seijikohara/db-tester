@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.format.yaml;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -396,6 +397,148 @@ class YamlFormatProviderTest {
           DataSetLoadException.class,
           () -> provider.parse(file),
           "should throw DataSetLoadException when path is a file");
+    }
+  }
+
+  /** Tests for template expression processing. */
+  @Nested
+  @DisplayName("template expression processing")
+  class TemplateExpressionProcessing {
+
+    /** Tests for template expression processing. */
+    TemplateExpressionProcessing() {}
+
+    /**
+     * Verifies that parse resolves UUID template expressions.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should resolve UUID template expression when ${uuid} is used")
+    void shouldResolveUuidExpression_whenUuidTemplateUsed(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createYamlFile(
+          tempDir,
+          "users.yaml",
+          """
+          - ID: "${uuid}"
+            NAME: John
+          """);
+
+      // When
+      final var result = provider.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var idString = (String) row.getValue(new ColumnName("ID")).value();
+
+      assertAll(
+          "UUID expression should be resolved",
+          () -> assertNotNull(idString, "ID value should not be null"),
+          () ->
+              assertFalse(
+                  idString != null && idString.contains("${uuid}"),
+                  "should not contain template expression"),
+          () ->
+              assertTrue(
+                  idString != null
+                      && idString.matches(
+                          "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"),
+                  "should be a valid UUID format"));
+    }
+
+    /**
+     * Verifies that parse resolves sequence template expressions.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should resolve sequence template expression when ${sequence} is used")
+    void shouldResolveSequenceExpression_whenSequenceTemplateUsed(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createYamlFile(
+          tempDir,
+          "users.yaml",
+          """
+          - ID: "${sequence}"
+            NAME: Alice
+          - ID: "${sequence}"
+            NAME: Bob
+          """);
+
+      // When
+      final var result = provider.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var rows = table.getRows();
+
+      assertAll(
+          "sequence expressions should be resolved incrementally",
+          () ->
+              assertEquals(
+                  "1",
+                  rows.getFirst().getValue(new ColumnName("ID")).value(),
+                  "first row should have sequence value 1"),
+          () ->
+              assertEquals(
+                  "2",
+                  rows.get(1).getValue(new ColumnName("ID")).value(),
+                  "second row should have sequence value 2"));
+    }
+
+    /**
+     * Verifies that parse passes through numeric values without modification.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should pass through numeric values when no template expression present")
+    void shouldPassThroughNumericValues_whenNoTemplateExpression(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createYamlFile(
+          tempDir,
+          "products.yaml",
+          """
+          - ID: 42
+            PRICE: 99.99
+            NAME: "${uuid}"
+          """);
+
+      // When
+      final var result = provider.parse(tempDir);
+
+      // Then
+      final var table = result.getTables().getFirst();
+      final var row = table.getRows().getFirst();
+      final var nameString = (String) row.getValue(new ColumnName("NAME")).value();
+
+      assertAll(
+          "numeric values should be passed through unchanged",
+          () ->
+              assertEquals(
+                  "42",
+                  row.getValue(new ColumnName("ID")).value(),
+                  "integer should be converted to string"),
+          () ->
+              assertEquals(
+                  "99.99",
+                  row.getValue(new ColumnName("PRICE")).value(),
+                  "decimal should be converted to string"),
+          () ->
+              assertFalse(
+                  nameString != null && nameString.contains("${uuid}"),
+                  "UUID template should be resolved"));
     }
   }
 
