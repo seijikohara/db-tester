@@ -337,6 +337,44 @@ class DataSetComparatorTest {
           exception.getMessage().contains("NAME"),
           "exception message should mention the differing column");
     }
+
+    /** Verifies that assertEqualsIgnoreColumns handles case-insensitive column names. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should ignore column when name case differs from actual column")
+    void shouldIgnoreColumn_whenNameCaseDiffersFromActualColumn() {
+      // Given
+      final var expected =
+          createTable(
+              "USERS", List.of("ID", "NAME", "UPDATED_AT"), List.of("1", "Alice", "2024-01-01"));
+      final var actual =
+          createTable(
+              "USERS", List.of("ID", "NAME", "UPDATED_AT"), List.of("1", "Alice", "2025-01-01"));
+
+      // When & Then - lowercase "updated_at" should match uppercase column "UPDATED_AT"
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsIgnoreColumns(expected, actual, Set.of("updated_at")),
+          "should ignore column regardless of case");
+    }
+
+    /** Verifies that assertEqualsIgnoreColumns handles mixed-case ignore column names. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should ignore column when mixed-case name is used")
+    void shouldIgnoreColumn_whenMixedCaseNameIsUsed() {
+      // Given
+      final var expected =
+          createTable(
+              "USERS", List.of("ID", "NAME", "Updated_At"), List.of("1", "Alice", "2024-01-01"));
+      final var actual =
+          createTable(
+              "USERS", List.of("ID", "NAME", "Updated_At"), List.of("1", "Alice", "2025-01-01"));
+
+      // When & Then - "Updated_At" should match column regardless of case
+      assertDoesNotThrow(
+          () -> comparator.assertEqualsIgnoreColumns(expected, actual, Set.of("Updated_At")),
+          "should ignore column with mixed-case name");
+    }
   }
 
   /**
