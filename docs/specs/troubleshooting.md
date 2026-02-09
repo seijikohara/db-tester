@@ -16,7 +16,7 @@ Use this checklist to identify your issue category:
 |---------|----------|---------|
 | "Dataset directory not found" | Data Loading | [DataSetLoadException](#datasetloadexception) |
 | "File is empty" or parse errors | Data Loading | [DataSetLoadException](#datasetloadexception) |
-| "Duplicate table name detected in AUTO format mode" | Data Loading | [DataSetLoadException](#datasetloadexception) |
+| "Table name conflict detected in AUTO format mode" | Data Loading | [DataSetLoadException](#datasetloadexception) |
 | "Assertion failed: N differences" | Validation | [ValidationException](#validationexception) |
 | "No default data source registered" | Configuration | [DataSource Issues](#datasource-issues) |
 | Test runs slowly | Performance | [Performance Optimization](#performance-optimization) |
@@ -111,9 +111,16 @@ Failed to parse file: /path/to/USERS.csv
 
 **Symptom**:
 ```
-Duplicate table name detected in AUTO format mode.
-Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
-Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+Table name conflict detected in AUTO format mode.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
 **Diagnosis**:

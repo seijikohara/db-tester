@@ -147,9 +147,16 @@ Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 The loader reports this error when `DataFormat.AUTO` detects the same table name in multiple file formats:
 
 ```
-Duplicate table name detected in AUTO format mode.
-Table 'USERS' found in multiple files: [USERS.csv, USERS.yaml]
-Hint: Remove duplicate files or specify a concrete DataFormat (CSV, TSV, JSON, or YAML).
+Table name conflict detected in AUTO format mode.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
 **Resolution**: Remove duplicate files so each table name appears in only one format, or configure a concrete `DataFormat` in `ConventionSettings`.
