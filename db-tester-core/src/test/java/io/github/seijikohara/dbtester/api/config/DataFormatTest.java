@@ -2,8 +2,11 @@ package io.github.seijikohara.dbtester.api.config;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +19,56 @@ class DataFormatTest {
 
   /** Tests for the DataFormat enum. */
   DataFormatTest() {}
+
+  /** Tests for the AUTO format. */
+  @Nested
+  @DisplayName("AUTO format")
+  class AutoFormat {
+
+    /** Tests for the AUTO format. */
+    AutoFormat() {}
+
+    /** Verifies that AUTO format has name AUTO. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have name AUTO")
+    void shouldHaveNameAuto() {
+      // When
+      final var name = DataFormat.AUTO.name();
+
+      // Then
+      assertEquals("AUTO", name, "name should be AUTO");
+    }
+
+    /** Verifies that AUTO format does not have an extension. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should not have extension")
+    void shouldNotHaveExtension() {
+      // When
+      final var result = DataFormat.AUTO.hasExtension();
+
+      // Then
+      assertFalse(result, "AUTO should not have a specific extension");
+    }
+
+    /** Verifies that getExtension throws UnsupportedOperationException for AUTO. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw UnsupportedOperationException when getExtension called")
+    void shouldThrowException_whenGetExtensionCalled() {
+      // When & Then
+      final var exception =
+          assertThrows(
+              UnsupportedOperationException.class,
+              () -> DataFormat.AUTO.getExtension(),
+              "getExtension should throw for AUTO");
+
+      final var message = exception.getMessage();
+      assertNotNull(message, "exception message should not be null");
+      assertTrue(message.contains("AUTO"), "exception message should mention AUTO");
+    }
+  }
 
   /** Tests for the CSV format. */
   @Nested
@@ -47,6 +100,18 @@ class DataFormatTest {
 
       // Then
       assertEquals("CSV", name, "name should be CSV");
+    }
+
+    /** Verifies that CSV format has extension. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have extension")
+    void shouldHaveExtension() {
+      // When
+      final var result = DataFormat.CSV.hasExtension();
+
+      // Then
+      assertTrue(result, "CSV should have a specific extension");
     }
   }
 
@@ -169,11 +234,12 @@ class DataFormatTest {
       assertAll(
           "should have all formats",
           () -> assertNotNull(values, "values should not be null"),
-          () -> assertEquals(4, values.length, "should have four formats"),
-          () -> assertEquals(DataFormat.CSV, values[0], "first should be CSV"),
-          () -> assertEquals(DataFormat.TSV, values[1], "second should be TSV"),
-          () -> assertEquals(DataFormat.JSON, values[2], "third should be JSON"),
-          () -> assertEquals(DataFormat.YAML, values[3], "fourth should be YAML"));
+          () -> assertEquals(5, values.length, "should have five formats"),
+          () -> assertEquals(DataFormat.AUTO, values[0], "first should be AUTO"),
+          () -> assertEquals(DataFormat.CSV, values[1], "second should be CSV"),
+          () -> assertEquals(DataFormat.TSV, values[2], "third should be TSV"),
+          () -> assertEquals(DataFormat.JSON, values[3], "fourth should be JSON"),
+          () -> assertEquals(DataFormat.YAML, values[4], "fifth should be YAML"));
     }
   }
 
@@ -184,6 +250,18 @@ class DataFormatTest {
 
     /** Tests for the valueOf method. */
     ValueOfMethod() {}
+
+    /** Verifies that valueOf returns correct format for AUTO. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return AUTO for valueOf(\"AUTO\")")
+    void shouldReturnAutoForValueOfAuto() {
+      // When
+      final var format = DataFormat.valueOf("AUTO");
+
+      // Then
+      assertEquals(DataFormat.AUTO, format, "should return AUTO");
+    }
 
     /** Verifies that valueOf returns correct format for CSV. */
     @Test

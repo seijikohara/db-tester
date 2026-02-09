@@ -16,6 +16,7 @@ description: "症状・診断・解決のワークフローによる実践的な
 |------|----------|-----------|
 | "Dataset directory not found" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "File is empty" またはパースエラー | データ読み込み | [DataSetLoadException](#datasetloadexception) |
+| "Table name conflict detected" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "Assertion failed: N differences" | 検証 | [ValidationException](#validationexception) |
 | "No default data source registered" | 設定 | [DataSource の問題](#datasource-の問題) |
 | テストの実行が遅い | パフォーマンス | [パフォーマンス最適化](#パフォーマンス最適化) |
@@ -55,17 +56,22 @@ mkdir -p src/test/resources/com/example/UserRepositoryTest
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
 Supported file extensions: [.csv, .tsv, .json, .yaml]
+Hint: Add at least one data file (for example, TABLE_NAME.csv)...
+Found files: [README.txt, notes.md]
 ```
 
+`Found files`行はディレクトリ内の全ファイルを列挙し、問題の診断に役立ちます。ディレクトリが空の場合、この行は省略されます。
+
 **診断**:
-1. ファイル拡張子が設定された `dataFormat` と一致しているか確認
-2. ファイルが隠しファイルでないか確認（`.` プレフィックスなし）
-3. ファイルが正しいディレクトリ階層にあるか確認
+1. `Found files`リストで拡張子が正しくないファイルを確認
+2. ファイル拡張子が設定された `dataFormat` と一致しているか確認
+3. ファイルが隠しファイルでないか確認（`.` プレフィックスなし）、正しいディレクトリ階層にあるか確認
 
 **解決策**:
 
 | dataFormat 設定 | 期待される拡張子 |
 |-----------------|------------------|
+| `DataFormat.AUTO`（デフォルト） | `.csv`、`.tsv`、`.json`、`.yaml` |
 | `DataFormat.CSV` | `.csv` |
 | `DataFormat.TSV` | `.tsv` |
 | `DataFormat.JSON` | `.json` |
@@ -104,6 +110,43 @@ Failed to parse file: /path/to/USERS.csv
 - 値内のカンマをエスケープ: `"value, with comma"`
 - クォートをエスケープ: `"value ""with quotes"""`
 - データに多くのカンマが含まれる場合は TSV 形式を使用
+
+### AUTOモードでのテーブル名競合
+
+**症状**:
+```
+Table name conflict detected in AUTO format mode.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
+```
+
+**診断**:
+`DataFormat.AUTO`（デフォルト）を使用している場合、フレームワークはデータセットディレクトリからすべてのサポート形式のファイルを読み込みます。同一テーブル名が異なる拡張子のファイルに存在する場合、フレームワークはどのファイルを使用すべきか判断できません。
+
+**解決策**:
+
+| 方法 | 対応 |
+|------|------|
+| 重複ファイルを削除 | テーブル名ごとに1つのファイルのみ残す（例: `USERS.csv` が存在する場合 `USERS.yaml` を削除） |
+| 特定の形式を指定 | `ConventionSettings` で `DataFormat.CSV`、`DataFormat.TSV`、`DataFormat.JSON`、または `DataFormat.YAML` を設定 |
+
+```java
+// 方法 1: データセットディレクトリから重複ファイルを削除
+
+// 方法 2: 特定の形式を指定
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.CSV)
+    .build();
+```
+
+[データフォーマット - 自動フォーマット検出](data-formats#自動フォーマット検出)の詳細を参照。
 
 ### 読み込み順序ファイルエラー
 
@@ -366,17 +409,22 @@ Configuration.builder()
 
 ### 拡張子の不一致
 
-**ミス**: `DataFormat.CSV`（デフォルト）で `.tsv` ファイルを使用。
+**ミス**: 特定の`DataFormat`（例: `DataFormat.CSV`）を設定しているのに、別の拡張子のファイルを使用。
+
+**注意**: デフォルトは`DataFormat.AUTO`であり、すべてのサポート形式が自動検出されます。特定の形式を指定している場合のみ、この問題が発生します。
 
 **解決策**:
-`ConventionSettings` でTSV形式を設定:
+
+- `DataFormat.AUTO`（デフォルト）を使用する場合は、すべてのサポート形式が自動的に読み込まれます
+- 特定の形式を指定する場合は、`ConventionSettings` で正しい形式を設定:
+
 ```java
 ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();
 ```
 
-またはファイルを `.csv` にリネーム。
+またはファイルの拡張子を設定に合わせてリネーム。
 
 ### 期待値サフィックスの不一致
 

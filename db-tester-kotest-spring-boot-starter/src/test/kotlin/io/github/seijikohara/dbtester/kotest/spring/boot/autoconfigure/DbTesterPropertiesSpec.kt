@@ -73,7 +73,7 @@ class DbTesterPropertiesSpec : AnnotationSpec() {
             convention.baseDirectory shouldBe null
             convention.expectationSuffix shouldBe ConventionSettings.DEFAULT_EXPECTATION_SUFFIX
             convention.scenarioMarker shouldBe ConventionSettings.DEFAULT_SCENARIO_MARKER
-            convention.dataFormat shouldBe DataFormat.CSV
+            convention.dataFormat shouldBe DataFormat.AUTO
             convention.tableMergeStrategy shouldBe TableMergeStrategy.UNION_ALL
             convention.loadOrderFileName shouldBe ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
         }

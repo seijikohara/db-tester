@@ -291,7 +291,7 @@ Configure via `application.properties`:
 ```properties
 db-tester.enabled=true
 db-tester.auto-register-data-sources=true
-db-tester.convention.data-format=CSV
+db-tester.convention.data-format=AUTO
 db-tester.convention.expectation-suffix=/expected
 db-tester.operation.preparation=CLEAN_INSERT
 ```
@@ -491,12 +491,16 @@ See the [Public API - Export API](https://seijikohara.github.io/db-tester/public
 
 | Format | Extension |
 |--------|-----------|
-| CSV | `.csv` (default) |
+| AUTO | All supported (default) |
+| CSV | `.csv` |
 | TSV | `.tsv` |
 | JSON | `.json` |
 | YAML | `.yaml` |
 
+The default `AUTO` mode detects all supported file formats in the dataset directory. If the same table name exists in multiple formats, an error is reported.
+
 ```java
+// Explicitly specify a single format
 ConventionSettings conventions = ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();

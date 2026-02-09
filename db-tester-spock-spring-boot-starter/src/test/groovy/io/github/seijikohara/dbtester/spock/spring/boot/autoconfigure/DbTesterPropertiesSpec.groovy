@@ -103,7 +103,7 @@ class DbTesterPropertiesSpec extends Specification {
 		properties.convention.baseDirectory == null
 		properties.convention.expectationSuffix == '/expected'
 		properties.convention.scenarioMarker == '[Scenario]'
-		properties.convention.dataFormat == DataFormat.CSV
+		properties.convention.dataFormat == DataFormat.AUTO
 		properties.convention.tableMergeStrategy == TableMergeStrategy.UNION_ALL
 	}
 

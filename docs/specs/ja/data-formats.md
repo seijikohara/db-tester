@@ -1,24 +1,79 @@
 ---
 title: "データフォーマット - DB Tester"
-description: "CSV、TSV、JSON、およびYAMLデータフォーマット、値の構文、特殊処理について。"
+description: "AUTO検出、CSV、TSV、JSON、およびYAMLデータフォーマット、値の構文、特殊処理について。"
 ---
 
 # DB Tester仕様 - データフォーマット
 
 ## サポートされる形式
 
-フレームワークは4つのデータフォーマットをサポートします: 2つの区切りテキスト形式（CSV、TSV）と2つの構造化形式（JSON、YAML）。
+フレームワークは5つのデータフォーマット設定をサポートします: 自動検出モード（AUTO）、2つの区切りテキスト形式（CSV、TSV）、および2つの構造化形式（JSON、YAML）。
 
 | 形式 | 拡張子 | 区切り文字 | デフォルト |
 |------|--------|-----------|-----------|
-| CSV | `.csv` | カンマ（`,`） | はい |
+| AUTO | 全サポート形式 | — | はい |
+| CSV | `.csv` | カンマ（`,`） | いいえ |
 | TSV | `.tsv` | タブ（`\t`） | いいえ |
 | JSON | `.json` | — | いいえ |
 | YAML | `.yaml` | — | いいえ |
 
+### AUTO（自動フォーマット検出）
+
+`DataFormat.AUTO`はデフォルトのフォーマット設定です。データセットディレクトリ内のすべてのサポート形式（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルを自動的に検出して読み込みます。
+
+```
+src/test/resources/com/example/UserTest/
+├── USERS.csv          # CSV形式で読み込み
+├── ORDERS.json        # JSON形式で読み込み
+├── CATEGORIES.yaml    # YAML形式で読み込み
+└── PRODUCTS.tsv       # TSV形式で読み込み
+```
+
+AUTOモードでは、異なる形式のファイルを同一ディレクトリに混在させることができます。各ファイルは拡張子に基づいて適切なパーサーで処理されます。
+
+#### テーブル名の競合検出
+
+AUTOモードでは、同一テーブル名が複数の形式で存在する場合、`DataSetLoadException`がスローされます。
+
+例えば、以下のようにディレクトリに`USERS.csv`と`USERS.yaml`の両方が存在する場合:
+
+```
+src/test/resources/com/example/UserTest/
+├── USERS.csv
+└── USERS.yaml
+```
+
+以下のエラーが発生します:
+
+```
+Table name conflict detected in AUTO format mode.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
+```
+
+エラーメッセージには競合するすべてのテーブル名と対応するファイルが列挙されるため、問題の特定が容易です。
+
+#### エクスポート制限
+
+`DataSetExporter`はエクスポート操作で`DataFormat.AUTO`をサポートしません。エクスポート時には具体的な形式（CSV、TSV、JSON、またはYAML）を指定してください。`AUTO`を使用すると`IllegalArgumentException`がスローされます。
+
+#### API詳細
+
+| メソッド | AUTOの挙動 |
+|---------|------------|
+| `hasExtension()` | `false`を返す |
+| `getExtension()` | `UnsupportedOperationException`をスロー |
+
 ### 形式の選択
 
-`ConventionSettings`で形式を設定します:
+特定の形式を指定する場合は、`ConventionSettings`で設定します:
 
 ```java
 var conventions = ConventionSettings.builder()
@@ -26,7 +81,7 @@ var conventions = ConventionSettings.builder()
     .build();
 ```
 
-ディレクトリからデータセットを読み込む際、設定された拡張子に一致するファイルのみが処理されます。
+特定の形式を指定した場合、ディレクトリからデータセットを読み込む際、設定された拡張子に一致するファイルのみが処理されます。AUTOモード（デフォルト）の場合は、すべてのサポート形式のファイルが処理されます。
 
 
 ## ファイル構造

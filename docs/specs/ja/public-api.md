@@ -665,6 +665,8 @@ if (!failures.isEmpty()) {
 | `json(DataSource, List<String>, Path)` | JSONファイルにテーブルをエクスポート（簡易メソッド） |
 | `yaml(DataSource, List<String>, Path)` | YAMLファイルにテーブルをエクスポート（簡易メソッド） |
 
+**注意**: `DataFormat.AUTO`をエクスポート形式として指定すると`IllegalArgumentException`がスローされます。エクスポート時は具体的な形式（CSV、TSV、JSON、YAML）を指定してください。
+
 **例**:
 
 ```java

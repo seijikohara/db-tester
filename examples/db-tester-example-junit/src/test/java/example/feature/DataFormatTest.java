@@ -27,20 +27,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Demonstrates different data format configurations (CSV, TSV, JSON, and YAML).
+ * Demonstrates different data format configurations (AUTO, CSV, TSV, JSON, and YAML).
  *
  * <p>This test demonstrates:
  *
  * <ul>
- *   <li>Using CSV format (default) with {@link DataFormat#CSV}
+ *   <li>Using AUTO format (default) with {@link DataFormat#AUTO} for automatic detection
+ *   <li>Using CSV format with {@link DataFormat#CSV}
  *   <li>Using TSV format with {@link DataFormat#TSV}
  *   <li>Using JSON format with {@link DataFormat#JSON}
  *   <li>Using YAML format with {@link DataFormat#YAML}
+ *   <li>Mixing CSV and JSON in the same directory with AUTO detection
  *   <li>Configuring data format via {@link ConventionSettings}
  * </ul>
  *
  * <p>CSV files use comma as delimiter, TSV files use tab character as delimiter. JSON files use
- * arrays of objects, and YAML files use lists of mappings.
+ * arrays of objects, and YAML files use lists of mappings. AUTO mode detects all formats
+ * automatically.
  */
 @DisplayName("DataFormatTest")
 final class DataFormatTest {
@@ -499,6 +502,175 @@ final class DataFormatTest {
 
       // Then
       logger.info("YAML format test completed");
+    }
+  }
+
+  /**
+   * Tests AUTO format (default configuration).
+   *
+   * <p>AUTO mode automatically detects all supported file formats in the dataset directory. No
+   * explicit format configuration is required.
+   */
+  @Nested
+  @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("AutoFormatTest")
+  class AutoFormatTest {
+
+    /** DataSource for AUTO format tests. */
+    private static DataSource dataSource;
+
+    /** Creates AutoFormatTest instance. */
+    AutoFormatTest() {}
+
+    /**
+     * Sets up database with default (AUTO) format configuration.
+     *
+     * @param context the extension context
+     * @throws Exception if setup fails
+     */
+    @BeforeAll
+    static void setupDatabase(final ExtensionContext context) throws Exception {
+      logger.info("Setting up database for AUTO format test");
+
+      // AUTO is the default format; no explicit configuration needed
+      final var registry = DatabaseTestExtension.getRegistry(context);
+      dataSource = createDataSource("DataFormatTest_AUTO");
+      registry.registerDefault(dataSource);
+      executeScript(dataSource, "ddl/feature/DataFormatTest.sql");
+
+      logger.info("AUTO format test setup completed");
+    }
+
+    /**
+     * Executes SQL against the test database.
+     *
+     * @param sql the SQL to execute
+     */
+    private void executeSql(final String sql) {
+      try (final var connection = dataSource.getConnection();
+          final var statement = connection.createStatement()) {
+        statement.executeUpdate(sql);
+      } catch (final SQLException e) {
+        throw new RuntimeException(String.format("Failed to execute SQL: %s", sql), e);
+      }
+    }
+
+    /**
+     * Verifies that AUTO format detects CSV files without explicit configuration.
+     *
+     * <p>This test uses the default AUTO format, which automatically detects CSV files in the
+     * dataset directory.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should auto-detect CSV format")
+    @DataSet(
+        operation = Operation.INSERT,
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$AutoFormatTest/shouldAutoDetectCsvFormat/")
+        })
+    @ExpectedDataSet(
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$AutoFormatTest/shouldAutoDetectCsvFormat/expected/")
+        })
+    void shouldAutoDetectCsvFormat() {
+      // Given
+      logger.info("Testing AUTO format with CSV files");
+
+      // When
+      executeSql("INSERT INTO DATA_FORMAT (ID, NAME, DATA_VALUE) VALUES (3, 'Charlie', 300)");
+
+      // Then
+      logger.info("AUTO format CSV detection test completed");
+    }
+  }
+
+  /**
+   * Tests AUTO format with mixed file formats in the same directory.
+   *
+   * <p>AUTO mode loads CSV and JSON files from the same directory, each mapped to a different
+   * table. This demonstrates zero-configuration multi-format support.
+   */
+  @Nested
+  @ExtendWith(DatabaseTestExtension.class)
+  @DisplayName("MixedFormatTest")
+  class MixedFormatTest {
+
+    /** DataSource for mixed format tests. */
+    private static DataSource dataSource;
+
+    /** Creates MixedFormatTest instance. */
+    MixedFormatTest() {}
+
+    /**
+     * Sets up database with default (AUTO) format configuration.
+     *
+     * @param context the extension context
+     * @throws Exception if setup fails
+     */
+    @BeforeAll
+    static void setupDatabase(final ExtensionContext context) throws Exception {
+      logger.info("Setting up database for mixed format test");
+
+      // AUTO is the default format; no explicit configuration needed
+      final var registry = DatabaseTestExtension.getRegistry(context);
+      dataSource = createDataSource("DataFormatTest_MIXED");
+      registry.registerDefault(dataSource);
+      executeScript(dataSource, "ddl/feature/DataFormatTest.sql");
+
+      logger.info("Mixed format test setup completed");
+    }
+
+    /**
+     * Executes SQL against the test database.
+     *
+     * @param sql the SQL to execute
+     */
+    private void executeSql(final String sql) {
+      try (final var connection = dataSource.getConnection();
+          final var statement = connection.createStatement()) {
+        statement.executeUpdate(sql);
+      } catch (final SQLException e) {
+        throw new RuntimeException(String.format("Failed to execute SQL: %s", sql), e);
+      }
+    }
+
+    /**
+     * Verifies that AUTO format loads both CSV and JSON files from the same directory.
+     *
+     * <p>The dataset directory contains DATA_FORMAT_CSV.csv and DATA_FORMAT_JSON.json. AUTO mode
+     * detects and loads both formats, each mapped to its respective table.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load mixed CSV and JSON formats")
+    @DataSet(
+        operation = Operation.INSERT,
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$MixedFormatTest/shouldLoadMixedFormats/")
+        })
+    @ExpectedDataSet(
+        sources = {
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/DataFormatTest$MixedFormatTest/shouldLoadMixedFormats/expected/")
+        })
+    void shouldLoadMixedFormats() {
+      // Given
+      logger.info("Testing AUTO format with mixed CSV and JSON files");
+
+      // When
+      executeSql("INSERT INTO DATA_FORMAT_CSV (ID, NAME) VALUES (2, 'Bob')");
+      executeSql("INSERT INTO DATA_FORMAT_JSON (ID, NAME) VALUES (2, 'Gadget')");
+
+      // Then
+      logger.info("Mixed format test completed");
     }
   }
 }

@@ -94,7 +94,7 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `baseDirectory` | `@Nullable String` | `null` | Absolute or relative base path; null for classpath-relative |
 | `expectationSuffix` | `String` | `"/expected"` | Subdirectory for expected datasets |
 | `scenarioMarker` | `String` | `"[Scenario]"` | Column name for scenario filtering |
-| `dataFormat` | `DataFormat` | `CSV` | File format for dataset files |
+| `dataFormat` | `DataFormat` | `AUTO` | File format for dataset files |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | File name for table loading order specification |
 | `globalExcludeColumns` | `Set<String>` | `Set.of()` | Column names to exclude from all verifications (case-insensitive) |
@@ -333,26 +333,29 @@ Defines supported file formats for dataset files.
 
 ### Values
 
-| Value | Extension | Field Separator |
-|-------|-----------|-----------------|
-| `CSV` | `.csv` | Comma (`,`) |
-| `TSV` | `.tsv` | Tab (`\t`) |
-| `JSON` | `.json` | — |
-| `YAML` | `.yaml` | — |
+| Value | Extension | Field Separator | Default |
+|-------|-----------|-----------------|---------|
+| `AUTO` | All supported | — | Yes |
+| `CSV` | `.csv` | Comma (`,`) | No |
+| `TSV` | `.tsv` | Tab (`\t`) | No |
+| `JSON` | `.json` | — | No |
+| `YAML` | `.yaml` | — | No |
 
 ### Methods
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getExtension()` | `String` | Returns file extension including dot |
+| `hasExtension()` | `boolean` | Returns `false` for `AUTO`, `true` for all other formats |
+| `getExtension()` | `String` | Returns file extension including dot; throws `UnsupportedOperationException` for `AUTO` |
 
 ### File Discovery
 
 When loading datasets from a directory:
 
-1. List all files matching the configured format extension
+1. List all files matching the configured format extension (or all supported extensions for `AUTO`)
 2. Parse each file as a table (filename without extension = table name)
-3. Ignore files with other extensions
+3. Ignore files with unsupported extensions
+4. For `AUTO` mode: throw `DataSetLoadException` if the same table name exists in multiple formats
 
 ## TableMergeStrategy
 
@@ -518,7 +521,7 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 - [Overview](overview) - Framework purpose and key concepts
 - [Public API](public-api) - Annotations and interfaces
-- [Data Formats](data-formats) - CSV, TSV, JSON, and YAML file structure
+- [Data Formats](data-formats) - AUTO detection, CSV, TSV, JSON, and YAML file structure
 - [Database Operations](database-operations) - Supported operations
 - [Test Frameworks](test-frameworks) - JUnit, Spock, and Kotest integration
 - [Error Handling](error-handling) - Error messages and exception types

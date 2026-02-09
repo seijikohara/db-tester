@@ -140,7 +140,29 @@ The loader reports this error when the directory exists but contains no supporte
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
 Supported file extensions: [.csv, .tsv, .json, .yaml]
 Hint: Add at least one data file (for example, TABLE_NAME.csv)...
+Found files: [README.txt, notes.md]
 ```
+
+The `Found files` line lists all files in the directory to help diagnose the issue. This line is omitted when the directory is empty.
+
+### Table Name Conflict (AUTO Format)
+
+The loader reports this error when `DataFormat.AUTO` detects the same table name in multiple file formats:
+
+```
+Table name conflict detected in AUTO format mode.
+The following table names are defined in multiple files with different formats:
+
+  Table 'USERS':
+    - USERS.csv
+    - USERS.yaml
+
+Each table name must be unique across all file formats in a directory.
+To resolve, remove duplicate files or specify a concrete format:
+  DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
+```
+
+**Resolution**: Remove duplicate files so each table name appears in only one format, or configure a concrete `DataFormat` in `ConventionSettings`.
 
 ### Empty File
 
