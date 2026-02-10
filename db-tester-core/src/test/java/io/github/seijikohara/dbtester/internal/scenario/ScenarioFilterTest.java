@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
 import java.util.List;
@@ -189,7 +191,7 @@ class ScenarioFilterTest {
     /** Tests for the findScenarioColumn method. */
     FindScenarioColumnMethod() {}
 
-    /** Verifies that findScenarioColumn returns column when marker matches. */
+    /** Verifies that findScenarioColumn returns column when marker matches first column. */
     @Test
     @Tag("normal")
     @DisplayName("should return column when marker matches first column")
@@ -207,11 +209,47 @@ class ScenarioFilterTest {
       assertEquals("[Test]", result.get().value(), "should return matching column");
     }
 
-    /** Verifies that findScenarioColumn returns empty when marker does not match. */
+    /** Verifies that findScenarioColumn returns column when marker matches non-first column. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return column when marker matches non-first column")
+    void shouldReturnColumn_whenMarkerMatchesNonFirstColumn() {
+      // Given
+      final var filter = new ScenarioFilter(scenarioMarker, List.of());
+      final var columns =
+          List.of(new ColumnName("id"), new ColumnName("[Test]"), new ColumnName("name"));
+
+      // When
+      final var result = filter.findScenarioColumn(columns);
+
+      // Then
+      assertTrue(result.isPresent(), "should find scenario column in non-first position");
+      assertEquals("[Test]", result.get().value(), "should return matching column");
+    }
+
+    /** Verifies that findScenarioColumn returns column when marker matches last column. */
     @Test
     @Tag("edge-case")
-    @DisplayName("should return empty when marker does not match first column")
-    void shouldReturnEmpty_whenMarkerDoesNotMatchFirstColumn() {
+    @DisplayName("should return column when marker matches last column")
+    void shouldReturnColumn_whenMarkerMatchesLastColumn() {
+      // Given
+      final var filter = new ScenarioFilter(scenarioMarker, List.of());
+      final var columns =
+          List.of(new ColumnName("id"), new ColumnName("name"), new ColumnName("[Test]"));
+
+      // When
+      final var result = filter.findScenarioColumn(columns);
+
+      // Then
+      assertTrue(result.isPresent(), "should find scenario column in last position");
+      assertEquals("[Test]", result.get().value(), "should return matching column");
+    }
+
+    /** Verifies that findScenarioColumn returns empty when marker does not match any column. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should return empty when marker does not match any column")
+    void shouldReturnEmpty_whenMarkerDoesNotMatchAnyColumn() {
       // Given
       final var filter = new ScenarioFilter(scenarioMarker, List.of());
       final var columns = List.of(new ColumnName("id"), new ColumnName("name"));
@@ -238,6 +276,32 @@ class ScenarioFilterTest {
       // Then
       assertFalse(result.isPresent(), "should not find scenario column");
     }
+
+    /** Verifies that findScenarioColumn throws exception when multiple columns match marker. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when multiple columns match marker")
+    void shouldThrowException_whenMultipleColumnsMatchMarker() {
+      // Given
+      final var filter = new ScenarioFilter(scenarioMarker, List.of());
+      final var columns =
+          List.of(new ColumnName("[Test]"), new ColumnName("id"), new ColumnName("[Test]"));
+
+      // When & Then
+      final var exception =
+          assertThrows(DataSetLoadException.class, () -> filter.findScenarioColumn(columns));
+
+      final var message = exception.getMessage();
+      assertAll(
+          "exception should contain expected information",
+          () ->
+              assertTrue(
+                  message != null && message.contains("Multiple columns"),
+                  "should mention multiple columns"),
+          () ->
+              assertTrue(
+                  message != null && message.contains("[Test]"), "should mention marker name"));
+    }
   }
 
   /** Tests for the deriveDataColumns(List, ColumnName) method. */
@@ -248,11 +312,11 @@ class ScenarioFilterTest {
     /** Tests for the deriveDataColumns method. */
     DeriveDataColumnsMethod() {}
 
-    /** Verifies that deriveDataColumns excludes scenario column. */
+    /** Verifies that deriveDataColumns excludes scenario column when in first position. */
     @Test
     @Tag("normal")
-    @DisplayName("should exclude scenario column when present")
-    void shouldExcludeScenarioColumn_whenPresent() {
+    @DisplayName("should exclude scenario column when present in first position")
+    void shouldExcludeScenarioColumn_whenPresentInFirstPosition() {
       // Given
       final var filter = new ScenarioFilter(scenarioMarker, List.of());
       final var scenarioColumn = new ColumnName("[Test]");
@@ -265,6 +329,28 @@ class ScenarioFilterTest {
       // Then
       assertAll(
           "should derive data columns",
+          () -> assertEquals(2, result.size(), "should have 2 data columns"),
+          () -> assertEquals("id", result.get(0).value(), "first column should be 'id'"),
+          () -> assertEquals("name", result.get(1).value(), "second column should be 'name'"));
+    }
+
+    /** Verifies that deriveDataColumns excludes scenario column when in non-first position. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should exclude scenario column when present in non-first position")
+    void shouldExcludeScenarioColumn_whenPresentInNonFirstPosition() {
+      // Given
+      final var filter = new ScenarioFilter(scenarioMarker, List.of());
+      final var scenarioColumn = new ColumnName("[Test]");
+      final var columns =
+          List.of(new ColumnName("id"), new ColumnName("[Test]"), new ColumnName("name"));
+
+      // When
+      final var result = filter.deriveDataColumns(columns, scenarioColumn);
+
+      // Then
+      assertAll(
+          "should derive data columns excluding non-first scenario column",
           () -> assertEquals(2, result.size(), "should have 2 data columns"),
           () -> assertEquals("id", result.get(0).value(), "first column should be 'id'"),
           () -> assertEquals("name", result.get(1).value(), "second column should be 'name'"));
