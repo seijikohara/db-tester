@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
 import org.spockframework.runtime.model.SpecInfo
 
@@ -25,6 +26,7 @@ class SpringBootDatabaseTestExtension implements IAnnotationDrivenExtension<Spri
 		def specClass = spec.reflection
 		def classDataSet = specClass.getAnnotation(DataSet)
 		def classExpectedDataSet = specClass.getAnnotation(ExpectedDataSet)
+		def classExportDataSet = specClass.getAnnotation(ExportDataSet)
 
 		spec.allFeatures
 				.collect { feature ->
@@ -32,14 +34,16 @@ class SpringBootDatabaseTestExtension implements IAnnotationDrivenExtension<Spri
 					[
 						feature        : feature,
 						dataSet        : method.getAnnotation(DataSet) ?: classDataSet,
-						expectedDataSet: method.getAnnotation(ExpectedDataSet) ?: classExpectedDataSet
+						expectedDataSet: method.getAnnotation(ExpectedDataSet) ?: classExpectedDataSet,
+						exportDataSet  : method.getAnnotation(ExportDataSet) ?: classExportDataSet
 					]
 				}
-				.findAll { it.dataSet || it.expectedDataSet }
+				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }
 				.each {
 					it.feature.addInterceptor(new SpringBootDatabaseTestInterceptor(
 							it.dataSet as DataSet,
-							it.expectedDataSet as ExpectedDataSet
+							it.expectedDataSet as ExpectedDataSet,
+							it.exportDataSet as ExportDataSet
 							))
 				}
 	}

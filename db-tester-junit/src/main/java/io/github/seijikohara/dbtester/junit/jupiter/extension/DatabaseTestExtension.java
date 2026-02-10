@@ -2,10 +2,12 @@ package io.github.seijikohara.dbtester.junit.jupiter.extension;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier;
+import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExportExecutor;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.PreparationExecutor;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -56,6 +58,9 @@ public class DatabaseTestExtension
 
   /** Verifier for handling test expectation verification phase. */
   private final ExpectationVerifier expectationVerifier = new ExpectationVerifier();
+
+  /** Executor for handling post-test database export. */
+  private final ExportExecutor exportExecutor = new ExportExecutor();
 
   /**
    * Creates a database test extension with default configuration.
@@ -127,33 +132,76 @@ public class DatabaseTestExtension
    *
    * <p>If the test method or class is annotated with {@link ExpectedDataSet}, this callback
    * executes the expectation phase by loading expected datasets and comparing them with the actual
-   * database state.
+   * database state. If the test method threw an exception, the expectation verification is skipped
+   * because the database state is unpredictable after a test failure.
    *
-   * <p>If the test method threw an exception, the expectation verification is skipped because the
-   * database state is unpredictable after a test failure. This behavior is consistent with Spock
-   * and Kotest integrations.
+   * <p>If the test method or class is annotated with {@link ExportDataSet}, the database state is
+   * exported to files after expectation verification. Export runs in a finally-equivalent block,
+   * executing regardless of whether the test or verification succeeded. When {@link
+   * ExportDataSet#onFailureOnly()} is {@code true}, the export is performed only when the test or
+   * verification failed. Export errors are logged but never mask test or verification failures.
    *
    * @param context the current extension context
    */
   @Override
+  @SuppressWarnings("NullAway")
   public void afterEach(final ExtensionContext context) {
-    if (context.getExecutionException().isPresent()) {
+    final var testFailed = context.getExecutionException().isPresent();
+    try {
+      if (testFailed) {
+        logger.debug(
+            "Skipping @ExpectedDataSet verification for {}.{}() because the test threw"
+                + " an exception",
+            context.getRequiredTestClass().getSimpleName(),
+            context.getRequiredTestMethod().getName());
+        return;
+      }
+      Optional.ofNullable(findExpectedDataSet(context))
+          .ifPresent(
+              expectedDataSet -> {
+                final var testContext = createTestContext(context);
+                logger.debug(
+                    "Executing afterEach for {}.{}()",
+                    testContext.testClass().getSimpleName(),
+                    testContext.testMethod().getName());
+                expectationVerifier.verify(testContext, expectedDataSet);
+              });
+    } finally {
+      handleExportDataSet(context, testFailed);
+    }
+  }
+
+  /**
+   * Handles {@link ExportDataSet} execution in a finally-equivalent block.
+   *
+   * <p>Export errors are caught and logged to prevent masking test or verification failures.
+   *
+   * @param context the extension context
+   * @param testFailed whether the test execution or verification failed
+   */
+  private void handleExportDataSet(final ExtensionContext context, final boolean testFailed) {
+    final var exportDataSet = findExportDataSet(context);
+    if (exportDataSet == null) {
+      return;
+    }
+    if (exportDataSet.onFailureOnly() && !testFailed) {
       logger.debug(
-          "Skipping @ExpectedDataSet verification for {}.{}() because the test threw an exception",
+          "Skipping @ExportDataSet for {}.{}() because the test passed and onFailureOnly=true",
           context.getRequiredTestClass().getSimpleName(),
           context.getRequiredTestMethod().getName());
       return;
     }
-    Optional.ofNullable(findExpectedDataSet(context))
-        .ifPresent(
-            expectedDataSet -> {
-              final var testContext = createTestContext(context);
-              logger.debug(
-                  "Executing afterEach for {}.{}()",
-                  testContext.testClass().getSimpleName(),
-                  testContext.testMethod().getName());
-              expectationVerifier.verify(testContext, expectedDataSet);
-            });
+    try {
+      final var testContext = createTestContext(context);
+      exportExecutor.export(testContext, exportDataSet);
+    } catch (final Exception e) {
+      logger.error(
+          "Failed to export dataset for {}.{}(): {}",
+          context.getRequiredTestClass().getSimpleName(),
+          context.getRequiredTestMethod().getName(),
+          e.getMessage(),
+          e);
+    }
   }
 
   /**
@@ -237,6 +285,22 @@ public class DatabaseTestExtension
     final var method = context.getRequiredTestMethod();
     return Optional.ofNullable(method.getAnnotation(ExpectedDataSet.class))
         .orElseGet(() -> context.getRequiredTestClass().getAnnotation(ExpectedDataSet.class));
+  }
+
+  /**
+   * Finds the effective {@link ExportDataSet} annotation for the current test.
+   *
+   * <p>Method-level annotations take precedence over class-level annotations. This method searches
+   * first at the test method level, then falls back to the test class level if not found at the
+   * method level.
+   *
+   * @param context the extension context providing access to test metadata
+   * @return the ExportDataSet annotation if found at method or class level, or null if not present
+   */
+  private ExportDataSet findExportDataSet(final ExtensionContext context) {
+    final var method = context.getRequiredTestMethod();
+    return Optional.ofNullable(method.getAnnotation(ExportDataSet.class))
+        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(ExportDataSet.class));
   }
 
   /**
