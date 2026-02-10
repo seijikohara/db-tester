@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -73,7 +74,7 @@ class DefaultExpectationProviderTest {
     }
   }
 
-  /** Tests for the verifyExpectation() method. */
+  /** Tests for the verifyExpectation(TableSet, DataSource) method. */
   @Nested
   @DisplayName("verifyExpectation(TableSet, DataSource) method")
   class VerifyExpectationMethod {
@@ -101,6 +102,62 @@ class DefaultExpectationProviderTest {
     }
   }
 
+  /** Tests for the verifyExpectation(TableSet, DataSource, ExpectationContext) method. */
+  @Nested
+  @DisplayName("verifyExpectation(TableSet, DataSource, ExpectationContext) method")
+  class VerifyExpectationWithContextMethod {
+
+    /** Tests for the verifyExpectation method with ExpectationContext. */
+    VerifyExpectationWithContextMethod() {}
+
+    /** Verifies that verifyExpectation delegates to expectation verifier with context. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should delegate to expectation verifier when called with context")
+    void shouldDelegateToExpectationVerifier_whenCalledWithContext() {
+      // Given
+      final var expectedDataSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      final var context = ExpectationContext.defaults();
+      doNothing()
+          .when(mockExpectationVerifier)
+          .verifyExpectation(
+              any(TableSet.class), any(DataSource.class), any(ExpectationContext.class));
+
+      // When
+      provider.verifyExpectation(expectedDataSet, dataSource, context);
+
+      // Then
+      verify(mockExpectationVerifier).verifyExpectation(expectedDataSet, dataSource, context);
+    }
+
+    /** Verifies that verifyExpectation passes all context parameters to verifier. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass context with all parameters to expectation verifier")
+    void shouldPassContextWithAllParameters_whenCalledWithCustomContext() {
+      // Given
+      final var expectedDataSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      final var context =
+          ExpectationContext.of(
+              List.of("CREATED_AT"),
+              Map.of("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")),
+              RowOrdering.UNORDERED,
+              OperationDefaults.standard());
+      doNothing()
+          .when(mockExpectationVerifier)
+          .verifyExpectation(
+              any(TableSet.class), any(DataSource.class), any(ExpectationContext.class));
+
+      // When
+      provider.verifyExpectation(expectedDataSet, dataSource, context);
+
+      // Then
+      verify(mockExpectationVerifier).verifyExpectation(expectedDataSet, dataSource, context);
+    }
+  }
+
   /**
    * Tests for the verifyExpectation(TableSet, DataSource, Collection, Map, RowOrdering,
    * OperationDefaults) method.
@@ -109,6 +166,7 @@ class DefaultExpectationProviderTest {
   @DisplayName(
       "verifyExpectation(TableSet, DataSource, Collection, Map, RowOrdering, OperationDefaults)"
           + " method")
+  @SuppressWarnings("removal")
   class VerifyExpectationWithOperationDefaultsMethod {
 
     /** Tests for the verifyExpectation method with OperationDefaults. */
