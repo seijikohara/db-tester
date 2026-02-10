@@ -394,6 +394,23 @@ When both datasets contain the same table:
 | `UNION` | Combine rows, remove exact duplicates |
 | `UNION_ALL` | Combine all rows, keep duplicates |
 
+### Strategy Selection Guide
+
+Choose the appropriate merge strategy based on your use case:
+
+| Strategy | When to Use | Example Scenario |
+|----------|-------------|------------------|
+| `UNION_ALL` (default) | Most use cases; preserves all rows including duplicates | Loading base data + scenario-specific overrides with intentional duplicates |
+| `UNION` | Combining datasets with overlapping rows; ensure unique rows only | Merging reference data from multiple sources without duplicates |
+| `LAST` | Override entire table with latest dataset | Production-like base data + test-specific complete replacement |
+| `FIRST` | Keep only base dataset; ignore subsequent datasets | Shared base data + optional per-test overrides (ignore if present) |
+
+### Row Equality in UNION
+
+`UNION` determines row equality by comparing cell values using `CellValue.equals()`. Two rows are considered equal if all corresponding column values are equal.
+
+Values from all data formats (CSV, TSV, JSON, YAML) are normalized to strings during parsing, so deduplication compares string representations. For example, a CSV value `1` and a JSON value `1` (integer) both become the string `"1"` and are treated as equal.
+
 ## RowOrdering
 
 Defines how rows should be compared during expectation verification.
