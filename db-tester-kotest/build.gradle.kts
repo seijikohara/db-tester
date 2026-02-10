@@ -20,6 +20,9 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
 
+    // Runtime dependency for SPI implementation (ServiceLoader)
+    runtimeOnly(project(":db-tester-core"))
+
     // Compile-time dependency for logging
     compileOnly(libs.slf4j.api)
 }
@@ -32,7 +35,6 @@ testing {
                 implementation(libs.kotest.runner.junit5)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.mockk)
-                runtimeOnly(project(":db-tester-core"))
                 runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
             }
