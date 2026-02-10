@@ -38,15 +38,20 @@ import org.slf4j.LoggerFactory;
  * <p>This record is immutable and thread-safe.
  *
  * @param testClass the test class used for convention-based path construction
+ * @param testMethodName the test method name for error message context
  * @see TestClassNameBasedDataSetLoader
  */
-record DirectoryResolver(Class<?> testClass) {
+record DirectoryResolver(Class<?> testClass, String testMethodName) {
 
   /** Logger for this class. */
   private static final Logger logger = LoggerFactory.getLogger(DirectoryResolver.class);
 
   /** Prefix for classpath-based resource locations. */
   private static final String CLASSPATH_PREFIX = "classpath:";
+
+  /** Documentation URL for dataset file setup guidance. */
+  private static final String DATASET_DOCS_URL =
+      "https://seijikohara.github.io/db-tester/getting-started";
 
   /**
    * Resolves a directory from a resource location or convention-based path.
@@ -96,12 +101,21 @@ record DirectoryResolver(Class<?> testClass) {
         final var message =
             String.format(
                 """
-                Dataset directory exists but contains no supported data files: '%s'
+                Dataset directory exists but contains no supported data files for '%s.%s': '%s'
 
                 Supported file extensions: %s
 
-                Hint: Add at least one data file (for example, TABLE_NAME%s) to this directory, or register a format provider for the desired file extension.""",
-                directory.toAbsolutePath(), supportedFileExtensions, exampleExtension);
+                To fix:
+                  1. Add at least one data file (e.g., TABLE_NAME%s) to this directory
+                  2. Or register a format provider for the desired file extension
+
+                See: %s""",
+                testClass.getSimpleName(),
+                testMethodName,
+                directory.toAbsolutePath(),
+                supportedFileExtensions,
+                exampleExtension,
+                DATASET_DOCS_URL);
         throw new IllegalStateException(message);
       }
     } catch (final IOException e) {
@@ -172,12 +186,23 @@ record DirectoryResolver(Class<?> testClass) {
               final var message =
                   String.format(
                       """
-                      Dataset directory not found on classpath: '%s'
+                      Dataset directory not found for test method '%s.%s'
 
+                      Searched location: classpath:%s
                       Expected location: %s
 
-                      Hint: Create the directory and add dataset files (for example, TABLE_NAME.csv), or use @DataSetSource(resourceLocation = "...") to specify a custom location.""",
-                      resourcePath, expectedLocation);
+                      To fix:
+                        1. Create the directory: %s
+                        2. Add dataset files (e.g., TABLE_NAME.csv) with table data
+                        3. Or specify an explicit location: @DataSetSource(resourceLocation = "...")
+
+                      See: %s""",
+                      testClass.getSimpleName(),
+                      testMethodName,
+                      resourcePath,
+                      expectedLocation,
+                      expectedLocation,
+                      DATASET_DOCS_URL);
               return new DataSetLoadException(message);
             });
   }
@@ -198,10 +223,14 @@ record DirectoryResolver(Class<?> testClass) {
       final var message =
           String.format(
               """
-              Dataset directory does not exist: '%s'
+              Dataset directory does not exist for '%s.%s': '%s'
 
-              Hint: Create the directory and add dataset files, or verify the path is correct.""",
-              location);
+              To fix:
+                1. Create the directory and add dataset files
+                2. Or verify the path is correct
+
+              See: %s""",
+              testClass.getSimpleName(), testMethodName, location, DATASET_DOCS_URL);
       throw new DataSetLoadException(message);
     }
 
