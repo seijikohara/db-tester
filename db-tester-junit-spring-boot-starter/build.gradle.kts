@@ -36,6 +36,7 @@ testing {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.junit.jupiter)
+                implementation(libs.assertj.core)
                 implementation(libs.spring.test)
                 implementation(libs.spring.boot.test)
                 runtimeOnly(platform(libs.slf4j.bom))

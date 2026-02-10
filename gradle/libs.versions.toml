@@ -1,4 +1,5 @@
 [versions]
+assertj = "3.27.6"
 axion-release = "1.21.1"
 checker-qual = "3.53.1"
 datafaker = "2.4.2"
@@ -33,6 +34,7 @@ testcontainers = "2.0.3"
 version-catalog-update = "1.0.1"
 
 [libraries]
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
 datafaker = { module = "net.datafaker:datafaker", version.ref = "datafaker" }
 derby-client = { module = "org.apache.derby:derbyclient", version.ref = "derby" }
