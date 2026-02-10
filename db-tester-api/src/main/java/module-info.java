@@ -22,6 +22,7 @@ module io.github.seijikohara.dbtester.api {
   exports io.github.seijikohara.dbtester.api.export;
   exports io.github.seijikohara.dbtester.api.loader;
   exports io.github.seijikohara.dbtester.api.operation;
+  exports io.github.seijikohara.dbtester.api.preparation;
   exports io.github.seijikohara.dbtester.api.scenario;
   exports io.github.seijikohara.dbtester.api.spi;
 
