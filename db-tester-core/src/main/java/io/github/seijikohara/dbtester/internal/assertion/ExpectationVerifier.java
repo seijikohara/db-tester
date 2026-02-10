@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -70,6 +71,86 @@ public final class ExpectationVerifier {
   }
 
   /**
+   * Verifies database state matches expected dataset using the specified context.
+   *
+   * <p>This method accepts an {@link ExpectationContext} parameter object that encapsulates all
+   * optional verification parameters.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param context the verification context containing optional parameters
+   * @throws AssertionError if verification fails
+   */
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final ExpectationContext context) {
+    final var excludeColumns = context.excludeColumns();
+    final var columnStrategies = context.columnStrategies();
+    final var rowOrdering = context.rowOrdering();
+    final var operationDefaults = context.operationDefaults();
+
+    logger.debug(
+        "Verifying expectation for {} tables with {} ordering and epsilon {}",
+        expectedTableSet.getTables().size(),
+        rowOrdering,
+        operationDefaults.floatingPointEpsilon());
+
+    final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
+    final var effectiveColumnStrategies =
+        columnStrategies.isEmpty() ? Map.<String, ColumnStrategyMapping>of() : columnStrategies;
+
+    if (!normalizedExcludeColumns.isEmpty()) {
+      logger.debug("Excluding columns from verification: {}", normalizedExcludeColumns);
+    }
+
+    if (!effectiveColumnStrategies.isEmpty()) {
+      logger.debug("Using column strategies for: {}", effectiveColumnStrategies.keySet());
+    }
+
+    // Create a comparator with the specified operation defaults if different from instance default
+    final var effectiveComparator =
+        operationDefaults.floatingPointEpsilon() != OperationDefaults.DEFAULT_FLOATING_POINT_EPSILON
+            ? new DataSetComparator(operationDefaults)
+            : comparator;
+
+    expectedTableSet
+        .getTables()
+        .forEach(
+            expectedTable -> {
+              final var tableName = expectedTable.getName().value();
+              final var expectedColumns = expectedTable.getColumns();
+
+              logger.trace(
+                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+
+              final var actualTable =
+                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+
+              logger.trace(
+                  "Comparing table {}: expected {} rows, actual {} rows ({})",
+                  tableName,
+                  expectedTable.getRowCount(),
+                  actualTable.getRowCount(),
+                  rowOrdering);
+
+              if (normalizedExcludeColumns.isEmpty() && effectiveColumnStrategies.isEmpty()) {
+                effectiveComparator.assertEquals(expectedTable, actualTable, null);
+              } else {
+                effectiveComparator.assertEqualsWithStrategies(
+                    expectedTable,
+                    actualTable,
+                    normalizedExcludeColumns,
+                    effectiveColumnStrategies,
+                    rowOrdering);
+              }
+            });
+
+    logger.debug(
+        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+  }
+
+  /**
    * Verifies database state matches expected dataset.
    *
    * <p>For each table in the expected dataset:
@@ -87,7 +168,7 @@ public final class ExpectationVerifier {
    * @throws AssertionError if verification fails
    */
   public void verifyExpectation(final TableSet expectedTableSet, final DataSource dataSource) {
-    verifyExpectation(expectedTableSet, dataSource, null);
+    verifyExpectation(expectedTableSet, dataSource, (Collection<String>) null);
   }
 
   /**

@@ -17,7 +17,9 @@ Aggregates the runtime configuration for the database testing extension.
 
 | Component | Type | Description |
 |-----------|------|-------------|
-| `conventions` | `ConventionSettings` | Dataset directory resolution rules |
+| `conventions` | `ConventionSettings` | Dataset directory resolution rules and naming conventions |
+| `verification` | `VerificationSettings` | Verification behavior for expectation phase |
+| `execution` | `ExecutionSettings` | Execution behavior for database operations |
 | `operations` | `OperationDefaults` | Default database operations |
 | `loader` | `DataSetLoader` | Dataset loading strategy |
 
@@ -39,6 +41,8 @@ Aggregates the runtime configuration for the database testing extension.
 | Method | Description |
 |--------|-------------|
 | `conventions(ConventionSettings)` | Sets the resolution rules for locating datasets |
+| `verification(VerificationSettings)` | Sets the verification behavior for expectation phase |
+| `execution(ExecutionSettings)` | Sets the execution behavior for database operations |
 | `operations(OperationDefaults)` | Sets the default database operations |
 | `loader(DataSetLoader)` | Sets the strategy for constructing datasets |
 | `build()` | Builds a new Configuration instance |
@@ -50,6 +54,8 @@ When `Configuration.defaults()` is used:
 1. Conventions: `ConventionSettings.standard()`
 2. Operations: `OperationDefaults.standard()`
 3. Loader: Loaded via ServiceLoader from `DataSetLoaderProvider`
+4. Verification: `VerificationSettings.standard()`
+5. Execution: `ExecutionSettings.standard()`
 
 ### Usage Example
 
@@ -61,6 +67,12 @@ var config = Configuration.defaults();
 var config = Configuration.builder()
     .conventions(ConventionSettings.builder()
         .dataFormat(DataFormat.TSV)
+        .build())
+    .verification(VerificationSettings.builder()
+        .rowOrdering(RowOrdering.UNORDERED)
+        .build())
+    .execution(ExecutionSettings.builder()
+        .queryTimeout(Duration.ofSeconds(30))
         .build())
     .operations(OperationDefaults.builder()
         .preparation(Operation.TRUNCATE_INSERT)
@@ -97,13 +109,6 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `dataFormat` | `DataFormat` | `AUTO` | File format for dataset files |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | Strategy for merging duplicate tables |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | File name for table loading order specification |
-| `globalExcludeColumns` | `Set<String>` | `Set.of()` | Column names to exclude from all verifications (case-insensitive) |
-| `globalColumnStrategies` | `Map<String, ColumnStrategyMapping>` | `Map.of()` | Column comparison strategies for all verifications |
-| `rowOrdering` | `RowOrdering` | `ORDERED` | Default row comparison strategy |
-| `queryTimeout` | `@Nullable Duration` | `null` | Maximum query wait time; null for no timeout |
-| `retryCount` | `int` | `0` | Retry attempts for verification (0 = no retry) |
-| `retryDelay` | `Duration` | `100ms` | Delay between retry attempts |
-| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | Transaction behavior for operations |
 
 ### Factory Methods
 
@@ -128,13 +133,6 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `dataFormat(DataFormat)` | Sets the data format |
 | `tableMergeStrategy(TableMergeStrategy)` | Sets the merge strategy |
 | `loadOrderFileName(String)` | Sets the load order file name |
-| `globalExcludeColumns(Set<String>)` | Sets the global exclude columns |
-| `globalColumnStrategies(Map<String, ColumnStrategyMapping>)` | Sets the global column strategies |
-| `rowOrdering(RowOrdering)` | Sets the row ordering strategy |
-| `queryTimeout(Duration)` | Sets the query timeout (null for no timeout) |
-| `retryCount(int)` | Sets the retry count |
-| `retryDelay(Duration)` | Sets the retry delay |
-| `transactionMode(TransactionMode)` | Sets the transaction mode |
 | `build()` | Builds a new ConventionSettings instance |
 
 ### With Methods (Fluent Copy)
@@ -147,13 +145,6 @@ Defines naming conventions for dataset discovery and scenario filtering.
 | `withDataFormat(DataFormat)` | Creates copy with specified format |
 | `withTableMergeStrategy(TableMergeStrategy)` | Creates copy with specified merge strategy |
 | `withLoadOrderFileName(String)` | Creates copy with specified load order file name |
-| `withGlobalExcludeColumns(Set<String>)` | Creates copy with specified global exclude columns |
-| `withGlobalColumnStrategies(Map<String, ColumnStrategyMapping>)` | Creates copy with specified global column strategies |
-| `withRowOrdering(RowOrdering)` | Creates copy with specified row ordering strategy |
-| `withQueryTimeout(Duration)` | Creates copy with specified query timeout (null for no timeout) |
-| `withRetryCount(int)` | Creates copy with specified retry count |
-| `withRetryDelay(Duration)` | Creates copy with specified retry delay |
-| `withTransactionMode(TransactionMode)` | Creates copy with specified transaction mode |
 
 ### Directory Resolution
 
@@ -182,7 +173,7 @@ When `baseDirectory` is specified:
 
 ### ExpectedDataSet Suffix
 
-The `expectedDataSetSuffix` is appended to the data set path:
+The `expectationSuffix` is appended to the data set path:
 
 | DataSet Path | Suffix | ExpectedDataSet Path |
 |-----------------|--------|------------------|
@@ -196,19 +187,119 @@ The `expectedDataSetSuffix` is appended to the data set path:
 // Configure retry, timeout, and unordered comparison
 var config = Configuration.builder()
     .conventions(ConventionSettings.builder()
+        .build())
+    .verification(VerificationSettings.builder()
         .rowOrdering(RowOrdering.UNORDERED)
-        .queryTimeout(Duration.ofSeconds(30))
         .retryCount(3)
         .retryDelay(Duration.ofMillis(500))
-        .transactionMode(TransactionMode.AUTO_COMMIT)
         .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
         .globalColumnStrategies(Map.of(
             "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
             "VERSION", ColumnStrategyMapping.ignore("VERSION")
         ))
         .build())
+    .execution(ExecutionSettings.builder()
+        .queryTimeout(Duration.ofSeconds(30))
+        .transactionMode(TransactionMode.AUTO_COMMIT)
+        .build())
     .build();
 ```
+
+## VerificationSettings
+
+Defines verification behavior for expectation phase validation.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.VerificationSettings`
+
+**Type**: `final class` with builder pattern
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `globalExcludeColumns` | `Set<String>` | `Set.of()` | Column names to exclude from all verifications (case-insensitive) |
+| `globalColumnStrategies` | `Map<String, ColumnStrategyMapping>` | `Map.of()` | Column comparison strategies for all verifications |
+| `rowOrdering` | `RowOrdering` | `ORDERED` | Default row comparison strategy |
+| `retryCount` | `int` | `0` | Retry attempts for verification (0 = no retry) |
+| `retryDelay` | `Duration` | `100ms` | Delay between retry attempts |
+
+### Factory Methods
+
+| Method | Description |
+|--------|-------------|
+| `builder()` | Creates a new builder for constructing VerificationSettings instances |
+| `standard()` | Creates settings with all defaults |
+
+### Instance Methods
+
+| Method | Description |
+|--------|-------------|
+| `toBuilder()` | Creates a new builder initialized with values from this instance |
+
+### Builder Methods
+
+| Method | Description |
+|--------|-------------|
+| `globalExcludeColumns(Set<String>)` | Sets the global exclude columns |
+| `globalColumnStrategies(Map<String, ColumnStrategyMapping>)` | Sets the global column strategies |
+| `rowOrdering(RowOrdering)` | Sets the row ordering strategy |
+| `retryCount(int)` | Sets the retry count |
+| `retryDelay(Duration)` | Sets the retry delay |
+| `build()` | Builds a new VerificationSettings instance |
+
+### With Methods (Fluent Copy)
+
+| Method | Description |
+|--------|-------------|
+| `withGlobalExcludeColumns(Set<String>)` | Creates copy with specified global exclude columns |
+| `withGlobalColumnStrategies(Map<String, ColumnStrategyMapping>)` | Creates copy with specified global column strategies |
+| `withRowOrdering(RowOrdering)` | Creates copy with specified row ordering strategy |
+| `withRetryCount(int)` | Creates copy with specified retry count |
+| `withRetryDelay(Duration)` | Creates copy with specified retry delay |
+
+## ExecutionSettings
+
+Defines execution behavior for database operations.
+
+**Location**: `io.github.seijikohara.dbtester.api.config.ExecutionSettings`
+
+**Type**: `final class` with builder pattern
+
+### Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `queryTimeout` | `@Nullable Duration` | `null` | Maximum query wait time; null for no timeout |
+| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | Transaction behavior for operations |
+
+### Factory Methods
+
+| Method | Description |
+|--------|-------------|
+| `builder()` | Creates a new builder for constructing ExecutionSettings instances |
+| `of(Duration, TransactionMode)` | Creates settings with specified values |
+| `standard()` | Creates settings with all defaults |
+
+### Instance Methods
+
+| Method | Description |
+|--------|-------------|
+| `toBuilder()` | Creates a new builder initialized with values from this instance |
+
+### Builder Methods
+
+| Method | Description |
+|--------|-------------|
+| `queryTimeout(Duration)` | Sets the query timeout (null for no timeout) |
+| `transactionMode(TransactionMode)` | Sets the transaction mode |
+| `build()` | Builds a new ExecutionSettings instance |
+
+### With Methods (Fluent Copy)
+
+| Method | Description |
+|--------|-------------|
+| `withQueryTimeout(Duration)` | Creates copy with specified query timeout (null for no timeout) |
+| `withTransactionMode(TransactionMode)` | Creates copy with specified transaction mode |
 
 ## DataSourceRegistry
 
@@ -438,7 +529,7 @@ Defines how rows should be compared during expectation verification.
 Row ordering can be configured:
 
 1. **Annotation-level**: Per-test via `@ExpectedDataSet(rowOrdering = ...)`
-2. **Global**: Via `ConventionSettings.withRowOrdering()`
+2. **Global**: Via `VerificationSettings.withRowOrdering()`
 
 Annotation-level configuration takes precedence over global settings.
 
@@ -478,7 +569,7 @@ Defines transaction behavior for database operations.
 
 ```java
 var config = Configuration.builder()
-    .conventions(ConventionSettings.builder()
+    .execution(ExecutionSettings.builder()
         .transactionMode(TransactionMode.AUTO_COMMIT)
         .build())
     .build();

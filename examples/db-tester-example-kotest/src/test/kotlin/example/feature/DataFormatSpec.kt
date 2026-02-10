@@ -7,9 +7,11 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
+import io.github.seijikohara.dbtester.api.config.VerificationSettings
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
@@ -61,12 +63,19 @@ class CsvFormatSpec :
                         .dataFormat(DataFormat.CSV)
                         .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
                         .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                        .build(),
+                ).verification(
+                    VerificationSettings
+                        .builder()
                         .globalExcludeColumns(emptySet())
-                        .globalColumnStrategies(emptyMap())
                         .rowOrdering(RowOrdering.ORDERED)
-                        .queryTimeout(null)
                         .retryCount(0)
                         .retryDelay(Duration.ofMillis(100))
+                        .build(),
+                ).execution(
+                    ExecutionSettings
+                        .builder()
+                        .queryTimeout(null)
                         .transactionMode(TransactionMode.SINGLE_TRANSACTION)
                         .build(),
                 ).build()
@@ -196,12 +205,19 @@ class TsvFormatSpec :
                         .dataFormat(DataFormat.TSV)
                         .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
                         .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+                        .build(),
+                ).verification(
+                    VerificationSettings
+                        .builder()
                         .globalExcludeColumns(emptySet())
-                        .globalColumnStrategies(emptyMap())
                         .rowOrdering(RowOrdering.ORDERED)
-                        .queryTimeout(null)
                         .retryCount(0)
                         .retryDelay(Duration.ofMillis(100))
+                        .build(),
+                ).execution(
+                    ExecutionSettings
+                        .builder()
+                        .queryTimeout(null)
                         .transactionMode(TransactionMode.SINGLE_TRANSACTION)
                         .build(),
                 ).build()

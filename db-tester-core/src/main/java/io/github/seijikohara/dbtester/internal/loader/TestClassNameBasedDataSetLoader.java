@@ -121,10 +121,11 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
     final var testClass = context.testClass();
     final var testMethod = context.testMethod();
     final var conventions = context.configuration().conventions();
+    final var verification = context.configuration().verification();
     final var expectFileSuffix = conventions.expectationSuffix();
     final var mergeStrategy = conventions.tableMergeStrategy();
-    final var globalExcludeColumns = conventions.globalExcludeColumns();
-    final var globalColumnStrategies = conventions.globalColumnStrategies();
+    final var globalExcludeColumns = verification.globalExcludeColumns();
+    final var globalColumnStrategies = verification.globalColumnStrategies();
 
     return annotationResolver
         .findExpectedDataSet(testMethod, testClass)

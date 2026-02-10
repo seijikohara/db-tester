@@ -1,6 +1,10 @@
 /**
  * Scenario name resolution API for test framework integration.
  *
+ * <p><strong>API Category: Extension API</strong> — This package is intended for framework
+ * integrators building custom testing extensions. Test authors typically do not interact with this
+ * package directly.
+ *
  * <p>This package provides the SPI for resolving test scenario names from test methods. Different
  * test frameworks (JUnit, Spock, Kotest) have different conventions for naming tests, and this SPI
  * allows each framework to provide its own implementation.

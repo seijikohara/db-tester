@@ -28,6 +28,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataSet {
 
+  /** Sentinel value indicating that the global setting should be used. */
+  int UNSET = -1;
+
   /**
    * Lists the dataset sources that must be executed before the test.
    *
@@ -60,14 +63,16 @@ public @interface DataSet {
   /**
    * Specifies the number of rows per batch for INSERT operations.
    *
-   * <p>When set to a positive value, the executor flushes the JDBC batch every N rows instead of
-   * accumulating all rows before execution. This reduces memory usage for large datasets.
+   * <p>Supported values:
    *
-   * <p>A value of {@code -1} means the global setting from {@link
-   * io.github.seijikohara.dbtester.api.config.OperationDefaults#batchSize()} is used. A value of
-   * {@code 0} means all rows are added to a single batch (default behavior).
+   * <ul>
+   *   <li>{@link #UNSET} ({@code -1}) — use the global setting from {@link
+   *       io.github.seijikohara.dbtester.api.config.OperationDefaults#batchSize()}
+   *   <li>{@code 0} — execute all rows in a single batch
+   *   <li>Positive integer — flush the JDBC batch every N rows
+   * </ul>
    *
-   * @return the batch size, or {@code -1} to use the global setting
+   * @return the batch size, or {@link #UNSET} to use the global setting
    */
-  int batchSize() default -1;
+  int batchSize() default UNSET;
 }

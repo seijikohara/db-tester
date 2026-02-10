@@ -3,7 +3,9 @@ package io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
+import io.github.seijikohara.dbtester.api.config.VerificationSettings
 import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -63,33 +65,50 @@ class DbTesterKotestAutoConfiguration {
                     .dataFormat(conventionProps.dataFormat)
                     .tableMergeStrategy(conventionProps.tableMergeStrategy)
                     .loadOrderFileName(conventionProps.loadOrderFileName)
-                    .globalExcludeColumns(conventionProps.globalExcludeColumns)
-                    .globalColumnStrategies(emptyMap())
                     .build()
             }.let { conventions ->
-                OperationDefaults
-                    .builder()
-                    .preparation(properties.operation.preparation)
-                    .expectation(properties.operation.expectation)
-                    .build()
-                    .let { operations ->
-                        ServiceLoader
-                            .load(DataSetLoaderProvider::class.java)
-                            .findFirst()
-                            .map { it.loader }
-                            .orElseThrow {
-                                IllegalStateException(
-                                    "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
-                                )
-                            }.let { loader ->
-                                Configuration
-                                    .builder()
-                                    .conventions(conventions)
-                                    .operations(operations)
-                                    .loader(loader)
-                                    .build()
-                            }
+                val verification =
+                    properties.verification.let { verificationProps ->
+                        VerificationSettings
+                            .builder()
+                            .globalExcludeColumns(verificationProps.globalExcludeColumns)
+                            .rowOrdering(verificationProps.rowOrdering)
+                            .retryCount(verificationProps.retryCount)
+                            .retryDelay(verificationProps.retryDelay)
+                            .build()
                     }
+                val execution =
+                    properties.execution.let { executionProps ->
+                        ExecutionSettings
+                            .builder()
+                            .queryTimeout(executionProps.queryTimeout)
+                            .transactionMode(executionProps.transactionMode)
+                            .build()
+                    }
+                val operations =
+                    OperationDefaults
+                        .builder()
+                        .preparation(properties.operation.preparation)
+                        .expectation(properties.operation.expectation)
+                        .build()
+                val loader =
+                    ServiceLoader
+                        .load(DataSetLoaderProvider::class.java)
+                        .findFirst()
+                        .map { it.loader }
+                        .orElseThrow {
+                            IllegalStateException(
+                                "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
+                            )
+                        }
+                Configuration
+                    .builder()
+                    .conventions(conventions)
+                    .verification(verification)
+                    .execution(execution)
+                    .operations(operations)
+                    .loader(loader)
+                    .build()
             }
 
     /**

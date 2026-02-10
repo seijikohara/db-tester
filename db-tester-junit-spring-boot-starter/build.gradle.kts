@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.maven.publish)
 }
 
-description = "DB Tester JUnit Spring Boot Starter - Spring Boot AutoConfiguration for JUnit 5 database testing"
+description = "DB Tester JUnit Spring Boot Starter - Spring Boot AutoConfiguration for JUnit 6 database testing"
 
 dependencies {
     // Public API dependency
@@ -48,6 +48,6 @@ testing {
 mavenPublishing {
     pom {
         name = "DB Tester JUnit Spring Boot Starter"
-        description = "Spring Boot Starter for DB Tester framework with JUnit 5 auto-configuration"
+        description = "Spring Boot Starter for DB Tester framework with JUnit 6 auto-configuration"
     }
 }

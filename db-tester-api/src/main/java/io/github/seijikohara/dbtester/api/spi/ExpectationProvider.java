@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.api.spi;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * test extensions (JUnit Jupiter, Spock) which internally delegate to this provider.
  *
  * @see java.util.ServiceLoader
+ * @see ExpectationContext
  */
 public interface ExpectationProvider {
 
@@ -59,101 +61,107 @@ public interface ExpectationProvider {
   void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
 
   /**
+   * Verifies that the database state matches the expected dataset using the specified context.
+   *
+   * <p>This method accepts an {@link ExpectationContext} parameter object that encapsulates all
+   * optional verification parameters (column exclusions, column strategies, row ordering, and
+   * operation defaults). This replaces the telescoping overload pattern.
+   *
+   * <p>The default implementation logs warnings for non-default context values and delegates to
+   * {@link #verifyExpectation(TableSet, DataSource)}. Implementations should override this method
+   * to support the full set of verification parameters.
+   *
+   * @param expectedTableSet the expected dataset containing expected table data
+   * @param dataSource the database connection source for retrieving actual data
+   * @param context the verification context containing optional parameters
+   * @throws AssertionError if verification fails
+   * @see ExpectationContext
+   */
+  default void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
+      final ExpectationContext context) {
+    if (!context.excludeColumns().isEmpty()) {
+      logWarning(
+          "Column exclusions specified but current ExpectationProvider does not support them. "
+              + "Exclusions will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
+              + "ExpectationContext) to support column exclusion.",
+          context.excludeColumns());
+    }
+    if (!context.columnStrategies().isEmpty()) {
+      logWarning(
+          "Column strategies specified but current ExpectationProvider does not support them. "
+              + "Strategies will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
+              + "ExpectationContext) to support column strategies.",
+          context.columnStrategies().keySet());
+    }
+    if (context.rowOrdering() == RowOrdering.UNORDERED) {
+      logWarning(
+          "Unordered row comparison requested but current ExpectationProvider does not support it. "
+              + "Falling back to ordered comparison. Override verifyExpectation(TableSet, "
+              + "DataSource, ExpectationContext) to support unordered comparison.");
+    }
+    if (context.operationDefaults().floatingPointEpsilon()
+        != OperationDefaults.DEFAULT_FLOATING_POINT_EPSILON) {
+      logWarning(
+          "Custom floating-point epsilon specified but current ExpectationProvider does not "
+              + "support it. Using default epsilon. Override verifyExpectation(TableSet, "
+              + "DataSource, ExpectationContext) to support custom epsilon.");
+    }
+    verifyExpectation(expectedTableSet, dataSource);
+  }
+
+  /**
    * Verifies that the database state matches the expected dataset, excluding specified columns.
-   *
-   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource)} with column exclusion
-   * support. Excluded columns are ignored during the comparison, which is useful for auto-generated
-   * columns (timestamps, version numbers, auto-increment IDs) that cannot be predicted in test
-   * data.
-   *
-   * <p>Column name matching is case-insensitive. For example, excluding {@code "CREATED_AT"} will
-   * ignore columns named {@code "created_at"}, {@code "CREATED_AT"}, or {@code "Created_At"}.
-   *
-   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource)}
-   * when no columns are excluded. Implementations should override this method to support column
-   * exclusion.
    *
    * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
    * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
    * @throws AssertionError if verification fails (row count mismatch, column value mismatch, or
    *     table structure mismatch)
+   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
+   *     Construct an {@link ExpectationContext} with {@link ExpectationContext#defaults()}{@code
+   *     .withExcludeColumns(excludeColumns)}. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   default void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
       final Collection<String> excludeColumns) {
-    // Default implementation delegates to the basic verifyExpectation method.
-    // Implementations should override this method to support column exclusion.
-    if (excludeColumns != null && !excludeColumns.isEmpty()) {
-      logWarning(
-          "Column exclusions specified but current ExpectationProvider does not support them. "
-              + "Exclusions will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
-              + "Collection) to support column exclusion.",
-          excludeColumns);
-    }
-    verifyExpectation(expectedTableSet, dataSource);
+    verifyExpectation(
+        expectedTableSet,
+        dataSource,
+        ExpectationContext.defaults().withExcludeColumns(excludeColumns));
   }
 
   /**
    * Verifies that the database state matches the expected dataset with column comparison
    * strategies.
    *
-   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection)} with
-   * column-specific comparison strategy support. Each column can have its own comparison strategy:
-   *
-   * <ul>
-   *   <li>{@code STRICT} - Exact match (default)
-   *   <li>{@code IGNORE} - Skip comparison entirely
-   *   <li>{@code NUMERIC} - Type-aware numeric comparison
-   *   <li>{@code CASE_INSENSITIVE} - Case-insensitive string comparison
-   *   <li>{@code TIMESTAMP_FLEXIBLE} - Ignores sub-second precision and handles timezone
-   *   <li>{@code NOT_NULL} - Only verify the value is not null
-   *   <li>{@code REGEX} - Match against a regular expression pattern
-   * </ul>
-   *
-   * <p>Column exclusion takes precedence: columns in {@code excludeColumns} are skipped entirely
-   * before column strategies are applied.
-   *
-   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
-   * Collection)} when no column strategies are provided. Implementations should override this
-   * method to support column strategies.
-   *
    * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
    * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
    * @param columnStrategies column comparison strategies keyed by uppercase column name
    * @throws AssertionError if verification fails
-   * @see ColumnStrategyMapping
-   * @see io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
+   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   default void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
       final Collection<String> excludeColumns,
       final Map<String, ColumnStrategyMapping> columnStrategies) {
-    // Default implementation ignores column strategies for backward compatibility.
-    // Implementations should override this method to support column strategies.
-    if (columnStrategies != null && !columnStrategies.isEmpty()) {
-      logWarning(
-          "Column strategies specified but current ExpectationProvider does not support them. "
-              + "Strategies will be ignored: {}. Override verifyExpectation(TableSet, DataSource, "
-              + "Collection, Map) to support column strategies.",
-          columnStrategies.keySet());
-    }
-    verifyExpectation(expectedTableSet, dataSource, excludeColumns);
+    verifyExpectation(
+        expectedTableSet,
+        dataSource,
+        ExpectationContext.defaults()
+            .withExcludeColumns(excludeColumns)
+            .withColumnStrategies(columnStrategies));
   }
 
   /**
    * Verifies that the database state matches the expected dataset with row ordering control.
-   *
-   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map)} with
-   * row ordering support. When set to {@link RowOrdering#UNORDERED}, rows are compared without
-   * considering their position, using set-based matching.
-   *
-   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
-   * Collection, Map)} when row ordering is {@link RowOrdering#ORDERED}. Implementations should
-   * override this method to support unordered comparison.
    *
    * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
@@ -161,35 +169,25 @@ public interface ExpectationProvider {
    * @param columnStrategies column comparison strategies keyed by uppercase column name
    * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
    * @throws AssertionError if verification fails
-   * @see RowOrdering
+   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
+   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   default void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
       final Collection<String> excludeColumns,
       final Map<String, ColumnStrategyMapping> columnStrategies,
       final RowOrdering rowOrdering) {
-    // Default implementation ignores row ordering for backward compatibility.
-    // Implementations should override this method to support unordered comparison.
-    if (rowOrdering == RowOrdering.UNORDERED) {
-      logWarning(
-          "Unordered row comparison requested but current ExpectationProvider does not support it. "
-              + "Falling back to ordered comparison. Override verifyExpectation(TableSet, "
-              + "DataSource, Collection, Map, RowOrdering) to support unordered comparison.");
-    }
-    verifyExpectation(expectedTableSet, dataSource, excludeColumns, columnStrategies);
+    verifyExpectation(
+        expectedTableSet,
+        dataSource,
+        ExpectationContext.of(
+            excludeColumns, columnStrategies, rowOrdering, OperationDefaults.standard()));
   }
 
   /**
    * Verifies that the database state matches the expected dataset with operation defaults.
-   *
-   * <p>This method extends {@link #verifyExpectation(TableSet, DataSource, Collection, Map,
-   * RowOrdering)} with operation defaults support. The operation defaults contain comparison
-   * settings such as the floating-point epsilon for numeric comparisons.
-   *
-   * <p>The default implementation delegates to {@link #verifyExpectation(TableSet, DataSource,
-   * Collection, Map, RowOrdering)}. Implementations should override this method to support
-   * operation defaults.
    *
    * @param expectedTableSet the expected dataset containing expected table data
    * @param dataSource the database connection source for retrieving actual data
@@ -198,8 +196,10 @@ public interface ExpectationProvider {
    * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
    * @param operationDefaults the operation defaults containing comparison settings
    * @throws AssertionError if verification fails
-   * @see OperationDefaults
+   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
+   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   default void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
@@ -207,17 +207,9 @@ public interface ExpectationProvider {
       final Map<String, ColumnStrategyMapping> columnStrategies,
       final RowOrdering rowOrdering,
       final OperationDefaults operationDefaults) {
-    // Default implementation ignores operation defaults for backward compatibility.
-    // Implementations should override this method to support operation defaults.
-    if (operationDefaults != null
-        && operationDefaults.floatingPointEpsilon()
-            != OperationDefaults.DEFAULT_FLOATING_POINT_EPSILON) {
-      logWarning(
-          "Custom floating-point epsilon specified but current ExpectationProvider does not "
-              + "support it. Using default epsilon. Override verifyExpectation(TableSet, "
-              + "DataSource, Collection, Map, RowOrdering, OperationDefaults) to support "
-              + "custom epsilon.");
-    }
-    verifyExpectation(expectedTableSet, dataSource, excludeColumns, columnStrategies, rowOrdering);
+    verifyExpectation(
+        expectedTableSet,
+        dataSource,
+        ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults));
   }
 }

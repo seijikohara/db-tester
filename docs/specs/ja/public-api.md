@@ -547,6 +547,7 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `CONTAINS` | false | false | false | String.contains() |
 | `RANGE` | false | false | false | min <= value <= max |
 
+**アーキテクチャに関する注記**: `ComparisonStrategy` はディスクリプタ（何を比較するか）として機能します。比較の実行（どのように比較するか）はcoreモジュールの `ComparisonEngine` が担当します。`ComparisonStrategy` の `matches()` メソッドは1.1で非推奨となり、2.0で削除予定です。
 
 ## アサーションAPI
 

@@ -1,6 +1,9 @@
 /**
  * Dataset abstraction for representing database tables and rows.
  *
+ * <p><strong>API Category: Domain Types</strong> — Shared value objects used across both User API
+ * and Extension API. These types appear in method signatures throughout the framework.
+ *
  * <p>This package contains the core interfaces for representing database data in a format-agnostic
  * way. The main interfaces are:
  *

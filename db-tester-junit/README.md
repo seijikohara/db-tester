@@ -15,10 +15,10 @@ db-tester-api (compile-time dependency)
         ↑
 db-tester-junit
         ↓
-db-tester-core (runtime dependency, loaded via ServiceLoader)
+db-tester-core (transitive runtime dependency, loaded via ServiceLoader)
 ```
 
-This module depends **only on `db-tester-api`** at compile time. The `db-tester-core` module is loaded at runtime via Java ServiceLoader mechanism.
+This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime dependency. Users only need to add `db-tester-junit` to their project.
 
 ## Requirements
 

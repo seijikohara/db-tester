@@ -114,7 +114,7 @@ graph TD
 
 | パッケージ | 責務 |
 |-----------|------|
-| `assertion` | データセット比較と検証 |
+| `assertion` | データセット比較、検証、および `ComparisonEngine` 実行 |
 | `dataset` | TableSet, Table, Row実装 |
 | `domain` | 内部値オブジェクト |
 | `format` | CSV、TSV、JSON、およびYAML解析とフォーマットプロバイダー |

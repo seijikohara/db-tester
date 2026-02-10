@@ -1,8 +1,8 @@
 /**
- * Spring Boot auto-configuration for DB Tester JUnit 5 integration.
+ * Spring Boot auto-configuration for DB Tester JUnit 6 integration.
  *
  * <p>This package provides automatic configuration for integrating the DB Tester framework with
- * Spring Boot applications using JUnit 5 (Jupiter) for testing. The auto-configuration
+ * Spring Boot applications using JUnit 6 (Jupiter) for testing. The auto-configuration
  * automatically registers Spring-managed {@link javax.sql.DataSource} beans with the database
  * testing framework.
  *

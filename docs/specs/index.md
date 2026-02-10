@@ -153,7 +153,7 @@ package com.example
 @DatabaseTest
 @DataSet  // Loads test data from CSV
 @ExpectedDataSet  // Verifies database state
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
     def "should create user"() {
         when:
