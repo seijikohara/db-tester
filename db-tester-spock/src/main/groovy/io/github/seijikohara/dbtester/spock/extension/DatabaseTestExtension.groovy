@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.spock.extension
 
+import io.github.seijikohara.dbtester.api.annotation.AnnotationUtils
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
@@ -36,18 +37,18 @@ class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> 
 	@Override
 	void visitSpecAnnotation(DatabaseTest annotation, SpecInfo spec) {
 		def specClass = spec.reflection
-		def classDataSet = specClass.getAnnotation(DataSet)
-		def classExpectedDataSet = specClass.getAnnotation(ExpectedDataSet)
-		def classExportDataSet = specClass.getAnnotation(ExportDataSet)
+		def classDataSet = AnnotationUtils.findOnElement(DataSet, specClass)
+		def classExpectedDataSet = AnnotationUtils.findOnElement(ExpectedDataSet, specClass)
+		def classExportDataSet = AnnotationUtils.findOnElement(ExportDataSet, specClass)
 
 		spec.allFeatures
 				.collect { feature ->
 					def method = feature.featureMethod.reflection
 					[
 						feature        : feature,
-						dataSet        : method.getAnnotation(DataSet) ?: classDataSet,
-						expectedDataSet: method.getAnnotation(ExpectedDataSet) ?: classExpectedDataSet,
-						exportDataSet  : method.getAnnotation(ExportDataSet) ?: classExportDataSet
+						dataSet        : AnnotationUtils.findOnElement(DataSet, method) ?: classDataSet,
+						expectedDataSet: AnnotationUtils.findOnElement(ExpectedDataSet, method) ?: classExpectedDataSet,
+						exportDataSet  : AnnotationUtils.findOnElement(ExportDataSet, method) ?: classExportDataSet
 					]
 				}
 				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }

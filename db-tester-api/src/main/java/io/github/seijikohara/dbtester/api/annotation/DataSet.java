@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
  * @see ExpectedDataSet
  */
 @Inherited
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataSet {
 

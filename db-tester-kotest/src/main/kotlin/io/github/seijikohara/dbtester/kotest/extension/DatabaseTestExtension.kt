@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.kotest.extension
 
+import io.github.seijikohara.dbtester.api.annotation.AnnotationUtils
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
@@ -15,7 +16,6 @@ import io.kotest.core.test.TestCase
 import io.kotest.engine.test.TestResult
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
-import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.jvm.javaMethod
 
 /**
@@ -308,6 +308,7 @@ class DatabaseTestExtension(
      * Finds the effective [DataSet] annotation for the current test.
      *
      * Method-level annotations take precedence over class-level annotations.
+     * Supports meta-annotation discovery through [AnnotationUtils].
      *
      * @param testCase the test case
      * @param method the resolved test method
@@ -317,14 +318,15 @@ class DatabaseTestExtension(
         testCase: TestCase,
         method: Method,
     ): DataSet? =
-        method.getAnnotation(DataSet::class.java)
-            ?: testCase.spec::class.findAnnotation<DataSet>()
-            ?: testCase.spec::class.java.getAnnotation(DataSet::class.java)
+        AnnotationUtils
+            .findAnnotation(DataSet::class.java, method, testCase.spec::class.java)
+            .orElse(null)
 
     /**
      * Finds the effective [ExpectedDataSet] annotation for the current test.
      *
      * Method-level annotations take precedence over class-level annotations.
+     * Supports meta-annotation discovery through [AnnotationUtils].
      *
      * @param testCase the test case
      * @param method the resolved test method
@@ -334,14 +336,15 @@ class DatabaseTestExtension(
         testCase: TestCase,
         method: Method,
     ): ExpectedDataSet? =
-        method.getAnnotation(ExpectedDataSet::class.java)
-            ?: testCase.spec::class.findAnnotation<ExpectedDataSet>()
-            ?: testCase.spec::class.java.getAnnotation(ExpectedDataSet::class.java)
+        AnnotationUtils
+            .findAnnotation(ExpectedDataSet::class.java, method, testCase.spec::class.java)
+            .orElse(null)
 
     /**
      * Finds the effective [ExportDataSet] annotation for the current test.
      *
      * Method-level annotations take precedence over class-level annotations.
+     * Supports meta-annotation discovery through [AnnotationUtils].
      *
      * @param testCase the test case
      * @param method the resolved test method
@@ -351,7 +354,7 @@ class DatabaseTestExtension(
         testCase: TestCase,
         method: Method,
     ): ExportDataSet? =
-        method.getAnnotation(ExportDataSet::class.java)
-            ?: testCase.spec::class.findAnnotation<ExportDataSet>()
-            ?: testCase.spec::class.java.getAnnotation(ExportDataSet::class.java)
+        AnnotationUtils
+            .findAnnotation(ExportDataSet::class.java, method, testCase.spec::class.java)
+            .orElse(null)
 }

@@ -15,6 +15,10 @@ import io.github.seijikohara.dbtester.api.annotation.Strategy;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
@@ -148,6 +152,46 @@ class AnnotationResolverTest {
       // Then
       assertTrue(result.isPresent(), "should find method annotation");
     }
+
+    /**
+     * Verifies that findDataSet resolves meta-annotation on method.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return annotation when method has composed meta-annotation")
+    void shouldReturnAnnotation_whenMethodHasMetaAnnotation() throws NoSuchMethodException {
+      // Given
+      final var testClass = TestClassWithMetaAnnotatedMethod.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      // When
+      final var result = resolver.findDataSet(testMethod, testClass);
+
+      // Then
+      assertTrue(result.isPresent(), "should find DataSet via meta-annotation on method");
+    }
+
+    /**
+     * Verifies that findDataSet resolves meta-annotation on class.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return annotation when class has composed meta-annotation")
+    void shouldReturnAnnotation_whenClassHasMetaAnnotation() throws NoSuchMethodException {
+      // Given
+      final var testClass = TestClassWithMetaAnnotatedClass.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      // When
+      final var result = resolver.findDataSet(testMethod, testClass);
+
+      // Then
+      assertTrue(result.isPresent(), "should find DataSet via meta-annotation on class");
+    }
   }
 
   /** Tests for the findExpectedDataSet() method. */
@@ -176,6 +220,28 @@ class AnnotationResolverTest {
 
       // Then
       assertTrue(result.isPresent(), "should find Expectation annotation on method");
+    }
+
+    /**
+     * Verifies that findExpectedDataSet resolves meta-annotation on method.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName(
+        "should return annotation when method has composed ExpectedDataSet meta-annotation")
+    void shouldReturnAnnotation_whenMethodHasExpectedDataSetMetaAnnotation()
+        throws NoSuchMethodException {
+      // Given
+      final var testClass = TestClassWithMetaExpectedDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+
+      // When
+      final var result = resolver.findExpectedDataSet(testMethod, testClass);
+
+      // Then
+      assertTrue(result.isPresent(), "should find ExpectedDataSet via meta-annotation on method");
     }
   }
 
@@ -856,6 +922,52 @@ class AnnotationResolverTest {
                       strategy = Strategy.REGEX,
                       pattern = "[a-f0-9-]{36}")
                 }))
+    void testMethod() {}
+  }
+
+  // --- Composed annotations for meta-annotation testing ---
+
+  /** Composed annotation that includes {@link DataSet}. */
+  @Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
+  @DataSet
+  @interface ComposedDataSet {}
+
+  /** Composed annotation that includes {@link ExpectedDataSet} with excludeColumns. */
+  @Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+  @Retention(RetentionPolicy.RUNTIME)
+  @ExpectedDataSet(sources = @DataSetSource(excludeColumns = {"CREATED_AT", "UPDATED_AT"}))
+  @interface VerifyIgnoringAuditColumns {}
+
+  // --- Test classes for meta-annotation testing ---
+
+  /** Test class with meta-annotated method. */
+  static class TestClassWithMetaAnnotatedMethod {
+    /** Test constructor. */
+    TestClassWithMetaAnnotatedMethod() {}
+
+    /** Test method with composed DataSet annotation. */
+    @ComposedDataSet
+    void testMethod() {}
+  }
+
+  /** Test class with meta-annotated class. */
+  @ComposedDataSet
+  static class TestClassWithMetaAnnotatedClass {
+    /** Test constructor. */
+    TestClassWithMetaAnnotatedClass() {}
+
+    /** Test method. */
+    void testMethod() {}
+  }
+
+  /** Test class with meta-annotated ExpectedDataSet. */
+  static class TestClassWithMetaExpectedDataSet {
+    /** Test constructor. */
+    TestClassWithMetaExpectedDataSet() {}
+
+    /** Test method with composed ExpectedDataSet annotation. */
+    @VerifyIgnoringAuditColumns
     void testMethod() {}
   }
 }

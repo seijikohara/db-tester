@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.junit.jupiter.extension;
 
+import io.github.seijikohara.dbtester.api.annotation.AnnotationUtils;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet;
@@ -11,6 +12,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExportExecutor;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.PreparationExecutor;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -261,13 +263,16 @@ public class DatabaseTestExtension
    * first at the test method level, then falls back to the test class level if not found at the
    * method level.
    *
+   * <p>This method supports meta-annotations, allowing annotations that are themselves annotated
+   * with {@link DataSet} to be discovered and used.
+   *
    * @param context the extension context providing access to test metadata
    * @return the DataSet annotation if found at method or class level, or null if not present
    */
-  private DataSet findDataSet(final ExtensionContext context) {
+  private @Nullable DataSet findDataSet(final ExtensionContext context) {
     final var method = context.getRequiredTestMethod();
-    return Optional.ofNullable(method.getAnnotation(DataSet.class))
-        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(DataSet.class));
+    return AnnotationUtils.findAnnotation(DataSet.class, method, context.getRequiredTestClass())
+        .orElse(null);
   }
 
   /**
@@ -277,14 +282,18 @@ public class DatabaseTestExtension
    * first at the test method level, then falls back to the test class level if not found at the
    * method level.
    *
+   * <p>This method supports meta-annotations, allowing annotations that are themselves annotated
+   * with {@link ExpectedDataSet} to be discovered and used.
+   *
    * @param context the extension context providing access to test metadata
    * @return the ExpectedDataSet annotation if found at method or class level, or null if not
    *     present
    */
-  private ExpectedDataSet findExpectedDataSet(final ExtensionContext context) {
+  private @Nullable ExpectedDataSet findExpectedDataSet(final ExtensionContext context) {
     final var method = context.getRequiredTestMethod();
-    return Optional.ofNullable(method.getAnnotation(ExpectedDataSet.class))
-        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(ExpectedDataSet.class));
+    return AnnotationUtils.findAnnotation(
+            ExpectedDataSet.class, method, context.getRequiredTestClass())
+        .orElse(null);
   }
 
   /**
