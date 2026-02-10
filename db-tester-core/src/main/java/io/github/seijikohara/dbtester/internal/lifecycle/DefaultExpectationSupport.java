@@ -80,12 +80,23 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
   /**
    * Resolves the retry count from annotation or global settings.
    *
+   * <p>If the annotation specifies a non-negative value, that value is used directly. If the
+   * annotation value is {@link ExpectedDataSet#UNSET} (the default), the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()} is used.
+   *
    * @param expectedDataSet the annotation
    * @param context the test context
    * @return the resolved retry count
+   * @throws IllegalArgumentException if retryCount is less than {@link ExpectedDataSet#UNSET}
    */
   private int resolveRetryCount(final ExpectedDataSet expectedDataSet, final TestContext context) {
     final var annotationValue = expectedDataSet.retryCount();
+    if (annotationValue < ExpectedDataSet.UNSET) {
+      throw new IllegalArgumentException(
+          String.format(
+              "retryCount must be %d (use global), 0, or positive. Got: %d",
+              ExpectedDataSet.UNSET, annotationValue));
+    }
     return annotationValue >= 0
         ? annotationValue
         : context.configuration().conventions().retryCount();
@@ -94,13 +105,24 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
   /**
    * Resolves the retry delay from annotation or global settings.
    *
+   * <p>If the annotation specifies a non-negative value, that value is used directly. If the
+   * annotation value is {@link ExpectedDataSet#UNSET} (the default), the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()} is used.
+   *
    * @param expectedDataSet the annotation
    * @param context the test context
    * @return the resolved retry delay
+   * @throws IllegalArgumentException if retryDelayMillis is less than {@link ExpectedDataSet#UNSET}
    */
   private Duration resolveRetryDelay(
       final ExpectedDataSet expectedDataSet, final TestContext context) {
     final var annotationValue = expectedDataSet.retryDelayMillis();
+    if (annotationValue < ExpectedDataSet.UNSET) {
+      throw new IllegalArgumentException(
+          String.format(
+              "retryDelayMillis must be %d (use global), 0, or positive. Got: %d",
+              ExpectedDataSet.UNSET, annotationValue));
+    }
     return annotationValue >= 0
         ? Duration.ofMillis(annotationValue)
         : context.configuration().conventions().retryDelay();
