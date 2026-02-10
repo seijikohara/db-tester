@@ -1,6 +1,9 @@
 /**
  * Type-safe domain value objects for database identifiers, metadata, and values.
  *
+ * <p><strong>API Category: Domain Types</strong> — Shared value objects used across both User API
+ * and Extension API. These types appear in method signatures throughout the framework.
+ *
  * <p>This package contains immutable value objects that provide compile-time type safety and rich
  * domain modeling for database testing.
  *

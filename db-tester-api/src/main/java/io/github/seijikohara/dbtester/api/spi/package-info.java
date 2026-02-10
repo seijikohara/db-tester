@@ -1,6 +1,10 @@
 /**
  * Service Provider Interfaces (SPI) for framework extensibility.
  *
+ * <p><strong>API Category: Extension API</strong> — This package is intended for framework
+ * integrators building custom testing extensions. Test authors typically do not interact with this
+ * package directly.
+ *
  * <p>This package contains SPI interfaces that allow the API module to remain independent of
  * specific implementations. Implementations are provided by the core module and loaded via {@link
  * java.util.ServiceLoader}.
