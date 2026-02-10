@@ -1,15 +1,11 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
-import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
-import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
-import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.util.Map;
-import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -72,8 +68,6 @@ public class DbTesterJUnitAutoConfiguration {
     final DbTesterProperties.ConventionProperties conventionProps = properties.getConvention();
     final DbTesterProperties.OperationProperties operationProps = properties.getOperation();
 
-    final Map<String, ColumnStrategyMapping> globalColumnStrategies = Map.of();
-
     final ConventionSettings conventions =
         ConventionSettings.builder()
             .baseDirectory(conventionProps.getBaseDirectory())
@@ -83,7 +77,7 @@ public class DbTesterJUnitAutoConfiguration {
             .tableMergeStrategy(conventionProps.getTableMergeStrategy())
             .loadOrderFileName(conventionProps.getLoadOrderFileName())
             .globalExcludeColumns(conventionProps.getGlobalExcludeColumns())
-            .globalColumnStrategies(globalColumnStrategies)
+            .globalColumnStrategies(Map.of())
             .build();
 
     final OperationDefaults operations =
@@ -92,28 +86,7 @@ public class DbTesterJUnitAutoConfiguration {
             .expectation(operationProps.getExpectation())
             .build();
 
-    final DataSetLoader loader = loadDataSetLoader();
-
-    return Configuration.builder()
-        .conventions(conventions)
-        .operations(operations)
-        .loader(loader)
-        .build();
-  }
-
-  /**
-   * Loads the DataSetLoader implementation via ServiceLoader.
-   *
-   * @return the DataSetLoader instance
-   */
-  private DataSetLoader loadDataSetLoader() {
-    return ServiceLoader.load(DataSetLoaderProvider.class)
-        .findFirst()
-        .map(DataSetLoaderProvider::getLoader)
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath."));
+    return Configuration.builder().conventions(conventions).operations(operations).build();
   }
 
   /**
@@ -148,6 +121,7 @@ public class DbTesterJUnitAutoConfiguration {
    * @return a new DataSourceRegistrar instance
    */
   @Bean
+  @ConditionalOnMissingBean
   public DataSourceRegistrar dataSourceRegistrar(final DbTesterProperties properties) {
     return new DataSourceRegistrar(properties);
   }

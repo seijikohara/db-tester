@@ -4,7 +4,6 @@ import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
-import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -12,7 +11,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import java.util.ServiceLoader
 import javax.sql.DataSource
 
 /**
@@ -73,22 +71,11 @@ class DbTesterKotestAutoConfiguration {
                     .expectation(properties.operation.expectation)
                     .build()
                     .let { operations ->
-                        ServiceLoader
-                            .load(DataSetLoaderProvider::class.java)
-                            .findFirst()
-                            .map { it.loader }
-                            .orElseThrow {
-                                IllegalStateException(
-                                    "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
-                                )
-                            }.let { loader ->
-                                Configuration
-                                    .builder()
-                                    .conventions(conventions)
-                                    .operations(operations)
-                                    .loader(loader)
-                                    .build()
-                            }
+                        Configuration
+                            .builder()
+                            .conventions(conventions)
+                            .operations(operations)
+                            .build()
                     }
             }
 
@@ -119,5 +106,6 @@ class DbTesterKotestAutoConfiguration {
      * @return a new DataSourceRegistrar instance
      */
     @Bean
+    @ConditionalOnMissingBean
     fun dataSourceRegistrar(properties: DbTesterProperties): DataSourceRegistrar = DataSourceRegistrar(properties)
 }
