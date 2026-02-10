@@ -568,6 +568,8 @@ Defines value comparison behavior during assertion.
 | `CONTAINS` | false | false | false | String.contains() |
 | `RANGE` | false | false | false | min <= value <= max |
 
+**Architecture Note**: `ComparisonStrategy` serves as a descriptor (what to compare). Comparison execution (how to compare) is handled by `ComparisonEngine` in the core module. The `matches()` method on `ComparisonStrategy` is deprecated since 1.1 and will be removed in 2.0.
+
 ## Assertion API
 
 ### DatabaseAssertion

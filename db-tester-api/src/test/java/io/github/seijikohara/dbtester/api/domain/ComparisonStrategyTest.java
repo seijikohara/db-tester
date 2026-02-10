@@ -23,6 +23,7 @@ class ComparisonStrategyTest {
   /** Tests for STRICT strategy. */
   @Nested
   @DisplayName("STRICT strategy")
+  @SuppressWarnings("removal")
   class StrictStrategyTests {
 
     /** Tests for STRICT strategy. */
@@ -70,6 +71,7 @@ class ComparisonStrategyTest {
   /** Tests for IGNORE strategy. */
   @Nested
   @DisplayName("IGNORE strategy")
+  @SuppressWarnings("removal")
   class IgnoreStrategyTests {
 
     /** Tests for IGNORE strategy. */
@@ -102,6 +104,7 @@ class ComparisonStrategyTest {
   /** Tests for NUMERIC strategy. */
   @Nested
   @DisplayName("NUMERIC strategy")
+  @SuppressWarnings("removal")
   class NumericStrategyTests {
 
     /** Tests for NUMERIC strategy. */
@@ -165,6 +168,7 @@ class ComparisonStrategyTest {
   /** Tests for CASE_INSENSITIVE strategy. */
   @Nested
   @DisplayName("CASE_INSENSITIVE strategy")
+  @SuppressWarnings("removal")
   class CaseInsensitiveStrategyTests {
 
     /** Tests for CASE_INSENSITIVE strategy. */
@@ -218,6 +222,7 @@ class ComparisonStrategyTest {
   /** Tests for TIMESTAMP_FLEXIBLE strategy. */
   @Nested
   @DisplayName("TIMESTAMP_FLEXIBLE strategy")
+  @SuppressWarnings("removal")
   class TimestampFlexibleStrategyTests {
 
     /** Tests for TIMESTAMP_FLEXIBLE strategy. */
@@ -407,6 +412,7 @@ class ComparisonStrategyTest {
   /** Tests for NOT_NULL strategy. */
   @Nested
   @DisplayName("NOT_NULL strategy")
+  @SuppressWarnings("removal")
   class NotNullStrategyTests {
 
     /** Tests for NOT_NULL strategy. */
@@ -445,6 +451,7 @@ class ComparisonStrategyTest {
   /** Tests for REGEX strategy. */
   @Nested
   @DisplayName("REGEX strategy")
+  @SuppressWarnings("removal")
   class RegexStrategyTests {
 
     /** Tests for REGEX strategy. */
@@ -561,6 +568,7 @@ class ComparisonStrategyTest {
   /** Tests for DATE_FLEXIBLE strategy. */
   @Nested
   @DisplayName("DATE_FLEXIBLE strategy")
+  @SuppressWarnings("removal")
   class DateFlexibleStrategyTests {
 
     /** Tests for DATE_FLEXIBLE strategy. */
@@ -645,6 +653,7 @@ class ComparisonStrategyTest {
   /** Tests for JSON_EQUIVALENT strategy. */
   @Nested
   @DisplayName("JSON_EQUIVALENT strategy")
+  @SuppressWarnings("removal")
   class JsonEquivalentStrategyTests {
 
     /** Tests for JSON_EQUIVALENT strategy. */
@@ -758,6 +767,7 @@ class ComparisonStrategyTest {
   /** Tests for CONTAINS strategy. */
   @Nested
   @DisplayName("CONTAINS strategy")
+  @SuppressWarnings("removal")
   class ContainsStrategyTests {
 
     /** Tests for CONTAINS strategy. */
@@ -835,6 +845,7 @@ class ComparisonStrategyTest {
   /** Tests for RANGE strategy. */
   @Nested
   @DisplayName("RANGE strategy")
+  @SuppressWarnings("removal")
   class RangeStrategyTests {
 
     /** Tests for RANGE strategy. */
