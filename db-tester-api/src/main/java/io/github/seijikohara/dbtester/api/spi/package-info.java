@@ -20,6 +20,9 @@
  *       verification
  *   <li>{@link io.github.seijikohara.dbtester.api.spi.TypeHandler} - Custom database type handling
  * </ul>
+ *
+ * <p><strong>Audience:</strong> Framework integrators and extension developers. Most users do not
+ * need to interact with this package directly.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.spi;

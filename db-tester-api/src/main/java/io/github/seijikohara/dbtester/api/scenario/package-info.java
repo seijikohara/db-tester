@@ -20,6 +20,8 @@
  * test scenarios. When a test method name (or framework-specific feature name) matches the scenario
  * column value, only those rows are used for the test.
  *
+ * <p><strong>Audience:</strong> Framework integrators and extension developers.
+ *
  * @see io.github.seijikohara.dbtester.api.scenario.ScenarioName
  * @see io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
  */

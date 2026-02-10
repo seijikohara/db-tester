@@ -8,6 +8,8 @@
  * <p>This package provides the {@link io.github.seijikohara.dbtester.api.context.TestContext}
  * record which captures the essential context of a running test, independent of any specific
  * testing framework.
+ *
+ * <p><strong>Audience:</strong> Framework integrators and extension developers.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.context;
