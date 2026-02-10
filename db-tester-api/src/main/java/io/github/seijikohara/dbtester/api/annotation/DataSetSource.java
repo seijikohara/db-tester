@@ -73,7 +73,7 @@ public @interface DataSetSource {
   String[] scenarioNames() default {};
 
   /**
-   * Lists the column names to exclude from assertion verification.
+   * Lists the column names or patterns to exclude from assertion verification.
    *
    * <p>Columns listed here are ignored during database state comparison. This is useful for
    * excluding auto-generated columns (timestamps, version numbers, auto-increment IDs) that cannot
@@ -81,6 +81,15 @@ public @interface DataSetSource {
    *
    * <p>Column name matching is case-insensitive. For example, specifying {@code "CREATED_AT"} will
    * exclude columns named {@code "created_at"}, {@code "CREATED_AT"}, or {@code "Created_At"}.
+   *
+   * <p>Glob patterns are supported for matching multiple columns:
+   *
+   * <ul>
+   *   <li>{@code *} matches any sequence of characters (e.g., {@code "*_AT"} matches {@code
+   *       CREATED_AT}, {@code UPDATED_AT})
+   *   <li>{@code ?} matches any single character (e.g., {@code "COL?"} matches {@code COL1}, {@code
+   *       COLA})
+   * </ul>
    *
    * <p>This attribute only applies to expectation verification (when used within {@link
    * ExpectedDataSet#sources()}). It has no effect when used within {@link DataSet#sources()} for
@@ -90,12 +99,13 @@ public @interface DataSetSource {
    *
    * <pre>{@code
    * @ExpectedDataSet(sources = @DataSetSource(
-   *     excludeColumns = {"CREATED_AT", "UPDATED_AT", "VERSION"}
+   *     excludeColumns = {"*_AT", "*_BY", "VERSION"}
    * ))
    * void testUserCreation() { }
    * }</pre>
    *
-   * @return column names to exclude from verification, or an empty array for no exclusions
+   * @return column names or patterns to exclude from verification, or an empty array for no
+   *     exclusions
    * @see io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion#assertEqualsIgnoreColumns
    */
   String[] excludeColumns() default {};

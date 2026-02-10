@@ -73,7 +73,7 @@ public final class ConventionSettings {
   /** The file name used to specify table loading order. */
   private final String loadOrderFileName;
 
-  /** The column names to exclude from all expectation verifications globally. */
+  /** The column names or glob patterns to exclude from all expectation verifications globally. */
   private final Set<String> globalExcludeColumns;
 
   /** The column comparison strategies applied globally. */
@@ -192,9 +192,14 @@ public final class ConventionSettings {
   }
 
   /**
-   * Returns the column names to exclude from all expectation verifications globally.
+   * Returns the column names or glob patterns to exclude from all expectation verifications
+   * globally.
    *
-   * @return an unmodifiable set of column names
+   * <p>Entries containing {@code *} or {@code ?} are treated as glob patterns and matched against
+   * actual column names during verification. Entries without wildcards are treated as exact column
+   * names.
+   *
+   * @return an unmodifiable set of column names or patterns
    */
   public Set<String> globalExcludeColumns() {
     return globalExcludeColumns;
@@ -502,7 +507,7 @@ public final class ConventionSettings {
     /** The file name used to specify table loading order. */
     private String loadOrderFileName = DEFAULT_LOAD_ORDER_FILE_NAME;
 
-    /** The column names to exclude from all expectation verifications globally. */
+    /** The column names or glob patterns to exclude from all expectation verifications globally. */
     private Set<String> globalExcludeColumns = Set.of();
 
     /** The column comparison strategies applied globally. */
@@ -593,9 +598,14 @@ public final class ConventionSettings {
     }
 
     /**
-     * Sets the column names to exclude from all expectation verifications globally.
+     * Sets the column names or glob patterns to exclude from all expectation verifications
+     * globally.
      *
-     * @param globalExcludeColumns the column names to exclude
+     * <p>Entries containing {@code *} or {@code ?} are treated as glob patterns. Example: {@code
+     * Set.of("*_AT", "*_BY", "VERSION")} excludes all columns ending with {@code _AT} or {@code
+     * _BY}, and the exact column {@code VERSION}.
+     *
+     * @param globalExcludeColumns the column names or patterns to exclude
      * @return this builder
      */
     public Builder globalExcludeColumns(final Set<String> globalExcludeColumns) {
