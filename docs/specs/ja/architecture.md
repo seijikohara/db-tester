@@ -175,7 +175,7 @@ flowchart LR
 | 戦略インターフェース | 実装 |
 |---------------------|------|
 | `Operation` enum | NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT, TRUNCATE_TABLE, CLEAN_INSERT, TRUNCATE_INSERT |
-| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, CONTAINS, RANGE |
+| `ComparisonStrategy` | STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, ~~CONTAINS~~, ~~RANGE~~ |
 | `TableMergeStrategy` | FIRST, LAST, UNION, UNION_ALL |
 | `TableOrderingStrategy` | AUTO, LOAD_ORDER_FILE, FOREIGN_KEY, ALPHABETICAL |
 | `FormatProvider` | CsvFormatProvider, TsvFormatProvider, JsonFormatProvider, YamlFormatProvider |

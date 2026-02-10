@@ -162,7 +162,11 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    *
    * @param columnName the column name for containment check
    * @return a new ColumnStrategyMapping with CONTAINS strategy
+   * @deprecated Use {@link #regex(String, String)} with pattern {@code ".*substring.*"} instead.
+   *     Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("removal")
   public static ColumnStrategyMapping contains(final String columnName) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains());
   }
@@ -173,7 +177,11 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    * @param columnName the column name for containment check
    * @param substring the substring to search for
    * @return a new ColumnStrategyMapping with CONTAINS strategy
+   * @deprecated Use {@link #regex(String, String)} with pattern {@code ".*substring.*"} instead.
+   *     Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("removal")
   public static ColumnStrategyMapping contains(final String columnName, final String substring) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains(substring));
   }
@@ -186,7 +194,10 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    * @param max the maximum value (inclusive)
    * @return a new ColumnStrategyMapping with RANGE strategy
    * @throws IllegalArgumentException if min is greater than max
+   * @deprecated Use programmatic assertions for range verification instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("removal")
   public static ColumnStrategyMapping range(
       final String columnName, final double min, final double max) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.range(min, max));

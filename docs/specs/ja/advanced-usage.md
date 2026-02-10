@@ -217,13 +217,13 @@ void shouldStoreJsonMetadata() throws SQLException {
 @DataSet
 @ExpectedDataSet(sources = @DataSetSource(
     columnStrategies = {
-        @ColumnStrategy(name = "SCORE", strategy = Strategy.RANGE, options = "min=0,max=100"),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS)
+        @ColumnStrategy(name = "SCORE", strategy = Strategy.NUMERIC),
+        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.REGEX, pattern = ".*expected.*")
     }
 ))
 void shouldValidateScoreAndDescription() throws SQLException {
-    // SCORE: 実際の値が0〜100の範囲内であることを検証（両端含む）
-    // DESCRIPTION: 実際の値が期待値を部分文字列として含むことを検証
+    // SCORE: 型を考慮した数値比較
+    // DESCRIPTION: 実際の値が正規表現パターンに一致することを検証
 }
 ```
 

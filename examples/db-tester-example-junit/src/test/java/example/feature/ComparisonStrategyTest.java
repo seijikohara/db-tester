@@ -522,6 +522,7 @@ final class ComparisonStrategyTest {
   /** Tests for CONTAINS comparison strategy. */
   @Nested
   @DisplayName("CONTAINS Strategy Tests")
+  @SuppressWarnings("removal")
   class ContainsStrategyTests {
 
     /** Creates ContainsStrategyTests instance. */
@@ -573,6 +574,7 @@ final class ComparisonStrategyTest {
   /** Tests for RANGE comparison strategy. */
   @Nested
   @DisplayName("RANGE Strategy Tests")
+  @SuppressWarnings("removal")
   class RangeStrategyTests {
 
     /** Creates RangeStrategyTests instance. */

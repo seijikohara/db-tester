@@ -758,6 +758,7 @@ class ComparisonStrategyTest {
   /** Tests for CONTAINS strategy. */
   @Nested
   @DisplayName("CONTAINS strategy")
+  @SuppressWarnings("removal")
   class ContainsStrategyTests {
 
     /** Tests for CONTAINS strategy. */
@@ -835,6 +836,7 @@ class ComparisonStrategyTest {
   /** Tests for RANGE strategy. */
   @Nested
   @DisplayName("RANGE strategy")
+  @SuppressWarnings("removal")
   class RangeStrategyTests {
 
     /** Tests for RANGE strategy. */
@@ -985,6 +987,7 @@ class ComparisonStrategyTest {
     @Test
     @Tag("normal")
     @DisplayName("should return options for parameterized strategies")
+    @SuppressWarnings("removal")
     void shouldReturnOptions_whenCalledOnParameterizedStrategy() {
       // Given
       final var rangeStrategy = ComparisonStrategy.range(10.0, 20.0);
