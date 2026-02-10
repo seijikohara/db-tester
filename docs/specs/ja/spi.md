@@ -179,30 +179,12 @@ public interface AssertionProvider {
 
 ```java
 public interface ExpectationProvider {
-    // 基本検証
+    // 基本検証（abstract）
     void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
 
-    // カラム除外付き
+    // ExpectationContextパラメータオブジェクト付き（default）
     default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns);
-
-    // カラム戦略付き
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns,
-                                   Map<String, ColumnStrategyMapping> columnStrategies);
-
-    // 行順序制御付き
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns,
-                                   Map<String, ColumnStrategyMapping> columnStrategies,
-                                   RowOrdering rowOrdering);
-
-    // 操作デフォルト付き（例: 浮動小数点イプシロン）
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns,
-                                   Map<String, ColumnStrategyMapping> columnStrategies,
-                                   RowOrdering rowOrdering,
-                                   OperationDefaults operationDefaults);
+                                   ExpectationContext context);
 }
 ```
 
@@ -213,26 +195,45 @@ public interface ExpectationProvider {
 | メソッド | 説明 |
 |----------|------|
 | `verifyExpectation(TableSet, DataSource)` | 基本的なデータベース状態検証 |
-| `verifyExpectation(..., excludeColumns)` | 指定カラムを除外して検証 |
-| `verifyExpectation(..., columnStrategies)` | カラム比較戦略付きで検証 |
-| `verifyExpectation(..., rowOrdering)` | 行順序制御付きで検証 |
-| `verifyExpectation(..., operationDefaults)` | 操作デフォルト付きで検証（例: 浮動小数点イプシロン） |
+| `verifyExpectation(TableSet, DataSource, ExpectationContext)` | フルコンテキスト付き検証（除外、戦略、順序、デフォルト） |
 
-**パラメータ**:
+**ExpectationContext** (`io.github.seijikohara.dbtester.api.config.ExpectationContext`):
 
-| パラメータ | 型 | 説明 |
+オプションの検証パラメータをカプセル化するパラメータオブジェクト：
+
+| フィールド | 型 | 説明 |
 |-----------|-----|------|
-| `expectedTableSet` | `TableSet` | 期待テーブルデータを含む期待テーブルセット |
-| `dataSource` | `DataSource` | 実際のデータを取得するためのデータベースコネクションソース |
-| `excludeColumns` | `Collection<String>` | 比較から除外するカラム名（大文字小文字区別なし） |
+| `excludeColumns` | `Set<String>` | 比較から除外するカラム名（大文字小文字区別なし） |
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | カラム名でキーイングされたカラム比較戦略 |
 | `rowOrdering` | `RowOrdering` | 行比較戦略（ORDEREDまたはUNORDERED） |
 | `operationDefaults` | `OperationDefaults` | 比較設定を含む操作デフォルト（例: 浮動小数点イプシロン） |
 
+```java
+// デフォルトコンテキスト（除外なし、順序付き、標準デフォルト）
+var context = ExpectationContext.defaults();
+
+// with*()コピーメソッドによるカスタムコンテキスト
+var context = ExpectationContext.defaults()
+    .withExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+    .withRowOrdering(RowOrdering.UNORDERED);
+
+// 全パラメータ指定のファクトリメソッド
+var context = ExpectationContext.of(
+    excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+```
+
+**非推奨メソッド**（2.0で削除予定）:
+
+旧テレスコーピングオーバーロードは`ExpectationContext`に置き換えられました：
+- `verifyExpectation(TableSet, DataSource, Collection<String>)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>, RowOrdering)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>, RowOrdering, OperationDefaults)`
+
 **プロセス**:
 1. 期待テーブルセット内の各テーブルに対して、データベースから実際のデータを取得
 2. 実際のデータを期待テーブルに存在するカラムのみにフィルタリング
-3. カラム除外と比較戦略を適用
+3. コンテキストからカラム除外と比較戦略を適用
 4. フィルタリングされた実際のデータを期待データと比較
 5. 検証失敗時は`AssertionError`をスロー
 
