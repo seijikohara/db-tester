@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.Table;
@@ -217,10 +218,11 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
 
     final var operationDefaults = context.configuration().operations();
+    final var expectationContext =
+        ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults);
 
     try {
-      expectationProvider.verifyExpectation(
-          tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+      expectationProvider.verifyExpectation(tableSet, dataSource, expectationContext);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",

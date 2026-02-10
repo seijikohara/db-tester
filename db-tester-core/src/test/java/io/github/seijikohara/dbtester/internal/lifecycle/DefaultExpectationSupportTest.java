@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.VerificationSettings;
@@ -126,7 +127,7 @@ class DefaultExpectationSupportTest {
 
       doNothing()
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertDoesNotThrow(
@@ -134,7 +135,7 @@ class DefaultExpectationSupportTest {
           "should not throw when verification succeeds");
 
       verify(expectationProvider, times(1))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
     /** Verifies that verification throws on first failure when retryCount is 0. */
@@ -155,7 +156,7 @@ class DefaultExpectationSupportTest {
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       final var exception =
@@ -170,7 +171,7 @@ class DefaultExpectationSupportTest {
           "exception message should indicate verification failure");
 
       verify(expectationProvider, times(1))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
     /** Verifies that verification succeeds on a retry attempt. */
@@ -194,14 +195,14 @@ class DefaultExpectationSupportTest {
       doThrow(new ValidationException("Mismatch"))
           .doNothing()
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertDoesNotThrow(
           () -> support.verify(context, expectedDataSet), "should not throw when retry succeeds");
 
       verify(expectationProvider, times(2))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
     /** Verifies that all retries are exhausted before throwing. */
@@ -223,7 +224,7 @@ class DefaultExpectationSupportTest {
 
       doThrow(new ValidationException("Persistent mismatch"))
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       final var exception =
@@ -241,7 +242,7 @@ class DefaultExpectationSupportTest {
                   "exception message should indicate verification failure"),
           () ->
               verify(expectationProvider, times(3))
-                  .verifyExpectation(any(), any(), any(), any(), any(), any()));
+                  .verifyExpectation(any(), any(), any(ExpectationContext.class)));
     }
 
     /** Verifies that no datasets results in early return without verification. */
@@ -258,7 +259,7 @@ class DefaultExpectationSupportTest {
           "should not throw when no datasets found");
 
       verify(expectationProvider, times(0))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
     /** Verifies that annotation retryCount overrides global setting. */
@@ -282,7 +283,7 @@ class DefaultExpectationSupportTest {
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertThrows(
@@ -292,7 +293,7 @@ class DefaultExpectationSupportTest {
 
       // Annotation retryCount=1 means 2 total attempts (initial + 1 retry)
       verify(expectationProvider, times(2))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
     /** Verifies that global retryCount is used when annotation value is -1. */
@@ -317,7 +318,7 @@ class DefaultExpectationSupportTest {
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertThrows(
@@ -327,7 +328,7 @@ class DefaultExpectationSupportTest {
 
       // Global retryCount=1 means 2 total attempts (initial + 1 retry)
       verify(expectationProvider, times(2))
-          .verifyExpectation(any(), any(), any(), any(), any(), any());
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
   }
 

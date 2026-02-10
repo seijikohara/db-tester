@@ -17,7 +17,7 @@ Packages intended for test authors writing database tests. These packages form t
 |---------|-------------|
 | `annotation` | Declarative test annotations (`@DataSet`, `@ExpectedDataSet`, `@DataSetSource`) |
 | `assertion` | Programmatic database assertion utilities (`DatabaseAssertion`) |
-| `config` | Configuration types (`Configuration`, `DataSourceRegistry`, `ConventionSettings`) |
+| `config` | Configuration types (`Configuration`, `DataSourceRegistry`, `ConventionSettings`, `ExpectationContext`) |
 | `exception` | Framework exception hierarchy |
 | `export` | Data export API (`DataSetExporter`) |
 | `operation` | Database operation enumerations (`Operation`, `TableOrderingStrategy`) |
