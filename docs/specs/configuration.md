@@ -182,7 +182,7 @@ When `baseDirectory` is specified:
 
 ### ExpectedDataSet Suffix
 
-The `expectedDataSetSuffix` is appended to the data set path:
+The `expectationSuffix` is appended to the data set path:
 
 | DataSet Path | Suffix | ExpectedDataSet Path |
 |-----------------|--------|------------------|

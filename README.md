@@ -43,7 +43,7 @@ class UserRepositoryTest {
 
 ```groovy
 @DatabaseTest
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
     @Shared
     DataSourceRegistry dbTesterRegistry

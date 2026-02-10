@@ -74,6 +74,16 @@ public interface OperationProvider {
         TableOrderingStrategy tableOrderingStrategy,
         TransactionMode transactionMode,
         @Nullable Duration queryTimeout);
+
+    // バッチサイズ制御付き（デフォルトではベースのexecuteに委譲）
+    default void execute(
+        Operation operation,
+        TableSet tableSet,
+        DataSource dataSource,
+        TableOrderingStrategy tableOrderingStrategy,
+        TransactionMode transactionMode,
+        @Nullable Duration queryTimeout,
+        int batchSize);
 }
 ```
 
@@ -89,6 +99,7 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | テーブル処理順序の戦略 |
 | `transactionMode` | `TransactionMode` | トランザクション動作モード |
 | `queryTimeout` | `@Nullable Duration` | クエリタイムアウト、またはタイムアウトなしの場合はnull |
+| `batchSize` | `int` | INSERTバッチあたりの行数（0 = 単一バッチ）、バッチオーバーロードで使用 |
 
 **操作**:
 - `NONE` - 操作なし
@@ -185,6 +196,13 @@ public interface ExpectationProvider {
                                    Collection<String> excludeColumns,
                                    Map<String, ColumnStrategyMapping> columnStrategies,
                                    RowOrdering rowOrdering);
+
+    // 操作デフォルト付き（例: 浮動小数点イプシロン）
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies,
+                                   RowOrdering rowOrdering,
+                                   OperationDefaults operationDefaults);
 }
 ```
 
@@ -198,6 +216,7 @@ public interface ExpectationProvider {
 | `verifyExpectation(..., excludeColumns)` | 指定カラムを除外して検証 |
 | `verifyExpectation(..., columnStrategies)` | カラム比較戦略付きで検証 |
 | `verifyExpectation(..., rowOrdering)` | 行順序制御付きで検証 |
+| `verifyExpectation(..., operationDefaults)` | 操作デフォルト付きで検証（例: 浮動小数点イプシロン） |
 
 **パラメータ**:
 
@@ -208,6 +227,7 @@ public interface ExpectationProvider {
 | `excludeColumns` | `Collection<String>` | 比較から除外するカラム名（大文字小文字区別なし） |
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | カラム名でキーイングされたカラム比較戦略 |
 | `rowOrdering` | `RowOrdering` | 行比較戦略（ORDEREDまたはUNORDERED） |
+| `operationDefaults` | `OperationDefaults` | 比較設定を含む操作デフォルト（例: 浮動小数点イプシロン） |
 
 **プロセス**:
 1. 期待テーブルセット内の各テーブルに対して、データベースから実際のデータを取得

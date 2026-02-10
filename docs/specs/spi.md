@@ -75,6 +75,16 @@ public interface OperationProvider {
         TableOrderingStrategy tableOrderingStrategy,
         TransactionMode transactionMode,
         @Nullable Duration queryTimeout);
+
+    // With batch size control (default delegates to base execute)
+    default void execute(
+        Operation operation,
+        TableSet tableSet,
+        DataSource dataSource,
+        TableOrderingStrategy tableOrderingStrategy,
+        TransactionMode transactionMode,
+        @Nullable Duration queryTimeout,
+        int batchSize);
 }
 ```
 
@@ -90,6 +100,7 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
 | `transactionMode` | `TransactionMode` | Transaction behavior mode |
 | `queryTimeout` | `@Nullable Duration` | Query timeout, or null for no timeout |
+| `batchSize` | `int` | Rows per INSERT batch (0 = single batch), used by the batch overload |
 
 **Operations**:
 
@@ -189,6 +200,13 @@ public interface ExpectationProvider {
                                    Collection<String> excludeColumns,
                                    Map<String, ColumnStrategyMapping> columnStrategies,
                                    RowOrdering rowOrdering);
+
+    // With operation defaults (e.g., floating-point epsilon)
+    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                                   Collection<String> excludeColumns,
+                                   Map<String, ColumnStrategyMapping> columnStrategies,
+                                   RowOrdering rowOrdering,
+                                   OperationDefaults operationDefaults);
 }
 ```
 
@@ -202,6 +220,7 @@ public interface ExpectationProvider {
 | `verifyExpectation(..., excludeColumns)` | Verify excluding specified columns |
 | `verifyExpectation(..., columnStrategies)` | Verify with column comparison strategies |
 | `verifyExpectation(..., rowOrdering)` | Verify with row ordering control |
+| `verifyExpectation(..., operationDefaults)` | Verify with operation defaults (e.g., floating-point epsilon) |
 
 **Parameters**:
 
@@ -212,6 +231,7 @@ public interface ExpectationProvider {
 | `excludeColumns` | `Collection<String>` | Column names to exclude from comparison (case-insensitive) |
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | Column comparison strategies keyed by column name |
 | `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
+| `operationDefaults` | `OperationDefaults` | Operation defaults containing comparison settings (e.g., floating-point epsilon) |
 
 **Process**:
 1. The provider iterates each table in the expected dataset and fetches actual data from the database.
