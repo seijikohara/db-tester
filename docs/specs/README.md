@@ -84,7 +84,7 @@ For comprehensive understanding, read the specifications in this order:
 | Base directory | null (classpath-relative) |
 | Expectation suffix | `/expected` |
 | Scenario marker | `[Scenario]` |
-| Data format | CSV |
+| Data format | AUTO |
 | Table merge strategy | UNION_ALL |
 | DataSet operation | CLEAN_INSERT |
 

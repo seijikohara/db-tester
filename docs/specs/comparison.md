@@ -165,7 +165,7 @@ USER:
 |------------|--------|------------|
 | **No XML support** | Cannot migrate from existing DBUnit XML datasets | Convert XML to CSV manually or via script |
 | **No Excel support** | Business users cannot maintain test data in spreadsheets | Export Excel to CSV |
-| **No programmatic dataset builder** | Cannot generate dynamic test data in code | Implement custom DataLoader via SPI |
+| **No fluent builder API for datasets** | Cannot construct datasets using a fluent builder in code | Use `TableSet`/`Table` factory methods or implement custom `DataLoader` via SPI |
 
 ### Feature Limitations
 
