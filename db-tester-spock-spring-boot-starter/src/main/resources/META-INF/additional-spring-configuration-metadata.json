@@ -32,14 +32,25 @@
     {
       "name": "db-tester.convention.data-format",
       "type": "io.github.seijikohara.dbtester.api.config.DataFormat",
-      "description": "File format for dataset files (CSV or TSV).",
-      "defaultValue": "CSV"
+      "description": "File format for dataset files.",
+      "defaultValue": "AUTO"
     },
     {
       "name": "db-tester.convention.table-merge-strategy",
       "type": "io.github.seijikohara.dbtester.api.config.TableMergeStrategy",
       "description": "Strategy for merging tables from multiple datasets (FIRST, LAST, UNION, UNION_ALL).",
       "defaultValue": "UNION_ALL"
+    },
+    {
+      "name": "db-tester.convention.load-order-file-name",
+      "type": "java.lang.String",
+      "description": "File name for specifying table loading order in dataset directories.",
+      "defaultValue": "load-order.txt"
+    },
+    {
+      "name": "db-tester.convention.global-exclude-columns",
+      "type": "java.util.Set<java.lang.String>",
+      "description": "Column names to exclude globally from all expectation verifications."
     },
     {
       "name": "db-tester.operation.preparation",
@@ -59,12 +70,24 @@
       "name": "db-tester.convention.data-format",
       "values": [
         {
+          "value": "AUTO",
+          "description": "Automatic format detection, loads all supported file formats"
+        },
+        {
           "value": "CSV",
           "description": "Comma-Separated Values format (.csv files)"
         },
         {
           "value": "TSV",
           "description": "Tab-Separated Values format (.tsv files)"
+        },
+        {
+          "value": "JSON",
+          "description": "JavaScript Object Notation format (.json files)"
+        },
+        {
+          "value": "YAML",
+          "description": "YAML Ain't Markup Language format (.yaml files)"
         }
       ]
     },
