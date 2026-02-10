@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.scenario;
 
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.exception.DataSetLoadException;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.domain.ScenarioMarker;
 import java.util.Collection;
@@ -88,20 +89,44 @@ public final class ScenarioFilter {
   /**
    * Finds the scenario column in the list of columns.
    *
-   * <p>The scenario column is identified by matching the first column's name against the scenario
-   * marker.
+   * <p>The scenario column is identified by matching any column's name against the scenario marker.
+   * The column can appear at any position in the list.
    *
    * @param columns the list of columns to search
    * @return an Optional containing the scenario column if found, or empty otherwise
+   * @throws DataSetLoadException if multiple columns match the scenario marker
    */
   public Optional<ColumnName> findScenarioColumn(final List<ColumnName> columns) {
-    return columns.stream()
-        .findFirst()
-        .filter(column -> scenarioMarker.value().equals(column.value()));
+    final var matchingColumns =
+        columns.stream().filter(column -> scenarioMarker.value().equals(column.value())).toList();
+
+    if (matchingColumns.size() > 1) {
+      throw new DataSetLoadException(
+          String.format(
+              "Multiple columns match the scenario marker '%s': found %d matches. "
+                  + "Each table must have at most one scenario marker column.",
+              scenarioMarker.value(), matchingColumns.size()));
+    }
+
+    final var result = matchingColumns.stream().findFirst();
+
+    if (result.isEmpty() && isActive()) {
+      logger.warn(
+          "Scenario names {} specified but no '{}' marker column found. "
+              + "All rows will be included. "
+              + "Add a '{}' column to enable scenario filtering.",
+          scenarioNames,
+          scenarioMarker.value(),
+          scenarioMarker.value());
+    }
+
+    return result;
   }
 
   /**
    * Derives the data columns by excluding the scenario column if present.
+   *
+   * <p>The scenario column is removed by name, regardless of its position in the list.
    *
    * @param columns the list of all columns
    * @param scenarioColumn the scenario column to exclude, or null if not present
@@ -110,7 +135,7 @@ public final class ScenarioFilter {
   public List<ColumnName> deriveDataColumns(
       final List<ColumnName> columns, final @Nullable ColumnName scenarioColumn) {
     return Optional.ofNullable(scenarioColumn)
-        .map(column -> columns.stream().skip(1).toList())
+        .map(column -> columns.stream().filter(c -> !c.value().equals(column.value())).toList())
         .orElse(columns);
   }
 

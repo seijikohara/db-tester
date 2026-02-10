@@ -75,6 +75,16 @@ public interface OperationProvider {
         TableOrderingStrategy tableOrderingStrategy,
         TransactionMode transactionMode,
         @Nullable Duration queryTimeout);
+
+    // With batch size control (default delegates to base execute)
+    default void execute(
+        Operation operation,
+        TableSet tableSet,
+        DataSource dataSource,
+        TableOrderingStrategy tableOrderingStrategy,
+        TransactionMode transactionMode,
+        @Nullable Duration queryTimeout,
+        int batchSize);
 }
 ```
 
@@ -90,6 +100,7 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
 | `transactionMode` | `TransactionMode` | Transaction behavior mode |
 | `queryTimeout` | `@Nullable Duration` | Query timeout, or null for no timeout |
+| `batchSize` | `int` | Rows per INSERT batch (0 = single batch), used by the batch overload |
 
 **Operations**:
 
@@ -172,23 +183,12 @@ Verifies database state against expected datasets.
 
 ```java
 public interface ExpectationProvider {
-    // Basic verification
+    // Basic verification (abstract)
     void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
 
-    // With column exclusion
+    // With ExpectationContext parameter object (default)
     default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns);
-
-    // With column strategies
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns,
-                                   Map<String, ColumnStrategyMapping> columnStrategies);
-
-    // With row ordering
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   Collection<String> excludeColumns,
-                                   Map<String, ColumnStrategyMapping> columnStrategies,
-                                   RowOrdering rowOrdering);
+                                   ExpectationContext context);
 }
 ```
 
@@ -199,24 +199,45 @@ public interface ExpectationProvider {
 | Method | Description |
 |--------|-------------|
 | `verifyExpectation(TableSet, DataSource)` | Basic database state verification |
-| `verifyExpectation(..., excludeColumns)` | Verify excluding specified columns |
-| `verifyExpectation(..., columnStrategies)` | Verify with column comparison strategies |
-| `verifyExpectation(..., rowOrdering)` | Verify with row ordering control |
+| `verifyExpectation(TableSet, DataSource, ExpectationContext)` | Verify with full context (exclusions, strategies, ordering, defaults) |
 
-**Parameters**:
+**ExpectationContext** (`io.github.seijikohara.dbtester.api.config.ExpectationContext`):
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `expectedTableSet` | `TableSet` | The expected table set containing expected table data |
-| `dataSource` | `DataSource` | The database connection source for retrieving actual data |
-| `excludeColumns` | `Collection<String>` | Column names to exclude from comparison (case-insensitive) |
+A parameter object that encapsulates all optional verification parameters:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `excludeColumns` | `Set<String>` | Column names to exclude from comparison (case-insensitive) |
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | Column comparison strategies keyed by column name |
 | `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
+| `operationDefaults` | `OperationDefaults` | Operation defaults containing comparison settings (e.g., floating-point epsilon) |
+
+```java
+// Default context (no exclusions, ordered, standard defaults)
+var context = ExpectationContext.defaults();
+
+// Custom context using with*() copy methods
+var context = ExpectationContext.defaults()
+    .withExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+    .withRowOrdering(RowOrdering.UNORDERED);
+
+// Factory method with all parameters
+var context = ExpectationContext.of(
+    excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+```
+
+**Deprecated Methods** (removed in 2.0):
+
+The previous telescoping overloads are deprecated in favor of `ExpectationContext`:
+- `verifyExpectation(TableSet, DataSource, Collection<String>)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>, RowOrdering)`
+- `verifyExpectation(TableSet, DataSource, Collection<String>, Map<String, ColumnStrategyMapping>, RowOrdering, OperationDefaults)`
 
 **Process**:
 1. The provider iterates each table in the expected dataset and fetches actual data from the database.
 2. The provider filters actual data to include only columns present in the expected table.
-3. The provider applies column exclusions and comparison strategies.
+3. The provider applies column exclusions and comparison strategies from the context.
 4. The provider compares filtered actual data against expected data.
 5. The provider throws `AssertionError` if verification fails.
 

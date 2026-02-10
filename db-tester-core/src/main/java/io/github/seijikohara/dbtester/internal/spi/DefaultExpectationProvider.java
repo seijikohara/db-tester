@@ -1,6 +1,7 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -46,10 +47,20 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
   public void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
+      final ExpectationContext context) {
+    expectationVerifier.verifyExpectation(expectedTableSet, dataSource, context);
+  }
+
+  @SuppressWarnings("removal")
+  @Override
+  public void verifyExpectation(
+      final TableSet expectedTableSet,
+      final DataSource dataSource,
       final Collection<String> excludeColumns) {
     expectationVerifier.verifyExpectation(expectedTableSet, dataSource, excludeColumns);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void verifyExpectation(
       final TableSet expectedTableSet,
@@ -60,6 +71,7 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
         expectedTableSet, dataSource, excludeColumns, columnStrategies);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void verifyExpectation(
       final TableSet expectedTableSet,
@@ -71,6 +83,7 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
         expectedTableSet, dataSource, excludeColumns, columnStrategies, rowOrdering);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void verifyExpectation(
       final TableSet expectedTableSet,

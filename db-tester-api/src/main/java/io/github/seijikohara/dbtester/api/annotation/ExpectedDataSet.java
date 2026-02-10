@@ -27,6 +27,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExpectedDataSet {
 
+  /** Sentinel value indicating that the global setting should be used. */
+  int UNSET = -1;
+
   /**
    * Lists the dataset sources that should be considered the canonical post-test state.
    *
@@ -69,22 +72,34 @@ public @interface ExpectedDataSet {
    * times, waiting {@link #retryDelayMillis()} between attempts. This is useful for eventual
    * consistency scenarios.
    *
-   * <p>A value of {@code -1} means the global setting from {@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()} is used.
+   * <p>Supported values:
    *
-   * @return the number of retry attempts, or -1 to use the global setting
+   * <ul>
+   *   <li>{@link #UNSET} ({@code -1}) — use the global setting from {@link
+   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()}
+   *   <li>{@code 0} — no retries (fail immediately on mismatch)
+   *   <li>Positive integer — retry up to N times
+   * </ul>
+   *
+   * @return the number of retry attempts, or {@link #UNSET} to use the global setting
    */
-  int retryCount() default -1;
+  int retryCount() default UNSET;
 
   /**
    * Specifies the delay between retry attempts in milliseconds.
    *
    * <p>This delay allows transient inconsistencies to resolve before the next verification attempt.
    *
-   * <p>A value of {@code -1} means the global setting from {@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()} is used.
+   * <p>Supported values:
    *
-   * @return the delay in milliseconds, or -1 to use the global setting
+   * <ul>
+   *   <li>{@link #UNSET} ({@code -1}) — use the global setting from {@link
+   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()}
+   *   <li>{@code 0} — no delay between retries
+   *   <li>Positive integer — wait N milliseconds before retrying
+   * </ul>
+   *
+   * @return the delay in milliseconds, or {@link #UNSET} to use the global setting
    */
-  long retryDelayMillis() default -1;
+  long retryDelayMillis() default UNSET;
 }

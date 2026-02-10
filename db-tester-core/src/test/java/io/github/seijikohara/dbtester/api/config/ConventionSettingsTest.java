@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link ConventionSettings}. */
 @DisplayName("ConventionSettings")
+@SuppressWarnings("removal")
 class ConventionSettingsTest {
 
   /** Tests for the ConventionSettings class. */

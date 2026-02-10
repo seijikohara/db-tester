@@ -107,9 +107,9 @@ public final class DefaultPreparationSupport implements PreparationSupport {
       final DataSource dataSource) {
     final var operation = dataSet.operation();
     final var tableOrderingStrategy = dataSet.tableOrdering();
-    final var conventions = context.configuration().conventions();
-    final var transactionMode = conventions.transactionMode();
-    final var queryTimeout = conventions.queryTimeout();
+    final var execution = context.configuration().execution();
+    final var transactionMode = execution.transactionMode();
+    final var queryTimeout = execution.queryTimeout();
     final var batchSize = resolveBatchSize(dataSet, context);
 
     operationProvider.execute(
@@ -126,15 +126,22 @@ public final class DefaultPreparationSupport implements PreparationSupport {
    * Resolves the effective batch size from the annotation and global defaults.
    *
    * <p>If the annotation specifies a non-negative value, that value is used directly. If the
-   * annotation value is {@code -1} (the default), the global setting from {@link
+   * annotation value is {@link DataSet#UNSET} (the default), the global setting from {@link
    * io.github.seijikohara.dbtester.api.config.OperationDefaults#batchSize()} is used.
    *
    * @param dataSet the DataSet annotation
    * @param context the test context
    * @return the effective batch size (zero or positive)
+   * @throws IllegalArgumentException if batchSize is less than {@link DataSet#UNSET}
    */
   private int resolveBatchSize(final DataSet dataSet, final TestContext context) {
     final var annotationBatchSize = dataSet.batchSize();
+    if (annotationBatchSize < DataSet.UNSET) {
+      throw new IllegalArgumentException(
+          String.format(
+              "batchSize must be %d (use global), 0 (single batch), or positive. Got: %d",
+              DataSet.UNSET, annotationBatchSize));
+    }
     if (annotationBatchSize >= 0) {
       return annotationBatchSize;
     }

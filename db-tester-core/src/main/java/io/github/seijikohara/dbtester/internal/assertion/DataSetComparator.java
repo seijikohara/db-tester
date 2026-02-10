@@ -751,8 +751,8 @@ public class DataSetComparator {
     final var expectedObj = Optional.ofNullable(expected).map(CellValue::value).orElse(null);
     final var actualObj = Optional.ofNullable(actual).map(CellValue::value).orElse(null);
 
-    // Use the strategy's matches method
-    return strategy.matches(expectedObj, actualObj);
+    // Use ComparisonEngine for comparison execution
+    return ComparisonEngine.matches(strategy, expectedObj, actualObj);
   }
 
   /**

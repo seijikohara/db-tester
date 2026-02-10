@@ -1,14 +1,14 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
-import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
+import io.github.seijikohara.dbtester.api.config.VerificationSettings;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
 import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
-import java.util.Map;
 import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
@@ -70,9 +70,10 @@ public class DbTesterJUnitAutoConfiguration {
   @ConditionalOnMissingBean
   public Configuration dbTesterConfiguration(final DbTesterProperties properties) {
     final DbTesterProperties.ConventionProperties conventionProps = properties.getConvention();
+    final DbTesterProperties.VerificationProperties verificationProps =
+        properties.getVerification();
+    final DbTesterProperties.ExecutionProperties executionProps = properties.getExecution();
     final DbTesterProperties.OperationProperties operationProps = properties.getOperation();
-
-    final Map<String, ColumnStrategyMapping> globalColumnStrategies = Map.of();
 
     final ConventionSettings conventions =
         ConventionSettings.builder()
@@ -82,8 +83,20 @@ public class DbTesterJUnitAutoConfiguration {
             .dataFormat(conventionProps.getDataFormat())
             .tableMergeStrategy(conventionProps.getTableMergeStrategy())
             .loadOrderFileName(conventionProps.getLoadOrderFileName())
-            .globalExcludeColumns(conventionProps.getGlobalExcludeColumns())
-            .globalColumnStrategies(globalColumnStrategies)
+            .build();
+
+    final VerificationSettings verification =
+        VerificationSettings.builder()
+            .globalExcludeColumns(verificationProps.getGlobalExcludeColumns())
+            .rowOrdering(verificationProps.getRowOrdering())
+            .retryCount(verificationProps.getRetryCount())
+            .retryDelay(verificationProps.getRetryDelay())
+            .build();
+
+    final ExecutionSettings execution =
+        ExecutionSettings.builder()
+            .queryTimeout(executionProps.getQueryTimeout())
+            .transactionMode(executionProps.getTransactionMode())
             .build();
 
     final OperationDefaults operations =
@@ -96,6 +109,8 @@ public class DbTesterJUnitAutoConfiguration {
 
     return Configuration.builder()
         .conventions(conventions)
+        .verification(verification)
+        .execution(execution)
         .operations(operations)
         .loader(loader)
         .build();

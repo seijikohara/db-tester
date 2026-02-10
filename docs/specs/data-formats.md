@@ -219,7 +219,7 @@ The framework includes rows matching any of the specified scenarios.
 
 ### Scenario Filtering in JSON
 
-Include the scenario marker as the first key in each JSON object:
+Include the scenario marker in each JSON object (any key position is supported; first key is recommended):
 
 ```json
 [
@@ -234,7 +234,7 @@ For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
 
 ### Scenario Filtering in YAML
 
-Include the scenario marker as the first key in each YAML mapping:
+Include the scenario marker in each YAML mapping (any key position is supported; first key is recommended):
 
 ```yaml
 - "[Scenario]": testCreate
@@ -518,7 +518,7 @@ The framework uses Jackson `ObjectMapper` to parse JSON files.
 | Column order | Determined by key order of the first object |
 | Null handling | JSON `null` maps to SQL NULL |
 | Value conversion | All non-null values are converted to strings |
-| Scenario filtering | Supported; include the scenario marker as the first key in each object |
+| Scenario filtering | Supported; include the scenario marker in each object (any key position) |
 
 ### YAML Parsing
 
@@ -531,7 +531,7 @@ The framework uses Jackson YAML module (`YAMLMapper`) to parse YAML files.
 | Null handling | YAML `null` or `~` maps to SQL NULL |
 | Value conversion | All non-null values are converted to strings |
 | Comments | Supported and ignored during parsing |
-| Scenario filtering | Supported; include the scenario marker as the first key in each mapping |
+| Scenario filtering | Supported; include the scenario marker in each mapping (any key position) |
 
 ### Header Row Requirements
 
