@@ -58,7 +58,7 @@ public @interface ExpectedDataSet {
    * position in the result set. This is useful when the database does not guarantee row ordering.
    *
    * <p>If not specified, the value from {@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#rowOrdering()} is used.
+   * io.github.seijikohara.dbtester.api.config.VerificationSettings#rowOrdering()} is used.
    *
    * @return the row ordering strategy, defaulting to {@link RowOrdering#ORDERED}
    * @see RowOrdering
@@ -76,7 +76,7 @@ public @interface ExpectedDataSet {
    *
    * <ul>
    *   <li>{@link #UNSET} ({@code -1}) — use the global setting from {@link
-   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()}
+   *       io.github.seijikohara.dbtester.api.config.VerificationSettings#retryCount()}
    *   <li>{@code 0} — no retries (fail immediately on mismatch)
    *   <li>Positive integer — retry up to N times
    * </ul>
@@ -94,7 +94,7 @@ public @interface ExpectedDataSet {
    *
    * <ul>
    *   <li>{@link #UNSET} ({@code -1}) — use the global setting from {@link
-   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()}
+   *       io.github.seijikohara.dbtester.api.config.VerificationSettings#retryDelay()}
    *   <li>{@code 0} — no delay between retries
    *   <li>Positive integer — wait N milliseconds before retrying
    * </ul>

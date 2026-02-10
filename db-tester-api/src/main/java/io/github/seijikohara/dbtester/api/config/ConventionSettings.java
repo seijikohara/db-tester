@@ -1,9 +1,6 @@
 package io.github.seijikohara.dbtester.api.config;
 
-import java.time.Duration;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -22,11 +19,10 @@ import org.jspecify.annotations.Nullable;
  * var settings = ConventionSettings.builder()
  *     .expectationSuffix("/expected")
  *     .dataFormat(DataFormat.TSV)
- *     .rowOrdering(RowOrdering.UNORDERED)
  *     .build();
  *
  * // Modifying existing settings
- * var modified = settings.withRowOrdering(RowOrdering.UNORDERED);
+ * var modified = settings.withDataFormat(DataFormat.JSON);
  * }</pre>
  */
 public final class ConventionSettings {
@@ -73,27 +69,6 @@ public final class ConventionSettings {
   /** The file name used to specify table loading order. */
   private final String loadOrderFileName;
 
-  /** The column names or glob patterns to exclude from all expectation verifications globally. */
-  private final Set<String> globalExcludeColumns;
-
-  /** The column comparison strategies applied globally. */
-  private final Map<String, ColumnStrategyMapping> globalColumnStrategies;
-
-  /** The default row ordering strategy for expectation verification. */
-  private final RowOrdering rowOrdering;
-
-  /** The maximum time to wait for database queries. */
-  private final @Nullable Duration queryTimeout;
-
-  /** The number of retry attempts for expectation verification. */
-  private final int retryCount;
-
-  /** The delay between retry attempts. */
-  private final Duration retryDelay;
-
-  /** The transaction behavior for database operations. */
-  private final TransactionMode transactionMode;
-
   /**
    * Creates a new instance from the builder.
    *
@@ -106,13 +81,6 @@ public final class ConventionSettings {
     this.dataFormat = builder.dataFormat;
     this.tableMergeStrategy = builder.tableMergeStrategy;
     this.loadOrderFileName = builder.loadOrderFileName;
-    this.globalExcludeColumns = Set.copyOf(builder.globalExcludeColumns);
-    this.globalColumnStrategies = Map.copyOf(builder.globalColumnStrategies);
-    this.rowOrdering = builder.rowOrdering;
-    this.queryTimeout = builder.queryTimeout;
-    this.retryCount = builder.retryCount;
-    this.retryDelay = builder.retryDelay;
-    this.transactionMode = builder.transactionMode;
   }
 
   /**
@@ -129,9 +97,7 @@ public final class ConventionSettings {
    *
    * @return conventions using classpath-relative discovery, {@value #DEFAULT_EXPECTATION_SUFFIX}
    *     suffix, {@value #DEFAULT_SCENARIO_MARKER} marker, AUTO format, UNION_ALL merge strategy,
-   *     {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file, no global exclude columns, no
-   *     global column strategies, ORDERED row ordering, no query timeout, no retry, and
-   *     SINGLE_TRANSACTION transaction mode
+   *     and {@value #DEFAULT_LOAD_ORDER_FILE_NAME} load order file
    */
   public static ConventionSettings standard() {
     return builder().build();
@@ -189,95 +155,6 @@ public final class ConventionSettings {
    */
   public String loadOrderFileName() {
     return loadOrderFileName;
-  }
-
-  /**
-   * Returns the column names or glob patterns to exclude from all expectation verifications
-   * globally.
-   *
-   * <p>Entries containing {@code *} or {@code ?} are treated as glob patterns and matched against
-   * actual column names during verification. Entries without wildcards are treated as exact column
-   * names.
-   *
-   * @return an unmodifiable set of column names or patterns
-   * @deprecated Use {@link VerificationSettings#globalExcludeColumns()} via {@link
-   *     Configuration#verification()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public Set<String> globalExcludeColumns() {
-    return globalExcludeColumns;
-  }
-
-  /**
-   * Returns the column comparison strategies applied globally.
-   *
-   * @return an unmodifiable map of column strategies
-   * @deprecated Use {@link VerificationSettings#globalColumnStrategies()} via {@link
-   *     Configuration#verification()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public Map<String, ColumnStrategyMapping> globalColumnStrategies() {
-    return globalColumnStrategies;
-  }
-
-  /**
-   * Returns the default row ordering strategy for expectation verification.
-   *
-   * @return the row ordering strategy
-   * @deprecated Use {@link VerificationSettings#rowOrdering()} via {@link
-   *     Configuration#verification()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public RowOrdering rowOrdering() {
-    return rowOrdering;
-  }
-
-  /**
-   * Returns the maximum time to wait for database queries.
-   *
-   * @return the query timeout duration, or null for no timeout
-   * @deprecated Use {@link ExecutionSettings#queryTimeout()} via {@link Configuration#execution()}
-   *     instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public @Nullable Duration queryTimeout() {
-    return queryTimeout;
-  }
-
-  /**
-   * Returns the number of retry attempts for expectation verification.
-   *
-   * @return the retry count (0 means no retry)
-   * @deprecated Use {@link VerificationSettings#retryCount()} via {@link
-   *     Configuration#verification()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public int retryCount() {
-    return retryCount;
-  }
-
-  /**
-   * Returns the delay between retry attempts.
-   *
-   * @return the retry delay duration
-   * @deprecated Use {@link VerificationSettings#retryDelay()} via {@link
-   *     Configuration#verification()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public Duration retryDelay() {
-    return retryDelay;
-  }
-
-  /**
-   * Returns the transaction behavior for database operations.
-   *
-   * @return the transaction mode
-   * @deprecated Use {@link ExecutionSettings#transactionMode()} via {@link
-   *     Configuration#execution()} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public TransactionMode transactionMode() {
-    return transactionMode;
   }
 
   /**
@@ -341,96 +218,6 @@ public final class ConventionSettings {
   }
 
   /**
-   * Creates a new ConventionSettings with the specified global exclude columns.
-   *
-   * @param globalExcludeColumns the column names to exclude globally
-   * @return a new ConventionSettings with the specified global exclude columns
-   * @deprecated Use {@link VerificationSettings#withGlobalExcludeColumns(Set)} instead. Removed in
-   *     2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
-    return toBuilder().globalExcludeColumns(globalExcludeColumns).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified global column strategies.
-   *
-   * @param globalColumnStrategies the column strategies to apply globally
-   * @return a new ConventionSettings with the specified global column strategies
-   * @deprecated Use {@link VerificationSettings#withGlobalColumnStrategies(Map)} instead. Removed
-   *     in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withGlobalColumnStrategies(
-      final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
-    return toBuilder().globalColumnStrategies(globalColumnStrategies).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified row ordering strategy.
-   *
-   * @param rowOrdering the row ordering strategy to use
-   * @return a new ConventionSettings with the specified row ordering
-   * @deprecated Use {@link VerificationSettings#withRowOrdering(RowOrdering)} instead. Removed in
-   *     2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withRowOrdering(final RowOrdering rowOrdering) {
-    return toBuilder().rowOrdering(rowOrdering).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified query timeout.
-   *
-   * @param queryTimeout the query timeout duration, or null for no timeout
-   * @return a new ConventionSettings with the specified query timeout
-   * @deprecated Use {@link ExecutionSettings#withQueryTimeout(Duration)} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withQueryTimeout(final @Nullable Duration queryTimeout) {
-    return toBuilder().queryTimeout(queryTimeout).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified retry count.
-   *
-   * @param retryCount the number of retry attempts (0 for no retry)
-   * @return a new ConventionSettings with the specified retry count
-   * @throws IllegalArgumentException if retryCount is negative
-   * @deprecated Use {@link VerificationSettings#withRetryCount(int)} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withRetryCount(final int retryCount) {
-    return toBuilder().retryCount(retryCount).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified retry delay.
-   *
-   * @param retryDelay the delay between retry attempts
-   * @return a new ConventionSettings with the specified retry delay
-   * @deprecated Use {@link VerificationSettings#withRetryDelay(Duration)} instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withRetryDelay(final Duration retryDelay) {
-    return toBuilder().retryDelay(retryDelay).build();
-  }
-
-  /**
-   * Creates a new ConventionSettings with the specified transaction mode.
-   *
-   * @param transactionMode the transaction mode to use
-   * @return a new ConventionSettings with the specified transaction mode
-   * @deprecated Use {@link ExecutionSettings#withTransactionMode(TransactionMode)} instead. Removed
-   *     in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public ConventionSettings withTransactionMode(final TransactionMode transactionMode) {
-    return toBuilder().transactionMode(transactionMode).build();
-  }
-
-  /**
    * Creates a new builder initialized with the values from this instance.
    *
    * @return a new builder with values copied from this instance
@@ -442,14 +229,7 @@ public final class ConventionSettings {
         .scenarioMarker(this.scenarioMarker)
         .dataFormat(this.dataFormat)
         .tableMergeStrategy(this.tableMergeStrategy)
-        .loadOrderFileName(this.loadOrderFileName)
-        .globalExcludeColumns(this.globalExcludeColumns)
-        .globalColumnStrategies(this.globalColumnStrategies)
-        .rowOrdering(this.rowOrdering)
-        .queryTimeout(this.queryTimeout)
-        .retryCount(this.retryCount)
-        .retryDelay(this.retryDelay)
-        .transactionMode(this.transactionMode);
+        .loadOrderFileName(this.loadOrderFileName);
   }
 
   @Override
@@ -465,14 +245,7 @@ public final class ConventionSettings {
         && Objects.equals(scenarioMarker, other.scenarioMarker)
         && dataFormat == other.dataFormat
         && tableMergeStrategy == other.tableMergeStrategy
-        && Objects.equals(loadOrderFileName, other.loadOrderFileName)
-        && Objects.equals(globalExcludeColumns, other.globalExcludeColumns)
-        && Objects.equals(globalColumnStrategies, other.globalColumnStrategies)
-        && rowOrdering == other.rowOrdering
-        && Objects.equals(queryTimeout, other.queryTimeout)
-        && retryCount == other.retryCount
-        && Objects.equals(retryDelay, other.retryDelay)
-        && transactionMode == other.transactionMode;
+        && Objects.equals(loadOrderFileName, other.loadOrderFileName);
   }
 
   @Override
@@ -483,14 +256,7 @@ public final class ConventionSettings {
         scenarioMarker,
         dataFormat,
         tableMergeStrategy,
-        loadOrderFileName,
-        globalExcludeColumns,
-        globalColumnStrategies,
-        rowOrdering,
-        queryTimeout,
-        retryCount,
-        retryDelay,
-        transactionMode);
+        loadOrderFileName);
   }
 
   @Override
@@ -508,20 +274,6 @@ public final class ConventionSettings {
         + tableMergeStrategy
         + ", loadOrderFileName="
         + loadOrderFileName
-        + ", globalExcludeColumns="
-        + globalExcludeColumns
-        + ", globalColumnStrategies="
-        + globalColumnStrategies
-        + ", rowOrdering="
-        + rowOrdering
-        + ", queryTimeout="
-        + queryTimeout
-        + ", retryCount="
-        + retryCount
-        + ", retryDelay="
-        + retryDelay
-        + ", transactionMode="
-        + transactionMode
         + ']';
   }
 
@@ -545,27 +297,6 @@ public final class ConventionSettings {
 
     /** The file name used to specify table loading order. */
     private String loadOrderFileName = DEFAULT_LOAD_ORDER_FILE_NAME;
-
-    /** The column names or glob patterns to exclude from all expectation verifications globally. */
-    private Set<String> globalExcludeColumns = Set.of();
-
-    /** The column comparison strategies applied globally. */
-    private Map<String, ColumnStrategyMapping> globalColumnStrategies = Map.of();
-
-    /** The default row ordering strategy for expectation verification. */
-    private RowOrdering rowOrdering = RowOrdering.ORDERED;
-
-    /** The maximum time to wait for database queries. */
-    private @Nullable Duration queryTimeout = null;
-
-    /** The number of retry attempts for expectation verification. */
-    private int retryCount = 0;
-
-    /** The delay between retry attempts. */
-    private Duration retryDelay = Duration.ofMillis(100);
-
-    /** The transaction behavior for database operations. */
-    private TransactionMode transactionMode = TransactionMode.SINGLE_TRANSACTION;
 
     /** Creates a new builder with default values. */
     public Builder() {}
@@ -633,115 +364,6 @@ public final class ConventionSettings {
      */
     public Builder loadOrderFileName(final String loadOrderFileName) {
       this.loadOrderFileName = Objects.requireNonNull(loadOrderFileName, "loadOrderFileName");
-      return this;
-    }
-
-    /**
-     * Sets the column names or glob patterns to exclude from all expectation verifications
-     * globally.
-     *
-     * <p>Entries containing {@code *} or {@code ?} are treated as glob patterns. Example: {@code
-     * Set.of("*_AT", "*_BY", "VERSION")} excludes all columns ending with {@code _AT} or {@code
-     * _BY}, and the exact column {@code VERSION}.
-     *
-     * @param globalExcludeColumns the column names or patterns to exclude
-     * @return this builder
-     * @deprecated Use {@link VerificationSettings.Builder#globalExcludeColumns(Set)} instead.
-     *     Removed in 2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder globalExcludeColumns(final Set<String> globalExcludeColumns) {
-      this.globalExcludeColumns =
-          Objects.requireNonNull(globalExcludeColumns, "globalExcludeColumns");
-      return this;
-    }
-
-    /**
-     * Sets the column comparison strategies applied globally.
-     *
-     * @param globalColumnStrategies the column strategies
-     * @return this builder
-     * @deprecated Use {@link VerificationSettings.Builder#globalColumnStrategies(Map)} instead.
-     *     Removed in 2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder globalColumnStrategies(
-        final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
-      this.globalColumnStrategies =
-          Objects.requireNonNull(globalColumnStrategies, "globalColumnStrategies");
-      return this;
-    }
-
-    /**
-     * Sets the default row ordering strategy for expectation verification.
-     *
-     * @param rowOrdering the row ordering strategy
-     * @return this builder
-     * @deprecated Use {@link VerificationSettings.Builder#rowOrdering(RowOrdering)} instead.
-     *     Removed in 2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder rowOrdering(final RowOrdering rowOrdering) {
-      this.rowOrdering = Objects.requireNonNull(rowOrdering, "rowOrdering");
-      return this;
-    }
-
-    /**
-     * Sets the maximum time to wait for database queries.
-     *
-     * @param queryTimeout the query timeout duration, or null for no timeout
-     * @return this builder
-     * @deprecated Use {@link ExecutionSettings.Builder#queryTimeout(Duration)} instead. Removed in
-     *     2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder queryTimeout(final @Nullable Duration queryTimeout) {
-      this.queryTimeout = queryTimeout;
-      return this;
-    }
-
-    /**
-     * Sets the number of retry attempts for expectation verification.
-     *
-     * @param retryCount the retry count (0 means no retry)
-     * @return this builder
-     * @throws IllegalArgumentException if retryCount is negative
-     * @deprecated Use {@link VerificationSettings.Builder#retryCount(int)} instead. Removed in 2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder retryCount(final int retryCount) {
-      if (retryCount < 0) {
-        throw new IllegalArgumentException("retryCount must not be negative");
-      }
-      this.retryCount = retryCount;
-      return this;
-    }
-
-    /**
-     * Sets the delay between retry attempts.
-     *
-     * @param retryDelay the retry delay duration
-     * @return this builder
-     * @deprecated Use {@link VerificationSettings.Builder#retryDelay(Duration)} instead. Removed in
-     *     2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder retryDelay(final Duration retryDelay) {
-      this.retryDelay = Objects.requireNonNull(retryDelay, "retryDelay");
-      return this;
-    }
-
-    /**
-     * Sets the transaction behavior for database operations.
-     *
-     * @param transactionMode the transaction mode
-     * @return this builder
-     * @deprecated Use {@link ExecutionSettings.Builder#transactionMode(TransactionMode)} instead.
-     *     Removed in 2.0.
-     */
-    @Deprecated(since = "1.1", forRemoval = true)
-    public Builder transactionMode(final TransactionMode transactionMode) {
-      this.transactionMode = Objects.requireNonNull(transactionMode, "transactionMode");
       return this;
     }
 

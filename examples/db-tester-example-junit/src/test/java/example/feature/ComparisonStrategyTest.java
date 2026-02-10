@@ -49,8 +49,6 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link ComparisonStrategy#JSON_EQUIVALENT} - JSON structural comparison
  *   <li>{@link ComparisonStrategy#NOT_NULL} - Only verify the value is not null
  *   <li>{@link ComparisonStrategy#regex(String)} - Match against a regular expression
- *   <li>{@link ComparisonStrategy#contains()} - Substring containment check
- *   <li>{@link ComparisonStrategy#range(double, double)} - Numeric range verification
  * </ul>
  *
  * <p>ComparisonStrategy is used with programmatic assertions via {@link DatabaseAssertion} by
@@ -516,109 +514,6 @@ final class ComparisonStrategyTest {
               DatabaseAssertion.assertEqualsWithStrategies(
                   expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
       logger.info("JSON_EQUIVALENT mismatch test completed");
-    }
-  }
-
-  /** Tests for CONTAINS comparison strategy. */
-  @Nested
-  @DisplayName("CONTAINS Strategy Tests")
-  @SuppressWarnings("removal")
-  class ContainsStrategyTests {
-
-    /** Creates ContainsStrategyTests instance. */
-    ContainsStrategyTests() {}
-
-    /** Verifies CONTAINS strategy matches when actual contains expected substring. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should pass when actual contains expected value as substring")
-    void shouldPassWhenActualContainsExpectedSubstring() {
-      // Given
-      logger.info("Testing CONTAINS strategy");
-      final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "important");
-      final var actualTable =
-          createTable(
-              "COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "This is an important message");
-
-      // When & Then
-      assertDoesNotThrow(
-          () ->
-              DatabaseAssertion.assertEqualsWithStrategies(
-                  expectedTable, actualTable, ColumnStrategyMapping.contains("DESCRIPTION")));
-      logger.info("CONTAINS strategy test completed");
-    }
-
-    /** Verifies CONTAINS strategy fails when substring not found. */
-    @Test
-    @Tag("error")
-    @DisplayName("should fail when actual does not contain expected substring")
-    void shouldFailWhenSubstringNotFound() {
-      // Given
-      logger.info("Testing CONTAINS strategy with missing substring");
-      final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "missing");
-      final var actualTable =
-          createTable("COMPARISON_TEST", List.of("ID", "DESCRIPTION"), 1, "This is a message");
-
-      // When & Then
-      assertThrows(
-          AssertionError.class,
-          () ->
-              DatabaseAssertion.assertEqualsWithStrategies(
-                  expectedTable, actualTable, ColumnStrategyMapping.contains("DESCRIPTION")));
-      logger.info("CONTAINS strategy mismatch test completed");
-    }
-  }
-
-  /** Tests for RANGE comparison strategy. */
-  @Nested
-  @DisplayName("RANGE Strategy Tests")
-  @SuppressWarnings("removal")
-  class RangeStrategyTests {
-
-    /** Creates RangeStrategyTests instance. */
-    RangeStrategyTests() {}
-
-    /** Verifies RANGE strategy passes when value is within range. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should pass when value is within specified range")
-    void shouldPassWhenValueIsWithinRange() {
-      // Given
-      logger.info("Testing RANGE strategy with value in range");
-      final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, "ignored");
-      final var actualTable =
-          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("75.50"));
-
-      // When & Then
-      assertDoesNotThrow(
-          () ->
-              DatabaseAssertion.assertEqualsWithStrategies(
-                  expectedTable, actualTable, ColumnStrategyMapping.range("AMOUNT", 0.0, 100.0)));
-      logger.info("RANGE strategy in-range test completed");
-    }
-
-    /** Verifies RANGE strategy fails when value is outside range. */
-    @Test
-    @Tag("error")
-    @DisplayName("should fail when value is outside specified range")
-    void shouldFailWhenValueIsOutsideRange() {
-      // Given
-      logger.info("Testing RANGE strategy with value out of range");
-      final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, "ignored");
-      final var actualTable =
-          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("150.00"));
-
-      // When & Then
-      assertThrows(
-          AssertionError.class,
-          () ->
-              DatabaseAssertion.assertEqualsWithStrategies(
-                  expectedTable, actualTable, ColumnStrategyMapping.range("AMOUNT", 0.0, 100.0)));
-      logger.info("RANGE strategy out-of-range test completed");
     }
   }
 

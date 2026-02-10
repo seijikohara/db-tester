@@ -8,7 +8,7 @@ This directory contains example tests demonstrating the features of the DB Teste
 - **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
 - **Data Formats** - CSV, TSV, JSON, and YAML file format support
 - **Table Merge Strategies** - FIRST, LAST, UNION, UNION_ALL merge behaviors
-- **Comparison Strategies** - STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX, CONTAINS, RANGE comparisons
+- **Comparison Strategies** - STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX comparisons
 - **Property-Based Configuration** - Spring Boot property binding for DB Tester settings
 
 ## Prerequisites

@@ -210,23 +210,6 @@ void shouldStoreJsonMetadata() throws SQLException {
 }
 ```
 
-### 範囲と包含の検証
-
-```java
-@Test
-@DataSet
-@ExpectedDataSet(sources = @DataSetSource(
-    columnStrategies = {
-        @ColumnStrategy(name = "SCORE", strategy = Strategy.NUMERIC),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.REGEX, pattern = ".*expected.*")
-    }
-))
-void shouldValidateScoreAndDescription() throws SQLException {
-    // SCORE: 型を考慮した数値比較
-    // DESCRIPTION: 実際の値が正規表現パターンに一致することを検証
-}
-```
-
 ### 戦略の優先順位
 
 フレームワークは以下の順序で戦略を適用します:

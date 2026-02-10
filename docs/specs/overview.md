@@ -42,7 +42,7 @@ The expected data set phase executes after each test method. The framework perfo
 3. Compares expected and actual states using configurable comparison strategies
 4. Reports differences with structured error messages
 
-Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`. The `CONTAINS` and `RANGE` strategies are deprecated; use `REGEX` or programmatic assertions instead.
+Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`.
 
 ### Convention-Based Discovery
 

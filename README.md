@@ -386,8 +386,6 @@ Override the default strict comparison for specific columns using `@ColumnStrate
 | `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) |
 | `NOT_NULL` | Verifies value is not null |
 | `REGEX` | Pattern matching (requires `pattern` attribute) |
-| `CONTAINS` | Substring containment check (uses `options` for custom substring) |
-| `RANGE` | Numeric range verification (requires `options` with `min=N,max=M`) |
 
 **Per-dataset strategy** via `@DataSetSource.columnStrategies`:
 

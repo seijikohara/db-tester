@@ -4,12 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
-import java.util.Map;
-import java.util.Set;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -17,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 /** Unit tests for {@link ConventionSettings}. */
 @DisplayName("ConventionSettings")
-@SuppressWarnings("removal")
 class ConventionSettingsTest {
 
   /** Tests for the ConventionSettings class. */
@@ -45,13 +40,6 @@ class ConventionSettingsTest {
       assertEquals(DataFormat.AUTO, settings.dataFormat());
       assertEquals(TableMergeStrategy.UNION_ALL, settings.tableMergeStrategy());
       assertEquals(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME, settings.loadOrderFileName());
-      assertTrue(settings.globalExcludeColumns().isEmpty());
-      assertTrue(settings.globalColumnStrategies().isEmpty());
-      assertEquals(RowOrdering.ORDERED, settings.rowOrdering());
-      assertNull(settings.queryTimeout());
-      assertEquals(0, settings.retryCount());
-      assertEquals(Duration.ofMillis(100), settings.retryDelay());
-      assertEquals(TransactionMode.SINGLE_TRANSACTION, settings.transactionMode());
     }
   }
 
@@ -133,91 +121,6 @@ class ConventionSettingsTest {
 
       assertEquals("order.txt", settings.loadOrderFileName());
     }
-
-    /** Verifies that builder builds settings with global exclude columns. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with global exclude columns")
-    void buildsSettingsWithGlobalExcludeColumns() {
-      final var excludeColumns = Set.of("created_at", "updated_at");
-      final var settings =
-          ConventionSettings.builder().globalExcludeColumns(excludeColumns).build();
-
-      assertEquals(excludeColumns, settings.globalExcludeColumns());
-    }
-
-    /** Verifies that builder builds settings with global column strategies. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with global column strategies")
-    void buildsSettingsWithGlobalColumnStrategies() {
-      final var strategies = Map.of("timestamp", ColumnStrategyMapping.ignore("timestamp"));
-      final var settings = ConventionSettings.builder().globalColumnStrategies(strategies).build();
-
-      assertEquals(1, settings.globalColumnStrategies().size());
-    }
-
-    /** Verifies that builder builds settings with custom row ordering. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with custom row ordering")
-    void buildsSettingsWithCustomRowOrdering() {
-      final var settings = ConventionSettings.builder().rowOrdering(RowOrdering.UNORDERED).build();
-
-      assertEquals(RowOrdering.UNORDERED, settings.rowOrdering());
-    }
-
-    /** Verifies that builder builds settings with custom query timeout. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with custom query timeout")
-    void buildsSettingsWithCustomQueryTimeout() {
-      final var timeout = Duration.ofSeconds(30);
-      final var settings = ConventionSettings.builder().queryTimeout(timeout).build();
-
-      assertEquals(timeout, settings.queryTimeout());
-    }
-
-    /** Verifies that builder builds settings with custom retry count. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with custom retry count")
-    void buildsSettingsWithCustomRetryCount() {
-      final var settings = ConventionSettings.builder().retryCount(3).build();
-
-      assertEquals(3, settings.retryCount());
-    }
-
-    /** Verifies that builder throws exception for negative retry count. */
-    @Test
-    @Tag("exceptional")
-    @DisplayName("throws exception for negative retry count")
-    void throwsExceptionForNegativeRetryCount() {
-      assertThrows(
-          IllegalArgumentException.class, () -> ConventionSettings.builder().retryCount(-1));
-    }
-
-    /** Verifies that builder builds settings with custom retry delay. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with custom retry delay")
-    void buildsSettingsWithCustomRetryDelay() {
-      final var delay = Duration.ofSeconds(1);
-      final var settings = ConventionSettings.builder().retryDelay(delay).build();
-
-      assertEquals(delay, settings.retryDelay());
-    }
-
-    /** Verifies that builder builds settings with custom transaction mode. */
-    @Test
-    @Tag("normal")
-    @DisplayName("builds settings with custom transaction mode")
-    void buildsSettingsWithCustomTransactionMode() {
-      final var settings =
-          ConventionSettings.builder().transactionMode(TransactionMode.AUTO_COMMIT).build();
-
-      assertEquals(TransactionMode.AUTO_COMMIT, settings.transactionMode());
-    }
   }
 
   /** Tests for with* methods. */
@@ -295,87 +198,6 @@ class ConventionSettingsTest {
 
       assertEquals("custom.txt", modified.loadOrderFileName());
     }
-
-    /** Verifies that withGlobalExcludeColumns creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withGlobalExcludeColumns creates new instance")
-    void withGlobalExcludeColumnsCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var columns = Set.of("id", "version");
-      final var modified = original.withGlobalExcludeColumns(columns);
-
-      assertEquals(columns, modified.globalExcludeColumns());
-    }
-
-    /** Verifies that withGlobalColumnStrategies creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withGlobalColumnStrategies creates new instance")
-    void withGlobalColumnStrategiesCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var strategies = Map.of("col", ColumnStrategyMapping.ignore("col"));
-      final var modified = original.withGlobalColumnStrategies(strategies);
-
-      assertEquals(1, modified.globalColumnStrategies().size());
-    }
-
-    /** Verifies that withRowOrdering creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withRowOrdering creates new instance")
-    void withRowOrderingCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var modified = original.withRowOrdering(RowOrdering.UNORDERED);
-
-      assertEquals(RowOrdering.UNORDERED, modified.rowOrdering());
-    }
-
-    /** Verifies that withQueryTimeout creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withQueryTimeout creates new instance")
-    void withQueryTimeoutCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var timeout = Duration.ofMinutes(1);
-      final var modified = original.withQueryTimeout(timeout);
-
-      assertEquals(timeout, modified.queryTimeout());
-    }
-
-    /** Verifies that withRetryCount creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withRetryCount creates new instance")
-    void withRetryCountCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var modified = original.withRetryCount(5);
-
-      assertEquals(5, modified.retryCount());
-    }
-
-    /** Verifies that withRetryDelay creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withRetryDelay creates new instance")
-    void withRetryDelayCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var delay = Duration.ofMillis(500);
-      final var modified = original.withRetryDelay(delay);
-
-      assertEquals(delay, modified.retryDelay());
-    }
-
-    /** Verifies that withTransactionMode creates new instance. */
-    @Test
-    @Tag("normal")
-    @DisplayName("withTransactionMode creates new instance")
-    void withTransactionModeCreatesNewInstance() {
-      final var original = ConventionSettings.standard();
-      final var modified = original.withTransactionMode(TransactionMode.NONE);
-
-      assertEquals(TransactionMode.NONE, modified.transactionMode());
-    }
   }
 
   /** Tests for toBuilder() method. */
@@ -392,11 +214,7 @@ class ConventionSettingsTest {
     @DisplayName("creates builder with current values")
     void createsBuilderWithCurrentValues() {
       final var original =
-          ConventionSettings.builder()
-              .baseDirectory("/test")
-              .dataFormat(DataFormat.TSV)
-              .retryCount(2)
-              .build();
+          ConventionSettings.builder().baseDirectory("/test").dataFormat(DataFormat.TSV).build();
 
       final var rebuilt = original.toBuilder().build();
 
@@ -408,12 +226,12 @@ class ConventionSettingsTest {
     @Tag("normal")
     @DisplayName("allows modification of copied values")
     void allowsModificationOfCopiedValues() {
-      final var original = ConventionSettings.builder().retryCount(1).build();
+      final var original = ConventionSettings.builder().dataFormat(DataFormat.CSV).build();
 
-      final var modified = original.toBuilder().retryCount(5).build();
+      final var modified = original.toBuilder().dataFormat(DataFormat.TSV).build();
 
-      assertEquals(1, original.retryCount());
-      assertEquals(5, modified.retryCount());
+      assertEquals(DataFormat.CSV, original.dataFormat());
+      assertEquals(DataFormat.TSV, modified.dataFormat());
     }
   }
 
@@ -442,7 +260,7 @@ class ConventionSettingsTest {
     @DisplayName("equals returns false for different values")
     void equalsReturnsFalseForDifferentValues() {
       final var settings1 = ConventionSettings.standard();
-      final var settings2 = ConventionSettings.builder().retryCount(5).build();
+      final var settings2 = ConventionSettings.builder().dataFormat(DataFormat.TSV).build();
 
       assertNotEquals(settings1, settings2);
     }

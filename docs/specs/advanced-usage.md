@@ -211,23 +211,6 @@ void shouldStoreJsonMetadata() throws SQLException {
 }
 ```
 
-### Range and Containment Verification
-
-```java
-@Test
-@DataSet
-@ExpectedDataSet(sources = @DataSetSource(
-    columnStrategies = {
-        @ColumnStrategy(name = "SCORE", strategy = Strategy.NUMERIC),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.REGEX, pattern = ".*expected.*")
-    }
-))
-void shouldValidateScoreAndDescription() throws SQLException {
-    // SCORE: type-aware numeric comparison
-    // DESCRIPTION: actual value must match the regex pattern
-}
-```
-
 ### Strategy Precedence
 
 The framework applies strategies in this order:
