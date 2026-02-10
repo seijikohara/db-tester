@@ -1,4 +1,4 @@
-/** Tests for JUnit 5 SPI implementations for DB Tester. */
+/** Tests for JUnit 6 SPI implementations for DB Tester. */
 @NullMarked
 package io.github.seijikohara.dbtester.junit.jupiter.spi;
 

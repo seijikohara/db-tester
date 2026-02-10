@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 }
 
-description = "DB Tester Example - JUnit 5 Spring Boot Starter Integration"
+description = "DB Tester Example - JUnit 6 Spring Boot Starter Integration"
 
 // Example projects are not published to Maven Central
 
