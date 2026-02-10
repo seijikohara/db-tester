@@ -20,17 +20,17 @@ The `db-tester-api` module exports packages organized into three layers by inten
 The User API contains the types that most users interact with directly:
 
 - **`annotation`** — `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`, `@ColumnStrategy`
+- **`assertion`** — `DatabaseAssertion`, `DatabaseQueryAssertion` for programmatic database verification
 - **`config`** — `Configuration`, `ConventionSettings`, `DataSourceRegistry`, `ExpectationContext`
 - **`operation`** — `Operation` enum (`CLEAN_INSERT`, `INSERT`, `TRUNCATE_INSERT`, etc.)
 - **`exception`** — Framework exceptions (passive consumption via catch/inspect)
+- **`export`** — `DataSetExporter` for exporting database content to files
 - **`preparation`** — `DatabasePreparation` for programmatic test data setup
 
 ### Advanced API
 
-The Advanced API provides programmatic access to datasets and assertions:
+The Advanced API provides programmatic access to datasets and type-safe value objects:
 
-- **`assertion`** — `DatabaseAssertion` for fine-grained database state verification
-- **`export`** — `DataSetExporter` for exporting database content to files
 - **`domain`** — Type-safe value objects (`CellValue`, `TableName`, `ColumnName`, `ComparisonStrategy`)
 - **`dataset`** — `TableSet`, `Table`, `Row` interfaces for dataset representation
 
@@ -592,8 +592,7 @@ Static facade for programmatic database assertions. This utility class delegates
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | Asserts table in table sets, ignoring specified columns |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | Asserts tables with column-specific comparison strategies |
-| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table set |
-| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
+| `assertEqualsByQuery(...)` | **Deprecated since 1.1** — Use `DatabaseQueryAssertion` instead |
 
 **Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
 
@@ -611,14 +610,45 @@ DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expec
 // Ignoring specific columns
 DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
 
-// Comparing SQL query results
-DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+// Comparing SQL query results (use DatabaseQueryAssertion instead)
+DatabaseQueryAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
 
 // Using column-specific comparison strategies
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
     ColumnStrategyMapping.ignore("CREATED_AT"),
     ColumnStrategyMapping.caseInsensitive("EMAIL"),
     ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"));
+```
+
+### DatabaseQueryAssertion
+
+Static facade for query-based database assertions. This utility class executes SQL queries and compares results with expected datasets. It separates query execution concerns from pure data comparison in `DatabaseAssertion`.
+
+**Location**: `io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion`
+
+**Type**: Utility class (non-instantiable, static methods only)
+
+**Static Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table set |
+| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
+
+**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
+
+**Example**:
+
+```java
+// Compare SQL query results against expected dataset
+DatabaseQueryAssertion.assertEqualsByQuery(
+    expectedTableSet, dataSource, "USERS",
+    "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+
+// With columns to ignore
+DatabaseQueryAssertion.assertEqualsByQuery(
+    expectedTableSet, dataSource, "USERS",
+    "SELECT * FROM USERS", "CREATED_AT", "UPDATED_AT");
 ```
 
 ### AssertionFailureHandler

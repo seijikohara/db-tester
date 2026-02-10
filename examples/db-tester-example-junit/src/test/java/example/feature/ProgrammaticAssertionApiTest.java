@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
+import io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion;
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
@@ -41,11 +42,11 @@ import org.slf4j.LoggerFactory;
  *       for complex scenarios where annotation-based testing is insufficient
  * </ul>
  *
- * <p>Key programmatic API features available in {@link DatabaseAssertion}:
+ * <p>Key programmatic API features:
  *
  * <ul>
- *   <li>{@link DatabaseAssertion#assertEqualsByQuery} - Compare expected data against SQL query
- *       results
+ *   <li>{@link DatabaseQueryAssertion#assertEqualsByQuery} - Compare expected data against SQL
+ *       query results
  *   <li>{@link DatabaseAssertion#assertEquals} - Compare two datasets or tables directly
  *   <li>{@link DatabaseAssertion#assertEqualsIgnoreColumns} - Compare datasets ignoring specific
  *       columns
@@ -256,7 +257,7 @@ final class ProgrammaticAssertionApiTest {
   }
 
   /**
-   * Demonstrates {@link DatabaseAssertion#assertEqualsByQuery} for comparing SQL query results
+   * Demonstrates {@link DatabaseQueryAssertion#assertEqualsByQuery} for comparing SQL query results
    * against expected data.
    *
    * <p>This test shows how to use the programmatic API to validate query results against
@@ -303,8 +304,8 @@ final class ProgrammaticAssertionApiTest {
             List.of(columnId, columnValue, columnNumber),
             List.of(row1, row2));
 
-    // Use DatabaseAssertion.assertEqualsByQuery to validate query results
-    DatabaseAssertion.assertEqualsByQuery(
+    // Use DatabaseQueryAssertion.assertEqualsByQuery to validate query results
+    DatabaseQueryAssertion.assertEqualsByQuery(
         expectedTable,
         dataSource,
         "QUERY_RESULT",
@@ -506,8 +507,8 @@ final class ProgrammaticAssertionApiTest {
             List.of("ID", "COLUMN1", "COLUMN2"),
             List.of(List.of(1, "Value1", 100), List.of(2, "Value2", 200)));
 
-    // Use DatabaseAssertion.assertEqualsByQuery to validate query results
-    DatabaseAssertion.assertEqualsByQuery(
+    // Use DatabaseQueryAssertion.assertEqualsByQuery to validate query results
+    DatabaseQueryAssertion.assertEqualsByQuery(
         expectedTable,
         dataSource,
         "QUERY_RESULT",
@@ -517,8 +518,8 @@ final class ProgrammaticAssertionApiTest {
   }
 
   /**
-   * Demonstrates using {@link DatabaseAssertion#assertEqualsByQuery} with TableSet for multi-table
-   * scenarios.
+   * Demonstrates using {@link DatabaseQueryAssertion#assertEqualsByQuery} with TableSet for
+   * multi-table scenarios.
    *
    * <p>This test shows how to use TableSet-based assertions when working with expected data that
    * contains multiple tables. The query results are compared against a specific table within the
@@ -557,7 +558,7 @@ final class ProgrammaticAssertionApiTest {
     final var expectedTableSet = TableSet.of(expectedTable);
 
     // Use TableSet-based assertEqualsByQuery
-    DatabaseAssertion.assertEqualsByQuery(
+    DatabaseQueryAssertion.assertEqualsByQuery(
         expectedTableSet, dataSource, "TABLE1", "SELECT ID, COLUMN1 FROM TABLE1 ORDER BY ID");
 
     logger.info("TableSet-based assertEqualsByQuery validation completed");

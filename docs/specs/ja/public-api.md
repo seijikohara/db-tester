@@ -613,8 +613,7 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | 指定カラムを除外してテーブルセット内のテーブルを検証 |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | カラムごとの比較戦略でテーブルを検証 |
-| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルセットと検証 |
-| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
+| `assertEqualsByQuery(...)` | **1.1で非推奨** — 代わりに`DatabaseQueryAssertion`を使用 |
 
 **可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
 
@@ -632,14 +631,45 @@ DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expec
 // 特定カラムを除外
 DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
 
-// SQLクエリ結果の比較
-DatabaseAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+// SQLクエリ結果の比較（代わりにDatabaseQueryAssertionを使用）
+DatabaseQueryAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
 
 // カラムごとの比較戦略を使用
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
     ColumnStrategyMapping.ignore("CREATED_AT"),
     ColumnStrategyMapping.caseInsensitive("EMAIL"),
     ColumnStrategyMapping.regex("TOKEN", "[a-f0-9-]{36}"));
+```
+
+### DatabaseQueryAssertion
+
+クエリベースのデータベースアサーションのための静的ファサードです。SQLクエリを実行し、結果を期待データセットと比較します。`DatabaseAssertion`の純粋なデータ比較からクエリ実行の関心事を分離します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion`
+
+**型**: ユーティリティクラス（インスタンス化不可、静的メソッドのみ）
+
+**静的メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルセットと検証 |
+| `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
+
+**可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
+
+**例**:
+
+```java
+// SQLクエリ結果を期待データセットと比較
+DatabaseQueryAssertion.assertEqualsByQuery(
+    expectedTableSet, dataSource, "USERS",
+    "SELECT * FROM USERS WHERE status = 'ACTIVE'");
+
+// 除外カラム指定付き
+DatabaseQueryAssertion.assertEqualsByQuery(
+    expectedTableSet, dataSource, "USERS",
+    "SELECT * FROM USERS", "CREATED_AT", "UPDATED_AT");
 ```
 
 ### AssertionFailureHandler
