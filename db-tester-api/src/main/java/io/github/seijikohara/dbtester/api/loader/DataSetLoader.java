@@ -56,11 +56,11 @@ public interface DataSetLoader {
    *   <li>Column exclusion information from annotations ({@link
    *       io.github.seijikohara.dbtester.api.annotation.DataSetSource#excludeColumns()}) and global
    *       settings ({@link
-   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#globalExcludeColumns()})
+   *       io.github.seijikohara.dbtester.api.config.VerificationSettings#globalExcludeColumns()})
    *   <li>Column comparison strategies from annotations ({@link
    *       io.github.seijikohara.dbtester.api.annotation.DataSetSource#columnStrategies()}) and
    *       global settings ({@link
-   *       io.github.seijikohara.dbtester.api.config.ConventionSettings#globalColumnStrategies()})
+   *       io.github.seijikohara.dbtester.api.config.VerificationSettings#globalColumnStrategies()})
    * </ul>
    *
    * <p>The default implementation wraps results from {@link #loadExpectationDataSets(TestContext)}
@@ -71,10 +71,10 @@ public interface DataSetLoader {
    * @return immutable list of expected table sets with column comparison configuration
    */
   default List<ExpectedTableSet> loadExpectationDataSetsWithExclusions(final TestContext context) {
-    final var conventions = context.configuration().conventions();
-    final var globalExcludeColumns = conventions.globalExcludeColumns();
+    final var verification = context.configuration().verification();
+    final var globalExcludeColumns = verification.globalExcludeColumns();
     final Map<String, ColumnStrategyMapping> globalColumnStrategies =
-        conventions.globalColumnStrategies();
+        verification.globalColumnStrategies();
     return loadExpectationDataSets(context).stream()
         .map(
             tableSet -> ExpectedTableSet.of(tableSet, globalExcludeColumns, globalColumnStrategies))

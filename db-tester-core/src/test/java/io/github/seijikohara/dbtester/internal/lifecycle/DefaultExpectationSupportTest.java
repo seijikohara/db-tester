@@ -14,11 +14,11 @@ import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
-import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
+import io.github.seijikohara.dbtester.api.config.VerificationSettings;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
@@ -61,8 +61,8 @@ class DefaultExpectationSupportTest {
   /** Mock data set loader. */
   private DataSetLoader loader;
 
-  /** Mock convention settings. */
-  private ConventionSettings conventions;
+  /** Mock verification settings. */
+  private VerificationSettings verification;
 
   /** Mock operation defaults. */
   private OperationDefaults operationDefaults;
@@ -81,13 +81,13 @@ class DefaultExpectationSupportTest {
     support = new DefaultExpectationSupport(expectationProvider);
 
     loader = mock(DataSetLoader.class);
-    conventions = mock(ConventionSettings.class);
+    verification = mock(VerificationSettings.class);
     operationDefaults = mock(OperationDefaults.class);
     registry = mock(DataSourceRegistry.class);
 
     configuration = mock(Configuration.class);
     when(configuration.loader()).thenReturn(loader);
-    when(configuration.conventions()).thenReturn(conventions);
+    when(configuration.verification()).thenReturn(verification);
     when(configuration.operations()).thenReturn(operationDefaults);
 
     final Method testMethod = DefaultExpectationSupportTest.class.getDeclaredMethod("setUp");
@@ -99,8 +99,8 @@ class DefaultExpectationSupportTest {
     when(expectedDataSet.retryCount()).thenReturn(-1);
     when(expectedDataSet.retryDelayMillis()).thenReturn(-1L);
 
-    when(conventions.retryCount()).thenReturn(0);
-    when(conventions.retryDelay()).thenReturn(Duration.ZERO);
+    when(verification.retryCount()).thenReturn(0);
+    when(verification.retryDelay()).thenReturn(Duration.ZERO);
   }
 
   /** Tests for the verify method with retry logic. */
@@ -152,7 +152,7 @@ class DefaultExpectationSupportTest {
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
 
-      when(conventions.retryCount()).thenReturn(0);
+      when(verification.retryCount()).thenReturn(0);
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
@@ -279,7 +279,7 @@ class DefaultExpectationSupportTest {
       // Annotation sets retryCount=1, global sets retryCount=5
       when(expectedDataSet.retryCount()).thenReturn(1);
       when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
-      when(conventions.retryCount()).thenReturn(5);
+      when(verification.retryCount()).thenReturn(5);
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
@@ -313,8 +313,8 @@ class DefaultExpectationSupportTest {
       // Annotation returns -1 (use global), global sets retryCount=1
       when(expectedDataSet.retryCount()).thenReturn(-1);
       when(expectedDataSet.retryDelayMillis()).thenReturn(-1L);
-      when(conventions.retryCount()).thenReturn(1);
-      when(conventions.retryDelay()).thenReturn(Duration.ZERO);
+      when(verification.retryCount()).thenReturn(1);
+      when(verification.retryDelay()).thenReturn(Duration.ZERO);
 
       doThrow(new ValidationException("Mismatch"))
           .when(expectationProvider)
