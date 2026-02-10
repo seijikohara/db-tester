@@ -200,7 +200,10 @@ public final class ConventionSettings {
    * names.
    *
    * @return an unmodifiable set of column names or patterns
+   * @deprecated Use {@link VerificationSettings#globalExcludeColumns()} via {@link
+   *     Configuration#verification()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public Set<String> globalExcludeColumns() {
     return globalExcludeColumns;
   }
@@ -209,7 +212,10 @@ public final class ConventionSettings {
    * Returns the column comparison strategies applied globally.
    *
    * @return an unmodifiable map of column strategies
+   * @deprecated Use {@link VerificationSettings#globalColumnStrategies()} via {@link
+   *     Configuration#verification()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public Map<String, ColumnStrategyMapping> globalColumnStrategies() {
     return globalColumnStrategies;
   }
@@ -218,7 +224,10 @@ public final class ConventionSettings {
    * Returns the default row ordering strategy for expectation verification.
    *
    * @return the row ordering strategy
+   * @deprecated Use {@link VerificationSettings#rowOrdering()} via {@link
+   *     Configuration#verification()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public RowOrdering rowOrdering() {
     return rowOrdering;
   }
@@ -227,7 +236,10 @@ public final class ConventionSettings {
    * Returns the maximum time to wait for database queries.
    *
    * @return the query timeout duration, or null for no timeout
+   * @deprecated Use {@link ExecutionSettings#queryTimeout()} via {@link Configuration#execution()}
+   *     instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public @Nullable Duration queryTimeout() {
     return queryTimeout;
   }
@@ -236,7 +248,10 @@ public final class ConventionSettings {
    * Returns the number of retry attempts for expectation verification.
    *
    * @return the retry count (0 means no retry)
+   * @deprecated Use {@link VerificationSettings#retryCount()} via {@link
+   *     Configuration#verification()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public int retryCount() {
     return retryCount;
   }
@@ -245,7 +260,10 @@ public final class ConventionSettings {
    * Returns the delay between retry attempts.
    *
    * @return the retry delay duration
+   * @deprecated Use {@link VerificationSettings#retryDelay()} via {@link
+   *     Configuration#verification()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public Duration retryDelay() {
     return retryDelay;
   }
@@ -254,7 +272,10 @@ public final class ConventionSettings {
    * Returns the transaction behavior for database operations.
    *
    * @return the transaction mode
+   * @deprecated Use {@link ExecutionSettings#transactionMode()} via {@link
+   *     Configuration#execution()} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public TransactionMode transactionMode() {
     return transactionMode;
   }
@@ -324,7 +345,10 @@ public final class ConventionSettings {
    *
    * @param globalExcludeColumns the column names to exclude globally
    * @return a new ConventionSettings with the specified global exclude columns
+   * @deprecated Use {@link VerificationSettings#withGlobalExcludeColumns(Set)} instead. Removed in
+   *     2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
     return toBuilder().globalExcludeColumns(globalExcludeColumns).build();
   }
@@ -334,7 +358,10 @@ public final class ConventionSettings {
    *
    * @param globalColumnStrategies the column strategies to apply globally
    * @return a new ConventionSettings with the specified global column strategies
+   * @deprecated Use {@link VerificationSettings#withGlobalColumnStrategies(Map)} instead. Removed
+   *     in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withGlobalColumnStrategies(
       final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
     return toBuilder().globalColumnStrategies(globalColumnStrategies).build();
@@ -345,7 +372,10 @@ public final class ConventionSettings {
    *
    * @param rowOrdering the row ordering strategy to use
    * @return a new ConventionSettings with the specified row ordering
+   * @deprecated Use {@link VerificationSettings#withRowOrdering(RowOrdering)} instead. Removed in
+   *     2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withRowOrdering(final RowOrdering rowOrdering) {
     return toBuilder().rowOrdering(rowOrdering).build();
   }
@@ -355,7 +385,9 @@ public final class ConventionSettings {
    *
    * @param queryTimeout the query timeout duration, or null for no timeout
    * @return a new ConventionSettings with the specified query timeout
+   * @deprecated Use {@link ExecutionSettings#withQueryTimeout(Duration)} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withQueryTimeout(final @Nullable Duration queryTimeout) {
     return toBuilder().queryTimeout(queryTimeout).build();
   }
@@ -366,7 +398,9 @@ public final class ConventionSettings {
    * @param retryCount the number of retry attempts (0 for no retry)
    * @return a new ConventionSettings with the specified retry count
    * @throws IllegalArgumentException if retryCount is negative
+   * @deprecated Use {@link VerificationSettings#withRetryCount(int)} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withRetryCount(final int retryCount) {
     return toBuilder().retryCount(retryCount).build();
   }
@@ -376,7 +410,9 @@ public final class ConventionSettings {
    *
    * @param retryDelay the delay between retry attempts
    * @return a new ConventionSettings with the specified retry delay
+   * @deprecated Use {@link VerificationSettings#withRetryDelay(Duration)} instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withRetryDelay(final Duration retryDelay) {
     return toBuilder().retryDelay(retryDelay).build();
   }
@@ -386,7 +422,10 @@ public final class ConventionSettings {
    *
    * @param transactionMode the transaction mode to use
    * @return a new ConventionSettings with the specified transaction mode
+   * @deprecated Use {@link ExecutionSettings#withTransactionMode(TransactionMode)} instead. Removed
+   *     in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public ConventionSettings withTransactionMode(final TransactionMode transactionMode) {
     return toBuilder().transactionMode(transactionMode).build();
   }
@@ -607,7 +646,10 @@ public final class ConventionSettings {
      *
      * @param globalExcludeColumns the column names or patterns to exclude
      * @return this builder
+     * @deprecated Use {@link VerificationSettings.Builder#globalExcludeColumns(Set)} instead.
+     *     Removed in 2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder globalExcludeColumns(final Set<String> globalExcludeColumns) {
       this.globalExcludeColumns =
           Objects.requireNonNull(globalExcludeColumns, "globalExcludeColumns");
@@ -619,7 +661,10 @@ public final class ConventionSettings {
      *
      * @param globalColumnStrategies the column strategies
      * @return this builder
+     * @deprecated Use {@link VerificationSettings.Builder#globalColumnStrategies(Map)} instead.
+     *     Removed in 2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder globalColumnStrategies(
         final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
       this.globalColumnStrategies =
@@ -632,7 +677,10 @@ public final class ConventionSettings {
      *
      * @param rowOrdering the row ordering strategy
      * @return this builder
+     * @deprecated Use {@link VerificationSettings.Builder#rowOrdering(RowOrdering)} instead.
+     *     Removed in 2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder rowOrdering(final RowOrdering rowOrdering) {
       this.rowOrdering = Objects.requireNonNull(rowOrdering, "rowOrdering");
       return this;
@@ -643,7 +691,10 @@ public final class ConventionSettings {
      *
      * @param queryTimeout the query timeout duration, or null for no timeout
      * @return this builder
+     * @deprecated Use {@link ExecutionSettings.Builder#queryTimeout(Duration)} instead. Removed in
+     *     2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder queryTimeout(final @Nullable Duration queryTimeout) {
       this.queryTimeout = queryTimeout;
       return this;
@@ -655,7 +706,9 @@ public final class ConventionSettings {
      * @param retryCount the retry count (0 means no retry)
      * @return this builder
      * @throws IllegalArgumentException if retryCount is negative
+     * @deprecated Use {@link VerificationSettings.Builder#retryCount(int)} instead. Removed in 2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder retryCount(final int retryCount) {
       if (retryCount < 0) {
         throw new IllegalArgumentException("retryCount must not be negative");
@@ -669,7 +722,10 @@ public final class ConventionSettings {
      *
      * @param retryDelay the retry delay duration
      * @return this builder
+     * @deprecated Use {@link VerificationSettings.Builder#retryDelay(Duration)} instead. Removed in
+     *     2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder retryDelay(final Duration retryDelay) {
       this.retryDelay = Objects.requireNonNull(retryDelay, "retryDelay");
       return this;
@@ -680,7 +736,10 @@ public final class ConventionSettings {
      *
      * @param transactionMode the transaction mode
      * @return this builder
+     * @deprecated Use {@link ExecutionSettings.Builder#transactionMode(TransactionMode)} instead.
+     *     Removed in 2.0.
      */
+    @Deprecated(since = "1.1", forRemoval = true)
     public Builder transactionMode(final TransactionMode transactionMode) {
       this.transactionMode = Objects.requireNonNull(transactionMode, "transactionMode");
       return this;

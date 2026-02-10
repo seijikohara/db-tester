@@ -2,8 +2,11 @@ package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import java.time.Duration;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -24,6 +27,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
  *   <li>{@code db-tester.enabled} - Enable/disable DB Tester (default: true)
  *   <li>{@code db-tester.auto-register-data-sources} - Auto-register DataSources (default: true)
  *   <li>{@code db-tester.convention.*} - Convention settings for dataset resolution
+ *   <li>{@code db-tester.verification.*} - Verification settings for expectation behavior
+ *   <li>{@code db-tester.execution.*} - Execution settings for database operation behavior
  *   <li>{@code db-tester.operation.*} - Default database operations
  * </ul>
  */
@@ -43,6 +48,13 @@ public class DbTesterProperties {
 
   /** Convention settings for dataset resolution. */
   @NestedConfigurationProperty private ConventionProperties convention = new ConventionProperties();
+
+  /** Verification settings for expectation behavior. */
+  @NestedConfigurationProperty
+  private VerificationProperties verification = new VerificationProperties();
+
+  /** Execution settings for database operation behavior. */
+  @NestedConfigurationProperty private ExecutionProperties execution = new ExecutionProperties();
 
   /** Default operation settings for preparation and expectation phases. */
   @NestedConfigurationProperty private OperationProperties operation = new OperationProperties();
@@ -102,6 +114,42 @@ public class DbTesterProperties {
   }
 
   /**
+   * Returns the verification properties.
+   *
+   * @return the verification properties
+   */
+  public VerificationProperties getVerification() {
+    return verification;
+  }
+
+  /**
+   * Sets the verification properties.
+   *
+   * @param verification the verification properties
+   */
+  public void setVerification(final VerificationProperties verification) {
+    this.verification = verification;
+  }
+
+  /**
+   * Returns the execution properties.
+   *
+   * @return the execution properties
+   */
+  public ExecutionProperties getExecution() {
+    return execution;
+  }
+
+  /**
+   * Sets the execution properties.
+   *
+   * @param execution the execution properties
+   */
+  public void setExecution(final ExecutionProperties execution) {
+    this.execution = execution;
+  }
+
+  /**
    * Returns the operation properties.
    *
    * @return the operation properties
@@ -138,8 +186,6 @@ public class DbTesterProperties {
    *       UNION_ALL)
    *   <li>{@code db-tester.convention.load-order-file-name} - File name for table loading order
    *       (default: {@value ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME})
-   *   <li>{@code db-tester.convention.global-exclude-columns} - Column names to exclude globally
-   *       from expectation verifications (default: empty)
    * </ul>
    */
   public static class ConventionProperties {
@@ -178,12 +224,6 @@ public class DbTesterProperties {
      * ConventionSettings#DEFAULT_LOAD_ORDER_FILE_NAME}.
      */
     private String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME;
-
-    /**
-     * Column names to exclude globally from all expectation verifications. Useful for excluding
-     * auto-generated columns such as timestamps, version numbers, or auto-increment IDs.
-     */
-    private Set<String> globalExcludeColumns = Set.of();
 
     /**
      * Returns the base directory for dataset resolution.
@@ -292,6 +332,42 @@ public class DbTesterProperties {
     public void setLoadOrderFileName(final String loadOrderFileName) {
       this.loadOrderFileName = loadOrderFileName;
     }
+  }
+
+  /**
+   * Verification properties for expectation behavior.
+   *
+   * <p>These properties control how the framework verifies expected database state after test
+   * execution.
+   *
+   * <h2>Available Properties</h2>
+   *
+   * <ul>
+   *   <li>{@code db-tester.verification.global-exclude-columns} - Column names to exclude globally
+   *       (default: empty)
+   *   <li>{@code db-tester.verification.row-ordering} - Row ordering strategy (default: ORDERED)
+   *   <li>{@code db-tester.verification.retry-count} - Retry attempts (default: 0)
+   *   <li>{@code db-tester.verification.retry-delay} - Delay between retries (default: 100ms)
+   * </ul>
+   */
+  public static class VerificationProperties {
+
+    /** Creates a new instance with default values. */
+    public VerificationProperties() {
+      // Default constructor for Spring Boot configuration binding
+    }
+
+    /** Column names to exclude globally from all expectation verifications. */
+    private Set<String> globalExcludeColumns = Set.of();
+
+    /** Row ordering strategy for expectation verification. Defaults to ORDERED. */
+    private RowOrdering rowOrdering = RowOrdering.ORDERED;
+
+    /** Number of retry attempts for expectation verification. Defaults to 0. */
+    private int retryCount = 0;
+
+    /** Delay between retry attempts. Defaults to 100ms. */
+    private Duration retryDelay = Duration.ofMillis(100);
 
     /**
      * Returns the global exclude columns.
@@ -309,6 +385,124 @@ public class DbTesterProperties {
      */
     public void setGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
       this.globalExcludeColumns = globalExcludeColumns;
+    }
+
+    /**
+     * Returns the row ordering strategy.
+     *
+     * @return the row ordering
+     */
+    public RowOrdering getRowOrdering() {
+      return rowOrdering;
+    }
+
+    /**
+     * Sets the row ordering strategy.
+     *
+     * @param rowOrdering the row ordering
+     */
+    public void setRowOrdering(final RowOrdering rowOrdering) {
+      this.rowOrdering = rowOrdering;
+    }
+
+    /**
+     * Returns the retry count.
+     *
+     * @return the retry count
+     */
+    public int getRetryCount() {
+      return retryCount;
+    }
+
+    /**
+     * Sets the retry count.
+     *
+     * @param retryCount the retry count
+     */
+    public void setRetryCount(final int retryCount) {
+      this.retryCount = retryCount;
+    }
+
+    /**
+     * Returns the retry delay.
+     *
+     * @return the retry delay
+     */
+    public Duration getRetryDelay() {
+      return retryDelay;
+    }
+
+    /**
+     * Sets the retry delay.
+     *
+     * @param retryDelay the retry delay
+     */
+    public void setRetryDelay(final Duration retryDelay) {
+      this.retryDelay = retryDelay;
+    }
+  }
+
+  /**
+   * Execution properties for database operation behavior.
+   *
+   * <p>These properties control how the framework executes database operations during test
+   * preparation.
+   *
+   * <h2>Available Properties</h2>
+   *
+   * <ul>
+   *   <li>{@code db-tester.execution.query-timeout} - Maximum query wait time (default: none)
+   *   <li>{@code db-tester.execution.transaction-mode} - Transaction behavior (default:
+   *       SINGLE_TRANSACTION)
+   * </ul>
+   */
+  public static class ExecutionProperties {
+
+    /** Creates a new instance with default values. */
+    public ExecutionProperties() {
+      // Default constructor for Spring Boot configuration binding
+    }
+
+    /** Maximum time to wait for database queries. Null means no timeout. */
+    private @Nullable Duration queryTimeout = null;
+
+    /** Transaction behavior for database operations. Defaults to SINGLE_TRANSACTION. */
+    private TransactionMode transactionMode = TransactionMode.SINGLE_TRANSACTION;
+
+    /**
+     * Returns the query timeout.
+     *
+     * @return the query timeout, or null for no timeout
+     */
+    public @Nullable Duration getQueryTimeout() {
+      return queryTimeout;
+    }
+
+    /**
+     * Sets the query timeout.
+     *
+     * @param queryTimeout the query timeout, or null for no timeout
+     */
+    public void setQueryTimeout(final @Nullable Duration queryTimeout) {
+      this.queryTimeout = queryTimeout;
+    }
+
+    /**
+     * Returns the transaction mode.
+     *
+     * @return the transaction mode
+     */
+    public TransactionMode getTransactionMode() {
+      return transactionMode;
+    }
+
+    /**
+     * Sets the transaction mode.
+     *
+     * @param transactionMode the transaction mode
+     */
+    public void setTransactionMode(final TransactionMode transactionMode) {
+      this.transactionMode = transactionMode;
     }
   }
 

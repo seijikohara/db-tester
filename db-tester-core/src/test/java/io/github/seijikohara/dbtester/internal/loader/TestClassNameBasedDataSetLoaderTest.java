@@ -12,14 +12,14 @@ import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.config.TransactionMode;
+import io.github.seijikohara.dbtester.api.config.VerificationSettings;
 import io.github.seijikohara.dbtester.api.context.TestContext;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import java.time.Duration;
-import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,14 +59,15 @@ class TestClassNameBasedDataSetLoaderTest {
             .dataFormat(DataFormat.CSV)
             .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
             .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+            .build();
+    final var verification =
+        VerificationSettings.builder()
             .globalExcludeColumns(Set.of())
-            .globalColumnStrategies(Map.of())
             .rowOrdering(RowOrdering.ORDERED)
-            .queryTimeout(null)
             .retryCount(0)
             .retryDelay(Duration.ofMillis(100))
-            .transactionMode(TransactionMode.SINGLE_TRANSACTION)
             .build();
+    final var execution = ExecutionSettings.standard();
     final var operationDefaults =
         OperationDefaults.builder()
             .preparation(Operation.CLEAN_INSERT)
@@ -76,6 +77,8 @@ class TestClassNameBasedDataSetLoaderTest {
     configuration =
         Configuration.builder()
             .conventions(conventions)
+            .verification(verification)
+            .execution(execution)
             .operations(operationDefaults)
             .loader(loader)
             .build();

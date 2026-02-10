@@ -9,10 +9,14 @@ import org.jspecify.annotations.Nullable;
 /**
  * Aggregates the runtime configuration consumed by the database testing extension.
  *
- * <p>A {@code Configuration} ties together three orthogonal aspects:
+ * <p>A {@code Configuration} ties together five orthogonal aspects:
  *
  * <ul>
  *   <li>{@link ConventionSettings} specify how the extension resolves dataset directories.
+ *   <li>{@link VerificationSettings} control expectation verification behavior (column exclusions,
+ *       retry, row ordering).
+ *   <li>{@link ExecutionSettings} control database operation execution behavior (query timeout,
+ *       transaction mode).
  *   <li>{@link OperationDefaults} provide the default database operations for preparation and
  *       expectation phases.
  *   <li>{@link DataSetLoader} describes how datasets are materialised and filtered.
@@ -31,6 +35,13 @@ import org.jspecify.annotations.Nullable;
  * var config = Configuration.builder()
  *     .conventions(ConventionSettings.builder()
  *         .dataFormat(DataFormat.TSV)
+ *         .build())
+ *     .verification(VerificationSettings.builder()
+ *         .globalExcludeColumns(Set.of("CREATED_AT"))
+ *         .retryCount(3)
+ *         .build())
+ *     .execution(ExecutionSettings.builder()
+ *         .queryTimeout(Duration.ofSeconds(30))
  *         .build())
  *     .operations(OperationDefaults.builder()
  *         .preparation(Operation.TRUNCATE_INSERT)
@@ -69,6 +80,12 @@ public final class Configuration {
   /** The resolution rules for locating datasets. */
   private final ConventionSettings conventions;
 
+  /** The verification behavior settings. */
+  private final VerificationSettings verification;
+
+  /** The execution behavior settings. */
+  private final ExecutionSettings execution;
+
   /** The default database operations. */
   private final OperationDefaults operations;
 
@@ -80,10 +97,60 @@ public final class Configuration {
    *
    * @param builder the builder containing configuration values
    */
+  @SuppressWarnings("removal")
   private Configuration(final Builder builder) {
     this.conventions = builder.conventions;
     this.operations = builder.operations;
     this.loader = builder.loader != null ? builder.loader : LoaderHolder.INSTANCE;
+    this.verification =
+        builder.verification != null
+            ? builder.verification
+            : deriveVerificationFromConventions(builder.conventions);
+    this.execution =
+        builder.execution != null
+            ? builder.execution
+            : deriveExecutionFromConventions(builder.conventions);
+  }
+
+  /**
+   * Derives verification settings from convention settings for backward compatibility.
+   *
+   * <p>When verification settings are not explicitly provided, this method extracts the relevant
+   * properties from the convention settings to ensure existing code that sets verification-related
+   * properties on ConventionSettings continues to work.
+   *
+   * @param conventions the convention settings to derive from
+   * @return verification settings derived from the conventions
+   */
+  @SuppressWarnings("removal")
+  private static VerificationSettings deriveVerificationFromConventions(
+      final ConventionSettings conventions) {
+    return VerificationSettings.builder()
+        .globalExcludeColumns(conventions.globalExcludeColumns())
+        .globalColumnStrategies(conventions.globalColumnStrategies())
+        .rowOrdering(conventions.rowOrdering())
+        .retryCount(conventions.retryCount())
+        .retryDelay(conventions.retryDelay())
+        .build();
+  }
+
+  /**
+   * Derives execution settings from convention settings for backward compatibility.
+   *
+   * <p>When execution settings are not explicitly provided, this method extracts the relevant
+   * properties from the convention settings to ensure existing code that sets execution-related
+   * properties on ConventionSettings continues to work.
+   *
+   * @param conventions the convention settings to derive from
+   * @return execution settings derived from the conventions
+   */
+  @SuppressWarnings("removal")
+  private static ExecutionSettings deriveExecutionFromConventions(
+      final ConventionSettings conventions) {
+    return ExecutionSettings.builder()
+        .queryTimeout(conventions.queryTimeout())
+        .transactionMode(conventions.transactionMode())
+        .build();
   }
 
   /**
@@ -98,7 +165,8 @@ public final class Configuration {
   /**
    * Returns a configuration that applies the framework defaults for all components.
    *
-   * @return configuration initialised with standard conventions, operations, and loader
+   * @return configuration initialised with standard conventions, verification, execution,
+   *     operations, and loader
    */
   public static Configuration defaults() {
     return builder().build();
@@ -111,6 +179,24 @@ public final class Configuration {
    */
   public ConventionSettings conventions() {
     return conventions;
+  }
+
+  /**
+   * Returns the verification behavior settings.
+   *
+   * @return the verification settings
+   */
+  public VerificationSettings verification() {
+    return verification;
+  }
+
+  /**
+   * Returns the execution behavior settings.
+   *
+   * @return the execution settings
+   */
+  public ExecutionSettings execution() {
+    return execution;
   }
 
   /**
@@ -139,6 +225,8 @@ public final class Configuration {
   public Builder toBuilder() {
     return new Builder()
         .conventions(this.conventions)
+        .verification(this.verification)
+        .execution(this.execution)
         .operations(this.operations)
         .loader(this.loader);
   }
@@ -152,13 +240,15 @@ public final class Configuration {
       return false;
     }
     return Objects.equals(conventions, other.conventions)
+        && Objects.equals(verification, other.verification)
+        && Objects.equals(execution, other.execution)
         && Objects.equals(operations, other.operations)
         && Objects.equals(loader, other.loader);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(conventions, operations, loader);
+    return Objects.hash(conventions, verification, execution, operations, loader);
   }
 
   @Override
@@ -166,6 +256,10 @@ public final class Configuration {
     return "Configuration["
         + "conventions="
         + conventions
+        + ", verification="
+        + verification
+        + ", execution="
+        + execution
         + ", operations="
         + operations
         + ", loader="
@@ -178,6 +272,12 @@ public final class Configuration {
 
     /** The resolution rules for locating datasets. */
     private ConventionSettings conventions = ConventionSettings.standard();
+
+    /** The verification behavior settings, or null to derive from conventions. */
+    private @Nullable VerificationSettings verification = null;
+
+    /** The execution behavior settings, or null to derive from conventions. */
+    private @Nullable ExecutionSettings execution = null;
 
     /** The default database operations. */
     private OperationDefaults operations = OperationDefaults.standard();
@@ -196,6 +296,34 @@ public final class Configuration {
      */
     public Builder conventions(final ConventionSettings conventions) {
       this.conventions = Objects.requireNonNull(conventions, "conventions");
+      return this;
+    }
+
+    /**
+     * Sets the verification behavior settings.
+     *
+     * <p>If not set, verification settings are derived from the convention settings for backward
+     * compatibility.
+     *
+     * @param verification the verification settings
+     * @return this builder
+     */
+    public Builder verification(final VerificationSettings verification) {
+      this.verification = Objects.requireNonNull(verification, "verification");
+      return this;
+    }
+
+    /**
+     * Sets the execution behavior settings.
+     *
+     * <p>If not set, execution settings are derived from the convention settings for backward
+     * compatibility.
+     *
+     * @param execution the execution settings
+     * @return this builder
+     */
+    public Builder execution(final ExecutionSettings execution) {
+      this.execution = Objects.requireNonNull(execution, "execution");
       return this;
     }
 
@@ -225,6 +353,10 @@ public final class Configuration {
 
     /**
      * Builds a new {@link Configuration} instance with the configured values.
+     *
+     * <p>If {@link #verification(VerificationSettings)} or {@link #execution(ExecutionSettings)}
+     * have not been called, the corresponding settings are derived from the convention settings for
+     * backward compatibility.
      *
      * @return a new Configuration instance
      */
