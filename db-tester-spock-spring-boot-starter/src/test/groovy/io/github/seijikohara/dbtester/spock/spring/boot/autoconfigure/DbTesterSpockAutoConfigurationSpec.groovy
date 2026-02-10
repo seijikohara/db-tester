@@ -1,7 +1,13 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.Configuration
+import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.RowOrdering
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.config.TransactionMode
+import io.github.seijikohara.dbtester.api.operation.Operation
+import java.time.Duration
 import spock.lang.Specification
 
 /**
@@ -130,5 +136,120 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 		config != null
 		registry != null
 		registrar != null
+	}
+
+	/** Verifies that Configuration has verification settings. */
+	def 'should return Configuration with verification settings'() {
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'configuration has verification'
+		config.verification() != null
+	}
+
+	/** Verifies that Configuration has execution settings. */
+	def 'should return Configuration with execution settings'() {
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'configuration has execution'
+		config.execution() != null
+	}
+
+	/** Verifies that custom convention properties are mapped to Configuration. */
+	def 'should map custom convention properties to Configuration'() {
+		given: 'custom convention properties'
+		properties.convention.baseDirectory = '/custom/base'
+		properties.convention.expectationSuffix = '/verify'
+		properties.convention.scenarioMarker = '[TestCase]'
+		properties.convention.dataFormat = DataFormat.TSV
+		properties.convention.tableMergeStrategy = TableMergeStrategy.FIRST
+		properties.convention.loadOrderFileName = 'custom-order.txt'
+
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'convention properties are mapped'
+		def conventions = config.conventions()
+		verifyAll {
+			conventions.baseDirectory() == '/custom/base'
+			conventions.expectationSuffix() == '/verify'
+			conventions.scenarioMarker() == '[TestCase]'
+			conventions.dataFormat() == DataFormat.TSV
+			conventions.tableMergeStrategy() == TableMergeStrategy.FIRST
+			conventions.loadOrderFileName() == 'custom-order.txt'
+		}
+	}
+
+	/** Verifies that custom verification properties are mapped to Configuration. */
+	def 'should map custom verification properties to Configuration'() {
+		given: 'custom verification properties'
+		properties.verification.globalExcludeColumns = ['created_at', 'updated_at'] as Set
+		properties.verification.rowOrdering = RowOrdering.UNORDERED
+		properties.verification.retryCount = 3
+		properties.verification.retryDelay = Duration.ofSeconds(2)
+
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'verification properties are mapped'
+		def verification = config.verification()
+		verifyAll {
+			verification.globalExcludeColumns() == ['created_at', 'updated_at'] as Set
+			verification.rowOrdering() == RowOrdering.UNORDERED
+			verification.retryCount() == 3
+			verification.retryDelay() == Duration.ofSeconds(2)
+		}
+	}
+
+	/** Verifies that custom execution properties are mapped to Configuration. */
+	def 'should map custom execution properties to Configuration'() {
+		given: 'custom execution properties'
+		properties.execution.queryTimeout = Duration.ofSeconds(30)
+		properties.execution.transactionMode = TransactionMode.AUTO_COMMIT
+
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'execution properties are mapped'
+		def execution = config.execution()
+		verifyAll {
+			execution.queryTimeout() == Duration.ofSeconds(30)
+			execution.transactionMode() == TransactionMode.AUTO_COMMIT
+		}
+	}
+
+	/** Verifies that custom operation properties are mapped to Configuration. */
+	def 'should map custom operation properties to Configuration'() {
+		given: 'custom operation properties'
+		properties.operation.preparation = Operation.INSERT
+		properties.operation.expectation = Operation.DELETE_ALL
+
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'operation properties are mapped'
+		def operations = config.operations()
+		verifyAll {
+			operations.preparation() == Operation.INSERT
+			operations.expectation() == Operation.DELETE_ALL
+		}
+	}
+
+	/** Verifies that default properties produce default Configuration values. */
+	def 'should produce default values for all Configuration sections'() {
+		when: 'getting dbTesterConfiguration with default properties'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'all default values are correct'
+		verifyAll {
+			config.conventions().baseDirectory() == null
+			config.verification().rowOrdering() == RowOrdering.ORDERED
+			config.verification().retryCount() == 0
+			config.execution().queryTimeout() == null
+			config.execution().transactionMode() == TransactionMode.SINGLE_TRANSACTION
+			config.operations().preparation() == Operation.CLEAN_INSERT
+			config.operations().expectation() == Operation.NONE
+		}
 	}
 }
