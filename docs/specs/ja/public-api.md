@@ -5,6 +5,48 @@ description: "DB Testerのアノテーション、設定、インターフェー
 
 # DB Tester仕様 - パブリックAPI
 
+## APIレイヤー
+
+`db-tester-api`モジュールは12のパッケージをエクスポートしており、対象ユーザーに応じて3つのレイヤーに分類されます：
+
+| レイヤー | パッケージ | 対象 | 安定性 |
+|---------|-----------|------|--------|
+| **ユーザーAPI** | `annotation`, `config`, `operation`, `exception` | すべてのユーザー | 安定 |
+| **アドバンストAPI** | `assertion`, `export`, `domain`, `dataset` | プログラマティックなアクセスが必要なユーザー | 安定 |
+| **拡張SPI** | `spi`, `loader`, `context`, `scenario` | フレームワークインテグレーター | 発展中のSPI |
+
+### ユーザーAPI
+
+ユーザーAPIには、ほとんどのユーザーが直接使用する型が含まれます：
+
+- **`annotation`** — `@DataSet`、`@ExpectedDataSet`、`@DataSetSource`、`@ColumnStrategy`
+- **`config`** — `Configuration`、`ConventionSettings`、`DataSourceRegistry`
+- **`operation`** — `Operation` enum（`CLEAN_INSERT`、`INSERT`、`TRUNCATE_INSERT`など）
+- **`exception`** — フレームワーク例外（catch/inspectによる受動利用）
+
+ガイド付きの導入については[はじめに](getting-started)ページを参照してください。
+
+### アドバンストAPI
+
+アドバンストAPIはデータセットとアサーションへのプログラマティックなアクセスを提供します：
+
+- **`assertion`** — `DatabaseAssertion`による詳細なデータベース状態検証
+- **`export`** — `DataSetExporter`によるデータベースコンテンツのファイルエクスポート
+- **`domain`** — 型安全な値オブジェクト（`CellValue`、`TableName`、`ColumnName`、`ComparisonStrategy`）
+- **`dataset`** — `TableSet`、`Table`、`Row`インターフェースによるデータセット表現
+
+### 拡張SPI
+
+拡張SPIは、カスタムテスト拡張やデータローダーを構築するフレームワークインテグレーター向けです：
+
+- **`spi`** — `OperationProvider`、`ExpectationProvider`、`DataSetLoaderProvider`
+- **`loader`** — `DataSetLoader`、`ExpectedTableSet`によるカスタムデータ読み込み
+- **`context`** — `TestContext`によるフレームワーク非依存のテスト実行
+- **`scenario`** — `ScenarioNameResolver`によるカスタムシナリオ名解決
+
+実装の詳細については[SPI](spi)を参照してください。
+
+
 ## アノテーション
 
 ### @DataSet
@@ -890,6 +932,7 @@ classDiagram
 
 ## 関連仕様
 
+- [はじめに](getting-started) - クイックスタートガイド
 - [概要](overview) - フレームワークの紹介
 - [設定](configuration) - 設定クラス
 - [データベース操作](database-operations) - Operation enumの詳細

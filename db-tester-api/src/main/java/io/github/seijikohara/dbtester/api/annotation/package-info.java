@@ -17,6 +17,8 @@
  * io.github.seijikohara.dbtester.api.config.ConventionSettings} are consulted to map test classes
  * and methods to dataset directories. Format-specific providers (CSV by default) are discovered via
  * the service loader.
+ *
+ * <p><strong>Audience:</strong> All users.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.annotation;

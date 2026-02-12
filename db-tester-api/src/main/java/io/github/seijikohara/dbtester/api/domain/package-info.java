@@ -29,6 +29,8 @@
  *   <li>{@link io.github.seijikohara.dbtester.api.domain.ComparisonStrategy} - Configurable value
  *       comparison strategies
  * </ul>
+ *
+ * <p><strong>Audience:</strong> Users with programmatic dataset or comparison needs.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.domain;
