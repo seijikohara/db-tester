@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.spock.extension
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
@@ -12,7 +13,7 @@ import spock.lang.Specification
  * Unit tests for {@link DatabaseTestInterceptor}.
  *
  * <p>This specification verifies the Spock method interceptor that handles
- * database setup and verification operations.
+ * database setup, verification, and export operations.
  *
  * <p>Note: Due to Spock's limitation on mocking final classes like Method,
  * SpecInfo, FeatureInfo, and IMethodInvocation, these tests focus on
@@ -20,13 +21,26 @@ import spock.lang.Specification
  */
 class DatabaseTestInterceptorSpec extends Specification {
 
-	def 'should create instance with both annotations'() {
+	def 'should create instance with all annotations'() {
+		given: 'mock annotations'
+		def dataSet = Mock(DataSet)
+		def expectedDataSet = Mock(ExpectedDataSet)
+		def exportDataSet = Mock(ExportDataSet)
+
+		when: 'creating interceptor'
+		def interceptor = new DatabaseTestInterceptor(dataSet, expectedDataSet, exportDataSet)
+
+		then: 'instance is created successfully'
+		interceptor != null
+	}
+
+	def 'should create instance with DataSet and ExpectedDataSet annotations'() {
 		given: 'mock annotations'
 		def dataSet = Mock(DataSet)
 		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(dataSet, expectedDataSet)
+		def interceptor = new DatabaseTestInterceptor(dataSet, expectedDataSet, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -37,7 +51,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 		def dataSet = Mock(DataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(dataSet, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -48,7 +62,18 @@ class DatabaseTestInterceptorSpec extends Specification {
 		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet)
+		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet, null)
+
+		then: 'instance is created successfully'
+		interceptor != null
+	}
+
+	def 'should create instance with only ExportDataSet annotation'() {
+		given: 'mock ExportDataSet annotation'
+		def exportDataSet = Mock(ExportDataSet)
+
+		when: 'creating interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, exportDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -56,7 +81,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create instance with null annotations'() {
 		when: 'creating interceptor with null annotations'
-		def interceptor = new DatabaseTestInterceptor(null, null)
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -64,7 +89,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 	def 'should implement IMethodInterceptor interface'() {
 		given: 'a new interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, null)
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
 
 		expect: 'implements IMethodInterceptor'
 		interceptor instanceof IMethodInterceptor
@@ -76,7 +101,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 		dataSet.operation() >> operation
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(dataSet, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null, null)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
@@ -98,8 +123,8 @@ class DatabaseTestInterceptorSpec extends Specification {
 		def expectedDataSet2 = Mock(ExpectedDataSet)
 
 		when: 'creating multiple interceptors'
-		def interceptor1 = new DatabaseTestInterceptor(dataSet1, expectedDataSet1)
-		def interceptor2 = new DatabaseTestInterceptor(dataSet2, expectedDataSet2)
+		def interceptor1 = new DatabaseTestInterceptor(dataSet1, expectedDataSet1, null)
+		def interceptor2 = new DatabaseTestInterceptor(dataSet2, expectedDataSet2, null)
 
 		then: 'interceptors are independent'
 		!interceptor1.is(interceptor2)
@@ -114,7 +139,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 		] as String[])
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(dataSet, null)
+		def interceptor = new DatabaseTestInterceptor(dataSet, null, null)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
@@ -126,7 +151,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 		expectedDataSet.columns() >> (['id', 'name', 'status'] as String[])
 
 		when: 'creating interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet)
+		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet, null)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
@@ -139,7 +164,7 @@ class DatabaseTestInterceptorSpec extends Specification {
 
 	def 'should get default Configuration when spec does not implement DatabaseTestSupport'() {
 		given: 'a test interceptor'
-		def interceptor = new DatabaseTestInterceptor(null, null)
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
 
 		and: 'a stub invocation with non-DatabaseTestSupport instance'
 		def invocation = Stub(IMethodInvocation) {
