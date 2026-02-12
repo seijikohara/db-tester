@@ -5,43 +5,43 @@ description: "Comprehensive API reference for DB Tester annotations, configurati
 
 # DB Tester Specification - Public API
 
-## API Categories
+## API Layers
 
-The `db-tester-api` module exports packages in three categories:
+The `db-tester-api` module exports packages organized into three layers by intended audience:
+
+| Layer | Packages | Audience | Stability |
+|-------|----------|----------|-----------|
+| **User API** | `annotation`, `config`, `operation`, `exception`, `preparation` | All users | Stable |
+| **Advanced API** | `assertion`, `export`, `domain`, `dataset` | Users with programmatic needs | Stable |
+| **Extension SPI** | `spi`, `loader`, `context`, `scenario` | Framework integrators | Evolving SPI |
 
 ### User API
 
-Packages intended for test authors writing database tests. These packages form the stable, primary API surface.
+The User API contains the types that most users interact with directly:
 
-| Package | Description |
-|---------|-------------|
-| `annotation` | Declarative test annotations (`@DataSet`, `@ExpectedDataSet`, `@DataSetSource`) |
-| `assertion` | Programmatic database assertion utilities (`DatabaseAssertion`) |
-| `config` | Configuration types (`Configuration`, `DataSourceRegistry`, `ConventionSettings`, `ExpectationContext`) |
-| `exception` | Framework exception hierarchy |
-| `export` | Data export API (`DataSetExporter`) |
-| `operation` | Database operation enumerations (`Operation`, `TableOrderingStrategy`) |
-| `preparation` | Programmatic test data preparation facade (`DatabasePreparation`) |
+- **`annotation`** — `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`, `@ColumnStrategy`
+- **`config`** — `Configuration`, `ConventionSettings`, `DataSourceRegistry`, `ExpectationContext`
+- **`operation`** — `Operation` enum (`CLEAN_INSERT`, `INSERT`, `TRUNCATE_INSERT`, etc.)
+- **`exception`** — Framework exceptions (passive consumption via catch/inspect)
+- **`preparation`** — `DatabasePreparation` for programmatic test data setup
 
-### Extension API
+### Advanced API
 
-Packages intended for framework integrators building custom testing extensions (JUnit, Spock, Kotest, or custom frameworks). These packages are stable but target advanced users.
+The Advanced API provides programmatic access to datasets and assertions:
 
-| Package | Description |
-|---------|-------------|
-| `context` | Test context abstraction (`TestContext`) |
-| `loader` | Dataset loading SPI (`DataSetLoader`, `ExpectedTableSet`) |
-| `scenario` | Scenario name resolution (`ScenarioNameResolver`, `ScenarioName`) |
-| `spi` | Service Provider Interfaces for core extensibility |
+- **`assertion`** — `DatabaseAssertion` for fine-grained database state verification
+- **`export`** — `DataSetExporter` for exporting database content to files
+- **`domain`** — Type-safe value objects (`CellValue`, `TableName`, `ColumnName`, `ComparisonStrategy`)
+- **`dataset`** — `TableSet`, `Table`, `Row` interfaces for dataset representation
 
-### Domain Types
+### Extension SPI
 
-Shared value objects and data structures used across both User API and Extension API. These types appear in method signatures throughout the framework.
+The Extension SPI is for framework integrators who build custom test extensions or data loaders:
 
-| Package | Description |
-|---------|-------------|
-| `dataset` | Format-agnostic dataset abstractions (`TableSet`, `Table`, `Row`) |
-| `domain` | Type-safe value objects for database identifiers and metadata |
+- **`spi`** — `OperationProvider`, `ExpectationProvider`, `DataSetLoaderProvider`
+- **`loader`** — `DataSetLoader`, `ExpectedTableSet` for custom data loading
+- **`context`** — `TestContext` for framework-agnostic test execution
+- **`scenario`** — `ScenarioNameResolver` for custom scenario name resolution
 
 ## Annotations
 
@@ -902,6 +902,7 @@ Annotation-level `columnStrategies` override global strategies configured in `Co
 
 ## Related Specifications
 
+- [Getting Started](getting-started) - Quick start guide
 - [Overview](overview) - Framework introduction
 - [Configuration](configuration) - Configuration classes
 - [Database Operations](database-operations) - Operation enum details

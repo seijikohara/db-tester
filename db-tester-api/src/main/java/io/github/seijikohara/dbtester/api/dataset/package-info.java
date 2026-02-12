@@ -16,6 +16,8 @@
  *
  * <p>These interfaces are implemented by the core module and are used throughout the framework for
  * data loading, comparison, and validation.
+ *
+ * <p><strong>Audience:</strong> Users with programmatic dataset needs.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.dataset;
