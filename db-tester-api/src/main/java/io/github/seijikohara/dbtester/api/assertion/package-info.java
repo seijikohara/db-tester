@@ -7,6 +7,8 @@
  * exposes comparison primitives, while {@link
  * io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler} allows callers to customise
  * how mismatches are reported.
+ *
+ * <p><strong>Audience:</strong> Users with programmatic assertion needs.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.assertion;
