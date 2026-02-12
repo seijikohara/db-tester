@@ -6,7 +6,6 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.config.VerificationSettings
-import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -14,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
-import java.util.ServiceLoader
 import javax.sql.DataSource
 
 /**
@@ -67,8 +65,8 @@ class DbTesterKotestAutoConfiguration {
                     .loadOrderFileName(conventionProps.loadOrderFileName)
                     .build()
             }.let { conventions ->
-                val verification =
-                    properties.verification.let { verificationProps ->
+                properties.verification
+                    .let { verificationProps ->
                         VerificationSettings
                             .builder()
                             .globalExcludeColumns(verificationProps.globalExcludeColumns)
@@ -76,39 +74,31 @@ class DbTesterKotestAutoConfiguration {
                             .retryCount(verificationProps.retryCount)
                             .retryDelay(verificationProps.retryDelay)
                             .build()
+                    }.let { verification ->
+                        properties.execution
+                            .let { executionProps ->
+                                ExecutionSettings
+                                    .builder()
+                                    .queryTimeout(executionProps.queryTimeout)
+                                    .transactionMode(executionProps.transactionMode)
+                                    .build()
+                            }.let { execution ->
+                                OperationDefaults
+                                    .builder()
+                                    .preparation(properties.operation.preparation)
+                                    .expectation(properties.operation.expectation)
+                                    .build()
+                                    .let { operations ->
+                                        Configuration
+                                            .builder()
+                                            .conventions(conventions)
+                                            .verification(verification)
+                                            .execution(execution)
+                                            .operations(operations)
+                                            .build()
+                                    }
+                            }
                     }
-                val execution =
-                    properties.execution.let { executionProps ->
-                        ExecutionSettings
-                            .builder()
-                            .queryTimeout(executionProps.queryTimeout)
-                            .transactionMode(executionProps.transactionMode)
-                            .build()
-                    }
-                val operations =
-                    OperationDefaults
-                        .builder()
-                        .preparation(properties.operation.preparation)
-                        .expectation(properties.operation.expectation)
-                        .build()
-                val loader =
-                    ServiceLoader
-                        .load(DataSetLoaderProvider::class.java)
-                        .findFirst()
-                        .map { it.loader }
-                        .orElseThrow {
-                            IllegalStateException(
-                                "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath.",
-                            )
-                        }
-                Configuration
-                    .builder()
-                    .conventions(conventions)
-                    .verification(verification)
-                    .execution(execution)
-                    .operations(operations)
-                    .loader(loader)
-                    .build()
             }
 
     /**
@@ -138,5 +128,6 @@ class DbTesterKotestAutoConfiguration {
      * @return a new DataSourceRegistrar instance
      */
     @Bean
+    @ConditionalOnMissingBean
     fun dataSourceRegistrar(properties: DbTesterProperties): DataSourceRegistrar = DataSourceRegistrar(properties)
 }
