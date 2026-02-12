@@ -1,11 +1,21 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
+import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
+import io.github.seijikohara.dbtester.api.operation.Operation;
+import java.time.Duration;
+import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,6 +108,195 @@ class DbTesterJUnitAutoConfigurationTest {
 
       // Then
       assertNotNull(config.operations(), "operations should not be null");
+    }
+
+    /** Verifies that Configuration has verification settings. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return Configuration with verification settings")
+    void should_return_configuration_with_verification() {
+      // Given & When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertNotNull(config.verification(), "verification should not be null");
+    }
+
+    /** Verifies that Configuration has execution settings. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return Configuration with execution settings")
+    void should_return_configuration_with_execution() {
+      // Given & When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertNotNull(config.execution(), "execution should not be null");
+    }
+
+    /** Verifies that Configuration has loader. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return Configuration with loader")
+    void should_return_configuration_with_loader() {
+      // Given & When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertNotNull(config.loader(), "loader should not be null");
+    }
+
+    /** Verifies that custom convention properties are mapped to Configuration. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should map custom convention properties to Configuration")
+    void should_map_custom_convention_properties() {
+      // Given
+      properties.getConvention().setBaseDirectory("/custom/base");
+      properties.getConvention().setExpectationSuffix("/verify");
+      properties.getConvention().setScenarioMarker("[TestCase]");
+      properties.getConvention().setDataFormat(DataFormat.TSV);
+      properties.getConvention().setTableMergeStrategy(TableMergeStrategy.FIRST);
+      properties.getConvention().setLoadOrderFileName("custom-order.txt");
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      final var conventions = config.conventions();
+      assertAll(
+          "convention properties should be mapped",
+          () -> assertEquals("/custom/base", conventions.baseDirectory(), "baseDirectory mismatch"),
+          () ->
+              assertEquals(
+                  "/verify", conventions.expectationSuffix(), "expectationSuffix mismatch"),
+          () -> assertEquals("[TestCase]", conventions.scenarioMarker(), "scenarioMarker mismatch"),
+          () -> assertEquals(DataFormat.TSV, conventions.dataFormat(), "dataFormat mismatch"),
+          () ->
+              assertEquals(
+                  TableMergeStrategy.FIRST,
+                  conventions.tableMergeStrategy(),
+                  "tableMergeStrategy mismatch"),
+          () ->
+              assertEquals(
+                  "custom-order.txt",
+                  conventions.loadOrderFileName(),
+                  "loadOrderFileName mismatch"));
+    }
+
+    /** Verifies that custom verification properties are mapped to Configuration. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should map custom verification properties to Configuration")
+    void should_map_custom_verification_properties() {
+      // Given
+      properties.getVerification().setGlobalExcludeColumns(Set.of("created_at", "updated_at"));
+      properties.getVerification().setRowOrdering(RowOrdering.UNORDERED);
+      properties.getVerification().setRetryCount(3);
+      properties.getVerification().setRetryDelay(Duration.ofSeconds(2));
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      final var verification = config.verification();
+      assertAll(
+          "verification properties should be mapped",
+          () ->
+              assertEquals(
+                  Set.of("created_at", "updated_at"),
+                  verification.globalExcludeColumns(),
+                  "globalExcludeColumns mismatch"),
+          () ->
+              assertEquals(
+                  RowOrdering.UNORDERED, verification.rowOrdering(), "rowOrdering mismatch"),
+          () -> assertEquals(3, verification.retryCount(), "retryCount mismatch"),
+          () ->
+              assertEquals(
+                  Duration.ofSeconds(2), verification.retryDelay(), "retryDelay mismatch"));
+    }
+
+    /** Verifies that custom execution properties are mapped to Configuration. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should map custom execution properties to Configuration")
+    void should_map_custom_execution_properties() {
+      // Given
+      properties.getExecution().setQueryTimeout(Duration.ofSeconds(30));
+      properties.getExecution().setTransactionMode(TransactionMode.AUTO_COMMIT);
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      final var execution = config.execution();
+      assertAll(
+          "execution properties should be mapped",
+          () ->
+              assertEquals(
+                  Duration.ofSeconds(30), execution.queryTimeout(), "queryTimeout mismatch"),
+          () ->
+              assertEquals(
+                  TransactionMode.AUTO_COMMIT,
+                  execution.transactionMode(),
+                  "transactionMode mismatch"));
+    }
+
+    /** Verifies that custom operation properties are mapped to Configuration. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should map custom operation properties to Configuration")
+    void should_map_custom_operation_properties() {
+      // Given
+      properties.getOperation().setPreparation(Operation.INSERT);
+      properties.getOperation().setExpectation(Operation.DELETE_ALL);
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      final var operations = config.operations();
+      assertAll(
+          "operation properties should be mapped",
+          () -> assertEquals(Operation.INSERT, operations.preparation(), "preparation mismatch"),
+          () ->
+              assertEquals(Operation.DELETE_ALL, operations.expectation(), "expectation mismatch"));
+    }
+
+    /** Verifies that default properties produce default Configuration values. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should produce default values for all Configuration sections")
+    void should_produce_default_values_for_all_sections() {
+      // Given - default properties
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertAll(
+          "default Configuration values should be correct",
+          () -> assertNull(config.conventions().baseDirectory(), "baseDirectory should be null"),
+          () ->
+              assertEquals(
+                  RowOrdering.ORDERED,
+                  config.verification().rowOrdering(),
+                  "rowOrdering should be ORDERED"),
+          () -> assertEquals(0, config.verification().retryCount(), "retryCount should be 0"),
+          () -> assertNull(config.execution().queryTimeout(), "queryTimeout should be null"),
+          () ->
+              assertEquals(
+                  TransactionMode.SINGLE_TRANSACTION,
+                  config.execution().transactionMode(),
+                  "transactionMode should be SINGLE_TRANSACTION"),
+          () ->
+              assertEquals(
+                  Operation.CLEAN_INSERT,
+                  config.operations().preparation(),
+                  "preparation should be CLEAN_INSERT"),
+          () ->
+              assertEquals(
+                  Operation.NONE, config.operations().expectation(), "expectation should be NONE"));
     }
   }
 

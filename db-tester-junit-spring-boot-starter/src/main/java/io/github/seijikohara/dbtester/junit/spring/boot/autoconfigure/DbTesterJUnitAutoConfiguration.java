@@ -20,7 +20,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 
 /**
- * Auto-configuration for DB Tester Spring Boot integration with JUnit 5.
+ * Auto-configuration for DB Tester Spring Boot integration with JUnit 6.
  *
  * <p>This auto-configuration is activated when:
  *

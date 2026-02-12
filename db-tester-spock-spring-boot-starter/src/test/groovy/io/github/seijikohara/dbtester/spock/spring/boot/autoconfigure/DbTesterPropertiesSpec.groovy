@@ -1,8 +1,11 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.DataFormat
+import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
+import java.time.Duration
 import spock.lang.Specification
 
 /**
@@ -162,5 +165,87 @@ class DbTesterPropertiesSpec extends Specification {
 
 		then: 'operation is replaced'
 		properties.operation.preparation == Operation.TRUNCATE_INSERT
+	}
+
+	/** Verifies that verification property has correct default values. */
+	def 'should have verification property with correct defaults'() {
+		expect: 'verification defaults are correct'
+		verifyAll {
+			properties.verification != null
+			properties.verification.globalExcludeColumns.isEmpty()
+			properties.verification.rowOrdering == RowOrdering.ORDERED
+			properties.verification.retryCount == 0
+			properties.verification.retryDelay == Duration.ofMillis(100)
+		}
+	}
+
+	/** Verifies that verification properties can be modified. */
+	def 'should allow modifying verification properties'() {
+		when: 'modifying verification properties'
+		properties.verification.globalExcludeColumns = ['created_at', 'updated_at'] as Set
+		properties.verification.rowOrdering = RowOrdering.UNORDERED
+		properties.verification.retryCount = 3
+		properties.verification.retryDelay = Duration.ofSeconds(1)
+
+		then: 'verification properties are modified'
+		verifyAll {
+			properties.verification.globalExcludeColumns == ['created_at', 'updated_at'] as Set
+			properties.verification.rowOrdering == RowOrdering.UNORDERED
+			properties.verification.retryCount == 3
+			properties.verification.retryDelay == Duration.ofSeconds(1)
+		}
+	}
+
+	/** Verifies that verification can be replaced with a new instance. */
+	def 'should allow replacing verification'() {
+		given: 'a new verification instance'
+		def newVerification = new DbTesterProperties.VerificationProperties()
+		newVerification.rowOrdering = RowOrdering.UNORDERED
+
+		when: 'replacing verification'
+		properties.verification = newVerification
+
+		then: 'verification is replaced'
+		properties.verification.rowOrdering == RowOrdering.UNORDERED
+	}
+
+	/** Verifies that execution property has correct default values. */
+	def 'should have execution property with correct defaults'() {
+		expect: 'execution defaults are correct'
+		verifyAll {
+			properties.execution != null
+			properties.execution.queryTimeout == null
+			properties.execution.transactionMode == TransactionMode.SINGLE_TRANSACTION
+		}
+	}
+
+	/** Verifies that execution properties can be modified. */
+	def 'should allow modifying execution properties'() {
+		when: 'modifying execution properties'
+		properties.execution.queryTimeout = Duration.ofSeconds(30)
+		properties.execution.transactionMode = TransactionMode.AUTO_COMMIT
+
+		then: 'execution properties are modified'
+		verifyAll {
+			properties.execution.queryTimeout == Duration.ofSeconds(30)
+			properties.execution.transactionMode == TransactionMode.AUTO_COMMIT
+		}
+	}
+
+	/** Verifies that execution can be replaced with a new instance. */
+	def 'should allow replacing execution'() {
+		given: 'a new execution instance'
+		def newExecution = new DbTesterProperties.ExecutionProperties()
+		newExecution.queryTimeout = Duration.ofMinutes(1)
+		newExecution.transactionMode = TransactionMode.AUTO_COMMIT
+
+		when: 'replacing execution'
+		properties.execution = newExecution
+
+		then: 'execution is replaced'
+		verifyAll {
+			properties.execution.queryTimeout == Duration.ofMinutes(1)
+			properties.execution.transactionMode == TransactionMode.AUTO_COMMIT
+		}
 	}
 }
