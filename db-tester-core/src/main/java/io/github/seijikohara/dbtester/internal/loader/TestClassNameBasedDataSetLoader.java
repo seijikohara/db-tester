@@ -201,7 +201,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
     final var testClass = context.testClass();
     final var conventions = context.configuration().conventions();
 
-    final var directoryResolver = new DirectoryResolver(testClass);
+    final var directoryResolver = new DirectoryResolver(testClass, testMethod.getName());
     final var directory = directoryResolver.resolveDirectory(null, suffix);
 
     directoryResolver.validateDirectoryContainsSupportedFiles(directory);
@@ -373,7 +373,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
       this.suffix = suffix;
       this.annotationResolver = annotationResolver;
       this.dataSetFactory = dataSetFactory;
-      this.directoryResolver = new DirectoryResolver(testClass);
+      this.directoryResolver = new DirectoryResolver(testClass, testMethod.getName());
     }
 
     /**
