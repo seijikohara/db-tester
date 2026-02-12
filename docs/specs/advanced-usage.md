@@ -218,13 +218,13 @@ void shouldStoreJsonMetadata() throws SQLException {
 @DataSet
 @ExpectedDataSet(sources = @DataSetSource(
     columnStrategies = {
-        @ColumnStrategy(name = "SCORE", strategy = Strategy.RANGE, options = "min=0,max=100"),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS)
+        @ColumnStrategy(name = "SCORE", strategy = Strategy.NUMERIC),
+        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.REGEX, pattern = ".*expected.*")
     }
 ))
 void shouldValidateScoreAndDescription() throws SQLException {
-    // SCORE: actual value must be between 0 and 100 (inclusive)
-    // DESCRIPTION: actual value must contain the expected value as substring
+    // SCORE: type-aware numeric comparison
+    // DESCRIPTION: actual value must match the regex pattern
 }
 ```
 

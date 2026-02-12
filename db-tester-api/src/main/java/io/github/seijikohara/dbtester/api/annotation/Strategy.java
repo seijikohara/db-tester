@@ -124,8 +124,10 @@ public enum Strategy {
    * ColumnStrategy#options()} is specified, the options value is used as the substring to search
    * for instead of the expected value.
    *
+   * @deprecated Use {@link #REGEX} with pattern {@code ".*substring.*"} instead. Removed in 2.0.
    * @see ComparisonStrategy#contains()
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   CONTAINS,
 
   /**
@@ -135,8 +137,10 @@ public enum Strategy {
    * ColumnStrategy#options()}. The options must be in the format {@code "min=N,max=M"} where N and
    * M are numeric values. Both bounds are inclusive.
    *
+   * @deprecated Use programmatic assertions for range verification instead. Removed in 2.0.
    * @see ComparisonStrategy#range(String)
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   RANGE;
 
   /**
@@ -148,6 +152,7 @@ public enum Strategy {
    * @return the corresponding ComparisonStrategy instance
    * @throws IllegalStateException if called on a strategy that requires parameters
    */
+  @SuppressWarnings("removal")
   private ComparisonStrategy toComparisonStrategy() {
     return switch (this) {
       case STRICT -> ComparisonStrategy.STRICT;
@@ -199,6 +204,7 @@ public enum Strategy {
    * @throws IllegalArgumentException if REGEX strategy is used with an empty pattern, or RANGE
    *     strategy is used with empty or invalid options
    */
+  @SuppressWarnings("removal")
   public ComparisonStrategy toComparisonStrategy(final String pattern, final String options) {
     if (this == REGEX) {
       if (pattern == null || pattern.isEmpty()) {
