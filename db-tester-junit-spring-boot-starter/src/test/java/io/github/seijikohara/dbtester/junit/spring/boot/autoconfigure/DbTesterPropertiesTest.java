@@ -9,8 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataFormat;
+import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
+import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import java.time.Duration;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -340,6 +344,182 @@ class DbTesterPropertiesTest {
           Operation.TRUNCATE_INSERT,
           properties.getOperation().getPreparation(),
           "preparation mismatch");
+    }
+  }
+
+  /** Tests for the verification property. */
+  @Nested
+  @DisplayName("verification property")
+  class VerificationProperty {
+
+    /** Tests for the verification property. */
+    VerificationProperty() {}
+
+    /** Verifies that verification has correct default values. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have correct default values")
+    void should_have_correct_default_values() {
+      // Given & When
+      final var verification = properties.getVerification();
+
+      // Then
+      assertAll(
+          "verification default values should be correct",
+          () -> assertNotNull(verification, "verification should not be null"),
+          () ->
+              assertTrue(
+                  verification.getGlobalExcludeColumns().isEmpty(),
+                  "globalExcludeColumns should default to empty"),
+          () ->
+              assertEquals(
+                  RowOrdering.ORDERED,
+                  verification.getRowOrdering(),
+                  "rowOrdering should default to ORDERED"),
+          () -> assertEquals(0, verification.getRetryCount(), "retryCount should default to 0"),
+          () ->
+              assertEquals(
+                  Duration.ofMillis(100),
+                  verification.getRetryDelay(),
+                  "retryDelay should default to 100ms"));
+    }
+
+    /** Verifies that verification properties can be modified. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow modifying verification properties")
+    void should_allow_modifying_verification_properties() {
+      // Given
+      final var verification = properties.getVerification();
+
+      // When
+      verification.setGlobalExcludeColumns(Set.of("created_at", "updated_at"));
+      verification.setRowOrdering(RowOrdering.UNORDERED);
+      verification.setRetryCount(3);
+      verification.setRetryDelay(Duration.ofSeconds(1));
+
+      // Then
+      assertAll(
+          "verification modified values should be correct",
+          () ->
+              assertEquals(
+                  Set.of("created_at", "updated_at"),
+                  verification.getGlobalExcludeColumns(),
+                  "globalExcludeColumns mismatch"),
+          () ->
+              assertEquals(
+                  RowOrdering.UNORDERED, verification.getRowOrdering(), "rowOrdering mismatch"),
+          () -> assertEquals(3, verification.getRetryCount(), "retryCount mismatch"),
+          () ->
+              assertEquals(
+                  Duration.ofSeconds(1), verification.getRetryDelay(), "retryDelay mismatch"));
+    }
+
+    /** Verifies that verification can be replaced. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow replacing verification")
+    void should_allow_replacing_verification() {
+      // Given
+      final var newVerification = new DbTesterProperties.VerificationProperties();
+      newVerification.setRowOrdering(RowOrdering.UNORDERED);
+      newVerification.setRetryCount(5);
+
+      // When
+      properties.setVerification(newVerification);
+
+      // Then
+      assertAll(
+          "replaced verification should be correct",
+          () ->
+              assertEquals(
+                  RowOrdering.UNORDERED,
+                  properties.getVerification().getRowOrdering(),
+                  "rowOrdering mismatch"),
+          () ->
+              assertEquals(5, properties.getVerification().getRetryCount(), "retryCount mismatch"));
+    }
+  }
+
+  /** Tests for the execution property. */
+  @Nested
+  @DisplayName("execution property")
+  class ExecutionProperty {
+
+    /** Tests for the execution property. */
+    ExecutionProperty() {}
+
+    /** Verifies that execution has correct default values. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should have correct default values")
+    void should_have_correct_default_values() {
+      // Given & When
+      final var execution = properties.getExecution();
+
+      // Then
+      assertAll(
+          "execution default values should be correct",
+          () -> assertNotNull(execution, "execution should not be null"),
+          () -> assertNull(execution.getQueryTimeout(), "queryTimeout should default to null"),
+          () ->
+              assertEquals(
+                  TransactionMode.SINGLE_TRANSACTION,
+                  execution.getTransactionMode(),
+                  "transactionMode should default to SINGLE_TRANSACTION"));
+    }
+
+    /** Verifies that execution properties can be modified. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow modifying execution properties")
+    void should_allow_modifying_execution_properties() {
+      // Given
+      final var execution = properties.getExecution();
+
+      // When
+      execution.setQueryTimeout(Duration.ofSeconds(30));
+      execution.setTransactionMode(TransactionMode.AUTO_COMMIT);
+
+      // Then
+      assertAll(
+          "execution modified values should be correct",
+          () ->
+              assertEquals(
+                  Duration.ofSeconds(30), execution.getQueryTimeout(), "queryTimeout mismatch"),
+          () ->
+              assertEquals(
+                  TransactionMode.AUTO_COMMIT,
+                  execution.getTransactionMode(),
+                  "transactionMode mismatch"));
+    }
+
+    /** Verifies that execution can be replaced. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should allow replacing execution")
+    void should_allow_replacing_execution() {
+      // Given
+      final var newExecution = new DbTesterProperties.ExecutionProperties();
+      newExecution.setQueryTimeout(Duration.ofMinutes(1));
+      newExecution.setTransactionMode(TransactionMode.AUTO_COMMIT);
+
+      // When
+      properties.setExecution(newExecution);
+
+      // Then
+      assertAll(
+          "replaced execution should be correct",
+          () ->
+              assertEquals(
+                  Duration.ofMinutes(1),
+                  properties.getExecution().getQueryTimeout(),
+                  "queryTimeout mismatch"),
+          () ->
+              assertEquals(
+                  TransactionMode.AUTO_COMMIT,
+                  properties.getExecution().getTransactionMode(),
+                  "transactionMode mismatch"));
     }
   }
 }
