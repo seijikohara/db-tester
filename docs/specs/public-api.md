@@ -5,6 +5,44 @@ description: "Comprehensive API reference for DB Tester annotations, configurati
 
 # DB Tester Specification - Public API
 
+## API Categories
+
+The `db-tester-api` module exports packages in three categories:
+
+### User API
+
+Packages intended for test authors writing database tests. These packages form the stable, primary API surface.
+
+| Package | Description |
+|---------|-------------|
+| `annotation` | Declarative test annotations (`@DataSet`, `@ExpectedDataSet`, `@DataSetSource`) |
+| `assertion` | Programmatic database assertion utilities (`DatabaseAssertion`) |
+| `config` | Configuration types (`Configuration`, `DataSourceRegistry`, `ConventionSettings`, `ExpectationContext`) |
+| `exception` | Framework exception hierarchy |
+| `export` | Data export API (`DataSetExporter`) |
+| `operation` | Database operation enumerations (`Operation`, `TableOrderingStrategy`) |
+| `preparation` | Programmatic test data preparation facade (`DatabasePreparation`) |
+
+### Extension API
+
+Packages intended for framework integrators building custom testing extensions (JUnit, Spock, Kotest, or custom frameworks). These packages are stable but target advanced users.
+
+| Package | Description |
+|---------|-------------|
+| `context` | Test context abstraction (`TestContext`) |
+| `loader` | Dataset loading SPI (`DataSetLoader`, `ExpectedTableSet`) |
+| `scenario` | Scenario name resolution (`ScenarioNameResolver`, `ScenarioName`) |
+| `spi` | Service Provider Interfaces for core extensibility |
+
+### Domain Types
+
+Shared value objects and data structures used across both User API and Extension API. These types appear in method signatures throughout the framework.
+
+| Package | Description |
+|---------|-------------|
+| `dataset` | Format-agnostic dataset abstractions (`TableSet`, `Table`, `Row`) |
+| `domain` | Type-safe value objects for database identifiers and metadata |
+
 ## Annotations
 
 ### @DataSet
@@ -529,6 +567,8 @@ Defines value comparison behavior during assertion.
 | `REGEX` | false | false | false | Pattern.matches() |
 | `CONTAINS` | false | false | false | String.contains() |
 | `RANGE` | false | false | false | min <= value <= max |
+
+**Architecture Note**: `ComparisonStrategy` serves as a descriptor (what to compare). Comparison execution (how to compare) is handled by `ComparisonEngine` in the core module. The `matches()` method on `ComparisonStrategy` is deprecated since 1.1 and will be removed in 2.0.
 
 ## Assertion API
 

@@ -1,16 +1,23 @@
 package io.github.seijikohara.dbtester.internal.lifecycle;
 
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.context.TestContext;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
+import io.github.seijikohara.dbtester.internal.assertion.ColumnPatternMatcher;
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +89,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
    *
    * <p>If the annotation specifies a non-negative value, that value is used directly. If the
    * annotation value is {@link ExpectedDataSet#UNSET} (the default), the global setting from {@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryCount()} is used.
+   * io.github.seijikohara.dbtester.api.config.VerificationSettings#retryCount()} is used.
    *
    * @param expectedDataSet the annotation
    * @param context the test context
@@ -99,7 +106,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
     return annotationValue >= 0
         ? annotationValue
-        : context.configuration().conventions().retryCount();
+        : context.configuration().verification().retryCount();
   }
 
   /**
@@ -107,7 +114,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
    *
    * <p>If the annotation specifies a non-negative value, that value is used directly. If the
    * annotation value is {@link ExpectedDataSet#UNSET} (the default), the global setting from {@link
-   * io.github.seijikohara.dbtester.api.config.ConventionSettings#retryDelay()} is used.
+   * io.github.seijikohara.dbtester.api.config.VerificationSettings#retryDelay()} is used.
    *
    * @param expectedDataSet the annotation
    * @param context the test context
@@ -125,7 +132,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
     return annotationValue >= 0
         ? Duration.ofMillis(annotationValue)
-        : context.configuration().conventions().retryDelay();
+        : context.configuration().verification().retryDelay();
   }
 
   /**
@@ -189,7 +196,8 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
       final ExpectedTableSet expectedTableSet,
       final RowOrdering rowOrdering) {
     final var tableSet = expectedTableSet.tableSet();
-    final var excludeColumns = expectedTableSet.excludeColumns();
+    final var rawExcludeColumns = expectedTableSet.excludeColumns();
+    final var excludeColumns = resolveExcludeColumnPatterns(rawExcludeColumns, tableSet);
     final var columnStrategies = expectedTableSet.columnStrategies();
     final DataSource dataSource =
         tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
@@ -210,10 +218,11 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
 
     final var operationDefaults = context.configuration().operations();
+    final var expectationContext =
+        ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults);
 
     try {
-      expectationProvider.verifyExpectation(
-          tableSet, dataSource, excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+      expectationProvider.verifyExpectation(tableSet, dataSource, expectationContext);
 
       logger.info(
           "Expectation validation completed successfully for {}: {} tables",
@@ -225,5 +234,36 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
               "Failed to verify expectation TableSet for %s", context.testMethod().getName()),
           e);
     }
+  }
+
+  /**
+   * Resolves glob patterns in exclude column entries against the expected table columns.
+   *
+   * <p>If any entry in {@code excludeColumns} contains glob wildcards ({@code *} or {@code ?}), the
+   * patterns are matched against the column names in the expected tables. Non-pattern entries are
+   * passed through unchanged.
+   *
+   * @param excludeColumns the exclude column entries (may contain both exact names and patterns)
+   * @param tableSet the expected table set providing column names for pattern resolution
+   * @return resolved set of column names (uppercase, no patterns remaining)
+   */
+  private Set<String> resolveExcludeColumnPatterns(
+      final Collection<String> excludeColumns,
+      final io.github.seijikohara.dbtester.api.dataset.TableSet tableSet) {
+    final var hasPatterns = excludeColumns.stream().anyMatch(ColumnPatternMatcher::isPattern);
+    if (!hasPatterns) {
+      return Set.copyOf(excludeColumns);
+    }
+
+    final var allColumnNames =
+        tableSet.getTables().stream()
+            .map(Table::getColumns)
+            .flatMap(Collection::stream)
+            .map(ColumnName::value)
+            .collect(Collectors.toUnmodifiableSet());
+
+    final var resolved = ColumnPatternMatcher.resolvePatterns(excludeColumns, allColumnNames);
+    logger.debug("Resolved exclude column patterns: {} -> {}", excludeColumns, resolved);
+    return resolved;
   }
 }

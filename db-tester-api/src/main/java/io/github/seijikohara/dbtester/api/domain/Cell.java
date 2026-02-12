@@ -145,7 +145,11 @@ public final class Cell {
    * @param other the value to compare with
    * @return {@code true} if the values match according to the column's strategy, {@code false}
    *     otherwise
+   * @deprecated Use {@code ComparisonEngine.matches(strategy, expected, actual)} in the core module
+   *     instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("removal")
   public boolean matches(final CellValue other) {
     return column.getComparisonStrategy().matches(value.value(), other.value());
   }
@@ -158,7 +162,10 @@ public final class Cell {
    * @param other the cell to compare with
    * @return {@code true} if the values match according to this column's strategy, {@code false}
    *     otherwise
+   * @deprecated Use {@code ComparisonEngine.matches(strategy, expected, actual)} in the core module
+   *     instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public boolean matches(final Cell other) {
     return matches(other.value);
   }

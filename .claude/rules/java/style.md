@@ -201,7 +201,25 @@ public record AppSettings(String name, int timeout) {
 | No setters | State cannot be modified |
 | Immutable collection returns | Use `.toList()`, `List.copyOf()`, `Set.copyOf()`, `Map.copyOf()` |
 | No arrays in API | Arrays are mutable; use collections |
-| No builder pattern | Use constructors or factory methods (external library builders permitted) |
+| Builder pattern restricted | Use constructors or factory methods for value objects. Builder pattern is permitted for configuration classes with 5+ optional parameters and complex validation requirements. External library builders are always permitted. |
+
+**Builder pattern guideline**:
+
+Use builders **only** for configuration objects where:
+- The object has 5+ optional parameters with reasonable defaults
+- Parameters have complex interdependencies or cross-parameter validation
+- Construction requires validation across multiple parameters
+
+Appropriate builder usage in this project:
+- `Configuration` — aggregates multiple configuration concerns
+- `ConventionSettings` — 13 optional parameters with mutual exclusions
+- `OperationDefaults` — optional settings with defaults
+- `ExportConfiguration` — export settings with validation
+
+Do not use builders for:
+- Value objects with 3 or fewer parameters (use constructors or factory methods)
+- Entities with natural construction order
+- Classes where `with*()` copy methods suffice
 
 ### Collections and Arrays
 
