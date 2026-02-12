@@ -148,6 +148,7 @@ class StrategyTest {
     @Test
     @Tag("normal")
     @DisplayName("should convert CONTAINS to ComparisonStrategy.contains()")
+    @SuppressWarnings("removal")
     void shouldConvertContains_toComparisonStrategy() {
       // When
       final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("");
@@ -227,6 +228,7 @@ class StrategyTest {
   /** Tests for toComparisonStrategy(String, String) with options. */
   @Nested
   @DisplayName("toComparisonStrategy(String, String)")
+  @SuppressWarnings("removal")
   class ToComparisonStrategyWithOptionsTests {
 
     /** Tests for toComparisonStrategy with pattern and options. */
@@ -341,6 +343,7 @@ class StrategyTest {
     @Test
     @Tag("normal")
     @DisplayName("should resolve values by name")
+    @SuppressWarnings("removal")
     void shouldResolveValuesByName() {
       // When & Then
       assertEquals(Strategy.STRICT, Strategy.valueOf("STRICT"), "should resolve STRICT");

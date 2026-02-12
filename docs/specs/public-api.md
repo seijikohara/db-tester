@@ -217,8 +217,8 @@ The `options` attribute provides configuration for parameterized strategies:
 
 | Strategy | Options Format | Example |
 |----------|---------------|---------|
-| `RANGE` | `"min=N,max=M"` (N, M: numeric, both inclusive) | `"min=100,max=200"` |
-| `CONTAINS` | Substring to search for (optional; if empty, uses expected value) | `"expected-substring"` |
+| `RANGE` (deprecated) | `"min=N,max=M"` (N, M: numeric, both inclusive) | `"min=100,max=200"` |
+| `CONTAINS` (deprecated) | Substring to search for (optional; if empty, uses expected value) | `"expected-substring"` |
 
 ### Strategy
 
@@ -239,8 +239,8 @@ Enum defining comparison strategy types for use in `@ColumnStrategy` annotations
 | `REGEX` | Pattern matching using regular expressions | `pattern` |
 | `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601, slashed, dot) | — |
 | `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) | — |
-| `CONTAINS` | Substring containment check | `options` (optional) |
-| `RANGE` | Numeric range verification (inclusive bounds) | `options` |
+| `CONTAINS` | Substring containment check (deprecated, use `REGEX`) | `options` (optional) |
+| `RANGE` | Numeric range verification (deprecated, use programmatic assertions) | `options` |
 
 **Examples with New Strategies**:
 
@@ -249,8 +249,7 @@ Enum defining comparison strategy types for use in `@ColumnStrategy` annotations
     columnStrategies = {
         @ColumnStrategy(name = "BIRTH_DATE", strategy = Strategy.DATE_FLEXIBLE),
         @ColumnStrategy(name = "METADATA", strategy = Strategy.JSON_EQUIVALENT),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS),
-        @ColumnStrategy(name = "PRICE", strategy = Strategy.RANGE, options = "min=100,max=200")
+        @ColumnStrategy(name = "PATTERN", strategy = Strategy.REGEX, pattern = ".*substring.*")
     }
 ))
 void testWithExtendedStrategies() { }
@@ -502,9 +501,9 @@ Represents programmatic column comparison strategy configuration.
 | `regex(String, String)` | Creates mapping with REGEX strategy and pattern |
 | `dateFlexible(String)` | Creates mapping with DATE_FLEXIBLE strategy |
 | `jsonEquivalent(String)` | Creates mapping with JSON_EQUIVALENT strategy |
-| `contains(String)` | Creates mapping with CONTAINS strategy (uses expected value) |
-| `contains(String, String)` | Creates mapping with CONTAINS strategy and specific substring |
-| `range(String, double, double)` | Creates mapping with RANGE strategy and min/max bounds |
+| `contains(String)` | Creates mapping with CONTAINS strategy (deprecated, use `regex`) |
+| `contains(String, String)` | Creates mapping with CONTAINS strategy (deprecated, use `regex`) |
+| `range(String, double, double)` | Creates mapping with RANGE strategy (deprecated) |
 
 **Example**:
 
@@ -565,8 +564,8 @@ Defines value comparison behavior during assertion.
 | `JSON_EQUIVALENT` | true | false | false | Normalized JSON comparison |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
-| `CONTAINS` | false | false | false | String.contains() |
-| `RANGE` | false | false | false | min <= value <= max |
+| `CONTAINS` (deprecated) | false | false | false | String.contains() |
+| `RANGE` (deprecated) | false | false | false | min <= value <= max |
 
 **Architecture Note**: `ComparisonStrategy` serves as a descriptor (what to compare). Comparison execution (how to compare) is handled by `ComparisonEngine` in the core module. The `matches()` method on `ComparisonStrategy` is deprecated since 1.1 and will be removed in 2.0.
 

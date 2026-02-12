@@ -36,6 +36,8 @@ module io.github.seijikohara.dbtester.core {
       io.github.seijikohara.dbtester.internal.lifecycle.DefaultExpectationSupport;
   provides io.github.seijikohara.dbtester.api.spi.OperationProvider with
       io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider;
+  provides io.github.seijikohara.dbtester.api.spi.ExportSupport with
+      io.github.seijikohara.dbtester.internal.lifecycle.DefaultExportSupport;
   provides io.github.seijikohara.dbtester.api.spi.PreparationSupport with
       io.github.seijikohara.dbtester.internal.lifecycle.DefaultPreparationSupport;
 

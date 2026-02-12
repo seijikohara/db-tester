@@ -224,8 +224,8 @@ void testWithColumnStrategies() { }
 
 | 戦略 | オプション形式 | 例 |
 |------|---------------|-----|
-| `RANGE` | `"min=N,max=M"`（N, M: 数値、両端を含む） | `"min=100,max=200"` |
-| `CONTAINS` | 検索する部分文字列（任意。空の場合は期待値を使用） | `"expected-substring"` |
+| `RANGE`（非推奨） | `"min=N,max=M"`（N, M: 数値、両端を含む） | `"min=100,max=200"` |
+| `CONTAINS`（非推奨） | 検索する部分文字列（任意。空の場合は期待値を使用） | `"expected-substring"` |
 
 
 ### Strategy
@@ -247,8 +247,8 @@ void testWithColumnStrategies() { }
 | `REGEX` | 正規表現を使用したパターンマッチング | `pattern` |
 | `DATE_FLEXIBLE` | 複数形式の日付比較（ISO-8601、スラッシュ区切り、ドット区切り） | — |
 | `JSON_EQUIVALENT` | JSON構造比較（キー順序と空白を無視） | — |
-| `CONTAINS` | 部分文字列包含チェック | `options`（任意） |
-| `RANGE` | 数値範囲検証（両端を含む） | `options` |
+| `CONTAINS`（非推奨、`REGEX`を使用） | 部分文字列包含チェック | `options`（任意） |
+| `RANGE`（非推奨、プログラム的アサーションを使用） | 数値範囲検証（両端を含む） | `options` |
 
 **新しい戦略の使用例**:
 
@@ -257,8 +257,7 @@ void testWithColumnStrategies() { }
     columnStrategies = {
         @ColumnStrategy(name = "BIRTH_DATE", strategy = Strategy.DATE_FLEXIBLE),
         @ColumnStrategy(name = "METADATA", strategy = Strategy.JSON_EQUIVALENT),
-        @ColumnStrategy(name = "DESCRIPTION", strategy = Strategy.CONTAINS),
-        @ColumnStrategy(name = "PRICE", strategy = Strategy.RANGE, options = "min=100,max=200")
+        @ColumnStrategy(name = "PATTERN", strategy = Strategy.REGEX, pattern = ".*substring.*")
     }
 ))
 void testWithExtendedStrategies() { }
@@ -522,9 +521,9 @@ JDBCから取得したデータベースカラムメタデータを表します�
 | `regex(String, String)` | REGEX戦略でマッピングを作成（パターン付き） |
 | `dateFlexible(String)` | DATE_FLEXIBLE戦略でマッピングを作成 |
 | `jsonEquivalent(String)` | JSON_EQUIVALENT戦略でマッピングを作成 |
-| `contains(String)` | CONTAINS戦略でマッピングを作成（期待値を使用） |
-| `contains(String, String)` | CONTAINS戦略でマッピングを作成（部分文字列指定） |
-| `range(String, double, double)` | RANGE戦略でマッピングを作成（最小値・最大値指定） |
+| `contains(String)` | CONTAINS戦略でマッピングを作成（非推奨、`regex`を使用） |
+| `contains(String, String)` | CONTAINS戦略でマッピングを作成（非推奨、`regex`を使用） |
+| `range(String, double, double)` | RANGE戦略でマッピングを作成（非推奨） |
 
 **例**:
 
@@ -586,8 +585,8 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `JSON_EQUIVALENT` | true | false | false | 正規化JSON比較 |
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
-| `CONTAINS` | false | false | false | String.contains() |
-| `RANGE` | false | false | false | min <= value <= max |
+| `CONTAINS`（非推奨） | false | false | false | String.contains() |
+| `RANGE`（非推奨） | false | false | false | min <= value <= max |
 
 **アーキテクチャに関する注記**: `ComparisonStrategy` はディスクリプタ（何を比較するか）として機能します。比較の実行（どのように比較するか）はcoreモジュールの `ComparisonEngine` が担当します。`ComparisonStrategy` の `matches()` メソッドは1.1で非推奨となり、2.0で削除予定です。
 
