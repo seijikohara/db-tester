@@ -2,10 +2,12 @@ package io.github.seijikohara.dbtester.kotest.extension
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.kotest.lifecycle.KotestExpectationVerifier
+import io.github.seijikohara.dbtester.kotest.lifecycle.KotestExportExecutor
 import io.github.seijikohara.dbtester.kotest.lifecycle.KotestPreparationExecutor
 import io.kotest.core.extensions.TestCaseExtension
 import io.kotest.core.spec.Spec
@@ -89,6 +91,7 @@ class DatabaseTestExtension(
 
     private val preparationExecutor = KotestPreparationExecutor()
     private val expectationVerifier = KotestExpectationVerifier()
+    private val exportExecutor = KotestExportExecutor()
 
     /**
      * Intercepts test case execution to handle preparation and expectation phases.
@@ -103,11 +106,15 @@ class DatabaseTestExtension(
     ): TestResult =
         requireMethod(testCase)
             .let { method ->
-                findDataSet(testCase, method) to findExpectedDataSet(testCase, method)
-            }.let { (dataSet, expectedDataSet) ->
+                Triple(
+                    findDataSet(testCase, method),
+                    findExpectedDataSet(testCase, method),
+                    findExportDataSet(testCase, method),
+                )
+            }.let { (dataSet, expectedDataSet, exportDataSet) ->
                 when {
-                    dataSet != null || expectedDataSet != null -> {
-                        executeWithAnnotations(testCase, execute, dataSet, expectedDataSet)
+                    dataSet != null || expectedDataSet != null || exportDataSet != null -> {
+                        executeWithAnnotations(testCase, execute, dataSet, expectedDataSet, exportDataSet)
                     }
 
                     else -> {
@@ -117,12 +124,13 @@ class DatabaseTestExtension(
             }
 
     /**
-     * Executes the test case with dataset and/or expected dataset handling.
+     * Executes the test case with dataset, expected dataset, and/or export dataset handling.
      *
      * @param testCase the test case being executed
      * @param execute the function to execute the test case
      * @param dataSet the DataSet annotation, or null
      * @param expectedDataSet the ExpectedDataSet annotation, or null
+     * @param exportDataSet the ExportDataSet annotation, or null
      * @return the test result
      */
     private suspend fun executeWithAnnotations(
@@ -130,6 +138,7 @@ class DatabaseTestExtension(
         execute: suspend (TestCase) -> TestResult,
         dataSet: DataSet?,
         expectedDataSet: ExpectedDataSet?,
+        exportDataSet: ExportDataSet?,
     ): TestResult =
         createTestContext(testCase, requireMethod(testCase)).let { testContext ->
             dataSet?.also {
@@ -141,16 +150,60 @@ class DatabaseTestExtension(
                 preparationExecutor.execute(testContext, it)
             }
             execute(testCase).also { result ->
-                if (result is TestResult.Success && expectedDataSet != null) {
-                    logger.debug(
-                        "Verifying expectation for {}.{}()",
-                        testContext.testClass().simpleName,
-                        testContext.testMethod().name,
-                    )
-                    expectationVerifier.verify(testContext, expectedDataSet)
+                var testFailed = result !is TestResult.Success
+                try {
+                    if (result is TestResult.Success && expectedDataSet != null) {
+                        logger.debug(
+                            "Verifying expectation for {}.{}()",
+                            testContext.testClass().simpleName,
+                            testContext.testMethod().name,
+                        )
+                        expectationVerifier.verify(testContext, expectedDataSet)
+                    }
+                } catch (e: Throwable) {
+                    testFailed = true
+                    throw e
+                } finally {
+                    handleExportDataSet(testContext, exportDataSet, testFailed)
                 }
             }
         }
+
+    /**
+     * Handles [ExportDataSet] execution in a finally-equivalent block.
+     *
+     * Export errors are caught and logged to prevent masking test or verification failures.
+     *
+     * @param testContext the test context
+     * @param exportDataSet the ExportDataSet annotation, or null
+     * @param testFailed whether the test execution or verification failed
+     */
+    private fun handleExportDataSet(
+        testContext: TestContext,
+        exportDataSet: ExportDataSet?,
+        testFailed: Boolean,
+    ) {
+        if (exportDataSet == null) return
+        if (exportDataSet.onFailureOnly && !testFailed) {
+            logger.debug(
+                "Skipping @ExportDataSet for {}.{}() because the test passed and onFailureOnly=true",
+                testContext.testClass().simpleName,
+                testContext.testMethod().name,
+            )
+            return
+        }
+        try {
+            exportExecutor.export(testContext, exportDataSet)
+        } catch (e: Exception) {
+            logger.error(
+                "Failed to export dataset for {}.{}(): {}",
+                testContext.testClass().simpleName,
+                testContext.testMethod().name,
+                e.message,
+                e,
+            )
+        }
+    }
 
     /**
      * Creates a [TestContext] from the Kotest [TestCase].
@@ -284,4 +337,21 @@ class DatabaseTestExtension(
         method.getAnnotation(ExpectedDataSet::class.java)
             ?: testCase.spec::class.findAnnotation<ExpectedDataSet>()
             ?: testCase.spec::class.java.getAnnotation(ExpectedDataSet::class.java)
+
+    /**
+     * Finds the effective [ExportDataSet] annotation for the current test.
+     *
+     * Method-level annotations take precedence over class-level annotations.
+     *
+     * @param testCase the test case
+     * @param method the resolved test method
+     * @return the ExportDataSet annotation if found, or null
+     */
+    private fun findExportDataSet(
+        testCase: TestCase,
+        method: Method,
+    ): ExportDataSet? =
+        method.getAnnotation(ExportDataSet::class.java)
+            ?: testCase.spec::class.findAnnotation<ExportDataSet>()
+            ?: testCase.spec::class.java.getAnnotation(ExportDataSet::class.java)
 }

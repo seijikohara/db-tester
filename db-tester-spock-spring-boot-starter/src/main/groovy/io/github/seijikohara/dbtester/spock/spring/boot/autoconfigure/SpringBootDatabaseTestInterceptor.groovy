@@ -2,10 +2,12 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.spock.lifecycle.SpockExpectationVerifier
+import io.github.seijikohara.dbtester.spock.lifecycle.SpockExportExecutor
 import io.github.seijikohara.dbtester.spock.lifecycle.SpockPreparationExecutor
 import java.lang.reflect.Method
 import org.slf4j.Logger
@@ -40,21 +42,30 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 	/** The expected data set annotation for verification phase (may be null). */
 	private final ExpectedDataSet expectedDataSet
 
+	/** The export data set annotation for post-test export (may be null). */
+	private final ExportDataSet exportDataSet
+
 	/** Executor for the preparation phase. */
 	private final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
 
 	/** Verifier for the expectation phase. */
 	private final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
 
+	/** Executor for the export phase. */
+	private final SpockExportExecutor exportExecutor = new SpockExportExecutor()
+
 	/**
 	 * Creates a new interceptor with the given annotations.
 	 *
 	 * @param dataSet the data set annotation (may be null)
 	 * @param expectedDataSet the expected data set annotation (may be null)
+	 * @param exportDataSet the export data set annotation (may be null)
 	 */
-	SpringBootDatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet) {
+	SpringBootDatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet,
+	ExportDataSet exportDataSet) {
 		this.dataSet = dataSet
 		this.expectedDataSet = expectedDataSet
+		this.exportDataSet = exportDataSet
 	}
 
 	@Override
@@ -62,8 +73,46 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		def testContext = createTestContext(invocation)
 
 		dataSet?.with { preparationExecutor.execute(testContext, it) }
-		invocation.proceed()
-		expectedDataSet?.with { expectationVerifier.verify(testContext, it) }
+
+		boolean testFailed = false
+		try {
+			invocation.proceed()
+			expectedDataSet?.with { expectationVerifier.verify(testContext, it) }
+		} catch (Throwable t) {
+			testFailed = true
+			throw t
+		} finally {
+			handleExportDataSet(testContext, testFailed)
+		}
+	}
+
+	/**
+	 * Handles ExportDataSet execution in a finally-equivalent block.
+	 *
+	 * <p>Export errors are caught and logged to prevent masking test or verification failures.
+	 *
+	 * @param testContext the test context
+	 * @param testFailed whether the test execution or verification failed
+	 */
+	private void handleExportDataSet(TestContext testContext, boolean testFailed) {
+		if (exportDataSet == null) {
+			return
+		}
+		if (exportDataSet.onFailureOnly() && !testFailed) {
+			logger.debug('Skipping @ExportDataSet for {}.{}() because the test passed and'
+					+ ' onFailureOnly=true',
+					testContext.testClass().simpleName,
+					testContext.testMethod().name)
+			return
+		}
+		try {
+			exportExecutor.export(testContext, exportDataSet)
+		} catch (Exception e) {
+			logger.error('Failed to export dataset for {}.{}(): {}',
+					testContext.testClass().simpleName,
+					testContext.testMethod().name,
+					e.message, e)
+		}
 	}
 
 	/**
