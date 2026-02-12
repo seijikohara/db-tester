@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.internal.loader;
 
+import io.github.seijikohara.dbtester.api.annotation.AnnotationUtils;
 import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
@@ -25,13 +26,13 @@ import org.slf4j.LoggerFactory;
  * Resolves annotation values for database test configurations.
  *
  * <p>This class handles the extraction and resolution of annotation values from {@link DataSet} and
- * {@link ExpectedDataSet} annotations, including class-level annotation inheritance. It processes
- * annotations to determine resource locations, scenario names, data source names, and database
- * operations.
+ * {@link ExpectedDataSet} annotations, including class-level annotation inheritance and
+ * meta-annotation support. It processes annotations to determine resource locations, scenario
+ * names, data source names, and database operations.
  *
  * <p>The resolver searches for annotations in the following order: method-level annotation (if
- * present), class-level annotation on test class, and class-level annotation on parent classes
- * (traversing up the hierarchy).
+ * present), class-level annotation on test class, class-level annotation on parent classes
+ * (traversing up the hierarchy), and meta-annotations on any of the above.
  *
  * <p>When {@link DataSetSource#scenarioNames()} is empty (not specified or contains only empty
  * strings), the test method name is automatically used as the scenario name. This enables
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @see DataSetSource
  * @see DataSet
  * @see ExpectedDataSet
+ * @see AnnotationUtils
  */
 public final class AnnotationResolver {
 
@@ -207,6 +209,7 @@ public final class AnnotationResolver {
    *   <li>Method-level annotation (if present)
    *   <li>Class-level annotation on test class
    *   <li>Class-level annotation on parent classes (traversing up the hierarchy)
+   *   <li>Meta-annotations on any of the above
    * </ol>
    *
    * @param <T> the annotation type
@@ -217,29 +220,6 @@ public final class AnnotationResolver {
    */
   private <T extends Annotation> Optional<T> findAnnotation(
       final Class<T> annotationClass, final Method testMethod, final Class<?> testClass) {
-
-    // First, check method-level annotation
-    return Optional.ofNullable(testMethod.getAnnotation(annotationClass))
-        .or(() -> findClassAnnotation(annotationClass, testClass));
-  }
-
-  /**
-   * Searches for an annotation in the class hierarchy.
-   *
-   * <p>Recursively searches up the class hierarchy until the annotation is found or the top of the
-   * hierarchy is reached.
-   *
-   * @param <T> the annotation type
-   * @param annotationClass the annotation class to search for
-   * @param testClass the starting class for the search
-   * @return Optional containing the annotation if found in the hierarchy
-   */
-  private <T extends Annotation> Optional<T> findClassAnnotation(
-      final Class<T> annotationClass, final Class<?> testClass) {
-    return Optional.ofNullable(testClass.getAnnotation(annotationClass))
-        .or(
-            () ->
-                Optional.ofNullable(testClass.getSuperclass())
-                    .flatMap(parent -> findClassAnnotation(annotationClass, parent)));
+    return AnnotationUtils.findAnnotation(annotationClass, testMethod, testClass);
   }
 }
