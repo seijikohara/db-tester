@@ -70,6 +70,7 @@ module io.github.seijikohara.dbtester.api {
 
   // SPI for implementations
   uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
+  uses io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider;
   uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
   uses io.github.seijikohara.dbtester.api.spi.ExportProvider;
   uses io.github.seijikohara.dbtester.api.spi.ExportSupport;

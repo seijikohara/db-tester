@@ -34,6 +34,7 @@ class DatabaseAssertionTest {
   @BeforeEach
   void setUp() {
     TestAssertionProvider.reset();
+    TestQueryAssertionProvider.reset();
   }
 
   /** Tests for assertEquals(TableSet, TableSet) method. */
@@ -458,15 +459,16 @@ class DatabaseAssertionTest {
   /** Tests for assertEqualsByQuery(TableSet, ...) method. */
   @Nested
   @DisplayName("assertEqualsByQuery(TableSet)")
+  @SuppressWarnings("removal")
   class AssertEqualsByQueryTableSetTest {
 
     /** Tests for assertEqualsByQuery(TableSet) method. */
     AssertEqualsByQueryTableSetTest() {}
 
-    /** Verifies that assertEqualsByQuery with TableSet delegates to provider. */
+    /** Verifies that assertEqualsByQuery with TableSet delegates to query provider. */
     @Test
     @Tag("normal")
-    @DisplayName("should delegate to provider with TableSet and query parameters")
+    @DisplayName("should delegate to query provider with TableSet and query parameters")
     void shouldDelegateToProvider_withTableSetAndQueryParameters() {
       // Given
       final var expected = mock(TableSet.class);
@@ -478,9 +480,9 @@ class DatabaseAssertionTest {
           expected, dataSource, "USERS", "SELECT * FROM USERS", ignoreColumns);
 
       // Then
-      final var invocation = TestAssertionProvider.getLastInvocation();
+      final var invocation = TestQueryAssertionProvider.getLastInvocation();
       assertAll(
-          "should delegate assertEqualsByQuery(TableSet) to provider",
+          "should delegate assertEqualsByQuery(TableSet) to query provider",
           () ->
               assertEquals(
                   "assertEqualsByQuery(TableSet,DataSource,String,String,Collection)",
@@ -510,7 +512,7 @@ class DatabaseAssertionTest {
           expected, dataSource, "USERS", "SELECT * FROM USERS", "ID", "VERSION");
 
       // Then
-      final var invocation = TestAssertionProvider.getLastInvocation();
+      final var invocation = TestQueryAssertionProvider.getLastInvocation();
       assertEquals(
           List.of("ID", "VERSION"),
           invocation.arguments().get(4),
@@ -521,15 +523,16 @@ class DatabaseAssertionTest {
   /** Tests for assertEqualsByQuery(Table, ...) method. */
   @Nested
   @DisplayName("assertEqualsByQuery(Table)")
+  @SuppressWarnings("removal")
   class AssertEqualsByQueryTableTest {
 
     /** Tests for assertEqualsByQuery(Table) method. */
     AssertEqualsByQueryTableTest() {}
 
-    /** Verifies that assertEqualsByQuery with Table delegates to provider. */
+    /** Verifies that assertEqualsByQuery with Table delegates to query provider. */
     @Test
     @Tag("normal")
-    @DisplayName("should delegate to provider with Table and query parameters")
+    @DisplayName("should delegate to query provider with Table and query parameters")
     void shouldDelegateToProvider_withTableAndQueryParameters() {
       // Given
       final var expected = mock(Table.class);
@@ -541,9 +544,9 @@ class DatabaseAssertionTest {
           expected, dataSource, "ORDERS", "SELECT * FROM ORDERS", ignoreColumns);
 
       // Then
-      final var invocation = TestAssertionProvider.getLastInvocation();
+      final var invocation = TestQueryAssertionProvider.getLastInvocation();
       assertAll(
-          "should delegate assertEqualsByQuery(Table) to provider",
+          "should delegate assertEqualsByQuery(Table) to query provider",
           () ->
               assertEquals(
                   "assertEqualsByQuery(Table,DataSource,String,String,Collection)",
@@ -575,7 +578,7 @@ class DatabaseAssertionTest {
           expected, dataSource, "ORDERS", "SELECT * FROM ORDERS", "COL1", "COL2");
 
       // Then
-      final var invocation = TestAssertionProvider.getLastInvocation();
+      final var invocation = TestQueryAssertionProvider.getLastInvocation();
       assertEquals(
           List.of("COL1", "COL2"), invocation.arguments().get(4), "should convert varargs to list");
     }

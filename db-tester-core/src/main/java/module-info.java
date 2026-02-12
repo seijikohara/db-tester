@@ -26,6 +26,8 @@ module io.github.seijikohara.dbtester.core {
   // SPI implementations for API module
   provides io.github.seijikohara.dbtester.api.spi.AssertionProvider with
       io.github.seijikohara.dbtester.internal.spi.DefaultAssertionProvider;
+  provides io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider with
+      io.github.seijikohara.dbtester.internal.spi.DefaultQueryAssertionProvider;
   provides io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider with
       io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider;
   provides io.github.seijikohara.dbtester.api.spi.ExpectationProvider with
