@@ -14,6 +14,9 @@ dependencies {
     implementation(platform(libs.junit.bom))
     implementation(libs.junit.jupiter)
 
+    // Runtime dependency for SPI implementation (ServiceLoader)
+    runtimeOnly(project(":db-tester-core"))
+
     // Compile-time dependency for logging
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
@@ -26,7 +29,6 @@ testing {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
                 implementation(libs.mockito.junit.jupiter)
-                runtimeOnly(project(":db-tester-core"))
                 runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
             }

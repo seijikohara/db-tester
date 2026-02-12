@@ -16,6 +16,9 @@ dependencies {
     implementation(libs.groovy)
     implementation(platform(libs.spock.bom))
 
+    // Runtime dependency for SPI implementation (ServiceLoader)
+    runtimeOnly(project(":db-tester-core"))
+
     // Compile-time dependency for logging
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
@@ -25,7 +28,6 @@ testing {
     suites {
         val test by getting(JvmTestSuite::class) {
             dependencies {
-                runtimeOnly(project(":db-tester-core"))
                 runtimeOnly(platform(libs.slf4j.bom))
                 runtimeOnly(libs.slf4j.simple)
                 runtimeOnly(libs.junit.platform.launcher)

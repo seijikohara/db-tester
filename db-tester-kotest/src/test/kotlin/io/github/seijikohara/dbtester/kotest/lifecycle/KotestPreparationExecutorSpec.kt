@@ -4,6 +4,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
@@ -173,16 +174,18 @@ class KotestPreparationExecutorSpec : AnnotationSpec() {
                         every { loader.loadExpectationDataSetsWithExclusions(any()) } returns emptyList()
                     }
 
-                val conventionsBuilder = ConventionSettings.builder()
-                if (queryTimeout != null) {
-                    conventionsBuilder.queryTimeout(queryTimeout)
-                }
-                val conventions = conventionsBuilder.build()
+                val conventions = ConventionSettings.builder().build()
+                val execution =
+                    ExecutionSettings
+                        .builder()
+                        .queryTimeout(queryTimeout)
+                        .build()
 
                 val configuration =
                     Configuration
                         .builder()
                         .conventions(conventions)
+                        .execution(execution)
                         .operations(OperationDefaults.standard())
                         .loader(loader)
                         .build()

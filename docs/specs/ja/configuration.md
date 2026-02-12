@@ -17,8 +17,10 @@ description: "DataSource登録、データベース操作、比較戦略の設�
 
 | コンポーネント | 型 | 説明 |
 |---------------|-----|------|
-| `conventions` | `ConventionSettings` | データセットディレクトリ解決ルール |
+| `conventions` | `ConventionSettings` | データセットディレクトリ解決ルールと命名規約 |
 | `operations` | `OperationDefaults` | デフォルトのデータベース操作 |
+| `verification` | `VerificationSettings` | 検証動作の設定 |
+| `execution` | `ExecutionSettings` | 実行動作の設定 |
 | `loader` | `DataSetLoader` | データセット読み込み戦略 |
 
 ### ファクトリメソッド
@@ -40,6 +42,8 @@ description: "DataSource登録、データベース操作、比較戦略の設�
 |----------|------|
 | `conventions(ConventionSettings)` | データセット検出の解決ルールを設定 |
 | `operations(OperationDefaults)` | デフォルトのデータベース操作を設定 |
+| `verification(VerificationSettings)` | 検証動作を設定 |
+| `execution(ExecutionSettings)` | 実行動作を設定 |
 | `loader(DataSetLoader)` | データセット構築戦略を設定 |
 | `build()` | 新しいConfigurationインスタンスをビルド |
 
@@ -50,6 +54,8 @@ description: "DataSource登録、データベース操作、比較戦略の設�
 1. 規約: `ConventionSettings.standard()`
 2. 操作: `OperationDefaults.standard()`
 3. ローダー: `DataSetLoaderProvider`からServiceLoader経由で読み込み
+4. 検証: `VerificationSettings.standard()`
+5. 実行: `ExecutionSettings.standard()`
 
 ### 使用例
 
@@ -98,13 +104,6 @@ static void setup(ExtensionContext context) {
 | `dataFormat` | `DataFormat` | `AUTO` | データセットファイルのファイル形式。AUTOはすべてのサポート形式を自動検出 |
 | `tableMergeStrategy` | `TableMergeStrategy` | `UNION_ALL` | 重複テーブルのマージ戦略 |
 | `loadOrderFileName` | `String` | `"load-order.txt"` | テーブル読み込み順序指定用ファイル名 |
-| `globalExcludeColumns` | `Set<String>` | `Set.of()` | すべての検証から除外するカラム名（大文字小文字を区別しない） |
-| `globalColumnStrategies` | `Map<String, ColumnStrategyMapping>` | `Map.of()` | すべての検証に適用するカラム比較戦略 |
-| `rowOrdering` | `RowOrdering` | `ORDERED` | デフォルトの行比較戦略 |
-| `queryTimeout` | `@Nullable Duration` | `null` | クエリの最大待機時間。nullでタイムアウトなし |
-| `retryCount` | `int` | `0` | 検証のリトライ回数（0でリトライなし） |
-| `retryDelay` | `Duration` | `100ms` | リトライ間の遅延 |
-| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | 操作のトランザクション動作 |
 
 ### ファクトリメソッド
 
@@ -129,13 +128,6 @@ static void setup(ExtensionContext context) {
 | `dataFormat(DataFormat)` | データ形式を設定 |
 | `tableMergeStrategy(TableMergeStrategy)` | マージ戦略を設定 |
 | `loadOrderFileName(String)` | 読み込み順序ファイル名を設定 |
-| `globalExcludeColumns(Set<String>)` | グローバル除外カラムを設定 |
-| `globalColumnStrategies(Map<String, ColumnStrategyMapping>)` | グローバルカラム戦略を設定 |
-| `rowOrdering(RowOrdering)` | 行順序戦略を設定 |
-| `queryTimeout(Duration)` | クエリタイムアウトを設定（nullでタイムアウトなし） |
-| `retryCount(int)` | リトライ回数を設定 |
-| `retryDelay(Duration)` | リトライ遅延を設定 |
-| `transactionMode(TransactionMode)` | トランザクションモードを設定 |
 | `build()` | 新しいConventionSettingsインスタンスをビルド |
 
 ### Withメソッド（Fluent Copy）
@@ -148,13 +140,6 @@ static void setup(ExtensionContext context) {
 | `withDataFormat(DataFormat)` | 指定した形式でコピーを作成 |
 | `withTableMergeStrategy(TableMergeStrategy)` | 指定したマージ戦略でコピーを作成 |
 | `withLoadOrderFileName(String)` | 指定した読み込み順序ファイル名でコピーを作成 |
-| `withGlobalExcludeColumns(Set<String>)` | 指定したグローバル除外カラムでコピーを作成 |
-| `withGlobalColumnStrategies(Map<String, ColumnStrategyMapping>)` | 指定したグローバルカラム戦略でコピーを作成 |
-| `withRowOrdering(RowOrdering)` | 指定した行順序戦略でコピーを作成 |
-| `withQueryTimeout(Duration)` | 指定したクエリタイムアウトでコピーを作成（nullでタイムアウトなし） |
-| `withRetryCount(int)` | 指定したリトライ回数でコピーを作成 |
-| `withRetryDelay(Duration)` | 指定したリトライ遅延でコピーを作成 |
-| `withTransactionMode(TransactionMode)` | 指定したトランザクションモードでコピーを作成 |
 
 ### ディレクトリ解決
 
@@ -190,6 +175,104 @@ src/test/resources/
 | `com/example/UserTest` | `/expected` | `com/example/UserTest/expected` |
 | `/data/test` | `/expected` | `/data/test/expected` |
 | `custom/path` | `/verify` | `custom/path/verify` |
+
+
+## VerificationSettings
+
+期待フェーズの検証動作を定義します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.config.VerificationSettings`
+
+**型**: ビルダーパターンを持つ`final class`
+
+### フィールド
+
+| フィールド | 型 | デフォルト | 説明 |
+|------------|-----|-----------|------|
+| `globalExcludeColumns` | `Set<String>` | `Set.of()` | すべての検証から除外するカラム名（大文字小文字を区別しない） |
+| `globalColumnStrategies` | `Map<String, ColumnStrategyMapping>` | `Map.of()` | すべての検証に適用するカラム比較戦略 |
+| `rowOrdering` | `RowOrdering` | `ORDERED` | デフォルトの行比較戦略 |
+| `retryCount` | `int` | `0` | 検証のリトライ回数（0でリトライなし） |
+| `retryDelay` | `Duration` | `100ms` | リトライ間の遅延 |
+
+### ファクトリメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `builder()` | VerificationSettingsインスタンス構築用の新しいビルダーを作成 |
+| `standard()` | すべてのデフォルトで設定を作成 |
+
+### インスタンスメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `toBuilder()` | このインスタンスの値で初期化された新しいビルダーを作成 |
+
+### ビルダーメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `globalExcludeColumns(Set<String>)` | グローバル除外カラムを設定 |
+| `globalColumnStrategies(Map<String, ColumnStrategyMapping>)` | グローバルカラム戦略を設定 |
+| `rowOrdering(RowOrdering)` | 行順序戦略を設定 |
+| `retryCount(int)` | リトライ回数を設定 |
+| `retryDelay(Duration)` | リトライ遅延を設定 |
+| `build()` | 新しいVerificationSettingsインスタンスをビルド |
+
+### Withメソッド（Fluent Copy）
+
+| メソッド | 説明 |
+|----------|------|
+| `withGlobalExcludeColumns(Set<String>)` | 指定したグローバル除外カラムでコピーを作成 |
+| `withGlobalColumnStrategies(Map<String, ColumnStrategyMapping>)` | 指定したグローバルカラム戦略でコピーを作成 |
+| `withRowOrdering(RowOrdering)` | 指定した行順序戦略でコピーを作成 |
+| `withRetryCount(int)` | 指定したリトライ回数でコピーを作成 |
+| `withRetryDelay(Duration)` | 指定したリトライ遅延でコピーを作成 |
+
+
+## ExecutionSettings
+
+データベース操作の実行動作を定義します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.config.ExecutionSettings`
+
+**型**: ビルダーパターンを持つ`final class`
+
+### フィールド
+
+| フィールド | 型 | デフォルト | 説明 |
+|------------|-----|-----------|------|
+| `queryTimeout` | `@Nullable Duration` | `null` | クエリの最大待機時間。nullでタイムアウトなし |
+| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | 操作のトランザクション動作 |
+
+### ファクトリメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `builder()` | ExecutionSettingsインスタンス構築用の新しいビルダーを作成 |
+| `of(Duration, TransactionMode)` | 指定した値で設定を作成 |
+| `standard()` | すべてのデフォルトで設定を作成 |
+
+### インスタンスメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `toBuilder()` | このインスタンスの値で初期化された新しいビルダーを作成 |
+
+### ビルダーメソッド
+
+| メソッド | 説明 |
+|----------|------|
+| `queryTimeout(Duration)` | クエリタイムアウトを設定（nullでタイムアウトなし） |
+| `transactionMode(TransactionMode)` | トランザクションモードを設定 |
+| `build()` | 新しいExecutionSettingsインスタンスをビルド |
+
+### Withメソッド（Fluent Copy）
+
+| メソッド | 説明 |
+|----------|------|
+| `withQueryTimeout(Duration)` | 指定したクエリタイムアウトでコピーを作成（nullでタイムアウトなし） |
+| `withTransactionMode(TransactionMode)` | 指定したトランザクションモードでコピーを作成 |
 
 
 ## DataSourceRegistry
@@ -415,7 +498,7 @@ static void setup(ExtensionContext context) {
 行順序は以下で設定できます:
 
 1. **アノテーションレベル**: テストごとに`@ExpectedDataSet(rowOrdering = ...)`で指定
-2. **グローバル**: `ConventionSettings.withRowOrdering()`で指定
+2. **グローバル**: `VerificationSettings.withRowOrdering()`で指定
 
 アノテーションレベルの設定がグローバル設定より優先されます。
 
@@ -456,7 +539,7 @@ static void setup(ExtensionContext context) {
 
 ```java
 var config = Configuration.builder()
-    .conventions(ConventionSettings.builder()
+    .execution(ExecutionSettings.builder()
         .transactionMode(TransactionMode.AUTO_COMMIT)
         .build())
     .build();
@@ -477,16 +560,20 @@ var config = Configuration.builder()
 // リトライ、タイムアウト、順序なし比較を設定
 var config = Configuration.builder()
     .conventions(ConventionSettings.builder()
+        .build())
+    .verification(VerificationSettings.builder()
         .rowOrdering(RowOrdering.UNORDERED)
-        .queryTimeout(Duration.ofSeconds(30))
         .retryCount(3)
         .retryDelay(Duration.ofMillis(500))
-        .transactionMode(TransactionMode.AUTO_COMMIT)
         .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
         .globalColumnStrategies(Map.of(
             "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
             "VERSION", ColumnStrategyMapping.ignore("VERSION")
         ))
+        .build())
+    .execution(ExecutionSettings.builder()
+        .queryTimeout(Duration.ofSeconds(30))
+        .transactionMode(TransactionMode.AUTO_COMMIT)
         .build())
     .build();
 ```
