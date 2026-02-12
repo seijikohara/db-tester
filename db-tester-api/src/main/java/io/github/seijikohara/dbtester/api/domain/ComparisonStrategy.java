@@ -137,7 +137,10 @@ public final class ComparisonStrategy {
    * <p>The expected value is checked as a substring of the actual value.
    *
    * @return a new CONTAINS comparison strategy
+   * @deprecated Use {@link #regex(String)} with pattern {@code ".*substring.*"} instead. Removed in
+   *     2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public static ComparisonStrategy contains() {
     return new ComparisonStrategy(Type.CONTAINS, null, null);
   }
@@ -149,7 +152,10 @@ public final class ComparisonStrategy {
    *
    * @param substring the substring to search for in the actual value
    * @return a new CONTAINS comparison strategy
+   * @deprecated Use {@link #regex(String)} with pattern {@code ".*substring.*"} instead. Removed in
+   *     2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public static ComparisonStrategy contains(final String substring) {
     return new ComparisonStrategy(Type.CONTAINS, null, substring);
   }
@@ -163,7 +169,9 @@ public final class ComparisonStrategy {
    * @param rangeOptions the range options string (e.g., "min=100,max=200")
    * @return a new RANGE comparison strategy
    * @throws IllegalArgumentException if the options string format is invalid
+   * @deprecated Use programmatic assertions for range verification instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public static ComparisonStrategy range(final String rangeOptions) {
     final var trimmed = rangeOptions.trim();
     final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(trimmed);
@@ -196,7 +204,9 @@ public final class ComparisonStrategy {
    * @param max the maximum value (inclusive)
    * @return a new RANGE comparison strategy
    * @throws IllegalArgumentException if min is greater than max
+   * @deprecated Use programmatic assertions for range verification instead. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public static ComparisonStrategy range(final double min, final double max) {
     if (min > max) {
       throw new IllegalArgumentException(
@@ -754,10 +764,20 @@ public final class ComparisonStrategy {
     /** Match against a regular expression. */
     REGEX,
 
-    /** Substring containment check. */
+    /**
+     * Substring containment check.
+     *
+     * @deprecated Use {@link #REGEX} instead. Removed in 2.0.
+     */
+    @Deprecated(since = "1.1", forRemoval = true)
     CONTAINS,
 
-    /** Numeric range verification. */
+    /**
+     * Numeric range verification.
+     *
+     * @deprecated Use programmatic assertions instead. Removed in 2.0.
+     */
+    @Deprecated(since = "1.1", forRemoval = true)
     RANGE
   }
 }

@@ -996,6 +996,7 @@ class ComparisonStrategyTest {
     @Test
     @Tag("normal")
     @DisplayName("should return options for parameterized strategies")
+    @SuppressWarnings("removal")
     void shouldReturnOptions_whenCalledOnParameterizedStrategy() {
       // Given
       final var rangeStrategy = ComparisonStrategy.range(10.0, 20.0);

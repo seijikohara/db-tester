@@ -42,7 +42,7 @@ DB Testerは、JUnit、Spock、およびKotest向けのデータベーステス�
 3. 設定可能な比較戦略を使用して期待値と実際の状態を比較
 4. 構造化されたエラーメッセージで差異を報告
 
-利用可能な比較戦略: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`, `CONTAINS`, `RANGE`
+利用可能な比較戦略: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`。`CONTAINS`と`RANGE`戦略は非推奨です。代わりに`REGEX`またはプログラム的アサーションを使用してください。
 
 ### 規約ベースの検出
 
