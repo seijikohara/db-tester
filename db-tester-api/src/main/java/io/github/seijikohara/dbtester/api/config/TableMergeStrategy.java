@@ -56,6 +56,11 @@ public enum TableMergeStrategy {
    * <p>Similar to SQL UNION. When the same table appears in multiple datasets, all unique rows are
    * combined. Duplicate rows (where all column values match) appear only once in the result.
    *
+   * <p>Row equality is determined by comparing cell values using {@code CellValue.equals()}. Two
+   * rows are considered equal if all corresponding column values are equal. Values from all data
+   * formats (CSV, TSV, JSON, YAML) are normalized to strings during parsing, so deduplication
+   * compares string representations.
+   *
    * <p>Example:
    *
    * <pre>
