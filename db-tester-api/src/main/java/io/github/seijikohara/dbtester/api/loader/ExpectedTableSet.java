@@ -18,12 +18,12 @@ import java.util.Set;
  * <p>The exclusion set is derived from both annotation-level exclusions ({@link
  * io.github.seijikohara.dbtester.api.annotation.DataSetSource#excludeColumns()}) and global
  * exclusions ({@link
- * io.github.seijikohara.dbtester.api.config.ConventionSettings#globalExcludeColumns()}).
+ * io.github.seijikohara.dbtester.api.config.VerificationSettings#globalExcludeColumns()}).
  *
  * <p>Column strategies are derived from annotation-level strategies ({@link
  * io.github.seijikohara.dbtester.api.annotation.DataSetSource#columnStrategies()}) and global
  * strategies ({@link
- * io.github.seijikohara.dbtester.api.config.ConventionSettings#globalColumnStrategies()}).
+ * io.github.seijikohara.dbtester.api.config.VerificationSettings#globalColumnStrategies()}).
  *
  * <p>Column name matching is case-insensitive for both exclusions and strategies.
  *

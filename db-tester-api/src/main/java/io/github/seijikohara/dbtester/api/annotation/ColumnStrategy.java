@@ -80,15 +80,8 @@ public @interface ColumnStrategy {
   /**
    * Strategy-specific options for parameterized strategies.
    *
-   * <p>This attribute provides configuration for strategies that require additional parameters:
-   *
-   * <ul>
-   *   <li>{@link Strategy#RANGE}: Range specification in the format {@code "min=N,max=M"} where N
-   *       and M are numeric values. Both min and max are inclusive. Example: {@code
-   *       "min=100,max=200"}
-   *   <li>{@link Strategy#CONTAINS}: Optional substring to search for. If empty, the expected value
-   *       from the dataset is used as the substring to match against the actual value.
-   * </ul>
+   * <p>This attribute is reserved for future use by strategies that require additional parameters
+   * beyond the {@link #pattern()} attribute.
    *
    * @return the strategy options, or empty string if not applicable
    */

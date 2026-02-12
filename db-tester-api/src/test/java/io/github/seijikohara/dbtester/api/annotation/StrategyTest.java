@@ -143,19 +143,6 @@ class StrategyTest {
           result.getType(),
           "should have JSON_EQUIVALENT type");
     }
-
-    /** Verifies that CONTAINS without options converts to default CONTAINS strategy. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert CONTAINS to ComparisonStrategy.contains()")
-    @SuppressWarnings("removal")
-    void shouldConvertContains_toComparisonStrategy() {
-      // When
-      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("");
-
-      // Then
-      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
-    }
   }
 
   /** Tests for toComparisonStrategy(String) method. */
@@ -234,72 +221,6 @@ class StrategyTest {
     /** Tests for toComparisonStrategy with pattern and options. */
     ToComparisonStrategyWithOptionsTests() {}
 
-    /** Verifies that CONTAINS with options creates contains strategy with substring. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert CONTAINS with options to contains strategy with substring")
-    void shouldConvertContainsWithOptions_toContainsStrategy() {
-      // When
-      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("", "hello");
-
-      // Then
-      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
-      assertTrue(result.getOptions().isPresent(), "should have options");
-      assertEquals("hello", result.getOptions().get(), "should have correct options");
-    }
-
-    /** Verifies that CONTAINS without options creates default contains strategy. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert CONTAINS without options to default contains strategy")
-    void shouldConvertContainsWithoutOptions_toDefaultContainsStrategy() {
-      // When
-      final ComparisonStrategy result = Strategy.CONTAINS.toComparisonStrategy("", "");
-
-      // Then
-      assertEquals(ComparisonStrategy.Type.CONTAINS, result.getType(), "should have CONTAINS type");
-    }
-
-    /** Verifies that RANGE with valid options creates range strategy. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert RANGE with options to range strategy")
-    void shouldConvertRangeWithOptions_toRangeStrategy() {
-      // When
-      final ComparisonStrategy result = Strategy.RANGE.toComparisonStrategy("", "min=0,max=100");
-
-      // Then
-      assertEquals(ComparisonStrategy.Type.RANGE, result.getType(), "should have RANGE type");
-      assertTrue(result.getOptions().isPresent(), "should have options");
-      assertEquals("min=0,max=100", result.getOptions().get(), "should have correct options");
-    }
-
-    /** Verifies that RANGE with empty options throws exception. */
-    @Test
-    @Tag("error")
-    @DisplayName("should throw IllegalArgumentException when RANGE options are empty")
-    void shouldThrowException_whenRangeOptionsAreEmpty() {
-      // When & Then
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> Strategy.RANGE.toComparisonStrategy("", ""),
-          "should throw IllegalArgumentException for empty options");
-    }
-
-    /** Verifies that RANGE with null options throws exception. */
-    @SuppressWarnings("NullAway")
-    @Test
-    @Tag("error")
-    @DisplayName("should throw IllegalArgumentException when RANGE options are null")
-    void shouldThrowException_whenRangeOptionsAreNull() {
-      // When & Then
-      final String nullOptions = null;
-      assertThrows(
-          IllegalArgumentException.class,
-          () -> Strategy.RANGE.toComparisonStrategy("", nullOptions),
-          "should throw IllegalArgumentException for null options");
-    }
-
     /** Verifies that REGEX still works with pattern in two-argument overload. */
     @Test
     @Tag("normal")
@@ -316,6 +237,18 @@ class StrategyTest {
       assertTrue(result.getPattern().isPresent(), "should have pattern");
       assertEquals(
           pattern, result.getPattern().get().pattern(), "should have correct pattern string");
+    }
+
+    /** Verifies that non-REGEX strategies delegate to single-arg overload. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should delegate to single-arg overload for non-REGEX strategies")
+    void shouldDelegate_whenNonRegexStrategy() {
+      // When
+      final ComparisonStrategy strictResult = Strategy.STRICT.toComparisonStrategy("", "ignored");
+
+      // Then
+      assertSame(ComparisonStrategy.STRICT, strictResult, "should return STRICT strategy");
     }
   }
 
@@ -336,7 +269,7 @@ class StrategyTest {
       final Strategy[] values = Strategy.values();
 
       // Then
-      assertEquals(11, values.length, "should have 11 strategy values");
+      assertEquals(9, values.length, "should have 9 strategy values");
     }
 
     /** Verifies valueOf works correctly. */
@@ -367,8 +300,6 @@ class StrategyTest {
           Strategy.JSON_EQUIVALENT,
           Strategy.valueOf("JSON_EQUIVALENT"),
           "should resolve JSON_EQUIVALENT");
-      assertEquals(Strategy.CONTAINS, Strategy.valueOf("CONTAINS"), "should resolve CONTAINS");
-      assertEquals(Strategy.RANGE, Strategy.valueOf("RANGE"), "should resolve RANGE");
     }
   }
 }

@@ -97,60 +97,13 @@ public final class Configuration {
    *
    * @param builder the builder containing configuration values
    */
-  @SuppressWarnings("removal")
   private Configuration(final Builder builder) {
     this.conventions = builder.conventions;
     this.operations = builder.operations;
     this.loader = builder.loader != null ? builder.loader : LoaderHolder.INSTANCE;
     this.verification =
-        builder.verification != null
-            ? builder.verification
-            : deriveVerificationFromConventions(builder.conventions);
-    this.execution =
-        builder.execution != null
-            ? builder.execution
-            : deriveExecutionFromConventions(builder.conventions);
-  }
-
-  /**
-   * Derives verification settings from convention settings for backward compatibility.
-   *
-   * <p>When verification settings are not explicitly provided, this method extracts the relevant
-   * properties from the convention settings to ensure existing code that sets verification-related
-   * properties on ConventionSettings continues to work.
-   *
-   * @param conventions the convention settings to derive from
-   * @return verification settings derived from the conventions
-   */
-  @SuppressWarnings("removal")
-  private static VerificationSettings deriveVerificationFromConventions(
-      final ConventionSettings conventions) {
-    return VerificationSettings.builder()
-        .globalExcludeColumns(conventions.globalExcludeColumns())
-        .globalColumnStrategies(conventions.globalColumnStrategies())
-        .rowOrdering(conventions.rowOrdering())
-        .retryCount(conventions.retryCount())
-        .retryDelay(conventions.retryDelay())
-        .build();
-  }
-
-  /**
-   * Derives execution settings from convention settings for backward compatibility.
-   *
-   * <p>When execution settings are not explicitly provided, this method extracts the relevant
-   * properties from the convention settings to ensure existing code that sets execution-related
-   * properties on ConventionSettings continues to work.
-   *
-   * @param conventions the convention settings to derive from
-   * @return execution settings derived from the conventions
-   */
-  @SuppressWarnings("removal")
-  private static ExecutionSettings deriveExecutionFromConventions(
-      final ConventionSettings conventions) {
-    return ExecutionSettings.builder()
-        .queryTimeout(conventions.queryTimeout())
-        .transactionMode(conventions.transactionMode())
-        .build();
+        builder.verification != null ? builder.verification : VerificationSettings.standard();
+    this.execution = builder.execution != null ? builder.execution : ExecutionSettings.standard();
   }
 
   /**
@@ -273,10 +226,10 @@ public final class Configuration {
     /** The resolution rules for locating datasets. */
     private ConventionSettings conventions = ConventionSettings.standard();
 
-    /** The verification behavior settings, or null to derive from conventions. */
+    /** The verification behavior settings, or null to use standard defaults. */
     private @Nullable VerificationSettings verification = null;
 
-    /** The execution behavior settings, or null to derive from conventions. */
+    /** The execution behavior settings, or null to use standard defaults. */
     private @Nullable ExecutionSettings execution = null;
 
     /** The default database operations. */
@@ -302,8 +255,7 @@ public final class Configuration {
     /**
      * Sets the verification behavior settings.
      *
-     * <p>If not set, verification settings are derived from the convention settings for backward
-     * compatibility.
+     * <p>If not set, standard verification settings are used.
      *
      * @param verification the verification settings
      * @return this builder
@@ -316,8 +268,7 @@ public final class Configuration {
     /**
      * Sets the execution behavior settings.
      *
-     * <p>If not set, execution settings are derived from the convention settings for backward
-     * compatibility.
+     * <p>If not set, standard execution settings are used.
      *
      * @param execution the execution settings
      * @return this builder
@@ -355,8 +306,7 @@ public final class Configuration {
      * Builds a new {@link Configuration} instance with the configured values.
      *
      * <p>If {@link #verification(VerificationSettings)} or {@link #execution(ExecutionSettings)}
-     * have not been called, the corresponding settings are derived from the convention settings for
-     * backward compatibility.
+     * have not been called, standard defaults are used.
      *
      * @return a new Configuration instance
      */

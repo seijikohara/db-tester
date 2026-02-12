@@ -140,37 +140,6 @@ public final class Cell {
   }
 
   /**
-   * Compares this cell's value with another CellValue using the column's comparison strategy.
-   *
-   * @param other the value to compare with
-   * @return {@code true} if the values match according to the column's strategy, {@code false}
-   *     otherwise
-   * @deprecated Use {@code ComparisonEngine.matches(strategy, expected, actual)} in the core module
-   *     instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  @SuppressWarnings("removal")
-  public boolean matches(final CellValue other) {
-    return column.getComparisonStrategy().matches(value.value(), other.value());
-  }
-
-  /**
-   * Compares this cell's value with another Cell's value.
-   *
-   * <p>Uses this cell's column comparison strategy for the comparison.
-   *
-   * @param other the cell to compare with
-   * @return {@code true} if the values match according to this column's strategy, {@code false}
-   *     otherwise
-   * @deprecated Use {@code ComparisonEngine.matches(strategy, expected, actual)} in the core module
-   *     instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  public boolean matches(final Cell other) {
-    return matches(other.value);
-  }
-
-  /**
    * Returns the value as a String, or empty if the value is NULL.
    *
    * @return the string representation or empty

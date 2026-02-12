@@ -1,12 +1,9 @@
 package io.github.seijikohara.dbtester.api.spi;
 
-import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
-import java.util.Collection;
-import java.util.Map;
 import javax.sql.DataSource;
 import org.slf4j.LoggerFactory;
 
@@ -109,107 +106,5 @@ public interface ExpectationProvider {
               + "DataSource, ExpectationContext) to support custom epsilon.");
     }
     verifyExpectation(expectedTableSet, dataSource);
-  }
-
-  /**
-   * Verifies that the database state matches the expected dataset, excluding specified columns.
-   *
-   * @param expectedTableSet the expected dataset containing expected table data
-   * @param dataSource the database connection source for retrieving actual data
-   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
-   * @throws AssertionError if verification fails (row count mismatch, column value mismatch, or
-   *     table structure mismatch)
-   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
-   *     Construct an {@link ExpectationContext} with {@link ExpectationContext#defaults()}{@code
-   *     .withExcludeColumns(excludeColumns)}. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  default void verifyExpectation(
-      final TableSet expectedTableSet,
-      final DataSource dataSource,
-      final Collection<String> excludeColumns) {
-    verifyExpectation(
-        expectedTableSet,
-        dataSource,
-        ExpectationContext.defaults().withExcludeColumns(excludeColumns));
-  }
-
-  /**
-   * Verifies that the database state matches the expected dataset with column comparison
-   * strategies.
-   *
-   * @param expectedTableSet the expected dataset containing expected table data
-   * @param dataSource the database connection source for retrieving actual data
-   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
-   * @param columnStrategies column comparison strategies keyed by uppercase column name
-   * @throws AssertionError if verification fails
-   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
-   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  default void verifyExpectation(
-      final TableSet expectedTableSet,
-      final DataSource dataSource,
-      final Collection<String> excludeColumns,
-      final Map<String, ColumnStrategyMapping> columnStrategies) {
-    verifyExpectation(
-        expectedTableSet,
-        dataSource,
-        ExpectationContext.defaults()
-            .withExcludeColumns(excludeColumns)
-            .withColumnStrategies(columnStrategies));
-  }
-
-  /**
-   * Verifies that the database state matches the expected dataset with row ordering control.
-   *
-   * @param expectedTableSet the expected dataset containing expected table data
-   * @param dataSource the database connection source for retrieving actual data
-   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
-   * @param columnStrategies column comparison strategies keyed by uppercase column name
-   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
-   * @throws AssertionError if verification fails
-   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
-   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  default void verifyExpectation(
-      final TableSet expectedTableSet,
-      final DataSource dataSource,
-      final Collection<String> excludeColumns,
-      final Map<String, ColumnStrategyMapping> columnStrategies,
-      final RowOrdering rowOrdering) {
-    verifyExpectation(
-        expectedTableSet,
-        dataSource,
-        ExpectationContext.of(
-            excludeColumns, columnStrategies, rowOrdering, OperationDefaults.standard()));
-  }
-
-  /**
-   * Verifies that the database state matches the expected dataset with operation defaults.
-   *
-   * @param expectedTableSet the expected dataset containing expected table data
-   * @param dataSource the database connection source for retrieving actual data
-   * @param excludeColumns column names to exclude from comparison (case-insensitive matching)
-   * @param columnStrategies column comparison strategies keyed by uppercase column name
-   * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
-   * @param operationDefaults the operation defaults containing comparison settings
-   * @throws AssertionError if verification fails
-   * @deprecated Use {@link #verifyExpectation(TableSet, DataSource, ExpectationContext)} instead.
-   *     Construct an {@link ExpectationContext} with the desired parameters. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  default void verifyExpectation(
-      final TableSet expectedTableSet,
-      final DataSource dataSource,
-      final Collection<String> excludeColumns,
-      final Map<String, ColumnStrategyMapping> columnStrategies,
-      final RowOrdering rowOrdering,
-      final OperationDefaults operationDefaults) {
-    verifyExpectation(
-        expectedTableSet,
-        dataSource,
-        ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults));
   }
 }

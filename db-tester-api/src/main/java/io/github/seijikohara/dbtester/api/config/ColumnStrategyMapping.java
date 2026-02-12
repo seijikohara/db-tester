@@ -6,18 +6,19 @@ import java.util.Locale;
 /**
  * Associates a column name with its comparison strategy for expectation verification.
  *
- * <p>This record is used to configure global column strategies in {@link ConventionSettings} and to
- * represent annotation-based column strategy configurations. Column name matching is
+ * <p>This record is used to configure global column strategies in {@link VerificationSettings} and
+ * to represent annotation-based column strategy configurations. Column name matching is
  * case-insensitive.
  *
  * <p>Example usage with programmatic configuration:
  *
  * <pre>{@code
- * var settings = ConventionSettings.standard()
- *     .withGlobalColumnStrategies(Map.of(
+ * var settings = VerificationSettings.builder()
+ *     .globalColumnStrategies(Map.of(
  *         "CREATED_AT", ColumnStrategyMapping.ignore("CREATED_AT"),
  *         "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")
- *     ));
+ *     ))
+ *     .build();
  * }</pre>
  *
  * <p>The column name is normalized to uppercase in the constructor, so mappings created with
@@ -25,7 +26,7 @@ import java.util.Locale;
  *
  * @param columnName the column name (stored in uppercase for case-insensitive matching)
  * @param strategy the comparison strategy to use for this column
- * @see ConventionSettings#globalColumnStrategies()
+ * @see VerificationSettings#globalColumnStrategies()
  * @see io.github.seijikohara.dbtester.api.annotation.ColumnStrategy
  */
 public record ColumnStrategyMapping(String columnName, ComparisonStrategy strategy) {
@@ -155,51 +156,5 @@ public record ColumnStrategyMapping(String columnName, ComparisonStrategy strate
    */
   public static ColumnStrategyMapping jsonEquivalent(final String columnName) {
     return new ColumnStrategyMapping(columnName, ComparisonStrategy.JSON_EQUIVALENT);
-  }
-
-  /**
-   * Creates a ColumnStrategyMapping for substring containment check.
-   *
-   * @param columnName the column name for containment check
-   * @return a new ColumnStrategyMapping with CONTAINS strategy
-   * @deprecated Use {@link #regex(String, String)} with pattern {@code ".*substring.*"} instead.
-   *     Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  @SuppressWarnings("removal")
-  public static ColumnStrategyMapping contains(final String columnName) {
-    return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains());
-  }
-
-  /**
-   * Creates a ColumnStrategyMapping for substring containment check with a specific substring.
-   *
-   * @param columnName the column name for containment check
-   * @param substring the substring to search for
-   * @return a new ColumnStrategyMapping with CONTAINS strategy
-   * @deprecated Use {@link #regex(String, String)} with pattern {@code ".*substring.*"} instead.
-   *     Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  @SuppressWarnings("removal")
-  public static ColumnStrategyMapping contains(final String columnName, final String substring) {
-    return new ColumnStrategyMapping(columnName, ComparisonStrategy.contains(substring));
-  }
-
-  /**
-   * Creates a ColumnStrategyMapping for numeric range verification.
-   *
-   * @param columnName the column name for range check
-   * @param min the minimum value (inclusive)
-   * @param max the maximum value (inclusive)
-   * @return a new ColumnStrategyMapping with RANGE strategy
-   * @throws IllegalArgumentException if min is greater than max
-   * @deprecated Use programmatic assertions for range verification instead. Removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  @SuppressWarnings("removal")
-  public static ColumnStrategyMapping range(
-      final String columnName, final double min, final double max) {
-    return new ColumnStrategyMapping(columnName, ComparisonStrategy.range(min, max));
   }
 }

@@ -14,8 +14,6 @@ import java.time.temporal.ChronoField;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -28,10 +26,6 @@ import org.jspecify.annotations.Nullable;
  * @see ComparisonStrategy
  */
 public final class ComparisonEngine {
-
-  /** Pattern for parsing RANGE options in format "min=N,max=M". */
-  private static final Pattern RANGE_OPTIONS_PATTERN =
-      Pattern.compile("min\\s*=\\s*([\\d.eE+\\-]+)\\s*,\\s*max\\s*=\\s*([\\d.eE+\\-]+)");
 
   /** Formatter for timestamps with timezone offset. */
   private static final DateTimeFormatter FLEXIBLE_OFFSET_FORMATTER =
@@ -87,7 +81,6 @@ public final class ComparisonEngine {
    * @param actual the actual value
    * @return {@code true} if the values match according to the strategy, {@code false} otherwise
    */
-  @SuppressWarnings("removal")
   public static boolean matches(
       final ComparisonStrategy strategy,
       final @Nullable Object expected,
@@ -102,8 +95,6 @@ public final class ComparisonEngine {
       case JSON_EQUIVALENT -> compareJsonEquivalent(expected, actual);
       case NOT_NULL -> actual != null;
       case REGEX -> matchesRegex(strategy, actual);
-      case CONTAINS -> matchesContains(strategy, expected, actual);
-      case RANGE -> matchesRange(strategy, actual);
     };
   }
 
@@ -363,93 +354,6 @@ public final class ComparisonEngine {
           }
           return Objects.equals(expStr, actStr);
         });
-  }
-
-  // ========== Contains comparison ==========
-
-  /**
-   * Checks if the actual value contains the expected value (or the configured substring).
-   *
-   * <p>If an options string is configured, the actual value is checked for that substring.
-   * Otherwise, the expected value is used as the substring to find in the actual value.
-   *
-   * @param strategy the comparison strategy with options
-   * @param expected the expected value
-   * @param actual the actual value
-   * @return {@code true} if the actual value contains the substring, {@code false} otherwise
-   */
-  private static boolean matchesContains(
-      final ComparisonStrategy strategy,
-      final @Nullable Object expected,
-      final @Nullable Object actual) {
-    if (actual == null) {
-      return false;
-    }
-    final var actualStr = actual.toString();
-    final var options = strategy.getOptions().orElse(null);
-    if (options != null && !options.isEmpty()) {
-      return actualStr.contains(options);
-    }
-    if (expected == null) {
-      return false;
-    }
-    return actualStr.contains(expected.toString());
-  }
-
-  // ========== Range comparison ==========
-
-  /**
-   * Checks if the actual value falls within the configured numeric range.
-   *
-   * @param strategy the comparison strategy with range options
-   * @param actual the actual value
-   * @return {@code true} if the value is within range (inclusive), {@code false} otherwise
-   */
-  private static boolean matchesRange(
-      final ComparisonStrategy strategy, final @Nullable Object actual) {
-    if (actual == null) {
-      return false;
-    }
-    final var options = strategy.getOptions().orElse(null);
-    if (options == null) {
-      return false;
-    }
-    final Matcher matcher = RANGE_OPTIONS_PATTERN.matcher(options);
-    if (!matcher.matches()) {
-      return false;
-    }
-    try {
-      final var min = new BigDecimal(matcher.group(1));
-      final var max = new BigDecimal(matcher.group(2));
-      final var actualValue = toBigDecimalFromObject(actual);
-      return actualValue.map(v -> v.compareTo(min) >= 0 && v.compareTo(max) <= 0).orElse(false);
-    } catch (final NumberFormatException e) {
-      return false;
-    }
-  }
-
-  /**
-   * Converts an object to BigDecimal if possible.
-   *
-   * @param value the value to convert
-   * @return the BigDecimal, or empty if not convertible
-   */
-  private static Optional<BigDecimal> toBigDecimalFromObject(final Object value) {
-    if (value instanceof Number num) {
-      try {
-        return Optional.of(new BigDecimal(num.toString()));
-      } catch (final NumberFormatException e) {
-        return Optional.empty();
-      }
-    }
-    if (value instanceof String str) {
-      try {
-        return Optional.of(new BigDecimal(str.trim()));
-      } catch (final NumberFormatException e) {
-        return Optional.empty();
-      }
-    }
-    return Optional.empty();
   }
 
   // ========== Regex comparison ==========

@@ -50,7 +50,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `DataSetExportTest` | `DataSetExporter` API for exporting database state to CSV, JSON, and YAML files |
 | `TableMergeStrategyTest` | FIRST, LAST, UNION, UNION_ALL strategies |
 | `TableOrderingStrategiesTest` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
-| `ComparisonStrategyTest` | All comparison strategies (STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, CONTAINS, RANGE, NOT_NULL, REGEX) |
+| `ComparisonStrategyTest` | All comparison strategies (STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX) |
 | `ComprehensiveDataTypesTest` | Various SQL data types support |
 | `CustomExpectationPathsTest` | Custom resource path configuration |
 | `CustomQueryValidationTest` | Custom SQL query validation |
