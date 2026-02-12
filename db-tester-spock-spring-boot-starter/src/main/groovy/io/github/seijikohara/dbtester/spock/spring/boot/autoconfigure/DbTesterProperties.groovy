@@ -2,8 +2,11 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
+import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
+import java.time.Duration
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
 
@@ -37,6 +40,14 @@ class DbTesterProperties {
 	/** Convention settings for dataset resolution. */
 	@NestedConfigurationProperty
 	ConventionProperties convention = new ConventionProperties()
+
+	/** Verification settings for expectation behavior. */
+	@NestedConfigurationProperty
+	VerificationProperties verification = new VerificationProperties()
+
+	/** Execution settings for database operation behavior. */
+	@NestedConfigurationProperty
+	ExecutionProperties execution = new ExecutionProperties()
 
 	/** Default operation settings for preparation and expectation phases. */
 	@NestedConfigurationProperty
@@ -85,9 +96,60 @@ class DbTesterProperties {
 
 		/** File name for specifying table loading order in dataset directories. Defaults to "load-order.txt". */
 		String loadOrderFileName = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+	}
 
-		/** Column names to exclude globally from all expectation verifications. Defaults to empty set. */
+	/**
+	 * Verification properties for expectation behavior.
+	 *
+	 * <p>These properties control how the framework verifies expected database state after test
+	 * execution.
+	 *
+	 * <h2>Available Properties</h2>
+	 *
+	 * <ul>
+	 *   <li>{@code db-tester.verification.global-exclude-columns} - Column names to exclude globally
+	 *       (default: empty)
+	 *   <li>{@code db-tester.verification.row-ordering} - Row ordering strategy (default: ORDERED)
+	 *   <li>{@code db-tester.verification.retry-count} - Retry attempts (default: 0)
+	 *   <li>{@code db-tester.verification.retry-delay} - Delay between retries (default: 100ms)
+	 * </ul>
+	 */
+	static class VerificationProperties {
+
+		/** Column names to exclude globally from all expectation verifications. */
 		Set<String> globalExcludeColumns = Set.of()
+
+		/** Row ordering strategy for expectation verification. Defaults to ORDERED. */
+		RowOrdering rowOrdering = RowOrdering.ORDERED
+
+		/** Number of retry attempts for expectation verification. Defaults to 0. */
+		int retryCount = 0
+
+		/** Delay between retry attempts. Defaults to 100ms. */
+		Duration retryDelay = Duration.ofMillis(100)
+	}
+
+	/**
+	 * Execution properties for database operation behavior.
+	 *
+	 * <p>These properties control how the framework executes database operations during test
+	 * preparation.
+	 *
+	 * <h2>Available Properties</h2>
+	 *
+	 * <ul>
+	 *   <li>{@code db-tester.execution.query-timeout} - Maximum query wait time (default: none)
+	 *   <li>{@code db-tester.execution.transaction-mode} - Transaction behavior (default:
+	 *       SINGLE_TRANSACTION)
+	 * </ul>
+	 */
+	static class ExecutionProperties {
+
+		/** Maximum time to wait for database queries. Null means no timeout. */
+		Duration queryTimeout = null
+
+		/** Transaction behavior for database operations. Defaults to SINGLE_TRANSACTION. */
+		TransactionMode transactionMode = TransactionMode.SINGLE_TRANSACTION
 	}
 
 	/**

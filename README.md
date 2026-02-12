@@ -348,13 +348,13 @@ void testWithExcludedColumns() {
 }
 ```
 
-**Global exclusion** via `ConventionSettings.globalExcludeColumns`:
+**Global exclusion** via `VerificationSettings.globalExcludeColumns`:
 
 ```java
 @BeforeAll
 static void setUp(ExtensionContext context) {
     var config = Configuration.builder()
-        .conventions(ConventionSettings.builder()
+        .verification(VerificationSettings.builder()
             .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
             .build())
         .build();
@@ -366,7 +366,7 @@ static void setUp(ExtensionContext context) {
 **Spring Boot configuration**:
 
 ```properties
-db-tester.convention.global-exclude-columns=CREATED_AT,UPDATED_AT,VERSION
+db-tester.verification.global-exclude-columns=CREATED_AT,UPDATED_AT,VERSION
 ```
 
 Column names are case-insensitive. Per-dataset exclusions are combined with global exclusions.
@@ -408,8 +408,8 @@ void testWithColumnStrategies() {
 **Spring Boot configuration**:
 
 ```properties
-db-tester.convention.column-strategies[0].column-name=CREATED_AT
-db-tester.convention.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
+db-tester.verification.column-strategies[0].column-name=CREATED_AT
+db-tester.verification.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
 ```
 
 Column names in strategies are case-insensitive. Annotation-level strategies override global strategies. Excluded columns take precedence over strategies.

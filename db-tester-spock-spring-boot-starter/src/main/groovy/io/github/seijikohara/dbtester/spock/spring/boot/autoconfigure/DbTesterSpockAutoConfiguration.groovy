@@ -3,7 +3,9 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
+import io.github.seijikohara.dbtester.api.config.VerificationSettings
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader
 import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import javax.sql.DataSource
@@ -52,6 +54,8 @@ class DbTesterSpockAutoConfiguration {
 	@ConditionalOnMissingBean
 	Configuration dbTesterConfiguration(DbTesterProperties properties) {
 		def conventionProps = properties.convention
+		def verificationProps = properties.verification
+		def executionProps = properties.execution
 		def operationProps = properties.operation
 
 		def conventions = ConventionSettings.builder()
@@ -61,8 +65,18 @@ class DbTesterSpockAutoConfiguration {
 				.dataFormat(conventionProps.dataFormat)
 				.tableMergeStrategy(conventionProps.tableMergeStrategy)
 				.loadOrderFileName(conventionProps.loadOrderFileName)
-				.globalExcludeColumns(conventionProps.globalExcludeColumns)
-				.globalColumnStrategies(Map.of())
+				.build()
+
+		def verification = VerificationSettings.builder()
+				.globalExcludeColumns(verificationProps.globalExcludeColumns)
+				.rowOrdering(verificationProps.rowOrdering)
+				.retryCount(verificationProps.retryCount)
+				.retryDelay(verificationProps.retryDelay)
+				.build()
+
+		def execution = ExecutionSettings.builder()
+				.queryTimeout(executionProps.queryTimeout)
+				.transactionMode(executionProps.transactionMode)
 				.build()
 
 		def operations = OperationDefaults.builder()
@@ -74,6 +88,8 @@ class DbTesterSpockAutoConfiguration {
 
 		return Configuration.builder()
 				.conventions(conventions)
+				.verification(verification)
+				.execution(execution)
 				.operations(operations)
 				.loader(loader)
 				.build()

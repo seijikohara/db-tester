@@ -267,7 +267,10 @@ public final class ComparisonStrategy {
    * @param expected the expected value
    * @param actual the actual value
    * @return {@code true} if the values match according to this strategy, {@code false} otherwise
+   * @deprecated Use {@code ComparisonEngine.matches(strategy, expected, actual)} in the core module
+   *     instead. Comparison logic is moving from API descriptors to core execution. Removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   public boolean matches(final @Nullable Object expected, final @Nullable Object actual) {
     return switch (type) {
       case STRICT -> Objects.equals(expected, actual);

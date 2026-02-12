@@ -273,6 +273,7 @@ class CellTest {
   /** Tests for matches method. */
   @Nested
   @DisplayName("matches")
+  @SuppressWarnings("removal")
   class Matches {
 
     /** Tests for matches method. */

@@ -113,7 +113,7 @@ Source: [db-tester-api/src/main/java](https://github.com/seijikohara/db-tester/t
 
 | Package | Responsibility |
 |---------|----------------|
-| `assertion` | Dataset comparison and verification |
+| `assertion` | Dataset comparison, verification, and `ComparisonEngine` execution |
 | `dataset` | Dataset, Table, Row implementations |
 | `domain` | Internal value objects |
 | `format` | CSV, TSV, JSON, and YAML parsing and format providers |

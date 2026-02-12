@@ -2,10 +2,13 @@ package io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataFormat
+import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
+import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
+import java.time.Duration
 
 /**
  * Configuration properties for DB Tester Spring Boot integration.
@@ -35,6 +38,14 @@ class DbTesterProperties {
     @NestedConfigurationProperty
     var convention: ConventionProperties = ConventionProperties()
 
+    /** Verification settings for expectation behavior. */
+    @NestedConfigurationProperty
+    var verification: VerificationProperties = VerificationProperties()
+
+    /** Execution settings for database operation behavior. */
+    @NestedConfigurationProperty
+    var execution: ExecutionProperties = ExecutionProperties()
+
     /** Default operation settings for preparation and expectation phases. */
     @NestedConfigurationProperty
     var operation: OperationProperties = OperationProperties()
@@ -62,9 +73,40 @@ class DbTesterProperties {
 
         /** File name for specifying table loading order in dataset directories. */
         var loadOrderFileName: String = ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME
+    }
 
+    /**
+     * Verification properties for expectation behavior.
+     *
+     * These properties control how the framework verifies expected database state after test
+     * execution.
+     */
+    class VerificationProperties {
         /** Column names to exclude globally from all expectation verifications. */
         var globalExcludeColumns: Set<String> = emptySet()
+
+        /** Row ordering strategy for expectation verification. Defaults to ORDERED. */
+        var rowOrdering: RowOrdering = RowOrdering.ORDERED
+
+        /** Number of retry attempts for expectation verification. Defaults to 0. */
+        var retryCount: Int = 0
+
+        /** Delay between retry attempts. Defaults to 100ms. */
+        var retryDelay: Duration = Duration.ofMillis(100)
+    }
+
+    /**
+     * Execution properties for database operation behavior.
+     *
+     * These properties control how the framework executes database operations during test
+     * preparation.
+     */
+    class ExecutionProperties {
+        /** Maximum time to wait for database queries. Null means no timeout. */
+        var queryTimeout: Duration? = null
+
+        /** Transaction behavior for database operations. Defaults to SINGLE_TRANSACTION. */
+        var transactionMode: TransactionMode = TransactionMode.SINGLE_TRANSACTION
     }
 
     /**
