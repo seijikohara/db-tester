@@ -11,7 +11,9 @@
  *
  * <ul>
  *   <li>{@link io.github.seijikohara.dbtester.api.spi.AssertionProvider} - Database assertion
- *       operations
+ *       operations (data comparison)
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider} - Query-based
+ *       database assertion operations (SQL query execution and comparison)
  *   <li>{@link io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider} - Dataset loading
  *       operations
  *   <li>{@link io.github.seijikohara.dbtester.api.spi.OperationProvider} - Database operation

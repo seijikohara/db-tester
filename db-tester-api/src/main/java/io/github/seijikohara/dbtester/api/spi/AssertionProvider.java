@@ -175,7 +175,10 @@ public interface AssertionProvider {
    * @param sqlQuery the SQL query to execute (SELECT statement)
    * @param ignoreColumnNames columns to exclude from comparison (e.g., auto-generated timestamps)
    * @throws AssertionError if the query results do not match the expected dataset
+   * @deprecated Use {@link QueryAssertionProvider#assertEqualsByQuery(TableSet, DataSource, String,
+   *     String, Collection)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
@@ -195,7 +198,10 @@ public interface AssertionProvider {
    * @param sqlQuery the SQL query to execute (SELECT statement)
    * @param ignoreColumnNames columns to exclude from comparison (e.g., auto-generated timestamps)
    * @throws AssertionError if the query results do not match the expected table
+   * @deprecated Use {@link QueryAssertionProvider#assertEqualsByQuery(Table, DataSource, String,
+   *     String, Collection)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
   void assertEqualsByQuery(
       final Table expected,
       final DataSource dataSource,

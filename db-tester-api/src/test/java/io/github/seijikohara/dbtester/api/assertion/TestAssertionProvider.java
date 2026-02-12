@@ -130,6 +130,7 @@ public final class TestAssertionProvider implements AssertionProvider {
             List.of(expected, actual, columnStrategies)));
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void assertEqualsByQuery(
       final TableSet expected,
@@ -143,6 +144,7 @@ public final class TestAssertionProvider implements AssertionProvider {
             List.of(expected, dataSource, tableName, sqlQuery, ignoreColumnNames)));
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void assertEqualsByQuery(
       final Table expected,

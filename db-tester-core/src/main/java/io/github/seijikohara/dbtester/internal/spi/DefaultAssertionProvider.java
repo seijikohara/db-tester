@@ -5,7 +5,6 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
-import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
@@ -130,6 +129,7 @@ public final class DefaultAssertionProvider implements AssertionProvider {
     comparator.assertEqualsWithStrategies(expected, actual, ignoreSet, strategyMap);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void assertEqualsByQuery(
       final TableSet expected,
@@ -137,16 +137,11 @@ public final class DefaultAssertionProvider implements AssertionProvider {
       final String tableName,
       final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
-    final var actualTable = tableReader.executeQuery(dataSource, sqlQuery, tableName);
-    final var expectedTable =
-        expected
-            .getTable(new TableName(tableName))
-            .orElseThrow(
-                () -> new AssertionError(String.format("Expected table not found: %s", tableName)));
-
-    comparator.assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumnNames);
+    queryProvider()
+        .assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
+  @SuppressWarnings("removal")
   @Override
   public void assertEqualsByQuery(
       final Table expected,
@@ -154,7 +149,16 @@ public final class DefaultAssertionProvider implements AssertionProvider {
       final String tableName,
       final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
-    final var actualTable = tableReader.executeQuery(dataSource, sqlQuery, tableName);
-    comparator.assertEqualsIgnoreColumns(expected, actualTable, ignoreColumnNames);
+    queryProvider()
+        .assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
+  }
+
+  /**
+   * Creates a QueryAssertionProvider using the same dependencies.
+   *
+   * @return a new DefaultQueryAssertionProvider instance
+   */
+  private DefaultQueryAssertionProvider queryProvider() {
+    return new DefaultQueryAssertionProvider(comparator, tableReader);
   }
 }

@@ -259,6 +259,7 @@ class DefaultAssertionProviderTest {
   /** Tests for the assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method. */
   @Nested
   @DisplayName("assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method")
+  @SuppressWarnings("removal")
   class AssertEqualsByQueryDataSetMethod {
 
     /** Tests for the assertEqualsByQuery method. */
@@ -320,6 +321,7 @@ class DefaultAssertionProviderTest {
   /** Tests for the assertEqualsByQuery(Table, DataSource, String, String, Collection) method. */
   @Nested
   @DisplayName("assertEqualsByQuery(Table, DataSource, String, String, Collection) method")
+  @SuppressWarnings("removal")
   class AssertEqualsByQueryTableMethod {
 
     /** Tests for the assertEqualsByQuery method with table. */

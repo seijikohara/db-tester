@@ -198,14 +198,19 @@ public final class DatabaseAssertion {
    * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param ignoreColumnNames collection of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected data
+   * @deprecated Use {@link DatabaseQueryAssertion#assertEqualsByQuery(TableSet, DataSource, String,
+   *     String, Collection)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("InlineMeSuggester")
   public static void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
       final String tableName,
       final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
-    getProvider().assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
   /**
@@ -222,14 +227,19 @@ public final class DatabaseAssertion {
    * @param sqlQuery the SQL query to execute; results will be compared against the expected data
    * @param ignoreColumnNames varargs of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected data
+   * @deprecated Use {@link DatabaseQueryAssertion#assertEqualsByQuery(TableSet, DataSource, String,
+   *     String, String...)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("InlineMeSuggester")
   public static void assertEqualsByQuery(
       final TableSet expected,
       final DataSource dataSource,
       final String tableName,
       final String sqlQuery,
       final String... ignoreColumnNames) {
-    assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, List.of(ignoreColumnNames));
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
   /**
@@ -242,14 +252,19 @@ public final class DatabaseAssertion {
    * @param sqlQuery SQL query to retrieve actual data
    * @param ignoreColumnNames collection of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected table
+   * @deprecated Use {@link DatabaseQueryAssertion#assertEqualsByQuery(Table, DataSource, String,
+   *     String, Collection)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("InlineMeSuggester")
   public static void assertEqualsByQuery(
       final Table expected,
       final DataSource dataSource,
       final String tableName,
       final String sqlQuery,
       final Collection<String> ignoreColumnNames) {
-    getProvider().assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
   /**
@@ -262,14 +277,19 @@ public final class DatabaseAssertion {
    * @param sqlQuery SQL query to retrieve actual data
    * @param ignoreColumnNames varargs of column names to exclude from comparison (may be empty)
    * @throws AssertionError if the query results do not match the expected table
+   * @deprecated Use {@link DatabaseQueryAssertion#assertEqualsByQuery(Table, DataSource, String,
+   *     String, String...)} instead. This method will be removed in 2.0.
    */
+  @Deprecated(since = "1.1", forRemoval = true)
+  @SuppressWarnings("InlineMeSuggester")
   public static void assertEqualsByQuery(
       final Table expected,
       final DataSource dataSource,
       final String tableName,
       final String sqlQuery,
       final String... ignoreColumnNames) {
-    assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, List.of(ignoreColumnNames));
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
   }
 
   /**
