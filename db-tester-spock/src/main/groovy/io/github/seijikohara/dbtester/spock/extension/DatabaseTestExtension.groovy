@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.spock.extension
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
 import org.spockframework.runtime.model.SpecInfo
 
@@ -9,13 +10,15 @@ import org.spockframework.runtime.model.SpecInfo
  * Annotation-driven Spock extension for database testing.
  *
  * <p>This extension is activated by the {@link DatabaseTest @DatabaseTest} annotation on a
- * specification class. It detects {@link DataSet @DataSet} and
- * {@link ExpectedDataSet @ExpectedDataSet} annotations on feature methods and adds the appropriate
- * interceptors to handle database setup and verification.
+ * specification class. It detects {@link DataSet @DataSet},
+ * {@link ExpectedDataSet @ExpectedDataSet}, and {@link ExportDataSet @ExportDataSet} annotations
+ * on feature methods and adds the appropriate interceptors to handle database setup, verification,
+ * and export.
  *
  * @see DatabaseTest
  * @see DataSet
  * @see ExpectedDataSet
+ * @see ExportDataSet
  * @see DatabaseTestInterceptor
  */
 class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> {
@@ -35,6 +38,7 @@ class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> 
 		def specClass = spec.reflection
 		def classDataSet = specClass.getAnnotation(DataSet)
 		def classExpectedDataSet = specClass.getAnnotation(ExpectedDataSet)
+		def classExportDataSet = specClass.getAnnotation(ExportDataSet)
 
 		spec.allFeatures
 				.collect { feature ->
@@ -42,14 +46,16 @@ class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> 
 					[
 						feature        : feature,
 						dataSet        : method.getAnnotation(DataSet) ?: classDataSet,
-						expectedDataSet: method.getAnnotation(ExpectedDataSet) ?: classExpectedDataSet
+						expectedDataSet: method.getAnnotation(ExpectedDataSet) ?: classExpectedDataSet,
+						exportDataSet  : method.getAnnotation(ExportDataSet) ?: classExportDataSet
 					]
 				}
-				.findAll { it.dataSet || it.expectedDataSet }
+				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }
 				.each {
 					it.feature.addInterceptor(new DatabaseTestInterceptor(
 							it.dataSet as DataSet,
-							it.expectedDataSet as ExpectedDataSet
+							it.expectedDataSet as ExpectedDataSet,
+							it.exportDataSet as ExportDataSet
 							))
 				}
 	}

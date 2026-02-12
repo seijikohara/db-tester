@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
 import spock.lang.Specification
@@ -14,13 +15,27 @@ import spock.lang.Specification
  */
 class SpringBootDatabaseTestInterceptorSpec extends Specification {
 
-	def 'should create instance with both annotations'() {
+	def 'should create instance with all annotations'() {
+		given: 'mock annotations'
+		def dataSet = Mock(DataSet)
+		def expectedDataSet = Mock(ExpectedDataSet)
+		def exportDataSet = Mock(ExportDataSet)
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet,
+				exportDataSet)
+
+		then: 'instance is created successfully'
+		interceptor != null
+	}
+
+	def 'should create instance with DataSet and ExpectedDataSet annotations'() {
 		given: 'mock annotations'
 		def dataSet = Mock(DataSet)
 		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -31,7 +46,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		def dataSet = Mock(DataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -42,7 +57,18 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		def expectedDataSet = Mock(ExpectedDataSet)
 
 		when: 'creating interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet)
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet, null)
+
+		then: 'instance is created successfully'
+		interceptor != null
+	}
+
+	def 'should create instance with only ExportDataSet annotation'() {
+		given: 'mock ExportDataSet annotation'
+		def exportDataSet = Mock(ExportDataSet)
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, exportDataSet)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -50,7 +76,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 
 	def 'should create instance with null annotations'() {
 		when: 'creating interceptor with null annotations'
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, null)
 
 		then: 'instance is created successfully'
 		interceptor != null
@@ -58,7 +84,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 
 	def 'should implement IMethodInterceptor interface'() {
 		given: 'a new interceptor'
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, null)
 
 		expect: 'implements IMethodInterceptor'
 		interceptor instanceof IMethodInterceptor
@@ -67,7 +93,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	def 'should handle invocation with DataSet annotation'() {
 		given: 'an interceptor with DataSet annotation'
 		def dataSet = createMockDataSet()
-		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null, null)
 
 		expect: 'interceptor is created with DataSet'
 		interceptor != null
@@ -76,7 +102,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	def 'should handle invocation with ExpectedDataSet annotation'() {
 		given: 'an interceptor with ExpectedDataSet annotation'
 		def expectedDataSet = createMockExpectedDataSet()
-		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet)
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, expectedDataSet, null)
 
 		expect: 'interceptor is created with ExpectedDataSet'
 		interceptor != null
@@ -86,7 +112,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		given: 'an interceptor with both annotations'
 		def dataSet = createMockDataSet()
 		def expectedDataSet = createMockExpectedDataSet()
-		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet, null)
 
 		expect: 'interceptor is created with both annotations'
 		interceptor != null
@@ -100,8 +126,8 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		def exp2 = createMockExpectedDataSet()
 
 		when: 'creating multiple interceptors'
-		def interceptor1 = new SpringBootDatabaseTestInterceptor(ds1, exp1)
-		def interceptor2 = new SpringBootDatabaseTestInterceptor(ds2, exp2)
+		def interceptor1 = new SpringBootDatabaseTestInterceptor(ds1, exp1, null)
+		def interceptor2 = new SpringBootDatabaseTestInterceptor(ds2, exp2, null)
 
 		then: 'interceptors are independent'
 		!interceptor1.is(interceptor2)
@@ -110,7 +136,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	def 'should handle different operation types'() {
 		given: 'sources with different operations'
 		def dataSet = createMockDataSet(operation)
-		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null)
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, null, null)
 
 		expect: 'interceptor is created successfully'
 		interceptor != null
