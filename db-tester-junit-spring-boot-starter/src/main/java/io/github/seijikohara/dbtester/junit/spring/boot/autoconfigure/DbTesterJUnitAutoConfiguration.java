@@ -6,10 +6,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
 import io.github.seijikohara.dbtester.api.config.ExecutionSettings;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.VerificationSettings;
-import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
-import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
-import java.util.ServiceLoader;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -105,30 +102,12 @@ public class DbTesterJUnitAutoConfiguration {
             .expectation(operationProps.getExpectation())
             .build();
 
-    final DataSetLoader loader = loadDataSetLoader();
-
     return Configuration.builder()
         .conventions(conventions)
         .verification(verification)
         .execution(execution)
         .operations(operations)
-        .loader(loader)
         .build();
-  }
-
-  /**
-   * Loads the DataSetLoader implementation via ServiceLoader.
-   *
-   * @return the DataSetLoader instance
-   */
-  private DataSetLoader loadDataSetLoader() {
-    return ServiceLoader.load(DataSetLoaderProvider.class)
-        .findFirst()
-        .map(DataSetLoaderProvider::getLoader)
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "No DataSetLoaderProvider implementation found. Add db-tester-core to your classpath."));
   }
 
   /**
@@ -163,6 +142,7 @@ public class DbTesterJUnitAutoConfiguration {
    * @return a new DataSourceRegistrar instance
    */
   @Bean
+  @ConditionalOnMissingBean
   public DataSourceRegistrar dataSourceRegistrar(final DbTesterProperties properties) {
     return new DataSourceRegistrar(properties);
   }

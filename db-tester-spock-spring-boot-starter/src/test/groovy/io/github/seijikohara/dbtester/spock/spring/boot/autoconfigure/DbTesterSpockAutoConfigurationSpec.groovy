@@ -8,6 +8,8 @@ import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.operation.Operation
 import java.time.Duration
+import javax.sql.DataSource
+import org.springframework.beans.factory.ObjectProvider
 import spock.lang.Specification
 
 /**
@@ -71,26 +73,47 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 	}
 
 	def 'should return DataSourceRegistry'() {
+		given: 'an empty DataSource provider'
+		def dataSourceProvider = createEmptyDataSourceProvider()
+
 		when: 'getting dbTesterDataSourceRegistry'
-		def registry = autoConfiguration.dbTesterDataSourceRegistry()
+		def registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
 
 		then: 'registry is not null'
 		registry != null
 		registry instanceof DataSourceRegistry
 	}
 
-	def 'should return empty DataSourceRegistry initially'() {
+	def 'should register DataSource as default when provided'() {
+		given: 'a DataSource provider with one DataSource'
+		def dataSource = Mock(DataSource)
+		def dataSourceProvider = createDataSourceProvider(dataSource)
+
 		when: 'getting dbTesterDataSourceRegistry'
-		def registry = autoConfiguration.dbTesterDataSourceRegistry()
+		def registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
+
+		then: 'registry has default DataSource'
+		registry.hasDefault()
+	}
+
+	def 'should return empty DataSourceRegistry when no DataSource provided'() {
+		given: 'an empty DataSource provider'
+		def dataSourceProvider = createEmptyDataSourceProvider()
+
+		when: 'getting dbTesterDataSourceRegistry'
+		def registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
 
 		then: 'registry has no default'
 		!registry.hasDefault()
 	}
 
 	def 'should return new DataSourceRegistry on each call'() {
+		given: 'an empty DataSource provider'
+		def dataSourceProvider = createEmptyDataSourceProvider()
+
 		when: 'getting dbTesterDataSourceRegistry twice'
-		def registry1 = autoConfiguration.dbTesterDataSourceRegistry()
-		def registry2 = autoConfiguration.dbTesterDataSourceRegistry()
+		def registry1 = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
+		def registry2 = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
 
 		then: 'different instances are returned'
 		!registry1.is(registry2)
@@ -127,9 +150,12 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 	}
 
 	def 'should create all beans successfully'() {
+		given: 'an empty DataSource provider'
+		def dataSourceProvider = createEmptyDataSourceProvider()
+
 		when: 'creating all beans'
 		def config = autoConfiguration.dbTesterConfiguration(properties)
-		def registry = autoConfiguration.dbTesterDataSourceRegistry()
+		def registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider)
 		def registrar = autoConfiguration.dataSourceRegistrar(properties)
 
 		then: 'all beans are created'
@@ -251,5 +277,28 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 			config.operations().preparation() == Operation.CLEAN_INSERT
 			config.operations().expectation() == Operation.NONE
 		}
+	}
+
+	/**
+	 * Creates an empty ObjectProvider for DataSource.
+	 *
+	 * @return the mock provider
+	 */
+	private ObjectProvider<DataSource> createEmptyDataSourceProvider() {
+		def provider = Mock(ObjectProvider)
+		provider.stream() >> { java.util.stream.Stream.empty() }
+		provider
+	}
+
+	/**
+	 * Creates an ObjectProvider with a single DataSource.
+	 *
+	 * @param dataSource the DataSource to provide
+	 * @return the mock provider
+	 */
+	private ObjectProvider<DataSource> createDataSourceProvider(DataSource dataSource) {
+		def provider = Mock(ObjectProvider)
+		provider.stream() >> { java.util.stream.Stream.of(dataSource) }
+		provider
 	}
 }

@@ -6,9 +6,8 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.config.VerificationSettings
-import io.github.seijikohara.dbtester.api.loader.DataSetLoader
-import io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
 import javax.sql.DataSource
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -84,46 +83,29 @@ class DbTesterSpockAutoConfiguration {
 				.expectation(operationProps.expectation)
 				.build()
 
-		def loader = loadDataSetLoader()
-
 		return Configuration.builder()
 				.conventions(conventions)
 				.verification(verification)
 				.execution(execution)
 				.operations(operations)
-				.loader(loader)
 				.build()
 	}
 
 	/**
-	 * Loads the DataSetLoader implementation via ServiceLoader.
+	 * Creates a DataSourceRegistry bean and registers all available DataSources.
 	 *
-	 * @return the DataSetLoader instance
-	 */
-	private DataSetLoader loadDataSetLoader() {
-		return ServiceLoader.load(DataSetLoaderProvider)
-				.findFirst()
-				.map { it.loader }
-				.orElseThrow {
-					new IllegalStateException(
-							"No DataSetLoaderProvider implementation found. " +
-							"Add db-tester-core to your classpath."
-							)
-				}
-	}
-
-	/**
-	 * Creates a DataSourceRegistry bean.
+	 * <p>If a single DataSource is available, it is registered as the default. If multiple
+	 * DataSources are available, they are registered by their bean names.
 	 *
-	 * <p>The registry is populated with DataSources by the {@link DataSourceRegistrar} when tests are
-	 * executed. This lazy initialization ensures proper integration with Spock's test lifecycle.
-	 *
+	 * @param dataSources provider for all DataSource beans
 	 * @return the data source registry
 	 */
 	@Bean
 	@ConditionalOnMissingBean
-	DataSourceRegistry dbTesterDataSourceRegistry() {
-		return new DataSourceRegistry()
+	DataSourceRegistry dbTesterDataSourceRegistry(ObjectProvider<DataSource> dataSources) {
+		def registry = new DataSourceRegistry()
+		dataSources.stream().findFirst().ifPresent { registry.registerDefault(it) }
+		return registry
 	}
 
 	/**
