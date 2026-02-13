@@ -43,7 +43,7 @@ public interface ScenarioNameResolver {
    *
    * <p>Implementations should extract the appropriate name based on their framework's conventions.
    * For example, Spock implementations would read from {@code @FeatureMetadata}, while JUnit
-   * implementations would simply return the method name.
+   * implementations would return the method name.
    *
    * @param testMethod the test method to resolve the scenario name from
    * @return the resolved scenario name

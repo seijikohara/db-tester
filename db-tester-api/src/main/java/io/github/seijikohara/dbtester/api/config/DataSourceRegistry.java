@@ -101,16 +101,6 @@ public final class DataSourceRegistry {
   }
 
   /**
-   * Retrieves a data source by name as an Optional.
-   *
-   * @param name the data source name
-   * @return an Optional containing the data source, or empty if not found
-   */
-  public Optional<DataSource> find(final String name) {
-    return Optional.ofNullable(dataSources.get(new DataSourceName(name)));
-  }
-
-  /**
    * Checks if a default data source is registered.
    *
    * @return {@code true} if a default data source exists, {@code false} otherwise

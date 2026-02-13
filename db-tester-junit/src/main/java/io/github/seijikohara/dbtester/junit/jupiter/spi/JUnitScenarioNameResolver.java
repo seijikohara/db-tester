@@ -8,8 +8,7 @@ import java.lang.reflect.Method;
  * JUnit Jupiter implementation of {@link ScenarioNameResolver}.
  *
  * <p>This resolver provides scenario name resolution for JUnit Jupiter tests. In JUnit, the
- * scenario name is simply the test method name, as JUnit uses standard Java method naming
- * conventions.
+ * scenario name is the test method name, as JUnit uses standard Java method naming conventions.
  *
  * <p>For JUnit tests, this resolver returns {@link Method#getName()} directly. This matches the
  * convention where test method names like {@code shouldLoadData} correspond to scenario names in

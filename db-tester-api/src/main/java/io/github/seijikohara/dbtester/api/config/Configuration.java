@@ -118,6 +118,11 @@ public final class Configuration {
   /**
    * Returns a configuration that applies the framework defaults for all components.
    *
+   * <p>This method uses "defaults" (not "standard") because Configuration aggregates multiple
+   * components, each with its own standard settings. The term "defaults" emphasizes that this is a
+   * sensible default for the entire framework, not just a single component's standard
+   * configuration.
+   *
    * @return configuration initialised with standard conventions, verification, execution,
    *     operations, and loader
    */

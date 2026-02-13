@@ -301,57 +301,6 @@ class DataSourceRegistryTest {
     }
   }
 
-  /** Tests for the find method. */
-  @Nested
-  @DisplayName("find(String) method")
-  class FindMethod {
-
-    /** Tests for the find method. */
-    FindMethod() {}
-
-    /** The registry under test. */
-    private DataSourceRegistry registry;
-
-    /** Sets up test fixtures. */
-    @BeforeEach
-    void setUp() {
-      registry = new DataSourceRegistry();
-    }
-
-    /** Verifies that find returns Optional with data source when it exists. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Optional with data source when it exists")
-    void should_return_optional_with_data_source_when_it_exists() {
-      // Given
-      final var dataSource = mock(DataSource.class);
-      registry.register("testDb", dataSource);
-
-      // When
-      final var result = registry.find("testDb");
-
-      // Then
-      assertAll(
-          "should return present Optional",
-          () -> assertTrue(result.isPresent(), "should be present"),
-          () -> assertSame(dataSource, result.orElseThrow(), "should contain data source"));
-    }
-
-    /** Verifies that find returns empty Optional when data source not found. */
-    @Test
-    @Tag("edge-case")
-    @DisplayName("should return empty Optional when data source not found")
-    void should_return_empty_optional_when_data_source_not_found() {
-      // Given - empty registry
-
-      // When
-      final var result = registry.find("nonExistent");
-
-      // Then
-      assertFalse(result.isPresent(), "should return empty Optional");
-    }
-  }
-
   /** Tests for the hasDefault method. */
   @Nested
   @DisplayName("hasDefault() method")

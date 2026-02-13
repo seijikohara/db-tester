@@ -37,8 +37,9 @@ import org.jspecify.annotations.Nullable;
  *
  * @param tableOrderingStrategy the strategy for determining table processing order
  * @param transactionMode the transaction behavior mode
- * @param queryTimeout the query timeout, or null for no timeout
- * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
+ * @param queryTimeout the query timeout, or null to use driver default (typically unlimited)
+ * @param batchSize the number of rows per INSERT batch; zero means single-batch execution (all rows
+ *     at once)
  * @see DatabasePreparation
  */
 public record PreparationConfig(
@@ -98,7 +99,7 @@ public record PreparationConfig(
   /**
    * Returns a new instance with the specified query timeout.
    *
-   * @param queryTimeout the query timeout, or null for no timeout
+   * @param queryTimeout the query timeout, or null to use driver default (typically unlimited)
    * @return a new instance with the specified timeout
    */
   public PreparationConfig withQueryTimeout(final @Nullable Duration queryTimeout) {
@@ -109,7 +110,8 @@ public record PreparationConfig(
   /**
    * Returns a new instance with the specified batch size.
    *
-   * @param batchSize the number of rows per batch, or zero for single-batch execution
+   * @param batchSize the number of rows per batch; zero means single-batch execution (all rows at
+   *     once)
    * @return a new instance with the specified batch size
    * @throws IllegalArgumentException if batchSize is negative
    */
