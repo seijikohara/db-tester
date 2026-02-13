@@ -197,7 +197,7 @@ public final class AutoFormatResolver {
    * Builds a detailed error message when no supported data files are found.
    *
    * <p>The message includes the directory path, supported extensions, a hint, and a list of files
-   * actually found in the directory (if any) to help users diagnose the issue.
+   * found in the directory (if any) to help users diagnose the issue.
    *
    * @param directory the directory that was scanned
    * @param foundFiles the list of file names found in the directory

@@ -76,7 +76,8 @@ public final class ExecutionSettings {
   /**
    * Creates an execution settings instance with the specified values.
    *
-   * @param queryTimeout the query timeout duration, or null for no timeout
+   * @param queryTimeout the query timeout duration, or null to use driver default (typically
+   *     unlimited)
    * @param transactionMode the transaction mode
    * @return a new ExecutionSettings instance
    */
@@ -88,7 +89,11 @@ public final class ExecutionSettings {
   /**
    * Returns the maximum time to wait for database queries.
    *
-   * @return the query timeout duration, or null for no timeout
+   * <p>When {@code null}, the JDBC driver's default timeout is used (typically unlimited). When set
+   * to a positive duration, queries exceeding this limit will throw {@link
+   * java.sql.SQLTimeoutException}.
+   *
+   * @return the query timeout duration, or null to use driver default (typically unlimited)
    */
   public @Nullable Duration queryTimeout() {
     return queryTimeout;
@@ -106,7 +111,8 @@ public final class ExecutionSettings {
   /**
    * Creates a new ExecutionSettings with the specified query timeout.
    *
-   * @param queryTimeout the query timeout duration, or null for no timeout
+   * @param queryTimeout the query timeout duration, or null to use driver default (typically
+   *     unlimited)
    * @return a new ExecutionSettings with the specified query timeout
    */
   public ExecutionSettings withQueryTimeout(final @Nullable Duration queryTimeout) {

@@ -209,17 +209,25 @@ Use builders **only** for configuration objects where:
 - The object has 5+ optional parameters with reasonable defaults
 - Parameters have complex interdependencies or cross-parameter validation
 - Construction requires validation across multiple parameters
+- The object is a configuration class (not a value object or record)
 
 Appropriate builder usage in this project:
 - `Configuration` — aggregates multiple configuration concerns
-- `ConventionSettings` — 13 optional parameters with mutual exclusions
-- `OperationDefaults` — optional settings with defaults
-- `ExportConfiguration` — export settings with validation
+- `ConventionSettings` — 6 optional parameters with defaults
+- `VerificationSettings` — 5 optional parameters with defaults
+- `ExecutionSettings` — 2 parameters but configuration class (consistency with other *Settings)
+- `OperationDefaults` — 3 optional parameters with defaults
+- `ExportConfiguration` — 4 parameters with validation
 
 Do not use builders for:
 - Value objects with 3 or fewer parameters (use constructors or factory methods)
+- Record types (use compact constructors and `with*()` methods instead)
+  - `ExpectationContext` — 4 fields, record with `with*()` methods
+  - `PreparationConfig` — 4 fields, record with `with*()` methods
 - Entities with natural construction order
 - Classes where `with*()` copy methods suffice
+
+**Rationale**: Configuration classes use builders for consistency and API stability, even if parameter count is low. Record types use compact constructors and provide concise `with*()` methods for immutable updates.
 
 ### Collections and Arrays
 
