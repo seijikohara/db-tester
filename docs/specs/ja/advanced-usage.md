@@ -474,6 +474,92 @@ testRuntimeOnly("net.datafaker:datafaker:VERSION")
 
 Datafakerがクラスパスにない場合、`${faker....}` 式は未処理のまま残されます。
 
+## 10. 合成メタアノテーション
+
+`@DataSet` と `@ExpectedDataSet` はどちらも `@Target` に `ANNOTATION_TYPE` を含んでおり、
+他のアノテーションに付与できます。これにより、共通のデータセット設定をカプセル化した
+再利用可能なメタアノテーションの合成が可能になります。フレームワークの `AnnotationUtils` は、
+循環検出付きの再帰的なメタアノテーションの走査によってこれらのアノテーションを検出します。
+
+### 合成 @DataSet アノテーションの定義
+
+固定のリソースロケーションで `@DataSet` をラップするカスタムアノテーションを作成します:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@DataSet(sources = @DataSetSource(
+    resourceLocation = "classpath:common/user-seed/"))
+public @interface UserSeedData {}
+```
+
+使用例:
+
+```java
+@Test
+@UserSeedData
+@ExpectedDataSet
+void shouldVerifyAfterSeeding() throws SQLException {
+    // @UserSeedData が classpath:common/user-seed/ からデータをロード
+}
+```
+
+### 合成 @ExpectedDataSet アノテーションの定義
+
+列の除外設定で `@ExpectedDataSet` をラップするカスタムアノテーションを作成します:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@ExpectedDataSet(sources = @DataSetSource(
+    excludeColumns = {"CREATED_AT", "UPDATED_AT"}))
+public @interface VerifyIgnoringAuditColumns {}
+```
+
+### 二段階合成
+
+両方の合成アノテーションを単一のアノテーションに統合します:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@UserSeedData
+@VerifyIgnoringAuditColumns
+public @interface UserDataTest {}
+```
+
+使用例:
+
+```java
+@Test
+@UserDataTest  // @UserSeedData + @VerifyIgnoringAuditColumns を統合
+void shouldSeedAndVerify() throws SQLException {
+    // フレームワークが二段階のメタアノテーション階層を走査
+}
+```
+
+### フレームワーク固有の構文
+
+**Groovy (Spock):**
+
+```groovy
+@Target([ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE])
+@Retention(RetentionPolicy.RUNTIME)
+@DataSet(sources = @DataSetSource(
+    resourceLocation = 'classpath:common/user-seed/'))
+@interface UserSeedData {}
+```
+
+**Kotlin (Kotest):**
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS, AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@DataSet(sources = [DataSetSource(
+    resourceLocation = "classpath:common/user-seed/")])
+annotation class UserSeedData
+```
+
 ## 関連ドキュメント
 
 - [はじめに](getting-started) - 初回テストのセットアップ

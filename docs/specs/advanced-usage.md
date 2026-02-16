@@ -475,6 +475,93 @@ testRuntimeOnly("net.datafaker:datafaker:VERSION")
 
 If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
 
+## 10. Composed Meta-Annotations
+
+Both `@DataSet` and `@ExpectedDataSet` include `ANNOTATION_TYPE` in their `@Target`,
+enabling them to be placed on other annotations. This supports composing reusable
+meta-annotations that encapsulate common dataset configurations. The framework's
+`AnnotationUtils` discovers these annotations through recursive meta-annotation
+traversal with cycle detection.
+
+### Defining a Composed @DataSet Annotation
+
+Create a custom annotation that wraps `@DataSet` with a fixed resource location:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@DataSet(sources = @DataSetSource(
+    resourceLocation = "classpath:common/user-seed/"))
+public @interface UserSeedData {}
+```
+
+Usage:
+
+```java
+@Test
+@UserSeedData
+@ExpectedDataSet
+void shouldVerifyAfterSeeding() throws SQLException {
+    // @UserSeedData loads data from classpath:common/user-seed/
+}
+```
+
+### Defining a Composed @ExpectedDataSet Annotation
+
+Create a custom annotation that wraps `@ExpectedDataSet` with column exclusions:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@ExpectedDataSet(sources = @DataSetSource(
+    excludeColumns = {"CREATED_AT", "UPDATED_AT"}))
+public @interface VerifyIgnoringAuditColumns {}
+```
+
+### Two-Level Composition
+
+Combine both composed annotations into a single annotation:
+
+```java
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@UserSeedData
+@VerifyIgnoringAuditColumns
+public @interface UserDataTest {}
+```
+
+Usage:
+
+```java
+@Test
+@UserDataTest  // Combines @UserSeedData + @VerifyIgnoringAuditColumns
+void shouldSeedAndVerify() throws SQLException {
+    // Framework traverses two levels of meta-annotation hierarchy
+}
+```
+
+### Framework-Specific Syntax
+
+**Groovy (Spock):**
+
+```groovy
+@Target([ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE])
+@Retention(RetentionPolicy.RUNTIME)
+@DataSet(sources = @DataSetSource(
+    resourceLocation = 'classpath:common/user-seed/'))
+@interface UserSeedData {}
+```
+
+**Kotlin (Kotest):**
+
+```kotlin
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS, AnnotationTarget.ANNOTATION_CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@DataSet(sources = [DataSetSource(
+    resourceLocation = "classpath:common/user-seed/")])
+annotation class UserSeedData
+```
+
 ## Related Documentation
 
 - [Getting Started](getting-started) - First test setup

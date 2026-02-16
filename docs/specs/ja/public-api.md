@@ -817,6 +817,93 @@ var config = ExportConfiguration.builder()
 
 **スレッドセーフティ**: 実装はスレッドセーフかつステートレスである必要があります。
 
+## プリパレーションAPI
+
+### DatabasePreparation
+
+プログラマティックなデータベースプリパレーションのための静的ファサードです。このユーティリティクラスはSPI経由でロードされたオペレーションプロバイダーに処理を委譲します。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.preparation.DatabasePreparation`
+
+**型**: ユーティリティクラス（インスタンス化不可、静的メソッドのみ）
+
+**静的メソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `cleanInsert(DataSource, TableSet)` | 標準設定でCLEAN_INSERTを実行 |
+| `cleanInsert(DataSource, TableSet, PreparationConfig)` | カスタム設定でCLEAN_INSERTを実行 |
+| `execute(DataSource, TableSet, Operation)` | 標準設定で指定オペレーションを実行 |
+| `execute(DataSource, TableSet, Operation, PreparationConfig)` | カスタム設定で指定オペレーションを実行 |
+
+**例**:
+
+```java
+// プログラマティックにデータセットを構築
+var users = Table.ofValues("USERS",
+    List.of("ID", "NAME", "EMAIL"),
+    List.of(
+        List.of(1, "Alice", "alice@example.com"),
+        List.of(2, "Bob", "bob@example.com")));
+
+// 標準デフォルトでクリーンインサート
+DatabasePreparation.cleanInsert(dataSource, TableSet.of(users));
+
+// 特定のオペレーションを実行
+DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.INSERT);
+
+// カスタム設定で実行
+var config = PreparationConfig.standard()
+    .withTransactionMode(TransactionMode.AUTO_COMMIT)
+    .withBatchSize(1000);
+DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSERT, config);
+```
+
+### PreparationConfig
+
+プログラマティックなデータベースプリパレーション操作の設定レコードです。`standard()`でデフォルト値のインスタンスを取得し、`with*()`メソッドでカスタマイズします。
+
+**パッケージ**: `io.github.seijikohara.dbtester.api.preparation.PreparationConfig`
+
+**型**: `record`
+
+**ファクトリメソッド**:
+
+| メソッド | 戻り値型 | 説明 |
+|----------|---------|------|
+| `standard()` | `PreparationConfig` | 標準デフォルト値のインスタンスを作成 |
+
+**プロパティ**:
+
+| プロパティ | 型 | デフォルト | 説明 |
+|-----------|-----|----------|------|
+| `tableOrderingStrategy` | `TableOrderingStrategy` | `AUTO` | テーブル処理順序を決定する戦略 |
+| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | トランザクション動作モード |
+| `queryTimeout` | `@Nullable Duration` | `null` | クエリタイムアウト。nullの場合はドライバーデフォルトを使用 |
+| `batchSize` | `int` | `0` | バッチあたりの行数。ゼロは単一バッチ実行を意味する |
+
+**イミュータブルコピーメソッド**:
+
+| メソッド | 説明 |
+|----------|------|
+| `withTableOrderingStrategy(TableOrderingStrategy)` | 指定した戦略で新しいインスタンスを返す |
+| `withTransactionMode(TransactionMode)` | 指定したモードで新しいインスタンスを返す |
+| `withQueryTimeout(@Nullable Duration)` | 指定したタイムアウトで新しいインスタンスを返す |
+| `withBatchSize(int)` | 指定したバッチサイズで新しいインスタンスを返す |
+
+**例**:
+
+```java
+// 標準デフォルト
+var config = PreparationConfig.standard();
+
+// カスタム設定
+var config = PreparationConfig.standard()
+    .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+    .withTransactionMode(TransactionMode.AUTO_COMMIT)
+    .withBatchSize(500);
+```
+
 ## 例外
 
 すべての例外は`DatabaseTesterException`を継承します。
