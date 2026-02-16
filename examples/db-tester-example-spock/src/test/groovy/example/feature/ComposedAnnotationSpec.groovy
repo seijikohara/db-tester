@@ -116,8 +116,8 @@ class ComposedAnnotationSpec extends Specification implements DatabaseTestSuppor
 	@UserSeedData
 	@ExpectedDataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/ComposedAnnotationSpec/composed-dataset/expected/'))
-	def 'should load data via composed @DataSet annotation'() {
-		expect: 'framework loads data via @UserSeedData and verifies via @ExpectedDataSet'
+	def 'should load data via composed DataSet annotation'() {
+		expect: 'framework loads data via UserSeedData and verifies via ExpectedDataSet'
 		true
 	}
 
@@ -132,8 +132,8 @@ class ComposedAnnotationSpec extends Specification implements DatabaseTestSuppor
 	@DataSet(sources = @DataSetSource(
 	resourceLocation = 'classpath:example/feature/ComposedAnnotationSpec/user-seed/'))
 	@VerifyIgnoringAuditColumns
-	def 'should exclude audit columns via composed @ExpectedDataSet annotation'() {
-		expect: 'framework loads data via @DataSet and verifies via @VerifyIgnoringAuditColumns'
+	def 'should exclude audit columns via composed ExpectedDataSet annotation'() {
+		expect: 'framework loads data via DataSet and verifies via VerifyIgnoringAuditColumns'
 		true
 	}
 
@@ -148,7 +148,7 @@ class ComposedAnnotationSpec extends Specification implements DatabaseTestSuppor
 	 */
 	@UserDataTest
 	def 'should apply both annotations via deeply composed annotation'() {
-		expect: 'framework loads and verifies via @UserDataTest two-level composition'
+		expect: 'framework loads and verifies via UserDataTest two-level composition'
 		true
 	}
 
