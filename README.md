@@ -131,6 +131,8 @@ ID,NAME,EMAIL
 | Batch insert | Configurable batch size for large dataset insertion |
 | Retry mechanism | Configurable retry with delay for async operation verification |
 | Programmatic assertion API | `DatabaseAssertion` facade for code-based verification |
+| Programmatic preparation API | `DatabasePreparation` facade for code-based test data setup |
+| Composed meta-annotations | Reusable custom annotations combining `@DataSet` and `@ExpectedDataSet` |
 | Spring Boot integration | Automatic DataSource registration from ApplicationContext |
 | Pure JDBC | No ORM or external testing framework dependencies |
 | SPI extensibility | Custom providers for data loading, operations, and export via ServiceLoader |

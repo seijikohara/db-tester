@@ -51,7 +51,7 @@ Declares the datasets to apply before a test method executes.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**Target**: `METHOD`, `TYPE`
+**Target**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **Attributes**:
 
@@ -90,7 +90,7 @@ Declares the datasets that define the expected database state after test executi
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
-**Target**: `METHOD`, `TYPE`
+**Target**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **Attributes**:
 
@@ -794,6 +794,93 @@ SPI for implementing format-specific export logic.
 **Discovery**: Providers are discovered via `java.util.ServiceLoader`. Register implementations in `META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`.
 
 **Thread Safety**: Implementations must be thread-safe and stateless.
+
+## Preparation API
+
+### DatabasePreparation
+
+Static facade for programmatic database preparation. This utility class delegates to the underlying operation provider loaded via SPI.
+
+**Location**: `io.github.seijikohara.dbtester.api.preparation.DatabasePreparation`
+
+**Type**: Utility class (non-instantiable, static methods only)
+
+**Static Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `cleanInsert(DataSource, TableSet)` | Executes CLEAN_INSERT with standard configuration |
+| `cleanInsert(DataSource, TableSet, PreparationConfig)` | Executes CLEAN_INSERT with custom configuration |
+| `execute(DataSource, TableSet, Operation)` | Executes the specified operation with standard configuration |
+| `execute(DataSource, TableSet, Operation, PreparationConfig)` | Executes the specified operation with custom configuration |
+
+**Example**:
+
+```java
+// Build dataset programmatically
+var users = Table.ofValues("USERS",
+    List.of("ID", "NAME", "EMAIL"),
+    List.of(
+        List.of(1, "Alice", "alice@example.com"),
+        List.of(2, "Bob", "bob@example.com")));
+
+// Clean insert with standard defaults
+DatabasePreparation.cleanInsert(dataSource, TableSet.of(users));
+
+// Execute a specific operation
+DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.INSERT);
+
+// Execute with custom configuration
+var config = PreparationConfig.standard()
+    .withTransactionMode(TransactionMode.AUTO_COMMIT)
+    .withBatchSize(1000);
+DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSERT, config);
+```
+
+### PreparationConfig
+
+Configuration record for programmatic database preparation operations. Use `standard()` to obtain an instance with default values, then use `with*()` methods to customize.
+
+**Location**: `io.github.seijikohara.dbtester.api.preparation.PreparationConfig`
+
+**Type**: `record`
+
+**Factory Methods**:
+
+| Method | Return Type | Description |
+|--------|-------------|-------------|
+| `standard()` | `PreparationConfig` | Creates an instance with standard default values |
+
+**Properties**:
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `tableOrderingStrategy` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
+| `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | Transaction behavior mode |
+| `queryTimeout` | `@Nullable Duration` | `null` | Query timeout; null uses driver default |
+| `batchSize` | `int` | `0` | Rows per batch; zero means single-batch execution |
+
+**Immutable Copy Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `withTableOrderingStrategy(TableOrderingStrategy)` | Returns a new instance with the specified strategy |
+| `withTransactionMode(TransactionMode)` | Returns a new instance with the specified mode |
+| `withQueryTimeout(@Nullable Duration)` | Returns a new instance with the specified timeout |
+| `withBatchSize(int)` | Returns a new instance with the specified batch size |
+
+**Example**:
+
+```java
+// Standard defaults
+var config = PreparationConfig.standard();
+
+// Custom configuration
+var config = PreparationConfig.standard()
+    .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+    .withTransactionMode(TransactionMode.AUTO_COMMIT)
+    .withBatchSize(500);
+```
 
 ## Exceptions
 
