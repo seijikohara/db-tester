@@ -118,25 +118,35 @@ class ProgrammaticPreparationApiSpec :
      */
     @Test
     @ExpectedDataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/clean-insert-default/expected/")])
-    fun `should insert data with default settings`(): Unit {
+        sources = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/clean-insert-default/expected/",
+            ),
+        ],
+    )
+    fun `should insert data with default settings`() {
         // Given
         logger.info("Running cleanInsert with default settings")
 
-        val usersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(
-                listOf(1, "Alice", "alice@example.com"),
-                listOf(2, "Bob", "bob@example.com")))
+        val usersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(
+                    listOf(1, "Alice", "alice@example.com"),
+                    listOf(2, "Bob", "bob@example.com"),
+                ),
+            )
 
-        val ordersTable = Table.ofValues(
-            "ORDERS",
-            listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
-            listOf(
-                listOf(101, 1, "Laptop", 999.99),
-                listOf(102, 2, "Mouse", 29.99)))
+        val ordersTable =
+            Table.ofValues(
+                "ORDERS",
+                listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
+                listOf(
+                    listOf(101, 1, "Laptop", 999.99),
+                    listOf(102, 2, "Mouse", 29.99),
+                ),
+            )
 
         val tableSet = TableSet.of(usersTable, ordersTable)
 
@@ -161,34 +171,46 @@ class ProgrammaticPreparationApiSpec :
      */
     @Test
     @ExpectedDataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/clean-insert-custom-batch/expected/")])
-    fun `should insert data with custom batch size`(): Unit {
+        sources = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/clean-insert-custom-batch/expected/",
+            ),
+        ],
+    )
+    fun `should insert data with custom batch size`() {
         // Given
         logger.info("Running cleanInsert with custom batch size")
 
-        val usersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(
-                listOf(1, "Alice", "alice@example.com"),
-                listOf(2, "Bob", "bob@example.com"),
-                listOf(3, "Charlie", "charlie@example.com")))
+        val usersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(
+                    listOf(1, "Alice", "alice@example.com"),
+                    listOf(2, "Bob", "bob@example.com"),
+                    listOf(3, "Charlie", "charlie@example.com"),
+                ),
+            )
 
-        val ordersTable = Table.ofValues(
-            "ORDERS",
-            listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
-            listOf(
-                listOf(101, 1, "Laptop", 999.99),
-                listOf(102, 2, "Mouse", 29.99),
-                listOf(103, 3, "Keyboard", 79.99)))
+        val ordersTable =
+            Table.ofValues(
+                "ORDERS",
+                listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
+                listOf(
+                    listOf(101, 1, "Laptop", 999.99),
+                    listOf(102, 2, "Mouse", 29.99),
+                    listOf(103, 3, "Keyboard", 79.99),
+                ),
+            )
 
         val tableSet = TableSet.of(usersTable, ordersTable)
 
-        val config = PreparationConfig.standard()
-            .withBatchSize(2)
-            .withTransactionMode(TransactionMode.AUTO_COMMIT)
-            .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+        val config =
+            PreparationConfig
+                .standard()
+                .withBatchSize(2)
+                .withTransactionMode(TransactionMode.AUTO_COMMIT)
+                .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
 
         // When
         DatabasePreparation.cleanInsert(dataSource, tableSet, config)
@@ -210,19 +232,21 @@ class ProgrammaticPreparationApiSpec :
      */
     @Test
     @ExpectedDataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/execute-insert/expected/")])
-    fun `should execute insert operation`(): Unit {
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/execute-insert/expected/")],
+    )
+    fun `should execute insert operation`() {
         // Given
         logger.info("Running execute with INSERT operation")
 
         executeSql(dataSource, "DELETE FROM ORDERS")
         executeSql(dataSource, "DELETE FROM USERS")
 
-        val usersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(listOf(1, "Alice", "alice@example.com")))
+        val usersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(listOf(1, "Alice", "alice@example.com")),
+            )
 
         val tableSet = TableSet.of(usersTable)
 
@@ -248,31 +272,43 @@ class ProgrammaticPreparationApiSpec :
      */
     @Test
     @ExpectedDataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/execute-full-config/expected/")])
-    fun `should execute with explicit operation and configuration`(): Unit {
+        sources = [
+            DataSetSource(
+                resourceLocation = "classpath:example/feature/ProgrammaticPreparationApiSpec/execute-full-config/expected/",
+            ),
+        ],
+    )
+    fun `should execute with explicit operation and configuration`() {
         // Given
         logger.info("Running execute with explicit operation and configuration")
 
-        val usersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(
-                listOf(1, "Alice", "alice@example.com"),
-                listOf(2, "Bob", "bob@example.com")))
+        val usersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(
+                    listOf(1, "Alice", "alice@example.com"),
+                    listOf(2, "Bob", "bob@example.com"),
+                ),
+            )
 
-        val ordersTable = Table.ofValues(
-            "ORDERS",
-            listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
-            listOf(
-                listOf(101, 1, "Laptop", 999.99),
-                listOf(102, 2, "Mouse", 29.99)))
+        val ordersTable =
+            Table.ofValues(
+                "ORDERS",
+                listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
+                listOf(
+                    listOf(101, 1, "Laptop", 999.99),
+                    listOf(102, 2, "Mouse", 29.99),
+                ),
+            )
 
         val tableSet = TableSet.of(usersTable, ordersTable)
 
-        val config = PreparationConfig.standard()
-            .withTransactionMode(TransactionMode.AUTO_COMMIT)
-            .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+        val config =
+            PreparationConfig
+                .standard()
+                .withTransactionMode(TransactionMode.AUTO_COMMIT)
+                .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
 
         // When
         DatabasePreparation.execute(dataSource, tableSet, Operation.CLEAN_INSERT, config)
@@ -294,23 +330,29 @@ class ProgrammaticPreparationApiSpec :
      * - Expectation: Builds expected data programmatically and verifies via `assertEqualsByQuery`
      */
     @Test
-    fun `should prepare and verify without annotations`(): Unit {
+    fun `should prepare and verify without annotations`() {
         // Given
         logger.info("Running full programmatic flow without annotations")
 
-        val usersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(
-                listOf(1, "Alice", "alice@example.com"),
-                listOf(2, "Bob", "bob@example.com")))
+        val usersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(
+                    listOf(1, "Alice", "alice@example.com"),
+                    listOf(2, "Bob", "bob@example.com"),
+                ),
+            )
 
-        val ordersTable = Table.ofValues(
-            "ORDERS",
-            listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
-            listOf(
-                listOf(101, 1, "Laptop", 999.99),
-                listOf(102, 2, "Mouse", 29.99)))
+        val ordersTable =
+            Table.ofValues(
+                "ORDERS",
+                listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
+                listOf(
+                    listOf(101, 1, "Laptop", 999.99),
+                    listOf(102, 2, "Mouse", 29.99),
+                ),
+            )
 
         val tableSet = TableSet.of(usersTable, ordersTable)
 
@@ -318,26 +360,34 @@ class ProgrammaticPreparationApiSpec :
         DatabasePreparation.cleanInsert(dataSource, tableSet)
 
         // Then
-        val expectedUsersTable = Table.ofValues(
-            "USERS",
-            listOf("ID", "NAME", "EMAIL"),
-            listOf(
-                listOf(1, "Alice", "alice@example.com"),
-                listOf(2, "Bob", "bob@example.com")))
+        val expectedUsersTable =
+            Table.ofValues(
+                "USERS",
+                listOf("ID", "NAME", "EMAIL"),
+                listOf(
+                    listOf(1, "Alice", "alice@example.com"),
+                    listOf(2, "Bob", "bob@example.com"),
+                ),
+            )
+
+        DatabaseQueryAssertion.assertEqualsByQuery(expectedUsersTable, dataSource, "USERS", "SELECT ID, NAME, EMAIL FROM USERS ORDER BY ID")
+
+        val expectedOrdersTable =
+            Table.ofValues(
+                "ORDERS",
+                listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
+                listOf(
+                    listOf(101, 1, "Laptop", 999.99),
+                    listOf(102, 2, "Mouse", 29.99),
+                ),
+            )
 
         DatabaseQueryAssertion.assertEqualsByQuery(
-            expectedUsersTable, dataSource, "USERS", "SELECT ID, NAME, EMAIL FROM USERS ORDER BY ID")
-
-        val expectedOrdersTable = Table.ofValues(
+            expectedOrdersTable,
+            dataSource,
             "ORDERS",
-            listOf("ID", "USER_ID", "PRODUCT", "AMOUNT"),
-            listOf(
-                listOf(101, 1, "Laptop", 999.99),
-                listOf(102, 2, "Mouse", 29.99)))
-
-        DatabaseQueryAssertion.assertEqualsByQuery(
-            expectedOrdersTable, dataSource, "ORDERS",
-            "SELECT ID, USER_ID, PRODUCT, AMOUNT FROM ORDERS ORDER BY ID")
+            "SELECT ID, USER_ID, PRODUCT, AMOUNT FROM ORDERS ORDER BY ID",
+        )
 
         logger.info("Full programmatic flow completed")
     }

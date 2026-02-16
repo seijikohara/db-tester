@@ -20,9 +20,7 @@ import javax.sql.DataSource
  */
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-@DataSet(
-    sources = [DataSetSource(
-        resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/user-seed/")])
+@DataSet(sources = [DataSetSource(resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/user-seed/")])
 annotation class UserSeedData
 
 /**
@@ -35,9 +33,13 @@ annotation class UserSeedData
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS, AnnotationTarget.ANNOTATION_CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @ExpectedDataSet(
-    sources = [DataSetSource(
-        excludeColumns = ["CREATED_AT", "UPDATED_AT"],
-        resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/verify-users/expected/")])
+    sources = [
+        DataSetSource(
+            excludeColumns = ["CREATED_AT", "UPDATED_AT"],
+            resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/verify-users/expected/",
+        ),
+    ],
+)
 annotation class VerifyIgnoringAuditColumns
 
 /**
@@ -141,8 +143,8 @@ class ComposedAnnotationSpec :
     @Test
     @UserSeedData
     @ExpectedDataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/composed-dataset/expected/")])
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/composed-dataset/expected/")],
+    )
     fun `should load data via composed DataSet annotation`(): Unit =
         logger.info("Running test with composed @DataSet annotation").also {
             // When - framework loads data via @UserSeedData meta-annotation
@@ -159,9 +161,7 @@ class ComposedAnnotationSpec :
      * from comparison.
      */
     @Test
-    @DataSet(
-        sources = [DataSetSource(
-            resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/user-seed/")])
+    @DataSet(sources = [DataSetSource(resourceLocation = "classpath:example/feature/ComposedAnnotationSpec/user-seed/")])
     @VerifyIgnoringAuditColumns
     fun `should exclude audit columns via composed ExpectedDataSet annotation`(): Unit =
         logger.info("Running test with composed @ExpectedDataSet annotation").also {
