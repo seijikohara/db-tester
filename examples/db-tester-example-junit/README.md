@@ -63,6 +63,8 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `ProgrammaticAssertionApiTest` | Programmatic `DatabaseAssertion` API usage |
 | `TemplateExpressionTest` | Template expression processing for dynamic test data (UUID, sequence, timestamp, Faker) |
 | `ErrorHandlingTest` | Assertion failure scenarios and error messages |
+| `ProgrammaticPreparationApiTest` | Programmatic `DatabasePreparation` API for dynamic test data setup |
+| `ComposedAnnotationTest` | Composed meta-annotations combining `@DataSet` and `@ExpectedDataSet` |
 
 ### Database Integration Tests
 

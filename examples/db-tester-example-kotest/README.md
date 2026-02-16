@@ -62,6 +62,8 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `PartialColumnValidationSpec` | Partial column comparison |
 | `ProgrammaticAssertionApiSpec` | Programmatic `DatabaseAssertion` API usage |
 | `ErrorHandlingSpec` | Assertion failure scenarios and error messages |
+| `ProgrammaticPreparationApiSpec` | Programmatic `DatabasePreparation` API for dynamic test data setup |
+| `ComposedAnnotationSpec` | Composed meta-annotations combining `@DataSet` and `@ExpectedDataSet` |
 
 ### Database Integration Tests
 

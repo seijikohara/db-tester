@@ -51,7 +51,7 @@ Declares the datasets to apply before a test method executes.
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**Target**: `METHOD`, `TYPE`
+**Target**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **Attributes**:
 
@@ -90,7 +90,7 @@ Declares the datasets that define the expected database state after test executi
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
-**Target**: `METHOD`, `TYPE`
+**Target**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **Attributes**:
 

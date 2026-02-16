@@ -55,7 +55,7 @@ description: "DB Testerのアノテーション、設定、インターフェー
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSet`
 
-**ターゲット**: `METHOD`, `TYPE`
+**ターゲット**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **属性**:
 
@@ -95,7 +95,7 @@ void testWithCustomPath() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet`
 
-**ターゲット**: `METHOD`, `TYPE`
+**ターゲット**: `METHOD`, `TYPE`, `ANNOTATION_TYPE`
 
 **属性**:
 

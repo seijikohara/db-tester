@@ -83,6 +83,8 @@ This directory contains example tests demonstrating the features of the DB Teste
 | Dataset export (CSV, JSON, YAML) | `DataSetExportTest` |
 | Export configuration | `DataSetExportTest` (CustomConfigTests) |
 | Programmatic assertion API | `ProgrammaticAssertionApiTest` |
+| Programmatic preparation API | `ProgrammaticPreparationApiTest` |
+| Composed meta-annotations | `ComposedAnnotationTest` |
 
 ## Related Modules
 
