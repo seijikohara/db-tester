@@ -148,7 +148,7 @@ public class DatabaseTestExtension
   @Override
   @SuppressWarnings("NullAway")
   public void afterEach(final ExtensionContext context) {
-    final var testFailed = context.getExecutionException().isPresent();
+    var testFailed = context.getExecutionException().isPresent();
     try {
       if (testFailed) {
         logger.debug(
@@ -168,6 +168,9 @@ public class DatabaseTestExtension
                     testContext.testMethod().getName());
                 expectationVerifier.verify(testContext, expectedDataSet);
               });
+    } catch (final Exception e) {
+      testFailed = true;
+      throw e;
     } finally {
       handleExportDataSet(context, testFailed);
     }
@@ -306,10 +309,11 @@ public class DatabaseTestExtension
    * @param context the extension context providing access to test metadata
    * @return the ExportDataSet annotation if found at method or class level, or null if not present
    */
-  private ExportDataSet findExportDataSet(final ExtensionContext context) {
+  private @Nullable ExportDataSet findExportDataSet(final ExtensionContext context) {
     final var method = context.getRequiredTestMethod();
-    return Optional.ofNullable(method.getAnnotation(ExportDataSet.class))
-        .orElseGet(() -> context.getRequiredTestClass().getAnnotation(ExportDataSet.class));
+    return AnnotationUtils.findAnnotation(
+            ExportDataSet.class, method, context.getRequiredTestClass())
+        .orElse(null);
   }
 
   /**
