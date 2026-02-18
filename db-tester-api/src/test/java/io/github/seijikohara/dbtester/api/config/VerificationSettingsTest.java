@@ -130,6 +130,25 @@ class VerificationSettingsTest {
           RowOrdering.UNORDERED, settings.rowOrdering(), "rowOrdering should be UNORDERED");
     }
 
+    /** Verifies that builder rejects RowOrdering.UNSET. */
+    @Test
+    @Tag("error")
+    @DisplayName("throws exception when RowOrdering.UNSET is provided")
+    void shouldThrowException_whenRowOrderingUnsetProvided() {
+      // Given
+      final var builder = VerificationSettings.builder();
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> builder.rowOrdering(RowOrdering.UNSET),
+              "should reject RowOrdering.UNSET");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("UNSET"), "exception message should mention UNSET");
+    }
+
     /** Verifies that builder builds settings with custom retry count. */
     @Test
     @Tag("normal")

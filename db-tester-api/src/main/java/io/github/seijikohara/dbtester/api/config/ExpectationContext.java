@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.config;
 
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -33,13 +34,15 @@ import java.util.Set;
  * @param columnStrategies column comparison strategies keyed by uppercase column name
  * @param rowOrdering the row comparison strategy (ORDERED or UNORDERED)
  * @param operationDefaults the operation defaults containing comparison settings
+ * @param tableOrdering the table ordering strategy for determining table processing order
  * @see io.github.seijikohara.dbtester.api.spi.ExpectationProvider
  */
 public record ExpectationContext(
     Set<String> excludeColumns,
     Map<String, ColumnStrategyMapping> columnStrategies,
     RowOrdering rowOrdering,
-    OperationDefaults operationDefaults) {
+    OperationDefaults operationDefaults,
+    TableOrderingStrategy tableOrdering) {
 
   /**
    * Creates an ExpectationContext with defensive copies of collections.
@@ -48,6 +51,7 @@ public record ExpectationContext(
    * @param columnStrategies column comparison strategies keyed by uppercase column name
    * @param rowOrdering the row comparison strategy
    * @param operationDefaults the operation defaults containing comparison settings
+   * @param tableOrdering the table ordering strategy for determining table processing order
    */
   public ExpectationContext {
     excludeColumns = Set.copyOf(excludeColumns);
@@ -58,20 +62,25 @@ public record ExpectationContext(
    * Returns an instance with default values.
    *
    * <p>The default context has no excluded columns, no column strategies, ordered row comparison,
-   * and standard operation defaults.
+   * standard operation defaults, and AUTO table ordering.
    *
    * @return a new ExpectationContext with default values
    */
   public static ExpectationContext defaults() {
     return new ExpectationContext(
-        Set.of(), Map.of(), RowOrdering.ORDERED, OperationDefaults.standard());
+        Set.of(),
+        Map.of(),
+        RowOrdering.ORDERED,
+        OperationDefaults.standard(),
+        TableOrderingStrategy.AUTO);
   }
 
   /**
    * Creates a new ExpectationContext from the provided parameters.
    *
    * <p>This factory method accepts {@link Collection} for exclude columns and converts it to an
-   * immutable {@link Set} internally.
+   * immutable {@link Set} internally. The table ordering strategy defaults to {@link
+   * TableOrderingStrategy#AUTO}.
    *
    * @param excludeColumns column names to exclude from comparison
    * @param columnStrategies column comparison strategies keyed by uppercase column name
@@ -85,7 +94,38 @@ public record ExpectationContext(
       final RowOrdering rowOrdering,
       final OperationDefaults operationDefaults) {
     return new ExpectationContext(
-        Set.copyOf(excludeColumns), columnStrategies, rowOrdering, operationDefaults);
+        Set.copyOf(excludeColumns),
+        columnStrategies,
+        rowOrdering,
+        operationDefaults,
+        TableOrderingStrategy.AUTO);
+  }
+
+  /**
+   * Creates a new ExpectationContext from the provided parameters.
+   *
+   * <p>This factory method accepts {@link Collection} for exclude columns and converts it to an
+   * immutable {@link Set} internally.
+   *
+   * @param excludeColumns column names to exclude from comparison
+   * @param columnStrategies column comparison strategies keyed by uppercase column name
+   * @param rowOrdering the row comparison strategy
+   * @param operationDefaults the operation defaults containing comparison settings
+   * @param tableOrdering the table ordering strategy for determining table processing order
+   * @return a new ExpectationContext
+   */
+  public static ExpectationContext of(
+      final Collection<String> excludeColumns,
+      final Map<String, ColumnStrategyMapping> columnStrategies,
+      final RowOrdering rowOrdering,
+      final OperationDefaults operationDefaults,
+      final TableOrderingStrategy tableOrdering) {
+    return new ExpectationContext(
+        Set.copyOf(excludeColumns),
+        columnStrategies,
+        rowOrdering,
+        operationDefaults,
+        tableOrdering);
   }
 
   /**
@@ -99,7 +139,8 @@ public record ExpectationContext(
         Set.copyOf(excludeColumns),
         this.columnStrategies,
         this.rowOrdering,
-        this.operationDefaults);
+        this.operationDefaults,
+        this.tableOrdering);
   }
 
   /**
@@ -111,7 +152,11 @@ public record ExpectationContext(
   public ExpectationContext withColumnStrategies(
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     return new ExpectationContext(
-        this.excludeColumns, columnStrategies, this.rowOrdering, this.operationDefaults);
+        this.excludeColumns,
+        columnStrategies,
+        this.rowOrdering,
+        this.operationDefaults,
+        this.tableOrdering);
   }
 
   /**
@@ -122,7 +167,11 @@ public record ExpectationContext(
    */
   public ExpectationContext withRowOrdering(final RowOrdering rowOrdering) {
     return new ExpectationContext(
-        this.excludeColumns, this.columnStrategies, rowOrdering, this.operationDefaults);
+        this.excludeColumns,
+        this.columnStrategies,
+        rowOrdering,
+        this.operationDefaults,
+        this.tableOrdering);
   }
 
   /**
@@ -133,6 +182,25 @@ public record ExpectationContext(
    */
   public ExpectationContext withOperationDefaults(final OperationDefaults operationDefaults) {
     return new ExpectationContext(
-        this.excludeColumns, this.columnStrategies, this.rowOrdering, operationDefaults);
+        this.excludeColumns,
+        this.columnStrategies,
+        this.rowOrdering,
+        operationDefaults,
+        this.tableOrdering);
+  }
+
+  /**
+   * Returns a new ExpectationContext with the specified table ordering strategy.
+   *
+   * @param tableOrdering the table ordering strategy
+   * @return a new ExpectationContext with the specified table ordering strategy
+   */
+  public ExpectationContext withTableOrdering(final TableOrderingStrategy tableOrdering) {
+    return new ExpectationContext(
+        this.excludeColumns,
+        this.columnStrategies,
+        this.rowOrdering,
+        this.operationDefaults,
+        tableOrdering);
   }
 }

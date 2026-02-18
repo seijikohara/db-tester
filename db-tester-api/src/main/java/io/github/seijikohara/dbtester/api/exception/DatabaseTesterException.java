@@ -12,15 +12,22 @@ import java.io.Serial;
  * <p>Framework exception hierarchy:
  *
  * <ul>
+ *   <li>{@link ConfigurationException} - Framework configuration failures
  *   <li>{@link DataSetLoadException} - Data loading and parsing failures
  *   <li>{@link DataSourceNotFoundException} - Missing DataSource registration
+ *   <li>{@link DatabaseOperationException} - SQL operation failures
  *   <li>{@link ValidationException} - Data validation and assertion failures
  * </ul>
  *
  * <p>This exception is unchecked (extends {@link RuntimeException}) to avoid forcing callers to
  * handle exceptions they may not be able to recover from.
  */
-public class DatabaseTesterException extends RuntimeException {
+public sealed class DatabaseTesterException extends RuntimeException
+    permits ConfigurationException,
+        DataSetLoadException,
+        DataSourceNotFoundException,
+        DatabaseOperationException,
+        ValidationException {
 
   /** Serial version UID for serialization compatibility. */
   @Serial private static final long serialVersionUID = 1L;

@@ -16,14 +16,29 @@ package io.github.seijikohara.dbtester.api.config;
  * }
  *
  * // Programmatic configuration
- * var settings = ConventionSettings.standard()
- *     .withRowOrdering(RowOrdering.UNORDERED);
+ * var settings = VerificationSettings.standard()
+ *     .toBuilder()
+ *     .rowOrdering(RowOrdering.UNORDERED)
+ *     .build();
  * }</pre>
  *
- * @see ConventionSettings
+ * @see VerificationSettings
  * @see io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
  */
 public enum RowOrdering {
+
+  /**
+   * Indicates that the framework should use the global setting.
+   *
+   * <p>When specified on {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet},
+   * this value instructs the framework to fall back to the global {@link
+   * VerificationSettings#rowOrdering()} configuration instead of using an annotation-level
+   * override.
+   *
+   * <p>This value is only valid in annotation contexts. It must not be used in programmatic
+   * configuration such as {@link VerificationSettings.Builder#rowOrdering(RowOrdering)}.
+   */
+  UNSET,
 
   /**
    * Compares rows in positional order (row-by-row by index).

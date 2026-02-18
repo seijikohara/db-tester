@@ -297,6 +297,11 @@ public final class VerificationSettings {
      * @return this builder
      */
     public Builder rowOrdering(final RowOrdering rowOrdering) {
+      if (rowOrdering == RowOrdering.UNSET) {
+        throw new IllegalArgumentException(
+            "RowOrdering.UNSET is only valid in annotation contexts;"
+                + " use ORDERED or UNORDERED for programmatic configuration");
+      }
       this.rowOrdering = Objects.requireNonNull(rowOrdering, "rowOrdering");
       return this;
     }

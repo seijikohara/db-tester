@@ -91,7 +91,7 @@ public final class DataSourceRegistry {
   public DataSource get(final @Nullable String name) {
     final var namedDataSource =
         Optional.ofNullable(name)
-            .filter(Predicate.not(String::isEmpty))
+            .filter(Predicate.not(String::isBlank))
             .map(DataSourceName::new)
             .flatMap(dataSourceName -> Optional.ofNullable(dataSources.get(dataSourceName)));
 
@@ -106,7 +106,7 @@ public final class DataSourceRegistry {
    * @return {@code true} if a default data source exists, {@code false} otherwise
    */
   public boolean hasDefault() {
-    return Optional.ofNullable(defaultDataSource).isPresent();
+    return defaultDataSource != null;
   }
 
   /**
@@ -140,7 +140,7 @@ public final class DataSourceRegistry {
    */
   private String buildMissingDataSourceMessage(final @Nullable String name) {
     return Optional.ofNullable(name)
-        .filter(Predicate.not(String::isEmpty))
+        .filter(Predicate.not(String::isBlank))
         .map(
             dataSourceName ->
                 String.format("No data source registered for name: %s", dataSourceName))

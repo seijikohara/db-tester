@@ -119,7 +119,7 @@ public @interface DataSetSource {
    *
    * <p>Column strategies override the default strict comparison. For columns not listed here, the
    * default {@link Strategy#STRICT} comparison is used unless a global column strategy is
-   * configured in {@link io.github.seijikohara.dbtester.api.config.ConventionSettings}.
+   * configured in {@link io.github.seijikohara.dbtester.api.config.VerificationSettings}.
    *
    * <p>This attribute only applies to expectation verification (when used within {@link
    * ExpectedDataSet#sources()}). It has no effect when used within {@link DataSet#sources()} for

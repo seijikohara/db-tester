@@ -44,7 +44,7 @@ import java.lang.annotation.Target;
  * @see io.github.seijikohara.dbtester.api.export.DataSetExporter
  */
 @Inherited
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExportDataSet {
 
