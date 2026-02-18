@@ -13,7 +13,9 @@ import org.slf4j.LoggerFactory;
  * Executes UPSERT operations on database tables.
  *
  * <p>This class implements {@link TableExecutor} and provides methods to perform upsert operations
- * - attempting to update first, then inserting if no rows were affected.
+ * - attempting to update first, then inserting if no rows were affected. The first column in each
+ * table definition is treated as the primary key for the {@code WHERE} clause of the update
+ * statement.
  *
  * <p>This class is stateless and thread-safe.
  */
@@ -55,7 +57,10 @@ public final class UpsertExecutor implements TableExecutor {
   /**
    * Upserts all rows in a table.
    *
-   * <p>For each row, attempts to update first. If no rows were affected, inserts the row.
+   * <p>For each row, attempts to update first. If no rows were affected, inserts the row. The first
+   * column in the table definition is treated as the primary key for the {@code UPDATE ... WHERE}
+   * clause. All remaining columns are included in the {@code SET} clause. Dataset files (CSV, JSON,
+   * YAML) must define the primary key column as the first column.
    *
    * @param table the table to upsert
    * @param connection the database connection
