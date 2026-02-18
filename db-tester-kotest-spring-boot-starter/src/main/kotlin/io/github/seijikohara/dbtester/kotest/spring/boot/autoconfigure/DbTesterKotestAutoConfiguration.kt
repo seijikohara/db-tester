@@ -54,67 +54,59 @@ class DbTesterKotestAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     fun dbTesterConfiguration(properties: DbTesterProperties): Configuration =
-        properties.convention
-            .let { conventionProps ->
+        run {
+            val conventions =
                 ConventionSettings
                     .builder()
-                    .baseDirectory(conventionProps.baseDirectory)
-                    .expectationSuffix(conventionProps.expectationSuffix)
-                    .scenarioMarker(conventionProps.scenarioMarker)
-                    .dataFormat(conventionProps.dataFormat)
-                    .tableMergeStrategy(conventionProps.tableMergeStrategy)
-                    .loadOrderFileName(conventionProps.loadOrderFileName)
+                    .baseDirectory(properties.convention.baseDirectory)
+                    .expectationSuffix(properties.convention.expectationSuffix)
+                    .scenarioMarker(properties.convention.scenarioMarker)
+                    .dataFormat(properties.convention.dataFormat)
+                    .tableMergeStrategy(properties.convention.tableMergeStrategy)
+                    .loadOrderFileName(properties.convention.loadOrderFileName)
                     .build()
-            }.let { conventions ->
-                properties.verification
-                    .let { verificationProps ->
-                        verificationProps.columnStrategies
-                            .filter { it.columnName != null && it.columnName!!.isNotBlank() && it.strategy != null }
-                            .associate { prop ->
-                                val mapping =
-                                    ColumnStrategyConverter.toColumnStrategyMapping(
-                                        prop.columnName!!,
-                                        prop.strategy!!,
-                                        prop.pattern,
-                                    )
-                                val entry = ColumnStrategyConverter.toMapEntry(prop.columnName!!, mapping)
-                                entry.key to entry.value
-                            }.let { columnStrategies ->
-                                VerificationSettings
-                                    .builder()
-                                    .globalExcludeColumns(verificationProps.globalExcludeColumns)
-                                    .globalColumnStrategies(columnStrategies)
-                                    .rowOrdering(verificationProps.rowOrdering)
-                                    .retryCount(verificationProps.retryCount)
-                                    .retryDelay(verificationProps.retryDelay)
-                                    .build()
-                            }
-                    }.let { verification ->
-                        properties.execution
-                            .let { executionProps ->
-                                ExecutionSettings
-                                    .builder()
-                                    .queryTimeout(executionProps.queryTimeout)
-                                    .transactionMode(executionProps.transactionMode)
-                                    .build()
-                            }.let { execution ->
-                                OperationDefaults
-                                    .builder()
-                                    .preparation(properties.operation.preparation)
-                                    .expectation(properties.operation.expectation)
-                                    .build()
-                                    .let { operations ->
-                                        Configuration
-                                            .builder()
-                                            .conventions(conventions)
-                                            .verification(verification)
-                                            .execution(execution)
-                                            .operations(operations)
-                                            .build()
-                                    }
-                            }
+            val columnStrategies =
+                properties.verification.columnStrategies
+                    .filter { it.columnName != null && it.columnName!!.isNotBlank() && it.strategy != null }
+                    .associate { prop ->
+                        val mapping =
+                            ColumnStrategyConverter.toColumnStrategyMapping(
+                                prop.columnName!!,
+                                prop.strategy!!,
+                                prop.pattern,
+                            )
+                        val entry = ColumnStrategyConverter.toMapEntry(prop.columnName!!, mapping)
+                        entry.key to entry.value
                     }
-            }
+            val verification =
+                VerificationSettings
+                    .builder()
+                    .globalExcludeColumns(properties.verification.globalExcludeColumns)
+                    .globalColumnStrategies(columnStrategies)
+                    .rowOrdering(properties.verification.rowOrdering)
+                    .retryCount(properties.verification.retryCount)
+                    .retryDelay(properties.verification.retryDelay)
+                    .build()
+            val execution =
+                ExecutionSettings
+                    .builder()
+                    .queryTimeout(properties.execution.queryTimeout)
+                    .transactionMode(properties.execution.transactionMode)
+                    .build()
+            val operations =
+                OperationDefaults
+                    .builder()
+                    .preparation(properties.operation.preparation)
+                    .expectation(properties.operation.expectation)
+                    .build()
+            Configuration
+                .builder()
+                .conventions(conventions)
+                .verification(verification)
+                .execution(execution)
+                .operations(operations)
+                .build()
+        }
 
     /**
      * Creates a DataSourceRegistry bean and registers all available DataSources.
