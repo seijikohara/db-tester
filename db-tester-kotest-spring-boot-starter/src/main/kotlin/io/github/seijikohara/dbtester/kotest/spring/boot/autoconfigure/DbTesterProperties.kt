@@ -30,10 +30,10 @@ import java.time.Duration
 @ConfigurationProperties(prefix = "db-tester")
 class DbTesterProperties {
     /** Whether DB Tester is enabled. Defaults to true. */
-    var isEnabled: Boolean = true
+    var enabled: Boolean = true
 
     /** Whether to automatically register DataSource beans. Defaults to true. */
-    var isAutoRegisterDataSources: Boolean = true
+    var autoRegisterDataSources: Boolean = true
 
     /** Convention settings for dataset resolution. */
     @NestedConfigurationProperty

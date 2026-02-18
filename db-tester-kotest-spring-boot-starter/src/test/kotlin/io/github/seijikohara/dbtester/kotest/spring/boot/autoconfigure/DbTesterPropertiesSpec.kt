@@ -33,40 +33,40 @@ class DbTesterPropertiesSpec : AnnotationSpec() {
     @Test
     fun `should have default values`(): Unit =
         properties.let { props ->
-            props.isEnabled shouldBe true
-            props.isAutoRegisterDataSources shouldBe true
+            props.enabled shouldBe true
+            props.autoRegisterDataSources shouldBe true
         }
 
     @Test
     fun `should allow changing enabled property`(): Unit =
         properties.let { props ->
-            props.isEnabled = false
-            props.isEnabled shouldBe false
+            props.enabled = false
+            props.enabled shouldBe false
         }
 
     @Test
     fun `should allow changing autoRegisterDataSources property`(): Unit =
         properties.let { props ->
-            props.isAutoRegisterDataSources = false
-            props.isAutoRegisterDataSources shouldBe false
+            props.autoRegisterDataSources = false
+            props.autoRegisterDataSources shouldBe false
         }
 
     @Test
     fun `should have independent property instances`(): Unit =
         DbTesterProperties().let { props1 ->
             DbTesterProperties().let { props2 ->
-                props1.isEnabled = false
-                props2.isEnabled shouldBe true
+                props1.enabled = false
+                props2.enabled shouldBe true
             }
         }
 
     @Test
     fun `should preserve multiple property changes`(): Unit =
         properties.let { props ->
-            props.isEnabled = false
-            props.isAutoRegisterDataSources = false
-            props.isEnabled shouldBe false
-            props.isAutoRegisterDataSources shouldBe false
+            props.enabled = false
+            props.autoRegisterDataSources = false
+            props.enabled shouldBe false
+            props.autoRegisterDataSources shouldBe false
         }
 
     @Test
