@@ -126,7 +126,7 @@ ID,NAME,EMAIL
 | Multi-format data | CSV, TSV, JSON, and YAML dataset support |
 | Template expressions | Dynamic values using `${uuid}`, `${sequence}`, `${now}`, `${faker.*}` |
 | 11 comparison strategies | Column-level verification: STRICT, REGEX, DATE_FLEXIBLE, JSON_EQUIVALENT, and more |
-| Dataset export | Export database tables to CSV, TSV, JSON, or YAML via `DataSetExporter` |
+| Dataset export | Export database tables to CSV, TSV, JSON, or YAML via `@ExportDataSet` or `DataSetExporter` |
 | Scenario filtering | Share dataset files across tests using the `[Scenario]` column |
 | Batch insert | Configurable batch size for large dataset insertion |
 | Retry mechanism | Configurable retry with delay for async operation verification |
@@ -294,9 +294,12 @@ Configure via `application.properties`:
 db-tester.enabled=true
 db-tester.auto-register-data-sources=true
 db-tester.convention.data-format=AUTO
+db-tester.convention.base-directory=custom/datasets
 db-tester.convention.expectation-suffix=/expected
 db-tester.operation.preparation=CLEAN_INSERT
 ```
+
+When `base-directory` is set, the framework resolves dataset files relative to this directory instead of the test class package path. When unset (default), datasets are resolved from the classpath relative to the test class.
 
 See the [Configuration](https://seijikohara.github.io/db-tester/configuration) documentation for all options.
 
@@ -445,7 +448,32 @@ See the [Advanced Usage - Template Expressions](https://seijikohara.github.io/db
 
 ### Dataset Export
 
-Export database tables to files for debugging or creating expected datasets:
+#### Annotation-Based Export
+
+Use `@ExportDataSet` to export database tables to files after test execution. This is useful for debugging failed tests or generating expected dataset files:
+
+```java
+@Test
+@DataSet
+@ExportDataSet(tables = {"USERS", "ORDERS"})
+void shouldProcessOrder() {
+    orderService.process(orderId);
+}
+
+// Export only when the test fails
+@Test
+@DataSet
+@ExportDataSet(format = DataFormat.JSON, tables = {"USERS"}, onFailureOnly = true)
+void shouldHandleEdgeCase() {
+    // ...
+}
+```
+
+Exported files are written to `build/db-tester-export/<className>/<methodName>/` by default.
+
+#### Programmatic Export
+
+Use `DataSetExporter` for code-based export:
 
 ```java
 // Export tables to CSV files
