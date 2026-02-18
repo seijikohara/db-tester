@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  *   <li>{@link UpdateExecutor} - UPDATE operations
  *   <li>{@link DeleteExecutor} - DELETE and DELETE_ALL operations
  *   <li>{@link TruncateExecutor} - TRUNCATE operations
- *   <li>{@link RefreshExecutor} - UPSERT operations
+ *   <li>{@link UpsertExecutor} - UPSERT operations
  * </ul>
  *
  * <p>Supported operations include: NONE, INSERT, UPDATE, DELETE, DELETE_ALL, UPSERT,
@@ -61,8 +61,8 @@ public final class OperationExecutor {
   /** The truncate executor for TRUNCATE operations. */
   private final TruncateExecutor truncateExecutor;
 
-  /** The refresh executor for UPSERT operations. */
-  private final RefreshExecutor refreshExecutor;
+  /** The upsert executor for UPSERT operations. */
+  private final UpsertExecutor upsertExecutor;
 
   /** The table order resolver for table ordering. */
   private final TableOrderResolver tableOrderResolver;
@@ -75,7 +75,7 @@ public final class OperationExecutor {
     this.updateExecutor = new UpdateExecutor(sqlBuilder, parameterBinder);
     this.deleteExecutor = new DeleteExecutor(sqlBuilder, parameterBinder);
     this.truncateExecutor = new TruncateExecutor(sqlBuilder);
-    this.refreshExecutor = new RefreshExecutor(insertExecutor, updateExecutor);
+    this.upsertExecutor = new UpsertExecutor(insertExecutor, updateExecutor);
     this.tableOrderResolver = new TableOrderResolver();
   }
 
@@ -88,7 +88,7 @@ public final class OperationExecutor {
    * @param updateExecutor the update executor
    * @param deleteExecutor the delete executor
    * @param truncateExecutor the truncate executor
-   * @param refreshExecutor the refresh executor
+   * @param upsertExecutor the upsert executor
    * @param tableOrderResolver the table order resolver
    */
   OperationExecutor(
@@ -96,13 +96,13 @@ public final class OperationExecutor {
       final UpdateExecutor updateExecutor,
       final DeleteExecutor deleteExecutor,
       final TruncateExecutor truncateExecutor,
-      final RefreshExecutor refreshExecutor,
+      final UpsertExecutor upsertExecutor,
       final TableOrderResolver tableOrderResolver) {
     this.insertExecutor = insertExecutor;
     this.updateExecutor = updateExecutor;
     this.deleteExecutor = deleteExecutor;
     this.truncateExecutor = truncateExecutor;
-    this.refreshExecutor = refreshExecutor;
+    this.upsertExecutor = upsertExecutor;
     this.tableOrderResolver = tableOrderResolver;
   }
 
@@ -332,7 +332,7 @@ public final class OperationExecutor {
       case UPDATE -> updateExecutor.execute(tables, connection, queryTimeout);
       case DELETE -> deleteExecutor.execute(tables, connection, queryTimeout);
       case DELETE_ALL -> deleteExecutor.executeDeleteAll(tables, connection, queryTimeout);
-      case UPSERT -> refreshExecutor.execute(tables, connection, queryTimeout);
+      case UPSERT -> upsertExecutor.execute(tables, connection, queryTimeout);
       case TRUNCATE_TABLE -> truncateExecutor.execute(tables, connection, queryTimeout);
       case CLEAN_INSERT -> {
         deleteExecutor.executeDeleteAll(tables.reversed(), connection, queryTimeout);

@@ -4,12 +4,21 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
+import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
+import io.github.seijikohara.dbtester.internal.jdbc.read.TableOrderResolver;
 import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
@@ -43,6 +52,9 @@ public final class ExpectationVerifier {
   /** Dataset comparator for assertions. */
   private final DataSetComparator comparator;
 
+  /** Table order resolver for foreign key-based ordering. */
+  private final TableOrderResolver tableOrderResolver;
+
   /** Creates a new expectation verifier with default dependencies. */
   public ExpectationVerifier() {
     this(new TableReader(), OperationDefaults.standard());
@@ -66,8 +78,23 @@ public final class ExpectationVerifier {
    * @param comparator the dataset comparator
    */
   public ExpectationVerifier(final TableReader tableReader, final DataSetComparator comparator) {
+    this(tableReader, comparator, new TableOrderResolver());
+  }
+
+  /**
+   * Creates a new expectation verifier with specified dependencies.
+   *
+   * @param tableReader the table reader
+   * @param comparator the dataset comparator
+   * @param tableOrderResolver the table order resolver
+   */
+  public ExpectationVerifier(
+      final TableReader tableReader,
+      final DataSetComparator comparator,
+      final TableOrderResolver tableOrderResolver) {
     this.tableReader = tableReader;
     this.comparator = comparator;
+    this.tableOrderResolver = tableOrderResolver;
   }
 
   /**
@@ -89,11 +116,13 @@ public final class ExpectationVerifier {
     final var columnStrategies = context.columnStrategies();
     final var rowOrdering = context.rowOrdering();
     final var operationDefaults = context.operationDefaults();
+    final var tableOrdering = context.tableOrdering();
 
     logger.debug(
-        "Verifying expectation for {} tables with {} ordering and epsilon {}",
+        "Verifying expectation for {} tables with {} ordering, {} table ordering, and epsilon {}",
         expectedTableSet.getTables().size(),
         rowOrdering,
+        tableOrdering,
         operationDefaults.floatingPointEpsilon());
 
     final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
@@ -114,37 +143,34 @@ public final class ExpectationVerifier {
             ? new DataSetComparator(operationDefaults)
             : comparator;
 
-    expectedTableSet
-        .getTables()
-        .forEach(
-            expectedTable -> {
-              final var tableName = expectedTable.getName().value();
-              final var expectedColumns = expectedTable.getColumns();
+    // Resolve table processing order
+    final var orderedTables =
+        resolveTableOrder(expectedTableSet.getTables(), dataSource, tableOrdering);
 
-              logger.trace(
-                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+    orderedTables.forEach(
+        expectedTable -> {
+          final var tableName = expectedTable.getName().value();
+          final var expectedColumns = expectedTable.getColumns();
 
-              final var actualTable =
-                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+          logger.trace(
+              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-              logger.trace(
-                  "Comparing table {}: expected {} rows, actual {} rows ({})",
-                  tableName,
-                  expectedTable.getRowCount(),
-                  actualTable.getRowCount(),
-                  rowOrdering);
+          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-              if (normalizedExcludeColumns.isEmpty() && effectiveColumnStrategies.isEmpty()) {
-                effectiveComparator.assertEquals(expectedTable, actualTable, null);
-              } else {
-                effectiveComparator.assertEqualsWithStrategies(
-                    expectedTable,
-                    actualTable,
-                    normalizedExcludeColumns,
-                    effectiveColumnStrategies,
-                    rowOrdering);
-              }
-            });
+          logger.trace(
+              "Comparing table {}: expected {} rows, actual {} rows ({})",
+              tableName,
+              expectedTable.getRowCount(),
+              actualTable.getRowCount(),
+              rowOrdering);
+
+          effectiveComparator.assertEqualsWithStrategies(
+              expectedTable,
+              actualTable,
+              normalizedExcludeColumns,
+              effectiveColumnStrategies,
+              rowOrdering);
+        });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
@@ -456,5 +482,118 @@ public final class ExpectationVerifier {
     return excludeColumns.stream()
         .map(column -> column.toUpperCase(Locale.ROOT))
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  /**
+   * Resolves the table processing order based on the specified strategy.
+   *
+   * @param tables the original table list
+   * @param dataSource the data source for metadata queries
+   * @param strategy the table ordering strategy
+   * @return the reordered table list
+   */
+  private List<Table> resolveTableOrder(
+      final List<Table> tables, final DataSource dataSource, final TableOrderingStrategy strategy) {
+    if (tables.size() <= 1) {
+      return tables;
+    }
+
+    return switch (strategy) {
+      case AUTO -> resolveTableOrderAuto(tables, dataSource);
+      case LOAD_ORDER_FILE -> tables; // Already ordered by load order file during dataset loading
+      case FOREIGN_KEY -> resolveTableOrderByForeignKey(tables, dataSource);
+      case ALPHABETICAL -> resolveTableOrderAlphabetically(tables);
+    };
+  }
+
+  /**
+   * Resolves table order using AUTO strategy.
+   *
+   * <p>AUTO strategy attempts foreign key resolution via JDBC metadata and falls back to the
+   * original order if resolution fails.
+   *
+   * @param tables the original table list
+   * @param dataSource the data source for metadata queries
+   * @return the reordered table list
+   */
+  private List<Table> resolveTableOrderAuto(final List<Table> tables, final DataSource dataSource) {
+    try (final var connection = dataSource.getConnection()) {
+      final var schema = getSchema(connection).orElse(null);
+      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
+
+      if (!tableNames.equals(orderedNames)) {
+        logger.debug("Resolved verification table order based on foreign keys: {}", orderedNames);
+        final var tableMap =
+            tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+        return orderedNames.stream().map(tableMap::get).toList();
+      }
+    } catch (final SQLException e) {
+      logger.debug(
+          "Foreign key resolution failed for verification, using original order: {}",
+          e.getMessage());
+    }
+
+    return tables;
+  }
+
+  /**
+   * Resolves table order based on foreign key relationships.
+   *
+   * @param tables the original table list
+   * @param dataSource the data source for metadata queries
+   * @return the reordered table list
+   */
+  private List<Table> resolveTableOrderByForeignKey(
+      final List<Table> tables, final DataSource dataSource) {
+    try (final var connection = dataSource.getConnection()) {
+      final var schema = getSchema(connection).orElse(null);
+      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
+
+      if (tableNames.equals(orderedNames)) {
+        logger.debug("No foreign key dependencies found for verification, using original order");
+        return tables;
+      }
+
+      logger.debug("Resolved verification table order based on foreign keys: {}", orderedNames);
+      final var tableMap =
+          tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+      return orderedNames.stream().map(tableMap::get).toList();
+
+    } catch (final SQLException e) {
+      logger.warn(
+          "Failed to resolve verification table order based on foreign keys, using original order",
+          e);
+      return tables;
+    }
+  }
+
+  /**
+   * Resolves table order alphabetically by table name.
+   *
+   * @param tables the original table list
+   * @return the alphabetically sorted table list
+   */
+  private List<Table> resolveTableOrderAlphabetically(final List<Table> tables) {
+    logger.debug("Sorting verification tables alphabetically");
+    return tables.stream()
+        .sorted(Comparator.comparing(table -> table.getName().value().toLowerCase(Locale.ROOT)))
+        .toList();
+  }
+
+  /**
+   * Gets the schema from the connection.
+   *
+   * @param connection the database connection
+   * @return an Optional containing the schema name, or empty if not available
+   */
+  private Optional<String> getSchema(final Connection connection) {
+    try {
+      return Optional.ofNullable(connection.getSchema());
+    } catch (final SQLException e) {
+      logger.debug("Failed to retrieve schema: {}", e.getMessage());
+      return Optional.empty();
+    }
   }
 }

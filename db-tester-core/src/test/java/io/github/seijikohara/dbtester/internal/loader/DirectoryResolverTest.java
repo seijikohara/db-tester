@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.internal.loader;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -41,7 +42,7 @@ class DirectoryResolverTest {
       final var methodName = "testMethod";
 
       // When
-      final var resolver = new DirectoryResolver(testClass, methodName);
+      final var resolver = new DirectoryResolver(testClass, methodName, null);
 
       // Then
       assertAll(
@@ -49,7 +50,30 @@ class DirectoryResolverTest {
           () -> assertNotNull(resolver, "resolver should not be null"),
           () -> assertEquals(testClass, resolver.testClass(), "should store test class"),
           () ->
-              assertEquals(methodName, resolver.testMethodName(), "should store test method name"));
+              assertEquals(methodName, resolver.testMethodName(), "should store test method name"),
+          () -> assertNull(resolver.baseDirectory(), "baseDirectory should be null"));
+    }
+
+    /** Verifies that constructor stores baseDirectory when provided. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should store baseDirectory when provided")
+    void shouldStoreBaseDirectory_whenProvided() {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var methodName = "testMethod";
+      final var baseDir = "/custom/base";
+
+      // When
+      final var resolver = new DirectoryResolver(testClass, methodName, baseDir);
+
+      // Then
+      assertAll(
+          "resolver should store all fields",
+          () -> assertEquals(testClass, resolver.testClass(), "should store test class"),
+          () ->
+              assertEquals(methodName, resolver.testMethodName(), "should store test method name"),
+          () -> assertEquals(baseDir, resolver.baseDirectory(), "should store baseDirectory"));
     }
   }
 
@@ -74,7 +98,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       final var customLocation = tempDir.toString();
       createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
 
@@ -97,7 +121,7 @@ class DirectoryResolverTest {
     void shouldReturnConventionBasedDirectory_whenNoLocationProvided() {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
 
       // When
       final var result =
@@ -122,7 +146,7 @@ class DirectoryResolverTest {
     void shouldReturnDirectoryWithSuffix_whenSuffixProvidedWithConventionBasedPath() {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
 
       // When
       final var result =
@@ -155,7 +179,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       final var customLocation = tempDir.toString();
       createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
 
@@ -173,7 +197,7 @@ class DirectoryResolverTest {
     void shouldThrowException_whenClasspathDirectoryNotFound() {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
 
       // When & Then
       final var exception =
@@ -210,7 +234,7 @@ class DirectoryResolverTest {
     void shouldThrowException_whenFileSystemDirectoryNotFound(final @TempDir Path tempDir) {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       final var nonExistentPath = tempDir.resolve("nonexistent").toString();
 
       // When & Then
@@ -247,7 +271,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       final var filePath = tempDir.resolve("file.txt");
       Files.writeString(filePath, "content");
 
@@ -261,6 +285,161 @@ class DirectoryResolverTest {
       assertTrue(
           message != null && message.contains("not a directory"),
           "exception should mention path is not a directory");
+    }
+
+    /**
+     * Verifies that resolveDirectory uses file system baseDirectory when baseDirectory is
+     * configured.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use file system baseDirectory when baseDirectory is configured")
+    void shouldUseFileSystemBaseDirectory_whenBaseDirectoryIsConfigured(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var baseDir = tempDir.toString();
+      final var resolver = new DirectoryResolver(testClass, "testMethod", baseDir);
+      createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
+
+      // When
+      final var result = resolver.resolveDirectory(null, null);
+
+      // Then
+      assertAll(
+          "should resolve using baseDirectory",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertEquals(tempDir, result, "should return baseDirectory path"));
+    }
+
+    /**
+     * Verifies that resolveDirectory appends suffix to baseDirectory when both are provided.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should append suffix to baseDirectory when both are provided")
+    void shouldAppendSuffixToBaseDirectory_whenBothAreProvided(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var expectedDir = tempDir.resolve("expected");
+      Files.createDirectories(expectedDir);
+      createCsvFile(expectedDir, "TABLE1.csv", "COL1", "A");
+      final var baseDir = tempDir.toString();
+      final var resolver = new DirectoryResolver(testClass, "testMethod", baseDir);
+
+      // When
+      final var result = resolver.resolveDirectory(null, "/expected");
+
+      // Then
+      assertAll(
+          "should resolve using baseDirectory with suffix",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertEquals(expectedDir, result, "should return baseDirectory + suffix path"));
+    }
+
+    /**
+     * Verifies that resolveDirectory uses classpath baseDirectory when baseDirectory starts with
+     * classpath prefix.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use classpath baseDirectory when baseDirectory starts with classpath:")
+    void shouldUseClasspathBaseDirectory_whenBaseDirectoryStartsWithClasspathPrefix() {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var baseDir =
+          "classpath:io/github/seijikohara/dbtester/internal/loader/DirectoryResolverTest";
+      final var resolver = new DirectoryResolver(testClass, "testMethod", baseDir);
+
+      // When
+      final var result = resolver.resolveDirectory(null, "/testMethod");
+
+      // Then
+      assertAll(
+          "should resolve using classpath baseDirectory",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertTrue(Files.exists(result), "directory should exist"),
+          () -> assertTrue(Files.isDirectory(result), "path should be directory"));
+    }
+
+    /**
+     * Verifies that resolveDirectory uses custom resourceLocation even when baseDirectory is
+     * configured.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName(
+        "should use custom resourceLocation when both resourceLocation and baseDirectory are set")
+    void shouldUseCustomResourceLocation_whenBothResourceLocationAndBaseDirectoryAreSet(
+        final @TempDir Path tempDir) throws IOException {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var resolver = new DirectoryResolver(testClass, "testMethod", "/some/base/directory");
+      final var customLocation = tempDir.toString();
+      createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
+
+      // When
+      final var result = resolver.resolveDirectory(customLocation, null);
+
+      // Then
+      assertEquals(tempDir, result, "should use custom resourceLocation and ignore baseDirectory");
+    }
+
+    /**
+     * Verifies that resolveDirectory falls back to convention-based path when baseDirectory is
+     * empty.
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should fall back to convention-based path when baseDirectory is empty")
+    void shouldFallBackToConventionBasedPath_whenBaseDirectoryIsEmpty() {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var resolver = new DirectoryResolver(testClass, "testMethod", "");
+
+      // When
+      final var result = resolver.resolveDirectory(null, "/testMethod");
+
+      // Then
+      assertAll(
+          "should fall back to convention-based resolution",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertTrue(Files.exists(result), "directory should exist"),
+          () -> assertTrue(Files.isDirectory(result), "path should be directory"));
+    }
+
+    /**
+     * Verifies that resolveDirectory throws exception when baseDirectory does not exist.
+     *
+     * @param tempDir temporary directory for test files
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when baseDirectory does not exist")
+    void shouldThrowException_whenBaseDirectoryDoesNotExist(final @TempDir Path tempDir) {
+      // Given
+      final var testClass = DirectoryResolverTest.class;
+      final var nonExistentBaseDir = tempDir.resolve("nonexistent").toString();
+      final var resolver = new DirectoryResolver(testClass, "testMethod", nonExistentBaseDir);
+
+      // When & Then
+      final var exception =
+          assertThrows(DataSetLoadException.class, () -> resolver.resolveDirectory(null, null));
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("does not exist"),
+          "exception should mention directory does not exist");
     }
   }
 
@@ -286,7 +465,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       createCsvFile(tempDir, "TABLE1.csv", "COL1", "A");
 
       // When & Then (no exception)
@@ -307,7 +486,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       Files.writeString(tempDir.resolve("unsupported.txt"), "data");
 
       // When & Then
@@ -346,7 +525,7 @@ class DirectoryResolverTest {
         throws IOException {
       // Given
       final var testClass = DirectoryResolverTest.class;
-      final var resolver = new DirectoryResolver(testClass, "testMethod");
+      final var resolver = new DirectoryResolver(testClass, "testMethod", null);
       final var nonExistentDir = tempDir.resolve("nonexistent");
 
       // When & Then

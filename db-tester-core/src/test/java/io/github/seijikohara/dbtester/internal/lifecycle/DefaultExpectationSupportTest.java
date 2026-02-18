@@ -2,6 +2,8 @@ package io.github.seijikohara.dbtester.internal.lifecycle;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,6 +26,7 @@ import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
 import io.github.seijikohara.dbtester.api.loader.ExpectedTableSet;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
 import java.lang.reflect.Method;
 import java.time.Duration;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 /** Unit tests for {@link DefaultExpectationSupport}. */
 @DisplayName("DefaultExpectationSupport")
@@ -95,12 +99,14 @@ class DefaultExpectationSupportTest {
         new TestContext(DefaultExpectationSupportTest.class, testMethod, configuration, registry);
 
     expectedDataSet = mock(ExpectedDataSet.class);
-    when(expectedDataSet.rowOrdering()).thenReturn(RowOrdering.ORDERED);
+    when(expectedDataSet.rowOrdering()).thenReturn(RowOrdering.UNSET);
+    when(expectedDataSet.tableOrdering()).thenReturn(TableOrderingStrategy.AUTO);
     when(expectedDataSet.retryCount()).thenReturn(-1);
     when(expectedDataSet.retryDelayMillis()).thenReturn(-1L);
 
     when(verification.retryCount()).thenReturn(0);
     when(verification.retryDelay()).thenReturn(Duration.ZERO);
+    when(verification.rowOrdering()).thenReturn(RowOrdering.ORDERED);
   }
 
   /** Tests for the verify method with retry logic. */
@@ -245,6 +251,118 @@ class DefaultExpectationSupportTest {
                   .verifyExpectation(any(), any(), any(ExpectationContext.class)));
     }
 
+    /** Verifies that AssertionError is retried when retryCount is positive. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should retry on AssertionError when retryCount is positive")
+    void shouldRetryOnAssertionError_whenRetryCountIsPositive() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      when(expectedDataSet.retryCount()).thenReturn(2);
+      when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
+
+      // First call throws AssertionError, second call succeeds
+      doThrow(new AssertionError("Data mismatch"))
+          .doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> support.verify(context, expectedDataSet),
+          "should not throw when retry succeeds after AssertionError");
+
+      verify(expectationProvider, times(2))
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+    }
+
+    /** Verifies that AssertionError exhausting retries throws ValidationException with cause. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw ValidationException when AssertionError exhausts retries")
+    void shouldThrowValidationException_whenAssertionErrorExhaustsRetries() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      when(expectedDataSet.retryCount()).thenReturn(1);
+      when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
+
+      doThrow(new AssertionError("Persistent data mismatch"))
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              ValidationException.class,
+              () -> support.verify(context, expectedDataSet),
+              "should throw ValidationException wrapping AssertionError");
+
+      assertAll(
+          "AssertionError retry exhaustion",
+          () ->
+              assertTrue(
+                  exception.getMessage() != null
+                      && exception.getMessage().contains("Failed to verify"),
+                  "exception message should indicate verification failure"),
+          () ->
+              assertInstanceOf(
+                  AssertionError.class, exception.getCause(), "cause should be AssertionError"),
+          () ->
+              verify(expectationProvider, times(2))
+                  .verifyExpectation(any(), any(), any(ExpectationContext.class)));
+    }
+
+    /** Verifies that AssertionError with zero retries throws immediately as ValidationException. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw immediately when retryCount is zero and AssertionError thrown")
+    void shouldThrowImmediately_whenRetryCountIsZeroAndAssertionErrorThrown() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      when(verification.retryCount()).thenReturn(0);
+
+      doThrow(new AssertionError("Data mismatch"))
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              ValidationException.class,
+              () -> support.verify(context, expectedDataSet),
+              "should throw ValidationException wrapping AssertionError");
+
+      assertAll(
+          "immediate AssertionError wrapping",
+          () ->
+              assertInstanceOf(
+                  AssertionError.class, exception.getCause(), "cause should be AssertionError"),
+          () ->
+              verify(expectationProvider, times(1))
+                  .verifyExpectation(any(), any(), any(ExpectationContext.class)));
+    }
+
     /** Verifies that no datasets results in early return without verification. */
     @Test
     @Tag("edge-case")
@@ -329,6 +447,221 @@ class DefaultExpectationSupportTest {
       // Global retryCount=1 means 2 total attempts (initial + 1 retry)
       verify(expectationProvider, times(2))
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
+    }
+  }
+
+  /** Tests for rowOrdering resolution logic. */
+  @Nested
+  @DisplayName("verify method - rowOrdering resolution")
+  class VerifyRowOrderingResolution {
+
+    /** Tests for rowOrdering resolution. */
+    VerifyRowOrderingResolution() {}
+
+    /** Verifies that global rowOrdering is used when annotation value is UNSET. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use global rowOrdering when annotation value is UNSET")
+    void shouldUseGlobalRowOrdering_whenAnnotationValueIsUnset() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      // Annotation returns UNSET, global sets UNORDERED
+      when(expectedDataSet.rowOrdering()).thenReturn(RowOrdering.UNSET);
+      when(verification.rowOrdering()).thenReturn(RowOrdering.UNORDERED);
+
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          RowOrdering.UNORDERED,
+          captor.getValue().rowOrdering(),
+          "should use global UNORDERED when annotation is UNSET");
+    }
+
+    /** Verifies that annotation rowOrdering overrides global setting when explicitly set. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use annotation rowOrdering when explicitly set to ORDERED")
+    void shouldUseAnnotationRowOrdering_whenExplicitlySetToOrdered() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      // Annotation explicitly sets ORDERED, global sets UNORDERED
+      when(expectedDataSet.rowOrdering()).thenReturn(RowOrdering.ORDERED);
+      when(verification.rowOrdering()).thenReturn(RowOrdering.UNORDERED);
+
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          RowOrdering.ORDERED,
+          captor.getValue().rowOrdering(),
+          "should use annotation ORDERED overriding global UNORDERED");
+    }
+
+    /** Verifies that annotation rowOrdering overrides global setting when set to UNORDERED. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should use annotation rowOrdering when explicitly set to UNORDERED")
+    void shouldUseAnnotationRowOrdering_whenExplicitlySetToUnordered() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      // Annotation explicitly sets UNORDERED, global sets ORDERED
+      when(expectedDataSet.rowOrdering()).thenReturn(RowOrdering.UNORDERED);
+      when(verification.rowOrdering()).thenReturn(RowOrdering.ORDERED);
+
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          RowOrdering.UNORDERED,
+          captor.getValue().rowOrdering(),
+          "should use annotation UNORDERED overriding global ORDERED");
+    }
+  }
+
+  /** Tests for tableOrdering pass-through. */
+  @Nested
+  @DisplayName("verify method - tableOrdering")
+  class VerifyTableOrdering {
+
+    /** Tests for tableOrdering pass-through. */
+    VerifyTableOrdering() {}
+
+    /** Verifies that tableOrdering from annotation is passed to ExpectationContext. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass tableOrdering from annotation to ExpectationContext")
+    void shouldPassTableOrdering_whenAnnotationSpecifiesStrategy() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      when(expectedDataSet.tableOrdering()).thenReturn(TableOrderingStrategy.ALPHABETICAL);
+
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          TableOrderingStrategy.ALPHABETICAL,
+          captor.getValue().tableOrdering(),
+          "should pass ALPHABETICAL table ordering to ExpectationContext");
+    }
+
+    /** Verifies that default tableOrdering AUTO is passed when not overridden. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass AUTO tableOrdering when annotation uses default")
+    void shouldPassAutoTableOrdering_whenAnnotationUsesDefault() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      // tableOrdering defaults to AUTO in setUp
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          TableOrderingStrategy.AUTO,
+          captor.getValue().tableOrdering(),
+          "should pass AUTO table ordering to ExpectationContext");
+    }
+
+    /** Verifies that FOREIGN_KEY tableOrdering is passed through correctly. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should pass FOREIGN_KEY tableOrdering to ExpectationContext")
+    void shouldPassForeignKeyTableOrdering_whenAnnotationSpecifiesForeignKey() {
+      // Given
+      final var tableSet = mock(TableSet.class);
+      final var dataSource = mock(DataSource.class);
+      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.getTables()).thenReturn(List.of());
+
+      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
+      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
+
+      when(expectedDataSet.tableOrdering()).thenReturn(TableOrderingStrategy.FOREIGN_KEY);
+
+      doNothing()
+          .when(expectationProvider)
+          .verifyExpectation(any(), any(), any(ExpectationContext.class));
+
+      // When
+      support.verify(context, expectedDataSet);
+
+      // Then
+      final var captor = ArgumentCaptor.forClass(ExpectationContext.class);
+      verify(expectationProvider).verifyExpectation(any(), any(), captor.capture());
+      assertEquals(
+          TableOrderingStrategy.FOREIGN_KEY,
+          captor.getValue().tableOrdering(),
+          "should pass FOREIGN_KEY table ordering to ExpectationContext");
     }
   }
 

@@ -21,9 +21,17 @@ import org.slf4j.LoggerFactory;
  * locations or convention-based paths. It supports both classpath and file system locations,
  * providing detailed error messages when directories cannot be found.
  *
- * <p>The resolver supports two resolution modes: custom location (when a resource location is
- * explicitly provided) and convention-based (when no location is provided, a path is constructed
- * based on the test class package and name).
+ * <p>The resolver supports three resolution modes:
+ *
+ * <ul>
+ *   <li><b>Custom location</b>: When a resource location is explicitly provided via annotation
+ *   <li><b>Base directory</b>: When {@code baseDirectory} is configured in {@link
+ *       io.github.seijikohara.dbtester.api.config.ConventionSettings}, datasets are resolved
+ *       relative to that directory. If the base directory starts with {@code classpath:}, it is
+ *       resolved as a classpath resource; otherwise, it is resolved as a file system path.
+ *   <li><b>Convention-based</b>: When neither custom location nor base directory is provided, a
+ *       path is constructed based on the test class package and name
+ * </ul>
  *
  * <p>Supported location formats include classpath ({@code classpath:com/example/TestClass/}) and
  * file system ({@code /absolute/path/to/data/}).
@@ -39,9 +47,13 @@ import org.slf4j.LoggerFactory;
  *
  * @param testClass the test class used for convention-based path construction
  * @param testMethodName the test method name for error message context
+ * @param baseDirectory the base directory for dataset resolution, or {@code null} for
+ *     convention-based resolution
  * @see TestClassNameBasedDataSetLoader
+ * @see io.github.seijikohara.dbtester.api.config.ConventionSettings#baseDirectory()
  */
-record DirectoryResolver(Class<?> testClass, String testMethodName) {
+record DirectoryResolver(
+    Class<?> testClass, String testMethodName, @Nullable String baseDirectory) {
 
   /** Logger for this class. */
   private static final Logger logger = LoggerFactory.getLogger(DirectoryResolver.class);
@@ -68,6 +80,7 @@ record DirectoryResolver(Class<?> testClass, String testMethodName) {
   Path resolveDirectory(final @Nullable String resourceLocation, final @Nullable String suffix) {
     logger.debug("Resolving dataset directory");
     logger.debug("  Test class: {}", testClass.getName());
+    logger.debug("  Base directory: {}", baseDirectory);
     logger.debug("  Resource location: {}", resourceLocation);
     logger.debug("  Suffix: {}", suffix);
     final var effectiveLocation = determineEffectiveLocation(resourceLocation, suffix);
@@ -249,20 +262,39 @@ record DirectoryResolver(Class<?> testClass, String testMethodName) {
   }
 
   /**
-   * Creates a convention-based classpath path from the test class name.
+   * Creates a convention-based path from the test class name or base directory.
    *
-   * <p>The path is constructed as: {@code classpath:[package]/[ClassName][suffix]}
+   * <p>When {@code baseDirectory} is configured, the path is constructed using that directory as
+   * the root. If the base directory starts with {@code classpath:}, the suffix is appended
+   * directly. Otherwise, the suffix is appended to the file system path.
    *
-   * <p>Example: For test class {@code com.example.UserServiceTest} with suffix "/expected", the
-   * result is {@code classpath:com/example/UserServiceTest/expected}
+   * <p>When {@code baseDirectory} is not configured (null or empty), the path is constructed from
+   * the test class name: {@code classpath:[package]/[ClassName][suffix]}
+   *
+   * <p>Examples:
+   *
+   * <ul>
+   *   <li>Base directory {@code "classpath:testdata"} with suffix {@code "/expected"} produces
+   *       {@code "classpath:testdata/expected"}
+   *   <li>Base directory {@code "/data/test"} with suffix {@code "/expected"} produces {@code
+   *       "/data/test/expected"}
+   *   <li>No base directory, test class {@code com.example.UserServiceTest} with suffix {@code
+   *       "/expected"} produces {@code "classpath:com/example/UserServiceTest/expected"}
+   * </ul>
    *
    * @param suffix the directory suffix to append, or {@code null} for no suffix
-   * @return the convention-based classpath location
+   * @return the resolved location string
    */
   private String createConventionBasedPath(final @Nullable String suffix) {
     final var normalizedSuffix = Optional.ofNullable(suffix).orElse("");
-    return String.format(
-        "%s%s%s", CLASSPATH_PREFIX, testClass().getName().replace('.', '/'), normalizedSuffix);
+    return Optional.ofNullable(baseDirectory)
+        .filter(Predicate.not(String::isEmpty))
+        .map(dir -> String.format("%s%s", dir, normalizedSuffix))
+        .orElseGet(
+            () ->
+                String.format(
+                    "%s%s%s",
+                    CLASSPATH_PREFIX, testClass().getName().replace('.', '/'), normalizedSuffix));
   }
 
   /**

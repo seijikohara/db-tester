@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-/** Unit tests for {@link RefreshExecutor}. */
-@DisplayName("RefreshExecutor")
-class RefreshExecutorTest {
+/** Unit tests for {@link UpsertExecutor}. */
+@DisplayName("UpsertExecutor")
+class UpsertExecutorTest {
 
-  /** Tests for the RefreshExecutor class. */
-  RefreshExecutorTest() {}
+  /** Tests for the UpsertExecutor class. */
+  UpsertExecutorTest() {}
 
   /** Mock insert executor. */
   private InsertExecutor insertExecutor;
@@ -39,14 +39,14 @@ class RefreshExecutorTest {
   private UpdateExecutor updateExecutor;
 
   /** The executor instance under test. */
-  private RefreshExecutor executor;
+  private UpsertExecutor executor;
 
   /** Sets up test fixtures before each test. */
   @BeforeEach
   void setUp() {
     insertExecutor = mock(InsertExecutor.class);
     updateExecutor = mock(UpdateExecutor.class);
-    executor = new RefreshExecutor(insertExecutor, updateExecutor);
+    executor = new UpsertExecutor(insertExecutor, updateExecutor);
   }
 
   /** Tests for the constructor. */
@@ -63,7 +63,7 @@ class RefreshExecutorTest {
     @DisplayName("should create instance with dependencies")
     void shouldCreateInstance_whenDependenciesProvided() {
       // When
-      final var instance = new RefreshExecutor(insertExecutor, updateExecutor);
+      final var instance = new UpsertExecutor(insertExecutor, updateExecutor);
 
       // Then
       assertNotNull(instance, "instance should not be null");
@@ -79,14 +79,14 @@ class RefreshExecutorTest {
     ExecuteMethod() {}
 
     /**
-     * Verifies that execute refreshes each table.
+     * Verifies that execute upserts each table.
      *
      * @throws SQLException if a database error occurs
      */
     @Test
     @Tag("normal")
-    @DisplayName("should refresh each table")
-    void shouldRefreshTables_whenTablesProvided() throws SQLException {
+    @DisplayName("should upsert each table")
+    void shouldUpsertTables_whenTablesProvided() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
 
