@@ -346,19 +346,26 @@ A parameter object that encapsulates all optional verification parameters:
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | Column comparison strategies keyed by column name |
 | `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
 | `operationDefaults` | `OperationDefaults` | Operation defaults containing comparison settings (e.g., floating-point epsilon) |
+| `tableOrdering` | `TableOrderingStrategy` | Table processing order (`AUTO` or `FOREIGN_KEY`). |
 
 ```java
-// Default context (no exclusions, ordered, standard defaults)
+// Default context (no exclusions, ordered, standard defaults, AUTO table ordering)
 var context = ExpectationContext.defaults();
 
 // Custom context using with*() copy methods
 var context = ExpectationContext.defaults()
     .withExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
-    .withRowOrdering(RowOrdering.UNORDERED);
+    .withRowOrdering(RowOrdering.UNORDERED)
+    .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
-// Factory method with all parameters
+// Factory method with 4 parameters (table ordering defaults to AUTO)
 var context = ExpectationContext.of(
     excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+
+// Factory method with 5 parameters (explicit table ordering)
+var context = ExpectationContext.of(
+    excludeColumns, columnStrategies, rowOrdering, operationDefaults,
+    TableOrderingStrategy.FOREIGN_KEY);
 ```
 
 **Deprecated Methods** (removed in 2.0):
@@ -374,7 +381,7 @@ The previous telescoping overloads are deprecated in favor of `ExpectationContex
 2. The provider filters actual data to include only columns present in the expected table.
 3. The provider applies column exclusions and comparison strategies from the context.
 4. The provider compares filtered actual data against expected data.
-5. The provider throws `AssertionError` if verification fails.
+5. The provider throws `ValidationException` (wrapping `AssertionError`) if verification fails.
 
 
 ### ScenarioNameResolver

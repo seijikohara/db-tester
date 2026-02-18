@@ -98,7 +98,7 @@ Declares the datasets that define the expected database state after test executi
 |-----------|------|---------|-------------|
 | `sources` | `DataSetSource[]` | `{}` | Dataset sources for verification; empty triggers convention-based discovery |
 | `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order during verification |
-| `rowOrdering` | `RowOrdering` | `ORDERED` | Row comparison strategy (positional or set-based) |
+| `rowOrdering` | `RowOrdering` | `UNSET` | Row comparison strategy; `UNSET` defers to global `VerificationSettings` |
 | `retryCount` | `int` | `-1` | Retry attempts for verification; `-1` uses global setting |
 | `retryDelayMillis` | `long` | `-1` | Delay between retries in milliseconds; `-1` uses global setting |
 
@@ -258,8 +258,11 @@ Enum defining row comparison strategies for use in `@ExpectedDataSet` annotation
 
 | Value | Description |
 |-------|-------------|
+| `UNSET` | Annotation default sentinel. Defers to global `VerificationSettings.rowOrdering()`. |
 | `ORDERED` | Positional comparison (row-by-row by index). Default behavior. |
-| `UNORDERED` | Set-based comparison (rows matched regardless of position) |
+| `UNORDERED` | Set-based comparison (rows matched regardless of position). |
+
+`UNSET` is the default for `@ExpectedDataSet.rowOrdering()`. When set, the global setting from `VerificationSettings` is used.
 
 **When to Use**:
 
@@ -977,7 +980,7 @@ This table lists the default values for all configurable attributes.
 | `@DataSet` | `batchSize` | `-1` | Use global setting |
 | `@ExpectedDataSet` | `sources` | `{}` | Convention-based discovery |
 | `@ExpectedDataSet` | `tableOrdering` | `AUTO` | Automatic ordering |
-| `@ExpectedDataSet` | `rowOrdering` | `ORDERED` | Positional row comparison |
+| `@ExpectedDataSet` | `rowOrdering` | `UNSET` | Defers to global `VerificationSettings.rowOrdering()` |
 | `@ExpectedDataSet` | `retryCount` | `-1` | Use global setting |
 | `@ExpectedDataSet` | `retryDelayMillis` | `-1` | Use global setting |
 | `@DataSetSource` | `resourceLocation` | `""` | Convention-based discovery |
