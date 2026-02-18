@@ -1,9 +1,11 @@
 package io.github.seijikohara.dbtester.spock.extension
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
+import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
 import org.spockframework.runtime.extension.IMethodInvocation
@@ -130,13 +132,10 @@ class DatabaseTestInterceptorSpec extends Specification {
 		!interceptor1.is(interceptor2)
 	}
 
-	def 'should create interceptor with DataSet having custom paths'() {
-		given: 'DataSet with custom paths'
+	def 'should create interceptor with DataSet having custom sources'() {
+		given: 'DataSet with custom sources'
 		def dataSet = Mock(DataSet)
-		dataSet.paths() >> ([
-			'custom/path1.csv',
-			'custom/path2.csv'
-		] as String[])
+		dataSet.sources() >> ([] as DataSetSource[])
 
 		when: 'creating interceptor'
 		def interceptor = new DatabaseTestInterceptor(dataSet, null, null)
@@ -145,13 +144,52 @@ class DatabaseTestInterceptorSpec extends Specification {
 		interceptor != null
 	}
 
-	def 'should create interceptor with ExpectedDataSet having custom columns'() {
-		given: 'ExpectedDataSet with custom columns'
+	def 'should create interceptor with ExpectedDataSet having custom sources'() {
+		given: 'ExpectedDataSet with custom sources'
 		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.columns() >> (['id', 'name', 'status'] as String[])
+		expectedDataSet.sources() >> ([] as DataSetSource[])
 
 		when: 'creating interceptor'
 		def interceptor = new DatabaseTestInterceptor(null, expectedDataSet, null)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should create interceptor with ExportDataSet having onFailureOnly true'() {
+		given: 'ExportDataSet with onFailureOnly enabled'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.onFailureOnly() >> true
+		exportDataSet.tables() >> (['USERS', 'ORDERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should create interceptor with ExportDataSet having onFailureOnly false'() {
+		given: 'ExportDataSet with onFailureOnly disabled'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.onFailureOnly() >> false
+		exportDataSet.tables() >> (['USERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should create interceptor with ExportDataSet having custom dataSourceName'() {
+		given: 'ExportDataSet with named DataSource'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.dataSourceName() >> 'secondary'
+		exportDataSet.tables() >> (['USERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, exportDataSet)
 
 		then: 'interceptor is created successfully'
 		interceptor != null
@@ -177,5 +215,81 @@ class DatabaseTestInterceptorSpec extends Specification {
 		then: 'default configuration is returned'
 		configuration != null
 		configuration == Configuration.defaults()
+	}
+
+	def 'should get Configuration from DatabaseTestSupport when spec implements trait'() {
+		given: 'a test interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
+
+		and: 'a custom configuration'
+		def customConfig = Configuration.defaults()
+
+		and: 'a stub invocation with DatabaseTestSupport instance'
+		def support = Stub(DatabaseTestSupport) {
+			getDbTesterConfiguration() >> customConfig
+		}
+		def invocation = Stub(IMethodInvocation) {
+			instance >> support
+		}
+
+		when: 'getConfiguration is called'
+		def configuration = interceptor.getConfiguration(invocation)
+
+		then: 'custom configuration is returned'
+		configuration == customConfig
+	}
+
+	def 'should get registry from DatabaseTestSupport when spec implements trait'() {
+		given: 'a test interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
+
+		and: 'a registry with a default DataSource'
+		def expectedRegistry = new DataSourceRegistry()
+
+		and: 'a stub invocation with DatabaseTestSupport instance'
+		def support = Stub(DatabaseTestSupport) {
+			getDbTesterRegistry() >> expectedRegistry
+		}
+		def invocation = Stub(IMethodInvocation) {
+			instance >> support
+		}
+
+		when: 'getRegistry is called'
+		def registry = interceptor.getRegistry(invocation)
+
+		then: 'expected registry is returned'
+		registry == expectedRegistry
+	}
+
+	def 'should throw IllegalStateException when spec does not implement DatabaseTestSupport for registry'() {
+		given: 'a test interceptor'
+		def interceptor = new DatabaseTestInterceptor(null, null, null)
+
+		and: 'a stub invocation with non-DatabaseTestSupport instance'
+		def invocation = Stub(IMethodInvocation) {
+			instance >> new Object()
+		}
+
+		when: 'getRegistry is called'
+		interceptor.getRegistry(invocation)
+
+		then: 'IllegalStateException is thrown'
+		def e = thrown(IllegalStateException)
+		e.message.contains('must implement DatabaseTestSupport')
+	}
+
+	def 'should support multi-DataSource registration via registry'() {
+		given: 'a registry with multiple DataSources'
+		def registry = new DataSourceRegistry()
+		def defaultDs = Stub(javax.sql.DataSource)
+		def secondaryDs = Stub(javax.sql.DataSource)
+		registry.registerDefault(defaultDs)
+		registry.register('secondary', secondaryDs)
+
+		expect: 'both DataSources are retrievable'
+		registry.hasDefault()
+		registry.has('secondary')
+		registry.getDefault() == defaultDs
+		registry.get('secondary') == secondaryDs
 	}
 }
