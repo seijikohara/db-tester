@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import java.time.Duration
 import javax.sql.DataSource
@@ -260,6 +261,43 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 			operations.preparation() == Operation.INSERT
 			operations.expectation() == Operation.DELETE_ALL
 		}
+	}
+
+	/** Verifies that column strategies properties are mapped to Configuration. */
+	def 'should map column strategies properties to Configuration'() {
+		given: 'custom column strategies'
+		def timestampStrategy = new DbTesterProperties.ColumnStrategyProperty()
+		timestampStrategy.columnName = 'CREATED_AT'
+		timestampStrategy.strategy = ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE
+
+		def ignoreStrategy = new DbTesterProperties.ColumnStrategyProperty()
+		ignoreStrategy.columnName = 'updated_at'
+		ignoreStrategy.strategy = ComparisonStrategy.Type.IGNORE
+
+		properties.verification.columnStrategies = [
+			timestampStrategy,
+			ignoreStrategy
+		]
+
+		when: 'getting dbTesterConfiguration'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'column strategies are mapped'
+		def strategies = config.verification().globalColumnStrategies()
+		verifyAll {
+			strategies.size() == 2
+			strategies.get('CREATED_AT').strategy() == ComparisonStrategy.TIMESTAMP_FLEXIBLE
+			strategies.get('UPDATED_AT').strategy() == ComparisonStrategy.IGNORE
+		}
+	}
+
+	/** Verifies that empty column strategies produces empty map. */
+	def 'should produce empty column strategies when none configured'() {
+		when: 'getting dbTesterConfiguration with default properties'
+		def config = autoConfiguration.dbTesterConfiguration(properties)
+
+		then: 'column strategies are empty'
+		config.verification().globalColumnStrategies().isEmpty()
 	}
 
 	/** Verifies that default properties produce default Configuration values. */

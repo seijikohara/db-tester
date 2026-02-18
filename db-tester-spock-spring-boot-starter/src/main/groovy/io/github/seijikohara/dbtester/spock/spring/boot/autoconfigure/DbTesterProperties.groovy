@@ -5,6 +5,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import java.time.Duration
 import org.springframework.boot.context.properties.ConfigurationProperties
@@ -109,6 +110,8 @@ class DbTesterProperties {
 	 * <ul>
 	 *   <li>{@code db-tester.verification.global-exclude-columns} - Column names to exclude globally
 	 *       (default: empty)
+	 *   <li>{@code db-tester.verification.column-strategies} - Column-level comparison strategies
+	 *       (default: empty)
 	 *   <li>{@code db-tester.verification.row-ordering} - Row ordering strategy (default: ORDERED)
 	 *   <li>{@code db-tester.verification.retry-count} - Retry attempts (default: 0)
 	 *   <li>{@code db-tester.verification.retry-delay} - Delay between retries (default: 100ms)
@@ -119,6 +122,9 @@ class DbTesterProperties {
 		/** Column names to exclude globally from all expectation verifications. */
 		Set<String> globalExcludeColumns = Set.of()
 
+		/** Column-level comparison strategies for expectation verification. */
+		List<ColumnStrategyProperty> columnStrategies = []
+
 		/** Row ordering strategy for expectation verification. Defaults to ORDERED. */
 		RowOrdering rowOrdering = RowOrdering.ORDERED
 
@@ -127,6 +133,31 @@ class DbTesterProperties {
 
 		/** Delay between retry attempts. Defaults to 100ms. */
 		Duration retryDelay = Duration.ofMillis(100)
+	}
+
+	/**
+	 * Property for configuring a column-level comparison strategy.
+	 *
+	 * <p>Each entry associates a column name with a {@link ComparisonStrategy.Type} and an optional
+	 * pattern for regex-based strategies.
+	 *
+	 * <p>Example usage in {@code application.properties}:
+	 *
+	 * <pre>{@code
+	 * db-tester.verification.column-strategies[0].column-name=CREATED_AT
+	 * db-tester.verification.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
+	 * }</pre>
+	 */
+	static class ColumnStrategyProperty {
+
+		/** The column name for the strategy. */
+		String columnName
+
+		/** The comparison strategy type. */
+		ComparisonStrategy.Type strategy
+
+		/** The regex pattern for REGEX strategy. */
+		String pattern
 	}
 
 	/**

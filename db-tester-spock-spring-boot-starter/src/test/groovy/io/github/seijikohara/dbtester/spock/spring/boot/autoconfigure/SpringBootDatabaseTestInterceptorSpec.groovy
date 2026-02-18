@@ -1,8 +1,10 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
+import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.spockframework.runtime.extension.IMethodInterceptor
 import spock.lang.Specification
@@ -150,6 +152,75 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 		]
 	}
 
+	def 'should create interceptor with ExportDataSet having onFailureOnly true'() {
+		given: 'ExportDataSet with onFailureOnly enabled'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.onFailureOnly() >> true
+		exportDataSet.tables() >> (['USERS', 'ORDERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should create interceptor with ExportDataSet having onFailureOnly false'() {
+		given: 'ExportDataSet with onFailureOnly disabled'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.onFailureOnly() >> false
+		exportDataSet.tables() >> (['USERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should create interceptor with ExportDataSet having custom dataSourceName'() {
+		given: 'ExportDataSet with named DataSource'
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.dataSourceName() >> 'secondary'
+		exportDataSet.tables() >> (['USERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(null, null, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
+	def 'should support multi-DataSource registration via registry'() {
+		given: 'a registry with multiple DataSources'
+		def registry = new DataSourceRegistry()
+		def defaultDs = Stub(javax.sql.DataSource)
+		def secondaryDs = Stub(javax.sql.DataSource)
+		registry.registerDefault(defaultDs)
+		registry.register('secondary', secondaryDs)
+
+		expect: 'both DataSources are retrievable'
+		registry.hasDefault()
+		registry.has('secondary')
+		registry.getDefault() == defaultDs
+		registry.get('secondary') == secondaryDs
+	}
+
+	def 'should create interceptor with all three annotations including ExportDataSet'() {
+		given: 'all annotations with export on failure'
+		def dataSet = createMockDataSet()
+		def expectedDataSet = createMockExpectedDataSet()
+		def exportDataSet = Mock(ExportDataSet)
+		exportDataSet.onFailureOnly() >> true
+		exportDataSet.tables() >> (['USERS'] as String[])
+
+		when: 'creating interceptor'
+		def interceptor = new SpringBootDatabaseTestInterceptor(dataSet, expectedDataSet, exportDataSet)
+
+		then: 'interceptor is created successfully'
+		interceptor != null
+	}
+
 	/**
 	 * Creates a mock DataSet annotation.
 	 *
@@ -168,7 +239,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	private DataSet createMockDataSet(Operation operation) {
 		def dataSet = Mock(DataSet)
 		dataSet.operation() >> operation
-		dataSet.paths() >> ([] as String[])
+		dataSet.sources() >> ([] as DataSetSource[])
 		return dataSet
 	}
 
@@ -179,8 +250,7 @@ class SpringBootDatabaseTestInterceptorSpec extends Specification {
 	 */
 	private ExpectedDataSet createMockExpectedDataSet() {
 		def expectedDataSet = Mock(ExpectedDataSet)
-		expectedDataSet.paths() >> ([] as String[])
-		expectedDataSet.columns() >> ([] as String[])
+		expectedDataSet.sources() >> ([] as DataSetSource[])
 		return expectedDataSet
 	}
 }

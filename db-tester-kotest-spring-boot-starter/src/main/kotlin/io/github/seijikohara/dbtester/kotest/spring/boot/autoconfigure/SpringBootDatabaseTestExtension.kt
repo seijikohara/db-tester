@@ -137,6 +137,8 @@ class SpringBootDatabaseTestExtension :
     /**
      * Registers DataSources from the Spring ApplicationContext.
      *
+     * Always registers DataSources for consistency with JUnit behavior.
+     *
      * @param applicationContext the application context
      */
     private fun registerDataSourcesFromContext(applicationContext: ApplicationContext): Unit =
@@ -144,6 +146,16 @@ class SpringBootDatabaseTestExtension :
             applicationContext.containsBean("dbTesterDataSourceRegistry") -> {
                 registry = applicationContext.getBean("dbTesterDataSourceRegistry", DataSourceRegistry::class.java)
                 logger.debug("Using Spring-managed DataSourceRegistry")
+
+                // Always register DataSources for consistency with JUnit behavior
+                when {
+                    applicationContext.containsBean("dataSourceRegistrar") -> {
+                        applicationContext.getBean(DataSourceRegistrar::class.java).registerAll(registry!!)
+                        logger.debug("Registered DataSources into Spring-managed DataSourceRegistry")
+                    }
+
+                    else -> {}
+                }
             }
 
             applicationContext.containsBean("dataSourceRegistrar") -> {

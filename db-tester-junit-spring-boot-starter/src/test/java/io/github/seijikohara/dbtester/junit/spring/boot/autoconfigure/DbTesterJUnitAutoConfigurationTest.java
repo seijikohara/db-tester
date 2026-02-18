@@ -13,8 +13,11 @@ import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.config.TransactionMode;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.sql.DataSource;
@@ -214,6 +217,95 @@ class DbTesterJUnitAutoConfigurationTest {
           () ->
               assertEquals(
                   Duration.ofSeconds(2), verification.retryDelay(), "retryDelay mismatch"));
+    }
+
+    /** Verifies that column strategies properties are mapped to Configuration. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should map column strategies properties to Configuration")
+    void should_map_column_strategies_properties() {
+      // Given
+      final var timestampStrategy = new DbTesterProperties.ColumnStrategyProperty();
+      timestampStrategy.setColumnName("CREATED_AT");
+      timestampStrategy.setStrategy(ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE);
+
+      final var ignoreStrategy = new DbTesterProperties.ColumnStrategyProperty();
+      ignoreStrategy.setColumnName("updated_at");
+      ignoreStrategy.setStrategy(ComparisonStrategy.Type.IGNORE);
+
+      final var regexStrategy = new DbTesterProperties.ColumnStrategyProperty();
+      regexStrategy.setColumnName("EMAIL");
+      regexStrategy.setStrategy(ComparisonStrategy.Type.REGEX);
+      regexStrategy.setPattern("^[a-z]+@[a-z]+\\.[a-z]+$");
+
+      properties
+          .getVerification()
+          .setColumnStrategies(List.of(timestampStrategy, ignoreStrategy, regexStrategy));
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      final var strategies = config.verification().globalColumnStrategies();
+      assertAll(
+          "column strategies should be mapped",
+          () -> assertEquals(3, strategies.size(), "should have 3 strategies"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.TIMESTAMP_FLEXIBLE,
+                  Objects.requireNonNull(strategies.get("CREATED_AT")).strategy(),
+                  "CREATED_AT should have TIMESTAMP_FLEXIBLE strategy"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.IGNORE,
+                  Objects.requireNonNull(strategies.get("UPDATED_AT")).strategy(),
+                  "UPDATED_AT should have IGNORE strategy"),
+          () ->
+              assertEquals(
+                  ComparisonStrategy.Type.REGEX,
+                  Objects.requireNonNull(strategies.get("EMAIL")).strategy().getType(),
+                  "EMAIL should have REGEX strategy type"));
+    }
+
+    /** Verifies that empty column strategies produces empty map. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should produce empty column strategies when none configured")
+    void should_produce_empty_column_strategies_when_none_configured() {
+      // Given - default properties
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertTrue(
+          config.verification().globalColumnStrategies().isEmpty(),
+          "column strategies should be empty");
+    }
+
+    /** Verifies that column strategies with null column name are filtered out. */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should filter out column strategies with null column name")
+    void should_filter_out_column_strategies_with_null_column_name() {
+      // Given
+      final var validStrategy = new DbTesterProperties.ColumnStrategyProperty();
+      validStrategy.setColumnName("CREATED_AT");
+      validStrategy.setStrategy(ComparisonStrategy.Type.IGNORE);
+
+      final var invalidStrategy = new DbTesterProperties.ColumnStrategyProperty();
+      invalidStrategy.setStrategy(ComparisonStrategy.Type.STRICT);
+
+      properties.getVerification().setColumnStrategies(List.of(validStrategy, invalidStrategy));
+
+      // When
+      final var config = autoConfiguration.dbTesterConfiguration(properties);
+
+      // Then
+      assertEquals(
+          1,
+          config.verification().globalColumnStrategies().size(),
+          "should have only 1 valid strategy");
     }
 
     /** Verifies that custom execution properties are mapped to Configuration. */

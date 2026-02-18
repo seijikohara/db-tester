@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
@@ -7,6 +8,9 @@ import io.github.seijikohara.dbtester.api.config.ExecutionSettings;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.VerificationSettings;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
+import io.github.seijikohara.dbtester.spring.support.ColumnStrategyConverter;
+import java.util.Map;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -82,9 +86,28 @@ public class DbTesterJUnitAutoConfiguration {
             .loadOrderFileName(conventionProps.getLoadOrderFileName())
             .build();
 
+    final Map<String, ColumnStrategyMapping> columnStrategies =
+        verificationProps.getColumnStrategies().stream()
+            .filter(
+                prop ->
+                    prop.getColumnName() != null
+                        && !prop.getColumnName().isBlank()
+                        && prop.getStrategy() != null)
+            .map(
+                prop -> {
+                  final var mapping =
+                      ColumnStrategyConverter.toColumnStrategyMapping(
+                          prop.getColumnName(), prop.getStrategy(), prop.getPattern());
+                  return ColumnStrategyConverter.toMapEntry(prop.getColumnName(), mapping);
+                })
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey, Map.Entry::getValue, (first, second) -> second));
+
     final VerificationSettings verification =
         VerificationSettings.builder()
             .globalExcludeColumns(verificationProps.getGlobalExcludeColumns())
+            .globalColumnStrategies(columnStrategies)
             .rowOrdering(verificationProps.getRowOrdering())
             .retryCount(verificationProps.getRetryCount())
             .retryDelay(verificationProps.getRetryDelay())

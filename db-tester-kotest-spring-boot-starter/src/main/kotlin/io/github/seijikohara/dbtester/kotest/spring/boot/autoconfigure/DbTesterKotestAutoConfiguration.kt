@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.config.VerificationSettings
+import io.github.seijikohara.dbtester.spring.support.ColumnStrategyConverter
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
@@ -67,13 +68,27 @@ class DbTesterKotestAutoConfiguration {
             }.let { conventions ->
                 properties.verification
                     .let { verificationProps ->
-                        VerificationSettings
-                            .builder()
-                            .globalExcludeColumns(verificationProps.globalExcludeColumns)
-                            .rowOrdering(verificationProps.rowOrdering)
-                            .retryCount(verificationProps.retryCount)
-                            .retryDelay(verificationProps.retryDelay)
-                            .build()
+                        verificationProps.columnStrategies
+                            .filter { it.columnName != null && it.columnName!!.isNotBlank() && it.strategy != null }
+                            .associate { prop ->
+                                val mapping =
+                                    ColumnStrategyConverter.toColumnStrategyMapping(
+                                        prop.columnName!!,
+                                        prop.strategy!!,
+                                        prop.pattern,
+                                    )
+                                val entry = ColumnStrategyConverter.toMapEntry(prop.columnName!!, mapping)
+                                entry.key to entry.value
+                            }.let { columnStrategies ->
+                                VerificationSettings
+                                    .builder()
+                                    .globalExcludeColumns(verificationProps.globalExcludeColumns)
+                                    .globalColumnStrategies(columnStrategies)
+                                    .rowOrdering(verificationProps.rowOrdering)
+                                    .retryCount(verificationProps.retryCount)
+                                    .retryDelay(verificationProps.retryDelay)
+                                    .build()
+                            }
                     }.let { verification ->
                         properties.execution
                             .let { executionProps ->

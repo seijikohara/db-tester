@@ -5,8 +5,11 @@ import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.config.TransactionMode;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -345,6 +348,8 @@ public class DbTesterProperties {
    * <ul>
    *   <li>{@code db-tester.verification.global-exclude-columns} - Column names to exclude globally
    *       (default: empty)
+   *   <li>{@code db-tester.verification.column-strategies} - Column-level comparison strategies
+   *       (default: empty)
    *   <li>{@code db-tester.verification.row-ordering} - Row ordering strategy (default: ORDERED)
    *   <li>{@code db-tester.verification.retry-count} - Retry attempts (default: 0)
    *   <li>{@code db-tester.verification.retry-delay} - Delay between retries (default: 100ms)
@@ -359,6 +364,9 @@ public class DbTesterProperties {
 
     /** Column names to exclude globally from all expectation verifications. */
     private Set<String> globalExcludeColumns = Set.of();
+
+    /** Column-level comparison strategies for expectation verification. */
+    private List<ColumnStrategyProperty> columnStrategies = new ArrayList<>();
 
     /** Row ordering strategy for expectation verification. Defaults to ORDERED. */
     private RowOrdering rowOrdering = RowOrdering.ORDERED;
@@ -385,6 +393,24 @@ public class DbTesterProperties {
      */
     public void setGlobalExcludeColumns(final Set<String> globalExcludeColumns) {
       this.globalExcludeColumns = globalExcludeColumns;
+    }
+
+    /**
+     * Returns the column-level comparison strategies.
+     *
+     * @return the column strategy properties
+     */
+    public List<ColumnStrategyProperty> getColumnStrategies() {
+      return columnStrategies;
+    }
+
+    /**
+     * Sets the column-level comparison strategies.
+     *
+     * @param columnStrategies the column strategy properties
+     */
+    public void setColumnStrategies(final List<ColumnStrategyProperty> columnStrategies) {
+      this.columnStrategies = columnStrategies;
     }
 
     /**
@@ -439,6 +465,93 @@ public class DbTesterProperties {
      */
     public void setRetryDelay(final Duration retryDelay) {
       this.retryDelay = retryDelay;
+    }
+  }
+
+  /**
+   * Property for configuring a column-level comparison strategy.
+   *
+   * <p>Each entry associates a column name with a {@link ComparisonStrategy.Type} and an optional
+   * pattern for regex-based strategies.
+   *
+   * <p>Example usage in {@code application.properties}:
+   *
+   * <pre>{@code
+   * db-tester.verification.column-strategies[0].column-name=CREATED_AT
+   * db-tester.verification.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
+   * db-tester.verification.column-strategies[1].column-name=EMAIL
+   * db-tester.verification.column-strategies[1].strategy=REGEX
+   * db-tester.verification.column-strategies[1].pattern=^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$
+   * }</pre>
+   */
+  public static class ColumnStrategyProperty {
+
+    /** Creates a new instance with default values. */
+    public ColumnStrategyProperty() {
+      // Default constructor for Spring Boot configuration binding
+    }
+
+    /** The column name for the strategy. */
+    private @Nullable String columnName;
+
+    /** The comparison strategy type. */
+    private ComparisonStrategy.@Nullable Type strategy;
+
+    /** The regex pattern for REGEX strategy. */
+    private @Nullable String pattern;
+
+    /**
+     * Returns the column name.
+     *
+     * @return the column name, or null if not set
+     */
+    public @Nullable String getColumnName() {
+      return columnName;
+    }
+
+    /**
+     * Sets the column name.
+     *
+     * @param columnName the column name
+     */
+    public void setColumnName(final @Nullable String columnName) {
+      this.columnName = columnName;
+    }
+
+    /**
+     * Returns the comparison strategy type.
+     *
+     * @return the strategy type, or null if not set
+     */
+    public ComparisonStrategy.@Nullable Type getStrategy() {
+      return strategy;
+    }
+
+    /**
+     * Sets the comparison strategy type.
+     *
+     * @param strategy the strategy type
+     */
+    public void setStrategy(final ComparisonStrategy.@Nullable Type strategy) {
+      this.strategy = strategy;
+    }
+
+    /**
+     * Returns the regex pattern for REGEX strategy.
+     *
+     * @return the pattern, or null if not applicable
+     */
+    public @Nullable String getPattern() {
+      return pattern;
+    }
+
+    /**
+     * Sets the regex pattern for REGEX strategy.
+     *
+     * @param pattern the regex pattern
+     */
+    public void setPattern(final @Nullable String pattern) {
+      this.pattern = pattern;
     }
   }
 
