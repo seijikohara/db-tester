@@ -37,7 +37,142 @@ flowchart TB
 3. **Extensibility**: Custom implementations replace defaults when registered.
 
 
-## API Module SPIs
+### Two-Tier SPI Architecture
+
+The framework uses a two-tier SPI architecture to separate framework-facing concerns from implementation details:
+
+```mermaid
+flowchart TB
+    subgraph Tier1["Tier 1 — Support Layer (Framework-facing)"]
+        PS[PreparationSupport]
+        ES[ExpectationSupport]
+        XS[ExportSupport]
+    end
+
+    subgraph Tier2["Tier 2 — Provider Layer (Implementation-facing)"]
+        OP[OperationProvider]
+        EP[ExpectationProvider]
+        AP[AssertionProvider]
+        QAP[QueryAssertionProvider]
+        XP[ExportProvider]
+    end
+
+    subgraph Frameworks[Test Framework Extensions]
+        JE[JUnit PreparationExecutor]
+        JV[JUnit ExpectationVerifier]
+        JX[JUnit ExportExecutor]
+    end
+
+    JE -->|ServiceLoader| PS
+    JV -->|ServiceLoader| ES
+    JX -->|ServiceLoader| XS
+
+    PS -->|ServiceLoader| OP
+    ES -->|ServiceLoader| EP
+    ES -.->|delegates| AP
+    XS -->|ServiceLoader| XP
+```
+
+**Tier 1 — Support Layer**: High-level lifecycle SPIs loaded by test framework extensions (JUnit, Spock, Kotest). Each Support interface encapsulates one test lifecycle phase (preparation, verification, export) and accepts annotation and context parameters.
+
+**Tier 2 — Provider Layer**: Low-level operation SPIs loaded by Support implementations in `db-tester-core`. Provider interfaces define fine-grained database operations (execute SQL, compare datasets, export files).
+
+**Standalone SPIs**: Some SPIs do not participate in the two-tier pattern:
+- `DataSetLoaderProvider` — loaded by `Configuration.defaults()` to provide the default dataset loader
+- `ScenarioNameResolver` — loaded by the core scenario resolution infrastructure
+- `TypeHandler` — loaded by `TypeHandlerRegistry` for custom database type handling
+- `FormatProvider` — internal SPI loaded by `FormatRegistry` for file format parsing
+
+
+## API Module SPIs — Support Layer
+
+### PreparationSupport
+
+Executes database preparation operations during the test lifecycle.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.PreparationSupport`
+
+**Interface**:
+
+```java
+public interface PreparationSupport {
+    void execute(TestContext context, DataSet dataSet);
+}
+```
+
+**Default Implementation**: `DefaultPreparationSupport` in `db-tester-core`
+
+**Loaded by**: Test framework extensions (`PreparationExecutor` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+
+**Internally uses**: `OperationProvider` (Tier 2) via ServiceLoader
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `context` | `TestContext` | Test context containing configuration, registry, and test metadata |
+| `dataSet` | `DataSet` | The `@DataSet` annotation containing preparation settings |
+
+
+### ExpectationSupport
+
+Executes database expectation verification during the test lifecycle.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.ExpectationSupport`
+
+**Interface**:
+
+```java
+public interface ExpectationSupport {
+    void verify(TestContext context, ExpectedDataSet expectedDataSet);
+}
+```
+
+**Default Implementation**: `DefaultExpectationSupport` in `db-tester-core`
+
+**Loaded by**: Test framework extensions (`ExpectationVerifier` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+
+**Internally uses**: `ExpectationProvider` and `AssertionProvider` (Tier 2)
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `context` | `TestContext` | Test context containing configuration, registry, and test metadata |
+| `expectedDataSet` | `ExpectedDataSet` | The `@ExpectedDataSet` annotation containing verification settings |
+
+**Throws**: `ValidationException` if verification fails after all configured retries.
+
+
+### ExportSupport
+
+Executes database state export after test execution.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.ExportSupport`
+
+**Interface**:
+
+```java
+public interface ExportSupport {
+    void export(TestContext context, ExportDataSet exportDataSet);
+}
+```
+
+**Default Implementation**: `DefaultExportSupport` in `db-tester-core`
+
+**Loaded by**: Test framework extensions (`ExportExecutor` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+
+**Internally uses**: `ExportProvider` (Tier 2) via `DataSetExporter`
+
+**Parameters**:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `context` | `TestContext` | Test context containing configuration, registry, and test metadata |
+| `exportDataSet` | `ExportDataSet` | The `@ExportDataSet` annotation containing export settings |
+
+
+## API Module SPIs — Provider Layer
 
 ### DataSetLoaderProvider
 
@@ -289,6 +424,98 @@ public interface ScenarioNameResolver {
 4. The framework calls `resolve()` to obtain the scenario name.
 
 
+### ExportProvider
+
+Exports database content to files in specific formats.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.ExportProvider`
+
+**Interface**:
+
+```java
+public interface ExportProvider {
+    DataFormat supportedFormat();
+    void export(DataSource dataSource, List<String> tableNames,
+                Path outputDirectory, ExportConfiguration config);
+    void exportQuery(DataSource dataSource, String query, String tableName,
+                     Path outputDirectory, ExportConfiguration config);
+}
+```
+
+**Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `supportedFormat()` | Returns the data format this provider handles |
+| `export(...)` | Exports specified tables to files in the output directory |
+| `exportQuery(...)` | Exports a SQL query result to a file |
+
+**Selection**: The framework selects the provider whose `supportedFormat()` matches the configured `DataFormat`.
+
+
+### QueryAssertionProvider
+
+Executes SQL queries and compares results with expected datasets.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider`
+
+**Interface**:
+
+```java
+public interface QueryAssertionProvider {
+    void assertEqualsByQuery(TableSet expected, DataSource dataSource,
+                             String tableName, String sqlQuery,
+                             Collection<String> ignoreColumnNames);
+    void assertEqualsByQuery(Table expected, DataSource dataSource,
+                             String tableName, String sqlQuery,
+                             Collection<String> ignoreColumnNames);
+}
+```
+
+**Default Implementation**: `DefaultQueryAssertionProvider` in `db-tester-core`
+
+**Loaded by**: `DatabaseQueryAssertion` facade class
+
+**Difference from `AssertionProvider`**: `AssertionProvider` compares in-memory datasets. `QueryAssertionProvider` executes SQL queries against the database and then compares the results.
+
+
+### TypeHandler
+
+Handles custom database type conversion for reading, writing, and formatting values.
+
+**Location**: `io.github.seijikohara.dbtester.api.spi.TypeHandler`
+
+**Interface**:
+
+```java
+public interface TypeHandler<T> {
+    Class<T> getJavaType();
+    List<Integer> getSqlTypes();
+    default List<String> getSupportedDatabases();
+    default int getPriority();
+    T read(ResultSet resultSet, int columnIndex) throws SQLException;
+    void write(PreparedStatement ps, int parameterIndex, T value) throws SQLException;
+    String format(T value);
+    T parse(String value);
+}
+```
+
+**Methods**:
+
+| Method | Description |
+|--------|-------------|
+| `getJavaType()` | Returns the Java type this handler produces |
+| `getSqlTypes()` | Returns SQL type codes (`java.sql.Types`) this handler supports |
+| `getSupportedDatabases()` | Returns database product names, or empty list for all databases |
+| `getPriority()` | Priority for handler selection (higher = preferred); default 0 |
+| `read(...)` | Reads a value from a `ResultSet` |
+| `write(...)` | Writes a value to a `PreparedStatement` |
+| `format(...)` | Converts a value to string for export |
+| `parse(...)` | Parses a string value from import |
+
+**Selection**: When multiple handlers support the same SQL type, the handler with the highest `getPriority()` is selected. Database-specific handlers (non-empty `getSupportedDatabases()`) take precedence over generic handlers when the database product name matches.
+
+
 ## Core Module SPIs
 
 ### FormatProvider
@@ -332,9 +559,7 @@ This internal SPI is not part of the public API contract and may change without 
 **db-tester-core**:
 
 ```
-# META-INF/services/io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
-io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider
-
+# Tier 2 — Provider Layer
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.OperationProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultOperationProvider
 
@@ -343,6 +568,29 @@ io.github.seijikohara.dbtester.internal.spi.DefaultAssertionProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectationProvider
 io.github.seijikohara.dbtester.internal.spi.DefaultExpectationProvider
+
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider
+io.github.seijikohara.dbtester.internal.spi.DefaultQueryAssertionProvider
+
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider
+io.github.seijikohara.dbtester.internal.export.csv.CsvExportProvider
+io.github.seijikohara.dbtester.internal.export.tsv.TsvExportProvider
+io.github.seijikohara.dbtester.internal.export.json.JsonExportProvider
+io.github.seijikohara.dbtester.internal.export.yaml.YamlExportProvider
+
+# Tier 1 — Support Layer
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.PreparationSupport
+io.github.seijikohara.dbtester.internal.lifecycle.DefaultPreparationSupport
+
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExpectationSupport
+io.github.seijikohara.dbtester.internal.lifecycle.DefaultExpectationSupport
+
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportSupport
+io.github.seijikohara.dbtester.internal.lifecycle.DefaultExportSupport
+
+# Standalone SPIs
+# META-INF/services/io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider
+io.github.seijikohara.dbtester.internal.loader.DefaultDataSetLoaderProvider
 
 # META-INF/services/io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
 io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
@@ -378,11 +626,28 @@ io.github.seijikohara.dbtester.kotest.spi.KotestScenarioNameResolver
 
 ```java
 module io.github.seijikohara.dbtester.api {
+    // Standalone SPIs
     uses io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider;
+    uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
+
+    // Provider Layer (Tier 2)
     uses io.github.seijikohara.dbtester.api.spi.OperationProvider;
     uses io.github.seijikohara.dbtester.api.spi.AssertionProvider;
     uses io.github.seijikohara.dbtester.api.spi.ExpectationProvider;
-    uses io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver;
+    uses io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider;
+    uses io.github.seijikohara.dbtester.api.spi.ExportProvider;
+    uses io.github.seijikohara.dbtester.api.spi.TypeHandler;
+}
+```
+
+**db-tester-junit module-info.java**:
+
+```java
+module io.github.seijikohara.dbtester.junit {
+    // Support Layer (Tier 1)
+    uses io.github.seijikohara.dbtester.api.spi.PreparationSupport;
+    uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
+    uses io.github.seijikohara.dbtester.api.spi.ExportSupport;
 }
 ```
 
@@ -499,13 +764,31 @@ com.example.XmlFormatProvider
 
 The framework selects providers as follows when multiple providers exist:
 
+**Support Layer (Tier 1)**:
+
 | SPI | Selection |
 |-----|-----------|
-| `DataSetLoaderProvider` | First found |
+| `PreparationSupport` | First found |
+| `ExpectationSupport` | First found |
+| `ExportSupport` | First found |
+
+**Provider Layer (Tier 2)**:
+
+| SPI | Selection |
+|-----|-----------|
 | `OperationProvider` | First found |
 | `AssertionProvider` | First found |
 | `ExpectationProvider` | First found |
+| `QueryAssertionProvider` | First found |
+| `ExportProvider` | First matching `supportedFormat()` |
+
+**Standalone SPIs**:
+
+| SPI | Selection |
+|-----|-----------|
+| `DataSetLoaderProvider` | First found |
 | `ScenarioNameResolver` | Sorted by `priority()`, first that `canResolve()` returns true |
+| `TypeHandler` | By SQL type, then `getPriority()` (highest wins); database-specific match preferred |
 | `FormatProvider` | First matching `supportedFileExtension()` |
 
 
