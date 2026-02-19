@@ -8,11 +8,8 @@ description = "DB Tester JUnit - JUnit Jupiter Extension for database testing"
 dependencies {
     // Public API dependencies (only db-tester-api and JUnit API)
     api(project(":db-tester-api"))
+    api(platform(libs.junit.bom))
     api(libs.junit.jupiter.api)
-
-    // JUnit BOM for version management (internal only)
-    implementation(platform(libs.junit.bom))
-    implementation(libs.junit.jupiter)
 
     // Runtime dependency for SPI implementation (ServiceLoader)
     runtimeOnly(project(":db-tester-core"))
