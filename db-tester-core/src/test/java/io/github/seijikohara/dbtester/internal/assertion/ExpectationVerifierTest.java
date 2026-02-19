@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
@@ -183,6 +184,80 @@ class ExpectationVerifierTest {
                   RowOrdering.ORDERED,
                   operationDefaults),
           "should not throw when exclude columns specified");
+    }
+  }
+
+  /** Tests for the verifyExpectation(TableSet, DataSource, ExpectationContext) method. */
+  @Nested
+  @DisplayName("verifyExpectation(TableSet, DataSource, ExpectationContext) method")
+  class VerifyExpectationWithExpectationContextMethod {
+
+    /** Tests for the verifyExpectation method with ExpectationContext. */
+    VerifyExpectationWithExpectationContextMethod() {}
+
+    /** Verifies that unordered comparison passes when rows match in different order. */
+    @Test
+    @Tag("normal")
+    @DisplayName(
+        "should pass with unordered comparison when row ordering is UNORDERED"
+            + " and collections are empty")
+    void shouldPassWithUnorderedComparison_whenRowOrderingIsUnorderedAndCollectionsAreEmpty() {
+      // Given
+      final var columns = List.of(new ColumnName("ID"), new ColumnName("NAME"));
+      final var row1Values = new LinkedHashMap<ColumnName, CellValue>();
+      row1Values.put(new ColumnName("ID"), new CellValue("1"));
+      row1Values.put(new ColumnName("NAME"), new CellValue("Alice"));
+      final var row2Values = new LinkedHashMap<ColumnName, CellValue>();
+      row2Values.put(new ColumnName("ID"), new CellValue("2"));
+      row2Values.put(new ColumnName("NAME"), new CellValue("Bob"));
+
+      final var expectedTable =
+          new SimpleTable(
+              new TableName("USERS"),
+              columns,
+              List.of(new SimpleRow(row1Values), new SimpleRow(row2Values)));
+
+      // Actual table has rows in reverse order
+      final var actualTable =
+          new SimpleTable(
+              new TableName("USERS"),
+              columns,
+              List.of(new SimpleRow(row2Values), new SimpleRow(row1Values)));
+
+      final var expectedTableSet = new SimpleTableSet(List.of(expectedTable));
+
+      when(mockTableReader.fetchTable(any(DataSource.class), eq("USERS"), anyCollection()))
+          .thenReturn(actualTable);
+
+      final var context = ExpectationContext.defaults().withRowOrdering(RowOrdering.UNORDERED);
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> verifier.verifyExpectation(expectedTableSet, mockDataSource, context),
+          "should not throw when rows match in different order with UNORDERED");
+    }
+
+    /** Verifies that ordered comparison passes when rows match in same order. */
+    @Test
+    @Tag("normal")
+    @DisplayName(
+        "should pass with ordered comparison when row ordering is ORDERED"
+            + " and collections are empty")
+    void shouldPassWithOrderedComparison_whenRowOrderingIsOrderedAndCollectionsAreEmpty() {
+      // Given
+      final var table =
+          createMatchingTablePair("USERS", List.of("ID", "NAME"), List.of("1", "Alice"));
+      final var expectedTableSet = new SimpleTableSet(List.of(table));
+
+      when(mockTableReader.fetchTable(any(DataSource.class), eq("USERS"), anyCollection()))
+          .thenReturn(table);
+
+      final var context = ExpectationContext.defaults().withRowOrdering(RowOrdering.ORDERED);
+
+      // When & Then
+      assertDoesNotThrow(
+          () -> verifier.verifyExpectation(expectedTableSet, mockDataSource, context),
+          "should not throw when rows match in same order with ORDERED");
     }
   }
 

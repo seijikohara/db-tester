@@ -1,11 +1,13 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.ExecutionSettings
 import io.github.seijikohara.dbtester.api.config.OperationDefaults
 import io.github.seijikohara.dbtester.api.config.VerificationSettings
+import io.github.seijikohara.dbtester.spring.support.ColumnStrategyConverter
 import javax.sql.DataSource
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
@@ -66,8 +68,18 @@ class DbTesterSpockAutoConfiguration {
 				.loadOrderFileName(conventionProps.loadOrderFileName)
 				.build()
 
+		Map<String, ColumnStrategyMapping> columnStrategies = verificationProps.columnStrategies
+				.findAll { it.columnName && !it.columnName.blank && it.strategy }
+				.collectEntries { prop ->
+					def mapping = ColumnStrategyConverter.toColumnStrategyMapping(
+							prop.columnName, prop.strategy, prop.pattern)
+					def entry = ColumnStrategyConverter.toMapEntry(prop.columnName, mapping)
+					[(entry.key): entry.value]
+				}
+
 		def verification = VerificationSettings.builder()
 				.globalExcludeColumns(verificationProps.globalExcludeColumns)
+				.globalColumnStrategies(columnStrategies)
 				.rowOrdering(verificationProps.rowOrdering)
 				.retryCount(verificationProps.retryCount)
 				.retryDelay(verificationProps.retryDelay)

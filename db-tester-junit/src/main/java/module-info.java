@@ -20,6 +20,7 @@ module io.github.seijikohara.dbtester.junit {
 
   // SPI service consumers
   uses io.github.seijikohara.dbtester.api.spi.ExpectationSupport;
+  uses io.github.seijikohara.dbtester.api.spi.ExportSupport;
   uses io.github.seijikohara.dbtester.api.spi.PreparationSupport;
 
   // SPI service providers

@@ -13,4 +13,12 @@
     Static imports for assertions improve test readability.
   -->
   <suppress checks="AvoidStarImport" files=".*Test\.java$"/>
+
+  <!--
+    Allow non-final local variable in DatabaseTestExtension.afterEach().
+    The testFailed flag must be mutable so the catch block can set it to true
+    when verification throws, ensuring @ExportDataSet(onFailureOnly=true) works.
+    See: https://github.com/seijikohara/db-tester/issues/216
+  -->
+  <suppress checks="FinalLocalVariable" files="DatabaseTestExtension\.java$"/>
 </suppressions>

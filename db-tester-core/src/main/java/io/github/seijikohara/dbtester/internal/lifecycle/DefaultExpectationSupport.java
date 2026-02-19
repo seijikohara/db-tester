@@ -77,11 +77,33 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
       return;
     }
 
-    final var rowOrdering = expectedDataSet.rowOrdering();
+    final var rowOrdering = resolveRowOrdering(expectedDataSet, context);
+    final var tableOrdering = expectedDataSet.tableOrdering();
     final var retryCount = resolveRetryCount(expectedDataSet, context);
     final var retryDelay = resolveRetryDelay(expectedDataSet, context);
 
-    verifyWithRetry(context, expectedTableSets, rowOrdering, retryCount, retryDelay);
+    verifyWithRetry(context, expectedTableSets, rowOrdering, tableOrdering, retryCount, retryDelay);
+  }
+
+  /**
+   * Resolves the row ordering from annotation or global settings.
+   *
+   * <p>If the annotation specifies a concrete value ({@link RowOrdering#ORDERED} or {@link
+   * RowOrdering#UNORDERED}), that value is used directly. If the annotation value is {@link
+   * RowOrdering#UNSET} (the default), the global setting from {@link
+   * io.github.seijikohara.dbtester.api.config.VerificationSettings#rowOrdering()} is used.
+   *
+   * @param expectedDataSet the annotation
+   * @param context the test context
+   * @return the resolved row ordering
+   */
+  private RowOrdering resolveRowOrdering(
+      final ExpectedDataSet expectedDataSet, final TestContext context) {
+    final var annotationValue = expectedDataSet.rowOrdering();
+    if (annotationValue == RowOrdering.UNSET) {
+      return context.configuration().verification().rowOrdering();
+    }
+    return annotationValue;
   }
 
   /**
@@ -141,6 +163,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
    * @param context the test context
    * @param expectedTableSets the expected datasets
    * @param rowOrdering the row ordering strategy
+   * @param tableOrdering the table ordering strategy
    * @param retryCount the number of retries (0 = no retry)
    * @param retryDelay the delay between retries
    */
@@ -148,6 +171,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
       final TestContext context,
       final List<ExpectedTableSet> expectedTableSets,
       final RowOrdering rowOrdering,
+      final io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy tableOrdering,
       final int retryCount,
       final Duration retryDelay) {
     ValidationException lastException = null;
@@ -164,7 +188,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
         }
 
         for (final var expectedTableSet : expectedTableSets) {
-          verifyExpectedTableSet(context, expectedTableSet, rowOrdering);
+          verifyExpectedTableSet(context, expectedTableSet, rowOrdering, tableOrdering);
         }
 
         // Success - exit the retry loop
@@ -181,7 +205,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
 
     // All retries exhausted, throw the last exception
-    throw lastException;
+    throw Objects.requireNonNull(lastException, "lastException must not be null after retry loop");
   }
 
   /**
@@ -190,11 +214,13 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
    * @param context the test context
    * @param expectedTableSet the expected table set
    * @param rowOrdering the row ordering strategy
+   * @param tableOrdering the table ordering strategy
    */
   private void verifyExpectedTableSet(
       final TestContext context,
       final ExpectedTableSet expectedTableSet,
-      final RowOrdering rowOrdering) {
+      final RowOrdering rowOrdering,
+      final io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy tableOrdering) {
     final var tableSet = expectedTableSet.tableSet();
     final var rawExcludeColumns = expectedTableSet.excludeColumns();
     final var excludeColumns = resolveExcludeColumnPatterns(rawExcludeColumns, tableSet);
@@ -204,10 +230,11 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
 
     final var tableCount = tableSet.getTables().size();
     logger.info(
-        "Validating expectation TableSet for {}: {} tables ({})",
+        "Validating expectation TableSet for {}: {} tables ({}, {})",
         context.testMethod().getName(),
         tableCount,
-        rowOrdering);
+        rowOrdering,
+        tableOrdering);
 
     if (expectedTableSet.hasExclusions()) {
       logger.debug("Excluding columns from verification: {}", excludeColumns);
@@ -219,7 +246,8 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
 
     final var operationDefaults = context.configuration().operations();
     final var expectationContext =
-        ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+        ExpectationContext.of(
+            excludeColumns, columnStrategies, rowOrdering, operationDefaults, tableOrdering);
 
     try {
       expectationProvider.verifyExpectation(tableSet, dataSource, expectationContext);
@@ -229,6 +257,11 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
           context.testMethod().getName(),
           tableCount);
     } catch (final ValidationException e) {
+      throw new ValidationException(
+          String.format(
+              "Failed to verify expectation TableSet for %s", context.testMethod().getName()),
+          e);
+    } catch (final AssertionError e) {
       throw new ValidationException(
           String.format(
               "Failed to verify expectation TableSet for %s", context.testMethod().getName()),

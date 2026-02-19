@@ -76,19 +76,40 @@ Inserts new rows without modifying existing data.
 
 ### UPSERT
 
-Performs upsert operations (insert or update).
+Performs upsert operations (insert or update). Combines INSERT and UPDATE into a single logical operation.
+
+**SQL Generated**:
+- Update attempt: `UPDATE table SET col2 = ?, col3 = ? WHERE col1 = ?`
+- Insert fallback: `INSERT INTO table (col1, col2, col3) VALUES (?, ?, ?)`
 
 **Behavior**:
-- Checks if row exists by primary key
-- Updates existing rows
-- Inserts new rows
+- For each row, attempts to update first using the primary key in the `WHERE` clause
+- If the update affects zero rows, inserts the row
+- The first column in the dataset definition is treated as the primary key
+- All remaining columns are included in the `SET` clause of the update statement
 
 **Use Case**:
 - Mixed scenarios with partial existing data
 - Incremental data setup
+- Idempotent test data preparation
 
 **Requirements**:
-- Tables must have primary keys defined
+- The first column in the dataset file (CSV header, JSON key order, YAML key order) must be the primary key
+- Tables must have a primary key column matching the first dataset column
+
+**Convention**:
+
+The framework uses a first-column-as-primary-key convention. Define the primary key column as the first column in dataset files:
+
+```csv
+ID,NAME,EMAIL
+1,alice,alice@example.com
+2,bob,bob@example.com
+```
+
+In this example, `ID` is used as the primary key for the `WHERE` clause. The framework generates:
+- `UPDATE USERS SET NAME = ?, EMAIL = ? WHERE ID = ?` (update attempt)
+- `INSERT INTO USERS (ID, NAME, EMAIL) VALUES (?, ?, ?)` (insert fallback)
 
 ### DELETE
 

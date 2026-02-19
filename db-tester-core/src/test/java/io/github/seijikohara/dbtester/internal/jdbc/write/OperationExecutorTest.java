@@ -51,8 +51,8 @@ class OperationExecutorTest {
   /** Mock truncate executor. */
   private TruncateExecutor truncateExecutor;
 
-  /** Mock refresh executor. */
-  private RefreshExecutor refreshExecutor;
+  /** Mock upsert executor. */
+  private UpsertExecutor upsertExecutor;
 
   /** Mock table order resolver. */
   private TableOrderResolver tableOrderResolver;
@@ -67,7 +67,7 @@ class OperationExecutorTest {
     updateExecutor = mock(UpdateExecutor.class);
     deleteExecutor = mock(DeleteExecutor.class);
     truncateExecutor = mock(TruncateExecutor.class);
-    refreshExecutor = mock(RefreshExecutor.class);
+    upsertExecutor = mock(UpsertExecutor.class);
     tableOrderResolver = mock(TableOrderResolver.class);
     executor =
         new OperationExecutor(
@@ -75,7 +75,7 @@ class OperationExecutorTest {
             updateExecutor,
             deleteExecutor,
             truncateExecutor,
-            refreshExecutor,
+            upsertExecutor,
             tableOrderResolver);
   }
 
@@ -111,7 +111,7 @@ class OperationExecutorTest {
               updateExecutor,
               deleteExecutor,
               truncateExecutor,
-              refreshExecutor,
+              upsertExecutor,
               tableOrderResolver);
 
       // Then
@@ -302,7 +302,7 @@ class OperationExecutorTest {
       verify(updateExecutor, never()).execute(any(), any(), any());
       verify(deleteExecutor, never()).execute(any(), any(), any());
       verify(truncateExecutor, never()).execute(any(), any(), any());
-      verify(refreshExecutor, never()).execute(any(), any(), any());
+      verify(upsertExecutor, never()).execute(any(), any(), any());
     }
 
     /**
@@ -398,14 +398,14 @@ class OperationExecutorTest {
     }
 
     /**
-     * Verifies that UPSERT operation delegates to refresh executor.
+     * Verifies that UPSERT operation delegates to upsert executor.
      *
      * @throws SQLException if a database error occurs
      */
     @Test
     @Tag("normal")
-    @DisplayName("should delegate to refresh executor for UPSERT operation")
-    void shouldDelegateToRefreshExecutor_whenUpsertOperation() throws SQLException {
+    @DisplayName("should delegate to upsert executor for UPSERT operation")
+    void shouldDelegateToUpsertExecutor_whenUpsertOperation() throws SQLException {
       // Given
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
@@ -417,7 +417,7 @@ class OperationExecutorTest {
           Operation.UPSERT, dataSet, connection, TableOrderingStrategy.ALPHABETICAL);
 
       // Then
-      verify(refreshExecutor).execute(eq(tables), eq(connection), isNull());
+      verify(upsertExecutor).execute(eq(tables), eq(connection), isNull());
     }
 
     /**

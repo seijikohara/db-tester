@@ -20,13 +20,13 @@ import org.jspecify.annotations.Nullable;
  *   <li>{@link UpdateExecutor} - UPDATE operations
  *   <li>{@link DeleteExecutor} - DELETE operations
  *   <li>{@link TruncateExecutor} - TRUNCATE operations
- *   <li>{@link RefreshExecutor} - UPSERT operations
+ *   <li>{@link UpsertExecutor} - UPSERT operations
  * </ul>
  *
  * <p>All implementations must be stateless and thread-safe.
  */
 public sealed interface TableExecutor
-    permits InsertExecutor, UpdateExecutor, DeleteExecutor, TruncateExecutor, RefreshExecutor {
+    permits InsertExecutor, UpdateExecutor, DeleteExecutor, TruncateExecutor, UpsertExecutor {
 
   /**
    * Executes the operation on the given tables.

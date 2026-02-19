@@ -60,7 +60,7 @@ class DataSourceRegistrar(
      */
     fun registerAll(registry: DataSourceRegistry): Unit =
         when {
-            !properties.isAutoRegisterDataSources -> {
+            !properties.autoRegisterDataSources -> {
                 logger.debug("Auto-registration disabled")
             }
 

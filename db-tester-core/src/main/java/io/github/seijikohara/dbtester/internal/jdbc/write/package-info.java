@@ -2,7 +2,7 @@
  * Database write operations for test data setup.
  *
  * <p>This package provides classes for writing data to databases, including insert, update, delete,
- * truncate, and refresh operations.
+ * truncate, and upsert operations.
  *
  * <p>Key classes:
  *
@@ -21,8 +21,8 @@
  *       operations
  *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.TruncateExecutor} - Executes
  *       TRUNCATE operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.RefreshExecutor} - Executes
- *       UPSERT operations
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.UpsertExecutor} - Executes UPSERT
+ *       operations
  * </ul>
  */
 @NullMarked

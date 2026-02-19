@@ -479,4 +479,143 @@ class TestClassNameBasedDataSetLoaderTest {
                 dataSourceName = "custom"))
     void testMethod() {}
   }
+
+  /** Tests for baseDirectory configuration. */
+  @Nested
+  @DisplayName("baseDirectory configuration")
+  class BaseDirectoryMethod {
+
+    /** Tests for baseDirectory configuration. */
+    BaseDirectoryMethod() {}
+
+    /**
+     * Verifies that loadPreparationDataSets uses baseDirectory when configured.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load preparation data sets from baseDirectory when configured")
+    void shouldLoadPreparationDataSets_whenBaseDirectoryIsConfigured()
+        throws NoSuchMethodException {
+      // Given
+      final var conventions =
+          ConventionSettings.builder()
+              .baseDirectory("classpath:testdata/basedir-test")
+              .expectationSuffix("/expected")
+              .scenarioMarker("SCENARIO")
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .build();
+      final var baseDirConfig =
+          Configuration.builder()
+              .conventions(conventions)
+              .verification(
+                  VerificationSettings.builder()
+                      .globalExcludeColumns(Set.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .build())
+              .execution(ExecutionSettings.standard())
+              .operations(
+                  OperationDefaults.builder()
+                      .preparation(Operation.CLEAN_INSERT)
+                      .expectation(Operation.NONE)
+                      .build())
+              .loader(new TestClassNameBasedDataSetLoader())
+              .build();
+
+      final var loader = new TestClassNameBasedDataSetLoader();
+      final var testClass = TestHelperWithBaseDirectoryDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+      final var context = new TestContext(testClass, testMethod, baseDirConfig, registry);
+
+      // When
+      final var result = loader.loadPreparationDataSets(context);
+
+      // Then
+      assertAll(
+          "data sets should be loaded from baseDirectory",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertEquals(1, result.size(), "should have one data set"),
+          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+    }
+
+    /**
+     * Verifies that loadExpectationDataSets uses baseDirectory with suffix when configured.
+     *
+     * @throws NoSuchMethodException if method cannot be found
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should load expectation data sets from baseDirectory with suffix when configured")
+    void shouldLoadExpectationDataSets_whenBaseDirectoryIsConfigured()
+        throws NoSuchMethodException {
+      // Given
+      final var conventions =
+          ConventionSettings.builder()
+              .baseDirectory("classpath:testdata/basedir-test")
+              .expectationSuffix("/expected")
+              .scenarioMarker("SCENARIO")
+              .dataFormat(DataFormat.CSV)
+              .tableMergeStrategy(TableMergeStrategy.UNION_ALL)
+              .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
+              .build();
+      final var baseDirConfig =
+          Configuration.builder()
+              .conventions(conventions)
+              .verification(
+                  VerificationSettings.builder()
+                      .globalExcludeColumns(Set.of())
+                      .rowOrdering(RowOrdering.ORDERED)
+                      .retryCount(0)
+                      .retryDelay(Duration.ofMillis(100))
+                      .build())
+              .execution(ExecutionSettings.standard())
+              .operations(
+                  OperationDefaults.builder()
+                      .preparation(Operation.CLEAN_INSERT)
+                      .expectation(Operation.NONE)
+                      .build())
+              .loader(new TestClassNameBasedDataSetLoader())
+              .build();
+
+      final var loader = new TestClassNameBasedDataSetLoader();
+      final var testClass = TestHelperWithBaseDirectoryExpectedDataSet.class;
+      final var testMethod = testClass.getDeclaredMethod("testMethod");
+      final var context = new TestContext(testClass, testMethod, baseDirConfig, registry);
+
+      // When
+      final var result = loader.loadExpectationDataSets(context);
+
+      // Then
+      assertAll(
+          "expectation data sets should be loaded from baseDirectory with suffix",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertEquals(1, result.size(), "should have one data set"),
+          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+    }
+  }
+
+  /** Test helper class with DataSet annotation for baseDirectory testing. */
+  static class TestHelperWithBaseDirectoryDataSet {
+    /** Test constructor. */
+    TestHelperWithBaseDirectoryDataSet() {}
+
+    /** Test method with DataSet annotation. */
+    @DataSet
+    void testMethod() {}
+  }
+
+  /** Test helper class with ExpectedDataSet annotation for baseDirectory testing. */
+  static class TestHelperWithBaseDirectoryExpectedDataSet {
+    /** Test constructor. */
+    TestHelperWithBaseDirectoryExpectedDataSet() {}
+
+    /** Test method with ExpectedDataSet annotation. */
+    @ExpectedDataSet
+    void testMethod() {}
+  }
 }

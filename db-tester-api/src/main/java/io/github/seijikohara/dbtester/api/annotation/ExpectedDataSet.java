@@ -57,13 +57,13 @@ public @interface ExpectedDataSet {
    * <p>When set to {@link RowOrdering#UNORDERED}, rows are compared without considering their
    * position in the result set. This is useful when the database does not guarantee row ordering.
    *
-   * <p>If not specified, the value from {@link
+   * <p>When set to {@link RowOrdering#UNSET} (the default), the global setting from {@link
    * io.github.seijikohara.dbtester.api.config.VerificationSettings#rowOrdering()} is used.
    *
-   * @return the row ordering strategy, defaulting to {@link RowOrdering#ORDERED}
+   * @return the row ordering strategy, or {@link RowOrdering#UNSET} to use the global setting
    * @see RowOrdering
    */
-  RowOrdering rowOrdering() default RowOrdering.ORDERED;
+  RowOrdering rowOrdering() default RowOrdering.UNSET;
 
   /**
    * Specifies the number of retry attempts for verification.

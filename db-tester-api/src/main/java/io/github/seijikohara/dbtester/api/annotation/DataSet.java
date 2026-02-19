@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
  * Declares the datasets that must be applied before a test method runs.
  *
  * <p>{@code @DataSet} may be placed on an individual test method or at the test class level. A
- * method-level declaration augments (and, when necessary, overrides) any class-level definition.
- * The annotation is inherited by subclasses to avoid restating common fixtures.
+ * method-level declaration overrides any class-level definition. The annotation is inherited by
+ * subclasses to avoid restating common fixtures.
  *
  * <p>Each associated {@link DataSetSource} is executed using the configured {@link #operation()}
  * (default {@link Operation#CLEAN_INSERT}) so that tests start from a deterministic database state.

@@ -32,7 +32,7 @@ class RowOrderingTest {
     @DisplayName("should have all expected ordering values")
     void shouldHaveAllExpectedOrderingValues() {
       // Given
-      final var expectedOrderings = Set.of("ORDERED", "UNORDERED");
+      final var expectedOrderings = Set.of("UNSET", "ORDERED", "UNORDERED");
 
       // When
       final var actualOrderings = Arrays.stream(RowOrdering.values()).map(Enum::name).toList();
@@ -52,6 +52,7 @@ class RowOrderingTest {
     @DisplayName("should return correct enum for valueOf")
     void shouldReturnCorrectEnumForValueOf() {
       // When & Then
+      assertEquals(RowOrdering.UNSET, RowOrdering.valueOf("UNSET"), "should return UNSET");
       assertEquals(RowOrdering.ORDERED, RowOrdering.valueOf("ORDERED"), "should return ORDERED");
       assertEquals(
           RowOrdering.UNORDERED, RowOrdering.valueOf("UNORDERED"), "should return UNORDERED");
@@ -76,7 +77,7 @@ class RowOrderingTest {
 
       // Then
       assertNotNull(values, "values should not be null");
-      assertEquals(2, values.length, "should have 2 orderings");
+      assertEquals(3, values.length, "should have 3 orderings");
     }
   }
 }

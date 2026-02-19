@@ -33,8 +33,8 @@ class VerificationSettingsTest {
     /** Verifies that standard returns instance with default values. */
     @Test
     @Tag("normal")
-    @DisplayName("returns instance with default values")
-    void returnsInstanceWithDefaultValues() {
+    @DisplayName("should return instance with default values when called")
+    void shouldReturnInstanceWithDefaultValues_whenCalled() {
       // When
       final var settings = VerificationSettings.standard();
 
@@ -71,8 +71,8 @@ class VerificationSettingsTest {
     /** Verifies that builder creates builder with default values. */
     @Test
     @Tag("normal")
-    @DisplayName("creates builder with default values")
-    void createsBuilderWithDefaultValues() {
+    @DisplayName("should create builder with default values when called")
+    void shouldCreateBuilderWithDefaultValues_whenCalled() {
       // When
       final var builder = VerificationSettings.builder();
 
@@ -83,8 +83,8 @@ class VerificationSettingsTest {
     /** Verifies that builder builds settings with custom global exclude columns. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with custom global exclude columns")
-    void buildsSettingsWithCustomGlobalExcludeColumns() {
+    @DisplayName("should build settings when custom global exclude columns provided")
+    void shouldBuildSettings_whenCustomGlobalExcludeColumnsProvided() {
       // Given
       final var excludeColumns = Set.of("CREATED_AT", "UPDATED_AT");
 
@@ -100,8 +100,8 @@ class VerificationSettingsTest {
     /** Verifies that builder builds settings with custom global column strategies. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with custom global column strategies")
-    void buildsSettingsWithCustomGlobalColumnStrategies() {
+    @DisplayName("should build settings when custom global column strategies provided")
+    void shouldBuildSettings_whenCustomGlobalColumnStrategiesProvided() {
       // Given
       final var strategies = Map.of("timestamp", ColumnStrategyMapping.ignore("timestamp"));
 
@@ -119,8 +119,8 @@ class VerificationSettingsTest {
     /** Verifies that builder builds settings with custom row ordering. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with custom row ordering")
-    void buildsSettingsWithCustomRowOrdering() {
+    @DisplayName("should build settings when custom row ordering provided")
+    void shouldBuildSettings_whenCustomRowOrderingProvided() {
       // When
       final var settings =
           VerificationSettings.builder().rowOrdering(RowOrdering.UNORDERED).build();
@@ -130,11 +130,30 @@ class VerificationSettingsTest {
           RowOrdering.UNORDERED, settings.rowOrdering(), "rowOrdering should be UNORDERED");
     }
 
+    /** Verifies that builder rejects RowOrdering.UNSET. */
+    @Test
+    @Tag("error")
+    @DisplayName("throws exception when RowOrdering.UNSET is provided")
+    void shouldThrowException_whenRowOrderingUnsetProvided() {
+      // Given
+      final var builder = VerificationSettings.builder();
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> builder.rowOrdering(RowOrdering.UNSET),
+              "should reject RowOrdering.UNSET");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("UNSET"), "exception message should mention UNSET");
+    }
+
     /** Verifies that builder builds settings with custom retry count. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with custom retry count")
-    void buildsSettingsWithCustomRetryCount() {
+    @DisplayName("should build settings when custom retry count provided")
+    void shouldBuildSettings_whenCustomRetryCountProvided() {
       // When
       final var settings = VerificationSettings.builder().retryCount(3).build();
 
@@ -145,8 +164,8 @@ class VerificationSettingsTest {
     /** Verifies that builder builds settings with custom retry delay. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with custom retry delay")
-    void buildsSettingsWithCustomRetryDelay() {
+    @DisplayName("should build settings when custom retry delay provided")
+    void shouldBuildSettings_whenCustomRetryDelayProvided() {
       // Given
       final var delay = Duration.ofSeconds(1);
 
@@ -160,8 +179,8 @@ class VerificationSettingsTest {
     /** Verifies that builder builds settings with all custom values. */
     @Test
     @Tag("normal")
-    @DisplayName("builds settings with all custom values")
-    void buildsSettingsWithAllCustomValues() {
+    @DisplayName("should build settings when all custom values provided")
+    void shouldBuildSettings_whenAllCustomValuesProvided() {
       // Given
       final var excludeColumns = Set.of("VERSION");
       final var strategies = Map.of("col", ColumnStrategyMapping.ignore("col"));
@@ -200,8 +219,8 @@ class VerificationSettingsTest {
     /** Verifies that builder throws exception for negative retry count. */
     @Test
     @Tag("error")
-    @DisplayName("throws exception for negative retry count")
-    void throwsExceptionForNegativeRetryCount() {
+    @DisplayName("should throw exception when negative retry count provided")
+    void shouldThrowException_whenNegativeRetryCountProvided() {
       // When & Then
       assertThrows(
           IllegalArgumentException.class,
@@ -212,9 +231,9 @@ class VerificationSettingsTest {
     /** Verifies that builder throws exception for null global exclude columns. */
     @Test
     @Tag("error")
-    @DisplayName("throws exception for null global exclude columns")
+    @DisplayName("should throw exception when null global exclude columns provided")
     @SuppressWarnings("NullAway")
-    void throwsExceptionForNullGlobalExcludeColumns() {
+    void shouldThrowException_whenNullGlobalExcludeColumnsProvided() {
       // When & Then
       assertThrows(
           NullPointerException.class,
@@ -225,9 +244,9 @@ class VerificationSettingsTest {
     /** Verifies that builder throws exception for null global column strategies. */
     @Test
     @Tag("error")
-    @DisplayName("throws exception for null global column strategies")
+    @DisplayName("should throw exception when null global column strategies provided")
     @SuppressWarnings("NullAway")
-    void throwsExceptionForNullGlobalColumnStrategies() {
+    void shouldThrowException_whenNullGlobalColumnStrategiesProvided() {
       // When & Then
       assertThrows(
           NullPointerException.class,
@@ -238,9 +257,9 @@ class VerificationSettingsTest {
     /** Verifies that builder throws exception for null row ordering. */
     @Test
     @Tag("error")
-    @DisplayName("throws exception for null row ordering")
+    @DisplayName("should throw exception when null row ordering provided")
     @SuppressWarnings("NullAway")
-    void throwsExceptionForNullRowOrdering() {
+    void shouldThrowException_whenNullRowOrderingProvided() {
       // When & Then
       assertThrows(
           NullPointerException.class,
@@ -251,9 +270,9 @@ class VerificationSettingsTest {
     /** Verifies that builder throws exception for null retry delay. */
     @Test
     @Tag("error")
-    @DisplayName("throws exception for null retry delay")
+    @DisplayName("should throw exception when null retry delay provided")
     @SuppressWarnings("NullAway")
-    void throwsExceptionForNullRetryDelay() {
+    void shouldThrowException_whenNullRetryDelayProvided() {
       // When & Then
       assertThrows(
           NullPointerException.class,
@@ -273,8 +292,8 @@ class VerificationSettingsTest {
     /** Verifies that withGlobalExcludeColumns creates new instance. */
     @Test
     @Tag("normal")
-    @DisplayName("withGlobalExcludeColumns creates new instance")
-    void withGlobalExcludeColumnsCreatesNewInstance() {
+    @DisplayName("should create new instance when withGlobalExcludeColumns called")
+    void shouldCreateNewInstance_whenWithGlobalExcludeColumnsCalled() {
       // Given
       final var original = VerificationSettings.standard();
       final var columns = Set.of("ID", "VERSION");
@@ -293,8 +312,8 @@ class VerificationSettingsTest {
     /** Verifies that withGlobalColumnStrategies creates new instance. */
     @Test
     @Tag("normal")
-    @DisplayName("withGlobalColumnStrategies creates new instance")
-    void withGlobalColumnStrategiesCreatesNewInstance() {
+    @DisplayName("should create new instance when withGlobalColumnStrategies called")
+    void shouldCreateNewInstance_whenWithGlobalColumnStrategiesCalled() {
       // Given
       final var original = VerificationSettings.standard();
       final var strategies = Map.of("col", ColumnStrategyMapping.ignore("col"));
@@ -311,8 +330,8 @@ class VerificationSettingsTest {
     /** Verifies that withRowOrdering creates new instance. */
     @Test
     @Tag("normal")
-    @DisplayName("withRowOrdering creates new instance")
-    void withRowOrderingCreatesNewInstance() {
+    @DisplayName("should create new instance when withRowOrdering called")
+    void shouldCreateNewInstance_whenWithRowOrderingCalled() {
       // Given
       final var original = VerificationSettings.standard();
 
@@ -332,8 +351,8 @@ class VerificationSettingsTest {
     /** Verifies that withRetryCount creates new instance. */
     @Test
     @Tag("normal")
-    @DisplayName("withRetryCount creates new instance")
-    void withRetryCountCreatesNewInstance() {
+    @DisplayName("should create new instance when withRetryCount called")
+    void shouldCreateNewInstance_whenWithRetryCountCalled() {
       // Given
       final var original = VerificationSettings.standard();
 
@@ -349,8 +368,8 @@ class VerificationSettingsTest {
     /** Verifies that withRetryDelay creates new instance. */
     @Test
     @Tag("normal")
-    @DisplayName("withRetryDelay creates new instance")
-    void withRetryDelayCreatesNewInstance() {
+    @DisplayName("should create new instance when withRetryDelay called")
+    void shouldCreateNewInstance_whenWithRetryDelayCalled() {
       // Given
       final var original = VerificationSettings.standard();
       final var delay = Duration.ofMillis(500);
@@ -377,8 +396,8 @@ class VerificationSettingsTest {
     /** Verifies that toBuilder creates builder with current values. */
     @Test
     @Tag("normal")
-    @DisplayName("creates builder with current values")
-    void createsBuilderWithCurrentValues() {
+    @DisplayName("should create builder with current values when toBuilder called")
+    void shouldCreateBuilderWithCurrentValues_whenToBuilderCalled() {
       // Given
       final var original =
           VerificationSettings.builder()
@@ -398,8 +417,8 @@ class VerificationSettingsTest {
     /** Verifies that toBuilder allows modification of copied values. */
     @Test
     @Tag("normal")
-    @DisplayName("allows modification of copied values")
-    void allowsModificationOfCopiedValues() {
+    @DisplayName("should allow modification when toBuilder called")
+    void shouldAllowModification_whenToBuilderCalled() {
       // Given
       final var original = VerificationSettings.builder().retryCount(1).build();
 
@@ -423,8 +442,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns true for same values. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns true for same values")
-    void equalsReturnsTrueForSameValues() {
+    @DisplayName("should return true when equals called with same values")
+    void shouldReturnTrue_whenEqualsCalledWithSameValues() {
       // Given
       final var settings1 = VerificationSettings.standard();
       final var settings2 = VerificationSettings.standard();
@@ -436,8 +455,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns false for different values. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns false for different values")
-    void equalsReturnsFalseForDifferentValues() {
+    @DisplayName("should return false when equals called with different values")
+    void shouldReturnFalse_whenEqualsCalledWithDifferentValues() {
       // Given
       final var settings1 = VerificationSettings.standard();
       final var settings2 = VerificationSettings.builder().retryCount(5).build();
@@ -450,8 +469,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns true for same instance. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns true for same instance")
-    void equalsReturnsTrueForSameInstance() {
+    @DisplayName("should return true when equals called with same instance")
+    void shouldReturnTrue_whenEqualsCalledWithSameInstance() {
       // Given
       final var settings = VerificationSettings.standard();
 
@@ -462,8 +481,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns false for null. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns false for null")
-    void equalsReturnsFalseForNull() {
+    @DisplayName("should return false when equals called with null")
+    void shouldReturnFalse_whenEqualsCalledWithNull() {
       // Given
       final var settings = VerificationSettings.standard();
 
@@ -474,8 +493,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns false for different type. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns false for different type")
-    void equalsReturnsFalseForDifferentType() {
+    @DisplayName("should return false when equals called with different type")
+    void shouldReturnFalse_whenEqualsCalledWithDifferentType() {
       // Given
       final var settings = VerificationSettings.standard();
 
@@ -486,8 +505,8 @@ class VerificationSettingsTest {
     /** Verifies that hashCode is consistent for equal objects. */
     @Test
     @Tag("normal")
-    @DisplayName("hashCode is consistent for equal objects")
-    void hashCodeIsConsistentForEqualObjects() {
+    @DisplayName("should be consistent when hashCode called for equal objects")
+    void shouldBeConsistent_whenHashCodeCalledForEqualObjects() {
       // Given
       final var settings1 = VerificationSettings.standard();
       final var settings2 = VerificationSettings.standard();
@@ -500,8 +519,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns false for different row ordering. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns false for different row ordering")
-    void equalsReturnsFalseForDifferentRowOrdering() {
+    @DisplayName("should return false when equals called with different row ordering")
+    void shouldReturnFalse_whenEqualsCalledWithDifferentRowOrdering() {
       // Given
       final var settings1 = VerificationSettings.standard();
       final var settings2 =
@@ -515,8 +534,8 @@ class VerificationSettingsTest {
     /** Verifies that equals returns false for different global exclude columns. */
     @Test
     @Tag("normal")
-    @DisplayName("equals returns false for different global exclude columns")
-    void equalsReturnsFalseForDifferentGlobalExcludeColumns() {
+    @DisplayName("should return false when equals called with different global exclude columns")
+    void shouldReturnFalse_whenEqualsCalledWithDifferentGlobalExcludeColumns() {
       // Given
       final var settings1 = VerificationSettings.standard();
       final var settings2 =
@@ -539,8 +558,8 @@ class VerificationSettingsTest {
     /** Verifies that toString returns string representation. */
     @Test
     @Tag("normal")
-    @DisplayName("returns string representation")
-    void returnsStringRepresentation() {
+    @DisplayName("should return string representation when toString called")
+    void shouldReturnStringRepresentation_whenToStringCalled() {
       // Given
       final var settings = VerificationSettings.standard();
 

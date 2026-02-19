@@ -41,7 +41,7 @@ class DataSourceRegistrarSpec : AnnotationSpec() {
     fun `should create instance with properties`(): Unit =
         DbTesterProperties()
             .also { customProperties ->
-                customProperties.isEnabled = false
+                customProperties.enabled = false
             }.let { customProperties ->
                 DataSourceRegistrar(customProperties).let { customRegistrar ->
                     customRegistrar shouldNotBe null
@@ -68,7 +68,7 @@ class DataSourceRegistrarSpec : AnnotationSpec() {
     fun `should do nothing when auto-register is disabled`(): Unit =
         DbTesterProperties()
             .also { props ->
-                props.isAutoRegisterDataSources = false
+                props.autoRegisterDataSources = false
             }.let { props ->
                 DataSourceRegistrar(props).let { reg ->
                     mockk<ConfigurableApplicationContext>().let { context ->

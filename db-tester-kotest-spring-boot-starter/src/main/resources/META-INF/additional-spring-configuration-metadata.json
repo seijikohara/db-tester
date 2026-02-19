@@ -48,9 +48,43 @@
       "defaultValue": "load-order.txt"
     },
     {
-      "name": "db-tester.convention.global-exclude-columns",
+      "name": "db-tester.verification.global-exclude-columns",
       "type": "java.util.Set<java.lang.String>",
       "description": "Column names to exclude globally from all expectation verifications."
+    },
+    {
+      "name": "db-tester.verification.column-strategies",
+      "type": "java.util.List<io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure.DbTesterProperties.ColumnStrategyProperty>",
+      "description": "Column-level comparison strategies for expectation verification. Each entry specifies a column name, strategy type, and optional regex pattern."
+    },
+    {
+      "name": "db-tester.verification.row-ordering",
+      "type": "io.github.seijikohara.dbtester.api.config.RowOrdering",
+      "description": "Row ordering strategy for expectation verification.",
+      "defaultValue": "ORDERED"
+    },
+    {
+      "name": "db-tester.verification.retry-count",
+      "type": "java.lang.Integer",
+      "description": "Number of retry attempts for expectation verification.",
+      "defaultValue": 0
+    },
+    {
+      "name": "db-tester.verification.retry-delay",
+      "type": "java.time.Duration",
+      "description": "Delay between retry attempts for expectation verification.",
+      "defaultValue": "100ms"
+    },
+    {
+      "name": "db-tester.execution.query-timeout",
+      "type": "java.time.Duration",
+      "description": "Maximum time to wait for database queries. Null means no timeout."
+    },
+    {
+      "name": "db-tester.execution.transaction-mode",
+      "type": "io.github.seijikohara.dbtester.api.config.TransactionMode",
+      "description": "Transaction behavior for database operations.",
+      "defaultValue": "SINGLE_TRANSACTION"
     },
     {
       "name": "db-tester.operation.preparation",
@@ -66,6 +100,77 @@
     }
   ],
   "hints": [
+    {
+      "name": "db-tester.verification.row-ordering",
+      "values": [
+        {
+          "value": "ORDERED",
+          "description": "Compares rows in positional order (row-by-row by index)"
+        },
+        {
+          "value": "UNORDERED",
+          "description": "Compares rows without considering order (set-based comparison)"
+        }
+      ]
+    },
+    {
+      "name": "db-tester.execution.transaction-mode",
+      "values": [
+        {
+          "value": "SINGLE_TRANSACTION",
+          "description": "Executes all operations within a single transaction"
+        },
+        {
+          "value": "AUTO_COMMIT",
+          "description": "Each statement is committed immediately (connection autoCommit = true)"
+        },
+        {
+          "value": "NONE",
+          "description": "No transaction management (connection state unchanged)"
+        }
+      ]
+    },
+    {
+      "name": "db-tester.verification.column-strategies.strategy",
+      "values": [
+        {
+          "value": "STRICT",
+          "description": "Exact match using equals() (default)"
+        },
+        {
+          "value": "IGNORE",
+          "description": "Skip comparison entirely"
+        },
+        {
+          "value": "NUMERIC",
+          "description": "Type-aware numeric comparison"
+        },
+        {
+          "value": "CASE_INSENSITIVE",
+          "description": "Case-insensitive string comparison"
+        },
+        {
+          "value": "TIMESTAMP_FLEXIBLE",
+          "description": "Flexible timestamp comparison (ignores sub-second precision)"
+        },
+        {
+          "value": "DATE_FLEXIBLE",
+          "description": "Flexible date comparison (handles multiple date formats)"
+        },
+        {
+          "value": "JSON_EQUIVALENT",
+          "description": "JSON structural equivalence comparison"
+        },
+        {
+          "value": "NOT_NULL",
+          "description": "Only verify the value is not null"
+        },
+        {
+          "value": "REGEX",
+          "description": "Match against a regular expression pattern (requires pattern property)"
+        }
+      ]
+    },
     {
       "name": "db-tester.convention.data-format",
       "values": [
@@ -128,7 +233,7 @@
           "description": "Inserts only new rows"
         },
         {
-          "value": "REFRESH",
+          "value": "UPSERT",
           "description": "Upserts rows by updating matches and inserting new entries"
         },
         {
@@ -169,7 +274,7 @@
           "description": "Inserts only new rows"
         },
         {
-          "value": "REFRESH",
+          "value": "UPSERT",
           "description": "Upserts rows by updating matches and inserting new entries"
         },
         {

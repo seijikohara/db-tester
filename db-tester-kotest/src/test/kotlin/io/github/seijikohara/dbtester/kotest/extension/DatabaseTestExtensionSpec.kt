@@ -91,6 +91,58 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
                 instance.shouldBeInstanceOf<TestCaseExtension>()
             }
         }
+
+    @Test
+    fun `should create instance with multi-DataSource registry provider`(): Unit =
+        DataSourceRegistry().let { registry ->
+            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
+                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+                    registry.registerDefault(defaultDs)
+                    registry.register("secondary", secondaryDs)
+                    DatabaseTestExtension(registryProvider = { registry }).let { ext ->
+                        assertSoftly {
+                            ext shouldNotBe null
+                            ext.shouldBeInstanceOf<TestCaseExtension>()
+                            registry.hasDefault() shouldBe true
+                            registry.has("secondary") shouldBe true
+                            registry.getDefault() shouldBe defaultDs
+                            registry.get("secondary") shouldBe secondaryDs
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun `should support multi-DataSource registration via registry`(): Unit =
+        DataSourceRegistry().let { registry ->
+            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
+                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+                    io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { tertiaryDs ->
+                        registry.registerDefault(defaultDs)
+                        registry.register("secondary", secondaryDs)
+                        registry.register("tertiary", tertiaryDs)
+                        assertSoftly {
+                            registry.hasDefault() shouldBe true
+                            registry.has("secondary") shouldBe true
+                            registry.has("tertiary") shouldBe true
+                            registry.getDefault() shouldBe defaultDs
+                            registry.get("secondary") shouldBe secondaryDs
+                            registry.get("tertiary") shouldBe tertiaryDs
+                        }
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun `should create extension with null registry provider for annotation-based usage`(): Unit =
+        DatabaseTestExtension(registryProvider = null, configurationProvider = null).let { ext ->
+            assertSoftly {
+                ext shouldNotBe null
+                ext.shouldBeInstanceOf<TestCaseExtension>()
+            }
+        }
 }
 
 /**
@@ -126,6 +178,27 @@ class DatabaseTestSupportSpec : AnnotationSpec() {
                 override val dbTesterRegistry: DataSourceRegistry = customRegistry
             }.let { support ->
                 support.dbTesterRegistry shouldBe customRegistry
+            }
+        }
+
+    @Test
+    fun `should support multi-DataSource registry via interface`(): Unit =
+        DataSourceRegistry().let { registry ->
+            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
+                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+                    registry.registerDefault(defaultDs)
+                    registry.register("secondary", secondaryDs)
+                    object : DatabaseTestSupport {
+                        override val dbTesterRegistry: DataSourceRegistry = registry
+                    }.let { support ->
+                        assertSoftly {
+                            support.dbTesterRegistry.hasDefault() shouldBe true
+                            support.dbTesterRegistry.has("secondary") shouldBe true
+                            support.dbTesterRegistry.getDefault() shouldBe defaultDs
+                            support.dbTesterRegistry.get("secondary") shouldBe secondaryDs
+                        }
+                    }
+                }
             }
         }
 }

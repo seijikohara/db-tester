@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -219,6 +220,43 @@ class DbTesterKotestAutoConfigurationSpec : AnnotationSpec() {
                     configuration.operations().expectation() shouldBe Operation.DELETE_ALL
                 }
             }
+
+    /** Verifies that column strategies properties are correctly mapped to Configuration. */
+    @Test
+    fun `should map column strategies properties to Configuration`(): Unit =
+        DbTesterProperties()
+            .also { customProperties ->
+                val timestampStrategy =
+                    DbTesterProperties.ColumnStrategyProperty().apply {
+                        columnName = "CREATED_AT"
+                        strategy = ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE
+                    }
+                val ignoreStrategy =
+                    DbTesterProperties.ColumnStrategyProperty().apply {
+                        columnName = "updated_at"
+                        strategy = ComparisonStrategy.Type.IGNORE
+                    }
+                customProperties.verification.columnStrategies = mutableListOf(timestampStrategy, ignoreStrategy)
+            }.let { customProperties ->
+                autoConfiguration.dbTesterConfiguration(customProperties).let { configuration ->
+                    configuration.verification().globalColumnStrategies().size shouldBe 2
+                    configuration
+                        .verification()
+                        .globalColumnStrategies()["CREATED_AT"]!!
+                        .strategy() shouldBe ComparisonStrategy.TIMESTAMP_FLEXIBLE
+                    configuration
+                        .verification()
+                        .globalColumnStrategies()["UPDATED_AT"]!!
+                        .strategy() shouldBe ComparisonStrategy.IGNORE
+                }
+            }
+
+    /** Verifies that empty column strategies produces empty map. */
+    @Test
+    fun `should produce empty column strategies when none configured`(): Unit =
+        autoConfiguration.dbTesterConfiguration(DbTesterProperties()).let { configuration ->
+            configuration.verification().globalColumnStrategies() shouldBe emptyMap()
+        }
 
     /** Verifies that default properties produce correct default values for all Configuration sections. */
     @Test

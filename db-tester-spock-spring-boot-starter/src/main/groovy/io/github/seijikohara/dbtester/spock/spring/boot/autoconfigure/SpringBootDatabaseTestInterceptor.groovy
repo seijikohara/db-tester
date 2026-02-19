@@ -180,7 +180,7 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 	/**
 	 * Gets the DataSourceRegistry from the ApplicationContext.
 	 *
-	 * <p>Populates the registry with DataSources if empty.
+	 * <p>Always registers DataSources for consistency with JUnit behavior.
 	 *
 	 * @param applicationContext the Spring ApplicationContext
 	 * @return the data source registry
@@ -190,8 +190,8 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		try {
 			def registry = applicationContext.getBean('dbTesterDataSourceRegistry', DataSourceRegistry)
 
-			// Populate registry if empty
-			if (!registry.hasDefault() && applicationContext.containsBean('dataSourceRegistrar')) {
+			// Always register DataSources for consistency with JUnit behavior
+			if (applicationContext.containsBean('dataSourceRegistrar')) {
 				def registrar = applicationContext.getBean('dataSourceRegistrar', DataSourceRegistrar)
 				registrar.registerAll(registry)
 			}

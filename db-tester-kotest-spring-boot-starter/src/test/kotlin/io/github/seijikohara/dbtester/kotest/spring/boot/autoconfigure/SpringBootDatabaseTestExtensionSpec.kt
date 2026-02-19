@@ -50,4 +50,31 @@ class SpringBootDatabaseTestExtensionSpec : AnnotationSpec() {
             ext.shouldBeInstanceOf<SpecExtension>()
             ext.shouldBeInstanceOf<TestCaseExtension>()
         }
+
+    @Test
+    fun `should support multi-DataSource registration via DataSourceRegistry`(): Unit =
+        io.github.seijikohara.dbtester.api.config.DataSourceRegistry().let { registry ->
+            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
+                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+                    registry.registerDefault(defaultDs)
+                    registry.register("secondary", secondaryDs)
+                    io.kotest.assertions.assertSoftly {
+                        registry.hasDefault() shouldBe true
+                        registry.has("secondary") shouldBe true
+                        registry.getDefault() shouldBe defaultDs
+                        registry.get("secondary") shouldBe secondaryDs
+                    }
+                }
+            }
+        }
+
+    @Test
+    fun `should create fresh extension for each test`(): Unit =
+        SpringBootDatabaseTestExtension().let { fresh1 ->
+            SpringBootDatabaseTestExtension().let { fresh2 ->
+                (fresh1 === fresh2) shouldBe false
+                fresh1.shouldBeInstanceOf<SpecExtension>()
+                fresh2.shouldBeInstanceOf<TestCaseExtension>()
+            }
+        }
 }

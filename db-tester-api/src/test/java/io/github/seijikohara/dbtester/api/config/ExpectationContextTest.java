@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +50,12 @@ class ExpectationContextTest {
           () ->
               assertEquals(
                   RowOrdering.ORDERED, context.rowOrdering(), "rowOrdering should be ORDERED"),
-          () -> assertNotNull(context.operationDefaults(), "operationDefaults should not be null"));
+          () -> assertNotNull(context.operationDefaults(), "operationDefaults should not be null"),
+          () ->
+              assertEquals(
+                  TableOrderingStrategy.AUTO,
+                  context.tableOrdering(),
+                  "tableOrdering should be AUTO"));
     }
   }
 
@@ -285,6 +291,32 @@ class ExpectationContextTest {
                   OperationDefaults.standard(),
                   original.operationDefaults(),
                   "original operationDefaults should remain standard"));
+    }
+
+    /** Verifies that withTableOrdering returns new instance with updated strategy. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return new instance with updated tableOrdering")
+    void shouldReturnNewInstance_whenWithTableOrderingCalled() {
+      // Given
+      final var original = ExpectationContext.defaults();
+
+      // When
+      final var updated = original.withTableOrdering(TableOrderingStrategy.ALPHABETICAL);
+
+      // Then
+      assertAll(
+          "updated context",
+          () ->
+              assertEquals(
+                  TableOrderingStrategy.ALPHABETICAL,
+                  updated.tableOrdering(),
+                  "tableOrdering should be ALPHABETICAL"),
+          () ->
+              assertEquals(
+                  TableOrderingStrategy.AUTO,
+                  original.tableOrdering(),
+                  "original tableOrdering should remain AUTO"));
     }
   }
 }

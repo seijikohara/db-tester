@@ -4,18 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.annotation.ExportDataSet;
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
+import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import io.github.seijikohara.dbtester.api.loader.DataSetLoader;
+import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier;
+import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExportExecutor;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -476,6 +484,62 @@ class DatabaseTestExtensionTest {
           () -> extension.afterEach(mockContext),
           "should process class-level ExpectedDataSet annotation");
     }
+
+    /**
+     * Verifies that afterEach sets testFailed to true when verification throws ValidationException,
+     * causing handleExportDataSet to receive testFailed=true for onFailureOnly export.
+     *
+     * @throws Exception if reflection or method lookup fails
+     */
+    @Test
+    @Tag("error")
+    @DisplayName(
+        "should set testFailed true when verification throws ValidationException"
+            + " so onFailureOnly export executes")
+    void shouldSetTestFailedTrue_whenVerificationThrowsValidationException() throws Exception {
+      // Given
+      final var mockExpectationVerifier = mock(ExpectationVerifier.class);
+      final var mockExportExecutor = mock(ExportExecutor.class);
+      setField(extension, "expectationVerifier", mockExpectationVerifier);
+      setField(extension, "exportExecutor", mockExportExecutor);
+
+      doThrow(new ValidationException("Row count mismatch"))
+          .when(mockExpectationVerifier)
+          .verify(any(), any());
+
+      final var mockConfiguration = mock(Configuration.class);
+      final var mockLoader = mock(DataSetLoader.class);
+      final var mockConventions = ConventionSettings.standard();
+      final var mockRegistry = new DataSourceRegistry();
+      final var rootContext = mock(ExtensionContext.class);
+      final var testClass = TestClassWithExpectedAndExportOnFailureOnly.class;
+      final var testMethod = testClass.getDeclaredMethod("annotatedMethod");
+
+      when(mockContext.getExecutionException()).thenReturn(Optional.empty());
+      doReturn(testClass).when(mockContext).getRequiredTestClass();
+      doReturn(testMethod).when(mockContext).getRequiredTestMethod();
+      when(mockContext.getTestClass()).thenReturn(Optional.of(testClass));
+      when(mockContext.getParent()).thenReturn(Optional.empty());
+      when(mockContext.getRoot()).thenReturn(rootContext);
+      when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
+      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
+      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockConfiguration.loader()).thenReturn(mockLoader);
+      when(mockConfiguration.conventions()).thenReturn(mockConventions);
+      when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
+          .thenReturn(Collections.emptyList());
+
+      // When & Then
+      final var thrown =
+          assertThrows(
+              ValidationException.class,
+              () -> extension.afterEach(mockContext),
+              "should re-throw ValidationException from verification");
+      assertEquals(
+          "Row count mismatch", thrown.getMessage(), "should preserve original exception message");
+
+      verify(mockExportExecutor).export(any(), any(ExportDataSet.class));
+    }
   }
 
   /** Tests for nested test class context hierarchy. */
@@ -605,5 +669,31 @@ class DatabaseTestExtensionTest {
      * @param value the string value
      */
     void testMethod(final String value) {}
+  }
+
+  /** Test class with both ExpectedDataSet and ExportDataSet(onFailureOnly=true) annotations. */
+  static class TestClassWithExpectedAndExportOnFailureOnly {
+    /** Test constructor. */
+    TestClassWithExpectedAndExportOnFailureOnly() {}
+
+    /** Test method with ExpectedDataSet and ExportDataSet(onFailureOnly=true) annotations. */
+    @ExpectedDataSet
+    @ExportDataSet(onFailureOnly = true)
+    void annotatedMethod() {}
+  }
+
+  /**
+   * Sets a private field value on the target object using reflection.
+   *
+   * @param target the object whose field to set
+   * @param fieldName the name of the field
+   * @param value the value to assign
+   * @throws Exception if reflection fails
+   */
+  private static void setField(final Object target, final String fieldName, final Object value)
+      throws Exception {
+    final Field field = target.getClass().getDeclaredField(fieldName);
+    field.setAccessible(true);
+    field.set(target, value);
   }
 }
