@@ -22,24 +22,55 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
       },
       {
         text: 'API Reference',
+        collapsed: false,
         items: [
-          { text: 'Public API', link: '/public-api' },
+          { text: 'API Overview', link: '/public-api' },
+          { text: 'Annotations', link: '/annotations' },
+          { text: 'Dataset Interfaces', link: '/dataset-interfaces' },
+          { text: 'Programmatic API', link: '/assertion-api' },
+          { text: 'Exceptions', link: '/exceptions' },
+        ],
+      },
+      {
+        text: 'Configuration',
+        items: [
           { text: 'Configuration', link: '/configuration' },
           { text: 'Data Formats', link: '/data-formats' },
         ],
       },
       {
-        text: 'Advanced',
+        text: 'Test Frameworks',
+        collapsed: false,
+        items: [
+          { text: 'Overview', link: '/test-frameworks' },
+          { text: 'JUnit', link: '/junit' },
+          { text: 'Spock', link: '/spock' },
+          { text: 'Kotest', link: '/kotest' },
+          { text: 'Spring Boot', link: '/spring-boot' },
+          { text: 'Lifecycle', link: '/lifecycle' },
+        ],
+      },
+      {
+        text: 'Internals',
+        collapsed: true,
         items: [
           { text: 'Database Operations', link: '/database-operations' },
-          { text: 'Test Frameworks', link: '/test-frameworks' },
-          { text: 'SPI', link: '/spi' },
+          { text: 'SPI Overview', link: '/spi' },
+          { text: 'SPI Providers', link: '/spi-providers' },
+          { text: 'SPI Registration', link: '/spi-registration' },
+        ],
+      },
+      {
+        text: 'Troubleshooting',
+        collapsed: true,
+        items: [
           { text: 'Error Handling', link: '/error-handling' },
           { text: 'Troubleshooting', link: '/troubleshooting' },
         ],
       },
       {
         text: 'Appendix',
+        collapsed: true,
         items: [{ text: 'Framework Comparison', link: '/comparison' }],
       },
     ],

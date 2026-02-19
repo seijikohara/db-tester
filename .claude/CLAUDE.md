@@ -33,15 +33,31 @@ See @README.md for project details.
 | Command | Description |
 |---------|-------------|
 | `./gradlew build` | Full build (compile, test, format check) |
+| `./gradlew :db-tester-core:build` | Single module build (avoids Testcontainers) |
 | `./gradlew spotlessApply` | Format code (required before commit) |
 | `./gradlew test` | Run all tests |
 | `./gradlew verifyNullMarkedPackages` | Verify `@NullMarked` annotations |
+| `npm run docs:dev` | Start VitePress dev server |
+| `npm run docs:build` | Build VitePress documentation site |
+
+### Build Gotchas
+
+- `./gradlew build` includes `examples/` modules that use Testcontainers (requires Docker). Use module-specific builds (e.g., `:db-tester-core:build`) when Docker is unavailable.
+- JaCoCo minimum coverage: 0.70. Use `-x jacocoTestCoverageVerification` for targeted test runs.
+- `spotlessApply` required before commit. `build` also runs Checkstyle and Error Prone.
+- Error Prone enforces: `final` on all parameters/locals, `LocalDateTime.now(ZoneId.systemDefault())`, `Duration.toSeconds()` not `getSeconds()`, `String.split(regex, limit)` not `split(regex)`.
+
+### CI
+
+- Tests run on Java 21 and Java 25. Required checks: `test (21)` and `test (25)`.
 
 ## Documentation
 
 - Technical Specifications: @docs/specs/overview.md
 - Architecture: @docs/specs/architecture.md
-- Public API: @docs/specs/public-api.md
+- API Reference: @docs/specs/public-api.md (landing page for annotations, dataset-interfaces, assertion-api, exceptions)
+- Test Frameworks: @docs/specs/test-frameworks.md (landing page for junit, spock, kotest, spring-boot, lifecycle)
+- SPI: @docs/specs/spi.md (landing page for spi-providers, spi-registration)
 - Code Style Guides: [.claude/rules/](.claude/rules/)
 
 ## Git Workflow

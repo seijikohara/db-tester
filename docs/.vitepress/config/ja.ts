@@ -22,24 +22,55 @@ export const ja: LocaleSpecificConfig<DefaultTheme.Config> = {
       },
       {
         text: 'API リファレンス',
+        collapsed: false,
         items: [
-          { text: 'パブリック API', link: '/ja/public-api' },
+          { text: 'API 概要', link: '/ja/public-api' },
+          { text: 'アノテーション', link: '/ja/annotations' },
+          { text: 'データセットインターフェース', link: '/ja/dataset-interfaces' },
+          { text: 'プログラマティック API', link: '/ja/assertion-api' },
+          { text: '例外', link: '/ja/exceptions' },
+        ],
+      },
+      {
+        text: '設定',
+        items: [
           { text: '設定', link: '/ja/configuration' },
           { text: 'データフォーマット', link: '/ja/data-formats' },
         ],
       },
       {
-        text: '応用',
+        text: 'テストフレームワーク',
+        collapsed: false,
+        items: [
+          { text: '概要', link: '/ja/test-frameworks' },
+          { text: 'JUnit', link: '/ja/junit' },
+          { text: 'Spock', link: '/ja/spock' },
+          { text: 'Kotest', link: '/ja/kotest' },
+          { text: 'Spring Boot', link: '/ja/spring-boot' },
+          { text: 'ライフサイクル', link: '/ja/lifecycle' },
+        ],
+      },
+      {
+        text: '内部構造',
+        collapsed: true,
         items: [
           { text: 'データベース操作', link: '/ja/database-operations' },
-          { text: 'テストフレームワーク', link: '/ja/test-frameworks' },
-          { text: 'SPI', link: '/ja/spi' },
+          { text: 'SPI 概要', link: '/ja/spi' },
+          { text: 'SPI プロバイダー', link: '/ja/spi-providers' },
+          { text: 'SPI 登録', link: '/ja/spi-registration' },
+        ],
+      },
+      {
+        text: 'トラブルシューティング',
+        collapsed: true,
+        items: [
           { text: 'エラーハンドリング', link: '/ja/error-handling' },
           { text: 'トラブルシューティング', link: '/ja/troubleshooting' },
         ],
       },
       {
         text: '付録',
+        collapsed: true,
         items: [{ text: 'フレームワーク比較', link: '/ja/comparison' }],
       },
     ],

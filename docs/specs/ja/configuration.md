@@ -18,9 +18,9 @@ description: "DataSource登録、データベース操作、比較戦略の設�
 | コンポーネント | 型 | 説明 |
 |---------------|-----|------|
 | `conventions` | `ConventionSettings` | データセットディレクトリ解決ルールと命名規約 |
-| `operations` | `OperationDefaults` | デフォルトのデータベース操作 |
 | `verification` | `VerificationSettings` | 検証動作の設定 |
 | `execution` | `ExecutionSettings` | 実行動作の設定 |
+| `operations` | `OperationDefaults` | デフォルトのデータベース操作 |
 | `loader` | `DataSetLoader` | データセット読み込み戦略 |
 
 ### ファクトリメソッド
@@ -41,9 +41,9 @@ description: "DataSource登録、データベース操作、比較戦略の設�
 | メソッド | 説明 |
 |----------|------|
 | `conventions(ConventionSettings)` | データセット検出の解決ルールを設定 |
-| `operations(OperationDefaults)` | デフォルトのデータベース操作を設定 |
 | `verification(VerificationSettings)` | 検証動作を設定 |
 | `execution(ExecutionSettings)` | 実行動作を設定 |
+| `operations(OperationDefaults)` | デフォルトのデータベース操作を設定 |
 | `loader(DataSetLoader)` | データセット構築戦略を設定 |
 | `build()` | 新しいConfigurationインスタンスをビルド |
 
@@ -67,6 +67,12 @@ var config = Configuration.defaults();
 var config = Configuration.builder()
     .conventions(ConventionSettings.builder()
         .dataFormat(DataFormat.TSV)
+        .build())
+    .verification(VerificationSettings.builder()
+        .rowOrdering(RowOrdering.UNORDERED)
+        .build())
+    .execution(ExecutionSettings.builder()
+        .queryTimeout(Duration.ofSeconds(30))
         .build())
     .operations(OperationDefaults.builder()
         .preparation(Operation.TRUNCATE_INSERT)
@@ -176,6 +182,29 @@ src/test/resources/
 | `/data/test` | `/expected` | `/data/test/expected` |
 | `custom/path` | `/verify` | `custom/path/verify` |
 
+### 高度な設定例
+
+```java
+// リトライ、タイムアウト、順序なし比較を設定
+var config = Configuration.builder()
+    .conventions(ConventionSettings.builder()
+        .build())
+    .verification(VerificationSettings.builder()
+        .rowOrdering(RowOrdering.UNORDERED)
+        .retryCount(3)
+        .retryDelay(Duration.ofMillis(500))
+        .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
+        .globalColumnStrategies(Map.of(
+            "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
+            "VERSION", ColumnStrategyMapping.ignore("VERSION")
+        ))
+        .build())
+    .execution(ExecutionSettings.builder()
+        .queryTimeout(Duration.ofSeconds(30))
+        .transactionMode(TransactionMode.AUTO_COMMIT)
+        .build())
+    .build();
+```
 
 ## VerificationSettings
 
@@ -277,7 +306,7 @@ src/test/resources/
 
 ## DataSourceRegistry
 
-`javax.sql.DataSource`インスタンスのミュータブルレジストリです。
+`javax.sql.DataSource`インスタンスのスレッドセーフなレジストリです。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.config.DataSourceRegistry`
 
@@ -300,7 +329,6 @@ src/test/resources/
 |----------|---------|------|
 | `getDefault()` | `DataSource` | デフォルトを返す。未登録の場合は例外をスロー |
 | `get(String)` | `DataSource` | 名前付きまたはデフォルトを返す。見つからない場合は例外をスロー |
-| `find(String)` | `Optional<DataSource>` | 名前付きデータソースをOptionalとして返す |
 
 ### クエリメソッド
 
@@ -411,8 +439,8 @@ static void setup(ExtensionContext context) {
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getExtension()` | `String` | ドットを含むファイル拡張子を返す。AUTOの場合は`UnsupportedOperationException`をスロー |
-| `hasExtension()` | `boolean` | ファイル拡張子を持つ場合`true`。AUTOは`false`、他は`true` |
+| `hasExtension()` | `boolean` | `AUTO`では`false`、他のすべての形式では`true`を返す |
+| `getExtension()` | `String` | ドットを含むファイル拡張子を返す。`AUTO`の場合は`UnsupportedOperationException`をスロー |
 
 ### ファイル検出
 
@@ -569,32 +597,6 @@ var config = Configuration.builder()
 | `SINGLE_TRANSACTION` | 完全なロールバック、部分的なデータなし |
 | `NONE` | 外部トランザクションマネージャに依存 |
 
-
-### 高度な設定例
-
-```java
-// リトライ、タイムアウト、順序なし比較を設定
-var config = Configuration.builder()
-    .conventions(ConventionSettings.builder()
-        .build())
-    .verification(VerificationSettings.builder()
-        .rowOrdering(RowOrdering.UNORDERED)
-        .retryCount(3)
-        .retryDelay(Duration.ofMillis(500))
-        .globalExcludeColumns(Set.of("CREATED_AT", "UPDATED_AT"))
-        .globalColumnStrategies(Map.of(
-            "EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL"),
-            "VERSION", ColumnStrategyMapping.ignore("VERSION")
-        ))
-        .build())
-    .execution(ExecutionSettings.builder()
-        .queryTimeout(Duration.ofSeconds(30))
-        .transactionMode(TransactionMode.AUTO_COMMIT)
-        .build())
-    .build();
-```
-
-
 ## TestContext
 
 テスト実行コンテキストのイミュータブルスナップショットです。
@@ -620,6 +622,12 @@ var config = Configuration.builder()
 
 ```java
 // フレームワーク拡張によって作成
+var configuration = Configuration.builder()
+    .conventions(ConventionSettings.standard())
+    .operations(OperationDefaults.standard())
+    .loader(loader)
+    .build();
+
 TestContext context = new TestContext(
     testClass,
     testMethod,
