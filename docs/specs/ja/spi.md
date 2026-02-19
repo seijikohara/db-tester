@@ -139,12 +139,6 @@ public interface AssertionProvider {
     // カラム戦略付き比較
     void assertEqualsWithStrategies(Table expected, Table actual,
                                     Collection<ColumnStrategyMapping> columnStrategies);
-
-    // SQLクエリベース比較
-    void assertEqualsByQuery(TableSet expected, DataSource dataSource, String tableName,
-                             String sqlQuery, Collection<String> ignoreColumnNames);
-    void assertEqualsByQuery(Table expected, DataSource dataSource, String tableName,
-                             String sqlQuery, Collection<String> ignoreColumnNames);
 }
 ```
 
@@ -158,7 +152,6 @@ public interface AssertionProvider {
 | `assertEquals(Table, Table)` | 2つのテーブルを比較 |
 | `assertEqualsIgnoreColumns(...)` | 特定カラムを無視して比較 |
 | `assertEqualsWithStrategies(...)` | カラム固有の比較戦略を使用して比較 |
-| `assertEqualsByQuery(...)` | クエリ結果を期待データと比較 |
 
 **動作**:
 1. 期待値と実際のテーブルセット/テーブルを比較

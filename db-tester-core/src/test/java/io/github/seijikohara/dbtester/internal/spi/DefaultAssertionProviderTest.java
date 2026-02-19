@@ -1,26 +1,20 @@
 package io.github.seijikohara.dbtester.internal.spi;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler;
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
-import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
-import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -37,9 +31,6 @@ class DefaultAssertionProviderTest {
   /** Mock comparator. */
   private DataSetComparator mockComparator;
 
-  /** Mock table reader. */
-  private TableReader mockTableReader;
-
   /** The provider instance under test. */
   private DefaultAssertionProvider provider;
 
@@ -47,8 +38,7 @@ class DefaultAssertionProviderTest {
   @BeforeEach
   void setUp() {
     mockComparator = mock(DataSetComparator.class);
-    mockTableReader = mock(TableReader.class);
-    provider = new DefaultAssertionProvider(mockComparator, mockTableReader);
+    provider = new DefaultAssertionProvider(mockComparator);
   }
 
   /** Tests for the constructor. */
@@ -77,7 +67,7 @@ class DefaultAssertionProviderTest {
     @DisplayName("should create instance when dependencies provided")
     void shouldCreateInstance_whenDependenciesProvided() {
       // When
-      final var instance = new DefaultAssertionProvider(mockComparator, mockTableReader);
+      final var instance = new DefaultAssertionProvider(mockComparator);
 
       // Then
       assertNotNull(instance, "instance should not be null");
@@ -253,104 +243,6 @@ class DefaultAssertionProviderTest {
 
       // Then
       verify(mockComparator).assertEqualsIgnoreColumns(expected, actual, ignoreColumns);
-    }
-  }
-
-  /** Tests for the assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method. */
-  @Nested
-  @DisplayName("assertEqualsByQuery(TableSet, DataSource, String, String, Collection) method")
-  @SuppressWarnings("removal")
-  class AssertEqualsByQueryDataSetMethod {
-
-    /** Tests for the assertEqualsByQuery method. */
-    AssertEqualsByQueryDataSetMethod() {}
-
-    /** Verifies that assertEqualsByQuery executes query and compares. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should execute query and compare when called")
-    void shouldExecuteQueryAndCompare_whenCalled() {
-      // Given
-      final var expectedDataSet = mock(TableSet.class);
-      final var expectedTable = mock(Table.class);
-      final var actualTable = mock(Table.class);
-      final var dataSource = mock(DataSource.class);
-      final var query = "SELECT * FROM users";
-      final var tableName = "users";
-      final Collection<String> ignoreColumns = List.of("CREATED_AT");
-
-      when(expectedDataSet.getTable(new TableName(tableName)))
-          .thenReturn(Optional.of(expectedTable));
-      when(mockTableReader.executeQuery(dataSource, query, tableName)).thenReturn(actualTable);
-      doNothing()
-          .when(mockComparator)
-          .assertEqualsIgnoreColumns(any(Table.class), any(Table.class), any());
-
-      // When
-      provider.assertEqualsByQuery(expectedDataSet, dataSource, tableName, query, ignoreColumns);
-
-      // Then
-      verify(mockTableReader).executeQuery(dataSource, query, tableName);
-      verify(mockComparator).assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumns);
-    }
-
-    /** Verifies that assertEqualsByQuery throws exception when expected table not found. */
-    @Test
-    @Tag("error")
-    @DisplayName("should throw exception when expected table not found")
-    void shouldThrowException_whenExpectedTableNotFound() {
-      // Given
-      final var expectedDataSet = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-      final var query = "SELECT * FROM users";
-      final var tableName = "nonexistent";
-      final Collection<String> ignoreColumns = List.of();
-
-      when(expectedDataSet.getTable(new TableName(tableName))).thenReturn(Optional.empty());
-
-      // When & Then
-      assertThrows(
-          AssertionError.class,
-          () ->
-              provider.assertEqualsByQuery(
-                  expectedDataSet, dataSource, tableName, query, ignoreColumns),
-          "should throw AssertionError");
-    }
-  }
-
-  /** Tests for the assertEqualsByQuery(Table, DataSource, String, String, Collection) method. */
-  @Nested
-  @DisplayName("assertEqualsByQuery(Table, DataSource, String, String, Collection) method")
-  @SuppressWarnings("removal")
-  class AssertEqualsByQueryTableMethod {
-
-    /** Tests for the assertEqualsByQuery method with table. */
-    AssertEqualsByQueryTableMethod() {}
-
-    /** Verifies that assertEqualsByQuery executes query and compares. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should execute query and compare when called")
-    void shouldExecuteQueryAndCompare_whenCalled() {
-      // Given
-      final var expectedTable = mock(Table.class);
-      final var actualTable = mock(Table.class);
-      final var dataSource = mock(DataSource.class);
-      final var tableName = "users";
-      final var query = "SELECT * FROM users";
-      final Collection<String> ignoreColumns = List.of("CREATED_AT");
-
-      when(mockTableReader.executeQuery(dataSource, query, tableName)).thenReturn(actualTable);
-      doNothing()
-          .when(mockComparator)
-          .assertEqualsIgnoreColumns(any(Table.class), any(Table.class), any());
-
-      // When
-      provider.assertEqualsByQuery(expectedTable, dataSource, tableName, query, ignoreColumns);
-
-      // Then
-      verify(mockTableReader).executeQuery(dataSource, query, tableName);
-      verify(mockComparator).assertEqualsIgnoreColumns(expectedTable, actualTable, ignoreColumns);
     }
   }
 

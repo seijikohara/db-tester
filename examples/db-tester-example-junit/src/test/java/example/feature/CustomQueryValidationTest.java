@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * </ul>
  *
  * <p>Note: For actual SQL query result validation using {@code
- * DatabaseAssertion.assertEqualsByQuery}, you would need to programmatically create expected
+ * DatabaseQueryAssertion.assertEqualsByQuery}, you would need to programmatically create expected
  * datasets using DbUnit APIs.
  */
 @ExtendWith(DatabaseTestExtension.class)

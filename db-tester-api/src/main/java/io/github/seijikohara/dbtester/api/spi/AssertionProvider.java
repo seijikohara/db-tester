@@ -5,7 +5,6 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.Collection;
-import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -162,50 +161,4 @@ public interface AssertionProvider {
       final Table expected,
       final Table actual,
       final Collection<ColumnStrategyMapping> columnStrategies);
-
-  /**
-   * Asserts that the results of a SQL query match the expected dataset.
-   *
-   * <p>Executes the provided SQL query and compares the result set with the expected dataset.
-   * Useful for validating queries or views that require custom SQL statements.
-   *
-   * @param expected the expected dataset containing reference data
-   * @param dataSource the data source for executing the SQL query
-   * @param tableName the name of the table in the expected dataset to compare against query results
-   * @param sqlQuery the SQL query to execute (SELECT statement)
-   * @param ignoreColumnNames columns to exclude from comparison (e.g., auto-generated timestamps)
-   * @throws AssertionError if the query results do not match the expected dataset
-   * @deprecated Use {@link QueryAssertionProvider#assertEqualsByQuery(TableSet, DataSource, String,
-   *     String, Collection)} instead. This method will be removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  void assertEqualsByQuery(
-      final TableSet expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames);
-
-  /**
-   * Asserts that the results of a SQL query match the expected table.
-   *
-   * <p>Executes the provided SQL query and compares the result set with the expected table. Useful
-   * for validating queries or views that require custom SQL statements.
-   *
-   * @param expected the expected table containing reference data
-   * @param dataSource the data source for executing the SQL query
-   * @param tableName the name to assign to the query result set for comparison purposes
-   * @param sqlQuery the SQL query to execute (SELECT statement)
-   * @param ignoreColumnNames columns to exclude from comparison (e.g., auto-generated timestamps)
-   * @throws AssertionError if the query results do not match the expected table
-   * @deprecated Use {@link QueryAssertionProvider#assertEqualsByQuery(Table, DataSource, String,
-   *     String, Collection)} instead. This method will be removed in 2.0.
-   */
-  @Deprecated(since = "1.1", forRemoval = true)
-  void assertEqualsByQuery(
-      final Table expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames);
 }

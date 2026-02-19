@@ -9,7 +9,6 @@ import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import java.util.List;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,7 +33,6 @@ class DatabaseAssertionTest {
   @BeforeEach
   void setUp() {
     TestAssertionProvider.reset();
-    TestQueryAssertionProvider.reset();
   }
 
   /** Tests for assertEquals(TableSet, TableSet) method. */
@@ -453,134 +451,6 @@ class DatabaseAssertionTest {
           List.of(strategy1, strategy2),
           invocation.arguments().get(2),
           "should convert varargs to list");
-    }
-  }
-
-  /** Tests for assertEqualsByQuery(TableSet, ...) method. */
-  @Nested
-  @DisplayName("assertEqualsByQuery(TableSet)")
-  @SuppressWarnings("removal")
-  class AssertEqualsByQueryTableSetTest {
-
-    /** Tests for assertEqualsByQuery(TableSet) method. */
-    AssertEqualsByQueryTableSetTest() {}
-
-    /** Verifies that assertEqualsByQuery with TableSet delegates to query provider. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should delegate to query provider with TableSet and query parameters")
-    void shouldDelegateToProvider_withTableSetAndQueryParameters() {
-      // Given
-      final var expected = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-      final var ignoreColumns = List.of("ID");
-
-      // When
-      DatabaseAssertion.assertEqualsByQuery(
-          expected, dataSource, "USERS", "SELECT * FROM USERS", ignoreColumns);
-
-      // Then
-      final var invocation = TestQueryAssertionProvider.getLastInvocation();
-      assertAll(
-          "should delegate assertEqualsByQuery(TableSet) to query provider",
-          () ->
-              assertEquals(
-                  "assertEqualsByQuery(TableSet,DataSource,String,String,Collection)",
-                  invocation.methodName(),
-                  "should call assertEqualsByQuery(TableSet,DataSource,String,String,Collection)"),
-          () ->
-              assertSame(
-                  dataSource, invocation.arguments().get(1), "should pass dataSource as argument"),
-          () ->
-              assertEquals(
-                  "SELECT * FROM USERS",
-                  invocation.arguments().get(3),
-                  "should pass SQL query as argument"));
-    }
-
-    /** Verifies that varargs overload converts arguments and delegates. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert varargs to List and delegate to collection overload")
-    void shouldConvertVarargs_toListAndDelegate() {
-      // Given
-      final var expected = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-
-      // When
-      DatabaseAssertion.assertEqualsByQuery(
-          expected, dataSource, "USERS", "SELECT * FROM USERS", "ID", "VERSION");
-
-      // Then
-      final var invocation = TestQueryAssertionProvider.getLastInvocation();
-      assertEquals(
-          List.of("ID", "VERSION"),
-          invocation.arguments().get(4),
-          "should convert varargs to list");
-    }
-  }
-
-  /** Tests for assertEqualsByQuery(Table, ...) method. */
-  @Nested
-  @DisplayName("assertEqualsByQuery(Table)")
-  @SuppressWarnings("removal")
-  class AssertEqualsByQueryTableTest {
-
-    /** Tests for assertEqualsByQuery(Table) method. */
-    AssertEqualsByQueryTableTest() {}
-
-    /** Verifies that assertEqualsByQuery with Table delegates to query provider. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should delegate to query provider with Table and query parameters")
-    void shouldDelegateToProvider_withTableAndQueryParameters() {
-      // Given
-      final var expected = mock(Table.class);
-      final var dataSource = mock(DataSource.class);
-      final var ignoreColumns = List.of("TIMESTAMP");
-
-      // When
-      DatabaseAssertion.assertEqualsByQuery(
-          expected, dataSource, "ORDERS", "SELECT * FROM ORDERS", ignoreColumns);
-
-      // Then
-      final var invocation = TestQueryAssertionProvider.getLastInvocation();
-      assertAll(
-          "should delegate assertEqualsByQuery(Table) to query provider",
-          () ->
-              assertEquals(
-                  "assertEqualsByQuery(Table,DataSource,String,String,Collection)",
-                  invocation.methodName(),
-                  "should call assertEqualsByQuery(Table,DataSource,String,String,Collection)"),
-          () ->
-              assertSame(
-                  expected,
-                  invocation.arguments().get(0),
-                  "should pass expected table as argument"),
-          () ->
-              assertEquals(
-                  ignoreColumns,
-                  invocation.arguments().get(4),
-                  "should pass ignore columns as argument"));
-    }
-
-    /** Verifies that varargs overload converts arguments and delegates. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should convert varargs to List and delegate to collection overload")
-    void shouldConvertVarargs_toListAndDelegate() {
-      // Given
-      final var expected = mock(Table.class);
-      final var dataSource = mock(DataSource.class);
-
-      // When
-      DatabaseAssertion.assertEqualsByQuery(
-          expected, dataSource, "ORDERS", "SELECT * FROM ORDERS", "COL1", "COL2");
-
-      // Then
-      final var invocation = TestQueryAssertionProvider.getLastInvocation();
-      assertEquals(
-          List.of("COL1", "COL2"), invocation.arguments().get(4), "should convert varargs to list");
     }
   }
 

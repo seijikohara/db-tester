@@ -596,7 +596,6 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable, strateg
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | 指定カラムを除外してテーブルセット内のテーブルを検証 |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | カラムごとの比較戦略でテーブルを検証 |
-| `assertEqualsByQuery(...)` | **1.1で非推奨** — 代わりに`DatabaseQueryAssertion`を使用 |
 
 **可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
 
@@ -613,9 +612,6 @@ DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expec
 
 // 特定カラムを除外
 DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
-
-// SQLクエリ結果の比較（代わりにDatabaseQueryAssertionを使用）
-DatabaseQueryAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
 
 // カラムごとの比較戦略を使用
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
