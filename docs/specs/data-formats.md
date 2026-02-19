@@ -1,6 +1,6 @@
 ---
 title: "Data Formats - DB Tester"
-description: "Learn about AUTO format detection, CSV, TSV, JSON, and YAML data formats, value syntax, and special handling."
+description: "Reference for AUTO format detection, CSV, TSV, JSON, and YAML data formats, value syntax, and special handling."
 ---
 
 # DB Tester Specification - Data Formats
@@ -69,7 +69,7 @@ src/test/resources/com/example/UserRepositoryTest/
 
 **Error message**:
 
-```
+```text
 Table name conflict detected in AUTO format mode.
 The following table names are defined in multiple files with different formats:
 
@@ -423,7 +423,7 @@ The `load-order.txt` file uses a line-based format:
 
 File: `load-order.txt`
 
-```
+```text
 # Parent tables first
 USERS
 CATEGORIES
@@ -569,10 +569,61 @@ All values are parsed as strings and converted during database operations:
 | Mismatched column count | `DataSetLoadException` |
 | Parse error | `DataSetLoadException` with details |
 
+## Template Expressions
+
+Dataset values support template expressions that generate dynamic values at load time. Expressions are resolved during dataset parsing, before values are inserted into the database.
+
+### Supported Expressions
+
+| Expression | Description | Example Output |
+|------------|-------------|----------------|
+| `${uuid}` | Random UUID | `550e8400-e29b-41d4-a716-446655440000` |
+| `${sequence:N}` | Set sequence counter to N and return N | `1` |
+| `${sequence}` | Increment and return next sequence value | `2`, `3`, `4`, ... |
+| `${now}` | Current timestamp in ISO-8601 format | `2024-01-15T10:30:00` |
+| `${now+Xd}` | Relative future date (d=days, h=hours, m=minutes, s=seconds) | `2024-01-22T10:30:00` |
+| `${now-Xd}` | Relative past date | `2024-01-08T10:30:00` |
+| `${faker.xxx.yyy}` | Datafaker expression (optional dependency) | Varies |
+
+### Example CSV
+
+```csv
+ID,NAME,EMAIL,CREATED_AT
+${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
+```
+
+### Datafaker Integration
+
+The `${faker.xxx.yyy}` template requires [Datafaker](https://www.datafaker.net/) as a runtime dependency:
+
+```kotlin
+testRuntimeOnly("net.datafaker:datafaker:VERSION")
+```
+
+If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
+
+## Convention-Based vs Explicit Paths
+
+### Convention-Based (Default)
+
+```java
+@DataSet           // src/test/resources/com/example/MyTest/
+@ExpectedDataSet   // src/test/resources/com/example/MyTest/expected/
+```
+
+### Explicit Resource Location
+
+```java
+@DataSet(sources = @DataSetSource(resourceLocation = "classpath:shared/common-data/"))
+void testWithSharedData() { }
+```
+
+Explicit paths are useful for sharing datasets across test classes.
+
 ## Related Specifications
 
 - [Overview](overview) - Framework purpose and key concepts
 - [Configuration](configuration) - DataFormat and ConventionSettings
 - [Database Operations](database-operations) - Table ordering and operations
-- [Public API](public-api) - Annotation attributes
+- [Annotations](annotations) - Annotation attributes
 - [Error Handling](error-handling) - Dataset load errors

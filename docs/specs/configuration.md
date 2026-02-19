@@ -326,7 +326,6 @@ Thread-safe registry for `javax.sql.DataSource` instances.
 |--------|-------------|-------------|
 | `getDefault()` | `DataSource` | Returns default; throws if not registered |
 | `get(String)` | `DataSource` | Returns named or default; throws if not found |
-| `find(String)` | `Optional<DataSource>` | Returns named data source as Optional |
 
 ### Query Methods
 

@@ -291,20 +291,19 @@ static void setUp(ExtensionContext context) throws SQLException {
 def setupSpec() {
     def dataSource = new JdbcDataSource()
     dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
-    registry.registerDefault(dataSource)
+    dbTesterRegistry.registerDefault(dataSource)
 }
 ```
 
 ```kotlin [Kotest]
-init {
-    extensions(DatabaseTestExtension(registryProvider = { registry }))
-}
+override val dbTesterRegistry = DataSourceRegistry()
 
-override suspend fun beforeSpec(spec: Spec) {
+@BeforeAll
+fun setup() {
     val dataSource = JdbcDataSource().apply {
         setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1")
     }
-    registry.registerDefault(dataSource)
+    dbTesterRegistry.registerDefault(dataSource)
 }
 ```
 

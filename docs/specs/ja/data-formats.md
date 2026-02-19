@@ -21,12 +21,12 @@ description: "AUTO検出、CSV、TSV、JSON、およびYAMLデータフォーマ
 
 `DataFormat.AUTO`はデフォルトのフォーマット設定です。データセットディレクトリ内のすべてのサポート形式（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルを自動的に検出して読み込みます。
 
-```
-src/test/resources/com/example/UserTest/
+```text
+src/test/resources/com/example/UserRepositoryTest/
 ├── USERS.csv          # CSV形式で読み込み
 ├── ORDERS.json        # JSON形式で読み込み
 ├── CATEGORIES.yaml    # YAML形式で読み込み
-└── PRODUCTS.tsv       # TSV形式で読み込み
+└── AUDIT_LOG.tsv      # TSV形式で読み込み
 ```
 
 AUTOモードでは、異なる形式のファイルを同一ディレクトリに混在させることができます。各ファイルは拡張子に基づいて適切なパーサーで処理されます。
@@ -37,15 +37,15 @@ AUTOモードでは、同一テーブル名が複数の形式で存在する場�
 
 例えば、以下のようにディレクトリに`USERS.csv`と`USERS.yaml`の両方が存在する場合:
 
-```
-src/test/resources/com/example/UserTest/
+```text
+src/test/resources/com/example/UserRepositoryTest/
 ├── USERS.csv
 └── USERS.yaml
 ```
 
 以下のエラーが発生します:
 
-```
+```text
 Table name conflict detected in AUTO format mode.
 The following table names are defined in multiple files with different formats:
 
@@ -341,7 +341,7 @@ id,nullable_col,empty_string_col
 
 ### 標準ディレクトリ構造
 
-```
+```text
 src/test/resources/
 └── {package}/
     └── {TestClassName}/
@@ -393,7 +393,7 @@ JUnitのネストされたテストクラスの場合:
 
 読み込み順序ファイルはデータセットディレクトリに配置されます:
 
-```
+```text
 src/test/resources/
 └── {package}/
     └── {TestClassName}/
@@ -417,7 +417,7 @@ src/test/resources/
 
 ファイル: `load-order.txt`
 
-```
+```text
 # 親テーブルを先に
 USERS
 CATEGORIES
@@ -567,10 +567,61 @@ RFC 4180に拡張機能を追加して準拠:
 | 解析エラー | 詳細付きの`DataSetLoadException` |
 
 
+## テンプレート式
+
+データセットの値は、ロード時に動的な値を生成するテンプレート式をサポートします。式はデータセット解析時に、データベースへの挿入前に解決されます。
+
+### サポートされる式
+
+| 式 | 説明 | 出力例 |
+|----|------|--------|
+| `${uuid}` | ランダムUUID | `550e8400-e29b-41d4-a716-446655440000` |
+| `${sequence:N}` | シーケンスカウンターをNに設定してNを返す | `1` |
+| `${sequence}` | シーケンスをインクリメントして次の値を返す | `2`, `3`, `4`, ... |
+| `${now}` | ISO-8601形式の現在タイムスタンプ | `2024-01-15T10:30:00` |
+| `${now+Xd}` | 相対的な未来の日付（d=日、h=時間、m=分、s=秒） | `2024-01-22T10:30:00` |
+| `${now-Xd}` | 相対的な過去の日付 | `2024-01-08T10:30:00` |
+| `${faker.xxx.yyy}` | Datafaker式（オプション依存） | 式に依存 |
+
+### CSVの例
+
+```csv
+ID,NAME,EMAIL,CREATED_AT
+${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
+```
+
+### Datafaker統合
+
+`${faker.xxx.yyy}` テンプレートは [Datafaker](https://www.datafaker.net/) をランタイム依存として必要とします：
+
+```kotlin
+testRuntimeOnly("net.datafaker:datafaker:VERSION")
+```
+
+Datafakerがクラスパスにない場合、`${faker....}` 式は未処理のまま残されます。
+
+## 規約ベース vs 明示的パス
+
+### 規約ベース（デフォルト）
+
+```java
+@DataSet           // src/test/resources/com/example/MyTest/
+@ExpectedDataSet   // src/test/resources/com/example/MyTest/expected/
+```
+
+### 明示的リソース指定
+
+```java
+@DataSet(sources = @DataSetSource(resourceLocation = "classpath:shared/common-data/"))
+void testWithSharedData() { }
+```
+
+明示的パスは、テストクラス間でデータセットを共有する場合に有用です。
+
 ## 関連仕様
 
 - [概要](overview) - フレームワークの目的と主要概念
 - [設定](configuration) - DataFormatとConventionSettings
 - [データベース操作](database-operations) - テーブル順序と操作
-- [パブリックAPI](public-api) - アノテーション属性
+- [アノテーション](annotations) - アノテーション属性
 - [エラーハンドリング](error-handling) - データセット読み込みエラー

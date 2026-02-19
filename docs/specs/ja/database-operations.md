@@ -80,19 +80,40 @@ description: "CLEAN_INSERT、DELETE_ALL、TRUNCATEなどのデータベース操
 
 ### UPSERT
 
-Upsert操作（挿入または更新）を実行します。
+Upsert操作（挿入または更新）を実行します。INSERTとUPDATEを単一の論理操作に組み合わせます。
+
+**生成されるSQL**:
+- 更新の試行: `UPDATE table SET col2 = ?, col3 = ? WHERE col1 = ?`
+- 挿入のフォールバック: `INSERT INTO table (col1, col2, col3) VALUES (?, ?, ?)`
 
 **動作**:
-- 主キーで行の存在を確認
-- 既存行を更新
-- 新規行を挿入
+- 各行に対して、まず`WHERE`句で主キーを使用して更新を試行
+- 更新が0行に影響した場合、行を挿入
+- データセット定義の先頭カラムが主キーとして扱われる
+- 残りのすべてのカラムは更新文の`SET`句に含まれる
 
 **ユースケース**:
 - 既存データが部分的に存在する混合シナリオ
 - 増分データセットアップ
+- 冪等なテストデータ準備
 
 **要件**:
-- テーブルに主キーが定義されていること
+- データセットファイル（CSVヘッダー、JSONキー順序、YAMLキー順序）の先頭カラムが主キーであること
+- テーブルにデータセットの先頭カラムと一致する主キーカラムがあること
+
+**規約**:
+
+本フレームワークは先頭カラムを主キーとする規約を使用します。データセットファイルでは主キーカラムを先頭カラムとして定義してください:
+
+```csv
+ID,NAME,EMAIL
+1,alice,alice@example.com
+2,bob,bob@example.com
+```
+
+この例では、`ID`が`WHERE`句の主キーとして使用されます。フレームワークは以下のSQLを生成します:
+- `UPDATE USERS SET NAME = ?, EMAIL = ? WHERE ID = ?`（更新の試行）
+- `INSERT INTO USERS (ID, NAME, EMAIL) VALUES (?, ?, ?)`（挿入のフォールバック）
 
 
 ### DELETE
@@ -199,7 +220,7 @@ Upsert操作（挿入または更新）を実行します。
 
 1. 設定された場所からデータセットファイルを読み込む
 2. シナリオマーカーで行をフィルタリング
-3. 外部キーに基づいてテーブル順序を解決
+3. 設定された戦略に基づいてテーブル順序を解決
 4. 設定された操作を実行
 5. トランザクションをコミット
 
@@ -312,7 +333,7 @@ void testWithFkOrder() { }
 
 // @ExpectedDataSetでの戦略（検証順序に影響）
 @ExpectedDataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
-void testExpectationOrder() { }
+void testExpectedDataSetOrder() { }
 
 // 組み合わせて使用
 @DataSet(operation = Operation.CLEAN_INSERT, tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
