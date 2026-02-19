@@ -17,7 +17,7 @@ description: "アノテーション駆動型拡張とDatabaseTestSupportトレ�
 
 ## 登録
 
-拡張機能は、Specificationクラスに`@DatabaseTest`を追加し、`DatabaseTestSupport`トレイトを実装することで有効化されます:
+Specificationクラスに`@DatabaseTest`を追加し、`DatabaseTestSupport`トレイトを実装します:
 
 ```groovy
 @DatabaseTest

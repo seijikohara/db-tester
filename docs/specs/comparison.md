@@ -224,7 +224,7 @@ db-tester-kotest  → Kotest 6 extension
 
 **Example:**
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 @DataSet  // Loads com/example/UserTest/users.csv
 @ExpectedDataSet  // Verifies against com/example/UserTest/expected/users.csv
 class UserTest {

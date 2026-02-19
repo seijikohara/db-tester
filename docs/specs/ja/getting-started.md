@@ -84,18 +84,18 @@ H2 バージョン (`2.3.232`) は例です。
 package com.example;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTest;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     private static JdbcDataSource dataSource;
@@ -139,7 +139,7 @@ class UserRepositoryTest {
 
 重要なポイント:
 
-- `@ExtendWith(DatabaseTestExtension.class)` は DB Tester 拡張を有効にします
+- `@DatabaseTest` は DB Tester 拡張を有効にします（`@ExtendWith(DatabaseTestExtension.class)` と同等）
 - `@BeforeAll` と `ExtensionContext` パラメータで DataSource を登録します
 - `DB_CLOSE_DELAY=-1` はテスト間で H2 データベースを開いたままにします
 - `@DataSet` はテストメソッド実行前にテストデータを読み込みます

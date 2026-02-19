@@ -17,7 +17,7 @@ description: "Integrate DB Tester with Spock using annotation-driven extensions 
 
 ## Registration
 
-Add `@DatabaseTest` to the specification class and implement the `DatabaseTestSupport` trait to activate the extension:
+Add `@DatabaseTest` to the specification class and implement the `DatabaseTestSupport` trait:
 
 ```groovy
 @DatabaseTest

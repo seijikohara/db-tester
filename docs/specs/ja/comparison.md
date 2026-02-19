@@ -223,7 +223,7 @@ db-tester-kotest  → Kotest 6拡張
 
 **例:**
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 @DataSet  // com/example/UserTest/users.csvを読み込み
 @ExpectedDataSet  // com/example/UserTest/expected/users.csvで検証
 class UserTest {

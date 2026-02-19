@@ -83,18 +83,18 @@ Create a test class with the following structure:
 package com.example;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTest;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     private static JdbcDataSource dataSource;
@@ -138,7 +138,7 @@ class UserRepositoryTest {
 
 Key points:
 
-- `@ExtendWith(DatabaseTestExtension.class)` enables the DB Tester extension
+- `@DatabaseTest` enables the DB Tester extension (equivalent to `@ExtendWith(DatabaseTestExtension.class)`)
 - `@BeforeAll` with `ExtensionContext` parameter registers the DataSource
 - `DB_CLOSE_DELAY=-1` keeps the H2 database open between tests
 - `@DataSet` loads test data before the test method runs
