@@ -22,7 +22,7 @@ import javax.sql.DataSource
  *   where annotation-based testing is insufficient
  *
  * Key programmatic API features available in DatabaseAssertion:
- * - assertEqualsByQuery: Compare expected data against SQL query results
+ * - [DatabaseQueryAssertion.assertEqualsByQuery]: Compare expected data against SQL query results
  * - assertEquals: Compare two datasets or tables directly
  * - assertEqualsIgnoreColumns: Compare datasets ignoring specific columns
  *

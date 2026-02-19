@@ -580,7 +580,6 @@ Static facade for programmatic database assertions. This utility class delegates
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | Asserts table in table sets, ignoring specified columns |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | Asserts tables with column-specific comparison strategies |
-| `assertEqualsByQuery(...)` | **Deprecated since 1.1** — Use `DatabaseQueryAssertion` instead |
 
 **Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
 
@@ -597,9 +596,6 @@ DatabaseAssertion.assertEquals(expectedTableSet, actualTableSet, (message, expec
 
 // Ignoring specific columns
 DatabaseAssertion.assertEqualsIgnoreColumns(expectedTableSet, actualTableSet, "USERS", "CREATED_AT", "UPDATED_AT");
-
-// Comparing SQL query results (use DatabaseQueryAssertion instead)
-DatabaseQueryAssertion.assertEqualsByQuery(expectedTableSet, dataSource, "USERS", "SELECT * FROM USERS WHERE status = 'ACTIVE'");
 
 // Using column-specific comparison strategies
 DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,

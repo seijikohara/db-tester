@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -128,34 +127,6 @@ public final class TestAssertionProvider implements AssertionProvider {
         new Invocation(
             "assertEqualsWithStrategies(Table,Table,Collection)",
             List.of(expected, actual, columnStrategies)));
-  }
-
-  @SuppressWarnings("removal")
-  @Override
-  public void assertEqualsByQuery(
-      final TableSet expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames) {
-    INVOCATIONS.add(
-        new Invocation(
-            "assertEqualsByQuery(TableSet,DataSource,String,String,Collection)",
-            List.of(expected, dataSource, tableName, sqlQuery, ignoreColumnNames)));
-  }
-
-  @SuppressWarnings("removal")
-  @Override
-  public void assertEqualsByQuery(
-      final Table expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames) {
-    INVOCATIONS.add(
-        new Invocation(
-            "assertEqualsByQuery(Table,DataSource,String,String,Collection)",
-            List.of(expected, dataSource, tableName, sqlQuery, ignoreColumnNames)));
   }
 
   /**

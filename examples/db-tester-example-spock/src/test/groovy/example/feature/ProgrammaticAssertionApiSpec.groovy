@@ -25,7 +25,7 @@ import spock.lang.Specification
  *
  * <p>Key programmatic API features available in {@link DatabaseAssertion}:
  * <ul>
- *   <li>{@link DatabaseAssertion#assertEqualsByQuery} - Compare expected data against SQL query results
+ *   <li>{@link DatabaseQueryAssertion#assertEqualsByQuery} - Compare expected data against SQL query results
  *   <li>{@link DatabaseAssertion#assertEquals} - Compare two datasets or tables directly
  *   <li>{@link DatabaseAssertion#assertEqualsIgnoreColumns} - Compare datasets ignoring specific columns
  * </ul>

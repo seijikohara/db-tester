@@ -23,7 +23,7 @@ import javax.sql.DataSource
  * - Validating date-range queries
  *
  * Note: For actual SQL query result validation using
- * [io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion.assertEqualsByQuery],
+ * [io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion.assertEqualsByQuery],
  * you would need to programmatically create expected datasets using DbUnit APIs.
  */
 @DatabaseTest

@@ -7,12 +7,10 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.spi.AssertionProvider;
 import io.github.seijikohara.dbtester.internal.assertion.DataSetComparator;
-import io.github.seijikohara.dbtester.internal.jdbc.read.TableReader;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -26,10 +24,7 @@ public final class DefaultAssertionProvider implements AssertionProvider {
   /** The comparator for dataset assertions. */
   private final DataSetComparator comparator;
 
-  /** Table reader for database queries. */
-  private final TableReader tableReader;
-
-  /** Creates a new instance with default comparator and table reader. */
+  /** Creates a new instance with default comparator. */
   public DefaultAssertionProvider() {
     this(OperationDefaults.standard());
   }
@@ -40,19 +35,16 @@ public final class DefaultAssertionProvider implements AssertionProvider {
    * @param operationDefaults the operation defaults to use
    */
   public DefaultAssertionProvider(final OperationDefaults operationDefaults) {
-    this(new DataSetComparator(operationDefaults), new TableReader());
+    this(new DataSetComparator(operationDefaults));
   }
 
   /**
-   * Creates a new instance with specified dependencies.
+   * Creates a new instance with specified comparator.
    *
    * @param comparator the dataset comparator
-   * @param tableReader the table reader
    */
-  public DefaultAssertionProvider(
-      final DataSetComparator comparator, final TableReader tableReader) {
+  public DefaultAssertionProvider(final DataSetComparator comparator) {
     this.comparator = comparator;
-    this.tableReader = tableReader;
   }
 
   @Override
@@ -127,38 +119,5 @@ public final class DefaultAssertionProvider implements AssertionProvider {
             .collect(Collectors.toSet());
 
     comparator.assertEqualsWithStrategies(expected, actual, ignoreSet, strategyMap);
-  }
-
-  @SuppressWarnings("removal")
-  @Override
-  public void assertEqualsByQuery(
-      final TableSet expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames) {
-    queryProvider()
-        .assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
-  }
-
-  @SuppressWarnings("removal")
-  @Override
-  public void assertEqualsByQuery(
-      final Table expected,
-      final DataSource dataSource,
-      final String tableName,
-      final String sqlQuery,
-      final Collection<String> ignoreColumnNames) {
-    queryProvider()
-        .assertEqualsByQuery(expected, dataSource, tableName, sqlQuery, ignoreColumnNames);
-  }
-
-  /**
-   * Creates a QueryAssertionProvider using the same dependencies.
-   *
-   * @return a new DefaultQueryAssertionProvider instance
-   */
-  private DefaultQueryAssertionProvider queryProvider() {
-    return new DefaultQueryAssertionProvider(comparator, tableReader);
   }
 }

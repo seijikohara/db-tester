@@ -278,12 +278,6 @@ public interface AssertionProvider {
     // Comparison with column strategies
     void assertEqualsWithStrategies(Table expected, Table actual,
                                     Collection<ColumnStrategyMapping> columnStrategies);
-
-    // SQL query-based comparison
-    void assertEqualsByQuery(TableSet expected, DataSource dataSource, String tableName,
-                             String sqlQuery, Collection<String> ignoreColumnNames);
-    void assertEqualsByQuery(Table expected, DataSource dataSource, String tableName,
-                             String sqlQuery, Collection<String> ignoreColumnNames);
 }
 ```
 
@@ -297,7 +291,6 @@ public interface AssertionProvider {
 | `assertEquals(Table, Table)` | Compare two tables |
 | `assertEqualsIgnoreColumns(...)` | Compare while ignoring specific columns |
 | `assertEqualsWithStrategies(...)` | Compare with column-specific comparison strategies |
-| `assertEqualsByQuery(...)` | Compare query results against expected data |
 
 **Behavior**:
 1. The provider compares expected and actual datasets or tables.
