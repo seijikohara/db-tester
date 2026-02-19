@@ -17,9 +17,7 @@ description: "AnnotationSpecとDatabaseTestSupportインターフェースを使
 
 ## 登録
 
-**`@DatabaseTest`を使用した簡素化アプローチ（推奨）**:
-
-`@DatabaseTest`アノテーションは自動的に`DatabaseTestExtension`を登録します。Specificationクラスは`DatabaseTestSupport`インターフェースを実装する必要があります:
+**推奨** — `@DatabaseTest`アノテーションを使用します。Specificationクラスは`DatabaseTestSupport`インターフェースを実装する必要があります:
 
 ```kotlin
 @DatabaseTest
@@ -43,9 +41,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 }
 ```
 
-**明示的な拡張機能登録**:
-
-`init`ブロックで拡張機能を登録します。Kotest 6では`extensions()`メソッドがfinalになり、オーバーライドできません:
+**代替手段** — `init`ブロックで拡張機能を登録:
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {

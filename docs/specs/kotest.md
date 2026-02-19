@@ -17,9 +17,7 @@ description: "Integrate DB Tester with Kotest using AnnotationSpec and the Datab
 
 ## Registration
 
-**Simplified approach with `@DatabaseTest` (recommended)**:
-
-The `@DatabaseTest` annotation registers `DatabaseTestExtension` automatically. The specification class must implement the `DatabaseTestSupport` interface:
+**Recommended** — Use the `@DatabaseTest` annotation. The specification class must implement the `DatabaseTestSupport` interface:
 
 ```kotlin
 @DatabaseTest
@@ -43,9 +41,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 }
 ```
 
-**Explicit extension registration**:
-
-Register the extension in the `init` block. In Kotest 6, the `extensions()` method is final:
+**Alternative** — Register the extension in the `init` block:
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {

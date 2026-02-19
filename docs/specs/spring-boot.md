@@ -32,24 +32,25 @@ dependencies {
 
 :::
 
-## JUnit Spring Boot Starter
+## Automatic DataSource Discovery
 
-**Module**: `db-tester-junit-spring-boot-starter`
+All three starters share the same auto-configuration behavior via `db-tester-spring-support`:
 
-**Extension**: `SpringBootDatabaseTestExtension`
-
-### Automatic DataSource Discovery
-
-The Spring Boot extension performs these steps automatically:
-1. Detects the Spring `ApplicationContext`
-2. Finds `DataSource` beans
-3. Resolves the default `DataSource` using the following priority:
+1. Detect the Spring `ApplicationContext`
+2. Find `DataSource` beans
+3. Resolve the default `DataSource` using the following priority:
    1. Single `DataSource` bean (automatic default)
    2. `@Primary`-annotated `DataSource`
    3. `DataSource` bean named `"dataSource"`
-4. Registers all beans with `DataSourceRegistry`
+4. Register all beans with `DataSourceRegistry`
 
-```java
+Manual DataSource registration is not required. The starter handles registration automatically.
+
+## Extension Registration
+
+::: code-group
+
+```java [JUnit]
 @SpringBootTest
 @ExtendWith(SpringBootDatabaseTestExtension.class)
 class UserRepositoryTest {
@@ -63,9 +64,47 @@ class UserRepositoryTest {
 }
 ```
 
-### Multiple DataSources
+```groovy [Spock]
+@SpringBootTest
+@SpringBootDatabaseTest
+class UserRepositorySpec extends Specification {
 
-For multiple data sources, use `@Qualifier`:
+    @DataSet
+    @ExpectedDataSet
+    def 'should create user'() {
+        // DataSource automatically registered from Spring context
+    }
+}
+```
+
+```kotlin [Kotest]
+@SpringBootTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    init {
+        extensions(SpringBootDatabaseTestExtension())
+    }
+
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should create user`() {
+        // DataSource automatically registered from Spring context
+    }
+}
+```
+
+:::
+
+| Framework | Registration Method |
+|-----------|-------------------|
+| JUnit | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
+| Spock | `@SpringBootDatabaseTest` (annotation-driven extension) |
+| Kotest | `init { extensions(SpringBootDatabaseTestExtension()) }` |
+
+## Multiple DataSources
+
+For multiple data sources, define beans with `@Primary` and `@Qualifier`:
 
 ```java
 @Configuration
@@ -81,23 +120,20 @@ class DataSourceConfig {
 }
 ```
 
-```java
-@SpringBootTest
-@ExtendWith(SpringBootDatabaseTestExtension.class)
-class MultiDatabaseTest {
+Reference named data sources in annotations:
 
-    @Test
-    @DataSet(sources = {
-        @DataSetSource(dataSourceName = ""),          // Primary (default)
-        @DataSetSource(dataSourceName = "secondary")  // Secondary
-    })
-    void testMultipleDatabases() { }
-}
+```java
+@Test
+@DataSet(sources = {
+    @DataSetSource(dataSourceName = ""),          // Primary (default)
+    @DataSetSource(dataSourceName = "secondary")  // Secondary
+})
+void testMultipleDatabases() { }
 ```
 
 ## Configuration Properties
 
-Configure via `application.properties` or `application.yml`:
+Configure via `application.properties` or `application.yml`. All properties apply to all three starters.
 
 ```properties
 # Enable or disable DB Tester (default: true)
@@ -127,58 +163,7 @@ db-tester.operation.expectation=NONE
 
 Property names use singular form (`convention`, `operation`).
 
-## Spock Spring Boot Starter
-
-**Module**: `db-tester-spock-spring-boot-starter`
-
-**Extension**: `SpringBootDatabaseTestExtension` (Groovy)
-
-**Type**: Annotation-driven extension (`IAnnotationDrivenExtension<SpringBootDatabaseTest>`)
-
-```groovy
-@SpringBootTest
-@SpringBootDatabaseTest
-class UserRepositorySpec extends Specification {
-
-    @DataSet
-    @ExpectedDataSet
-    def 'should create user'() {
-        // DataSource automatically registered from Spring context
-    }
-}
-```
-
-## Kotest Spring Boot Starter
-
-**Module**: `db-tester-kotest-spring-boot-starter`
-
-**Extension**: `SpringBootDatabaseTestExtension` (Kotlin)
-
-**Type**: `TestCaseExtension` with automatic Spring ApplicationContext integration.
-
-```kotlin
-@SpringBootTest
-class UserRepositorySpec : AnnotationSpec() {
-
-    @Autowired
-    private lateinit var userRepository: UserRepository
-
-    init {
-        extensions(SpringBootDatabaseTestExtension())
-    }
-
-    @Test
-    @DataSet
-    @ExpectedDataSet
-    fun `should create user`() {
-        // DataSource automatically registered from Spring context
-    }
-}
-```
-
-## Auto-Configuration
-
-Auto-configuration classes:
+## Auto-Configuration Classes
 
 | Module | Auto-Configuration Class |
 |--------|-------------------------|

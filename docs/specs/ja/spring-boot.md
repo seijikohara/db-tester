@@ -32,15 +32,10 @@ dependencies {
 
 :::
 
-## JUnit Spring Boot Starter
+## 自動DataSource検出
 
-**モジュール**: `db-tester-junit-spring-boot-starter`
+3つのスターターすべてが`db-tester-spring-support`を通じて同一の自動設定動作を共有します:
 
-**拡張機能**: `SpringBootDatabaseTestExtension`
-
-### 自動DataSource検出
-
-Spring Boot拡張機能は自動的に以下を実行します:
 1. Spring `ApplicationContext`を検出
 2. `DataSource` Beanを検索
 3. デフォルト`DataSource`を以下の優先順位で解決:
@@ -49,7 +44,13 @@ Spring Boot拡張機能は自動的に以下を実行します:
    3. `"dataSource"`という名前の`DataSource` Bean
 4. すべてのBeanを`DataSourceRegistry`に登録
 
-```java
+手動のDataSource登録は不要です。スターターが自動的に登録を処理します。
+
+## 拡張機能の登録
+
+::: code-group
+
+```java [JUnit]
 @SpringBootTest
 @ExtendWith(SpringBootDatabaseTestExtension.class)
 class UserRepositoryTest {
@@ -63,9 +64,47 @@ class UserRepositoryTest {
 }
 ```
 
-### 複数DataSource
+```groovy [Spock]
+@SpringBootTest
+@SpringBootDatabaseTest
+class UserRepositorySpec extends Specification {
 
-複数のデータソースには`@Qualifier`を使用します:
+    @DataSet
+    @ExpectedDataSet
+    def 'should create user'() {
+        // DataSourceはSpringコンテキストから自動登録
+    }
+}
+```
+
+```kotlin [Kotest]
+@SpringBootTest
+class UserRepositorySpec : AnnotationSpec() {
+
+    init {
+        extensions(SpringBootDatabaseTestExtension())
+    }
+
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should create user`() {
+        // DataSourceはSpringコンテキストから自動登録
+    }
+}
+```
+
+:::
+
+| フレームワーク | 登録方法 |
+|------------|---------|
+| JUnit | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
+| Spock | `@SpringBootDatabaseTest`（アノテーション駆動型拡張） |
+| Kotest | `init { extensions(SpringBootDatabaseTestExtension()) }` |
+
+## 複数DataSource
+
+複数のデータソースを使用する場合、`@Primary`と`@Qualifier`でBeanを定義します:
 
 ```java
 @Configuration
@@ -81,23 +120,20 @@ class DataSourceConfig {
 }
 ```
 
-```java
-@SpringBootTest
-@ExtendWith(SpringBootDatabaseTestExtension.class)
-class MultiDatabaseTest {
+アノテーションで名前付きデータソースを参照します:
 
-    @Test
-    @DataSet(sources = {
-        @DataSetSource(dataSourceName = ""),          // Primary（デフォルト）
-        @DataSetSource(dataSourceName = "secondary")  // Secondary
-    })
-    void testMultipleDatabases() { }
-}
+```java
+@Test
+@DataSet(sources = {
+    @DataSetSource(dataSourceName = ""),          // Primary（デフォルト）
+    @DataSetSource(dataSourceName = "secondary")  // Secondary
+})
+void testMultipleDatabases() { }
 ```
 
 ## 設定プロパティ
 
-`application.properties`または`application.yml`で設定します:
+`application.properties`または`application.yml`で設定します。すべてのプロパティが3つのスターターに共通です。
 
 ```properties
 # DB Testerの有効化/無効化（デフォルト: true）
@@ -125,60 +161,9 @@ db-tester.operation.preparation=CLEAN_INSERT
 db-tester.operation.expectation=NONE
 ```
 
-**注意**: プロパティ名は複数形ではなく単数形（`convention`, `operation`）を使用します。
+プロパティ名は単数形（`convention`, `operation`）を使用します。
 
-## Spock Spring Boot Starter
-
-**モジュール**: `db-tester-spock-spring-boot-starter`
-
-**拡張機能**: `SpringBootDatabaseTestExtension`（Groovy）
-
-**タイプ**: アノテーション駆動型拡張（`IAnnotationDrivenExtension<SpringBootDatabaseTest>`）
-
-```groovy
-@SpringBootTest
-@SpringBootDatabaseTest
-class UserRepositorySpec extends Specification {
-
-    @DataSet
-    @ExpectedDataSet
-    def 'should create user'() {
-        // DataSourceはSpringコンテキストから自動登録
-    }
-}
-```
-
-## Kotest Spring Boot Starter
-
-**モジュール**: `db-tester-kotest-spring-boot-starter`
-
-**拡張機能**: `SpringBootDatabaseTestExtension`（Kotlin）
-
-**タイプ**: 自動Spring ApplicationContext統合を持つ`TestCaseExtension`。
-
-```kotlin
-@SpringBootTest
-class UserRepositorySpec : AnnotationSpec() {
-
-    @Autowired
-    private lateinit var userRepository: UserRepository
-
-    init {
-        extensions(SpringBootDatabaseTestExtension())
-    }
-
-    @Test
-    @DataSet
-    @ExpectedDataSet
-    fun `should create user`() {
-        // DataSourceはSpringコンテキストから自動登録
-    }
-}
-```
-
-## 自動設定
-
-自動設定クラス:
+## 自動設定クラス
 
 | モジュール | 自動設定クラス |
 |------------|---------------|

@@ -130,7 +130,7 @@ dependencies {
 ```java [JUnit]
 package com.example;
 
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 @DataSet  // CSVからテストデータを読み込む
 @ExpectedDataSet  // データベースの状態を検証
 class UserRepositoryTest {

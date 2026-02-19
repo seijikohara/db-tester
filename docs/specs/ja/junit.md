@@ -20,6 +20,19 @@ description: "DatabaseTestExtensionを使用したJUnitとDB Testerの統合方�
 
 ## 登録
 
+**推奨** — `@DatabaseTest`コンポーズドアノテーションを使用:
+
+```java
+@DatabaseTest
+class UserRepositoryTest {
+    // ...
+}
+```
+
+`@DatabaseTest`は`@ExtendWith(DatabaseTestExtension.class)`と同等で、ボイラープレートを削減します。
+
+**代替手段** — 拡張機能を直接登録:
+
 ```java
 @ExtendWith(DatabaseTestExtension.class)
 class UserRepositoryTest {
@@ -32,7 +45,7 @@ class UserRepositoryTest {
 `@BeforeAll`でデータソースを登録します:
 
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     @BeforeAll
@@ -79,7 +92,7 @@ static void setup(ExtensionContext context) {
 拡張機能はネストされたテストクラス間で状態を共有します:
 
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     @BeforeAll

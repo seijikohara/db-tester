@@ -20,6 +20,19 @@ description: "Integrate DB Tester with JUnit using DatabaseTestExtension for ann
 
 ## Registration
 
+**Recommended** — Use the `@DatabaseTest` composed annotation:
+
+```java
+@DatabaseTest
+class UserRepositoryTest {
+    // ...
+}
+```
+
+`@DatabaseTest` is equivalent to `@ExtendWith(DatabaseTestExtension.class)` with less boilerplate.
+
+**Alternative** — Register the extension directly:
+
 ```java
 @ExtendWith(DatabaseTestExtension.class)
 class UserRepositoryTest {
@@ -32,7 +45,7 @@ class UserRepositoryTest {
 Register data sources in `@BeforeAll`:
 
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     @BeforeAll
@@ -79,7 +92,7 @@ static void setup(ExtensionContext context) {
 The extension shares state across nested test classes:
 
 ```java
-@ExtendWith(DatabaseTestExtension.class)
+@DatabaseTest
 class UserRepositoryTest {
 
     @BeforeAll
