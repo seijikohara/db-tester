@@ -9,7 +9,7 @@ import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.MySQLContainer
+import org.testcontainers.mysql.MySQLContainer
 import java.sql.SQLException
 import javax.sql.DataSource
 
@@ -31,7 +31,7 @@ class MySQLIntegrationSpec :
     companion object {
         private val logger = LoggerFactory.getLogger(MySQLIntegrationSpec::class.java)
 
-        private val mysql: MySQLContainer<*> =
+        private val mysql: MySQLContainer =
             MySQLContainer("mysql:latest")
                 .withDatabaseName("testdb")
                 .withUsername("testuser")
@@ -43,11 +43,11 @@ class MySQLIntegrationSpec :
          * @param container the MySQL container
          * @return configured DataSource
          */
-        private fun createDataSource(container: MySQLContainer<*>): DataSource =
+        private fun createDataSource(container: MySQLContainer): DataSource =
             MysqlDataSource().apply {
-                setURL(container.jdbcUrl)
-                user = container.username
-                password = container.password
+                setURL(container.getJdbcUrl())
+                user = container.getUsername()
+                password = container.getPassword()
             }
 
         /**

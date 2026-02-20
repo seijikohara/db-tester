@@ -8,7 +8,7 @@ import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import org.postgresql.ds.PGSimpleDataSource
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import java.sql.SQLException
 import javax.sql.DataSource
 
@@ -27,8 +27,7 @@ class PostgreSQLIntegrationSpec : AnnotationSpec() {
     companion object {
         private val logger = LoggerFactory.getLogger(PostgreSQLIntegrationSpec::class.java)
 
-        @Suppress("DEPRECATION")
-        private val postgres: PostgreSQLContainer<*> =
+        private val postgres: PostgreSQLContainer =
             PostgreSQLContainer("postgres:latest")
                 .withDatabaseName("testdb")
                 .withUsername("testuser")
@@ -40,12 +39,11 @@ class PostgreSQLIntegrationSpec : AnnotationSpec() {
          * @param container the PostgreSQL container
          * @return configured DataSource
          */
-        @Suppress("DEPRECATION")
-        private fun createDataSource(container: PostgreSQLContainer<*>): DataSource =
+        private fun createDataSource(container: PostgreSQLContainer): DataSource =
             PGSimpleDataSource().apply {
-                setURL(container.jdbcUrl)
-                user = container.username
-                password = container.password
+                setURL(container.getJdbcUrl())
+                user = container.getUsername()
+                password = container.getPassword()
             }
 
         /**

@@ -8,7 +8,7 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.kotest.core.spec.style.AnnotationSpec
 import org.slf4j.LoggerFactory
-import org.testcontainers.containers.MSSQLServerContainer
+import org.testcontainers.mssqlserver.MSSQLServerContainer
 import java.sql.SQLException
 import javax.sql.DataSource
 
@@ -27,7 +27,7 @@ class MSSQLServerIntegrationSpec : AnnotationSpec() {
     companion object {
         private val logger = LoggerFactory.getLogger(MSSQLServerIntegrationSpec::class.java)
 
-        private val mssql: MSSQLServerContainer<*> =
+        private val mssql: MSSQLServerContainer =
             MSSQLServerContainer("mcr.microsoft.com/mssql/server:latest")
                 .acceptLicense()
                 .withPassword("StrongPassword123!")
@@ -38,11 +38,11 @@ class MSSQLServerIntegrationSpec : AnnotationSpec() {
          * @param container the SQL Server container
          * @return configured DataSource
          */
-        private fun createDataSource(container: MSSQLServerContainer<*>): DataSource =
+        private fun createDataSource(container: MSSQLServerContainer): DataSource =
             SQLServerDataSource().apply {
-                url = container.jdbcUrl
-                user = container.username
-                setPassword(container.password)
+                url = container.getJdbcUrl()
+                user = container.getUsername()
+                setPassword(container.getPassword())
             }
 
         /**
