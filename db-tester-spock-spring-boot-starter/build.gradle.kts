@@ -1,39 +1,31 @@
 plugins {
-    `java-library`
-    groovy
-    alias(libs.plugins.maven.publish)
+    id("dbtester.groovy-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.spock.spring.autoconfigure"
 
 description = "DB Tester Spock Spring Boot Starter - Spring Boot AutoConfiguration for Spock database testing"
 
 dependencies {
-    // Groovy BOM for version management
     implementation(platform(libs.groovy.bom))
     implementation(platform(libs.spock.bom))
 
-    // Public API dependency
     api(project(":db-tester-spock"))
 
-    // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
-
-    // Spring support (common DataSource registration logic)
     implementation(project(":db-tester-spring-support"))
-
-    // Spock Spring integration - provides SpringExtension for ApplicationContext access
     implementation(libs.spock.spring)
-
-    // Internal implementation
     implementation(libs.spring.boot.autoconfigure)
-    implementation(libs.spring.test)
+    implementation(libs.groovy)
     annotationProcessor(libs.spring.boot.configuration.processor)
 
-    // Groovy for extension implementation
-    implementation(libs.groovy)
-
-    // Optional dependencies (provided at runtime by Spring Boot)
     compileOnly(libs.spring.boot.starter.jdbc)
     compileOnly(libs.spring.boot.starter.test)
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    inputs.files(tasks.named("processResources"))
 }
 
 testing {
@@ -42,6 +34,7 @@ testing {
             dependencies {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)
+                implementation(libs.mockito.junit.jupiter)
                 implementation(libs.spring.test)
                 implementation(libs.spring.boot.test)
                 runtimeOnly(platform(libs.slf4j.bom))

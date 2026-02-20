@@ -1,15 +1,13 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.maven.publish)
+    id("dbtester.java-library")
+    id("dbtester.publishing")
 }
 
 description = "DB Tester API - Public API for database testing"
 
 dependencies {
-    // Null safety annotations
     api(libs.jspecify)
 
-    // Logging
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
 }

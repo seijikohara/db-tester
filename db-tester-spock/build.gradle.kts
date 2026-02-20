@@ -1,25 +1,22 @@
 plugins {
-    `java-library`
-    groovy
-    alias(libs.plugins.maven.publish)
+    id("dbtester.groovy-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.spock"
 
 description = "DB Tester Spock - Spock Extension for database testing"
 
 dependencies {
-    // Public API dependencies (only db-tester-api and Spock API)
     api(project(":db-tester-api"))
+    api(platform(libs.spock.bom))
     api(libs.spock.core)
 
-    // Groovy and Spock BOM for version management (internal only)
     implementation(platform(libs.groovy.bom))
     implementation(libs.groovy)
-    implementation(platform(libs.spock.bom))
 
-    // Runtime dependency for SPI implementation (ServiceLoader)
     runtimeOnly(project(":db-tester-core"))
 
-    // Compile-time dependency for logging
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
 }

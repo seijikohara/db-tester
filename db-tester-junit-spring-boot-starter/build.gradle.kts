@@ -1,31 +1,25 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.maven.publish)
+    id("dbtester.java-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.junit.spring.autoconfigure"
 
 description = "DB Tester JUnit Spring Boot Starter - Spring Boot AutoConfiguration for JUnit 6 database testing"
 
 dependencies {
-    // Public API dependency
     api(project(":db-tester-junit"))
 
-    // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
-
-    // Spring support (common DataSource registration logic)
     implementation(project(":db-tester-spring-support"))
-
-    // Internal implementation
     implementation(libs.spring.boot.autoconfigure)
     annotationProcessor(libs.spring.boot.configuration.processor)
 
-    // Optional dependencies (provided at runtime by Spring Boot)
     compileOnly(libs.spring.boot.starter.jdbc)
     compileOnly(libs.spring.boot.starter.test)
 }
 
 tasks.named<JavaCompile>("compileJava") {
-    // Spring Boot configuration processor requires resources to be processed first
     inputs.files(tasks.named("processResources"))
 }
 

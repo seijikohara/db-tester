@@ -1,30 +1,21 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.maven.publish)
+    id("dbtester.kotlin-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.kotest.spring.autoconfigure"
 
 description = "DB Tester Kotest Spring Boot Starter - Spring Boot AutoConfiguration for Kotest database testing"
 
 dependencies {
-    // Public API dependency
     api(project(":db-tester-kotest"))
 
-    // Core implementation (provides SPI implementations)
     implementation(project(":db-tester-core"))
-
-    // Spring support (common DataSource registration logic)
     implementation(project(":db-tester-spring-support"))
-
-    // Kotlin
     implementation(platform(libs.kotlin.bom))
-    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
-
-    // Internal implementation
     implementation(libs.spring.boot.autoconfigure)
 
-    // Optional dependencies (provided at runtime by Spring Boot)
     compileOnly(libs.spring.boot.starter.jdbc)
     compileOnly(libs.spring.boot.starter.test)
 }
@@ -44,10 +35,6 @@ testing {
             }
         }
     }
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
 }
 
 mavenPublishing {
