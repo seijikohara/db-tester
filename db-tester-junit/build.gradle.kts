@@ -1,20 +1,17 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.maven.publish)
+    id("dbtester.java-library")
+    id("dbtester.publishing")
 }
 
 description = "DB Tester JUnit - JUnit Jupiter Extension for database testing"
 
 dependencies {
-    // Public API dependencies (only db-tester-api and JUnit API)
     api(project(":db-tester-api"))
     api(platform(libs.junit.bom))
     api(libs.junit.jupiter.api)
 
-    // Runtime dependency for SPI implementation (ServiceLoader)
     runtimeOnly(project(":db-tester-core"))
 
-    // Compile-time dependency for logging
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
 }

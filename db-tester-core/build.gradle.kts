@@ -1,24 +1,20 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.maven.publish)
+    id("dbtester.java-library")
+    id("dbtester.publishing")
 }
 
 description = "DB Tester Core - Core implementation library"
 
 dependencies {
-    // API module (exposed to consumers)
     api(project(":db-tester-api"))
 
-    // Logging (compile-time only - users provide their own SLF4J binding)
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
 
-    // CSV/TSV parsing and YAML output (internal implementation only)
     implementation(platform(libs.jackson.bom))
     implementation(libs.jackson.dataformat.csv)
     implementation(libs.jackson.dataformat.yaml)
 
-    // Test data generation (optional runtime dependency - users opt in)
     compileOnly(libs.datafaker)
 }
 

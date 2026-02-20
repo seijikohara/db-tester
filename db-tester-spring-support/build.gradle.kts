@@ -1,18 +1,17 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.maven.publish)
+    id("dbtester.java-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.spring.support"
 
 description = "DB Tester Spring Support - Common Spring utilities for database testing"
 
 dependencies {
-    // API module dependency
     api(project(":db-tester-api"))
 
-    // Spring Context (for ApplicationContext utilities)
     implementation(libs.spring.context)
 
-    // Logging (compile-time only - users provide their own SLF4J binding)
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
 }
@@ -20,7 +19,6 @@ dependencies {
 testing {
     suites {
         val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter()
             dependencies {
                 implementation(platform(libs.mockito.bom))
                 implementation(libs.mockito.core)

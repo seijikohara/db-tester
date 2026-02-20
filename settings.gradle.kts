@@ -11,6 +11,8 @@ pluginManagement {
     }
 }
 
+includeBuild("build-logic")
+
 plugins {
     // Toolchain resolver for automatic JDK provisioning
     // https://docs.gradle.org/current/userguide/toolchains.html

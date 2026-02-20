@@ -1,29 +1,24 @@
 plugins {
-    `java-library`
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.maven.publish)
+    id("dbtester.kotlin-library")
+    id("dbtester.publishing")
 }
+
+extra["automaticModuleName"] = "io.github.seijikohara.dbtester.kotest"
 
 description = "DB Tester Kotest - Kotest Framework Extension for database testing"
 
 dependencies {
-    // BOM for version management (must be first)
     api(platform(libs.kotest.bom))
     implementation(platform(libs.kotlin.bom))
     compileOnly(platform(libs.slf4j.bom))
 
-    // Public API dependencies (only db-tester-api and Kotest API)
     api(project(":db-tester-api"))
     api(libs.kotest.framework.engine)
 
-    // Kotlin runtime dependencies
-    implementation(libs.kotlin.stdlib)
     implementation(libs.kotlin.reflect)
 
-    // Runtime dependency for SPI implementation (ServiceLoader)
     runtimeOnly(project(":db-tester-core"))
 
-    // Compile-time dependency for logging
     compileOnly(libs.slf4j.api)
 }
 
@@ -40,10 +35,6 @@ testing {
             }
         }
     }
-}
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
 }
 
 mavenPublishing {

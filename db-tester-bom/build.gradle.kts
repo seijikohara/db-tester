@@ -1,17 +1,18 @@
 plugins {
     `java-platform`
-    id("com.vanniktech.maven.publish")
+    id("dbtester.publishing")
 }
+
+group = rootProject.group
+version = rootProject.version
 
 description = "DB Tester BOM - Bill of Materials for DB Tester framework"
 
 javaPlatform {
-    // Allow importing other BOMs/platforms
     allowDependencies()
 }
 
 dependencies {
-    // Version constraints for all DB Tester modules
     constraints {
         api(project(":db-tester-api"))
         api(project(":db-tester-core"))

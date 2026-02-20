@@ -1,15 +1,13 @@
 plugins {
-    `java-library`
+    id("dbtester.example")
+    java
     alias(libs.plugins.spring.boot)
     alias(libs.plugins.spring.dependency.management)
 }
 
 description = "DB Tester Example - JUnit 6 Spring Boot Starter Integration"
 
-// Example projects are not published to Maven Central
-
 dependencies {
-    // Spring Boot dependencies
     implementation(libs.spring.boot.starter.data.jpa)
     runtimeOnly(libs.h2)
 }
@@ -20,13 +18,6 @@ testing {
             dependencies {
                 implementation(project(":db-tester-junit-spring-boot-starter"))
                 implementation(libs.spring.boot.starter.test)
-            }
-            targets.configureEach {
-                testTask.configure {
-                    testLogging {
-                        events("passed", "skipped", "failed")
-                    }
-                }
             }
         }
     }
