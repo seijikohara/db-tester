@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SourcesJar
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.plugins.quality.CodeNarc
@@ -109,7 +110,7 @@ pluginManager.withPlugin("com.vanniktech.maven.publish") {
         configure(
             JavaLibrary(
                 javadocJar = JavadocJar.Dokka("groovydoc"),
-                sourcesJar = true,
+                sourcesJar = SourcesJar.Sources(),
             ),
         )
     }

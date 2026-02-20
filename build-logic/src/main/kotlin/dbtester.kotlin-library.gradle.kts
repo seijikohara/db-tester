@@ -1,6 +1,7 @@
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
+import com.vanniktech.maven.publish.SourcesJar
 import org.jetbrains.dokka.gradle.DokkaExtension
 import org.jetbrains.dokka.gradle.engine.parameters.VisibilityModifier
 plugins {
@@ -45,7 +46,7 @@ pluginManager.withPlugin("com.vanniktech.maven.publish") {
         configure(
             JavaLibrary(
                 javadocJar = JavadocJar.Dokka("dokkaGenerateHtml"),
-                sourcesJar = true,
+                sourcesJar = SourcesJar.Sources(),
             ),
         )
     }

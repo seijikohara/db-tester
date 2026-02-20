@@ -9,11 +9,11 @@ description = "DB Tester Spock - Spock Extension for database testing"
 
 dependencies {
     api(project(":db-tester-api"))
+    api(platform(libs.spock.bom))
     api(libs.spock.core)
 
     implementation(platform(libs.groovy.bom))
     implementation(libs.groovy)
-    implementation(platform(libs.spock.bom))
 
     runtimeOnly(project(":db-tester-core"))
 
