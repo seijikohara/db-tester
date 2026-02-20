@@ -20,8 +20,8 @@ spotless {
 }
 
 checkstyle {
-    configFile = rootProject.file("config/checkstyle/checkstyle.xml")
-    configDirectory = rootProject.file("config/checkstyle")
+    configFile = rootProject.layout.projectDirectory.file("config/checkstyle/checkstyle.xml").asFile
+    configDirectory = rootProject.layout.projectDirectory.dir("config/checkstyle")
     isIgnoreFailures = false
     isShowViolations = true
     maxWarnings = 0

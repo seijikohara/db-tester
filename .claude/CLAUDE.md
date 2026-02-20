@@ -28,6 +28,19 @@ See @README.md for project details.
 - JUnit 6, Spock 2, Kotest 6
 - Spring Boot 4 (for Spring Boot starters)
 
+## Build System
+
+Convention Plugins in `build-logic/` included build. No `subprojects{}`/`allprojects{}`.
+
+| Convention Plugin | Applied To |
+|-------------------|------------|
+| `dbtester.java-common` | All JVM modules (toolchain, JaCoCo, Spotless CC workaround) |
+| `dbtester.java-library` | Java published modules (Checkstyle, Error Prone, NullAway) |
+| `dbtester.groovy-library` | Groovy published modules (CodeNarc, Spock) |
+| `dbtester.kotlin-library` | Kotlin published modules (Dokka) |
+| `dbtester.publishing` | Maven Central modules |
+| `dbtester.example` | Example modules |
+
 ## Build Commands
 
 | Command | Description |
@@ -46,6 +59,7 @@ See @README.md for project details.
 - JaCoCo minimum coverage: 0.70. Use `-x jacocoTestCoverageVerification` for targeted test runs.
 - `spotlessApply` required before commit. `build` also runs Checkstyle and Error Prone.
 - Error Prone enforces: `final` on all parameters/locals, `LocalDateTime.now(ZoneId.systemDefault())`, `Duration.toSeconds()` not `getSeconds()`, `String.split(regex, limit)` not `split(regex)`.
+- Configuration cache is `fail` mode. Spotless tasks are marked `notCompatibleWithConfigurationCache`.
 
 ### CI
 

@@ -25,7 +25,7 @@ spotless {
 }
 
 extensions.configure<CodeNarcExtension> {
-    configFile = rootProject.file("config/codenarc/codenarc.xml")
+    configFile = rootProject.layout.projectDirectory.file("config/codenarc/codenarc.xml").asFile
     reportFormat = "html"
     isIgnoreFailures = false
     maxPriority1Violations = 0

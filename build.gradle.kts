@@ -2,6 +2,7 @@ import com.diffplug.gradle.spotless.SpotlessTask
 
 plugins {
     alias(libs.plugins.axion.release)
+    alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.spotless)
     alias(libs.plugins.version.catalog.update)
 }
