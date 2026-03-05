@@ -1,4 +1,4 @@
-/** Tests for JUnit Jupiter lifecycle management. */
+/** Unit tests for the JUnit Jupiter lifecycle management. */
 @NullMarked
 package io.github.seijikohara.dbtester.junit.jupiter.lifecycle;
 

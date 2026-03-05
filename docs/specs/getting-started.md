@@ -5,9 +5,9 @@ description: "Step-by-step guide to set up and run your first database test with
 
 # Getting Started
 
-This guide walks you through creating and running your first database test
-with DB Tester. By the end, you will have a working test that prepares data
-in an H2 in-memory database and verifies the expected state.
+This guide walks you through creating and running your first database test with DB Tester.
+By the end, you will have a working test that prepares data in an H2 in-memory database
+and verifies the expected state.
 
 ## Prerequisites
 
@@ -170,7 +170,7 @@ to uppercase, so use `USERS.csv` to match the `USERS` table.
 
 ::: info Scenario Column
 The `[Scenario]` column is optional. When present, DB Tester filters rows
-by the current test method name. When omitted, all rows are loaded.
+by the current test method name. When omitted, all rows load.
 See [Data Formats](data-formats) for details.
 :::
 
@@ -190,7 +190,7 @@ mvn test -Dtest=com.example.UserRepositoryTest
 
 :::
 
-If successful, you will see output indicating one test passed with no failures.
+If successful, the output indicates one test passed with no failures.
 
 ## Step 5: Verify Database State (Optional)
 
@@ -250,8 +250,8 @@ No default data source registered
 
 **Cause**: The `@BeforeAll` method did not register a DataSource, or the method signature is incorrect.
 
-**Solution**: Ensure your `@BeforeAll` method includes the `ExtensionContext`
-parameter and calls `DatabaseTestExtension.getRegistry(context).registerDefault(dataSource)`.
+**Solution**: Ensure your `@BeforeAll` method includes the `ExtensionContext` parameter and calls
+`DatabaseTestExtension.getRegistry(context).registerDefault(dataSource)`.
 
 ### Dataset directory not found
 
@@ -281,7 +281,7 @@ File is empty: /path/to/USERS.csv
 - [Test Frameworks](test-frameworks) - Learn about Spock and Kotest integration
 - [Configuration](configuration) - Customize framework behavior
 - [Data Formats](data-formats) - Learn about CSV structure and scenario filtering
-- [Database Operations](database-operations) - Understand available operations (INSERT, CLEAN_INSERT, etc.)
+- [Database Operations](database-operations) - Understand available operations (INSERT, CLEAN_INSERT, and others)
 - [Error Handling](error-handling) - Complete error reference
 
 For Spring Boot applications, see the Spring Boot Starter modules:

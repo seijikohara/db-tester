@@ -6,7 +6,7 @@ description: "エラーハンドリング戦略、例外タイプ、トラブル
 
 ## 例外階層
 
-すべてのフレームワーク例外は`DatabaseTesterException`を継承します:
+フレームワーク例外はすべて`DatabaseTesterException`を継承します。
 
 ```mermaid
 classDiagram
@@ -31,11 +31,11 @@ classDiagram
 
 ## 検証エラー
 
-フレームワークは期待値検証が失敗した場合に`ValidationException`をスローします（`@ExpectedDataSet`フェーズ）。
+期待値検証が失敗すると、フレームワークは`ValidationException`をスローします（`@ExpectedDataSet`フェーズ）。
 
 ### 出力形式
 
-フレームワークは**すべての差異**を収集し、人間が読みやすい要約に続いてYAML詳細を報告します:
+フレームワークは**すべての差異**を収集し、人間が読みやすい要約とYAML詳細を報告します。
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -63,7 +63,7 @@ tables:
           type: "DECIMAL(10,2)"
 ```
 
-出力は（最初の要約行の後）**有効なYAML**です。標準YAMLライブラリがCI/CD統合のためにこの出力を解析できます。
+出力は（最初の要約行の後）**有効なYAML**です。標準YAMLライブラリでCI/CD統合用に解析できます。
 
 ### 出力構造
 
@@ -87,7 +87,7 @@ tables:
 
 ### 値比較ルール
 
-コンパレータは不一致を報告する前に以下のルールを適用します:
+コンパレータは不一致を報告する前に以下のルールを適用します。
 
 | ルール | 説明 |
 |--------|------|
@@ -101,11 +101,11 @@ tables:
 
 ## データセット読み込みエラー
 
-フレームワークはデータセットファイルを読み込めないか解析できない場合に`DataSetLoadException`をスローします。
+データセットファイルの読み込みまたは解析に失敗すると、フレームワークは`DataSetLoadException`をスローします。
 
 ### ディレクトリが見つからない（クラスパス）
 
-データセットディレクトリがクラスパス上に存在しない場合:
+データセットディレクトリがクラスパス上に存在しない場合。
 
 ```
 Dataset directory not found on classpath: 'com/example/UserRepositoryTest'
@@ -115,7 +115,7 @@ Hint: Create the directory and add dataset files...
 
 ### ディレクトリが見つからない（ファイルシステム）
 
-データセットディレクトリがファイルシステム上に存在しない場合:
+データセットディレクトリがファイルシステム上に存在しない場合。
 
 ```
 Dataset directory does not exist: '/path/to/datasets'
@@ -124,7 +124,7 @@ Hint: Create the directory and add dataset files...
 
 ### パスがディレクトリではない
 
-パスは存在するがファイルの場合:
+パスは存在するがファイルの場合。
 
 ```
 Path exists but is not a directory: '/path/to/file.csv'
@@ -133,7 +133,7 @@ Hint: Ensure the path points to a directory, not a file.
 
 ### サポートされるファイルがない
 
-ディレクトリは存在するがサポートされるデータファイルがない場合:
+ディレクトリは存在するがサポートされるデータファイルがない場合。
 
 ```
 Dataset directory exists but contains no supported data files: '/path/to/datasets'
@@ -146,7 +146,7 @@ Found files: [README.txt, notes.md]
 
 ### テーブル名の競合（AUTOフォーマット）
 
-`DataFormat.AUTO`が同一テーブル名を複数のファイル形式で検出した場合:
+`DataFormat.AUTO`が同一テーブル名を複数のファイル形式で検出した場合。
 
 ```
 Table name conflict detected in AUTO format mode.
@@ -161,11 +161,11 @@ To resolve, remove duplicate files or specify a concrete format:
   DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
-**解決策**: 各テーブル名が1つの形式にのみ存在するように重複ファイルを削除するか、`ConventionSettings`で具体的な`DataFormat`を設定してください。
+**解決策**: 重複ファイルを削除してテーブル名ごとに1つの形式にするか、`ConventionSettings`で`DataFormat`を明示指定してください。
 
 ### 空のファイル
 
-データファイルが空の場合:
+データファイルが空の場合。
 
 ```
 File is empty: /path/to/USERS.csv
@@ -173,7 +173,7 @@ File is empty: /path/to/USERS.csv
 
 ### 解析失敗
 
-ファイル解析が失敗した場合:
+ファイル解析が失敗した場合。
 
 ```
 Failed to parse file: /path/to/USERS.csv
@@ -181,7 +181,7 @@ Failed to parse file: /path/to/USERS.csv
 
 ### 読み込み順序ファイルエラー
 
-`load-order.txt`ファイルを読み取れないか書き込めない場合:
+`load-order.txt`ファイルの読み取りまたは書き込みに失敗した場合。
 
 ```
 Failed to read load order file: /path/to/load-order.txt
@@ -196,17 +196,17 @@ Failed to write load order file: /path/to/load-order.txt
 
 ## DataSourceエラー
 
-フレームワークはDataSourceの検索が失敗した場合に`DataSourceNotFoundException`をスローします。
+DataSourceの検索に失敗すると、フレームワークは`DataSourceNotFoundException`をスローします。
 
 ### デフォルトDataSourceが登録されていない
 
-デフォルトDataSourceが登録されていない場合:
+デフォルトDataSourceが登録されていない場合。
 
 ```
 No default data source registered
 ```
 
-**解決策**: `@BeforeAll`または`setupSpec()`でデフォルトDataSourceを登録:
+**解決策**: `@BeforeAll`または`setupSpec()`でデフォルトDataSourceを登録します。
 
 ```java
 registry.registerDefault(dataSource);
@@ -214,13 +214,13 @@ registry.registerDefault(dataSource);
 
 ### 名前付きDataSourceが見つからない
 
-名前付きDataSourceが登録されていない場合:
+名前付きDataSourceが登録されていない場合。
 
 ```
 No data source registered for name: secondary_db
 ```
 
-**解決策**: 名前付きDataSourceを登録:
+**解決策**: 名前付きDataSourceを登録します。
 
 ```java
 registry.register("secondary_db", dataSource);
@@ -229,11 +229,11 @@ registry.register("secondary_db", dataSource);
 
 ## データベース操作エラー
 
-フレームワークは準備フェーズ中にSQL操作が失敗した場合に`DatabaseOperationException`をスローします。
+準備フェーズ中にSQL操作が失敗すると、フレームワークは`DatabaseOperationException`をスローします。
 
 ### ラップされたSQL例外
 
-`DatabaseOperationException`は基盤となる`SQLException`をラップします:
+`DatabaseOperationException`は`SQLException`をラップします。
 
 ```
 DatabaseOperationException: Failed to execute INSERT on table USERS
@@ -242,7 +242,7 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 
 ### 無効なSQL識別子
 
-テーブル名またはカラム名に無効な文字が含まれている場合:
+テーブル名またはカラム名に無効な文字が含まれている場合。
 
 ```
 DatabaseOperationException: Invalid SQL identifier: 'user-accounts'.
@@ -271,11 +271,11 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 
 ## 設定エラー
 
-フレームワークは初期化中に`ConfigurationException`をスローします。
+初期化中に設定値が不正だと、フレームワークは`ConfigurationException`をスローします。
 
 ### 無効な設定
 
-設定値が無効な場合:
+設定値が無効な場合。
 
 ```
 ConfigurationException: Invalid data format: XML
@@ -283,7 +283,7 @@ ConfigurationException: Invalid data format: XML
 
 ### 必須設定が欠落
 
-必須設定が欠落している場合:
+必須設定が欠落している場合。
 
 ```
 ConfigurationException: Convention settings cannot be null
@@ -337,7 +337,7 @@ Condition not satisfied:
 
 ### テストメソッドコンテキスト
 
-フレームワークはコンテキストとしてエラーにテストメソッド名を含めます:
+フレームワークはエラーにテストメソッド名をコンテキストとして含めます。
 
 ```
 Failed to verify expectation dataset for testUserCreation
@@ -356,7 +356,7 @@ Failed to verify expectation dataset for testUserCreation
 
 ### ロギング
 
-詳細な操作出力のためにDEBUGロギングを有効化:
+詳細な操作出力のためにDEBUGロギングを有効化します。
 
 ```properties
 logging.level.io.github.seijikohara.dbtester=DEBUG

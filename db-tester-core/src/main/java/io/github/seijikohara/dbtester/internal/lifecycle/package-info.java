@@ -1,9 +1,9 @@
 /**
- * Test lifecycle support implementations.
+ * Provides test lifecycle support implementations.
  *
- * <p>This package contains implementations of the lifecycle SPIs ({@link
+ * <p>This package implements the lifecycle SPIs ({@link
  * io.github.seijikohara.dbtester.api.spi.PreparationSupport} and {@link
- * io.github.seijikohara.dbtester.api.spi.ExpectationSupport}) that provide common logic for test
+ * io.github.seijikohara.dbtester.api.spi.ExpectationSupport}) with common logic shared across test
  * framework integrations.
  */
 @NullMarked

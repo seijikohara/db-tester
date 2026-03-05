@@ -5,7 +5,7 @@ description: "DB TesterのSPIプロバイダーインターフェースリファ
 
 # SPIプロバイダー
 
-## APIモジュールSPI — プロバイダーレイヤー
+## APIモジュールSPI -- プロバイダーレイヤー
 
 ### DataSetLoaderProvider
 
@@ -23,8 +23,7 @@ public interface DataSetLoaderProvider {
 
 **デフォルト実装**: `db-tester-core`の`DefaultDataSetLoaderProvider`
 
-**使用方法**: ローダーを取得するために`Configuration.defaults()`から呼び出される
-
+**使用方法**: `Configuration.defaults()`がローダーを取得する際に呼び出す。
 
 ### OperationProvider
 
@@ -71,16 +70,18 @@ public interface OperationProvider {
 | `batchSize` | `int` | INSERTバッチあたりの行数（0 = 単一バッチ）、バッチオーバーロードで使用 |
 
 **操作**:
-- `NONE` - 操作なし
-- `INSERT` - 行を挿入
-- `UPDATE` - 主キーで更新
-- `DELETE` - 主キーで削除
-- `DELETE_ALL` - 全行を削除
-- `UPSERT` - Upsert（挿入または更新）
-- `TRUNCATE_TABLE` - テーブルを切り捨て
-- `CLEAN_INSERT` - 全削除後に挿入
-- `TRUNCATE_INSERT` - 切り捨て後に挿入
 
+| 操作 | 説明 |
+|------|------|
+| `NONE` | 操作なし |
+| `INSERT` | 行を挿入 |
+| `UPDATE` | 主キーで更新 |
+| `DELETE` | 主キーで削除 |
+| `DELETE_ALL` | 全行を削除 |
+| `UPSERT` | Upsert（挿入または更新） |
+| `TRUNCATE_TABLE` | テーブルを切り捨て |
+| `CLEAN_INSERT` | 全削除後に挿入 |
+| `TRUNCATE_INSERT` | 切り捨て後に挿入 |
 
 ### AssertionProvider
 
@@ -132,7 +133,6 @@ public interface AssertionProvider {
 
 出力形式の詳細については[エラーハンドリング - 検証エラー](error-handling#検証エラー)を参照してください。
 
-
 ### ExpectationProvider
 
 期待テーブルセットに対するデータベース状態を検証します。
@@ -163,7 +163,7 @@ public interface ExpectationProvider {
 
 **ExpectationContext** (`io.github.seijikohara.dbtester.api.config.ExpectationContext`):
 
-オプションの検証パラメータをカプセル化するパラメータオブジェクト：
+オプションの検証パラメータをカプセル化するパラメータオブジェクト。
 
 | フィールド | 型 | 説明 |
 |-----------|-----|------|
@@ -199,7 +199,6 @@ var context = ExpectationContext.of(
 3. コンテキストからカラム除外と比較戦略を適用
 4. フィルタリングされた実際のデータを期待データと比較
 5. 検証失敗時は`ValidationException`（`AssertionError`をラップ）をスロー
-
 
 ### ScenarioNameResolver
 
@@ -247,7 +246,6 @@ public interface ScenarioNameResolver {
 3. `true`を返す最初のリゾルバを使用
 4. `resolve()`を呼び出してシナリオ名を取得
 
-
 ### ExportProvider
 
 データベースの内容を特定の形式のファイルにエクスポートします。
@@ -274,8 +272,7 @@ public interface ExportProvider {
 | `export(...)` | 指定されたテーブルを出力ディレクトリにファイルとしてエクスポート |
 | `exportQuery(...)` | SQLクエリの結果をファイルにエクスポート |
 
-**選択**: フレームワークは、設定された`DataFormat`と一致する`supportedFormat()`を持つプロバイダーを選択します。
-
+**選択**: 設定された`DataFormat`と一致する`supportedFormat()`を持つプロバイダーが選択される。
 
 ### QueryAssertionProvider
 
@@ -300,8 +297,7 @@ public interface QueryAssertionProvider {
 
 **読み込み元**: `DatabaseQueryAssertion`ファサードクラス
 
-**`AssertionProvider`との違い**: `AssertionProvider`はインメモリのデータセットを比較します。`QueryAssertionProvider`はデータベースに対してSQLクエリを実行し、その結果を比較します。
-
+**`AssertionProvider`との違い**: `AssertionProvider`はインメモリのデータセットを比較する。`QueryAssertionProvider`はデータベースでSQLクエリを実行し、その結果を比較する。
 
 ### TypeHandler
 
@@ -331,14 +327,13 @@ public interface TypeHandler<T> {
 | `getJavaType()` | このハンドラーが生成するJava型を返す |
 | `getSqlTypes()` | このハンドラーがサポートするSQL型コード（`java.sql.Types`）を返す |
 | `getSupportedDatabases()` | データベース製品名を返す。全データベース対応の場合は空リスト |
-| `getPriority()` | ハンドラー選択の優先度（大きいほど優先）; デフォルト0 |
+| `getPriority()` | ハンドラー選択の優先度（大きいほど優先）。デフォルト0 |
 | `read(...)` | `ResultSet`から値を読み取る |
 | `write(...)` | `PreparedStatement`に値を書き込む |
 | `format(...)` | エクスポート用に値を文字列に変換する |
 | `parse(...)` | インポート用に文字列値を解析する |
 
-**選択**: 同じSQL型をサポートする複数のハンドラーが存在する場合、`getPriority()`が最も高いハンドラーが選択されます。データベース固有のハンドラー（`getSupportedDatabases()`が空でない）は、データベース製品名が一致する場合、汎用ハンドラーよりも優先されます。
-
+**選択**: 同一SQL型に複数のハンドラーが存在する場合、`getPriority()`が最も高いハンドラーを選択する。データベース固有のハンドラー（`getSupportedDatabases()`が空でない）は、製品名が一致する場合に汎用ハンドラーより優先される。
 
 ## CoreモジュールSPI
 
@@ -373,7 +368,7 @@ public interface FormatProvider {
 | `JsonFormatProvider` | `.json` | JSON構造 |
 | `YamlFormatProvider` | `.yaml` | YAML構造 |
 
-**注意**: FormatProviderは内部SPIであり、パブリックAPI契約の一部ではありません。予告なく変更される可能性があります。
+この内部SPIはパブリックAPI契約の一部ではなく、予告なく変更される可能性があります。
 
 ## 関連仕様
 

@@ -41,7 +41,7 @@ This page compares DB Tester with other database testing frameworks in the Java/
 *DSL: Database Rider supports `@DataSet` and `@ExpectedDataSet` annotations. DB Tester uses the same annotation names. For Spock with Database Rider, use the [RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl) programmatic API.
 
 **Analysis:**
-- DB Tester offers the only native JUnit 6 and Kotest support.
+- DB Tester provides the only native JUnit 6 and Kotest support.
 - Database Rider covers the widest test framework range for JUnit 5, but Spock requires a programmatic API.
 - DBUnit lacks JUnit 5/6 support.
 
@@ -61,7 +61,7 @@ This page compares DB Tester with other database testing frameworks in the Java/
 | SQL Scripts | - | - | Yes | - | Yes | - |
 
 **Analysis:**
-- Database Rider supports the most formats (YAML, JSON, XML, CSV, Excel).
+- Database Rider supports the most formats (YAML, JSON, XML, CSV, and Excel).
 - DB Tester supports CSV, TSV, JSON, and YAML for data management.
 - DbSetup and JDBDT prefer programmatic data definition.
 
@@ -163,15 +163,15 @@ USER:
 
 | Limitation | Impact | Workaround |
 |------------|--------|------------|
-| **No XML support** | Cannot migrate from existing DBUnit XML datasets | Convert XML to CSV manually or via script |
+| **No XML support** | Cannot migrate from existing DBUnit XML datasets | Convert XML to CSV manually or with a script |
 | **No Excel support** | Business users cannot maintain test data in spreadsheets | Export Excel to CSV |
-| **No fluent builder API for datasets** | Cannot construct datasets using a fluent builder in code | Use `TableSet`/`Table` factory methods or implement custom `DataLoader` via SPI |
+| **No fluent builder API for datasets** | Cannot construct datasets with a fluent builder in code | Use `TableSet`/`Table` factory methods or implement custom `DataLoader` via SPI |
 
 ### Feature Limitations
 
 | Limitation | Impact | Alternative |
 |------------|--------|-------------|
-| **No delta assertions** | Cannot verify only the changes made by test | Verify full expected state |
+| **No delta assertions** | Cannot verify only the changes a test made | Verify full expected state |
 | **No sequence reset** | Cannot reset auto-increment counters | Handle via SQL in @BeforeEach |
 | **No connection leak detection** | Connection leaks may go unnoticed | Use external monitoring tools |
 
@@ -190,13 +190,13 @@ USER:
 
 Consider alternatives if you need:
 
-1. **Multiple data formats** → Choose Database Rider
-2. **Existing XML datasets** → Choose DBUnit or Database Rider
-3. **BDD/Cucumber integration** → Choose Database Rider
-4. **JUnit 4/5 or TestNG** → Choose DBUnit, Database Rider, or DbSetup
-5. **Delta assertions** → Choose JDBDT
-6. **Code-only approach** → Choose DbSetup
-7. **Mature, battle-tested solution** → Choose DBUnit
+1. **Multiple data formats** -- Choose Database Rider
+2. **Existing XML datasets** -- Choose DBUnit or Database Rider
+3. **BDD/Cucumber integration** -- Choose Database Rider
+4. **JUnit 4/5 or TestNG** -- Choose DBUnit, Database Rider, or DbSetup
+5. **Delta assertions** -- Choose JDBDT
+6. **Code-only approach** -- Choose DbSetup
+7. **Mature, battle-tested solution** -- Choose DBUnit
 
 ---
 
@@ -248,9 +248,9 @@ class UserTest {
 - Wide IDE and tool integration
 
 **Core Components:**
-- `IDatabaseConnection` - Database connection abstraction
-- `IDataSet` - Collection of tables (FlatXml, Xml, Xls, Query, and others)
-- `DatabaseOperation` - CRUD operations on datasets
+- `IDatabaseConnection` -- Database connection abstraction
+- `IDataSet` -- Collection of tables (FlatXml, Xml, Xls, Query, and others)
+- `DatabaseOperation` -- CRUD operations on datasets
 
 **Example:**
 ```java
@@ -267,12 +267,12 @@ public void setUp() throws Exception {
 **Philosophy:** Comprehensive DBUnit wrapper with annotation-driven API.
 
 **Unique Strengths:**
-- Widest data format support (YAML, JSON, XML, CSV, Excel)
+- Widest data format support (YAML, JSON, XML, CSV, and Excel)
 - Scriptable datasets use Groovy/JavaScript
 - Regex matching in expected datasets
 - CDI and Cucumber integration
 - Connection leak detection
-- Active development and active community
+- Active development and community
 
 **Configuration Options:**
 ```java
@@ -486,7 +486,7 @@ public void testQueryDoesNotModify() {
 |---------|-----------|-------|
 | `insertInto("users").columns(...).values(...)` | `users.csv` file | Externalize to file |
 | `deleteAllFrom("users")` | Implicit in CLEAN_INSERT | Default behavior |
-| `DbSetupTracker` | Not needed | Each test has own data |
+| `DbSetupTracker` | Not needed | Each test has its own data |
 | No assertions | `@ExpectedDataSet` | Add verification |
 
 ---
@@ -501,6 +501,6 @@ public void testQueryDoesNotModify() {
 - [JDBDT](https://jdbdt.github.io/)
 
 ### Related Tools
-- [Testcontainers](https://testcontainers.com/) - Database containers for integration testing
-- [Flyway](https://flywaydb.org/) - Database migration tool
-- [Liquibase](https://www.liquibase.org/) - Database change management
+- [Testcontainers](https://testcontainers.com/) -- Database containers for integration testing
+- [Flyway](https://flywaydb.org/) -- Database migration tool
+- [Liquibase](https://www.liquibase.org/) -- Database change management

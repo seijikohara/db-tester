@@ -9,27 +9,27 @@ description: "JUnit、Spock、Kotest統合のテストライフサイクルフ�
 
 ```mermaid
 flowchart TD
-    subgraph テスト実行
+    subgraph Test Execution
         BA["@BeforeAll"]
-        BA --> BA1[DataSourceを登録]
-        BA1 --> BA2[設定を設定]
+        BA --> BA1[Register DataSource]
+        BA1 --> BA2[Set Configuration]
 
-        subgraph each["各テストメソッドに対して"]
+        subgraph each["For each Test method"]
             BE["beforeEach()"]
-            BE --> BE1["DataSetを検索"]
-            BE1 --> BE2[データセットを読み込み]
-            BE2 --> BE3[操作を実行]
-            BE3 --> TM[テストメソッド実行]
+            BE --> BE1["Find DataSet"]
+            BE1 --> BE2[Load datasets]
+            BE2 --> BE3[Execute operation]
+            BE3 --> TM[Test method execution]
             TM --> AE["afterEach()"]
-            AE --> AE1["ExpectedDataSetを検索"]
-            AE1 --> AE2[期待データセットを読み込み]
-            AE2 --> AE3[データベースと比較]
-            AE3 --> AE4[不一致を報告]
+            AE --> AE1["Find ExpectedDataSet"]
+            AE1 --> AE2[Load expected datasets]
+            AE2 --> AE3[Compare with database]
+            AE3 --> AE4[Report mismatches]
         end
 
         BA2 --> each
         each --> AA["@AfterAll"]
-        AA --> AA1[クリーンアップ]
+        AA --> AA1[Cleanup]
     end
 ```
 
@@ -37,23 +37,23 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph Specification実行
+    subgraph Specification Execution
         SS["setupSpec()"]
-        SS --> SS1[dbTesterRegistryを初期化]
-        SS1 --> SS2[DataSourceを登録]
-        SS2 --> SS3[dbTesterConfigurationを設定]
+        SS --> SS1[Initialize dbTesterRegistry]
+        SS1 --> SS2[Register DataSource]
+        SS2 --> SS3[Set dbTesterConfiguration]
 
-        subgraph each["各フィーチャーメソッドに対して"]
-            INT1["インターセプター（前）"]
-            INT1 --> INT1A["DataSetを実行"]
-            INT1A --> FM[フィーチャーメソッド実行]
-            FM --> INT2["インターセプター（後）"]
-            INT2 --> INT2A["ExpectedDataSetを実行"]
+        subgraph each["For each feature method"]
+            INT1["Interceptor (Before)"]
+            INT1 --> INT1A["Execute DataSet"]
+            INT1A --> FM[Feature method execution]
+            FM --> INT2["Interceptor (After)"]
+            INT2 --> INT2A["Execute ExpectedDataSet"]
         end
 
         SS3 --> each
         each --> CS["cleanupSpec()"]
-        CS --> CS1[クリーンアップ]
+        CS --> CS1[Cleanup]
     end
 ```
 
@@ -61,31 +61,31 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph Specification実行
-        ANN["@DatabaseTestまたはinitブロック"]
-        ANN --> ANN1[拡張機能を登録]
+    subgraph Specification Execution
+        ANN["@DatabaseTest or init block"]
+        ANN --> ANN1[Register Extension]
 
         BA["@BeforeAll"]
-        BA --> BA1[Registryを初期化]
-        BA1 --> BA2[DataSourceを登録]
+        BA --> BA1[Initialize Registry]
+        BA1 --> BA2[Register DataSource]
 
-        subgraph each["各@Testメソッドに対して"]
+        subgraph each["For each @Test method"]
             INT["intercept()"]
-            INT --> INT1["dbTesterRegistryを発見"]
-            INT1 --> INT2["DataSetを検索"]
-            INT2 --> INT3[データセットを読み込み]
-            INT3 --> INT4[操作を実行]
-            INT4 --> TM[テストメソッド実行]
-            TM --> INT5["ExpectedDataSetを検索"]
-            INT5 --> INT6[期待データセットを読み込み]
-            INT6 --> INT7[データベースと比較]
-            INT7 --> INT8[不一致を報告]
+            INT --> INT1["Get dbTesterRegistry from DatabaseTestSupport"]
+            INT1 --> INT2["Find DataSet"]
+            INT2 --> INT3[Load datasets]
+            INT3 --> INT4[Execute operation]
+            INT4 --> TM[Test method execution]
+            TM --> INT5["Find ExpectedDataSet"]
+            INT5 --> INT6[Load expected datasets]
+            INT6 --> INT7[Compare with database]
+            INT7 --> INT8[Report mismatches]
         end
 
         ANN1 --> BA
         BA2 --> each
         each --> AA["@AfterAll"]
-        AA --> AA1[クリーンアップ]
+        AA --> AA1[Cleanup]
     end
 ```
 

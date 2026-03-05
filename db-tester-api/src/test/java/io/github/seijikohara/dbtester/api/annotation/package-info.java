@@ -1,4 +1,4 @@
-/** Unit tests for annotation types in the DB Tester API. */
+/** Unit tests for the annotation types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.annotation;
 

@@ -7,15 +7,16 @@ description: "Reference for AUTO format detection, CSV, TSV, JSON, and YAML data
 
 ## Supported Formats
 
-The framework supports automatic format detection and four data formats: two delimited text formats (CSV, TSV) and two structured formats (JSON, YAML).
+The framework supports automatic format detection and four data formats:
+two delimited text formats (CSV, TSV) and two structured formats (JSON, YAML).
 
 | Format | Extension | Delimiter | Default |
 |--------|-----------|-----------|---------|
-| AUTO | All supported | — | Yes |
+| AUTO | All supported | -- | Yes |
 | CSV | `.csv` | Comma (`,`) | No |
 | TSV | `.tsv` | Tab (`\t`) | No |
-| JSON | `.json` | — | No |
-| YAML | `.yaml` | — | No |
+| JSON | `.json` | -- | No |
+| YAML | `.yaml` | -- | No |
 
 ### Format Selection
 
@@ -27,19 +28,23 @@ var conventions = ConventionSettings.builder()
     .build();
 ```
 
-When using a concrete format (CSV, TSV, JSON, or YAML), the framework processes only files matching the configured extension. When using `AUTO` (the default), the framework processes all supported file extensions.
+When using a concrete format (CSV, TSV, JSON, or YAML), the framework processes only files
+matching the configured extension. When using `AUTO` (the default), the framework processes
+all supported file extensions.
 
 ## Automatic Format Detection
 
-`DataFormat.AUTO` is the default format. It automatically detects and loads all supported file formats (CSV, TSV, JSON, and YAML) from a dataset directory.
+`DataFormat.AUTO` is the default format. It detects and loads all supported file formats
+(CSV, TSV, JSON, and YAML) from a dataset directory.
 
 ### Behavior
 
 When `AUTO` is active:
 
-1. The framework scans the dataset directory for files with any supported extension (`.csv`, `.tsv`, `.json`, `.yaml`)
+1. The framework scans the dataset directory for files with any supported extension
+   (`.csv`, `.tsv`, `.json`, `.yaml`)
 2. Each file is parsed according to its extension
-3. Table names are derived from filenames without extensions, as with concrete formats
+3. Table names derive from filenames without extensions, as with concrete formats
 
 ### Mixed Format Loading
 
@@ -53,11 +58,12 @@ src/test/resources/com/example/UserRepositoryTest/
 └── AUDIT_LOG.tsv
 ```
 
-Each file is parsed using the appropriate format parser based on its extension.
+Each file is parsed using the format parser matching its extension.
 
 ### Table Name Conflict Detection
 
-If the same table name appears in multiple file formats, the framework throws a `DataSetLoadException`. This prevents ambiguous dataset definitions.
+If the same table name appears in multiple file formats, the framework throws a
+`DataSetLoadException` to prevent ambiguous dataset definitions.
 
 **Example conflict**:
 
@@ -84,7 +90,9 @@ To resolve, remove duplicate files or specify a concrete format:
 
 ### Export Restriction
 
-`DataSetExporter` does not support `DataFormat.AUTO` for export operations. Specify a concrete format (CSV, TSV, JSON, or YAML) when exporting. Using `AUTO` throws `IllegalArgumentException`.
+`DataSetExporter` does not support `DataFormat.AUTO` for export operations.
+Specify a concrete format (CSV, TSV, JSON, or YAML) when exporting.
+Using `AUTO` throws `IllegalArgumentException`.
 
 ### API Details
 
@@ -143,7 +151,8 @@ File: `USERS.json`
 ]
 ```
 
-Each JSON file contains an array of objects. Each object represents a row, with key-value pairs representing column-value mappings.
+Each JSON file contains an array of objects.
+Each object represents a row, with key-value pairs representing column-value mappings.
 
 ### Example YAML
 
@@ -160,7 +169,8 @@ File: `USERS.yaml`
   created_at: "2024-01-02 00:00:00"
 ```
 
-Each YAML file contains a list of mappings. Each mapping represents a row, with key-value pairs representing column-value mappings.
+Each YAML file contains a list of mappings.
+Each mapping represents a row, with key-value pairs representing column-value mappings.
 
 ## Scenario Filtering
 
@@ -176,9 +186,9 @@ The scenario marker column enables multiple test methods to share a dataset file
 
 When a dataset file contains the scenario marker column, the framework performs these steps:
 
-1. Filters rows where the marker matches the current scenario
-2. Removes the scenario marker column from the resulting dataset
-3. Passes remaining columns and data to the database operation
+1. Filter rows where the marker matches the current scenario
+2. Remove the scenario marker column from the resulting dataset
+3. Pass remaining columns and data to the database operation
 
 ### Example with Scenarios
 
@@ -201,7 +211,7 @@ For test method `testCreate`, the framework filters to:
 
 ### Scenario Resolution
 
-The scenario name resolves in the following order:
+The scenario name resolves in this order:
 
 1. Explicit `scenarioNames` in `@DataSetSource` annotation
 2. Test method name (via `ScenarioNameResolver` SPI)
@@ -219,7 +229,8 @@ The framework includes rows matching any of the specified scenarios.
 
 ### Scenario Filtering in JSON
 
-Include the scenario marker in each JSON object (any key position is supported; first key is recommended):
+Include the scenario marker in each JSON object (any key position is supported;
+first key is recommended):
 
 ```json
 [
@@ -234,7 +245,8 @@ For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
 
 ### Scenario Filtering in YAML
 
-Include the scenario marker in each YAML mapping (any key position is supported; first key is recommended):
+Include the scenario marker in each YAML mapping (any key position is supported;
+first key is recommended):
 
 ```yaml
 - "[Scenario]": testCreate
@@ -259,7 +271,8 @@ For test method `testCreate`, the framework filters to rows with `id` 1 and 2.
 
 ### Empty Scenario Values
 
-Rows with empty, blank, or null scenario values are always included regardless of the active scenario filter. This applies to all formats (CSV, TSV, JSON, YAML).
+Rows with empty, blank, or null scenario values are always included regardless of the
+active scenario filter. This applies to all formats (CSV, TSV, JSON, YAML).
 
 This behavior is useful for common reference data that every scenario requires.
 
@@ -379,7 +392,7 @@ For JUnit nested test classes:
 
 ### Table Name Derivation
 
-Table names are derived from filenames:
+Table names derive from filenames:
 
 | Filename | Table Name |
 |----------|------------|
@@ -391,13 +404,15 @@ Case sensitivity depends on the database configuration.
 
 ## Load Order
 
-### Overview
+### Load Order File
 
-The `load-order.txt` file controls the order in which tables are processed during database operations. This is important for tables with foreign key relationships where parent tables must be populated before child tables.
+The `load-order.txt` file controls the order in which tables are processed during
+database operations. This is important for tables with foreign key relationships
+where parent tables must be populated before child tables.
 
 ### File Location
 
-The load order file is located in the dataset directory:
+The load order file resides in the dataset directory:
 
 ```
 src/test/resources/
@@ -437,10 +452,10 @@ ORDER_ITEMS
 
 When `load-order.txt` does not exist in the dataset directory:
 
-1. Tables are sorted alphabetically by filename
-2. The framework does not automatically generate the file
+1. Tables sort alphabetically by filename
+2. The framework does not auto-generate the file
 
-To explicitly require the load order file, use:
+To require the load order file explicitly, use:
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
@@ -462,11 +477,12 @@ The table ordering interacts with database operations as follows:
 
 ### Relationship with TableOrderingStrategy
 
-The `TableOrderingStrategy` enum controls how table ordering is determined. See [Database Operations](database-operations#table-ordering-strategy) for full details.
+The `TableOrderingStrategy` enum controls how table ordering is determined.
+See [Database Operations](database-operations#table-ordering-strategy) for full details.
 
 | Strategy | Behavior |
 |----------|----------|
-| `AUTO` (default) | Use `load-order.txt` if exists, then FK metadata, then alphabetical |
+| `AUTO` (default) | Use `load-order.txt` if it exists, then FK metadata, then alphabetical |
 | `LOAD_ORDER_FILE` | Require `load-order.txt` (error if not found) |
 | `FOREIGN_KEY` | Use JDBC metadata for FK-based ordering |
 | `ALPHABETICAL` | Sort tables alphabetically by name |
@@ -476,7 +492,8 @@ The `TableOrderingStrategy` enum controls how table ordering is determined. See 
 1. **Commit the ordering file**: Include `load-order.txt` in version control for reproducible tests
 2. **Parent tables first**: List parent tables before child tables to satisfy foreign key constraints
 3. **Use comments**: Document the reasoning for non-obvious ordering decisions
-4. **Consider FK strategy**: For databases with proper FK constraints, `TableOrderingStrategy.FOREIGN_KEY` provides automatic ordering without manual file maintenance
+4. **Consider FK strategy**: For databases with FK constraints, `TableOrderingStrategy.FOREIGN_KEY`
+   provides automatic ordering without manual file maintenance
 
 ### Error Handling
 
@@ -517,7 +534,7 @@ The framework uses Jackson `ObjectMapper` to parse JSON files.
 | Structure | Array of objects |
 | Column order | Determined by key order of the first object |
 | Null handling | JSON `null` maps to SQL NULL |
-| Value conversion | All non-null values are converted to strings |
+| Value conversion | All non-null values convert to strings |
 | Scenario filtering | Supported; include the scenario marker in each object (any key position) |
 
 ### YAML Parsing
@@ -529,7 +546,7 @@ The framework uses Jackson YAML module (`YAMLMapper`) to parse YAML files.
 | Structure | List of mappings |
 | Column order | Determined by key order of the first mapping |
 | Null handling | YAML `null` or `~` maps to SQL NULL |
-| Value conversion | All non-null values are converted to strings |
+| Value conversion | All non-null values convert to strings |
 | Comments | Supported and ignored during parsing |
 | Scenario filtering | Supported; include the scenario marker in each mapping (any key position) |
 
@@ -571,7 +588,8 @@ All values are parsed as strings and converted during database operations:
 
 ## Template Expressions
 
-Dataset values support template expressions that generate dynamic values at load time. Expressions are resolved during dataset parsing, before values are inserted into the database.
+Dataset values support template expressions that generate dynamic values at load time.
+Expressions resolve during dataset parsing, before values are inserted into the database.
 
 ### Supported Expressions
 
@@ -594,13 +612,14 @@ ${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
 
 ### Datafaker Integration
 
-The `${faker.xxx.yyy}` template requires [Datafaker](https://www.datafaker.net/) as a runtime dependency:
+The `${faker.xxx.yyy}` template requires [Datafaker](https://www.datafaker.net/) as a
+runtime dependency:
 
 ```kotlin
 testRuntimeOnly("net.datafaker:datafaker:VERSION")
 ```
 
-If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
+If Datafaker is not on the classpath, `${faker....}` expressions remain unprocessed.
 
 ## Convention-Based vs Explicit Paths
 

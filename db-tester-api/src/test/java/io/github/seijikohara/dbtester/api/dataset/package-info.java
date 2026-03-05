@@ -1,4 +1,4 @@
-/** Unit tests for dataset classes. */
+/** Unit tests for the dataset interfaces. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.dataset;
 

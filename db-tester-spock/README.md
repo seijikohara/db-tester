@@ -1,12 +1,15 @@
 # DB Tester - Spock Module
 
-This module provides [Spock](https://spockframework.org/) integration for the DB Tester framework through `DatabaseTestExtension`.
+This module provides [Spock](https://spockframework.org/) integration for the DB Tester framework through
+`DatabaseTestExtension`.
 
 ## Overview
 
-- **Annotation-Driven Extension** - `DatabaseTestExtension` activates via `@DatabaseTest` annotation on spec class
-- **Lifecycle Management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` execute preparation and expectation phases
-- **Method Interceptor** - `DatabaseTestInterceptor` intercepts feature method execution for database operations
+- **Annotation-driven extension** - `DatabaseTestExtension` activates via `@DatabaseTest` annotation on the
+  spec class
+- **Lifecycle management** - `SpockPreparationExecutor` and `SpockExpectationVerifier` execute preparation and
+  expectation phases
+- **Method interceptor** - `DatabaseTestInterceptor` intercepts feature method execution for database operations
 
 ## Architecture
 
@@ -18,7 +21,8 @@ db-tester-spock
 db-tester-core (transitive runtime dependency, loaded via ServiceLoader)
 ```
 
-This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime dependency. Users only need to add `db-tester-spock` to their project.
+This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime
+dependency. Add only `db-tester-spock` to your project.
 
 ## Requirements
 
@@ -47,7 +51,8 @@ dependencies {
 </dependency>
 ```
 
-For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spock).
+For the latest version, see
+[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spock).
 
 ## Usage
 
@@ -83,7 +88,7 @@ Add the `@DatabaseTest` annotation to enable the extension. Register the DataSou
 
 ### DataSource Registration
 
-Register data sources in `setupSpec()` using a `@Shared` field:
+Register data sources in `setupSpec()` using a `@Shared` field.
 
 ```groovy
 @Shared
@@ -98,7 +103,7 @@ def setupSpec() {
 
 ### Class-Level Annotations
 
-Apply annotations at the class level for all feature methods:
+Apply annotations at the class level to affect all feature methods.
 
 ```groovy
 @DatabaseTest
@@ -114,7 +119,7 @@ class UserRepositorySpec extends Specification {
 
 ### Method-Level Annotations
 
-Override class-level annotations at the method level:
+Override class-level annotations at the method level.
 
 ```groovy
 @DataSet(sources = @DataSetSource(resourceLocation = "custom/path"))
@@ -125,7 +130,7 @@ def "should create user with custom data"() {
 
 ### Scenario Filtering
 
-Use the `[Scenario]` column to share CSV files across multiple features:
+Use the `[Scenario]` column to share CSV files across multiple features.
 
 ```csv
 [Scenario],ID,NAME,EMAIL
@@ -176,4 +181,4 @@ def setupSpec() {
 
 ## Documentation
 
-For detailed usage documentation and examples, refer to the [main README](../README.md).
+For usage examples and detailed documentation, see the [main README](../README.md).

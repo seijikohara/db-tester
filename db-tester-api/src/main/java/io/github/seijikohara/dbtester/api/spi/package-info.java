@@ -1,30 +1,25 @@
 /**
- * Service Provider Interfaces (SPI) for framework extensibility.
+ * Provides Service Provider Interfaces (SPI) for framework extensibility.
  *
- * <p><strong>API Category: Extension API</strong> — This package is intended for framework
- * integrators building custom testing extensions. Test authors typically do not interact with this
- * package directly.
+ * <p><strong>API Category: Extension API</strong> — Intended for framework integrators building
+ * custom testing extensions. Test authors do not interact with this package directly.
  *
- * <p>This package contains SPI interfaces that allow the API module to remain independent of
- * specific implementations. Implementations are provided by the core module and loaded via {@link
- * java.util.ServiceLoader}.
+ * <p>These SPI interfaces decouple the API module from concrete implementations. The core module
+ * provides implementations, loaded via {@link java.util.ServiceLoader}.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.AssertionProvider} - Database assertion
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.AssertionProvider} — database assertion
  *       operations (data comparison)
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider} - Query-based
- *       database assertion operations (SQL query execution and comparison)
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider} - Dataset loading
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.QueryAssertionProvider} — query-based
+ *       assertion operations (SQL query execution and comparison)
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.DataSetLoaderProvider} — dataset loading
  *       operations
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.OperationProvider} - Database operation
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.OperationProvider} — database operation
  *       execution
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.ExpectationProvider} - Expectation
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.ExpectationProvider} — expectation
  *       verification
- *   <li>{@link io.github.seijikohara.dbtester.api.spi.TypeHandler} - Custom database type handling
+ *   <li>{@link io.github.seijikohara.dbtester.api.spi.TypeHandler} — custom database type handling
  * </ul>
- *
- * <p><strong>Audience:</strong> Framework integrators and extension developers. Most users do not
- * need to interact with this package directly.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.spi;

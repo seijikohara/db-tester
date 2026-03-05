@@ -74,12 +74,14 @@ graph TD
 
 ## Module Dependencies
 
-Each module's `build.gradle.kts` file defines its dependencies. See the source files for current dependencies:
+Each module defines its dependencies in its `build.gradle.kts` file.
+See the source files for current dependencies:
 
 | Module | Build Configuration |
 |--------|---------------------|
 | `db-tester-api` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-api/build.gradle.kts) |
 | `db-tester-core` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-core/build.gradle.kts) |
+| `db-tester-spring-support` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spring-support/build.gradle.kts) |
 | `db-tester-junit` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-junit/build.gradle.kts) |
 | `db-tester-spock` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock/build.gradle.kts) |
 | `db-tester-kotest` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest/build.gradle.kts) |
@@ -87,7 +89,8 @@ Each module's `build.gradle.kts` file defines its dependencies. See the source f
 | `db-tester-spock-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-spock-spring-boot-starter/build.gradle.kts) |
 | `db-tester-kotest-spring-boot-starter` | [build.gradle.kts](https://github.com/seijikohara/db-tester/blob/main/db-tester-kotest-spring-boot-starter/build.gradle.kts) |
 
-Test framework modules depend on `db-tester-api` at compile time. The framework loads `db-tester-core` at runtime via ServiceLoader.
+Test framework modules depend on `db-tester-api` at compile time.
+The framework loads `db-tester-core` at runtime via ServiceLoader.
 
 ## Package Organization
 
@@ -99,7 +102,7 @@ Test framework modules depend on `db-tester-api` at compile time. The framework 
 | `assertion` | Programmatic assertion API |
 | `config` | Configuration classes and registries |
 | `context` | Test execution context |
-| `dataset` | Dataset, Table, Row interfaces |
+| `dataset` | TableSet, Table, Row interfaces |
 | `domain` | Value objects (`TableName`, `ColumnName`, `CellValue`) |
 | `exception` | Exception hierarchy |
 | `loader` | Dataset loader interface |
@@ -114,7 +117,7 @@ Source: [db-tester-api/src/main/java](https://github.com/seijikohara/db-tester/t
 | Package | Responsibility |
 |---------|----------------|
 | `assertion` | Dataset comparison, verification, and `ComparisonEngine` execution |
-| `dataset` | Dataset, Table, Row implementations |
+| `dataset` | TableSet, Table, Row implementations |
 | `domain` | Internal value objects |
 | `format` | CSV, TSV, JSON, and YAML parsing and format providers |
 | `jdbc` | JDBC read/write operations |
@@ -153,13 +156,13 @@ The framework uses SPI for loose coupling between modules:
 ```mermaid
 flowchart LR
     subgraph JUNIT[db-tester-junit]
-        U1[TableSetLoader]
+        U1[DataSetLoader]
         U2[OperationProvider]
         U3[ScenarioResolver]
     end
 
     subgraph CORE[db-tester-core]
-        P1[TableSetLoaderProvider]
+        P1[DataSetLoaderProvider]
         P2[OperationProvider]
         P3[ScenarioResolver]
     end
@@ -183,7 +186,7 @@ Operations and comparison strategies use the strategy pattern:
 
 ### Full Module Support
 
-The following modules provide complete `module-info.java`:
+These modules provide complete `module-info.java`:
 
 | Module | Module Name |
 |--------|-------------|
@@ -193,7 +196,7 @@ The following modules provide complete `module-info.java`:
 
 ### Automatic Module Names
 
-The following modules use `Automatic-Module-Name` in `MANIFEST.MF`:
+These modules use `Automatic-Module-Name` in `MANIFEST.MF`:
 
 | Module | Automatic-Module-Name |
 |--------|----------------------|

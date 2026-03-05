@@ -1,15 +1,11 @@
 /**
- * Test context abstraction for framework-agnostic test execution.
+ * Provides a framework-agnostic test context abstraction.
  *
- * <p><strong>API Category: Extension API</strong> — This package is intended for framework
- * integrators building custom testing extensions. Test authors typically do not interact with this
- * package directly.
+ * <p><strong>API Category: Extension API</strong> — Intended for framework integrators building
+ * custom testing extensions. Test authors do not interact with this package directly.
  *
- * <p>This package provides the {@link io.github.seijikohara.dbtester.api.context.TestContext}
- * record which captures the essential context of a running test, independent of any specific
- * testing framework.
- *
- * <p><strong>Audience:</strong> Framework integrators and extension developers.
+ * <p>The {@link io.github.seijikohara.dbtester.api.context.TestContext} record captures the
+ * essential context of a running test, independent of any specific testing framework.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.context;

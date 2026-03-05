@@ -133,7 +133,8 @@ void testMultipleDatabases() { }
 
 ## Configuration Properties
 
-Configure via `application.properties` or `application.yml`. All properties apply to all three starters.
+Configure via `application.properties` or `application.yml`.
+All properties apply to all three starters.
 
 ```properties
 # Enable or disable DB Tester (default: true)

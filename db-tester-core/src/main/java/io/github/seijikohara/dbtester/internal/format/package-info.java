@@ -1,18 +1,15 @@
 /**
- * Data format parsing and loading infrastructure.
+ * Provides data format parsing and loading infrastructure.
  *
- * <p>This package provides the Service Provider Interface (SPI) and implementations for parsing
- * various data file formats (CSV, TSV, etc.) into {@link
- * io.github.seijikohara.dbtester.api.dataset.TableSet} objects.
- *
- * <p>Key components:
+ * <p>This package defines the SPI and implementations for parsing data files (CSV, TSV, JSON, YAML)
+ * into {@link io.github.seijikohara.dbtester.api.dataset.TableSet} objects.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.format.spi.FormatProvider} - SPI for format
+ *   <li>{@link io.github.seijikohara.dbtester.internal.format.spi.FormatProvider} — SPI for format
  *       support
- *   <li>{@link io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry} - Provider
+ *   <li>{@link io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry} — provider
  *       registration and lookup
- *   <li>{@link io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser} - CSV/TSV
+ *   <li>{@link io.github.seijikohara.dbtester.internal.format.parser.DelimitedParser} — CSV/TSV
  *       parser
  * </ul>
  *

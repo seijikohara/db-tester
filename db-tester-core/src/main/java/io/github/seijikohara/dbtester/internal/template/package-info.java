@@ -1,9 +1,8 @@
 /**
- * Template expression processing for dynamic test data generation.
+ * Provides template expression processing for dynamic test data generation.
  *
- * <p>This package provides template expression resolution for CSV values. Expressions use the
- * {@code ${...}} syntax and support sequence numbers, UUIDs, date/time values, and optional
- * Datafaker integration for realistic test data.
+ * <p>Expressions use the {@code ${...}} syntax. Supported expressions include sequence numbers,
+ * UUIDs, date/time values, and Datafaker integration for realistic test data.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.template;

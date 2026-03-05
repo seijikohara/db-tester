@@ -173,7 +173,7 @@ When `baseDirectory` is specified:
 
 ### ExpectedDataSet Suffix
 
-The `expectationSuffix` is appended to the data set path:
+The `expectationSuffix` appends to the DataSet path:
 
 | DataSet Path | Suffix | ExpectedDataSet Path |
 |-----------------|--------|------------------|
@@ -425,11 +425,11 @@ Defines supported file formats for dataset files.
 
 | Value | Extension | Field Separator | Default |
 |-------|-----------|-----------------|---------|
-| `AUTO` | All supported | — | Yes |
+| `AUTO` | All supported | -- | Yes |
 | `CSV` | `.csv` | Comma (`,`) | No |
 | `TSV` | `.tsv` | Tab (`\t`) | No |
-| `JSON` | `.json` | — | No |
-| `YAML` | `.yaml` | — | No |
+| `JSON` | `.json` | -- | No |
+| `YAML` | `.yaml` | -- | No |
 
 ### Methods
 
@@ -466,7 +466,7 @@ Defines how tables from multiple datasets merge.
 
 ### Merge Behavior
 
-Datasets are processed in annotation declaration order:
+Datasets process in annotation declaration order:
 
 ```java
 @DataSet(sources = {
@@ -486,24 +486,28 @@ When both datasets contain the same table:
 
 ### Strategy Selection Guide
 
-Choose the appropriate merge strategy based on your use case:
+Choose the merge strategy based on your use case:
 
 | Strategy | When to Use | Example Scenario |
 |----------|-------------|------------------|
 | `UNION_ALL` (default) | Most use cases; preserves all rows including duplicates | Loading base data + scenario-specific overrides with intentional duplicates |
-| `UNION` | Combining datasets with overlapping rows; ensure unique rows only | Merging reference data from multiple sources without duplicates |
+| `UNION` | Combining datasets with overlapping rows; deduplicate | Merging reference data from multiple sources without duplicates |
 | `LAST` | Override entire table with latest dataset | Production-like base data + test-specific complete replacement |
 | `FIRST` | Keep only base dataset; ignore subsequent datasets | Shared base data + optional per-test overrides (ignore if present) |
 
 ### Row Equality in UNION
 
-`UNION` determines row equality by comparing cell values using `CellValue.equals()`. Two rows are considered equal if all corresponding column values are equal.
+`UNION` determines row equality by comparing cell values using `CellValue.equals()`.
+Two rows are considered equal if all corresponding column values are equal.
 
-Values from all data formats (CSV, TSV, JSON, YAML) are normalized to strings during parsing, so deduplication compares string representations. For example, a CSV value `1` and a JSON value `1` (integer) both become the string `"1"` and are treated as equal.
+Values from all data formats (CSV, TSV, JSON, YAML) normalize to strings during parsing,
+so deduplication compares string representations.
+For example, a CSV value `1` and a JSON value `1` (integer) both become the string `"1"`
+and are treated as equal.
 
 ## RowOrdering
 
-Defines how rows should be compared during expectation verification.
+Defines how rows are compared during expectation verification.
 
 **Location**: `io.github.seijikohara.dbtester.api.config.RowOrdering`
 
@@ -525,7 +529,7 @@ Defines how rows should be compared during expectation verification.
 
 ### Configuration
 
-Row ordering can be configured:
+Row ordering can be configured at two levels:
 
 1. **Annotation-level**: Per-test via `@ExpectedDataSet(rowOrdering = ...)`
 2. **Global**: Via `VerificationSettings.withRowOrdering()`
@@ -534,7 +538,8 @@ Annotation-level configuration takes precedence over global settings.
 
 ### Performance Considerations
 
-Unordered comparison has O(n*m) complexity in the worst case, where n is the expected row count and m is the actual row count. For large datasets, consider:
+Unordered comparison has O(n*m) complexity in the worst case, where n is the expected
+row count and m is the actual row count. For large datasets, consider:
 
 - Using `ORDERED` with ORDER BY in queries
 - Limiting the dataset size
@@ -601,7 +606,9 @@ Immutable snapshot of test execution context.
 
 ### Purpose
 
-`TestContext` provides a framework-agnostic representation of test execution state. Test framework extensions (JUnit, Spock, and Kotest) create `TestContext` instances from their native context objects.
+`TestContext` provides a framework-agnostic representation of test execution state.
+Test framework extensions (JUnit, Spock, and Kotest) create `TestContext` instances
+from their native context objects.
 
 ### Usage
 

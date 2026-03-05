@@ -1,9 +1,4 @@
-/**
- * Tests for database read operations.
- *
- * <p>This package contains unit tests for the read operation classes including table readers, order
- * resolvers, and type converters.
- */
+/** Unit tests for the database read operation classes. */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.jdbc.read;
 

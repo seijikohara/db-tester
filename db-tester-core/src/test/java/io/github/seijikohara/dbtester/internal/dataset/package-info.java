@@ -1,4 +1,4 @@
-/** Tests for internal dataset implementations. */
+/** Unit tests for the internal dataset implementations. */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.dataset;
 

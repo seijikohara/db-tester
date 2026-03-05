@@ -4,10 +4,11 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 ## Overview
 
-- **Convention-Based Testing** - CSV file resolution based on specification class and feature method names
-- **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
-- **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, UPSERT, DELETE)
-- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j
+- **Convention-based testing** - CSV file resolution based on specification class and feature method names
+- **Scenario filtering** - CSV row filtering using `[Scenario]` column marker
+- **Database operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, UPSERT, DELETE)
+- **Database integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server,
+  and Neo4j
 
 ## Prerequisites
 
@@ -16,21 +17,21 @@ This module contains example tests demonstrating the features of the DB Tester f
 - H2 Database (included as test dependency)
 - Docker (optional, for Testcontainers-based integration tests)
 
-## Usage
+## Running Tests
 
-### Running Tests
+Run all tests.
 
 ```bash
 ./gradlew :examples:db-tester-example-spock:test
 ```
 
-### Running Feature Tests Only
+Run feature tests only.
 
 ```bash
 ./gradlew :examples:db-tester-example-spock:test --tests "example.feature.*"
 ```
 
-### Running Database Integration Tests Only
+Run database integration tests only.
 
 ```bash
 ./gradlew :examples:db-tester-example-spock:test --tests "example.database.*"
@@ -48,16 +49,16 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `ColumnStrategyAnnotationSpec` | Annotation-based column comparison strategies using `@ColumnStrategy` |
 | `ConfigurationCustomizationSpec` | Framework convention customization |
 | `DataFormatSpec` | CSV, TSV, JSON, and YAML format support |
-| `TableMergeStrategySpec` | FIRST, LAST, UNION, UNION_ALL strategies |
-| `TableOrderingStrategiesSpec` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
+| `TableMergeStrategySpec` | FIRST, LAST, UNION, and UNION_ALL strategies |
+| `TableOrderingStrategiesSpec` | Table ordering strategies (ALPHABETICAL, MANUAL) |
 | `ComparisonStrategySpec` | Comparison strategies (STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, TIMESTAMP_FLEXIBLE, NOT_NULL, REGEX) |
-| `ComprehensiveDataTypesSpec` | Various SQL data types support |
+| `ComprehensiveDataTypesSpec` | SQL data types support |
 | `CustomExpectationPathsSpec` | Custom resource path configuration |
 | `CustomQueryValidationSpec` | Custom SQL query validation |
 | `InheritedAnnotationSpec` | Annotation inheritance from base classes |
 | `MultipleDataSourceSpec` | Multiple DataSource support |
 | `NullAndEmptyValuesSpec` | NULL and empty value handling |
-| `OperationVariationsSpec` | All database operations (INSERT, UPDATE, DELETE, etc.) |
+| `OperationVariationsSpec` | All database operations (INSERT, UPDATE, DELETE) |
 | `PartialColumnValidationSpec` | Partial column comparison |
 | `ProgrammaticAssertionApiSpec` | Programmatic `DatabaseAssertion` API usage |
 | `ErrorHandlingSpec` | Assertion failure scenarios and error messages |
@@ -78,7 +79,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 ## Spock-Specific Features
 
-Feature method names with spaces map directly to `[Scenario]` column values:
+Feature method names with spaces map directly to `[Scenario]` column values.
 
 ```groovy
 def 'should create active user'() { ... }  // Matches: should create active user
@@ -91,4 +92,4 @@ def 'should create inactive user'() { ... } // Matches: should create inactive u
 
 ## Documentation
 
-For detailed framework documentation, refer to the [main README](../../README.md).
+For framework documentation, see the [main README](../../README.md).

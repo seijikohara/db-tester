@@ -183,9 +183,9 @@ module io.github.seijikohara.dbtester.core {
 
 ### カスタムDataSetLoader
 
-カスタムデータセットローダーを提供するには:
+カスタムデータセットローダーを提供する手順です。
 
-1. `DataSetLoader`インターフェースを実装:
+1. `DataSetLoader`インターフェースを実装します。
 
 ```java
 public class CustomDataSetLoader implements DataSetLoader {
@@ -201,7 +201,7 @@ public class CustomDataSetLoader implements DataSetLoader {
 }
 ```
 
-2. `Configuration`経由で登録:
+2. `Configuration`経由で登録します。
 
 ```java
 var config = Configuration.builder()
@@ -212,9 +212,9 @@ DatabaseTestExtension.setConfiguration(context, config);
 
 ### カスタムScenarioNameResolver
 
-カスタムシナリオリゾルバを提供するには:
+カスタムシナリオリゾルバを提供する手順です。
 
-1. `ScenarioNameResolver`を実装:
+1. `ScenarioNameResolver`を実装します。
 
 ```java
 public class CustomScenarioNameResolver implements ScenarioNameResolver {
@@ -237,7 +237,7 @@ public class CustomScenarioNameResolver implements ScenarioNameResolver {
 }
 ```
 
-2. ServiceLoader経由で登録:
+2. ServiceLoader経由で登録します。
 
 ```text
 # META-INF/services/io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver
@@ -247,12 +247,12 @@ com.example.CustomScenarioNameResolver
 ### カスタムFormatProvider
 
 ::: warning
-FormatProviderは内部SPIです。このインターフェースはパブリックAPI契約の一部ではなく、予告なく変更される可能性があります。カスタム実装は内部パッケージに依存します。
+FormatProviderは内部SPIです。パブリックAPI契約の一部ではなく、予告なく変更される可能性があります。カスタム実装は内部パッケージに依存します。
 :::
 
-追加のファイル形式をサポートするには:
+追加のファイル形式をサポートする手順です。
 
-1. `FormatProvider`を実装:
+1. `FormatProvider`を実装します。
 
 ```java
 public class XmlFormatProvider implements FormatProvider {
@@ -268,7 +268,7 @@ public class XmlFormatProvider implements FormatProvider {
 }
 ```
 
-2. ServiceLoader経由で登録:
+2. ServiceLoader経由で登録します。
 
 ```text
 # META-INF/services/io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
@@ -277,7 +277,7 @@ com.example.XmlFormatProvider
 
 ## プロバイダー優先順位
 
-複数のプロバイダーが登録されている場合、フレームワークは以下のようにプロバイダーを選択します:
+複数のプロバイダーが登録されている場合、フレームワークは以下の基準でプロバイダーを選択します。
 
 **サポートレイヤー（Tier 1）**:
 

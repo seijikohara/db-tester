@@ -1,14 +1,11 @@
 /**
- * Programmatic assertion utilities for fine-grained database validation.
+ * Provides programmatic assertion utilities for database validation.
  *
- * <p>Where {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet} expresses
- * validation declaratively, this package provides APIs for scenarios that demand imperative
- * control. The {@link io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion} facade
- * exposes comparison primitives, while {@link
- * io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler} allows callers to customise
- * how mismatches are reported.
- *
- * <p><strong>Audience:</strong> Users with programmatic assertion needs.
+ * <p>While {@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet} expresses
+ * validation declaratively, this package offers APIs for scenarios that require imperative control.
+ * {@link io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion} exposes comparison
+ * primitives. {@link io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler} allows
+ * callers to customize how mismatches are reported.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.assertion;

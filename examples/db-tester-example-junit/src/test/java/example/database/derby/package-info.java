@@ -1,7 +1,7 @@
 /**
- * Apache Derby integration tests.
+ * Contains Apache Derby integration tests.
  *
- * <p>Demonstrates framework compatibility with Apache Derby.
+ * <p>Demonstrates framework compatibility with the Apache Derby embedded database.
  */
 @NullMarked
 package example.database.derby;

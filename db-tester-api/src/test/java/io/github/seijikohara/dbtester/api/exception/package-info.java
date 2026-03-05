@@ -1,4 +1,4 @@
-/** Unit tests for exception classes. */
+/** Unit tests for the exception types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.exception;
 

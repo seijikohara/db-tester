@@ -4,9 +4,9 @@ This module provides a Bill of Materials (BOM) for managing consistent versions 
 
 ## Overview
 
-- **Centralized Version Management** - Single location for all DB Tester artifact versions
-- **Version Compatibility** - Ensures compatibility between modules
-- **Dependency Declaration** - Eliminates version specification for individual artifacts
+- **Centralized version management** - Single location for all DB Tester artifact versions
+- **Version compatibility** - Ensures compatibility between modules
+- **Simplified dependency declaration** - Eliminates version specification for individual artifacts
 
 ## Architecture
 
@@ -23,7 +23,7 @@ db-tester-bom (manages versions)
     └── db-tester-kotest-spring-boot-starter
 ```
 
-The BOM does not contain code. It provides dependency management only.
+The BOM contains no code. It provides dependency management only.
 
 ## Requirements
 
@@ -82,4 +82,4 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ## Documentation
 
-For usage examples and configuration details, refer to the [main README](../README.md).
+For usage examples and configuration details, see the [main README](../README.md).

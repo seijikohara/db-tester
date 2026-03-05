@@ -1,9 +1,8 @@
 /**
- * Programmatic preparation API for database testing.
+ * Provides the programmatic preparation API for database test data setup.
  *
- * <p>This package provides a static facade ({@link
- * io.github.seijikohara.dbtester.api.preparation.DatabasePreparation}) for programmatic test data
- * setup, symmetric with the assertion API in {@link
+ * <p>The {@link io.github.seijikohara.dbtester.api.preparation.DatabasePreparation} facade offers
+ * programmatic data setup, symmetric with {@link
  * io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion}.
  *
  * @see io.github.seijikohara.dbtester.api.preparation.DatabasePreparation

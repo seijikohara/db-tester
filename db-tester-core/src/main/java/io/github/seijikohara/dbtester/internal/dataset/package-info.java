@@ -1,20 +1,17 @@
 /**
- * Internal dataset implementations and utilities.
- *
- * <p>This package provides internal implementations of the dataset interfaces defined in the API
- * module, including:
+ * Provides internal implementations of the dataset interfaces defined in the API module.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet} - basic dataset
- *       implementation
- *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTable} - basic table
- *       implementation
- *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleRow} - basic row
- *       implementation
+ *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet} — default {@link
+ *       io.github.seijikohara.dbtester.api.dataset.TableSet} implementation
+ *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleTable} — default {@link
+ *       io.github.seijikohara.dbtester.api.dataset.Table} implementation
+ *   <li>{@link io.github.seijikohara.dbtester.internal.dataset.SimpleRow} — default {@link
+ *       io.github.seijikohara.dbtester.api.dataset.Row} implementation
  * </ul>
  *
- * <p><strong>Note:</strong> This is an internal package and is not part of the public API. Classes
- * in this package may change without notice.
+ * <p><strong>Internal package.</strong> Not part of the public API. Classes may change without
+ * notice.
  *
  * @see io.github.seijikohara.dbtester.api.dataset
  */

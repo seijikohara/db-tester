@@ -1,17 +1,12 @@
 /**
- * Database read operations for test data verification.
- *
- * <p>This package provides classes for reading data from databases, including table content
- * retrieval, foreign key dependency resolution, and LOB type conversion.
- *
- * <p>Key classes:
+ * Provides database read operations for test data verification.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TableReader} - Reads table data
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TableReader} — reads table data
  *       from the database
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TableOrderResolver} - Resolves
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TableOrderResolver} — resolves
  *       table ordering based on foreign key dependencies
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TypeConverter} - Converts LOB and
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.read.TypeConverter} — converts LOB and
  *       special database types to standard Java types
  * </ul>
  */

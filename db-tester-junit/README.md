@@ -1,12 +1,15 @@
 # DB Tester - JUnit Module
 
-This module provides [JUnit](https://junit.org/) integration for the DB Tester framework through `DatabaseTestExtension`.
+This module provides [JUnit](https://junit.org/) integration for the DB Tester framework through
+`DatabaseTestExtension`.
 
 ## Overview
 
-- **JUnit Extension** - `DatabaseTestExtension` implements `BeforeEachCallback` and `AfterEachCallback` for test lifecycle integration
-- **Lifecycle Management** - `PreparationExecutor` and `ExpectationVerifier` execute preparation and expectation phases
-- **ExtensionContext Integration** - Stores `DataSourceRegistry` and `Configuration` in JUnit `ExtensionContext`
+- **JUnit extension** - `DatabaseTestExtension` implements `BeforeEachCallback` and `AfterEachCallback`
+  for test lifecycle integration
+- **Lifecycle management** - `PreparationExecutor` and `ExpectationVerifier` execute preparation and
+  expectation phases
+- **ExtensionContext integration** - Stores `DataSourceRegistry` and `Configuration` in JUnit `ExtensionContext`
 
 ## Architecture
 
@@ -18,7 +21,8 @@ db-tester-junit
 db-tester-core (transitive runtime dependency, loaded via ServiceLoader)
 ```
 
-This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime dependency. Users only need to add `db-tester-junit` to their project.
+This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime
+dependency. Add only `db-tester-junit` to your project.
 
 ## Requirements
 
@@ -75,7 +79,7 @@ Register `DatabaseTestExtension` using `@ExtendWith`. Register the DataSource in
 
 ### DataSource Registration
 
-Register data sources in `@BeforeAll`:
+Register data sources in `@BeforeAll`.
 
 ```java
 @BeforeAll
@@ -88,7 +92,7 @@ static void setup(ExtensionContext context) {
 
 ### Class-Level Annotations
 
-Apply annotations at the class level for all test methods:
+Apply annotations at the class level to affect all test methods.
 
 ```java
 @ExtendWith(DatabaseTestExtension.class)
@@ -105,7 +109,7 @@ class UserRepositoryTest {
 
 ### Method-Level Annotations
 
-Override class-level annotations at the method level:
+Override class-level annotations at the method level.
 
 ```java
 @Test
@@ -117,7 +121,7 @@ void testWithCustomDataSet() {
 
 ### Scenario Filtering
 
-Use the `[Scenario]` column to share CSV files across multiple tests:
+Use the `[Scenario]` column to share CSV files across multiple tests.
 
 ```csv
 [Scenario],ID,NAME,EMAIL
@@ -169,4 +173,4 @@ requires io.github.seijikohara.dbtester.junit;
 
 ## Documentation
 
-For detailed usage documentation and examples, refer to the [main README](../README.md).
+For usage examples and detailed documentation, see the [main README](../README.md).

@@ -1,4 +1,4 @@
-/** Tests for JUnit Jupiter extension. */
+/** Unit tests for the JUnit Jupiter extension. */
 @NullMarked
 package io.github.seijikohara.dbtester.junit.jupiter.extension;
 

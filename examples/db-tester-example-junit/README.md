@@ -4,10 +4,11 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 ## Overview
 
-- **Convention-Based Testing** - CSV file resolution based on test class and method names
-- **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
-- **Database Operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, UPSERT, DELETE)
-- **Database Integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server, Neo4j
+- **Convention-based testing** - CSV file resolution based on test class and method names
+- **Scenario filtering** - CSV row filtering using `[Scenario]` column marker
+- **Database operations** - All supported operations (CLEAN_INSERT, INSERT, UPDATE, UPSERT, DELETE)
+- **Database integration** - Compatibility tests with Derby, HSQLDB, MySQL, PostgreSQL, Oracle, SQL Server,
+  and Neo4j
 
 ## Prerequisites
 
@@ -15,21 +16,21 @@ This module contains example tests demonstrating the features of the DB Tester f
 - H2 Database (included as test dependency)
 - Docker (optional, for Testcontainers-based integration tests)
 
-## Usage
+## Running Tests
 
-### Running Tests
+Run all tests.
 
 ```bash
 ./gradlew :examples:db-tester-example-junit:test
 ```
 
-### Running Feature Tests Only
+Run feature tests only.
 
 ```bash
 ./gradlew :examples:db-tester-example-junit:test --tests "example.feature.*"
 ```
 
-### Running Database Integration Tests Only
+Run database integration tests only.
 
 ```bash
 ./gradlew :examples:db-tester-example-junit:test --tests "example.database.*"
@@ -48,17 +49,17 @@ This module contains example tests demonstrating the features of the DB Tester f
 | `ConfigurationCustomizationTest` | Framework convention customization |
 | `DataFormatTest` | AUTO detection, CSV, TSV, JSON, and YAML format support |
 | `DataSetExportTest` | `DataSetExporter` API for exporting database state to CSV, JSON, and YAML files |
-| `TableMergeStrategyTest` | FIRST, LAST, UNION, UNION_ALL strategies |
-| `TableOrderingStrategiesTest` | Table ordering strategies (ALPHABETICAL, MANUAL, etc.) |
+| `TableMergeStrategyTest` | FIRST, LAST, UNION, and UNION_ALL strategies |
+| `TableOrderingStrategiesTest` | Table ordering strategies (ALPHABETICAL, MANUAL) |
 | `ComparisonStrategyTest` | All comparison strategies (STRICT, NUMERIC, CASE_INSENSITIVE, IGNORE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX) |
-| `ComprehensiveDataTypesTest` | Various SQL data types support |
+| `ComprehensiveDataTypesTest` | SQL data types support |
 | `CustomExpectationPathsTest` | Custom resource path configuration |
 | `CustomQueryValidationTest` | Custom SQL query validation |
 | `InheritedAnnotationTest` | Annotation inheritance from base classes |
 | `MultipleDataSourceTest` | Multiple DataSource support |
 | `NestedConventionTest` | `@Nested` test classes with convention-based loading |
 | `NullAndEmptyValuesTest` | NULL and empty value handling |
-| `OperationVariationsTest` | All database operations (INSERT, UPDATE, DELETE, etc.) |
+| `OperationVariationsTest` | All database operations (INSERT, UPDATE, DELETE) |
 | `PartialColumnValidationTest` | Partial column comparison |
 | `ProgrammaticAssertionApiTest` | Programmatic `DatabaseAssertion` API usage |
 | `TemplateExpressionTest` | Template expression processing for dynamic test data (UUID, sequence, timestamp, Faker) |
@@ -80,7 +81,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 
 ## JUnit-Specific Features
 
-JUnit method names are used directly as `[Scenario]` column values:
+JUnit method names map directly to `[Scenario]` column values.
 
 ```java
 @Test
@@ -97,4 +98,4 @@ Nested test classes with `@Nested` annotation inherit parent class conventions.
 
 ## Documentation
 
-For detailed framework documentation, refer to the [main README](../../README.md).
+For framework documentation, see the [main README](../../README.md).

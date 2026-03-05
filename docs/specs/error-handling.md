@@ -29,14 +29,15 @@ classDiagram
 | `DatabaseOperationException` | SQL execution failure |
 | `ConfigurationException` | Framework initialization failure |
 
-
 ## Validation Errors
 
-The framework throws `ValidationException` when expectation verification fails (`@ExpectedDataSet` phase).
+The framework throws `ValidationException` when expectation verification fails
+(`@ExpectedDataSet` phase).
 
 ### Output Format
 
-The framework collects **all differences** and reports them with a human-readable summary followed by YAML details:
+The framework collects **all differences** and reports them with a human-readable summary
+followed by YAML details:
 
 ```
 Assertion failed: 3 differences in USERS, ORDERS
@@ -64,7 +65,8 @@ tables:
           type: "DECIMAL(10,2)"
 ```
 
-The output is **valid YAML** after the first summary line. Standard YAML libraries parse this output for CI/CD integration.
+The output is **valid YAML** after the first summary line.
+Standard YAML libraries parse this output for CI/CD integration.
 
 ### Output Structure
 
@@ -98,7 +100,6 @@ The comparator applies these rules before reporting mismatches:
 | Boolean | "1", "0", "true", "false", "yes", "no", "y", and "n" supported |
 | Timestamp precision | "2024-01-01 10:00:00" matches "2024-01-01 10:00:00.0" |
 | CLOB | The comparator treats CLOB as string |
-
 
 ## Dataset Load Errors
 
@@ -143,11 +144,13 @@ Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 Found files: [README.txt, notes.md]
 ```
 
-The `Found files` line lists all files in the directory to help diagnose the issue. This line is omitted when the directory is empty.
+The `Found files` line lists all files in the directory to help diagnose the issue.
+This line is omitted when the directory is empty.
 
 ### Table Name Conflict (AUTO Format)
 
-The loader reports this error when `DataFormat.AUTO` detects the same table name in multiple file formats:
+The loader reports this error when `DataFormat.AUTO` detects the same table name
+in multiple file formats:
 
 ```
 Table name conflict detected in AUTO format mode.
@@ -162,7 +165,8 @@ To resolve, remove duplicate files or specify a concrete format:
   DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
-**Resolution**: Remove duplicate files so each table name appears in only one format, or configure a concrete `DataFormat` in `ConventionSettings`.
+**Resolution**: Remove duplicate files so each table name appears in only one format,
+or configure a concrete `DataFormat` in `ConventionSettings`.
 
 ### Empty File
 
@@ -192,8 +196,8 @@ Failed to read load order file: /path/to/load-order.txt
 Failed to write load order file: /path/to/load-order.txt
 ```
 
-For details about the load order file format and usage, see [Data Formats - Load Order](data-formats#load-order).
-
+For details about the load order file format and usage,
+see [Data Formats - Load Order](data-formats#load-order).
 
 ## DataSource Errors
 
@@ -227,10 +231,10 @@ No data source registered for name: secondary_db
 registry.register("secondary_db", dataSource);
 ```
 
-
 ## Database Operation Errors
 
-The framework throws `DatabaseOperationException` when SQL operations fail during the preparation phase.
+The framework throws `DatabaseOperationException` when SQL operations fail
+during the preparation phase.
 
 ### Wrapped SQL Exception
 
@@ -243,7 +247,8 @@ Caused by: SQLException: Duplicate entry '1' for key 'PRIMARY'
 
 ### Invalid SQL Identifier
 
-The framework reports this error when a table name or column name contains invalid characters:
+The framework reports this error when a table name or column name contains
+invalid characters:
 
 ```
 DatabaseOperationException: Invalid SQL identifier: 'user-accounts'.
@@ -269,7 +274,6 @@ Identifiers must start with a letter or underscore and contain only letters, dig
 | Data truncation | Value exceeds column size | Check data fits column definition |
 | Invalid identifier | Table/column name has invalid characters | Use only letters, digits, underscores |
 
-
 ## Configuration Errors
 
 The framework throws `ConfigurationException` during initialization.
@@ -289,7 +293,6 @@ The framework reports this error when a required setting is missing:
 ```
 ConfigurationException: Convention settings cannot be null
 ```
-
 
 ## Error Context in Test Output
 
@@ -344,7 +347,6 @@ The framework includes the test method name in errors for context:
 Failed to verify expectation dataset for testUserCreation
 ```
 
-
 ## Debugging Tips
 
 | Symptom | Check |
@@ -362,7 +364,6 @@ Enable DEBUG logging for detailed operation output:
 ```properties
 logging.level.io.github.seijikohara.dbtester=DEBUG
 ```
-
 
 ## Related Specifications
 

@@ -1,4 +1,4 @@
-/** Tests for domain value types. */
+/** Unit tests for the domain value types. */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.domain;
 

@@ -56,7 +56,7 @@ Indicates failure to load dataset files.
 
 ## DataSourceNotFoundException
 
-Indicates requested DataSource is not registered.
+Indicates the requested DataSource is not registered.
 
 **Typical Causes**:
 
@@ -83,7 +83,8 @@ Indicates assertion or validation failure.
 - Row count differences
 - Column value mismatches
 
-**Output Format**: Validation errors output a human-readable summary followed by YAML details. See [Error Handling - Validation Errors](error-handling#validation-errors) for format details.
+**Output Format**: Validation errors output a human-readable summary followed by YAML details.
+See [Error Handling - Validation Errors](error-handling#validation-errors) for format details.
 
 ## Default Values Reference
 
@@ -113,17 +114,20 @@ This table lists the default values for all configurable attributes.
 
 **Magic Value: `-1`**
 
-Attributes with a default of `-1` delegate to the global configuration in `OperationDefaults`. This allows test-level overrides while maintaining consistent defaults across the test suite. A value of `0` or higher uses the specified value directly.
+Attributes with a default of `-1` delegate to the global configuration in `OperationDefaults`.
+This allows test-level overrides while maintaining consistent defaults across the test suite.
+A value of `0` or higher uses the specified value directly.
 
 ## Column Comparison Precedence
 
 When verifying expected database state, column comparison follows this precedence order:
 
-1. **`excludeColumns`**: Columns listed in `excludeColumns` are skipped entirely. No comparison occurs for these columns.
+1. **`excludeColumns`**: Columns listed in `excludeColumns` are skipped entirely. No comparison occurs.
 2. **`columnStrategies`**: Columns with a `@ColumnStrategy` annotation use the specified strategy.
 3. **`STRICT` (default)**: All remaining columns use exact match comparison.
 
-Annotation-level `columnStrategies` override global strategies configured in `VerificationSettings`. Global exclusions from `VerificationSettings` are combined with per-dataset `excludeColumns`.
+Annotation-level `columnStrategies` override global strategies configured in `VerificationSettings`.
+Global exclusions from `VerificationSettings` combine with per-dataset `excludeColumns`.
 
 ## Related Specifications
 

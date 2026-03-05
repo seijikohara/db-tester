@@ -19,29 +19,29 @@ The `db-tester-api` module exports packages organized into three layers by inten
 
 The User API contains the types that most users interact with directly:
 
-- **`annotation`** — `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`, `@ColumnStrategy`
-- **`assertion`** — `DatabaseAssertion`, `DatabaseQueryAssertion` for programmatic database verification
-- **`config`** — `Configuration`, `ConventionSettings`, `DataSourceRegistry`, `ExpectationContext`
-- **`operation`** — `Operation` enum (`CLEAN_INSERT`, `INSERT`, `TRUNCATE_INSERT`, etc.)
-- **`exception`** — Framework exceptions (passive consumption via catch/inspect)
-- **`export`** — `DataSetExporter` for exporting database content to files
-- **`preparation`** — `DatabasePreparation` for programmatic test data setup
+- **`annotation`** -- `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`, `@ColumnStrategy`
+- **`assertion`** -- `DatabaseAssertion`, `DatabaseQueryAssertion` for programmatic database verification
+- **`config`** -- `Configuration`, `ConventionSettings`, `DataSourceRegistry`, `ExpectationContext`
+- **`operation`** -- `Operation` enum (`CLEAN_INSERT`, `INSERT`, `TRUNCATE_INSERT`, and others)
+- **`exception`** -- Framework exceptions (passive consumption via catch/inspect)
+- **`export`** -- `DataSetExporter` for exporting database content to files
+- **`preparation`** -- `DatabasePreparation` for programmatic test data setup
 
 ### Advanced API
 
 The Advanced API provides programmatic access to datasets and type-safe value objects:
 
-- **`domain`** — Type-safe value objects (`CellValue`, `TableName`, `ColumnName`, `ComparisonStrategy`)
-- **`dataset`** — `TableSet`, `Table`, `Row` interfaces for dataset representation
+- **`domain`** -- Type-safe value objects (`CellValue`, `TableName`, `ColumnName`, `ComparisonStrategy`)
+- **`dataset`** -- `TableSet`, `Table`, `Row` interfaces for dataset representation
 
 ### Extension SPI
 
-The Extension SPI is for framework integrators who build custom test extensions or data loaders:
+The Extension SPI targets framework integrators who build custom test extensions or data loaders:
 
-- **`spi`** — `OperationProvider`, `ExpectationProvider`, `DataSetLoaderProvider`
-- **`loader`** — `DataSetLoader`, `ExpectedTableSet` for custom data loading
-- **`context`** — `TestContext` for framework-agnostic test execution
-- **`scenario`** — `ScenarioNameResolver` for custom scenario name resolution
+- **`spi`** -- `OperationProvider`, `ExpectationProvider`, `DataSetLoaderProvider`
+- **`loader`** -- `DataSetLoader`, `ExpectedTableSet` for custom data loading
+- **`context`** -- `TestContext` for framework-agnostic test execution
+- **`scenario`** -- `ScenarioNameResolver` for custom scenario name resolution
 
 ## @DataSet
 
@@ -132,7 +132,8 @@ Configures individual dataset source parameters within `@DataSet` or `@ExpectedD
 
 **Location**: `io.github.seijikohara.dbtester.api.annotation.DataSetSource`
 
-**Target**: None (`@Target({})`) - This annotation cannot be applied directly to classes or methods. Use it exclusively within `@DataSet#sources()` and `@ExpectedDataSet#sources()` arrays.
+**Target**: None (`@Target({})`) - This annotation cannot apply directly to classes or methods.
+Use it exclusively within `@DataSet#sources()` and `@ExpectedDataSet#sources()` arrays.
 
 **Attributes**:
 
@@ -141,8 +142,8 @@ Configures individual dataset source parameters within `@DataSet` or `@ExpectedD
 | `resourceLocation` | `String` | `""` | Dataset directory path; empty uses convention-based discovery |
 | `dataSourceName` | `String` | `""` | Named DataSource identifier; empty uses default |
 | `scenarioNames` | `String[]` | `{}` | Scenario filters; empty uses test method name |
-| `excludeColumns` | `String[]` | `{}` | Column names to exclude from verification (case-insensitive); only effective in `@ExpectedDataSet` |
-| `columnStrategies` | `ColumnStrategy[]` | `{}` | Column-specific comparison strategies; only effective in `@ExpectedDataSet` |
+| `excludeColumns` | `String[]` | `{}` | Column names to exclude from verification (case-insensitive); effective only in `@ExpectedDataSet` |
+| `columnStrategies` | `ColumnStrategy[]` | `{}` | Column-specific comparison strategies; effective only in `@ExpectedDataSet` |
 
 **Resource Location Formats**:
 
@@ -182,13 +183,13 @@ void testWithColumnStrategies() { }
 
 **Column Exclusion Behavior**:
 
-- Column names are normalized to uppercase for comparison
-- Per-dataset exclusions are combined with global exclusions from `VerificationSettings`
+- Column names normalize to uppercase for comparison
+- Per-dataset exclusions combine with global exclusions from `VerificationSettings`
 - Exclusions apply only to `@ExpectedDataSet` verification, not `@DataSet` preparation
 
 **Column Strategy Behavior**:
 
-- Column strategies override default strict comparison for specific columns
+- Column strategies override the default strict comparison for specific columns
 - Annotation-level strategies override global strategies from `VerificationSettings`
 - Exclusions take precedence: excluded columns are skipped before strategies apply
 
@@ -224,15 +225,15 @@ Enum defining comparison strategy types for use in `@ColumnStrategy` annotations
 
 | Value | Description | Required Attribute |
 |-------|-------------|-------------------|
-| `STRICT` | Exact match using `equals()` (default) | — |
-| `IGNORE` | Skip comparison entirely | — |
-| `NUMERIC` | Type-aware numeric comparison | — |
-| `CASE_INSENSITIVE` | Case-insensitive string comparison | — |
-| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision | — |
-| `NOT_NULL` | Verifies value is not null | — |
+| `STRICT` | Exact match using `equals()` (default) | -- |
+| `IGNORE` | Skip comparison entirely | -- |
+| `NUMERIC` | Type-aware numeric comparison | -- |
+| `CASE_INSENSITIVE` | Case-insensitive string comparison | -- |
+| `TIMESTAMP_FLEXIBLE` | Converts to UTC and ignores sub-second precision | -- |
+| `NOT_NULL` | Verifies value is not null | -- |
 | `REGEX` | Pattern matching using regular expressions | `pattern` |
-| `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601, slashed, dot) | — |
-| `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) | — |
+| `DATE_FLEXIBLE` | Multi-format date comparison (ISO-8601, slashed, dot) | -- |
+| `JSON_EQUIVALENT` | JSON structural comparison (ignores key order and whitespace) | -- |
 
 **Examples**:
 
@@ -260,7 +261,8 @@ Enum defining row comparison strategies for use in `@ExpectedDataSet` annotation
 | `ORDERED` | Positional comparison (row-by-row by index). Default behavior. |
 | `UNORDERED` | Set-based comparison (rows matched regardless of position). |
 
-`UNSET` is the default for `@ExpectedDataSet.rowOrdering()`. When set, the global setting from `VerificationSettings` is used.
+`UNSET` is the default for `@ExpectedDataSet.rowOrdering()`.
+When set, the global setting from `VerificationSettings` applies.
 
 **When to Use**:
 
@@ -311,14 +313,14 @@ void shouldProcessTransaction() throws SQLException {
 
 The framework applies strategies in this order:
 
-1. `excludeColumns` — Columns listed here are excluded from comparison
-2. `columnStrategies` — Per-column strategies override the default
-3. `STRICT` — Default comparison for columns without explicit strategy
+1. `excludeColumns` -- Columns listed here are excluded from comparison
+2. `columnStrategies` -- Per-column strategies override the default
+3. `STRICT` -- Default comparison for columns without an explicit strategy
 
 ## Composed Meta-Annotations
 
 Both `@DataSet` and `@ExpectedDataSet` include `ANNOTATION_TYPE` in their `@Target`,
-enabling them to be placed on other annotations. This supports composing reusable
+which allows placing them on other annotations. This supports composing reusable
 meta-annotations that encapsulate common dataset configurations. The framework's
 `AnnotationUtils` discovers these annotations through recursive meta-annotation
 traversal with cycle detection.

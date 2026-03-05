@@ -230,7 +230,7 @@ src/test/resources/
 
 ### Validation Output
 
-DB Tester outputs detailed YAML-formatted error messages when expectation verification fails:
+DB Tester produces detailed YAML-formatted error messages when expectation verification fails.
 
 ```yaml
 Assertion failed: 2 differences in USERS

@@ -1,7 +1,7 @@
 # DB Tester
 
 [![Test](https://github.com/seijikohara/db-tester/actions/workflows/test.yml/badge.svg)](https://github.com/seijikohara/db-tester/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/seijikohara/db-tester/graph/badge.svg)](https://codecov.io/gh/seijikohara/db-tester)
+[![codecov](https://codecov.io/gh/seijikohara/db-tester/graph/badge.svg)](https://codecov.io/gh/seijikohara)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.seijikohara/db-tester-bom.svg)](https://search.maven.org/artifact/io.github.seijikohara/db-tester-bom)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Docs](https://img.shields.io/badge/Docs-VitePress-646cff.svg)](https://seijikohara.github.io/db-tester/)
@@ -10,7 +10,8 @@
   <img src="docs/public/favicon.svg" width="200" alt="DB Tester Logo">
 </div>
 
-A database testing framework for JUnit 6, Spock 2, and Kotest 6. The framework prepares database state from CSV, TSV, JSON, and YAML test data before tests and verifies it after tests using `@DataSet` and `@ExpectedDataSet` annotations.
+A database testing framework for JUnit 6, Spock 2, and Kotest 6. DB Tester prepares database state from CSV, TSV,
+JSON, and YAML test data before tests and verifies it after tests using `@DataSet` and `@ExpectedDataSet` annotations.
 
 **[Documentation](https://seijikohara.github.io/db-tester/)** · **[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-bom)** · **[Examples](examples/)**
 
@@ -153,7 +154,7 @@ ID,NAME,EMAIL
 
 ## Installation
 
-Select a module based on your test framework:
+Select a module based on your test framework.
 
 | Use Case | Module |
 |----------|--------|
@@ -215,9 +216,10 @@ testImplementation("io.github.seijikohara:db-tester-junit")
 
 ## Spring Boot Integration
 
-Spring Boot starters automatically discover and register `DataSource` beans from the ApplicationContext. Manual registration is not required.
+Spring Boot starters discover and register `DataSource` beans from the ApplicationContext automatically.
+Manual registration is not required.
 
-**Default DataSource resolution priority** (for multiple DataSource beans):
+**Default DataSource resolution priority** (when multiple DataSource beans exist):
 
 1. Single `DataSource` bean (automatic default)
 2. `@Primary`-annotated `DataSource`
@@ -288,7 +290,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ### Configuration Properties
 
-Configure via `application.properties`:
+Configure via `application.properties`.
 
 ```properties
 db-tester.enabled=true
@@ -299,7 +301,8 @@ db-tester.convention.expectation-suffix=/expected
 db-tester.operation.preparation=CLEAN_INSERT
 ```
 
-When `base-directory` is set, the framework resolves dataset files relative to this directory instead of the test class package path. When unset (default), datasets are resolved from the classpath relative to the test class.
+When `base-directory` is set, the framework resolves dataset files relative to this directory instead of the test
+class package path. When unset (default), datasets are resolved from the classpath relative to the test class.
 
 See the [Configuration](https://seijikohara.github.io/db-tester/configuration) documentation for all options.
 
@@ -309,7 +312,7 @@ See the [Configuration](https://seijikohara.github.io/db-tester/configuration) d
 
 ### Scenario Filtering
 
-Share CSV files across multiple tests using the `[Scenario]` column:
+Share CSV files across multiple tests using the `[Scenario]` column.
 
 ```csv
 [Scenario],ID,NAME,EMAIL
@@ -323,12 +326,13 @@ Each test method loads only rows matching its name.
 **Behavior details**:
 
 - CSV files without a `[Scenario]` column load all rows for every test
-- By default, the test method name is used as the scenario name for filtering
-- Override with `@DataSetSource(scenarioNames = {"scenario1", "scenario2"})` to load rows matching any of the specified scenarios (OR filter)
+- By default, the test method name serves as the scenario name for filtering
+- Override with `@DataSetSource(scenarioNames = {"scenario1", "scenario2"})` to load rows matching any of the
+  specified scenarios (OR filter)
 
 ### Custom Resource Location
 
-Specify explicit resource locations instead of convention-based discovery:
+Specify explicit resource locations instead of convention-based discovery.
 
 ```java
 @DataSet(sources = @DataSetSource(resourceLocation = "custom/data"))
@@ -338,7 +342,7 @@ void testWithCustomLocation() { }
 
 ### Column Exclusion
 
-Exclude columns (such as timestamps or auto-generated IDs) from verification:
+Exclude columns (such as timestamps or auto-generated IDs) from verification.
 
 **Per-dataset exclusion** via `@DataSetSource.excludeColumns`:
 
@@ -378,7 +382,7 @@ Column names are case-insensitive. Per-dataset exclusions are combined with glob
 
 ### Column Comparison Strategies
 
-Override the default strict comparison for specific columns using `@ColumnStrategy`:
+Override the default strict comparison for specific columns using `@ColumnStrategy`.
 
 | Strategy | Description |
 |----------|-------------|
@@ -415,11 +419,12 @@ db-tester.verification.column-strategies[0].column-name=CREATED_AT
 db-tester.verification.column-strategies[0].strategy=TIMESTAMP_FLEXIBLE
 ```
 
-Column names in strategies are case-insensitive. Annotation-level strategies override global strategies. Excluded columns take precedence over strategies.
+Column names in strategies are case-insensitive. Annotation-level strategies override global strategies.
+Excluded columns take precedence over strategies.
 
 ### Template Expressions
 
-Dataset values support template expressions that generate dynamic values at load time:
+Dataset values support template expressions that generate dynamic values at load time.
 
 | Expression | Description | Example Output |
 |------------|-------------|----------------|
@@ -436,13 +441,13 @@ ID,NAME,EMAIL,CREATED_AT
 ${sequence:1},${faker.name.fullName},user_${sequence}@example.com,${now}
 ```
 
-The `${faker.*}` expressions require [Datafaker](https://www.datafaker.net/) as an optional runtime dependency:
+The `${faker.*}` expressions require [Datafaker](https://www.datafaker.net/) as an optional runtime dependency.
 
 ```kotlin
 testRuntimeOnly("net.datafaker:datafaker:VERSION")
 ```
 
-If Datafaker is not on the classpath, `${faker....}` expressions are left unprocessed.
+If Datafaker is not on the classpath, `${faker....}` expressions remain unprocessed.
 
 See the [Advanced Usage - Template Expressions](https://seijikohara.github.io/db-tester/advanced-usage#_9-template-expressions) documentation for details.
 
@@ -450,7 +455,8 @@ See the [Advanced Usage - Template Expressions](https://seijikohara.github.io/db
 
 #### Annotation-Based Export
 
-Use `@ExportDataSet` to export database tables to files after test execution. This is useful for debugging failed tests or generating expected dataset files:
+Use `@ExportDataSet` to export database tables to files after test execution. This approach is useful for
+debugging failed tests or generating expected dataset files.
 
 ```java
 @Test
@@ -473,7 +479,7 @@ Exported files are written to `build/db-tester-export/<className>/<methodName>/`
 
 #### Programmatic Export
 
-Use `DataSetExporter` for code-based export:
+Use `DataSetExporter` for code-based export.
 
 ```java
 // Export tables to CSV files
@@ -491,7 +497,8 @@ DataSetExporter.exportQuery(dataSource, "SELECT * FROM USERS WHERE active = true
     "ACTIVE_USERS", Paths.get("export"), DataFormat.CSV);
 ```
 
-See the [Public API - Export API](https://seijikohara.github.io/db-tester/public-api#export-api) documentation for full reference.
+See the [Public API - Export API](https://seijikohara.github.io/db-tester/public-api#export-api) documentation
+for the full reference.
 
 ---
 
@@ -525,10 +532,11 @@ See the [Public API - Export API](https://seijikohara.github.io/db-tester/public
 | JSON | `.json` |
 | YAML | `.yaml` |
 
-The default `AUTO` mode detects all supported file formats in the dataset directory. If the same table name exists in multiple formats, an error is reported.
+The default `AUTO` mode detects all supported file formats in the dataset directory. If the same table name
+exists in multiple formats, the framework reports an error.
 
 ```java
-// Explicitly specify a single format
+// Specify a single format explicitly
 ConventionSettings conventions = ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();
@@ -550,7 +558,7 @@ registry.register("secondary", secondaryDataSource);
 
 ## Assertion Output
 
-When verification fails, the framework outputs differences in YAML format:
+When verification fails, the framework outputs differences in YAML format.
 
 ```yaml
 summary:
@@ -595,7 +603,7 @@ tables:
 | Error | Cause | Solution |
 |-------|-------|----------|
 | `DataSetLoadException: Could not find dataset directory` | CSV path does not match test class | Verify directory structure matches package path |
-| `DataSourceNotFoundException` | DataSource not registered | Register in `@BeforeAll` or use Spring Boot starter |
+| `DataSourceNotFoundException` | DataSource not registered | Register in `@BeforeAll` or use a Spring Boot starter |
 
 ---
 

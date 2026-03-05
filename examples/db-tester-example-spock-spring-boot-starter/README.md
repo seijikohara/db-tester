@@ -4,10 +4,10 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
-- **Convention-Based Loading** - CSV dataset resolution based on specification class and feature method names
-- **Property-Based Configuration** - Configure DB Tester via `application.properties`
-- **Spring Data JPA Integration** - Testing Spring Data repositories
+- **Auto-registration** - Spring-managed `DataSource` beans are registered with DB Tester automatically
+- **Convention-based loading** - CSV dataset resolution based on specification class and feature method names
+- **Property-based configuration** - Configure DB Tester via `application.properties`
+- **Spring Data JPA integration** - Testing Spring Data repositories
 
 ## Prerequisites
 
@@ -16,9 +16,7 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 - Spring Boot 4 or later
 - H2 Database (included as test dependency)
 
-## Usage
-
-### Running Tests
+## Running Tests
 
 ```bash
 ./gradlew :examples:db-tester-example-spock-spring-boot-starter:test
@@ -56,8 +54,9 @@ class UserRepositorySpec extends Specification {
 
 ## Related Modules
 
-- [db-tester-spock-spring-boot-starter](../../db-tester-spock-spring-boot-starter/) - Spring Boot auto-configuration for Spock
+- [db-tester-spock-spring-boot-starter](../../db-tester-spock-spring-boot-starter/) - Spring Boot
+  auto-configuration for Spock
 
 ## Documentation
 
-For detailed framework documentation, refer to the [main README](../../README.md).
+For framework documentation, see the [main README](../../README.md).

@@ -1,7 +1,7 @@
 /**
- * MySQL database integration tests.
+ * Contains MySQL database integration tests.
  *
- * <p>Demonstrates framework compatibility with MySQL using Testcontainers.
+ * <p>Demonstrates framework compatibility with MySQL via Testcontainers.
  */
 @NullMarked
 package example.database.mysql;

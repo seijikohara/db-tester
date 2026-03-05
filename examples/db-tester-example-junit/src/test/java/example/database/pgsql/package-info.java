@@ -1,7 +1,7 @@
 /**
- * PostgreSQL database integration tests.
+ * Contains PostgreSQL database integration tests.
  *
- * <p>Demonstrates framework compatibility with PostgreSQL using Testcontainers.
+ * <p>Demonstrates framework compatibility with PostgreSQL via Testcontainers.
  */
 @NullMarked
 package example.database.pgsql;

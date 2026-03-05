@@ -1,4 +1,4 @@
-/** Unit tests for the preparation package. */
+/** Unit tests for the preparation types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.preparation;
 

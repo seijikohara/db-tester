@@ -1,7 +1,7 @@
 /**
- * Service Provider Interface for data format support.
+ * Provides the Service Provider Interface for data format support.
  *
- * <p>This package contains the SPI definitions for extending the framework with new data formats.
+ * <p>This package defines the SPI for extending the framework with new data formats.
  *
  * @see io.github.seijikohara.dbtester.internal.format.spi.FormatProvider
  * @see io.github.seijikohara.dbtester.internal.format.spi.FormatRegistry

@@ -42,7 +42,7 @@ class UserRepositoryTest {
 
 ## DataSource登録
 
-`@BeforeAll`でデータソースを登録します:
+`@BeforeAll`でデータソースを登録します。
 
 ```java
 @DatabaseTest
@@ -89,7 +89,7 @@ static void setup(ExtensionContext context) {
 
 ## ネストされたテストクラス
 
-拡張機能はネストされたテストクラス間で状態を共有します:
+拡張機能はネストされたテストクラス間で状態を共有します。
 
 ```java
 @DatabaseTest
@@ -121,7 +121,7 @@ class UserRepositoryTest {
 
 ## アノテーション優先順位
 
-メソッドレベルのアノテーションがクラスレベルをオーバーライドします:
+メソッドレベルのアノテーションがクラスレベルをオーバーライドします。
 
 ```java
 @DataSet(operation = Operation.CLEAN_INSERT)  // クラスデフォルト
@@ -139,11 +139,11 @@ class UserRepositoryTest {
 
 ## テスト失敗時の動作
 
-テストメソッドが例外をスローした場合、`@ExpectedDataSet`の検証はスキップされます。テスト失敗後のデータベース状態は予測不能であるため、検証結果は信頼できません。この動作はすべてのフレームワーク統合（JUnit、Spock、Kotest）で一貫しています。
+テストメソッドが例外をスローすると、`@ExpectedDataSet`の検証はスキップされます。テスト失敗後のデータベース状態は予測不能なため、検証結果は信頼できません。この動作はJUnit、Spock、Kotestの全統合で共通です。
 
 ## 複数DataSourceの使用
 
-複数のデータソースを登録して、複数データベース間のテストを実行します:
+複数のデータソースを登録して、複数データベース間のテストを実行します。
 
 ```java
 @BeforeAll

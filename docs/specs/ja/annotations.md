@@ -7,7 +7,7 @@ description: "DB Testerのアノテーションリファレンス: @DataSet、@E
 
 ## APIレイヤー
 
-`db-tester-api`モジュールは12のパッケージをエクスポートしており、対象ユーザーに応じて3つのレイヤーに分類されます：
+`db-tester-api`モジュールは、対象ユーザーに応じて3つのレイヤーに分類されたパッケージをエクスポートします。
 
 | レイヤー | パッケージ | 対象 | 安定性 |
 |---------|-----------|------|--------|
@@ -17,35 +17,31 @@ description: "DB Testerのアノテーションリファレンス: @DataSet、@E
 
 ### ユーザーAPI
 
-ユーザーAPIには、ほとんどのユーザーが直接使用する型が含まれます：
+ユーザーAPIには、大半のユーザーが直接使用する型が含まれます。
 
 - **`annotation`** — `@DataSet`、`@ExpectedDataSet`、`@DataSetSource`、`@ColumnStrategy`
 - **`assertion`** — `DatabaseAssertion`、`DatabaseQueryAssertion`によるプログラマティックなデータベース状態検証
 - **`config`** — `Configuration`、`ConventionSettings`、`DataSourceRegistry`、`ExpectationContext`
-- **`operation`** — `Operation` enum（`CLEAN_INSERT`、`INSERT`、`TRUNCATE_INSERT`など）
+- **`operation`** — `Operation` enum（`CLEAN_INSERT`、`INSERT`、`TRUNCATE_INSERT`他）
 - **`exception`** — フレームワーク例外（catch/inspectによる受動利用）
 - **`export`** — `DataSetExporter`によるデータベースコンテンツのファイルエクスポート
 - **`preparation`** — `DatabasePreparation`によるプログラマティックなテストデータセットアップ
 
-ガイド付きの導入については[はじめに](getting-started)ページを参照してください。
-
 ### アドバンストAPI
 
-アドバンストAPIはデータセットと型安全な値オブジェクトへのプログラマティックなアクセスを提供します：
+アドバンストAPIはデータセットと型安全な値オブジェクトへのプログラマティックなアクセスを提供します。
 
 - **`domain`** — 型安全な値オブジェクト（`CellValue`、`TableName`、`ColumnName`、`ComparisonStrategy`）
 - **`dataset`** — `TableSet`、`Table`、`Row`インターフェースによるデータセット表現
 
 ### 拡張SPI
 
-拡張SPIは、カスタムテスト拡張やデータローダーを構築するフレームワークインテグレーター向けです：
+拡張SPIは、カスタムテスト拡張やデータローダーを構築するフレームワークインテグレーター向けです。
 
 - **`spi`** — `OperationProvider`、`ExpectationProvider`、`DataSetLoaderProvider`
 - **`loader`** — `DataSetLoader`、`ExpectedTableSet`によるカスタムデータ読み込み
 - **`context`** — `TestContext`によるフレームワーク非依存のテスト実行
 - **`scenario`** — `ScenarioNameResolver`によるカスタムシナリオ名解決
-
-実装の詳細については[SPI](spi)を参照してください。
 
 ## @DataSet
 
@@ -66,9 +62,9 @@ description: "DB Testerのアノテーションリファレンス: @DataSet、@E
 
 **アノテーションの継承**:
 
-- クラスレベルのアノテーションはサブクラスに継承されます
-- メソッドレベルのアノテーションはクラスレベルの宣言をオーバーライドします
-- `@Inherited`で注釈されています
+- クラスレベルのアノテーションはサブクラスに継承される
+- メソッドレベルのアノテーションはクラスレベルの宣言をオーバーライドする
+- `@Inherited`で注釈されている
 
 **例**:
 
@@ -136,7 +132,8 @@ void testWithRetry() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.annotation.DataSetSource`
 
-**ターゲット**: なし (`@Target({})`) - このアノテーションはクラスやメソッドに直接適用できません。`@DataSet#sources()`と`@ExpectedDataSet#sources()`配列内でのみ使用されます。直接適用しようとするとコンパイルエラーになります。
+**ターゲット**: なし (`@Target({})`) - クラスやメソッドに直接適用できません。
+`@DataSet#sources()`と`@ExpectedDataSet#sources()`配列内でのみ使用します。
 
 **属性**:
 
@@ -152,7 +149,7 @@ void testWithRetry() { }
 
 | 形式 | 例 | 解決方法 |
 |------|-----|----------|
-| クラスパス相対 | `data/users` | テストクラスパスルートから |
+| クラスパス相対 | `data/users` | テストクラスパスルートから解決 |
 | クラスパスプレフィックス | `classpath:data/users` | 明示的なクラスパス解決 |
 | 絶対パス | `/tmp/testdata` | ファイルシステム絶対パス |
 | 空文字列 | `""` | 規約ベースの検出 |
@@ -186,15 +183,15 @@ void testWithColumnStrategies() { }
 
 **カラム除外の動作**:
 
-- カラム名は比較のために大文字に正規化されます
-- データセットごとの除外は`VerificationSettings`のグローバル除外と結合されます
-- 除外は`@ExpectedDataSet`の検証にのみ適用され、`@DataSet`の準備には適用されません
+- カラム名は比較のために大文字に正規化される
+- データセットごとの除外は`VerificationSettings`のグローバル除外と結合される
+- 除外は`@ExpectedDataSet`の検証にのみ適用され、`@DataSet`の準備には適用されない
 
 **カラム戦略の動作**:
 
-- カラム戦略は特定のカラムのデフォルトの厳密比較をオーバーライドします
-- アノテーションレベルの戦略は`VerificationSettings`のグローバル戦略をオーバーライドします
-- 除外が優先されます：除外されたカラムは戦略が適用される前にスキップされます
+- カラム戦略は特定のカラムのデフォルト厳密比較をオーバーライドする
+- アノテーションレベルの戦略は`VerificationSettings`のグローバル戦略をオーバーライドする
+- 除外が優先される: 除外されたカラムは戦略適用前にスキップされる
 
 ## @ColumnStrategy
 
@@ -202,7 +199,7 @@ void testWithColumnStrategies() { }
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.annotation.ColumnStrategy`
 
-**ターゲット**: なし (`@Target({})`) - `@DataSetSource#columnStrategies()`内でのみ使用されます。
+**ターゲット**: なし (`@Target({})`) - `@DataSetSource#columnStrategies()`内でのみ使用します。
 
 **属性**:
 
@@ -227,15 +224,15 @@ void testWithColumnStrategies() { }
 
 | 値 | 説明 | 必須属性 |
 |-----|------|---------|
-| `STRICT` | `equals()`を使用した完全一致（デフォルト） | — |
-| `IGNORE` | 比較を完全にスキップ | — |
-| `NUMERIC` | 型を考慮した数値比較 | — |
-| `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 | — |
-| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 | — |
-| `NOT_NULL` | 値がnullでないことを検証 | — |
-| `REGEX` | 正規表現を使用したパターンマッチング | `pattern` |
-| `DATE_FLEXIBLE` | 複数形式の日付比較（ISO-8601、スラッシュ区切り、ドット区切り） | — |
-| `JSON_EQUIVALENT` | JSON構造比較（キー順序と空白を無視） | — |
+| `STRICT` | `equals()`による完全一致（デフォルト） | -- |
+| `IGNORE` | 比較をスキップ | -- |
+| `NUMERIC` | 型を考慮した数値比較 | -- |
+| `CASE_INSENSITIVE` | 大文字小文字を区別しない文字列比較 | -- |
+| `TIMESTAMP_FLEXIBLE` | UTCに変換しサブ秒精度を無視 | -- |
+| `NOT_NULL` | 値がnullでないことを検証 | -- |
+| `REGEX` | 正規表現によるパターンマッチング | `pattern` |
+| `DATE_FLEXIBLE` | 複数形式の日付比較（ISO-8601、スラッシュ区切り、ドット区切り） | -- |
+| `JSON_EQUIVALENT` | JSON構造比較（キー順序と空白を無視） | -- |
 
 **使用例**:
 
@@ -270,7 +267,7 @@ void testWithExtendedStrategies() { }
 | モード | ユースケース |
 |--------|------------|
 | `ORDERED` | クエリにORDER BYを含む場合。行順序が重要な場合。最大パフォーマンス |
-| `UNORDERED` | ORDER BYなしの場合。行順序が重要でない場合。データベースが予測不能な順序で行を返す可能性がある場合 |
+| `UNORDERED` | ORDER BYなしの場合。行順序が不定の場合。データベースが予測不能な順序で行を返す場合 |
 
 **パフォーマンスに関する注意**: UNORDERED比較は最悪の場合O(n*m)の計算量になります。
 
@@ -305,14 +302,14 @@ void shouldCreateUser() throws SQLException {
 void shouldProcessTransaction() throws SQLException {
     // ID: UUID形式として検証
     // EMAIL: 大文字小文字を無視して比較
-    // CREATED_AT: 比較を完全にスキップ
+    // CREATED_AT: 比較をスキップ
     // BALANCE: 数値として比較（型の違いを無視）
 }
 ```
 
 ### 戦略の優先順位
 
-フレームワークは以下の順序で戦略を適用します:
+フレームワークは以下の順序で戦略を適用します。
 
 1. `excludeColumns` — 指定された列を比較から除外
 2. `columnStrategies` — 列ごとの戦略がデフォルトを上書き
@@ -320,14 +317,11 @@ void shouldProcessTransaction() throws SQLException {
 
 ## 合成メタアノテーション
 
-`@DataSet` と `@ExpectedDataSet` はどちらも `@Target` に `ANNOTATION_TYPE` を含んでおり、
-他のアノテーションに付与できます。これにより、共通のデータセット設定をカプセル化した
-再利用可能なメタアノテーションの合成が可能になります。フレームワークの `AnnotationUtils` は、
-循環検出付きの再帰的なメタアノテーションの走査によってこれらのアノテーションを検出します。
+`@DataSet`と`@ExpectedDataSet`はどちらも`@Target`に`ANNOTATION_TYPE`を含んでおり、他のアノテーションに付与できます。これにより、共通のデータセット設定をカプセル化した再利用可能なメタアノテーションを合成できます。フレームワークの`AnnotationUtils`は、循環検出付きの再帰的なメタアノテーション走査でこれらのアノテーションを検出します。
 
 ### 合成 @DataSet アノテーションの定義
 
-固定のリソースロケーションで `@DataSet` をラップするカスタムアノテーションを作成します:
+固定のリソースロケーションで`@DataSet`をラップするカスタムアノテーションを作成します。
 
 ```java
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
@@ -350,7 +344,7 @@ void shouldVerifyAfterSeeding() throws SQLException {
 
 ### 合成 @ExpectedDataSet アノテーションの定義
 
-列の除外設定で `@ExpectedDataSet` をラップするカスタムアノテーションを作成します:
+列の除外設定で`@ExpectedDataSet`をラップするカスタムアノテーションを作成します。
 
 ```java
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
@@ -362,7 +356,7 @@ public @interface VerifyIgnoringAuditColumns {}
 
 ### 二段階合成
 
-両方の合成アノテーションを単一のアノテーションに統合します:
+両方の合成アノテーションを単一のアノテーションに統合します。
 
 ```java
 @Target({ElementType.METHOD, ElementType.TYPE, ElementType.ANNOTATION_TYPE})
