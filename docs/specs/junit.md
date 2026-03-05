@@ -20,7 +20,7 @@ description: "Integrate DB Tester with JUnit using DatabaseTestExtension for ann
 
 ## Registration
 
-**Recommended** — Use the `@DatabaseTest` composed annotation:
+**Recommended** -- Use the `@DatabaseTest` composed annotation:
 
 ```java
 @DatabaseTest
@@ -31,7 +31,7 @@ class UserRepositoryTest {
 
 `@DatabaseTest` is equivalent to `@ExtendWith(DatabaseTestExtension.class)` with less boilerplate.
 
-**Alternative** — Register the extension directly:
+**Alternative** -- Register the extension directly:
 
 ```java
 @ExtendWith(DatabaseTestExtension.class)
@@ -121,7 +121,7 @@ class UserRepositoryTest {
 
 ## Annotation Precedence
 
-Method-level annotations override class-level:
+Method-level annotations override class-level annotations:
 
 ```java
 @DataSet(operation = Operation.CLEAN_INSERT)  // Class default
@@ -139,7 +139,10 @@ class UserRepositoryTest {
 
 ## Test Failure Behavior
 
-When a test method throws an exception, `@ExpectedDataSet` verification is skipped. The database state is unpredictable after a test failure, so verification results would be misleading. This behavior is consistent across all framework integrations (JUnit, Spock, Kotest).
+When a test method throws an exception, `@ExpectedDataSet` verification is skipped.
+The database state is unpredictable after a test failure, so verification results
+would be misleading. This behavior is consistent across all framework integrations
+(JUnit, Spock, Kotest).
 
 ## Multiple DataSource Usage
 

@@ -1,23 +1,20 @@
 /**
- * Dataset abstraction for representing database tables and rows.
+ * Provides format-agnostic dataset abstractions for database tables and rows.
  *
- * <p><strong>API Category: Domain Types</strong> — Shared value objects used across both User API
- * and Extension API. These types appear in method signatures throughout the framework.
+ * <p><strong>API Category: Domain Types</strong> — Shared value objects used across the User API
+ * and Extension API.
  *
- * <p>This package contains the core interfaces for representing database data in a format-agnostic
- * way. The main interfaces are:
+ * <p>This package defines the following interfaces:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.dataset.TableSet} - A collection of tables
- *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Table} - A single database table with
+ *   <li>{@link io.github.seijikohara.dbtester.api.dataset.TableSet} — a collection of tables
+ *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Table} — a single database table with
  *       columns and rows
- *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Row} - A single row within a table
+ *   <li>{@link io.github.seijikohara.dbtester.api.dataset.Row} — a single row within a table
  * </ul>
  *
- * <p>These interfaces are implemented by the core module and are used throughout the framework for
- * data loading, comparison, and validation.
- *
- * <p><strong>Audience:</strong> Users with programmatic dataset needs.
+ * <p>The core module implements these interfaces. The framework uses them for data loading,
+ * comparison, and validation.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.dataset;

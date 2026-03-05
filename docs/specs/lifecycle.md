@@ -102,7 +102,7 @@ flowchart TD
 | Phase | Error Type | Behavior |
 |-------|------------|----------|
 | DataSet | `DatabaseOperationException` | Test fails before execution |
-| Test | Any exception | ExpectedDataSet is skipped |
+| Test | Any exception | ExpectedDataSet verification is skipped |
 | ExpectedDataSet | `ValidationException` | Test fails with comparison details |
 
 ## Related Specifications

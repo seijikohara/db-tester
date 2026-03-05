@@ -1,8 +1,4 @@
-/**
- * Unit tests for operation classes.
- *
- * <p>This package contains unit tests for the operation-related enums and classes.
- */
+/** Unit tests for the operation types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.operation;
 

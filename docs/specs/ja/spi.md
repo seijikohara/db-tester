@@ -5,51 +5,50 @@ description: "カスタムSPI実装によるDB Testerの拡張方法。"
 
 # DB Tester仕様 - サービスプロバイダーインターフェース（SPI）
 
-## SPI概要
+## SPIアーキテクチャ
 
-本フレームワークはモジュール間の疎結合のためにJava ServiceLoaderを使用します:
+本フレームワークはモジュール間の疎結合のためにJava ServiceLoaderを使用します。
 
 ```mermaid
 flowchart TB
     subgraph API[db-tester-api]
-        SPI[SPIインターフェース]
+        SPI[SPI Interfaces]
     end
 
     subgraph CORE[db-tester-core]
-        IMPL[実装]
+        IMPL[Implementations]
     end
 
-    subgraph Frameworks[テストフレームワーク]
+    subgraph Frameworks[Test Frameworks]
         JUNIT[db-tester-junit]
         SPOCK[db-tester-spock]
         KOTEST[db-tester-kotest]
     end
 
     API <-->|ServiceLoader| CORE
-    Frameworks -->|コンパイル時| API
-    CORE -.->|ServiceLoader経由でランタイム時| Frameworks
+    Frameworks -->|Compile-time| API
+    CORE -.->|Runtime via ServiceLoader| Frameworks
 ```
 
 ### 設計原則
 
-1. **API独立性**: テストフレームワークモジュールは`db-tester-api`のみに依存
-2. **ランタイム検出**: Core実装はServiceLoader経由で読み込み
-3. **拡張性**: カスタム実装でデフォルトを置換可能
-
+1. **API独立性**: テストフレームワークモジュールは`db-tester-api`のみに依存する。
+2. **ランタイム検出**: ServiceLoaderがCore実装をランタイムに読み込む。
+3. **拡張性**: カスタム実装を登録するとデフォルトを置換できる。
 
 ### 2層SPIアーキテクチャ
 
-本フレームワークは、フレームワーク向けの関心事と実装の詳細を分離するために2層SPIアーキテクチャを使用します:
+本フレームワークは、フレームワーク向けの関心事と実装の詳細を分離する2層SPIアーキテクチャを使用します。
 
 ```mermaid
 flowchart TB
-    subgraph Tier1["Tier 1 — サポートレイヤー (フレームワーク向け)"]
+    subgraph Tier1["Tier 1 — Support Layer (Framework-facing)"]
         PS[PreparationSupport]
         ES[ExpectationSupport]
         XS[ExportSupport]
     end
 
-    subgraph Tier2["Tier 2 — プロバイダーレイヤー (実装向け)"]
+    subgraph Tier2["Tier 2 — Provider Layer (Implementation-facing)"]
         OP[OperationProvider]
         EP[ExpectationProvider]
         AP[AssertionProvider]
@@ -57,7 +56,7 @@ flowchart TB
         XP[ExportProvider]
     end
 
-    subgraph Frameworks[テストフレームワークエクステンション]
+    subgraph Frameworks[Test Framework Extensions]
         JE[JUnit PreparationExecutor]
         JV[JUnit ExpectationVerifier]
         JX[JUnit ExportExecutor]
@@ -73,16 +72,15 @@ flowchart TB
     XS -->|ServiceLoader| XP
 ```
 
-**Tier 1 — サポートレイヤー**: テストフレームワークエクステンション（JUnit、Spock、Kotest）によって読み込まれる高レベルのライフサイクルSPI。各Supportインターフェースはテストライフサイクルの1つのフェーズ（準備、検証、エクスポート）をカプセル化し、アノテーションとコンテキストパラメータを受け取ります。
+**Tier 1 -- サポートレイヤー**: テストフレームワークエクステンション（JUnit、Spock、Kotest）が読み込む高レベルのライフサイクルSPIです。各Supportインターフェースはテストライフサイクルの1フェーズ（準備、検証、エクスポート）をカプセル化し、アノテーションとコンテキストパラメータを受け取ります。
 
-**Tier 2 — プロバイダーレイヤー**: `db-tester-core`のSupport実装によって読み込まれる低レベルの操作SPI。Providerインターフェースは細粒度のデータベース操作（SQL実行、データセット比較、ファイルエクスポート）を定義します。
+**Tier 2 -- プロバイダーレイヤー**: `db-tester-core`のSupport実装が読み込む低レベルの操作SPIです。Providerインターフェースは細粒度のデータベース操作（SQL実行、データセット比較、ファイルエクスポート）を定義します。
 
-**スタンドアロンSPI**: 2層パターンに参加しないSPIもあります:
-- `DataSetLoaderProvider` — デフォルトデータセットローダーを提供するために`Configuration.defaults()`から読み込まれる
-- `ScenarioNameResolver` — コアのシナリオ解決インフラストラクチャから読み込まれる
-- `TypeHandler` — カスタムデータベース型処理のために`TypeHandlerRegistry`から読み込まれる
-- `FormatProvider` — ファイル形式解析のために`FormatRegistry`から読み込まれる内部SPI
-
+**スタンドアロンSPI**: 2層パターンに属さないSPIは以下のとおりです。
+- `DataSetLoaderProvider` -- デフォルトデータセットローダーを提供するために`Configuration.defaults()`から読み込まれる
+- `ScenarioNameResolver` -- コアのシナリオ解決インフラストラクチャから読み込まれる
+- `TypeHandler` -- カスタムデータベース型処理のために`TypeHandlerRegistry`から読み込まれる
+- `FormatProvider` -- ファイル形式解析のために`FormatRegistry`から読み込まれる内部SPI
 
 ## サポートレイヤー
 
@@ -113,7 +111,6 @@ public interface PreparationSupport {
 | `context` | `TestContext` | 設定、レジストリ、テストメタデータを含むテストコンテキスト |
 | `dataSet` | `DataSet` | 準備設定を含む`@DataSet`アノテーション |
 
-
 ### ExpectationSupport
 
 テストライフサイクル中にデータベース期待値検証を実行します。
@@ -141,8 +138,7 @@ public interface ExpectationSupport {
 | `context` | `TestContext` | 設定、レジストリ、テストメタデータを含むテストコンテキスト |
 | `expectedDataSet` | `ExpectedDataSet` | 検証設定を含む`@ExpectedDataSet`アノテーション |
 
-**スロー**: 設定されたすべてのリトライ後に検証が失敗した場合、`ValidationException`をスローします。
-
+**スロー**: 設定済みリトライ回数を超えても検証が失敗した場合、`ValidationException`をスローする。
 
 ### ExportSupport
 

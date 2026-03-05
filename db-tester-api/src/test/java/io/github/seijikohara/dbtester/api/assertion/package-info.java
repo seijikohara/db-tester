@@ -1,4 +1,4 @@
-/** Unit tests for assertion types in the DB Tester API. */
+/** Unit tests for the assertion types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.assertion;
 

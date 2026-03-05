@@ -2,9 +2,10 @@
 title: "フレームワーク比較 - DB Tester"
 description: "DB TesterとDBUnitなど他フレームワークとの比較。"
 ---
+
 # フレームワーク比較
 
-このページでは、DB TesterとJava/JVMエコシステムの他のデータベーステスティングフレームワークを詳細に比較します。
+DB TesterとJava/JVMエコシステムの他のデータベーステスティングフレームワークを比較します。
 
 ## エグゼクティブサマリー
 
@@ -37,7 +38,7 @@ description: "DB TesterとDBUnitなど他フレームワークとの比較。"
 | CDI/Jakarta EE | - | - | Yes | - | - | - |
 | Cucumber/BDD | - | - | Yes | - | - | - |
 
-*DSL: アノテーション（`@DataSet`、`@ExpectedDataSet`など）は非対応。[RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl)プログラマティックAPIを使用。
+*DSL: Database Riderは`@DataSet`と`@ExpectedDataSet`アノテーションをサポートする。DB Testerも同名のアノテーションを使用する。SpockでDatabase Riderを使用する場合は、[RiderDSL](https://database-rider.github.io/database-rider/latest/documentation.html#_rider_dsl)プログラマティックAPIを使用する。
 
 **分析:**
 - DB TesterはJUnit 6とKotestをネイティブサポートする唯一のフレームワーク
@@ -61,8 +62,8 @@ description: "DB TesterとDBUnitなど他フレームワークとの比較。"
 
 **分析:**
 - Database Riderは最も多くのフォーマットをサポート（YAML、JSON、XML、CSV、Excel）
-- DB TesterはCSV、TSV、JSON、およびYAMLによるデータ管理をサポート
-- DbSetupとJDBDTはプログラムによるデータ定義を好む
+- DB TesterはCSV、TSV、JSON、YAMLによるデータ管理をサポート
+- DbSetupとJDBDTはプログラムによるデータ定義を採用
 
 ### 設定アプローチ
 
@@ -164,7 +165,7 @@ USER:
 |-----|------|-------|
 | **XMLサポートなし** | 既存のDBUnit XMLデータセットから移行できない | XMLをCSVに手動またはスクリプトで変換 |
 | **Excelサポートなし** | ビジネスユーザーがスプレッドシートでテストデータを管理できない | ExcelをCSVにエクスポート |
-| **プログラムによるデータセットビルダーなし** | コード内で動的テストデータを生成できない | SPIでカスタムDataLoaderを実装 |
+| **データセット用のFluentビルダーAPIなし** | コード内でFluentビルダーによるデータセット構築ができない | `TableSet`/`Table`ファクトリメソッドを使用するか、SPI経由でカスタム`DataLoader`を実装 |
 
 ### 機能の制限
 
@@ -187,15 +188,15 @@ USER:
 
 ### DB Testerを選択すべきでない場合
 
-以下が必要な場合は代替を検討してください：
+以下が必要な場合は代替を検討してください。
 
-1. **複数データフォーマット** → Database Riderを選択
-2. **既存のXMLデータセット** → DBUnitまたはDatabase Riderを選択
-3. **BDD/Cucumber統合** → Database Riderを選択
-4. **JUnit 4/5またはTestNG** → DBUnit、Database Rider、またはDbSetupを選択
-5. **差分アサーション** → JDBDTを選択
-6. **コードのみアプローチ** → DbSetupを選択
-7. **成熟した実績のあるソリューション** → DBUnitを選択
+1. **複数データフォーマット** -- Database Riderを選択
+2. **既存のXMLデータセット** -- DBUnitまたはDatabase Riderを選択
+3. **BDD/Cucumber統合** -- Database Riderを選択
+4. **JUnit 4/5またはTestNG** -- DBUnit、Database Rider、またはDbSetupを選択
+5. **差分アサーション** -- JDBDTを選択
+6. **コードのみアプローチ** -- DbSetupを選択
+7. **成熟した実績のあるソリューション** -- DBUnitを選択
 
 ---
 
@@ -500,6 +501,6 @@ public void testQueryDoesNotModify() {
 - [JDBDT](https://jdbdt.github.io/)
 
 ### 関連ツール
-- [Testcontainers](https://testcontainers.com/) - 統合テスト用のデータベースコンテナ
-- [Flyway](https://flywaydb.org/) - データベースマイグレーションツール
-- [Liquibase](https://www.liquibase.org/) - データベース変更管理
+- [Testcontainers](https://testcontainers.com/) -- 統合テスト用のデータベースコンテナ
+- [Flyway](https://flywaydb.org/) -- データベースマイグレーションツール
+- [Liquibase](https://www.liquibase.org/) -- データベース変更管理

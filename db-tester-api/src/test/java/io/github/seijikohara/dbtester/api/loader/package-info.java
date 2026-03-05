@@ -1,4 +1,4 @@
-/** Unit tests for loader types in the DB Tester API. */
+/** Unit tests for the dataset loader types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.loader;
 

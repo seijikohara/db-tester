@@ -1,5 +1,5 @@
 /**
- * CSV format provider implementation.
+ * Provides the CSV format provider implementation.
  *
  * @see io.github.seijikohara.dbtester.internal.format.csv.CsvFormatProvider
  */

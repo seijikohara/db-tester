@@ -1,7 +1,7 @@
 /**
- * Lifecycle management for JUnit Jupiter database testing.
+ * Provides lifecycle management for JUnit Jupiter database testing.
  *
- * <p>This package contains the preparation executor and expectation verifier that manage the test
+ * <p>This package contains the preparation executor and expectation verifier that manage test
  * lifecycle phases.
  */
 @NullMarked

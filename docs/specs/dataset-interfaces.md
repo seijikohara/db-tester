@@ -348,7 +348,8 @@ Defines value comparison behavior during assertion.
 | `NOT_NULL` | false | false | false | true |
 | `REGEX` | false | false | false | Pattern.matches() |
 
-**Architecture Note**: `ComparisonStrategy` serves as a descriptor (what to compare). Comparison execution (how to compare) is handled by `ComparisonEngine` in the core module.
+**Architecture Note**: `ComparisonStrategy` serves as a descriptor (what to compare).
+Comparison execution (how to compare) is handled by `ComparisonEngine` in the core module.
 
 ## Related Specifications
 

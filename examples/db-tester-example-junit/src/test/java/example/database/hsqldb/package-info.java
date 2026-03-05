@@ -1,7 +1,7 @@
 /**
- * HSQLDB (HyperSQL Database) integration tests.
+ * Contains HSQLDB (HyperSQL Database) integration tests.
  *
- * <p>Demonstrates framework compatibility with HSQLDB.
+ * <p>Demonstrates framework compatibility with the HSQLDB in-memory database.
  */
 @NullMarked
 package example.database.hsqldb;

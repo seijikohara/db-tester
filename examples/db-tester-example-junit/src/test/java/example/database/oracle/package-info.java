@@ -1,7 +1,7 @@
 /**
- * Oracle Database integration tests.
+ * Contains Oracle Database integration tests.
  *
- * <p>Demonstrates framework compatibility with Oracle using Testcontainers.
+ * <p>Demonstrates framework compatibility with Oracle via Testcontainers.
  */
 @NullMarked
 package example.database.oracle;

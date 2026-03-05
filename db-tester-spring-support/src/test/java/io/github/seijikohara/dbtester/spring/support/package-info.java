@@ -1,4 +1,4 @@
-/** Unit tests for Spring support utilities. */
+/** Unit tests for the Spring support utilities. */
 @NullMarked
 package io.github.seijikohara.dbtester.spring.support;
 

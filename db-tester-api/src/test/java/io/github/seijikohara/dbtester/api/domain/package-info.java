@@ -1,4 +1,4 @@
-/** Tests for the domain package. */
+/** Unit tests for the domain value objects. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.domain;
 

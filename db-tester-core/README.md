@@ -1,13 +1,14 @@
 # DB Tester - Core Module
 
-This module provides the internal implementation of the DB Tester framework. The module implements the SPI interfaces defined in `db-tester-api`. It contains database operations, dataset loaders, and format providers.
+This module provides the internal implementation of the DB Tester framework. It implements the SPI interfaces
+defined in `db-tester-api` and contains database operations, dataset loaders, and format providers.
 
 ## Overview
 
-- **SPI Implementations** - Default providers for operations, assertions, and data loading
-- **Database Operations** - Pure JDBC implementation for database setup and verification
-- **Dataset Loaders** - Convention-based and custom data loading implementations
-- **Format Providers** - CSV, TSV, JSON, and YAML format support with scenario filtering
+- **SPI implementations** - Default providers for operations, assertions, and data loading
+- **Database operations** - Pure JDBC implementation for database setup and verification
+- **Dataset loaders** - Convention-based and custom data loading implementations
+- **Format providers** - CSV, TSV, JSON, and YAML format support with scenario filtering
 
 ## Architecture
 
@@ -20,7 +21,7 @@ db-tester-junit / db-tester-spock / db-tester-kotest (test framework integration
 ```
 
 - **Depends on**: `db-tester-api`
-- **Is loaded at runtime** by `db-tester-junit`, `db-tester-spock`, and `db-tester-kotest` via ServiceLoader
+- **Loaded at runtime** by `db-tester-junit`, `db-tester-spock`, and `db-tester-kotest` via ServiceLoader
 
 ## Requirements
 
@@ -28,7 +29,8 @@ db-tester-junit / db-tester-spock / db-tester-kotest (test framework integration
 
 ## Installation
 
-Integration modules load this module automatically at runtime via ServiceLoader. Direct dependency is not required for typical usage.
+Integration modules load this module at runtime via ServiceLoader. Direct dependency is not required for
+typical usage.
 
 Use the integration modules instead:
 
@@ -65,7 +67,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 | Package | Description |
 |---------|-------------|
 | `internal.assertion` | Database assertion and comparison implementations |
-| `internal.dataset` | TableSet, Table, Row implementations |
+| `internal.dataset` | TableSet, Table, and Row implementations |
 | `internal.domain` | Internal type-safe domain value objects |
 | `internal.format` | Format parsing framework |
 | `internal.format.csv` | CSV format provider implementation |
@@ -84,7 +86,7 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ## SPI Providers
 
-This module provides implementations for the SPI interfaces defined in `db-tester-api`:
+This module implements the SPI interfaces defined in `db-tester-api`.
 
 | SPI Interface | Implementation |
 |---------------|----------------|
@@ -120,7 +122,7 @@ requires io.github.seijikohara.dbtester.core;
 | `DataSetComparator` | Compares expected and actual datasets |
 | `OperationExecutor` | Coordinates JDBC operation execution |
 | `TableReader` | Reads table data from database |
-| `SqlIdentifier` | Validates SQL identifiers (table/column names) |
+| `SqlIdentifier` | Validates SQL identifiers (table and column names) |
 | `FormatRegistry` | Manages format providers (CSV, TSV, JSON, YAML) |
 | `TableSetMerger` | Merges multiple datasets using configured strategy |
 
@@ -135,4 +137,4 @@ requires io.github.seijikohara.dbtester.core;
 
 ## Documentation
 
-For usage examples and configuration details, refer to the [main README](../README.md).
+For usage examples and configuration details, see the [main README](../README.md).

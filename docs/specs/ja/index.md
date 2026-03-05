@@ -23,23 +23,23 @@ features:
   - icon:
       src: /icons/declarative.svg
     title: 宣言的なテスト
-    details: "@DataSetと@ExpectedDataSetアノテーションを使用して、テストデータのセットアップと検証を定義できます。"
+    details: "@DataSetと@ExpectedDataSetアノテーションでテストデータのセットアップと検証を定義します。"
   - icon:
       src: /icons/convention.svg
     title: 設定より規約
-    details: フレームワークがテストクラスとメソッド名に基づいてデータセットを自動検出します。
+    details: テストクラスとメソッド名に基づいてデータセットを自動検出します。
   - icon:
       src: /icons/frameworks.svg
     title: 複数フレームワーク対応
-    details: JUnit Jupiter、Spock、Kotestを完全サポート。Spring Boot統合も利用可能です。
+    details: JUnit Jupiter、Spock、Kotestをサポートします。Spring Boot統合も利用できます。
   - icon:
       src: /icons/data-formats.svg
     title: 柔軟なデータフォーマット
-    details: CSV、TSV、JSON、およびYAMLをサポート。シナリオフィルタリングにより複数のテストでデータセットを共有できます。
+    details: CSV、TSV、JSON、YAMLをサポートします。シナリオフィルタリングで複数のテストがデータセットを共有できます。
   - icon:
       src: /icons/database.svg
     title: データベース操作
-    details: CLEAN_INSERT、INSERT、UPDATE、DELETE、TRUNCATEなどをサポート。テーブル順序のカスタマイズも可能です。
+    details: CLEAN_INSERT、INSERT、UPDATE、DELETE、TRUNCATEをサポートします。テーブル順序のカスタマイズも可能です。
   - icon:
       src: /icons/extensible.svg
     title: 拡張可能なアーキテクチャ
@@ -123,7 +123,7 @@ dependencies {
 
 :::
 
-### 基本的な使い方
+### 使い方
 
 ::: code-group
 
@@ -153,7 +153,7 @@ package com.example
 @DatabaseTest
 @DataSet  // CSVからテストデータを読み込む
 @ExpectedDataSet  // データベースの状態を検証
-class UserRepositorySpec extends Specification {
+class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
     def "should create user"() {
         when:
@@ -230,7 +230,7 @@ src/test/resources/
 
 ### 検証出力
 
-期待値の検証が失敗した場合、DB Testerは詳細なYAML形式のエラーメッセージを提供します：
+期待値の検証が失敗した場合、DB TesterはYAML形式の詳細なエラーメッセージを出力します。
 
 ```yaml
 Assertion failed: 2 differences in USERS
@@ -252,7 +252,7 @@ tables:
 ```
 
 ::: tip
-出力は有効なYAMLです。標準的なYAMLライブラリがCI/CD統合のためにこの出力を解析できます。
+出力は有効なYAMLです。標準YAMLライブラリでCI/CD統合用に解析できます。
 :::
 
 詳細は[エラーハンドリング](/ja/error-handling)を参照してください。

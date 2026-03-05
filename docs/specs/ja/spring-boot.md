@@ -34,17 +34,17 @@ dependencies {
 
 ## 自動DataSource検出
 
-3つのスターターすべてが`db-tester-spring-support`を通じて同一の自動設定動作を共有します:
+3つのスターターは`db-tester-spring-support`を通じて同一の自動設定動作を共有します。
 
 1. Spring `ApplicationContext`を検出
 2. `DataSource` Beanを検索
-3. デフォルト`DataSource`を以下の優先順位で解決:
+3. デフォルト`DataSource`を以下の優先順位で解決
    1. 単一の`DataSource` Bean（自動的にデフォルト）
-   2. `@Primary`アノテーション付き`DataSource`
+   2. `@Primary`付き`DataSource`
    3. `"dataSource"`という名前の`DataSource` Bean
 4. すべてのBeanを`DataSourceRegistry`に登録
 
-手動のDataSource登録は不要です。スターターが自動的に登録を処理します。
+手動のDataSource登録は不要です。スターターが登録を自動処理します。
 
 ## 拡張機能の登録
 
@@ -104,7 +104,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ## 複数DataSource
 
-複数のデータソースを使用する場合、`@Primary`と`@Qualifier`でBeanを定義します:
+複数のデータソースを使用する場合、`@Primary`と`@Qualifier`でBeanを定義します。
 
 ```java
 @Configuration
@@ -120,7 +120,7 @@ class DataSourceConfig {
 }
 ```
 
-アノテーションで名前付きデータソースを参照します:
+アノテーションで名前付きデータソースを参照します。
 
 ```java
 @Test
@@ -133,7 +133,7 @@ void testMultipleDatabases() { }
 
 ## 設定プロパティ
 
-`application.properties`または`application.yml`で設定します。すべてのプロパティが3つのスターターに共通です。
+`application.properties`または`application.yml`で設定します。すべてのプロパティは3つのスターター共通です。
 
 ```properties
 # DB Testerの有効化/無効化（デフォルト: true）

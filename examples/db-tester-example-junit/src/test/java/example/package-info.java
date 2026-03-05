@@ -1,8 +1,5 @@
 /**
- * Example tests demonstrating database testing features.
- *
- * <p>This package contains comprehensive examples and integration tests for the database testing
- * framework.
+ * Contains example tests demonstrating database testing features.
  */
 @NullMarked
 package example;

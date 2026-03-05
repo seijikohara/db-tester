@@ -9,7 +9,7 @@ description: "DB TesterのプログラマティックAPIリファレンス: Data
 
 ### DatabaseAssertion
 
-プログラマティックなデータベースアサーションのための静的ファサードです。このユーティリティクラスはSPI経由でロードされたアサーションプロバイダーに処理を委譲します。
+プログラマティックなデータベースアサーションの静的ファサードです。SPI経由でロードされたアサーションプロバイダーに処理を委譲します。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion`
 
@@ -19,16 +19,16 @@ description: "DB TesterのプログラマティックAPIリファレンス: Data
 
 | メソッド | 説明 |
 |----------|------|
-| `assertEquals(TableSet, TableSet)` | 2つのテーブルセットが等しいことを検証 |
+| `assertEquals(TableSet, TableSet)` | 2つのテーブルセットの一致を検証 |
 | `assertEquals(TableSet, TableSet, AssertionFailureHandler)` | カスタム失敗ハンドラーで検証 |
-| `assertEquals(Table, Table)` | 2つのテーブルが等しいことを検証 |
+| `assertEquals(Table, Table)` | 2つのテーブルの一致を検証 |
 | `assertEquals(Table, Table, Collection<String>)` | 追加カラムを含めてテーブルを検証 |
 | `assertEquals(Table, Table, AssertionFailureHandler)` | カスタム失敗ハンドラーでテーブルを検証 |
 | `assertEqualsIgnoreColumns(TableSet, TableSet, String, Collection<String>)` | 指定カラムを除外してテーブルセット内のテーブルを検証 |
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | 指定カラムを除外してテーブルを検証 |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | カラムごとの比較戦略でテーブルを検証 |
 
-**可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
+**可変長引数オーバーロード**: `Collection<String>`を受け取るメソッドには、`String...`可変長引数オーバーロードも存在します。
 
 **例**:
 
@@ -53,7 +53,7 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
 
 ### DatabaseQueryAssertion
 
-クエリベースのデータベースアサーションのための静的ファサードです。SQLクエリを実行し、結果を期待データセットと比較します。`DatabaseAssertion`の純粋なデータ比較からクエリ実行の関心事を分離します。
+クエリベースのデータベースアサーションの静的ファサードです。SQLクエリを実行し、結果を期待データセットと比較します。`DatabaseAssertion`のデータ比較とクエリ実行の関心事を分離します。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion`
 
@@ -66,7 +66,7 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
 | `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルセットと検証 |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | SQLクエリ結果を期待テーブルと検証 |
 
-**可変長引数オーバーロード**: カラム名に`Collection<String>`を受け取るメソッドは、利便性のため`String...`可変長引数オーバーロードも提供しています。
+**可変長引数オーバーロード**: `Collection<String>`を受け取るメソッドには、`String...`可変長引数オーバーロードも存在します。
 
 **例**:
 
@@ -84,7 +84,7 @@ DatabaseQueryAssertion.assertEqualsByQuery(
 
 ### AssertionFailureHandler
 
-アサーション不一致に対応するための戦略インターフェースです。実装はカスタム例外のスロー、診断ログの出力、差分の蓄積など、ドメイン固有のアクションに変換できます。
+アサーション不一致に対応する戦略インターフェースです。実装はカスタム例外のスロー、診断ログの出力、差分の蓄積といったドメイン固有のアクションに変換できます。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler`
 
@@ -128,7 +128,7 @@ if (!failures.isEmpty()) {
 
 ### DataSetExporter
 
-データベースコンテンツをファイルにエクスポートするための静的ファサードです。このユーティリティクラスは`ExportProvider` SPI経由でロードされた形式固有の実装に処理を委譲します。
+データベースコンテンツをファイルにエクスポートする静的ファサードです。`ExportProvider` SPI経由でロードされた形式固有の実装に処理を委譲します。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.export.DataSetExporter`
 
@@ -138,16 +138,14 @@ if (!failures.isEmpty()) {
 
 | メソッド | 説明 |
 |----------|------|
-| `export(DataSource, List<String>, Path, DataFormat)` | デフォルト設定で指定形式のファイルにテーブルをエクスポート |
-| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | カスタム設定でファイルにテーブルをエクスポート |
-| `exportQuery(DataSource, String, String, Path, DataFormat)` | デフォルト設定でSQLクエリ結果をファイルにエクスポート |
-| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | カスタム設定でSQLクエリ結果をファイルにエクスポート |
+| `export(DataSource, List<String>, Path, DataFormat)` | デフォルト設定で指定形式のファイルにテーブルをエクスポート。`AUTO`指定時は`IllegalArgumentException`をスロー |
+| `export(DataSource, List<String>, Path, DataFormat, ExportConfiguration)` | カスタム設定でファイルにテーブルをエクスポート。`AUTO`指定時は`IllegalArgumentException`をスロー |
+| `exportQuery(DataSource, String, String, Path, DataFormat)` | デフォルト設定でSQLクエリ結果をファイルにエクスポート。`AUTO`指定時は`IllegalArgumentException`をスロー |
+| `exportQuery(DataSource, String, String, Path, DataFormat, ExportConfiguration)` | カスタム設定でSQLクエリ結果をファイルにエクスポート。`AUTO`指定時は`IllegalArgumentException`をスロー |
 | `csv(DataSource, List<String>, Path)` | CSVファイルにテーブルをエクスポート（簡易メソッド） |
 | `tsv(DataSource, List<String>, Path)` | TSVファイルにテーブルをエクスポート（簡易メソッド） |
 | `json(DataSource, List<String>, Path)` | JSONファイルにテーブルをエクスポート（簡易メソッド） |
 | `yaml(DataSource, List<String>, Path)` | YAMLファイルにテーブルをエクスポート（簡易メソッド） |
-
-**注意**: `DataFormat.AUTO`をエクスポート形式として指定すると`IllegalArgumentException`がスローされます。エクスポート時は具体的な形式（CSV、TSV、JSON、YAML）を指定してください。
 
 **例**:
 
@@ -193,7 +191,7 @@ DataSetExporter.exportQuery(
 | `timeFormatter` | `DateTimeFormatter` | `ISO_LOCAL_TIME` | 時刻値のフォーマッタ（`HH:mm:ss`） |
 | `timestampFormatter` | `DateTimeFormatter` | `yyyy-MM-dd HH:mm:ss` | タイムスタンプ値のフォーマッタ |
 | `lobHandling` | `LobHandling` | `BASE64` | LOBカラムの処理戦略 |
-| `writeLoadOrderFile` | `boolean` | `false` | ロード順序ファイルを生成するかどうか |
+| `writeLoadOrderFile` | `boolean` | `false` | ロード順序ファイルの生成有無 |
 | `loadOrderFileName` | `String` | `load-order.txt` | ロード順序ファイルの名前 |
 
 **例**:
@@ -212,7 +210,7 @@ var config = ExportConfiguration.builder()
 
 ### LobHandling
 
-エクスポート時のLOB（Large Object）カラムの処理方法を定義するenumです。
+エクスポート時のLOB（Large Object）カラム処理方法を定義するenumです。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.export.LobHandling`
 
@@ -220,12 +218,12 @@ var config = ExportConfiguration.builder()
 
 | 値 | 説明 |
 |-----|------|
-| `BASE64` | LOB値を`[BASE64]`プレフィックス付きのBase64エンコード文字列としてエクスポート。エクスポートとインポートの往復をサポート |
-| `OMIT` | LOBカラムをエクスポートから除外。バイナリデータが不要な場合やファイルサイズを削減する場合に使用 |
+| `BASE64` | LOB値を`[BASE64]`プレフィックス付きBase64エンコード文字列としてエクスポート。エクスポートとインポートの往復に対応 |
+| `OMIT` | LOBカラムをエクスポートから除外。バイナリデータが不要な場合やファイルサイズの削減に使用 |
 
 ### ExportProvider（SPI）
 
-形式固有のエクスポートロジックを実装するためのSPIです。
+形式固有のエクスポートロジックを実装するSPIです。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.spi.ExportProvider`
 
@@ -239,15 +237,15 @@ var config = ExportConfiguration.builder()
 | `export(DataSource, List<String>, Path, ExportConfiguration)` | `void` | テーブルをファイルにエクスポート |
 | `exportQuery(DataSource, String, String, Path, ExportConfiguration)` | `void` | SQLクエリ結果をファイルにエクスポート |
 
-**検出方法**: プロバイダーは`java.util.ServiceLoader`経由で検出されます。`META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`に実装を登録してください。
+**検出方法**: `java.util.ServiceLoader`経由で検出されます。`META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`に実装を登録してください。
 
-**スレッドセーフティ**: 実装はスレッドセーフかつステートレスである必要があります。
+**スレッドセーフティ**: 実装はスレッドセーフかつステートレスにしてください。
 
 ## プリパレーションAPI
 
 ### DatabasePreparation
 
-プログラマティックなデータベースプリパレーションのための静的ファサードです。このユーティリティクラスはSPI経由でロードされたオペレーションプロバイダーに処理を委譲します。
+プログラマティックなデータベースプリパレーションの静的ファサードです。SPI経由でロードされたオペレーションプロバイダーに処理を委譲します。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.preparation.DatabasePreparation`
 
@@ -287,7 +285,7 @@ DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSE
 
 ### PreparationConfig
 
-プログラマティックなデータベースプリパレーション操作の設定レコードです。`standard()`でデフォルト値のインスタンスを取得し、`with*()`メソッドでカスタマイズします。
+プログラマティックなデータベースプリパレーション操作の設定レコードです。`standard()`でデフォルト値のインスタンスを取得し、`with*()`メソッドで個別にカスタマイズします。
 
 **パッケージ**: `io.github.seijikohara.dbtester.api.preparation.PreparationConfig`
 

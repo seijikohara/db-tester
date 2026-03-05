@@ -1,5 +1,5 @@
 /**
- * TSV format provider implementation.
+ * Provides the TSV format provider implementation.
  *
  * @see io.github.seijikohara.dbtester.internal.format.tsv.TsvFormatProvider
  */

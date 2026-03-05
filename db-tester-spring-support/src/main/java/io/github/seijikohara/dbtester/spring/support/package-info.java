@@ -1,16 +1,12 @@
 /**
- * Spring support utilities for DB Tester framework.
+ * Provides Spring support utilities for the DB Tester framework.
  *
- * <p>This package provides common utilities for integrating DB Tester with Spring-based
- * applications. The classes in this package are designed to be used by Spring Boot starter modules
- * to eliminate code duplication.
- *
- * <p>Key classes:
+ * <p>Spring Boot starter modules use these utilities to share DataSource registration logic.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.spring.support.DataSourceRegistrarSupport} - Common
+ *   <li>{@link io.github.seijikohara.dbtester.spring.support.DataSourceRegistrarSupport} — common
  *       logic for DataSource registration
- *   <li>{@link io.github.seijikohara.dbtester.spring.support.PrimaryBeanResolver} - Utility for
+ *   <li>{@link io.github.seijikohara.dbtester.spring.support.PrimaryBeanResolver} — utility for
  *       resolving primary bean status
  * </ul>
  *

@@ -4,12 +4,13 @@ This directory contains example tests demonstrating the features of the DB Teste
 
 ## Overview
 
-- **Convention-Based Testing** - CSV file resolution based on test class and method names
-- **Scenario Filtering** - CSV row filtering using `[Scenario]` column marker
-- **Data Formats** - CSV, TSV, JSON, and YAML file format support
-- **Table Merge Strategies** - FIRST, LAST, UNION, UNION_ALL merge behaviors
-- **Comparison Strategies** - STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE, JSON_EQUIVALENT, NOT_NULL, REGEX comparisons
-- **Property-Based Configuration** - Spring Boot property binding for DB Tester settings
+- **Convention-based testing** - CSV file resolution based on test class and method names
+- **Scenario filtering** - CSV row filtering using `[Scenario]` column marker
+- **Data formats** - CSV, TSV, JSON, and YAML file format support
+- **Table merge strategies** - FIRST, LAST, UNION, and UNION_ALL merge behaviors
+- **Comparison strategies** - STRICT, IGNORE, NUMERIC, CASE_INSENSITIVE, TIMESTAMP_FLEXIBLE, DATE_FLEXIBLE,
+  JSON_EQUIVALENT, NOT_NULL, and REGEX comparisons
+- **Property-based configuration** - Spring Boot property binding for DB Tester settings
 
 ## Prerequisites
 
@@ -23,16 +24,16 @@ This directory contains example tests demonstrating the features of the DB Teste
 
 | Module | Description |
 |--------|-------------|
-| [db-tester-example-junit](db-tester-example-junit/) | JUnit examples with feature tests and database integration tests |
-| [db-tester-example-spock](db-tester-example-spock/) | Spock examples with feature tests and database integration tests |
-| [db-tester-example-kotest](db-tester-example-kotest/) | Kotest examples with feature tests and database integration tests |
+| [db-tester-example-junit](db-tester-example-junit/) | JUnit examples with feature and database integration tests |
+| [db-tester-example-spock](db-tester-example-spock/) | Spock examples with feature and database integration tests |
+| [db-tester-example-kotest](db-tester-example-kotest/) | Kotest examples with feature and database integration tests |
 | [db-tester-example-junit-spring-boot-starter](db-tester-example-junit-spring-boot-starter/) | Spring Boot examples with JUnit |
 | [db-tester-example-spock-spring-boot-starter](db-tester-example-spock-spring-boot-starter/) | Spring Boot examples with Spock |
 | [db-tester-example-kotest-spring-boot-starter](db-tester-example-kotest-spring-boot-starter/) | Spring Boot examples with Kotest |
 
-## Usage
+## Running Examples
 
-### Running All Examples
+Run each module separately.
 
 ```bash
 ./gradlew :examples:db-tester-example-junit:test
@@ -43,7 +44,7 @@ This directory contains example tests demonstrating the features of the DB Teste
 ./gradlew :examples:db-tester-example-kotest-spring-boot-starter:test
 ```
 
-### Running with Verbose Output
+Run with verbose output.
 
 ```bash
 ./gradlew :examples:db-tester-example-junit:test --info
@@ -99,4 +100,4 @@ This directory contains example tests demonstrating the features of the DB Teste
 
 ## Documentation
 
-For detailed framework documentation, refer to the [main README](../README.md).
+For framework documentation, see the [main README](../README.md).

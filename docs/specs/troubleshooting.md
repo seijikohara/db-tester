@@ -35,7 +35,7 @@ Expected location: src/test/resources/com/example/UserRepositoryTest
 ```
 
 **Diagnosis**:
-1. Check if the directory exists at `src/test/resources/{package}/{TestClassName}/`
+1. Check that the directory exists at `src/test/resources/{package}/{TestClassName}/`
 2. Verify the package path uses forward slashes
 3. Confirm the test class name matches exactly (case-sensitive)
 
@@ -60,12 +60,12 @@ Hint: Add at least one data file (for example, TABLE_NAME.csv)...
 Found files: [README.txt, notes.md]
 ```
 
-The `Found files` line lists all files in the directory to help diagnose the issue. This line is omitted when the directory is empty.
+The `Found files` line lists all files in the directory to help diagnose the issue. The framework omits this line when the directory is empty.
 
 **Diagnosis**:
 1. Check the `Found files` list for files with incorrect extensions
 2. Verify file extensions match the configured `dataFormat`
-3. Confirm files are not hidden (no `.` prefix) and are in the correct directory level
+3. Confirm files are not hidden (no `.` prefix) and reside in the correct directory level
 
 **Solution**:
 
@@ -134,7 +134,7 @@ When using `DataFormat.AUTO` (the default), the framework loads all supported fi
 
 | Approach | Action |
 |----------|--------|
-| Remove duplicates | Keep only one file per table name (e.g., remove `USERS.yaml` if `USERS.csv` exists) |
+| Remove duplicates | Keep only one file per table name (for example, remove `USERS.yaml` if `USERS.csv` exists) |
 | Specify concrete format | Set `DataFormat.CSV`, `DataFormat.TSV`, `DataFormat.JSON`, or `DataFormat.YAML` in `ConventionSettings` |
 
 ```java
@@ -156,7 +156,7 @@ Failed to read load order file: /path/to/load-order.txt
 ```
 
 **Diagnosis**:
-When using `TableOrderingStrategy.LOAD_ORDER_FILE`, the `load-order.txt` file is required.
+When using `TableOrderingStrategy.LOAD_ORDER_FILE`, the framework requires `load-order.txt`.
 
 **Solution**:
 Create `load-order.txt` in your dataset directory:
@@ -175,7 +175,7 @@ See [Data Formats - Load Order](data-formats#load-order) for details.
 
 ### Understanding YAML Output
 
-When validation fails, DB Tester outputs structured YAML:
+When validation fails, DB Tester produces structured YAML:
 
 ```yaml
 Assertion failed: 2 differences in USERS
@@ -204,16 +204,16 @@ tables:
 
 **Diagnosis**:
 1. Check `[Scenario]` column filtering
-2. Verify all expected rows are in the CSV
-3. Check if test logic deleted rows unexpectedly
+2. Verify all expected rows exist in the CSV
+3. Check whether test logic deleted rows unexpectedly
 
 **Solution**:
 
 | Cause | Action |
 |-------|--------|
-| Missing `[Scenario]` value | Add test method name to `[Scenario]` column |
-| Wrong scenario name | Match exactly with test method name |
-| Extra rows filtered | Remove `[Scenario]` column to load all rows |
+| Missing `[Scenario]` value | Add the test method name to the `[Scenario]` column |
+| Wrong scenario name | Match exactly with the test method name |
+| Extra rows filtered | Remove the `[Scenario]` column to load all rows |
 
 See [Data Formats - Scenario Filtering](data-formats#scenario-filtering).
 
@@ -227,8 +227,8 @@ See [Data Formats - Scenario Filtering](data-formats#scenario-filtering).
 ```
 
 **Diagnosis**:
-1. Compare expected CSV with actual database state
-2. Check if test logic updated the value
+1. Compare the expected CSV with the actual database state
+2. Check whether test logic updated the value
 3. Verify row ordering matches
 
 **Solution**:
@@ -236,7 +236,7 @@ See [Data Formats - Scenario Filtering](data-formats#scenario-filtering).
 | Cause | Action |
 |-------|--------|
 | Row order differs | Use `rowOrdering = RowOrdering.UNORDERED` |
-| Timestamp precision | Check comparison strategy for date columns |
+| Timestamp precision | Check the comparison strategy for date columns |
 | Floating point | Values within epsilon (1e-6) match automatically |
 
 ### Using excludeColumns and columnStrategies
@@ -269,7 +269,7 @@ No default data source registered
 ```
 
 **Diagnosis**:
-1. Check `@BeforeAll` method signature includes `ExtensionContext`
+1. Check that the `@BeforeAll` method signature includes `ExtensionContext`
 2. Verify `registerDefault()` is called
 3. Confirm no exception occurred during registration
 
@@ -342,11 +342,11 @@ Then reference it in annotations:
 |--------------|--------|-----|
 | Use `RowOrdering.ORDERED` | Fastest comparison (O(n)) | Set in `@ExpectedDataSet` |
 | Use `TRUNCATE_INSERT` | Faster than `CLEAN_INSERT` | Set in `@DataSet` |
-| Create `load-order.txt` | Skip metadata discovery | Add file to dataset directory |
+| Create `load-order.txt` | Skips metadata discovery | Add file to dataset directory |
 | Reduce dataset size | Fewer rows to process | Use `[Scenario]` filtering |
 
 ::: warning RowOrdering Performance
-`RowOrdering.UNORDERED` performs O(n*m) comparison in worst case.
+`RowOrdering.UNORDERED` performs O(n*m) comparison in the worst case.
 Use `ORDERED` when row order is predictable.
 :::
 
@@ -357,10 +357,10 @@ See [Database Operations](database-operations) for operation details.
 **Symptom**: Connection timeout or pool exhaustion.
 
 **Note**: Connection pooling is external to DB Tester.
-Configure your connection pool (HikariCP, c3p0, etc.) appropriately.
+Configure your connection pool (HikariCP, c3p0, and others) accordingly.
 
 **Recommendations**:
-- Set appropriate `maximumPoolSize` for parallel test execution
+- Set an appropriate `maximumPoolSize` for parallel test execution
 - Configure `connectionTimeout` for slow database connections
 - Use `DB_CLOSE_DELAY=-1` for H2 in-memory databases
 
@@ -370,7 +370,7 @@ Configure your connection pool (HikariCP, c3p0, etc.) appropriately.
 
 **Solutions**:
 1. Split large CSVs into smaller files per scenario
-2. Use `[Scenario]` column to load only relevant rows
+2. Use the `[Scenario]` column to load only relevant rows
 3. Increase JVM heap size for tests: `-Xmx512m`
 
 ---
@@ -392,7 +392,7 @@ src/test/resources/
 
 ### Scenario Column Name Mismatch
 
-**Mistake**: Using different scenario marker than configured.
+**Mistake**: Using a scenario marker different from the configured value.
 
 **Default**: `[Scenario]` column
 
@@ -409,7 +409,7 @@ Configuration.builder()
 
 **Mistake**: Using unsupported file extensions with a concrete `DataFormat`.
 
-With `DataFormat.AUTO` (the default), the framework accepts all supported extensions (`.csv`, `.tsv`, `.json`, `.yaml`). When a concrete format is configured, only files with the matching extension are loaded.
+With `DataFormat.AUTO` (the default), the framework accepts all supported extensions (`.csv`, `.tsv`, `.json`, `.yaml`). When a concrete format is configured, only files with the matching extension load.
 
 **Solution**:
 Use `DataFormat.AUTO` (default) to load all supported formats, or configure the matching format:
@@ -419,11 +419,11 @@ ConventionSettings.builder()
     .build();
 ```
 
-Or rename files to match the configured format extension.
+Alternatively, rename files to match the configured format extension.
 
 ### Expectation Suffix Mismatch
 
-**Mistake**: Expected files not in `expected/` subdirectory.
+**Mistake**: Expected files not in the `expected/` subdirectory.
 
 **Default**: `expected/` suffix for expectation datasets.
 
@@ -438,7 +438,7 @@ See [Configuration](configuration) for all settings.
 
 ### Table Name Case Sensitivity
 
-**Mistake**: CSV filename case does not match table name.
+**Mistake**: CSV filename case does not match the table name.
 
 **Example**:
 - Table created as `USERS` (H2 uppercase)
@@ -479,7 +479,7 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 ### Step 2: Check Dataset Loading
 
 DEBUG output shows:
-- Which files are being loaded
+- Which files the framework loads
 - Table order determination
 - Row filtering by scenario
 
@@ -504,7 +504,7 @@ void debugTest() throws SQLException {
 ### Step 4: Compare Expected vs Actual
 
 If validation fails, the YAML output shows exact differences.
-Use this to identify whether the issue is in:
+Use this output to identify whether the issue is in:
 - Expected data (CSV)
 - Test logic
 - Database state
@@ -513,8 +513,8 @@ Use this to identify whether the issue is in:
 
 ## Related Documentation
 
-- [Error Handling](error-handling) - Exception specifications
-- [Configuration](configuration) - Framework settings
-- [Data Formats](data-formats) - Data format structure
-- [Database Operations](database-operations) - Operation types
-- [Public API](public-api) - Annotation reference
+- [Error Handling](error-handling) -- Exception specifications
+- [Configuration](configuration) -- Framework settings
+- [Data Formats](data-formats) -- Data format structure
+- [Database Operations](database-operations) -- Operation types
+- [Public API](public-api) -- Annotation reference

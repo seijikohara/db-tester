@@ -13,11 +13,12 @@ description: "Integrate DB Tester with Kotest using AnnotationSpec and the Datab
 
 **Location**: `io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension`
 
-**Type**: `TestCaseExtension` - Intercepts test case execution for data set and expected data set phases.
+**Type**: `TestCaseExtension` - Intercepts test case execution for DataSet and ExpectedDataSet phases.
 
 ## Registration
 
-**Recommended** — Use the `@DatabaseTest` annotation. The specification class must implement the `DatabaseTestSupport` interface:
+**Recommended** -- Use the `@DatabaseTest` annotation.
+The specification class must implement the `DatabaseTestSupport` interface:
 
 ```kotlin
 @DatabaseTest
@@ -41,7 +42,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 }
 ```
 
-**Alternative** — Register the extension in the `init` block:
+**Alternative** -- Register the extension in the `init` block:
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
@@ -125,8 +126,9 @@ fun `should create user with email`() {
 
 ## AnnotationSpec Requirement
 
-DB Tester requires `AnnotationSpec` style for Kotest integration because:
-1. Annotations (`@DataSet`, `@ExpectedDataSet`) can be applied to test methods
+DB Tester requires `AnnotationSpec` style for Kotest integration for three reasons:
+
+1. Annotations (`@DataSet`, `@ExpectedDataSet`) can apply to test methods
 2. Method resolution via reflection is reliable
 3. Familiar JUnit-like structure for Java developers
 

@@ -7,7 +7,7 @@ description: "DB Testerのモジュラーアーキテクチャ、拡張ポイン
 
 ## モジュール構造
 
-本フレームワークは、階層化されたアーキテクチャで構成された10のモジュールから構成されています。
+本フレームワークは、階層化されたアーキテクチャで構成された10のモジュールで構成されています。
 
 ```mermaid
 graph TD
@@ -64,8 +64,8 @@ graph TD
 | `db-tester-bom` | バージョン管理と依存関係の整合 |
 | `db-tester-api` | パブリックアノテーション、設定、ドメインモデル、SPIインターフェース |
 | `db-tester-core` | JDBC操作、フォーマット解析、SPI実装 |
-| `db-tester-spring-support` | Spring Boot starter向け共通DataSource登録ロジック |
-| `db-tester-junit` | JUnit Jupiter BeforeEach/AfterEachコールバック |
+| `db-tester-spring-support` | Spring DataSource統合サポート |
+| `db-tester-junit` | JUnit Jupiter BeforeEachおよびAfterEachコールバック |
 | `db-tester-spock` | Spockアノテーション駆動型拡張とインターセプター |
 | `db-tester-kotest` | Kotest AnnotationSpec TestCaseExtension |
 | `db-tester-junit-spring-boot-starter` | JUnit用Spring Boot自動設定 |
@@ -104,7 +104,7 @@ graph TD
 | `domain` | 値オブジェクト（`TableName`, `ColumnName`, `CellValue`） |
 | `exception` | 例外階層 |
 | `loader` | データセットローダーインターフェース |
-| `operation` | Operationenumと戦略 |
+| `operation` | Operation enumと戦略 |
 | `scenario` | シナリオフィルタリングインターフェース |
 | `spi` | サービスプロバイダーインターフェース |
 
@@ -114,10 +114,10 @@ graph TD
 
 | パッケージ | 責務 |
 |-----------|------|
-| `assertion` | データセット比較、検証、および `ComparisonEngine` 実行 |
+| `assertion` | データセット比較、検証、`ComparisonEngine`実行 |
 | `dataset` | TableSet, Table, Row実装 |
 | `domain` | 内部値オブジェクト |
-| `format` | CSV、TSV、JSON、およびYAML解析とフォーマットプロバイダー |
+| `format` | CSV、TSV、JSON、YAML解析とフォーマットプロバイダー |
 | `jdbc` | JDBC読み取り/書き込み操作 |
 | `loader` | 規約ベースのデータセット読み込み |
 | `scenario` | シナリオフィルタリング実装 |
@@ -238,6 +238,6 @@ module io.github.seijikohara.dbtester.api {
 - [概要](overview) - フレームワークの目的と主要概念
 - [パブリックAPI](public-api) - アノテーションと設定クラス
 - [設定](configuration) - 設定オプション
-- [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
+- [テストフレームワーク](test-frameworks) - JUnit、Spock、Kotestの統合
 - [SPI](spi) - サービスプロバイダーインターフェース拡張ポイント
 - [エラーハンドリング](error-handling) - エラーメッセージと例外型

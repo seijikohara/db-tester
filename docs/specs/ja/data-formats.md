@@ -7,43 +7,68 @@ description: "AUTO検出、CSV、TSV、JSON、およびYAMLデータフォーマ
 
 ## サポートされる形式
 
-フレームワークは5つのデータフォーマット設定をサポートします: 自動検出モード（AUTO）、2つの区切りテキスト形式（CSV、TSV）、および2つの構造化形式（JSON、YAML）。
+フレームワークは自動フォーマット検出と4つのデータフォーマットをサポートします。
+2つの区切りテキスト形式（CSV、TSV）と2つの構造化形式（JSON、YAML）です。
 
 | 形式 | 拡張子 | 区切り文字 | デフォルト |
 |------|--------|-----------|-----------|
-| AUTO | 全サポート形式 | — | はい |
+| AUTO | 全サポート形式 | -- | はい |
 | CSV | `.csv` | カンマ（`,`） | いいえ |
 | TSV | `.tsv` | タブ（`\t`） | いいえ |
-| JSON | `.json` | — | いいえ |
-| YAML | `.yaml` | — | いいえ |
+| JSON | `.json` | -- | いいえ |
+| YAML | `.yaml` | -- | いいえ |
 
-### AUTO（自動フォーマット検出）
+### 形式の選択
 
-`DataFormat.AUTO`はデフォルトのフォーマット設定です。データセットディレクトリ内のすべてのサポート形式（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルを自動的に検出して読み込みます。
+`ConventionSettings`で形式を設定します:
 
-```text
-src/test/resources/com/example/UserRepositoryTest/
-├── USERS.csv          # CSV形式で読み込み
-├── ORDERS.json        # JSON形式で読み込み
-├── CATEGORIES.yaml    # YAML形式で読み込み
-└── AUDIT_LOG.tsv      # TSV形式で読み込み
+```java
+var conventions = ConventionSettings.builder()
+    .dataFormat(DataFormat.TSV)
+    .build();
 ```
 
-AUTOモードでは、異なる形式のファイルを同一ディレクトリに混在させることができます。各ファイルは拡張子に基づいて適切なパーサーで処理されます。
+具体的な形式（CSV、TSV、JSON、またはYAML）を使用する場合、フレームワークは設定された拡張子に一致するファイルのみを処理します。`AUTO`（デフォルト）を使用する場合、フレームワークはすべてのサポート形式のファイルを処理します。
 
-#### テーブル名の競合検出
+## 自動フォーマット検出
 
-AUTOモードでは、同一テーブル名が複数の形式で存在する場合、`DataSetLoadException`がスローされます。
+`DataFormat.AUTO`はデフォルトのフォーマットです。データセットディレクトリ内のすべてのサポート形式（CSV、TSV、JSON、YAML）のファイルを検出して読み込みます。
 
-例えば、以下のようにディレクトリに`USERS.csv`と`USERS.yaml`の両方が存在する場合:
+### 動作
 
-```text
+`AUTO`が有効な場合:
+
+1. データセットディレクトリ内のサポート拡張子（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルをスキャンする
+2. 各ファイルを拡張子に基づいて解析する
+3. テーブル名は具体的な形式と同様にファイル名（拡張子なし）から導出する
+
+### 混合フォーマット読み込み
+
+単一のデータセットディレクトリに異なる形式のファイルを含められます:
+
+```
+src/test/resources/com/example/UserRepositoryTest/
+├── USERS.csv
+├── ORDERS.json
+├── CATEGORIES.yaml
+└── AUDIT_LOG.tsv
+```
+
+各ファイルは拡張子に対応するフォーマットパーサーで解析されます。
+
+### テーブル名の競合検出
+
+同一テーブル名が複数のファイル形式で存在する場合、フレームワークは`DataSetLoadException`をスローします。
+
+**競合の例**:
+
+```
 src/test/resources/com/example/UserRepositoryTest/
 ├── USERS.csv
 └── USERS.yaml
 ```
 
-以下のエラーが発生します:
+**エラーメッセージ**:
 
 ```text
 Table name conflict detected in AUTO format mode.
@@ -58,30 +83,16 @@ To resolve, remove duplicate files or specify a concrete format:
   DataFormat.CSV, DataFormat.TSV, DataFormat.JSON, or DataFormat.YAML
 ```
 
-エラーメッセージには競合するすべてのテーブル名と対応するファイルが列挙されるため、問題の特定が容易です。
-
-#### エクスポート制限
+### エクスポート制限
 
 `DataSetExporter`はエクスポート操作で`DataFormat.AUTO`をサポートしません。エクスポート時には具体的な形式（CSV、TSV、JSON、またはYAML）を指定してください。`AUTO`を使用すると`IllegalArgumentException`がスローされます。
 
-#### API詳細
+### API詳細
 
 | メソッド | AUTOの挙動 |
 |---------|------------|
 | `hasExtension()` | `false`を返す |
 | `getExtension()` | `UnsupportedOperationException`をスロー |
-
-### 形式の選択
-
-特定の形式を指定する場合は、`ConventionSettings`で設定します:
-
-```java
-var conventions = ConventionSettings.builder()
-    .dataFormat(DataFormat.TSV)
-    .build();
-```
-
-特定の形式を指定した場合、ディレクトリからデータセットを読み込む際、設定された拡張子に一致するファイルのみが処理されます。AUTOモード（デフォルト）の場合は、すべてのサポート形式のファイルが処理されます。
 
 
 ## ファイル構造
@@ -158,7 +169,7 @@ order_id	user_id	amount	status
 
 ### シナリオマーカーカラム
 
-シナリオマーカーカラムにより、複数のテストメソッドでデータセットファイルを共有できます:
+シナリオマーカーカラムにより、複数のテストメソッドでデータセットファイルを共有できます。
 
 | カラム名 | 設定可能 | デフォルト |
 |----------|----------|-----------|
@@ -166,7 +177,7 @@ order_id	user_id	amount	status
 
 ### シナリオカラムの動作
 
-データセットファイルにシナリオマーカーカラムが含まれている場合、本フレームワークは以下の処理を行います:
+データセットファイルにシナリオマーカーカラムが含まれている場合、本フレームワークは以下の処理を実行します。
 
 1. マーカーが現在のシナリオに一致する行をフィルタリング
 2. 結果のデータセットからシナリオマーカーカラムを削除
@@ -184,7 +195,7 @@ testUpdate,3,Charlie,charlie@example.com
 testDelete,4,Diana,diana@example.com
 ```
 
-テストメソッド`testCreate`の場合、本フレームワークは以下にフィルタリングします:
+テストメソッド`testCreate`の場合、以下の行にフィルタリングされます。
 
 | id | name | email |
 |----|------|-------|
@@ -200,7 +211,7 @@ testDelete,4,Diana,diana@example.com
 
 ### 複数シナリオ
 
-単一のテストで複数のシナリオを使用できます:
+単一のテストで複数のシナリオを使用できます。
 
 ```java
 @DataSet(sources = @DataSetSource(scenarioNames = {"scenario1", "scenario2"}))
@@ -385,9 +396,9 @@ JUnitのネストされたテストクラスの場合:
 
 ## 読み込み順序
 
-### 概要
+### 読み込み順序ファイル
 
-`load-order.txt`ファイルは、データベース操作中にテーブルが処理される順序を制御します。これは、親テーブルを子テーブルより先に投入する必要がある外部キー関係を持つテーブルにとって重要です。
+`load-order.txt`ファイルは、データベース操作中のテーブル処理順序を制御します。外部キー関係を持つテーブルで、親テーブルを子テーブルより先に投入する必要がある場合に重要です。
 
 ### ファイルの場所
 
@@ -431,10 +442,8 @@ ORDER_ITEMS
 
 データセットディレクトリに`load-order.txt`が存在しない場合:
 
-1. テーブルはファイル名で**アルファベット順**にソートされます
-2. フレームワークはファイルを**自動生成しません**
-
-**注意**: 他のデータベーステストフレームワークとは異なり、db-testerは`load-order.txt`ファイルを自動作成しません。これはDbUnit互換性のため、およびテストリソースの変更を避けるための意図的な設計です。
+1. テーブルはファイル名でアルファベット順にソートされる
+2. フレームワークはファイルを自動生成しない
 
 読み込み順序ファイルを明示的に必須にするには、以下を使用します:
 
@@ -621,7 +630,7 @@ void testWithSharedData() { }
 ## 関連仕様
 
 - [概要](overview) - フレームワークの目的と主要概念
-- [設定](configuration) - DataFormatとConventionSettings
+- [設定](configuration) - DataFormat、ConventionSettings
 - [データベース操作](database-operations) - テーブル順序と操作
 - [アノテーション](annotations) - アノテーション属性
 - [エラーハンドリング](error-handling) - データセット読み込みエラー

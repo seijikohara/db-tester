@@ -33,9 +33,8 @@ Performs no database operation.
 - Skips all dataset tables
 - Does not modify database state
 
-**Use Case**:
-- ExpectedDataSet-only tests where data set data exists from previous tests
-- Manual setup scenarios
+**Use Case**: ExpectedDataSet-only tests where data exists from previous tests,
+or manual setup scenarios.
 
 ### UPDATE
 
@@ -48,9 +47,7 @@ Updates existing rows identified by primary key.
 - Updates non-key columns
 - Ignores rows not found in database
 
-**Use Case**:
-- Modifying existing test data
-- State transitions within tests
+**Use Case**: Modifying existing test data or state transitions within tests.
 
 **Requirements**:
 - Tables must have primary keys defined
@@ -67,16 +64,14 @@ Inserts new rows without modifying existing data.
 - Fails on duplicate primary key violations
 - Does not affect existing rows
 
-**Use Case**:
-- Appending to tables with existing data
-- Tests requiring specific row additions
+**Use Case**: Appending to tables with existing data or tests requiring specific row additions.
 
-**Constraints**:
-- Requires empty target rows or unique keys
+**Constraints**: Requires empty target rows or unique keys.
 
 ### UPSERT
 
-Performs upsert operations (insert or update). Combines INSERT and UPDATE into a single logical operation.
+Performs upsert operations (insert or update).
+Combines INSERT and UPDATE into a single logical operation.
 
 **SQL Generated**:
 - Update attempt: `UPDATE table SET col2 = ?, col3 = ? WHERE col1 = ?`
@@ -88,18 +83,18 @@ Performs upsert operations (insert or update). Combines INSERT and UPDATE into a
 - The first column in the dataset definition is treated as the primary key
 - All remaining columns are included in the `SET` clause of the update statement
 
-**Use Case**:
-- Mixed scenarios with partial existing data
-- Incremental data setup
-- Idempotent test data preparation
+**Use Case**: Mixed scenarios with partial existing data, incremental data setup,
+or idempotent test data preparation.
 
 **Requirements**:
-- The first column in the dataset file (CSV header, JSON key order, YAML key order) must be the primary key
+- The first column in the dataset file (CSV header, JSON key order, YAML key order)
+  must be the primary key
 - Tables must have a primary key column matching the first dataset column
 
 **Convention**:
 
-The framework uses a first-column-as-primary-key convention. Define the primary key column as the first column in dataset files:
+The framework uses a first-column-as-primary-key convention.
+Define the primary key column as the first column in dataset files:
 
 ```csv
 ID,NAME,EMAIL
@@ -107,7 +102,8 @@ ID,NAME,EMAIL
 2,bob,bob@example.com
 ```
 
-In this example, `ID` is used as the primary key for the `WHERE` clause. The framework generates:
+In this example, `ID` is used as the primary key for the `WHERE` clause.
+The framework generates:
 - `UPDATE USERS SET NAME = ?, EMAIL = ? WHERE ID = ?` (update attempt)
 - `INSERT INTO USERS (ID, NAME, EMAIL) VALUES (?, ?, ?)` (insert fallback)
 
@@ -122,12 +118,9 @@ Deletes specific rows identified by primary key.
 - Deletes only matching rows
 - Other rows remain unchanged
 
-**Use Case**:
-- Removing specific test records
-- Cleanup of individual rows
+**Use Case**: Removing specific test records or cleaning up individual rows.
 
-**Requirements**:
-- Dataset must include primary key columns
+**Requirements**: Dataset must include primary key columns.
 
 ### DELETE_ALL
 
@@ -138,14 +131,11 @@ Deletes all rows from referenced tables.
 **Behavior**:
 - Deletes all rows from each table in dataset
 - Does not reset identity or sequence columns
-- Respects foreign key constraints (may fail)
+- Respects foreign key constraints (may fail if constraints exist)
 
-**Use Case**:
-- Clearing tables while preserving sequences
-- Setup for insert-only operations
+**Use Case**: Clearing tables while preserving sequences, or setup for insert-only operations.
 
-**Table Processing Order**:
-- Tables processed in reverse foreign key order
+**Table Processing Order**: Tables processed in reverse foreign key order.
 
 ### TRUNCATE_TABLE
 
@@ -158,9 +148,7 @@ Truncates tables, resetting identity columns where supported.
 - Resets identity and auto-increment columns
 - Database-dependent behavior for foreign keys
 
-**Use Case**:
-- Complete table reset including sequences
-- Performance-critical cleanup
+**Use Case**: Complete table reset including sequences, or performance-critical cleanup.
 
 **Database Support**:
 
@@ -182,9 +170,7 @@ Deletes all rows then inserts dataset rows.
 1. Delete all rows from each table (reverse FK order)
 2. Insert all rows from dataset (FK order)
 
-**Use Case**:
-- Standard test data set setup (default operation)
-- Deterministic starting state
+**Use Case**: Standard test data setup (default operation) for a deterministic starting state.
 
 **Execution Order**:
 - DELETE phase: Child tables first
@@ -200,9 +186,7 @@ Truncates tables then inserts dataset rows.
 1. Truncate each table (may require CASCADE)
 2. Insert all rows from dataset
 
-**Use Case**:
-- Test data set setup with sequence reset
-- Performance-optimized setup
+**Use Case**: Test data setup with sequence reset, or performance-optimized setup.
 
 ## Execution Flow
 
@@ -248,13 +232,14 @@ flowchart TD
 
 **Location**: `io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy`
 
-The `TableOrderingStrategy` enum controls how the framework determines the order in which tables are processed during database operations.
+The `TableOrderingStrategy` enum controls how the framework determines the order
+in which tables are processed during database operations.
 
 ### Available Strategies
 
 | Strategy | Description |
 |----------|-------------|
-| `AUTO` | Automatically determine best ordering (default) |
+| `AUTO` | Determine best ordering automatically (default) |
 | `LOAD_ORDER_FILE` | Use `load-order.txt` file (error if not found) |
 | `FOREIGN_KEY` | Use JDBC metadata for FK-based ordering |
 | `ALPHABETICAL` | Sort tables alphabetically by name |
@@ -263,19 +248,21 @@ The `TableOrderingStrategy` enum controls how the framework determines the order
 
 #### AUTO (Default)
 
-The framework attempts strategies in the following order:
+The framework attempts strategies in this order:
 
 1. **LOAD_ORDER_FILE** - If `load-order.txt` exists in the dataset directory, use it
 2. **FOREIGN_KEY** - Query JDBC metadata to resolve foreign key dependencies
 3. **ALPHABETICAL** - Fall back to case-insensitive alphabetical ordering
 
-This strategy provides the most flexible behavior and is suitable for most use cases.
+This strategy provides the most flexible behavior and suits most use cases.
 
 #### LOAD_ORDER_FILE
 
-Requires a `load-order.txt` file in the dataset directory. If the file does not exist, the framework throws a `DataSetLoadException`.
+Requires a `load-order.txt` file in the dataset directory.
+If the file does not exist, the framework throws a `DataSetLoadException`.
 
-**Use Case**: When you need explicit control over table ordering and want to guarantee the order is always specified.
+**Use Case**: When you need explicit control over table ordering and want to
+guarantee the order is always specified.
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
@@ -284,14 +271,16 @@ void testWithExplicitOrder() { }
 
 #### FOREIGN_KEY
 
-Uses JDBC database metadata (`DatabaseMetaData.getExportedKeys()`) to analyze foreign key dependencies and performs a topological sort.
+Uses JDBC database metadata (`DatabaseMetaData.getExportedKeys()`) to analyze
+foreign key dependencies and performs a topological sort.
 
 **Behavior**:
-- Parent tables (those referenced by foreign keys) are processed before child tables
+- Parent tables (referenced by foreign keys) process before child tables
 - If foreign key metadata cannot be retrieved, falls back to original table order
 - If circular dependencies are detected, logs a warning and uses declaration order
 
-**Use Case**: Databases with well-defined foreign key constraints where automatic ordering is desired.
+**Use Case**: Databases with well-defined foreign key constraints where automatic
+ordering is desired.
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.FOREIGN_KEY)
@@ -300,9 +289,10 @@ void testWithFkOrdering() { }
 
 #### ALPHABETICAL
 
-Tables are sorted in ascending alphabetical order (case-insensitive).
+Tables sort in ascending alphabetical order (case-insensitive).
 
-**Use Case**: When table ordering does not matter (no FK constraints) or for deterministic ordering in scenarios without dependencies.
+**Use Case**: When table ordering does not matter (no FK constraints) or for
+deterministic ordering in scenarios without dependencies.
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
@@ -334,13 +324,16 @@ void testBothPhases() { }
 
 ### Manual Ordering with load-order.txt
 
-The `load-order.txt` file provides the preferred method for controlling table processing order. This file specifies the exact order in which the framework processes tables.
+The `load-order.txt` file provides the preferred method for controlling table processing order.
+This file specifies the exact order in which the framework processes tables.
 
-For detailed information about the file format and usage, see [Data Formats - Load Order](data-formats#load-order).
+For detailed information about the file format and usage,
+see [Data Formats - Load Order](data-formats#load-order).
 
 ### Foreign Key Awareness
 
-When no `load-order.txt` file exists, the framework resolves table dependencies using database metadata:
+When no `load-order.txt` file exists, the framework resolves table dependencies
+using database metadata:
 
 1. Query `DatabaseMetaData.getExportedKeys()` for each table
 2. Build dependency graph
@@ -358,13 +351,16 @@ When no `load-order.txt` file exists, the framework resolves table dependencies 
 
 ### Order Resolution Priority
 
-The `TableOrderingStrategy` determines table order. When using `AUTO` (the default), the priority is:
+The `TableOrderingStrategy` determines table order.
+When using `AUTO` (the default), the priority is:
 
 1. **Manual ordering**: `load-order.txt` file in dataset directory
 2. **FK-based ordering**: Automatic resolution using database metadata
 3. **Alphabetical ordering**: Fallback when no other ordering is available
 
-**Note**: Unlike other frameworks, DB Tester does **not** automatically generate the `load-order.txt` file. See [Table Ordering Strategy](#table-ordering-strategy) for details.
+**Note**: Unlike other frameworks, DB Tester does **not** auto-generate
+the `load-order.txt` file. See [Table Ordering Strategy](#table-ordering-strategy)
+for details.
 
 ### Circular Dependencies
 
@@ -410,11 +406,11 @@ On exception:
 
 ## SQL Identifier Validation
 
-### Overview
-
-The framework validates all SQL identifiers (table names and column names) before interpolating them into SQL statements. This validation prevents malformed inputs from causing SQL syntax errors or security issues.
-
 ### Validation Rules
+
+The framework validates all SQL identifiers (table names and column names) before
+interpolating them into SQL statements. This validation prevents malformed inputs
+from causing SQL syntax errors or security issues.
 
 Identifiers must match the following pattern:
 
@@ -443,7 +439,8 @@ Identifiers must match the following pattern:
 
 ### Error Handling
 
-When the framework detects an invalid identifier, it throws an `IllegalArgumentException` with a descriptive message:
+When the framework detects an invalid identifier, it throws an `IllegalArgumentException`
+with a descriptive message:
 
 ```
 Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or underscore and contain only letters, digits, and underscores.
@@ -457,8 +454,8 @@ The framework derives identifiers from:
 
 | Source | Example |
 |--------|---------|
-| Dataset filename | `USERS.csv` → table `USERS` |
-| CSV/TSV header row or JSON/YAML keys | `ID,NAME,EMAIL` → columns |
+| Dataset filename | `USERS.csv` -> table `USERS` |
+| CSV/TSV header row or JSON/YAML keys | `ID,NAME,EMAIL` -> columns |
 | `@DataSetSource` attributes | Custom paths and names |
 
 Ensure all data files follow the naming conventions to avoid validation errors.
@@ -467,7 +464,7 @@ Ensure all data files follow the naming conventions to avoid validation errors.
 
 ### String to SQL Type
 
-The framework converts string values from dataset files to appropriate SQL types:
+The framework converts string values from dataset files to SQL types:
 
 | Target SQL Type | Conversion Method |
 |-----------------|-------------------|
@@ -487,7 +484,7 @@ The framework converts string values from dataset files to appropriate SQL types
 ### NULL Handling
 
 - Empty CSV field = SQL NULL
-- `PreparedStatement.setNull()` with appropriate SQL type
+- `PreparedStatement.setNull()` with the SQL type
 
 ### Date and Time Formats
 
@@ -501,8 +498,8 @@ The framework converts string values from dataset files to appropriate SQL types
 
 | Type | Conversion |
 |------|------------|
-| BLOB | Base64 string → byte[] |
-| CLOB | String → Reader |
+| BLOB | Base64 string -> byte[] |
+| CLOB | String -> Reader |
 
 ## Related Specifications
 

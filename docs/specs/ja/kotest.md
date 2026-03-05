@@ -17,7 +17,7 @@ description: "AnnotationSpecとDatabaseTestSupportインターフェースを使
 
 ## 登録
 
-**推奨** — `@DatabaseTest`アノテーションを使用します。Specificationクラスは`DatabaseTestSupport`インターフェースを実装する必要があります:
+**推奨** — `@DatabaseTest`アノテーションを使用します。Specificationクラスは`DatabaseTestSupport`インターフェースを実装してください。
 
 ```kotlin
 @DatabaseTest
@@ -41,7 +41,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 }
 ```
 
-**代替手段** — `init`ブロックで拡張機能を登録:
+**代替手段** — `init`ブロックで拡張機能を登録します。
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
@@ -68,7 +68,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
 ## DatabaseTestSupportインターフェース
 
-`DatabaseTestSupport`インターフェースはデータベーステストのコントラクトを提供します:
+`DatabaseTestSupport`インターフェースはデータベーステストのコントラクトを提供します。
 
 | プロパティ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
@@ -77,7 +77,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
 ## DataSource登録
 
-`DatabaseTestSupport`インターフェースを実装し、`dbTesterRegistry`をオーバーライドします:
+`DatabaseTestSupport`インターフェースを実装し、`dbTesterRegistry`をオーバーライドします。
 
 ```kotlin
 @DatabaseTest
@@ -95,7 +95,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
 ## 設定のカスタマイズ
 
-インターフェース実装で`dbTesterConfiguration`をオーバーライドします:
+インターフェース実装で`dbTesterConfiguration`をオーバーライドします。
 
 ```kotlin
 @DatabaseTest
@@ -113,7 +113,7 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 
 ## テストメソッド命名
 
-説明的なテスト名にはバッククォートメソッド名を使用します:
+説明的なテスト名にはバッククォートメソッド名を使用します。
 
 ```kotlin
 @Test
@@ -125,9 +125,10 @@ fun `should create user with email`() {
 
 ## AnnotationSpec要件
 
-DB TesterはKotest統合に`AnnotationSpec`スタイルを必要とします:
+DB TesterはKotest統合に`AnnotationSpec`スタイルを必要とします。
+
 1. アノテーション（`@DataSet`、`@ExpectedDataSet`）をテストメソッドに適用可能
-2. リフレクションによるメソッド解決が信頼性が高い
+2. リフレクションによるメソッド解決の信頼性が高い
 3. Java開発者にとって馴染みのあるJUnit風の構造
 
 ## 関連仕様

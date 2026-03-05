@@ -1,12 +1,14 @@
 # DB Tester - Kotest Module
 
-This module provides [Kotest](https://kotest.io/) integration for the DB Tester framework through `DatabaseTestExtension`.
+This module provides [Kotest](https://kotest.io/) integration for the DB Tester framework through
+`DatabaseTestExtension`.
 
 ## Overview
 
 - **TestCaseExtension** - `DatabaseTestExtension` implements `TestCaseExtension` for test lifecycle integration
-- **Lifecycle Management** - `KotestPreparationExecutor` and `KotestExpectationVerifier` execute preparation and expectation phases
-- **AnnotationSpec Support** - Works with Kotest `AnnotationSpec` style for annotation-based testing
+- **Lifecycle management** - `KotestPreparationExecutor` and `KotestExpectationVerifier` execute preparation
+  and expectation phases
+- **AnnotationSpec support** - Works with Kotest `AnnotationSpec` style for annotation-based testing
 
 ## Architecture
 
@@ -18,7 +20,8 @@ db-tester-kotest
 db-tester-core (transitive runtime dependency, loaded via ServiceLoader)
 ```
 
-This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime dependency. Users only need to add `db-tester-kotest` to their project.
+This module depends on `db-tester-api` at compile time and includes `db-tester-core` as a transitive runtime
+dependency. Add only `db-tester-kotest` to your project.
 
 ## Requirements
 
@@ -47,13 +50,14 @@ dependencies {
 </dependency>
 ```
 
-For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-kotest).
+For the latest version, see
+[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-kotest).
 
 ## Usage
 
 ### Simplified Example with `@DatabaseTest`
 
-The recommended approach uses the `@DatabaseTest` annotation with convention-based registry discovery:
+The recommended approach uses the `@DatabaseTest` annotation with convention-based registry discovery.
 
 ```kotlin
 @DatabaseTest
@@ -77,11 +81,12 @@ class UserRepositorySpec : AnnotationSpec(), DatabaseTestSupport {
 }
 ```
 
-The `@DatabaseTest` annotation registers `DatabaseTestExtension` automatically. The extension discovers the registry by locating a property named `dbTesterRegistry`.
+The `@DatabaseTest` annotation registers `DatabaseTestExtension` automatically. The extension discovers the
+registry by locating a property named `dbTesterRegistry`.
 
 ### Explicit Extension Registration
 
-For more control, register the extension explicitly:
+For more control, register the extension explicitly.
 
 ```kotlin
 class UserRepositorySpec : AnnotationSpec() {
@@ -114,7 +119,7 @@ Register `DatabaseTestExtension` in the `init` block. Register the DataSource in
 
 **Convention-based discovery (recommended):**
 
-When using `@DatabaseTest`, the extension discovers the registry by locating a property named `dbTesterRegistry`:
+When using `@DatabaseTest`, the extension discovers the registry by locating a property named `dbTesterRegistry`.
 
 ```kotlin
 @DatabaseTest
@@ -147,7 +152,7 @@ fun setupSpec() {
 
 ### Class-Level Annotations
 
-Apply annotations at the class level for all test methods:
+Apply annotations at the class level to affect all test methods.
 
 ```kotlin
 @DataSet
@@ -163,7 +168,7 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ### Method-Level Annotations
 
-Override class-level annotations at the method level:
+Override class-level annotations at the method level.
 
 ```kotlin
 @Test
@@ -175,7 +180,7 @@ fun `should create user with custom data`() {
 
 ### Scenario Filtering
 
-Use the `[Scenario]` column to share CSV files across multiple tests:
+Use the `[Scenario]` column to share CSV files across multiple tests.
 
 ```csv
 [Scenario],ID,NAME,EMAIL
@@ -189,7 +194,7 @@ Test method names with backticks map to `[Scenario]` column values.
 
 **Convention-based discovery:**
 
-When using `@DatabaseTest`, provide a property named `dbTesterConfiguration`:
+When using `@DatabaseTest`, provide a property named `dbTesterConfiguration`.
 
 ```kotlin
 @DatabaseTest
@@ -247,4 +252,4 @@ init {
 
 ## Documentation
 
-For detailed usage documentation and examples, refer to the [main README](../README.md).
+For usage examples and detailed documentation, see the [main README](../README.md).

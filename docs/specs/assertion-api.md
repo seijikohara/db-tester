@@ -9,7 +9,8 @@ description: "Reference for DB Tester programmatic APIs: DatabaseAssertion, Data
 
 ### DatabaseAssertion
 
-Static facade for programmatic database assertions. This utility class delegates to the underlying assertion provider loaded via SPI.
+Static facade for programmatic database assertions.
+This utility class delegates to the underlying assertion provider loaded via SPI.
 
 **Location**: `io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion`
 
@@ -28,7 +29,8 @@ Static facade for programmatic database assertions. This utility class delegates
 | `assertEqualsIgnoreColumns(Table, Table, Collection<String>)` | Asserts tables, ignoring specified columns |
 | `assertEqualsWithStrategies(Table, Table, Collection<ColumnStrategyMapping>)` | Asserts tables with column-specific comparison strategies |
 
-**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
+**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have
+`String...` varargs overloads for convenience.
 
 **Example**:
 
@@ -53,7 +55,9 @@ DatabaseAssertion.assertEqualsWithStrategies(expectedTable, actualTable,
 
 ### DatabaseQueryAssertion
 
-Static facade for query-based database assertions. This utility class executes SQL queries and compares results with expected datasets. It separates query execution concerns from pure data comparison in `DatabaseAssertion`.
+Static facade for query-based database assertions.
+This utility class executes SQL queries and compares results with expected datasets.
+It separates query execution concerns from pure data comparison in `DatabaseAssertion`.
 
 **Location**: `io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion`
 
@@ -66,7 +70,8 @@ Static facade for query-based database assertions. This utility class executes S
 | `assertEqualsByQuery(TableSet, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table set |
 | `assertEqualsByQuery(Table, DataSource, String, String, Collection<String>)` | Asserts SQL query results against expected table |
 
-**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have `String...` varargs overloads for convenience.
+**Varargs Overloads**: Methods accepting `Collection<String>` for column names also have
+`String...` varargs overloads for convenience.
 
 **Example**:
 
@@ -84,7 +89,9 @@ DatabaseQueryAssertion.assertEqualsByQuery(
 
 ### AssertionFailureHandler
 
-Strategy interface for reacting to assertion mismatches. Implementations can translate individual failures into domain-specific actions such as raising custom exceptions, logging diagnostics, or aggregating differences.
+Strategy interface for reacting to assertion mismatches.
+Implementations can translate individual failures into domain-specific actions
+such as raising custom exceptions, logging diagnostics, or aggregating differences.
 
 **Location**: `io.github.seijikohara.dbtester.api.assertion.AssertionFailureHandler`
 
@@ -128,7 +135,8 @@ if (!failures.isEmpty()) {
 
 ### DataSetExporter
 
-Static facade for exporting database content to files. This utility class delegates to format-specific implementations loaded via the `ExportProvider` SPI.
+Static facade for exporting database content to files.
+This utility class delegates to format-specific implementations loaded via the `ExportProvider` SPI.
 
 **Location**: `io.github.seijikohara.dbtester.api.export.DataSetExporter`
 
@@ -237,7 +245,8 @@ SPI for implementing format-specific export logic.
 | `export(DataSource, List<String>, Path, ExportConfiguration)` | `void` | Exports tables to files |
 | `exportQuery(DataSource, String, String, Path, ExportConfiguration)` | `void` | Exports SQL query results to a file |
 
-**Discovery**: Providers are discovered via `java.util.ServiceLoader`. Register implementations in `META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`.
+**Discovery**: Providers are discovered via `java.util.ServiceLoader`.
+Register implementations in `META-INF/services/io.github.seijikohara.dbtester.api.spi.ExportProvider`.
 
 **Thread Safety**: Implementations must be thread-safe and stateless.
 
@@ -245,7 +254,8 @@ SPI for implementing format-specific export logic.
 
 ### DatabasePreparation
 
-Static facade for programmatic database preparation. This utility class delegates to the underlying operation provider loaded via SPI.
+Static facade for programmatic database preparation.
+This utility class delegates to the underlying operation provider loaded via SPI.
 
 **Location**: `io.github.seijikohara.dbtester.api.preparation.DatabasePreparation`
 
@@ -285,7 +295,9 @@ DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSE
 
 ### PreparationConfig
 
-Configuration record for programmatic database preparation operations. Use `standard()` to obtain an instance with default values, then use `with*()` methods to customize.
+Configuration record for programmatic database preparation operations.
+Use `standard()` to obtain an instance with default values,
+then use `with*()` methods to customize.
 
 **Location**: `io.github.seijikohara.dbtester.api.preparation.PreparationConfig`
 

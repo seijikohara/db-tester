@@ -1,8 +1,8 @@
 /**
- * Public API for database testing with type-safe null safety enforcement.
+ * Provides the public API for database testing.
  *
- * <p>This package contains the core interfaces and types that users interact with when using the
- * db-tester library. All types are null-safe by default through JSpecify annotations.
+ * <p>This package contains the core interfaces and types for the db-tester library. All types
+ * enforce null safety through JSpecify {@code @NullMarked} annotations.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api;

@@ -1,36 +1,31 @@
 /**
- * Type-safe domain value objects for database identifiers, metadata, and values.
+ * Provides type-safe domain value objects for database identifiers, metadata, and values.
  *
- * <p><strong>API Category: Domain Types</strong> — Shared value objects used across both User API
- * and Extension API. These types appear in method signatures throughout the framework.
+ * <p><strong>API Category: Domain Types</strong> — Shared value objects used across the User API
+ * and Extension API.
  *
- * <p>This package contains immutable value objects that provide compile-time type safety and rich
- * domain modeling for database testing.
- *
- * <p>Core identifiers:
+ * <p>Identifiers:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.TableName} - Database table identifiers
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.ColumnName} - Simple column name wrapper
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.DataSourceName} - DataSource identifiers
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.TableName} — database table identifier
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.ColumnName} — column name wrapper
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.DataSourceName} — DataSource identifier
  * </ul>
  *
- * <p>Rich domain models:
+ * <p>Domain models:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.Column} - Column with metadata and
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.Column} — column with metadata and
  *       comparison strategy
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.ColumnMetadata} - Schema metadata (type,
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.ColumnMetadata} — schema metadata (type,
  *       constraints, precision)
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.Cell} - Column-value pair with comparison
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.Cell} — column-value pair with comparison
  *       support
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.CellValue} - Cell values with NULL
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.CellValue} — cell values with NULL
  *       handling
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.ComparisonStrategy} - Configurable value
+ *   <li>{@link io.github.seijikohara.dbtester.api.domain.ComparisonStrategy} — configurable value
  *       comparison strategies
  * </ul>
- *
- * <p><strong>Audience:</strong> Users with programmatic dataset or comparison needs.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.domain;

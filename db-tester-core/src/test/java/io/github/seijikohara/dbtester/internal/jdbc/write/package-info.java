@@ -1,9 +1,4 @@
-/**
- * Tests for database write operations.
- *
- * <p>This package contains unit tests for the write operation classes including executors, SQL
- * builders, and parameter binders.
- */
+/** Unit tests for the database write operation classes. */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.jdbc.write;
 

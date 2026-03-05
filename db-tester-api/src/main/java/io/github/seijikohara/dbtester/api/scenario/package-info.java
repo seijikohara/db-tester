@@ -1,26 +1,23 @@
 /**
- * Scenario name resolution API for test framework integration.
+ * Provides the scenario name resolution SPI for test framework integration.
  *
- * <p><strong>API Category: Extension API</strong> — This package is intended for framework
- * integrators building custom testing extensions. Test authors typically do not interact with this
- * package directly.
+ * <p><strong>API Category: Extension API</strong> — Intended for framework integrators building
+ * custom testing extensions. Test authors do not interact with this package directly.
  *
- * <p>This package provides the SPI for resolving test scenario names from test methods. Different
- * test frameworks (JUnit, Spock, Kotest) have different conventions for naming tests, and this SPI
- * allows each framework to provide its own implementation.
+ * <p>This package defines the SPI for resolving test scenario names from test methods. Each test
+ * framework (JUnit, Spock, Kotest) has its own naming convention, and this SPI allows each to
+ * supply its own implementation.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.scenario.ScenarioName} - Immutable value object
+ *   <li>{@link io.github.seijikohara.dbtester.api.scenario.ScenarioName} — immutable value object
  *       representing a scenario identifier
- *   <li>{@link io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver} - SPI for
+ *   <li>{@link io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver} — SPI for
  *       resolving scenario names from test methods
  * </ul>
  *
- * <p>Scenario names are used to filter rows in shared CSV/TSV files that contain data for multiple
- * test scenarios. When a test method name (or framework-specific feature name) matches the scenario
- * column value, only those rows are used for the test.
- *
- * <p><strong>Audience:</strong> Framework integrators and extension developers.
+ * <p>Scenario names filter rows in shared CSV/TSV files that contain data for multiple test
+ * scenarios. When a test method name matches the scenario column value, the framework uses only
+ * those rows for the test.
  *
  * @see io.github.seijikohara.dbtester.api.scenario.ScenarioName
  * @see io.github.seijikohara.dbtester.api.scenario.ScenarioNameResolver

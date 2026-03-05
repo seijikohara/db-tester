@@ -1,11 +1,8 @@
 /**
- * Data export API for exporting database content to files.
+ * Provides the data export API for writing database content to files.
  *
- * <p>This package provides the public API for exporting database tables to various file formats
- * (CSV, TSV, JSON, YAML). The main entry point is {@link
- * io.github.seijikohara.dbtester.api.export.DataSetExporter}.
- *
- * <p><strong>Audience:</strong> Users with programmatic export needs.
+ * <p>This package exports database tables to CSV, TSV, JSON, and YAML formats. The primary entry
+ * point is {@link io.github.seijikohara.dbtester.api.export.DataSetExporter}.
  *
  * @see io.github.seijikohara.dbtester.api.export.DataSetExporter
  * @see io.github.seijikohara.dbtester.api.export.ExportConfiguration

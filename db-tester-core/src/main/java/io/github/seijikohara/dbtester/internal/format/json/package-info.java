@@ -1,8 +1,7 @@
 /**
- * JSON format provider for parsing JSON dataset files.
+ * Provides the JSON format provider for parsing JSON dataset files.
  *
- * <p>This package provides the {@link
- * io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider} implementation of the
+ * <p>{@link io.github.seijikohara.dbtester.internal.format.json.JsonFormatProvider} implements the
  * {@link io.github.seijikohara.dbtester.internal.format.spi.FormatProvider} SPI for JSON files.
  *
  * @see io.github.seijikohara.dbtester.internal.format.spi.FormatProvider

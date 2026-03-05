@@ -5,18 +5,18 @@ description: "症状・診断・解決のワークフローによる実践的な
 
 # トラブルシューティング
 
-このガイドでは、DB Tester 使用時の一般的な問題に対する実践的な解決策を提供します。
-例外の詳細な仕様については、[エラーハンドリング](error-handling)を参照してください。
+DB Tester使用時の一般的な問題に対する実践的な解決策を提供します。
+例外の仕様については[エラーハンドリング](error-handling)を参照してください。
 
 ## クイック診断
 
-このチェックリストを使用して問題のカテゴリを特定してください:
+以下のチェックリストで問題のカテゴリを特定してください。
 
 | 症状 | カテゴリ | ジャンプ先 |
 |------|----------|-----------|
 | "Dataset directory not found" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "File is empty" またはパースエラー | データ読み込み | [DataSetLoadException](#datasetloadexception) |
-| "Table name conflict detected" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
+| "Table name conflict detected in AUTO format mode" | データ読み込み | [DataSetLoadException](#datasetloadexception) |
 | "Assertion failed: N differences" | 検証 | [ValidationException](#validationexception) |
 | "No default data source registered" | 設定 | [DataSource の問題](#datasource-の問題) |
 | テストの実行が遅い | パフォーマンス | [パフォーマンス最適化](#パフォーマンス最適化) |
@@ -87,7 +87,7 @@ File is empty: /path/to/USERS.csv
 ```
 
 **解決策**:
-少なくともヘッダー行と1つのデータ行を追加してください:
+少なくともヘッダー行と1つのデータ行を追加してください。
 
 ```csv
 ID,NAME,EMAIL
@@ -128,7 +128,7 @@ To resolve, remove duplicate files or specify a concrete format:
 ```
 
 **診断**:
-`DataFormat.AUTO`（デフォルト）を使用している場合、フレームワークはデータセットディレクトリからすべてのサポート形式のファイルを読み込みます。同一テーブル名が異なる拡張子のファイルに存在する場合、フレームワークはどのファイルを使用すべきか判断できません。
+`DataFormat.AUTO`（デフォルト）を使用すると、フレームワークはデータセットディレクトリから全サポート形式のファイルを読み込みます。同一テーブル名が異なる拡張子のファイルに存在する場合、使用すべきファイルを判断できません。
 
 **解決策**:
 
@@ -176,7 +176,7 @@ GRANDCHILD_TABLE
 
 ### YAML 出力の理解
 
-検証が失敗すると、DB Tester は構造化された YAML を出力します:
+検証が失敗すると、DB Testerは構造化されたYAMLを出力します。
 
 ```yaml
 Assertion failed: 2 differences in USERS
@@ -242,7 +242,7 @@ tables:
 
 ### excludeColumns と columnStrategies の使用
 
-**優先順位ルール**: `excludeColumns` が `columnStrategies` より優先されます。
+**優先順位ルール**: `excludeColumns`が`columnStrategies`より優先されます。
 
 ```java
 @ExpectedDataSet(sources = @DataSetSource(
@@ -253,10 +253,10 @@ tables:
 ))
 ```
 
-この例では、`CREATED_AT` は完全に除外されます。
-`UPDATED_AT` は比較に IGNORE 戦略を使用します。
+この例では、`CREATED_AT`は完全に除外されます。
+`UPDATED_AT`はIGNORE戦略で比較されます。
 
-アノテーションの詳細は[パブリック API](public-api)を参照。
+アノテーションの詳細は[パブリックAPI](public-api)を参照してください。
 
 ---
 
@@ -335,7 +335,7 @@ registry.register("secondary_db", secondaryDataSource);
 
 ### 大規模データセットの最適化
 
-**症状**: 多くの行を持つテストの実行が遅い。
+**症状**: 行数が多いテストの実行が遅い。
 
 **解決策**:
 
@@ -357,22 +357,22 @@ registry.register("secondary_db", secondaryDataSource);
 
 **症状**: 接続タイムアウトまたはプール枯渇。
 
-**注意**: コネクションプールは DB Tester の外部依存です。
-使用しているコネクションプール（HikariCP、c3p0 など）を適切に設定してください。
+**注意**: コネクションプールはDB Testerの外部依存です。
+使用中のコネクションプール（HikariCP、c3p0など）を設定してください。
 
 **推奨事項**:
-- 並列テスト実行のために適切な `maximumPoolSize` を設定
-- 遅いデータベース接続のために `connectionTimeout` を設定
-- H2 インメモリデータベースには `DB_CLOSE_DELAY=-1` を使用
+- 並列テスト実行に対応する`maximumPoolSize`を設定
+- 遅いデータベース接続に対応する`connectionTimeout`を設定
+- H2インメモリデータベースには`DB_CLOSE_DELAY=-1`を使用
 
 ### メモリ管理
 
-**症状**: 大規模データセットで OutOfMemoryError。
+**症状**: 大規模データセットでOutOfMemoryError。
 
 **解決策**:
-1. 大きな CSV をシナリオごとに小さなファイルに分割
-2. `[Scenario]` カラムを使用して関連する行のみを読み込む
-3. テスト用の JVM ヒープサイズを増加: `-Xmx512m`
+1. 大きなCSVをシナリオごとに小さなファイルに分割
+2. `[Scenario]`カラムで関連する行のみを読み込む
+3. テスト用のJVMヒープサイズを増加: `-Xmx512m`
 
 ---
 
@@ -380,9 +380,9 @@ registry.register("secondary_db", secondaryDataSource);
 
 ### クラスパス配置エラー
 
-**ミス**: データセットファイルを `src/test/resources` の外に配置。
+**ミス**: データセットファイルを`src/test/resources`の外に配置。
 
-**正しい構造**:
+**正しいディレクトリ構造**:
 ```
 src/test/resources/
 └── com/example/UserRepositoryTest/
@@ -395,7 +395,7 @@ src/test/resources/
 
 **ミス**: 設定と異なるシナリオマーカーを使用。
 
-**デフォルト**: `[Scenario]` カラム
+**デフォルト**: `[Scenario]`カラム
 
 **カスタム設定**:
 ```java
@@ -408,22 +408,19 @@ Configuration.builder()
 
 ### 拡張子の不一致
 
-**ミス**: 特定の`DataFormat`（例: `DataFormat.CSV`）を設定しているのに、別の拡張子のファイルを使用。
+**ミス**: 特定の`DataFormat`を設定しているのに、サポートされない拡張子のファイルを使用。
 
-**注意**: デフォルトは`DataFormat.AUTO`であり、すべてのサポート形式が自動検出されます。特定の形式を指定している場合のみ、この問題が発生します。
+`DataFormat.AUTO`（デフォルト）ではすべてのサポート拡張子（`.csv`、`.tsv`、`.json`、`.yaml`）を受け付けます。特定の形式を設定した場合、一致する拡張子のファイルのみが読み込まれます。
 
 **解決策**:
-
-- `DataFormat.AUTO`（デフォルト）を使用する場合は、すべてのサポート形式が自動的に読み込まれます
-- 特定の形式を指定する場合は、`ConventionSettings` で正しい形式を設定:
-
+`DataFormat.AUTO`（デフォルト）を使用してすべてのサポート形式を読み込むか、一致する形式を設定します。
 ```java
 ConventionSettings.builder()
     .dataFormat(DataFormat.TSV)
     .build();
 ```
 
-またはファイルの拡張子を設定に合わせてリネーム。
+または、ファイルの拡張子を設定された形式に合わせてリネームします。
 
 ### 期待値サフィックスの不一致
 
@@ -442,14 +439,14 @@ ConventionSettings.builder()
 
 ### テーブル名の大文字小文字
 
-**ミス**: CSV ファイル名の大文字小文字がテーブル名と一致しない。
+**ミス**: CSVファイル名の大文字小文字がテーブル名と一致しない。
 
 **例**:
-- テーブルは `USERS` として作成（H2 は大文字）
-- CSV は `users.csv`（小文字）
+- テーブルは`USERS`として作成（H2は大文字）
+- CSVは`users.csv`（小文字）
 
-**解決策**: データベーステーブル名の正確な大文字小文字と一致させる。
-H2 は引用符なしの識別子を大文字に変換します。
+**解決策**: データベーステーブル名の大文字小文字に一致させます。
+H2は引用符なしの識別子を大文字に変換します。
 
 ### 外部キー順序
 
@@ -463,7 +460,7 @@ CHILD
 GRANDCHILD
 ```
 
-テーブル順序戦略を設定:
+テーブル順序戦略を設定します。
 
 ```java
 @DataSet(tableOrdering = TableOrderingStrategy.LOAD_ORDER_FILE)
@@ -482,14 +479,14 @@ logging.level.io.github.seijikohara.dbtester=DEBUG
 
 ### ステップ 2: データセット読み込みを確認
 
-DEBUG 出力には以下が表示されます:
+DEBUG出力には以下が表示されます。
 - 読み込まれているファイル
 - テーブル順序の決定
 - シナリオによる行フィルタリング
 
 ### ステップ 3: データベース状態を確認
 
-`@DataSet` 準備後にデータベースを直接クエリ:
+`@DataSet`準備後にデータベースを直接クエリします。
 
 ```java
 @Test
@@ -507,8 +504,8 @@ void debugTest() throws SQLException {
 
 ### ステップ 4: 期待値と実際の値を比較
 
-検証が失敗した場合、YAML 出力は正確な差異を示します。
-これを使用して、問題が以下のどこにあるかを特定:
+検証が失敗した場合、YAML出力は正確な差異を示します。
+この出力から、問題が以下のどこにあるかを特定します。
 - 期待データ（CSV）
 - テストロジック
 - データベース状態
@@ -517,8 +514,8 @@ void debugTest() throws SQLException {
 
 ## 関連ドキュメント
 
-- [エラーハンドリング](error-handling) - 例外仕様
-- [設定](configuration) - フレームワーク設定
-- [データフォーマット](data-formats) - データフォーマット構造
-- [データベース操作](database-operations) - 操作タイプ
-- [パブリック API](public-api) - アノテーションリファレンス
+- [エラーハンドリング](error-handling) -- 例外仕様
+- [設定](configuration) -- フレームワーク設定
+- [データフォーマット](data-formats) -- データフォーマット構造
+- [データベース操作](database-operations) -- 操作タイプ
+- [パブリック API](public-api) -- アノテーションリファレンス

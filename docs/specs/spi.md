@@ -5,7 +5,7 @@ description: "Extend DB Tester with custom SPI implementations for data formats 
 
 # DB Tester Specification - Service Provider Interface (SPI)
 
-## SPI Overview
+## SPI Architecture
 
 The framework uses Java ServiceLoader to decouple modules:
 
@@ -36,10 +36,10 @@ flowchart TB
 2. **Runtime Discovery**: ServiceLoader loads core implementations at runtime.
 3. **Extensibility**: Custom implementations replace defaults when registered.
 
-
 ### Two-Tier SPI Architecture
 
-The framework uses a two-tier SPI architecture to separate framework-facing concerns from implementation details:
+The framework uses a two-tier SPI architecture to separate framework-facing concerns
+from implementation details:
 
 ```mermaid
 flowchart TB
@@ -73,16 +73,19 @@ flowchart TB
     XS -->|ServiceLoader| XP
 ```
 
-**Tier 1 — Support Layer**: High-level lifecycle SPIs loaded by test framework extensions (JUnit, Spock, Kotest). Each Support interface encapsulates one test lifecycle phase (preparation, verification, export) and accepts annotation and context parameters.
+**Tier 1 -- Support Layer**: High-level lifecycle SPIs loaded by test framework extensions
+(JUnit, Spock, Kotest). Each Support interface encapsulates one test lifecycle phase
+(preparation, verification, export) and accepts annotation and context parameters.
 
-**Tier 2 — Provider Layer**: Low-level operation SPIs loaded by Support implementations in `db-tester-core`. Provider interfaces define fine-grained database operations (execute SQL, compare datasets, export files).
+**Tier 2 -- Provider Layer**: Low-level operation SPIs loaded by Support implementations
+in `db-tester-core`. Provider interfaces define fine-grained database operations
+(execute SQL, compare datasets, export files).
 
-**Standalone SPIs**: Some SPIs do not participate in the two-tier pattern:
-- `DataSetLoaderProvider` — loaded by `Configuration.defaults()` to provide the default dataset loader
-- `ScenarioNameResolver` — loaded by the core scenario resolution infrastructure
-- `TypeHandler` — loaded by `TypeHandlerRegistry` for custom database type handling
-- `FormatProvider` — internal SPI loaded by `FormatRegistry` for file format parsing
-
+**Standalone SPIs**: These SPIs do not participate in the two-tier pattern:
+- `DataSetLoaderProvider` -- loaded by `Configuration.defaults()` to provide the default dataset loader
+- `ScenarioNameResolver` -- loaded by the core scenario resolution infrastructure
+- `TypeHandler` -- loaded by `TypeHandlerRegistry` for custom database type handling
+- `FormatProvider` -- internal SPI loaded by `FormatRegistry` for file format parsing
 
 ## Support Layer
 
@@ -102,7 +105,8 @@ public interface PreparationSupport {
 
 **Default Implementation**: `DefaultPreparationSupport` in `db-tester-core`
 
-**Loaded by**: Test framework extensions (`PreparationExecutor` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+**Loaded by**: Test framework extensions (`PreparationExecutor` in JUnit,
+`DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
 
 **Internally uses**: `OperationProvider` (Tier 2) via ServiceLoader
 
@@ -112,7 +116,6 @@ public interface PreparationSupport {
 |-----------|------|-------------|
 | `context` | `TestContext` | Test context containing configuration, registry, and test metadata |
 | `dataSet` | `DataSet` | The `@DataSet` annotation containing preparation settings |
-
 
 ### ExpectationSupport
 
@@ -130,7 +133,8 @@ public interface ExpectationSupport {
 
 **Default Implementation**: `DefaultExpectationSupport` in `db-tester-core`
 
-**Loaded by**: Test framework extensions (`ExpectationVerifier` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+**Loaded by**: Test framework extensions (`ExpectationVerifier` in JUnit,
+`DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
 
 **Internally uses**: `ExpectationProvider` and `AssertionProvider` (Tier 2)
 
@@ -142,7 +146,6 @@ public interface ExpectationSupport {
 | `expectedDataSet` | `ExpectedDataSet` | The `@ExpectedDataSet` annotation containing verification settings |
 
 **Throws**: `ValidationException` if verification fails after all configured retries.
-
 
 ### ExportSupport
 
@@ -160,7 +163,8 @@ public interface ExportSupport {
 
 **Default Implementation**: `DefaultExportSupport` in `db-tester-core`
 
-**Loaded by**: Test framework extensions (`ExportExecutor` in JUnit, `DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
+**Loaded by**: Test framework extensions (`ExportExecutor` in JUnit,
+`DatabaseTestInterceptor` in Spock, `DatabaseTestExtension` in Kotest)
 
 **Internally uses**: `ExportProvider` (Tier 2) via `DataSetExporter`
 

@@ -1,9 +1,8 @@
 /**
- * Example tests demonstrating db-tester-junit-spring-boot-starter integration.
+ * Contains integration tests demonstrating db-tester-junit-spring-boot-starter usage.
  *
- * <p>This package contains integration tests that demonstrate how to use the DB Tester framework
- * with Spring Boot and JUnit 6, including automatic DataSource registration and CSV-based dataset
- * loading.
+ * <p>These tests demonstrate automatic DataSource registration and CSV-based dataset loading with
+ * Spring Boot and JUnit 6.
  */
 @NullMarked
 package example;

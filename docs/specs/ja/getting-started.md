@@ -5,14 +5,12 @@ description: "DB Testerを使用した最初のデータベーステストのセ
 
 # はじめに
 
-このガイドでは、DB Tester を使用して最初のデータベーステストを作成し、
-実行する方法を説明します。このガイドを終えると、H2 インメモリデータベースに
-データを準備し、期待される状態を検証する動作するテストが完成します。
+このガイドでは、DB Testerを使用して最初のデータベーステストを作成し実行する手順を説明します。完了後、H2インメモリデータベースにデータを準備し、期待される状態を検証するテストが動作します。
 
 ## 前提条件
 
-- Java 21 以降
-- Gradle 8.0 以降 または Maven 3.9 以降
+- Java 21以降
+- Gradle 8.0以降 または Maven 3.9以降
 
 ## ステップ 1: 依存関係の追加
 
@@ -66,17 +64,13 @@ dependencies {
 
 :::
 
-`VERSION` を
-[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit)
-の最新バージョンに置き換えてください。
+`VERSION`を[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-junit)の最新バージョンに置き換えてください。
 
-::: tip H2 バージョン
-H2 バージョン (`2.3.232`) は例です。
-[Maven Central](https://central.sonatype.com/artifact/com.h2database/h2)
-で最新バージョンを確認してください。
+::: tip H2バージョン
+H2バージョン (`2.3.232`) は例です。[Maven Central](https://central.sonatype.com/artifact/com.h2database/h2)で最新バージョンを確認してください。
 :::
 
-## ステップ 2: 最初のテストを作成
+## ステップ 2: テストクラスの作成
 
 以下の構造でテストクラスを作成します。
 
@@ -139,14 +133,14 @@ class UserRepositoryTest {
 
 重要なポイント:
 
-- `@DatabaseTest` は DB Tester 拡張を有効にします（`@ExtendWith(DatabaseTestExtension.class)` と同等）
-- `@BeforeAll` と `ExtensionContext` パラメータで DataSource を登録します
-- `DB_CLOSE_DELAY=-1` はテスト間で H2 データベースを開いたままにします
-- `@DataSet` はテストメソッド実行前にテストデータを読み込みます
+- `@DatabaseTest`はDB Tester拡張を有効にする（`@ExtendWith(DatabaseTestExtension.class)`と同等）
+- `@BeforeAll`と`ExtensionContext`パラメータでDataSourceを登録する
+- `DB_CLOSE_DELAY=-1`はテスト間でH2データベースを維持する
+- `@DataSet`はテストメソッド実行前にテストデータを読み込む
 
 ## ステップ 3: テストデータファイルの作成
 
-テストクラスの場所に対応するテストデータディレクトリと CSV ファイルを作成します。
+テストクラスの場所に対応するテストデータディレクトリとCSVファイルを作成します。
 
 ```
 src/test/resources/
@@ -154,9 +148,9 @@ src/test/resources/
     └── USERS.csv
 ```
 
-ディレクトリパスは次の規約に従います: `{パッケージ}/{テストクラス名}/`
+ディレクトリパスの規約: `{パッケージ}/{テストクラス名}/`
 
-以下の内容で `USERS.csv` を作成します。
+以下の内容で`USERS.csv`を作成します。
 
 ```csv
 ID,NAME,EMAIL
@@ -164,20 +158,17 @@ ID,NAME,EMAIL
 2,Bob,bob@example.com
 ```
 
-::: tip CSV ファイル名
-CSV ファイル名はテーブル名と一致させる必要があります。H2 は引用符なしの識別子を
-大文字に変換するため、`USERS` テーブルに対応する `USERS.csv` を使用してください。
+::: tip CSVファイル名
+CSVファイル名はテーブル名と一致させてください。H2は引用符なしの識別子を大文字に変換するため、`USERS`テーブルには`USERS.csv`を使用します。
 :::
 
-::: info Scenario カラム
-`[Scenario]` カラムはオプションです。存在する場合、DB Tester は現在のテストメソッド名で
-行をフィルタリングします。省略すると、すべての行が読み込まれます。
-詳細は[データフォーマット](data-formats)を参照してください。
+::: info Scenarioカラム
+`[Scenario]`カラムはオプションです。存在する場合、DB Testerは現在のテストメソッド名で行をフィルタリングします。省略すると、すべての行が読み込まれます。詳細は[データフォーマット](data-formats)を参照してください。
 :::
 
 ## ステップ 4: テストの実行
 
-ビルドツールを使用してテストを実行します。
+ビルドツールでテストを実行します。
 
 ::: code-group
 
@@ -191,14 +182,14 @@ mvn test -Dtest=com.example.UserRepositoryTest
 
 :::
 
-成功すると、1 つのテストがパスし、失敗がないことを示す出力が表示されます。
+成功すると、1つのテストがパスし失敗がないことを示す出力が表示されます。
 
-## ステップ 5: データベース状態の検証 (オプション)
+## ステップ 5: データベース状態の検証（オプション）
 
-`@ExpectedDataSet` を追加して、テストロジック実行後のデータベース状態を検証します。
+`@ExpectedDataSet`を追加して、テストロジック実行後のデータベース状態を検証します。
 
-::: info Import 文
-`@ExpectedDataSet` を使用するには、以下の import を追加してください:
+::: info Import文
+`@ExpectedDataSet`を使用するには、以下のimportを追加してください:
 ```java
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 ```
@@ -233,7 +224,7 @@ src/test/resources/
         └── USERS.csv
 ```
 
-`expected/USERS.csv` ファイルには期待される状態を記述します。
+`expected/USERS.csv`ファイルに期待される状態を記述します。
 
 ```csv
 ID,NAME,EMAIL
@@ -249,12 +240,9 @@ ID,NAME,EMAIL
 No default data source registered
 ```
 
-**原因**: `@BeforeAll` メソッドで DataSource が登録されていないか、
-メソッドシグネチャが正しくありません。
+**原因**: `@BeforeAll`メソッドでDataSourceが登録されていない、またはメソッドシグネチャが正しくない。
 
-**解決策**: `@BeforeAll` メソッドに `ExtensionContext` パラメータが含まれ、
-`DatabaseTestExtension.getRegistry(context).registerDefault(dataSource)`
-を呼び出していることを確認してください。
+**解決策**: `@BeforeAll`メソッドに`ExtensionContext`パラメータを含め、`DatabaseTestExtension.getRegistry(context).registerDefault(dataSource)`を呼び出してください。
 
 ### Dataset directory not found
 
@@ -264,11 +252,9 @@ Expected location: src/test/resources/com/example/UserRepositoryTest
 Hint: Create the directory and add dataset files...
 ```
 
-**原因**: テストデータディレクトリが存在しないか、間違った場所にあります。
+**原因**: テストデータディレクトリが存在しない、または配置場所が誤っている。
 
-**解決策**: `src/test/resources/{パッケージ}/{テストクラス名}/`
-にディレクトリを作成してください。`{パッケージ}` はスラッシュ区切り
-（例: `com/example`）で記述します。
+**解決策**: `src/test/resources/{パッケージ}/{テストクラス名}/`にディレクトリを作成してください。`{パッケージ}`はスラッシュ区切り（例: `com/example`）で記述します。
 
 ### File is empty
 
@@ -276,21 +262,20 @@ Hint: Create the directory and add dataset files...
 File is empty: /path/to/USERS.csv
 ```
 
-**原因**: CSV ファイルは存在しますが、データが含まれていません。
+**原因**: CSVファイルは存在するが、データが含まれていない。
 
-**解決策**: CSV ファイルに少なくともヘッダー行と 1 つのデータ行が
-含まれていることを確認してください。
+**解決策**: CSVファイルにヘッダー行と1つ以上のデータ行を追加してください。
 
 ## 次のステップ
 
-- [テストフレームワーク](test-frameworks) - Spock と Kotest の統合について
-- [設定](configuration) - フレームワークの動作のカスタマイズ
-- [データフォーマット](data-formats) - CSV 構造とシナリオフィルタリングについて
-- [データベース操作](database-operations) - 利用可能な操作（INSERT、CLEAN_INSERT など）
+- [テストフレームワーク](test-frameworks) - SpockとKotestの統合について
+- [設定](configuration) - フレームワーク動作のカスタマイズ
+- [データフォーマット](data-formats) - CSV構造とシナリオフィルタリング
+- [データベース操作](database-operations) - 利用可能な操作（INSERT、CLEAN_INSERT他）
 - [エラーハンドリング](error-handling) - 完全なエラーリファレンス
 
-Spring Boot アプリケーションの場合は、Spring Boot Starter モジュールを参照してください。
+Spring Bootアプリケーションの場合は、Spring Boot Starterモジュールを参照してください。
 
-- `db-tester-junit-spring-boot-starter` - Spring 管理の DataSource Bean を自動登録
-- `db-tester-spock-spring-boot-starter` - Spring Boot との Spock 統合
-- `db-tester-kotest-spring-boot-starter` - Spring Boot との Kotest 統合
+- `db-tester-junit-spring-boot-starter` - Spring管理のDataSource Beanを自動登録
+- `db-tester-spock-spring-boot-starter` - Spring BootとSpockの統合
+- `db-tester-kotest-spring-boot-starter` - Spring BootとKotestの統合

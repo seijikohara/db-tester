@@ -1,8 +1,8 @@
 /**
- * JDBC-based database operations.
+ * Provides JDBC-based database operations for test data management.
  *
- * <p>This package provides direct JDBC implementations of database operations for test data
- * management without depending on external libraries like DbUnit.
+ * <p>This package implements database operations directly via JDBC without depending on external
+ * libraries.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.internal.jdbc;

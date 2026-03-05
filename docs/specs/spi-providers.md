@@ -5,7 +5,7 @@ description: "Reference for DB Tester SPI provider interfaces: OperationProvider
 
 # SPI Providers
 
-## API Module SPIs — Provider Layer
+## API Module SPIs -- Provider Layer
 
 ### DataSetLoaderProvider
 
@@ -24,7 +24,6 @@ public interface DataSetLoaderProvider {
 **Default Implementation**: `DefaultDataSetLoaderProvider` in `db-tester-core`
 
 **Usage**: `Configuration.defaults()` calls this provider to obtain the loader.
-
 
 ### OperationProvider
 
@@ -84,7 +83,6 @@ public interface OperationProvider {
 | `CLEAN_INSERT` | Delete all then insert |
 | `TRUNCATE_INSERT` | Truncate then insert |
 
-
 ### AssertionProvider
 
 Performs database assertions for expectation verification.
@@ -135,7 +133,6 @@ public interface AssertionProvider {
 
 See [Error Handling - Validation Errors](error-handling#validation-errors) for output format details.
 
-
 ### ExpectationProvider
 
 Verifies database state against expected datasets.
@@ -173,8 +170,8 @@ A parameter object that encapsulates all optional verification parameters:
 | `excludeColumns` | `Set<String>` | Column names to exclude from comparison (case-insensitive) |
 | `columnStrategies` | `Map<String, ColumnStrategyMapping>` | Column comparison strategies keyed by column name |
 | `rowOrdering` | `RowOrdering` | Row comparison strategy (ORDERED or UNORDERED) |
-| `operationDefaults` | `OperationDefaults` | Operation defaults containing comparison settings (e.g., floating-point epsilon) |
-| `tableOrdering` | `TableOrderingStrategy` | Table processing order (`AUTO` or `FOREIGN_KEY`). |
+| `operationDefaults` | `OperationDefaults` | Operation defaults containing comparison settings (floating-point epsilon) |
+| `tableOrdering` | `TableOrderingStrategy` | Table processing order (`AUTO` or `FOREIGN_KEY`) |
 
 ```java
 // Default context (no exclusions, ordered, standard defaults, AUTO table ordering)
@@ -197,12 +194,11 @@ var context = ExpectationContext.of(
 ```
 
 **Process**:
-1. The provider iterates each table in the expected dataset and fetches actual data from the database.
+1. The provider iterates each table in the expected dataset and fetches actual data.
 2. The provider filters actual data to include only columns present in the expected table.
 3. The provider applies column exclusions and comparison strategies from the context.
 4. The provider compares filtered actual data against expected data.
 5. The provider throws `ValidationException` (wrapping `AssertionError`) if verification fails.
-
 
 ### ScenarioNameResolver
 
@@ -233,7 +229,7 @@ public interface ScenarioNameResolver {
 | Method | Return Type | Default | Description |
 |--------|-------------|---------|-------------|
 | `resolve(Method)` | `ScenarioName` | - | Resolves scenario name from test method |
-| `canResolve(Method)` | `boolean` | `true` | Returns whether this resolver can handle the method |
+| `canResolve(Method)` | `boolean` | `true` | Returns whether this resolver handles the method |
 | `priority()` | `int` | `0` | Returns priority for resolver selection (higher = preferred) |
 
 **Implementations**:
@@ -249,7 +245,6 @@ public interface ScenarioNameResolver {
 2. The framework queries each resolver via `canResolve()`.
 3. The framework selects the first resolver that returns `true`.
 4. The framework calls `resolve()` to obtain the scenario name.
-
 
 ### ExportProvider
 
@@ -277,8 +272,8 @@ public interface ExportProvider {
 | `export(...)` | Exports specified tables to files in the output directory |
 | `exportQuery(...)` | Exports a SQL query result to a file |
 
-**Selection**: The framework selects the provider whose `supportedFormat()` matches the configured `DataFormat`.
-
+**Selection**: The framework selects the provider whose `supportedFormat()` matches
+the configured `DataFormat`.
 
 ### QueryAssertionProvider
 
@@ -303,8 +298,8 @@ public interface QueryAssertionProvider {
 
 **Loaded by**: `DatabaseQueryAssertion` facade class
 
-**Difference from `AssertionProvider`**: `AssertionProvider` compares in-memory datasets. `QueryAssertionProvider` executes SQL queries against the database and then compares the results.
-
+**Difference from `AssertionProvider`**: `AssertionProvider` compares in-memory datasets.
+`QueryAssertionProvider` executes SQL queries against the database and compares the results.
 
 ### TypeHandler
 
@@ -340,8 +335,10 @@ public interface TypeHandler<T> {
 | `format(...)` | Converts a value to string for export |
 | `parse(...)` | Parses a string value from import |
 
-**Selection**: When multiple handlers support the same SQL type, the handler with the highest `getPriority()` is selected. Database-specific handlers (non-empty `getSupportedDatabases()`) take precedence over generic handlers when the database product name matches.
-
+**Selection**: When multiple handlers support the same SQL type, the handler with the
+highest `getPriority()` is selected. Database-specific handlers (non-empty
+`getSupportedDatabases()`) take precedence over generic handlers when the database
+product name matches.
 
 ## Core Module SPIs
 

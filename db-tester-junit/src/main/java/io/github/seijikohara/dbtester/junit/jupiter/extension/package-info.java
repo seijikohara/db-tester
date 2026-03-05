@@ -1,9 +1,8 @@
 /**
- * JUnit Jupiter extension for database testing.
+ * Provides the JUnit Jupiter extension for database testing.
  *
- * <p>This package contains the {@link
- * io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension
- * DatabaseTestExtension} which integrates the db-tester framework with JUnit Jupiter.
+ * <p>{@link io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension}
+ * integrates the db-tester framework with JUnit Jupiter.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.junit.jupiter.extension;

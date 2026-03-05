@@ -1,28 +1,25 @@
 /**
- * Declarative annotations that describe dataset-driven database tests.
+ * Provides declarative annotations for dataset-driven database tests.
  *
- * <p>The package contains the following annotations:
+ * <p>This package contains the following annotations:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} defines the datasets
- *       and database operations that establish the pre-test state.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet}
- *       specifies the datasets that capture the expected database state after a test.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ExportDataSet @ExportDataSet} exports
- *       the actual database state to files for debugging and analysis.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSetSource @DataSetSource} captures
- *       the fine-grained metadata required to locate and filter an individual dataset, regardless
- *       of the underlying file format.
- *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ColumnStrategy @ColumnStrategy}
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSet @DataSet} — defines datasets
+ *       and database operations that establish pre-test state.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet @ExpectedDataSet} —
+ *       specifies datasets representing the expected database state after a test.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ExportDataSet @ExportDataSet} —
+ *       exports the actual database state to files for debugging and analysis.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.DataSetSource @DataSetSource} —
+ *       captures metadata required to locate and filter an individual dataset.
+ *   <li>{@link io.github.seijikohara.dbtester.api.annotation.ColumnStrategy @ColumnStrategy} —
  *       associates a column with a comparison strategy for expectation verification.
  * </ul>
  *
- * <p>When explicit locations are omitted the {@link
- * io.github.seijikohara.dbtester.api.config.ConventionSettings} are consulted to map test classes
- * and methods to dataset directories. Format-specific providers (CSV by default) are discovered via
- * the service loader.
- *
- * <p><strong>Audience:</strong> All users.
+ * <p>When explicit locations are omitted, {@link
+ * io.github.seijikohara.dbtester.api.config.ConventionSettings} maps test classes and methods to
+ * dataset directories. Format-specific providers (CSV by default) are discovered via {@link
+ * java.util.ServiceLoader}.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.annotation;

@@ -1,4 +1,4 @@
-/** Tests for configuration types. */
+/** Unit tests for the configuration types. */
 @NullMarked
 package io.github.seijikohara.dbtester.api.config;
 

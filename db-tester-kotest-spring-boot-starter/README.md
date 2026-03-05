@@ -4,10 +4,10 @@ This module provides Spring Boot auto-configuration for the DB Tester framework 
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
-- **Property-Based Configuration** - Configure conventions via `application.properties` or `application.yml`
-- **Multiple DataSource Support** - Handles multiple DataSource beans with `@Primary` annotation support
-- **Kotest Integration** - Extends `DatabaseTestExtension` with Spring Boot auto-configuration
+- **Auto-registration** - Spring-managed `DataSource` beans are registered with DB Tester automatically
+- **Property-based configuration** - Configure conventions via `application.properties` or `application.yml`
+- **Multiple DataSource support** - Handles multiple DataSource beans with `@Primary` annotation support
+- **Kotest integration** - Extends `DatabaseTestExtension` with Spring Boot auto-configuration
 
 ## Architecture
 
@@ -51,7 +51,8 @@ dependencies {
 </dependency>
 ```
 
-For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-kotest-spring-boot-starter).
+For the latest version, see
+[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-kotest-spring-boot-starter).
 
 ## Usage
 
@@ -77,11 +78,12 @@ class UserRepositorySpec : AnnotationSpec() {
 }
 ```
 
-Register `SpringBootDatabaseTestExtension` in the `init` block. The extension registers the DataSource from the Spring context.
+Register `SpringBootDatabaseTestExtension` in the `init` block. The extension registers the DataSource from the
+Spring context automatically.
 
 ### Multiple DataSources
 
-For multiple DataSource beans, use bean names in `@DataSetSource`:
+For multiple DataSource beans, specify bean names in `@DataSetSource`.
 
 ```kotlin
 @Test
@@ -96,7 +98,7 @@ fun `should test primary database`() {
 
 ### Application Properties
 
-Configure in `application.properties` or `application.yml`:
+Configure in `application.properties` or `application.yml`.
 
 ```yaml
 db-tester:
@@ -119,7 +121,7 @@ db-tester:
 
 | Property | Description | Default |
 |----------|-------------|---------|
-| `db-tester.enabled` | Enable/disable auto-configuration | `true` |
+| `db-tester.enabled` | Enable or disable auto-configuration | `true` |
 | `db-tester.auto-register-data-sources` | Auto-register Spring DataSources | `true` |
 | `db-tester.convention.base-directory` | Base directory for datasets | `null` (classpath) |
 | `db-tester.convention.expectation-suffix` | Suffix for expectation datasets | `/expected` |
@@ -131,7 +133,7 @@ db-tester:
 
 ### Programmatic Configuration
 
-Override properties via Configuration API:
+Override properties via the Configuration API.
 
 ```kotlin
 init {
@@ -170,4 +172,4 @@ init {
 
 ## Documentation
 
-For detailed usage documentation and examples, refer to the [main README](../README.md).
+For usage examples and detailed documentation, see the [main README](../README.md).

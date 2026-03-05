@@ -15,16 +15,16 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `of(List<Table>)` | `TableSet` | 指定されたテーブルでテーブルセットを作成します |
-| `of(Table...)` | `TableSet` | 指定されたテーブルでテーブルセットを作成します（可変長引数） |
+| `of(List<Table>)` | `TableSet` | 指定されたテーブルでテーブルセットを作成 |
+| `of(Table...)` | `TableSet` | 指定されたテーブルでテーブルセットを作成（可変長引数） |
 
 **インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getTables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返します |
-| `getTable(TableName)` | `Optional<Table>` | 名前でテーブルを検索します |
-| `getDataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返します |
+| `getTables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返す |
+| `getTable(TableName)` | `Optional<Table>` | 名前でテーブルを検索 |
+| `getDataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返す |
 
 **保証事項**:
 
@@ -42,18 +42,18 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `of(TableName, List<ColumnName>, List<Row>)` | `Table` | 型安全な名前でテーブルを作成します |
-| `of(String, List<String>, List<Row>)` | `Table` | 文字列名でテーブルを作成します（簡易版） |
-| `ofValues(String, List<String>, List<List<?>>)` | `Table` | 生の値からテーブルを作成します（ラッピング不要の簡易版） |
+| `of(TableName, List<ColumnName>, List<Row>)` | `Table` | 型安全な名前でテーブルを作成 |
+| `of(String, List<String>, List<Row>)` | `Table` | 文字列名でテーブルを作成（簡易版） |
+| `ofValues(String, List<String>, List<List<?>>)` | `Table` | 生の値からテーブルを作成（ラッピング不要の簡易版） |
 
 **インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getName()` | `TableName` | テーブル識別子を返します |
-| `getColumns()` | `List<ColumnName>` | 定義順序でカラム名を返します |
-| `getRows()` | `List<Row>` | すべての行を返します（空の場合もあります） |
-| `getRowCount()` | `int` | 行数を返します |
+| `getName()` | `TableName` | テーブル識別子を返す |
+| `getColumns()` | `List<ColumnName>` | 定義順序でカラム名を返す |
+| `getRows()` | `List<Row>` | すべての行を返す（空の場合もあります） |
+| `getRowCount()` | `int` | 行数を返す |
 
 **保証事項**:
 
@@ -71,15 +71,15 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `of(Map<ColumnName, CellValue>)` | `Row` | 指定されたカラム値ペアで行を作成します |
-| `of(List<String>, List<?>)` | `Row` | カラム名と生の値をペアにして行を作成します（簡易版） |
+| `of(Map<ColumnName, CellValue>)` | `Row` | 指定されたカラム値ペアで行を作成 |
+| `of(List<String>, List<?>)` | `Row` | カラム名と生の値をペアにして行を作成（簡易版） |
 
 **インスタンスメソッド**:
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getValues()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返します |
-| `getValue(ColumnName)` | `CellValue` | カラムの値を返します。存在しない場合は`CellValue.NULL` |
+| `getValues()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返す |
+| `getValue(ColumnName)` | `CellValue` | カラムの値を返す。存在しない場合は`CellValue.NULL` |
 
 ## ドメイン値オブジェクト
 
@@ -107,7 +107,7 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `isNull()` | `boolean` | 値がnullの場合`true`を返します |
+| `isNull()` | `boolean` | 値がnullの場合`true`を返す |
 
 ### TableName
 
@@ -180,14 +180,14 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getName()` | `ColumnName` | カラム名を返します |
+| `getName()` | `ColumnName` | カラム名を返す |
 | `getNameValue()` | `String` | カラム名を文字列として返します |
 | `getMetadata()` | `Optional<ColumnMetadata>` | メタデータが利用可能な場合に返します |
-| `getComparisonStrategy()` | `ComparisonStrategy` | 比較戦略を返します |
-| `hasMetadata()` | `boolean` | メタデータが存在する場合`true`を返します |
-| `isIgnored()` | `boolean` | 戦略がIGNOREの場合`true`を返します |
-| `withComparisonStrategy(ComparisonStrategy)` | `Column` | 更新された戦略で新しいColumnを返します |
-| `withMetadata(ColumnMetadata)` | `Column` | 更新されたメタデータで新しいColumnを返します |
+| `getComparisonStrategy()` | `ComparisonStrategy` | 比較戦略を返す |
+| `hasMetadata()` | `boolean` | メタデータが存在する場合`true`を返す |
+| `isIgnored()` | `boolean` | 戦略がIGNOREの場合`true`を返す |
+| `withComparisonStrategy(ComparisonStrategy)` | `Column` | 更新された戦略で新しいColumnを返す |
+| `withMetadata(ColumnMetadata)` | `Column` | 更新されたメタデータで新しいColumnを返す |
 
 ### Cell
 
@@ -217,12 +217,12 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getColumn()` | `Column` | カラムを返します |
-| `getColumnName()` | `ColumnName` | カラム名を返します |
-| `getValue()` | `CellValue` | セル値を返します |
-| `getRawValue()` | `Optional<Object>` | 生の値を返します。NULLの場合はempty |
-| `isNull()` | `boolean` | 値がNULLの場合`true`を返します |
-| `shouldIgnore()` | `boolean` | カラム戦略がIGNOREの場合`true`を返します |
+| `getColumn()` | `Column` | カラムを返す |
+| `getColumnName()` | `ColumnName` | カラム名を返す |
+| `getValue()` | `CellValue` | セル値を返す |
+| `getRawValue()` | `Optional<Object>` | 生の値を返す。NULLの場合はempty |
+| `isNull()` | `boolean` | 値がNULLの場合`true`を返す |
+| `shouldIgnore()` | `boolean` | カラム戦略がIGNOREの場合`true`を返す |
 | `getValueAsString()` | `Optional<String>` | 値をStringとして返します。NULLの場合はempty |
 | `getValueAsNumber()` | `Optional<Number>` | 値をNumberとして返します。該当しない場合はempty |
 
@@ -257,12 +257,12 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `isNumeric()` | `boolean` | カラム型が数値の場合`true`を返します |
-| `isTextual()` | `boolean` | カラム型がテキストベースの場合`true`を返します |
-| `isTemporal()` | `boolean` | カラム型が日付/時間の場合`true`を返します |
-| `isBinary()` | `boolean` | カラム型がバイナリの場合`true`を返します |
-| `isBoolean()` | `boolean` | カラム型がブール値の場合`true`を返します |
-| `isLikelyAutoIncrement()` | `boolean` | カラムが自動インクリメントと推定される場合`true`を返します |
+| `isNumeric()` | `boolean` | カラム型が数値の場合`true`を返す |
+| `isTextual()` | `boolean` | カラム型がテキストベースの場合`true`を返す |
+| `isTemporal()` | `boolean` | カラム型が日付/時間の場合`true`を返す |
+| `isBinary()` | `boolean` | カラム型がバイナリの場合`true`を返す |
+| `isBoolean()` | `boolean` | カラム型がブール値の場合`true`を返す |
+| `isLikelyAutoIncrement()` | `boolean` | カラムが自動インクリメントと推定される場合`true`を返す |
 
 ### ColumnStrategyMapping
 

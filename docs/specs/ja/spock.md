@@ -17,7 +17,7 @@ description: "アノテーション駆動型拡張とDatabaseTestSupportトレ�
 
 ## 登録
 
-Specificationクラスに`@DatabaseTest`を追加し、`DatabaseTestSupport`トレイトを実装します:
+Specificationクラスに`@DatabaseTest`を追加し、`DatabaseTestSupport`トレイトを実装します。
 
 ```groovy
 @DatabaseTest
@@ -39,7 +39,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
 ## DatabaseTestSupportトレイト
 
-`DatabaseTestSupport`トレイトはデータベーステストのコントラクトを提供します:
+`DatabaseTestSupport`トレイトはデータベーステストのコントラクトを提供します。
 
 | プロパティ | 型 | 必須 | 説明 |
 |-----------|-----|------|------|
@@ -48,7 +48,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
 ## 設定のカスタマイズ
 
-Specificationで`getDbTesterConfiguration()`をオーバーライドします:
+Specificationで`getDbTesterConfiguration()`をオーバーライドします。
 
 ```groovy
 @DatabaseTest
@@ -74,7 +74,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
 ## フィーチャーメソッド命名
 
-シナリオ名はフィーチャーメソッドから導出されます:
+シナリオ名はフィーチャーメソッドから導出されます。
 
 ```groovy
 @DataSet
@@ -85,7 +85,7 @@ def 'should create user with email'() {
 
 ## データ駆動テスト
 
-`where:`ブロックを使用したパラメータ化テストの場合、Spockはイテレーション名を使用します:
+`where:`ブロックを使用したパラメータ化テストでは、Spockはイテレーション名を使用します。
 
 ```groovy
 @DataSet

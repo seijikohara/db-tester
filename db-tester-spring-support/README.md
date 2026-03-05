@@ -1,11 +1,12 @@
 # DB Tester - Spring Support Module
 
-This module provides common Spring utilities for the DB Tester framework. The module contains shared logic used by the Spring Boot starter modules to eliminate code duplication.
+This module provides common Spring utilities for the DB Tester framework. It contains shared logic used by
+the Spring Boot starter modules to eliminate code duplication.
 
 ## Overview
 
-- **DataSource Registration Support** - Common logic for registering Spring-managed DataSource beans
-- **Primary Bean Resolution** - Utility for determining if a bean is marked with `@Primary`
+- **DataSource registration support** - Common logic for registering Spring-managed DataSource beans
+- **Primary bean resolution** - Utility for determining if a bean is marked with `@Primary`
 
 ## Architecture
 
@@ -20,7 +21,7 @@ db-tester-kotest-spring-boot-starter
 ```
 
 - **Depends on**: `db-tester-api`, Spring Context
-- **Is used by**: Spring Boot starter modules
+- **Used by**: Spring Boot starter modules
 
 ## Requirements
 
@@ -29,7 +30,8 @@ db-tester-kotest-spring-boot-starter
 
 ## Installation
 
-The Spring Boot starters include this module as a transitive dependency. Direct dependency is not required for typical usage.
+The Spring Boot starters include this module as a transitive dependency. Direct dependency is not required
+for typical usage.
 
 Use the Spring Boot starter modules instead:
 
@@ -55,7 +57,8 @@ dependencies {
 </dependency>
 ```
 
-For the latest version, see [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spring-support).
+For the latest version, see
+[Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spring-support).
 
 ## Key Classes
 
@@ -72,13 +75,13 @@ For the latest version, see [Maven Central](https://central.sonatype.com/artifac
 
 ## Usage
 
-The Spring Boot starters use these support classes internally:
+The Spring Boot starters use these support classes internally.
 
 ```java
 // In a Spring Boot starter's DataSourceRegistrar
 public void registerAll(DataSourceRegistry registry) {
     var dataSources = context.getBeansOfType(DataSource.class);
-    
+
     DataSourceRegistrarSupport.registerDataSources(
         registry,
         dataSources,
@@ -92,7 +95,7 @@ public void registerAll(DataSourceRegistry registry) {
 
 When multiple DataSources are present, the default is resolved in this order:
 
-1. **Single DataSource** - Automatically becomes the default
+1. **Single DataSource** - Becomes the default automatically
 2. **Primary DataSource** - Bean marked with `@Primary`
 3. **Named "dataSource"** - Bean with the standard name
 
@@ -107,4 +110,4 @@ When multiple DataSources are present, the default is resolved in this order:
 
 ## Documentation
 
-For usage examples and configuration details, refer to the [main README](../README.md).
+For usage examples and configuration details, see the [main README](../README.md).

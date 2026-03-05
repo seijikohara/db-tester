@@ -1,27 +1,22 @@
 /**
- * Database write operations for test data setup.
- *
- * <p>This package provides classes for writing data to databases, including insert, update, delete,
- * truncate, and upsert operations.
- *
- * <p>Key classes:
+ * Provides database write operations for test data setup.
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor} - Coordinates
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.OperationExecutor} — coordinates
  *       database write operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.SqlBuilder} - Builds SQL
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.SqlBuilder} — builds SQL
  *       statements for database operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.ParameterBinder} - Binds
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.ParameterBinder} — binds
  *       parameters to PreparedStatement with type conversion
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.InsertExecutor} - Executes INSERT
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.InsertExecutor} — executes INSERT
  *       operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.UpdateExecutor} - Executes UPDATE
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.UpdateExecutor} — executes UPDATE
  *       operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.DeleteExecutor} - Executes DELETE
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.DeleteExecutor} — executes DELETE
  *       operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.TruncateExecutor} - Executes
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.TruncateExecutor} — executes
  *       TRUNCATE operations
- *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.UpsertExecutor} - Executes UPSERT
+ *   <li>{@link io.github.seijikohara.dbtester.internal.jdbc.write.UpsertExecutor} — executes UPSERT
  *       operations
  * </ul>
  */

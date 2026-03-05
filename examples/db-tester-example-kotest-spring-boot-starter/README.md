@@ -4,10 +4,10 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 
 ## Overview
 
-- **Auto-Registration** - Spring-managed `DataSource` beans are automatically registered with DB Tester
-- **Convention-Based Loading** - CSV dataset resolution based on test class and method names
-- **Property-Based Configuration** - Configure DB Tester via `application.properties`
-- **Spring Data JPA Integration** - Testing Spring Data repositories
+- **Auto-registration** - Spring-managed `DataSource` beans are registered with DB Tester automatically
+- **Convention-based loading** - CSV dataset resolution based on test class and method names
+- **Property-based configuration** - Configure DB Tester via `application.properties`
+- **Spring Data JPA integration** - Testing Spring Data repositories
 
 ## Prerequisites
 
@@ -16,9 +16,7 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 - Spring Boot 4 or later
 - H2 Database (included as test dependency)
 
-## Usage
-
-### Running Tests
+## Running Tests
 
 ```bash
 ./gradlew :examples:db-tester-example-kotest-spring-boot-starter:test
@@ -56,8 +54,9 @@ class UserRepositorySpec : AnnotationSpec() {
 
 ## Related Modules
 
-- [db-tester-kotest-spring-boot-starter](../../db-tester-kotest-spring-boot-starter/) - Spring Boot auto-configuration for Kotest
+- [db-tester-kotest-spring-boot-starter](../../db-tester-kotest-spring-boot-starter/) - Spring Boot
+  auto-configuration for Kotest
 
 ## Documentation
 
-For detailed framework documentation, refer to the [main README](../../README.md).
+For framework documentation, see the [main README](../../README.md).

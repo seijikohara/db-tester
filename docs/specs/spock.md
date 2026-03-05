@@ -74,7 +74,7 @@ class UserRepositorySpec extends Specification implements DatabaseTestSupport {
 
 ## Feature Method Naming
 
-The scenario name is derived from the feature method:
+The scenario name derives from the feature method:
 
 ```groovy
 @DataSet

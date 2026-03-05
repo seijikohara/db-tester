@@ -149,7 +149,7 @@ static void setup(ExtensionContext context) {
 
 ### ディレクトリ解決
 
-`baseDirectory`がnull（デフォルト）の場合、データセットはテストクラスに対して相対的に解決されます:
+`baseDirectory`がnull（デフォルト）の場合、データセットはテストクラスに対して相対的に解決されます。
 
 ```
 src/test/resources/
@@ -162,7 +162,7 @@ src/test/resources/
         └── TABLE2.csv
 ```
 
-`baseDirectory`が指定されている場合:
+`baseDirectory`を指定した場合:
 
 ```
 {baseDirectory}/
@@ -174,7 +174,7 @@ src/test/resources/
 
 ### 期待サフィックス
 
-`expectationSuffix`は準備パスに追加されます:
+`expectationSuffix`は準備パスに追加されます。
 
 | 準備パス | サフィックス | 期待パス |
 |----------|-------------|----------|
@@ -334,8 +334,8 @@ var config = Configuration.builder()
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `hasDefault()` | `boolean` | デフォルトが登録されているかチェック |
-| `has(String)` | `boolean` | 名前付きデータソースが存在するかチェック |
+| `hasDefault()` | `boolean` | デフォルトが登録されているか確認 |
+| `has(String)` | `boolean` | 名前付きデータソースが存在するか確認 |
 
 ### 管理メソッド
 
@@ -429,36 +429,27 @@ static void setup(ExtensionContext context) {
 
 | 値 | 拡張子 | フィールド区切り文字 | デフォルト |
 |----|--------|---------------------|-----------|
-| `AUTO` | 全サポート形式 | — | はい |
+| `AUTO` | 全サポート形式 | -- | はい |
 | `CSV` | `.csv` | カンマ（`,`） | いいえ |
 | `TSV` | `.tsv` | タブ（`\t`） | いいえ |
-| `JSON` | `.json` | — | いいえ |
-| `YAML` | `.yaml` | — | いいえ |
+| `JSON` | `.json` | -- | いいえ |
+| `YAML` | `.yaml` | -- | いいえ |
 
 ### メソッド
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `hasExtension()` | `boolean` | `AUTO`では`false`、他のすべての形式では`true`を返す |
+| `hasExtension()` | `boolean` | `AUTO`では`false`、他の形式では`true`を返す |
 | `getExtension()` | `String` | ドットを含むファイル拡張子を返す。`AUTO`の場合は`UnsupportedOperationException`をスロー |
 
 ### ファイル検出
 
 ディレクトリからデータセットを読み込む場合:
 
-**AUTOモード（デフォルト）**:
-
-1. すべてのサポート形式（`.csv`、`.tsv`、`.json`、`.yaml`）のファイルをリスト
-2. 各ファイルを拡張子に基づいて適切なパーサーで解析
-3. 同一テーブル名が複数の形式で検出された場合、`DataSetLoadException`をスロー
-
-**特定形式モード**:
-
-1. 設定された形式拡張子に一致するすべてのファイルをリスト
-2. 各ファイルをテーブルとして解析（拡張子を除いたファイル名 = テーブル名）
-3. 他の拡張子のファイルは無視
-
-**エクスポート時の注意**: `DataSetExporter`でAUTOを指定すると`IllegalArgumentException`がスローされます。エクスポート時は具体的な形式（CSV、TSV、JSON、YAML）を指定してください。
+1. 設定された形式拡張子に一致するファイルを列挙する（`AUTO`の場合はすべてのサポート拡張子）
+2. 各ファイルをテーブルとして解析する（拡張子を除いたファイル名 = テーブル名）
+3. サポートされていない拡張子のファイルは無視する
+4. `AUTO`モードの場合、同一テーブル名が複数の形式で存在すると`DataSetLoadException`をスロー
 
 
 ## TableMergeStrategy
@@ -480,7 +471,7 @@ static void setup(ExtensionContext context) {
 
 ### マージ動作
 
-データセットはアノテーション宣言順に処理されます:
+データセットはアノテーション宣言順に処理されます。
 
 ```java
 @DataSet(sources = {
@@ -500,20 +491,20 @@ static void setup(ExtensionContext context) {
 
 ### 戦略選択ガイド
 
-ユースケースに応じて適切なマージ戦略を選択します：
+ユースケースに応じてマージ戦略を選択します。
 
 | 戦略 | 用途 | シナリオ例 |
 |------|------|-----------|
-| `UNION_ALL`（デフォルト） | 一般的なユースケース。重複を含む全行を保持 | ベースデータ + シナリオ固有の追加データ |
+| `UNION_ALL`（デフォルト） | 重複を含む全行を保持する一般的なケース | ベースデータ + シナリオ固有の追加データ |
 | `UNION` | 重複行を持つデータセットの結合。一意の行のみ保持 | 複数ソースからの参照データのマージ |
 | `LAST` | テーブル全体を最新データセットで上書き | 本番相当のベースデータ + テスト固有の完全置換 |
 | `FIRST` | ベースデータセットのみを保持。後続データセットを無視 | 共有ベースデータ + オプションのテスト固有オーバーライド |
 
 ### UNIONにおける行の等価性
 
-`UNION`は`CellValue.equals()`を使用してセル値を比較し、行の等価性を判定します。すべてのカラム値が一致する場合、2つの行は等しいとみなされます。
+`UNION`は`CellValue.equals()`でセル値を比較し、行の等価性を判定します。すべてのカラム値が一致する場合、2つの行は等しいとみなされます。
 
-すべてのデータフォーマット（CSV、TSV、JSON、YAML）の値はパース時に文字列に正規化されるため、重複排除は文字列表現を比較します。例えば、CSVの値`1`とJSONの値`1`（整数）はどちらも文字列`"1"`となり、等しいとみなされます。
+すべてのデータフォーマット（CSV、TSV、JSON、YAML）の値はパース時に文字列に正規化されるため、重複排除は文字列表現を比較します。例: CSVの値`1`とJSONの値`1`（整数）はどちらも文字列`"1"`となり、等しいとみなされます。
 
 ## RowOrdering
 
@@ -527,7 +518,7 @@ static void setup(ExtensionContext context) {
 
 | 値 | 説明 |
 |----|------|
-| `ORDERED` | 位置による比較（インデックスによる行ごとの比較）。デフォルト動作。 |
+| `ORDERED` | 位置による比較（インデックスによる行ごとの比較）。デフォルト動作 |
 | `UNORDERED` | セットベースの比較（位置に関係なく行をマッチング） |
 
 ### 使用するタイミング
@@ -535,11 +526,11 @@ static void setup(ExtensionContext context) {
 | モード | ユースケース |
 |--------|-------------|
 | `ORDERED` | クエリにORDER BYが含まれる、行順序が重要、最大パフォーマンス |
-| `UNORDERED` | ORDER BYなし、行順序が重要でない、データベースが予測できない順序で行を返す可能性がある |
+| `UNORDERED` | ORDER BYなし、行順序が不定、データベースが予測できない順序で行を返す |
 
 ### 設定
 
-行順序は以下で設定できます:
+行順序は以下で設定できます。
 
 1. **アノテーションレベル**: テストごとに`@ExpectedDataSet(rowOrdering = ...)`で指定
 2. **グローバル**: `VerificationSettings.withRowOrdering()`で指定
@@ -548,7 +539,7 @@ static void setup(ExtensionContext context) {
 
 ### パフォーマンスに関する考慮事項
 
-順序なし比較は最悪の場合O(n*m)の計算量を持ちます（nは期待される行数、mは実際の行数）。大きなデータセットの場合は以下を検討してください:
+順序なし比較は最悪の場合O(n*m)の計算量を持ちます（nは期待される行数、mは実際の行数）。大きなデータセットの場合は以下を検討してください。
 
 - クエリでORDER BYを使用した`ORDERED`
 - データセットサイズの制限
@@ -575,7 +566,7 @@ static void setup(ExtensionContext context) {
 
 | モード | ユースケース |
 |--------|-------------|
-| `AUTO_COMMIT` | 外部キー制約がトランザクション挿入を妨げる、デバッグ |
+| `AUTO_COMMIT` | 外部キー制約がトランザクション挿入を妨げる場合、デバッグ |
 | `SINGLE_TRANSACTION` | アトミックな全部または何もなし操作（推奨） |
 | `NONE` | 外部トランザクション管理（Springの@Transactional） |
 
@@ -616,7 +607,7 @@ var config = Configuration.builder()
 
 ### 目的
 
-`TestContext`は、テスト実行状態のフレームワーク非依存の表現を提供します。テストフレームワーク拡張（JUnit、Spock、およびKotest）は、ネイティブコンテキストオブジェクトから`TestContext`インスタンスを作成します。
+`TestContext`は、テスト実行状態のフレームワーク非依存の表現を提供します。テストフレームワーク拡張（JUnit、Spock、Kotest）は、ネイティブコンテキストオブジェクトから`TestContext`インスタンスを作成します。
 
 ### 使用法
 
@@ -644,7 +635,7 @@ List<TableSet> tableSets = loader.loadPreparationDataSets(context);
 
 - [概要](overview) - フレームワークの目的と主要概念
 - [パブリックAPI](public-api) - アノテーションとインターフェース
-- [データフォーマット](data-formats) - CSV、TSV、JSON、およびYAMLファイル構造
+- [データフォーマット](data-formats) - AUTO検出、CSV、TSV、JSON、YAMLファイル構造
 - [データベース操作](database-operations) - サポートされる操作
-- [テストフレームワーク](test-frameworks) - JUnit、Spock、およびKotestの統合
+- [テストフレームワーク](test-frameworks) - JUnit、Spock、Kotestの統合
 - [エラーハンドリング](error-handling) - エラーメッセージと例外型

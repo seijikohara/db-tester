@@ -247,7 +247,8 @@ com.example.CustomScenarioNameResolver
 ### Custom FormatProvider
 
 ::: warning
-FormatProvider is an internal SPI. The interface is not part of the public API contract and may change without notice. Custom implementations depend on internal packages.
+FormatProvider is an internal SPI. The interface is not part of the public API contract
+and may change without notice. Custom implementations depend on internal packages.
 :::
 
 To support additional file formats:
@@ -302,7 +303,7 @@ The framework selects providers as follows when multiple providers exist:
 | SPI | Selection |
 |-----|-----------|
 | `DataSetLoaderProvider` | First found |
-| `ScenarioNameResolver` | Sorted by `priority()`, first that `canResolve()` returns true |
+| `ScenarioNameResolver` | Sorted by `priority()`, first where `canResolve()` returns true |
 | `TypeHandler` | By SQL type, then `getPriority()` (highest wins); database-specific match preferred |
 | `FormatProvider` | First matching `supportedFileExtension()` |
 

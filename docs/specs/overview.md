@@ -7,9 +7,11 @@ description: "Learn about DB Tester's architecture, key concepts, and annotation
 
 ## Purpose
 
-DB Tester is a database testing framework for JUnit, Spock, and Kotest. The framework provides annotation-driven data preparation and state verification. Test data files use CSV, TSV, JSON, or YAML format, with automatic format detection by default.
+DB Tester is a database testing framework for JUnit, Spock, and Kotest.
+The framework provides annotation-driven data preparation and state verification.
+Test data files use CSV, TSV, JSON, or YAML format, with automatic format detection by default.
 
-The framework addresses the following challenges in database testing:
+The framework addresses these challenges in database testing:
 
 | Challenge | Solution |
 |-----------|----------|
@@ -17,32 +19,34 @@ The framework addresses the following challenges in database testing:
 | Repetitive setup code | Declarative `@DataSet` and `@ExpectedDataSet` annotations |
 | Multi-database testing | Named `DataSource` registry with explicit binding |
 | Test isolation | Automatic cleanup via configurable database operations |
-| Data format flexibility | Automatic format detection with support for CSV, TSV, JSON, and YAML formats |
+| Data format flexibility | Automatic format detection supporting CSV, TSV, JSON, and YAML |
 | Validation flexibility | Column-level comparison strategies |
 
 ## Key Concepts
 
 ### DataSet Phase
 
-The data set phase executes before each test method. The framework performs these steps:
+The DataSet phase executes before each test method. The framework performs these steps:
 
-1. Resolves dataset files based on test class and method names
-2. Filters rows by scenario markers when applicable
-3. Orders tables using the configured strategy (default: `AUTO`)
-4. Applies the configured database operation (default: `CLEAN_INSERT`)
+1. Resolve dataset files based on test class and method names
+2. Filter rows by scenario markers when applicable
+3. Order tables using the configured strategy (default: `AUTO`)
+4. Apply the configured database operation (default: `CLEAN_INSERT`)
 
-Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `UPSERT`, `TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
+Available operations: `NONE`, `INSERT`, `UPDATE`, `DELETE`, `DELETE_ALL`, `UPSERT`,
+`TRUNCATE_TABLE`, `CLEAN_INSERT`, `TRUNCATE_INSERT`.
 
 ### ExpectedDataSet Phase
 
-The expected data set phase executes after each test method. The framework performs these steps:
+The ExpectedDataSet phase executes after each test method. The framework performs these steps:
 
-1. Loads expected datasets from the designated directory (default: `expected/` subdirectory)
-2. Reads actual data from the database
-3. Compares expected and actual states using configurable comparison strategies
-4. Reports differences with structured error messages
+1. Load expected datasets from the designated directory (default: `expected/` subdirectory)
+2. Read actual data from the database
+3. Compare expected and actual states using configurable comparison strategies
+4. Report differences with structured error messages
 
-Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`.
+Available comparison strategies: `STRICT`, `IGNORE`, `NUMERIC`, `CASE_INSENSITIVE`,
+`TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`, `JSON_EQUIVALENT`, `NOT_NULL`, `REGEX`.
 
 ### Convention-Based Discovery
 
@@ -77,7 +81,7 @@ The framework minimizes explicit configuration by establishing sensible defaults
 - Dataset location derived from test class package and name
 - ExpectedDataSet suffix defaults to `/expected`
 - Scenario marker column defaults to `[Scenario]`
-- Data format defaults to `AUTO` (detects all supported formats: CSV, TSV, JSON, YAML)
+- Data format defaults to `AUTO` (detects CSV, TSV, JSON, and YAML)
 - Table ordering strategy defaults to `AUTO`
 - DataSet operation defaults to `CLEAN_INSERT`
 
@@ -90,7 +94,8 @@ The framework separates public API from internal implementation:
 | `db-tester-api` | Public | Annotations, configuration, domain models, SPI interfaces |
 | `db-tester-core` | Internal | JDBC operations, format parsing, SPI implementations |
 
-Test framework modules depend only on the API module at compile time. The core module loads at runtime via Java ServiceLoader mechanism.
+Test framework modules depend only on the API module at compile time.
+The core module loads at runtime via Java ServiceLoader.
 
 ### Immutability
 
@@ -122,7 +127,8 @@ The framework uses JSpecify annotations for null safety:
 
 ### Database Compatibility
 
-The framework uses standard JDBC operations. It supports any JDBC-compliant database, including:
+The framework uses standard JDBC operations.
+It supports any JDBC-compliant database, including:
 
 - H2
 - HSQLDB

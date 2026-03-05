@@ -1,6 +1,7 @@
 # DB Tester - API Module
 
-This module provides the public API for DB Tester. The module includes annotations, configuration types, domain objects, and SPI interfaces.
+This module defines the public API for DB Tester. It includes annotations, configuration types, domain objects,
+and SPI interfaces.
 
 ## Overview
 
@@ -20,7 +21,7 @@ db-tester-api (public API)
     └── db-tester-kotest (compile-time dependency)
 ```
 
-The API module provides the stable public contract. All other modules depend on this module.
+The API module defines the stable public contract. All other modules depend on this module.
 
 ## Requirements
 
@@ -30,7 +31,7 @@ The API module provides the stable public contract. All other modules depend on 
 
 Integration modules include this module transitively. Direct dependency is not required.
 
-Use the integration modules:
+Use the integration modules instead:
 
 - [db-tester-junit](../db-tester-junit/) for JUnit
 - [db-tester-spock](../db-tester-spock/) for Spock
