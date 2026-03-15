@@ -8,13 +8,13 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import java.sql.SQLException
+import java.time.Duration
 import javax.sql.DataSource
 import oracle.jdbc.pool.OracleDataSource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.testcontainers.oracle.OracleContainer
 import org.testcontainers.spock.Testcontainers
-import spock.lang.IgnoreIf
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -28,14 +28,11 @@ import spock.lang.Specification
  * to automatically manage the container lifecycle. The {@code @Shared} annotation ensures
  * the container is not restarted between feature methods.
  *
- * <p>This test is skipped in CI environments because Oracle containers require extended
- * startup time that often exceeds CI timeout limits.
+ * <p>Uses the {@code slim-faststart} image variant, which has a pre-initialized database, to
+ * ensure reliable startup within CI timeout limits.
  *
  * @see <a href="https://java.testcontainers.org/test_framework_integration/spock/">Testcontainers Spock Integration</a>
  */
-@IgnoreIf({
-	System.getenv('CI') == 'true'
-})
 @Testcontainers
 @DatabaseTest
 class OracleIntegrationSpec extends Specification implements DatabaseTestSupport {
@@ -44,10 +41,11 @@ class OracleIntegrationSpec extends Specification implements DatabaseTestSupport
 
 	/** Oracle container for integration testing. */
 	@Shared
-	OracleContainer oracle = new OracleContainer('gvenzl/oracle-free:latest')
+	OracleContainer oracle = new OracleContainer('gvenzl/oracle-free:slim-faststart')
 	.withDatabaseName('testdb')
 	.withUsername('testuser')
 	.withPassword('testpass')
+	.withStartupTimeout(Duration.ofMinutes(3))
 
 	/** Shared registry for DataSource. */
 	static DataSourceRegistry sharedRegistry

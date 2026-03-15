@@ -7,6 +7,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
@@ -32,10 +32,9 @@ import org.testcontainers.oracle.OracleContainer;
  * <p>This test validates that the framework works correctly with Oracle Database using
  * Testcontainers. This is a smoke test to ensure Oracle compatibility.
  *
- * <p>This test is skipped in CI environments because Oracle containers require extended startup
- * time that often exceeds CI timeout limits.
+ * <p>Uses the {@code slim-faststart} image variant, which has a pre-initialized database, to
+ * ensure reliable startup within CI timeout limits.
  */
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 @Testcontainers
 @ExtendWith(DatabaseTestExtension.class)
 @DisplayName("OracleIntegrationTest")
@@ -50,10 +49,11 @@ final class OracleIntegrationTest {
   /** Oracle container for integration testing. */
   @Container
   static final OracleContainer oracle =
-      new OracleContainer("gvenzl/oracle-free:latest")
+      new OracleContainer("gvenzl/oracle-free:slim-faststart")
           .withDatabaseName("testdb")
           .withUsername("testuser")
-          .withPassword("testpass");
+          .withPassword("testpass")
+          .withStartupTimeout(Duration.ofMinutes(3));
 
   /**
    * Sets up Oracle database connection and schema using Testcontainers.

@@ -6,20 +6,13 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
-import io.kotest.core.annotation.EnabledIf
 import io.kotest.core.spec.style.AnnotationSpec
 import oracle.jdbc.pool.OracleDataSource
 import org.slf4j.LoggerFactory
 import org.testcontainers.oracle.OracleContainer
 import java.sql.SQLException
+import java.time.Duration
 import javax.sql.DataSource
-
-/**
- * Condition to check if the test is not running in CI environment.
- */
-class NotInCiCondition : io.kotest.core.annotation.Condition {
-    override fun evaluate(kclass: kotlin.reflect.KClass<out io.kotest.core.spec.Spec>): Boolean = System.getenv("CI") != "true"
-}
 
 /**
  * Oracle Database integration test using Testcontainers.
@@ -30,12 +23,11 @@ class NotInCiCondition : io.kotest.core.annotation.Condition {
  * The container is manually started in [setupDatabase] and stopped in [cleanupDatabase]
  * since Kotest does not support the JUnit-specific @Testcontainers/@Container annotations.
  *
- * This test is skipped in CI environments because Oracle containers require extended
- * startup time that often exceeds CI timeout limits.
+ * Uses the `slim-faststart` image variant, which has a pre-initialized database, to
+ * ensure reliable startup within CI timeout limits.
  *
  * @see <a href="https://java.testcontainers.org/modules/databases/oraclefree/">Testcontainers Oracle Module</a>
  */
-@EnabledIf(NotInCiCondition::class)
 @DatabaseTest
 class OracleIntegrationSpec :
     AnnotationSpec(),
@@ -44,10 +36,11 @@ class OracleIntegrationSpec :
         private val logger = LoggerFactory.getLogger(OracleIntegrationSpec::class.java)
 
         private val oracle: OracleContainer =
-            OracleContainer("gvenzl/oracle-free:latest")
+            OracleContainer("gvenzl/oracle-free:slim-faststart")
                 .withDatabaseName("testdb")
                 .withUsername("testuser")
                 .withPassword("testpass")
+                .withStartupTimeout(Duration.ofMinutes(3))
 
         /**
          * Creates an Oracle DataSource from the Testcontainer.
