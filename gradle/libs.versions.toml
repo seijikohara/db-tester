@@ -1,6 +1,6 @@
 [versions]
 axion-release = "1.21.1"
-checker-qual = "3.53.1"
+checker-qual = "3.54.0"
 datafaker = "2.5.4"
 derby = "10.17.1.0"
 dokka = "2.1.0"
