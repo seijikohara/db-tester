@@ -119,6 +119,11 @@ docs/.vitepress/dist/
 docs/.vitepress/cache/
 
 # =========================================
+# Kotlin
+# =========================================
+.kotlin/
+
+# =========================================
 # Claude Code
 # =========================================
 # Version control: .claude/agents/, .claude/commands/, .claude/settings.json
