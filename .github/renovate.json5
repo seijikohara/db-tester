@@ -1,0 +1,77 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(deps)",
+    ":dependencyDashboard",
+    ":enableVulnerabilityAlertsWithLabel(security)",
+    "group:monorepos",
+    "group:recommended",
+    "helpers:pinGitHubActionDigests",
+  ],
+
+  timezone: "Asia/Tokyo",
+  schedule: ["before 09:00 on monday"],
+
+  // Match the prior Dependabot commit style:
+  // "chore(deps): bump <dep> from <old> to <new>"
+  commitMessageAction: "bump",
+  commitMessageTopic: "{{depName}}",
+  commitMessageExtra: "from {{currentVersion}} to {{newVersion}}",
+
+  // Use platform-native auto-merge so branch protection and required checks are honored.
+  platformAutomerge: true,
+
+  packageRules: [
+    {
+      // Auto-merge low-risk updates. Major updates require manual review.
+      matchUpdateTypes: ["minor", "patch", "pin", "digest"],
+      automerge: true,
+      automergeStrategy: "rebase",
+    },
+    {
+      matchUpdateTypes: ["major"],
+      automerge: false,
+      labels: ["dependencies", "major-update"],
+    },
+    {
+      matchManagers: ["github-actions"],
+      labels: ["dependencies", "github-actions"],
+    },
+    {
+      matchManagers: ["gradle", "gradle-wrapper"],
+      labels: ["dependencies", "gradle"],
+    },
+    {
+      matchManagers: ["npm"],
+      labels: ["dependencies", "npm"],
+    },
+    {
+      // Group Spring Boot ecosystem updates together.
+      groupName: "spring boot",
+      matchPackageNames: [
+        "/^org\\.springframework(\\..+)?$/",
+        "/^org\\.springframework\\.boot(\\..+)?$/",
+      ],
+    },
+    {
+      // Group test framework updates together to reduce PR churn.
+      groupName: "test frameworks",
+      matchPackageNames: [
+        "/^org\\.junit(\\..+)?$/",
+        "/^org\\.spockframework(\\..+)?$/",
+        "/^io\\.kotest(\\..+)?$/",
+      ],
+    },
+  ],
+
+  vulnerabilityAlerts: {
+    // Vulnerability fixes bypass the weekly schedule and are raised immediately.
+    schedule: ["at any time"],
+    labels: ["security"],
+    // Block auto-merge for security PRs to ensure manual review.
+    automerge: false,
+  },
+}
