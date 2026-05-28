@@ -116,13 +116,22 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 	/**
 	 * Creates a TestContext from the Spock invocation.
 	 *
+	 * <p>This interceptor is registered via {@code feature.addInterceptor()}, so
+	 * {@code invocation.feature} is always non-null and resolves to the executing
+	 * feature method.
+	 *
 	 * @param invocation the method invocation
 	 * @return the test context
+	 * @throws IllegalStateException if the feature method cannot be resolved
 	 */
 	protected TestContext createTestContext(IMethodInvocation invocation) {
 		def specClass = invocation.spec.reflection
-		def featureMethod = (invocation.feature?.featureMethod?.reflection
-				?: invocation.method?.reflection) as Method
+		Method featureMethod = invocation.feature?.featureMethod?.reflection
+		if (featureMethod == null) {
+			throw new IllegalStateException(
+			"Cannot resolve feature method from invocation for spec '${specClass.simpleName}'."
+			)
+		}
 
 		new TestContext(
 				specClass,

@@ -39,8 +39,8 @@ class JUnitScenarioNameResolverTest {
     /** Verifies that constructor creates a valid instance. */
     @Test
     @Tag("normal")
-    @DisplayName("should create instance")
-    void should_create_instance() {
+    @DisplayName("should create instance when called")
+    void shouldCreateInstance_whenCalled() {
       // Given & When
       final var instance = new JUnitScenarioNameResolver();
 
@@ -64,8 +64,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should return method name as scenario name")
-    void should_return_method_name_as_scenario_name() throws NoSuchMethodException {
+    @DisplayName("should return method name as scenario name when method provided")
+    void shouldReturnMethodNameAsScenarioName_whenMethodProvided() throws NoSuchMethodException {
       // Given
       final var method = SampleTestClass.class.getMethod("shouldCreateUser");
 
@@ -83,8 +83,9 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should handle various method naming patterns")
-    void should_handle_various_method_naming_patterns() throws NoSuchMethodException {
+    @DisplayName("should handle various method naming patterns when methods provided")
+    void shouldHandleVariousMethodNamingPatterns_whenMethodsProvided()
+        throws NoSuchMethodException {
       // Given
       final var camelCase = SampleTestClass.class.getMethod("shouldCreateUser");
       final var snakeCase = SampleTestClass.class.getMethod("should_create_user");
@@ -111,8 +112,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should return non-null ScenarioName")
-    void should_return_non_null_scenario_name() throws NoSuchMethodException {
+    @DisplayName("should return non-null ScenarioName when method provided")
+    void shouldReturnNonNullScenarioName_whenMethodProvided() throws NoSuchMethodException {
       // Given
       final var method = SampleTestClass.class.getMethod("shouldCreateUser");
 
@@ -139,8 +140,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should return true for any method")
-    void should_return_true_for_any_method() throws NoSuchMethodException {
+    @DisplayName("should return true when any method provided")
+    void shouldReturnTrue_whenAnyMethodProvided() throws NoSuchMethodException {
       // Given
       final var method = SampleTestClass.class.getMethod("shouldCreateUser");
 
@@ -158,8 +159,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("edge-case")
-    @DisplayName("should return true for methods without @Test annotation")
-    void should_return_true_for_methods_without_test_annotation() throws NoSuchMethodException {
+    @DisplayName("should return true when method has no @Test annotation")
+    void shouldReturnTrue_whenMethodHasNoTestAnnotation() throws NoSuchMethodException {
       // Given
       final var helperMethod = SampleTestClass.class.getMethod("helperMethod");
 
@@ -177,8 +178,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("edge-case")
-    @DisplayName("should return true for static methods")
-    void should_return_true_for_static_methods() throws NoSuchMethodException {
+    @DisplayName("should return true when method is static")
+    void shouldReturnTrue_whenMethodIsStatic() throws NoSuchMethodException {
       // Given
       final var staticMethod = SampleTestClass.class.getMethod("staticMethod");
 
@@ -201,8 +202,8 @@ class JUnitScenarioNameResolverTest {
     /** Verifies that priority returns DEFAULT_PRIORITY. */
     @Test
     @Tag("normal")
-    @DisplayName("should return DEFAULT_PRIORITY")
-    void should_return_default_priority() {
+    @DisplayName("should return DEFAULT_PRIORITY when called")
+    void shouldReturnDefaultPriority_whenCalled() {
       // Given & When
       final var result = resolver.priority();
 
@@ -214,8 +215,8 @@ class JUnitScenarioNameResolverTest {
     /** Verifies that priority is consistent. */
     @Test
     @Tag("normal")
-    @DisplayName("should return consistent priority")
-    void should_return_consistent_priority() {
+    @DisplayName("should return consistent priority when called multiple times")
+    void shouldReturnConsistentPriority_whenCalledMultipleTimes() {
       // Given & When
       final var priority1 = resolver.priority();
       final var priority2 = resolver.priority();
@@ -236,8 +237,8 @@ class JUnitScenarioNameResolverTest {
     /** Verifies that resolver implements ScenarioNameResolver. */
     @Test
     @Tag("normal")
-    @DisplayName("should implement ScenarioNameResolver")
-    void should_implement_scenario_name_resolver() {
+    @DisplayName("should implement ScenarioNameResolver interface")
+    void shouldImplementScenarioNameResolver_whenInstantiated() {
       // Given & When & Then
       assertTrue(
           ScenarioNameResolver.class.isAssignableFrom(resolver.getClass()),
@@ -251,8 +252,8 @@ class JUnitScenarioNameResolverTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should act as fallback resolver with default priority")
-    void should_act_as_fallback_resolver() throws NoSuchMethodException {
+    @DisplayName("should act as fallback resolver when default priority used")
+    void shouldActAsFallbackResolver_whenDefaultPriorityUsed() throws NoSuchMethodException {
       // Given
       final var method = SampleTestClass.class.getMethod("shouldCreateUser");
 
