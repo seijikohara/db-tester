@@ -216,37 +216,64 @@ final class ComparisonStrategyTest {
     /** Creates NumericStrategyTests instance. */
     NumericStrategyTests() {}
 
-    /** Verifies NUMERIC strategy handles different numeric types. */
+    /** Verifies NUMERIC strategy matches integer and decimal representations of the same value. */
     @Test
     @Tag("normal")
-    @DisplayName("should match different numeric types with same value")
-    void shouldMatchDifferentNumericTypesWithSameValue() {
+    @DisplayName("should match across numeric types when NUMERIC strategy applied")
+    void shouldMatchAcrossNumericTypes_whenNumericStrategyApplied() {
       // Given
-      logger.info("Testing NUMERIC strategy with different numeric types");
+      logger.info("Testing NUMERIC strategy across Integer and BigDecimal");
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, 100);
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("100.00"));
 
       // When & Then
-      assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("NUMERIC strategy type conversion test completed");
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.numeric("AMOUNT")));
+      logger.info("NUMERIC strategy type coercion test completed");
     }
 
-    /** Verifies NUMERIC strategy handles precision differences. */
+    /** Verifies NUMERIC strategy ignores trailing zero scale differences. */
     @Test
     @Tag("edge-case")
-    @DisplayName("should match values with different precision")
-    void shouldMatchValuesWithDifferentPrecision() {
+    @DisplayName("should match scaled decimals when NUMERIC strategy applied")
+    void shouldMatchScaledDecimals_whenNumericStrategyApplied() {
       // Given
-      logger.info("Testing NUMERIC strategy with precision differences");
+      logger.info("Testing NUMERIC strategy with trailing zero scale");
       final var expectedTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("99.99"));
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("99.990"));
 
       // When & Then
-      assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("NUMERIC strategy precision test completed");
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.numeric("AMOUNT")));
+      logger.info("NUMERIC strategy scale test completed");
+    }
+
+    /** Verifies NUMERIC strategy fails when values are numerically distinct. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when values are numerically distinct under NUMERIC strategy")
+    void shouldFail_whenValuesAreNumericallyDistinctUnderNumericStrategy() {
+      // Given
+      logger.info("Testing NUMERIC strategy rejection of distinct values");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("99.99"));
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "AMOUNT"), 1, new BigDecimal("100.00"));
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.numeric("AMOUNT")));
+      logger.info("NUMERIC strategy rejection test completed");
     }
   }
 
@@ -258,20 +285,57 @@ final class ComparisonStrategyTest {
     /** Creates CaseInsensitiveStrategyTests instance. */
     CaseInsensitiveStrategyTests() {}
 
-    /** Verifies CASE_INSENSITIVE strategy documents case-sensitive behavior. */
+    /** Verifies default STRICT comparison is case-sensitive. */
     @Test
     @Tag("error")
-    @DisplayName("should demonstrate case-sensitive comparison by default")
-    void shouldDemonstrateCaseSensitiveComparison() {
+    @DisplayName("should fail with case difference under default STRICT comparison")
+    void shouldFail_withCaseDifferenceUnderDefaultStrictComparison() {
       // Given
-      logger.info("Testing default case-sensitive comparison");
+      logger.info("Verifying STRICT default is case-sensitive");
       final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "alice");
       final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "ALICE");
 
       // When & Then
       assertThrows(
           AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("Case-sensitive comparison test completed");
+      logger.info("STRICT default case-sensitivity test completed");
+    }
+
+    /** Verifies CASE_INSENSITIVE strategy ignores letter case. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match across letter cases when CASE_INSENSITIVE strategy applied")
+    void shouldMatchAcrossLetterCases_whenCaseInsensitiveStrategyApplied() {
+      // Given
+      logger.info("Testing CASE_INSENSITIVE strategy across letter cases");
+      final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "alice");
+      final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "ALICE");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.caseInsensitive("NAME")));
+      logger.info("CASE_INSENSITIVE strategy match test completed");
+    }
+
+    /** Verifies CASE_INSENSITIVE strategy still fails when text content differs. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when text differs under CASE_INSENSITIVE strategy")
+    void shouldFail_whenTextDiffersUnderCaseInsensitiveStrategy() {
+      // Given
+      logger.info("Testing CASE_INSENSITIVE strategy rejection of distinct text");
+      final var expectedTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "alice");
+      final var actualTable = createTable("COMPARISON_TEST", List.of("ID", "NAME"), 1, "bob");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.caseInsensitive("NAME")));
+      logger.info("CASE_INSENSITIVE strategy rejection test completed");
     }
   }
 
@@ -311,33 +375,39 @@ final class ComparisonStrategyTest {
     /** Creates NotNullStrategyTests instance. */
     NotNullStrategyTests() {}
 
-    /** Verifies value comparison when both expected and actual are not null. */
+    /**
+     * Verifies NOT_NULL strategy tolerates an actual value that differs from the expected
+     * placeholder so long as the actual value is not null.
+     */
     @Test
     @Tag("normal")
-    @DisplayName("should pass when both values are not null")
-    void shouldPassWhenValuesAreNotNull() {
+    @DisplayName("should match any non-null actual when NOT_NULL strategy applied")
+    void shouldMatchAnyNonNullActual_whenNotNullStrategyApplied() {
       // Given
-      logger.info("Testing NOT_NULL strategy with non-null values");
+      logger.info("Testing NOT_NULL strategy with differing non-null values");
       final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "expected-value");
+          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "any-placeholder");
       final var actualTable =
-          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "expected-value");
+          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "0xFEED-CAFE-1234");
 
       // When & Then
-      assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("NOT_NULL strategy test completed");
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.notNull("GENERATED_ID")));
+      logger.info("NOT_NULL strategy non-null match test completed");
     }
 
-    /** Verifies that comparison fails when expected is not null but actual is null. */
+    /** Verifies NOT_NULL strategy fails when the actual value is null. */
     @Test
     @Tag("error")
-    @DisplayName("should fail when expected is not null but actual is null")
+    @DisplayName("should fail when actual is null under NOT_NULL strategy")
     @SuppressWarnings("NullAway")
-    void shouldFailWhenActualIsNull() {
+    void shouldFail_whenActualIsNullUnderNotNullStrategy() {
       // Given
-      logger.info("Testing comparison with null value");
+      logger.info("Testing NOT_NULL strategy rejection of null actual value");
       final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "any-value");
+          createTable("COMPARISON_TEST", List.of("ID", "GENERATED_ID"), 1, "any-placeholder");
       final Object nullValue = null;
       final var actualTable =
           createTableWithNullableValues(
@@ -345,8 +415,11 @@ final class ComparisonStrategyTest {
 
       // When & Then
       assertThrows(
-          AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("NOT_NULL strategy null value test completed");
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.notNull("GENERATED_ID")));
+      logger.info("NOT_NULL strategy null rejection test completed");
     }
   }
 
@@ -402,6 +475,53 @@ final class ComparisonStrategyTest {
                   ColumnStrategyMapping.timestampFlexible("TIMESTAMP")));
       logger.info("TIMESTAMP_FLEXIBLE date mismatch test completed");
     }
+
+    /** Verifies TIMESTAMP_FLEXIBLE strategy treats the same instant across offsets as equal. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match same instant across timezone offsets")
+    void shouldMatchSameInstant_acrossTimezoneOffsets() {
+      // Given
+      logger.info("Testing TIMESTAMP_FLEXIBLE strategy with same instant across offsets");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00+09:00");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T01:30:00Z");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.timestampFlexible("TIMESTAMP")));
+      logger.info("TIMESTAMP_FLEXIBLE timezone equivalence test completed");
+    }
+
+    /** Verifies TIMESTAMP_FLEXIBLE strategy distinguishes different instants across offsets. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when offsets shift instant under TIMESTAMP_FLEXIBLE")
+    void shouldFail_whenOffsetsShiftInstantUnderTimestampFlexible() {
+      // Given
+      logger.info("Testing TIMESTAMP_FLEXIBLE strategy with distinct instants across offsets");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00+09:00");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00Z");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.timestampFlexible("TIMESTAMP")));
+      logger.info("TIMESTAMP_FLEXIBLE distinct instant test completed");
+    }
   }
 
   /** Tests for DATE_FLEXIBLE comparison strategy. */
@@ -451,6 +571,26 @@ final class ComparisonStrategyTest {
               DatabaseAssertion.assertEqualsWithStrategies(
                   expectedTable, actualTable, ColumnStrategyMapping.dateFlexible("BIRTH_DATE")));
       logger.info("DATE_FLEXIBLE mismatch test completed");
+    }
+
+    /** Verifies DATE_FLEXIBLE strategy supports the dot-delimited date format. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match dot-delimited date format")
+    void shouldMatchDotDelimitedDateFormat() {
+      // Given
+      logger.info("Testing DATE_FLEXIBLE strategy with dot-delimited format");
+      final var expectedTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024-06-15");
+      final var actualTable =
+          createTable("COMPARISON_TEST", List.of("ID", "BIRTH_DATE"), 1, "2024.06.15");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.dateFlexible("BIRTH_DATE")));
+      logger.info("DATE_FLEXIBLE dot format test completed");
     }
   }
 
@@ -515,6 +655,63 @@ final class ComparisonStrategyTest {
                   expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
       logger.info("JSON_EQUIVALENT mismatch test completed");
     }
+
+    /** Verifies JSON_EQUIVALENT strategy normalizes key order within nested objects. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match nested JSON when keys are reordered")
+    void shouldMatchNestedJson_whenKeysAreReordered() {
+      // Given
+      logger.info("Testing JSON_EQUIVALENT strategy with nested object key reordering");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"user\":{\"name\":\"Alice\",\"roles\":[\"admin\",\"user\"]}}");
+      final var actualTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"user\":{\"roles\":[\"admin\",\"user\"],\"name\":\"Alice\"}}");
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
+      logger.info("JSON_EQUIVALENT nested key reorder test completed");
+    }
+
+    /** Verifies JSON_EQUIVALENT strategy preserves array element order. */
+    @Test
+    @Tag("error")
+    @DisplayName("should fail when nested array order differs")
+    void shouldFail_whenNestedArrayOrderDiffers() {
+      // Given
+      logger.info("Testing JSON_EQUIVALENT strategy preserves array ordering");
+      final var expectedTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"tags\":[\"alpha\",\"beta\",\"gamma\"]}");
+      final var actualTable =
+          createTable(
+              "COMPARISON_TEST",
+              List.of("ID", "METADATA"),
+              1,
+              "{\"tags\":[\"gamma\",\"alpha\",\"beta\"]}");
+
+      // When & Then
+      assertThrows(
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable, actualTable, ColumnStrategyMapping.jsonEquivalent("METADATA")));
+      logger.info("JSON_EQUIVALENT array order rejection test completed");
+    }
   }
 
   /** Tests for REGEX comparison strategy. */
@@ -522,42 +719,58 @@ final class ComparisonStrategyTest {
   @DisplayName("REGEX Strategy Tests")
   class RegexStrategyTests {
 
+    /** Email validation pattern used by the REGEX strategy tests. */
+    private static final String EMAIL_PATTERN = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}";
+
     /** Creates RegexStrategyTests instance. */
     RegexStrategyTests() {}
 
-    /** Verifies exact match comparison. */
+    /**
+     * Verifies REGEX strategy matches an actual value against the configured pattern, ignoring the
+     * placeholder expected value.
+     */
     @Test
     @Tag("normal")
-    @DisplayName("should match exact values")
-    void shouldMatchExactValues() {
+    @DisplayName("should match actual against pattern when REGEX strategy applied")
+    void shouldMatchActualAgainstPattern_whenRegexStrategyApplied() {
       // Given
-      logger.info("Testing exact value comparison");
+      logger.info("Testing REGEX strategy with conforming actual value");
       final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
+          createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "<PATTERN_EMAIL>");
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
 
       // When & Then
-      assertDoesNotThrow(() -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("REGEX strategy test completed");
+      assertDoesNotThrow(
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.regex("EMAIL", EMAIL_PATTERN)));
+      logger.info("REGEX strategy match test completed");
     }
 
-    /** Verifies comparison fails when values don't match. */
+    /** Verifies REGEX strategy fails when the actual value does not satisfy the pattern. */
     @Test
     @Tag("error")
-    @DisplayName("should fail when values don't match")
-    void shouldFailWhenValuesDontMatch() {
+    @DisplayName("should fail when actual does not match pattern under REGEX strategy")
+    void shouldFail_whenActualDoesNotMatchPatternUnderRegexStrategy() {
       // Given
-      logger.info("Testing value mismatch");
+      logger.info("Testing REGEX strategy rejection of non-conforming actual value");
       final var expectedTable =
-          createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "alice@example.com");
+          createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "<PATTERN_EMAIL>");
       final var actualTable =
           createTable("COMPARISON_TEST", List.of("ID", "EMAIL"), 1, "invalid-email");
 
       // When & Then
       assertThrows(
-          AssertionError.class, () -> DatabaseAssertion.assertEquals(expectedTable, actualTable));
-      logger.info("REGEX strategy non-matching test completed");
+          AssertionError.class,
+          () ->
+              DatabaseAssertion.assertEqualsWithStrategies(
+                  expectedTable,
+                  actualTable,
+                  ColumnStrategyMapping.regex("EMAIL", EMAIL_PATTERN)));
+      logger.info("REGEX strategy rejection test completed");
     }
   }
 }
