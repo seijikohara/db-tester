@@ -176,4 +176,51 @@ final class NullAndEmptyValuesTest {
     // Then
     logger.info("NULL values test completed successfully");
   }
+
+  /**
+   * Documents that the CSV loader normalizes both a bare empty cell ({@code ,,}) and a quoted
+   * empty string ({@code ,"",}) to SQL {@code NULL} for database compatibility.
+   *
+   * <p>The fixture supplies two rows in the {@code shouldDistinguishEmptyStringFromNullValues}
+   * scenario:
+   *
+   * <ul>
+   *   <li>ID=1 - COLUMN2 is left empty
+   *   <li>ID=2 - COLUMN2 is quoted as {@code ""}
+   * </ul>
+   *
+   * <p>SQL probes confirm that both forms materialize as {@code NULL}, which matches the
+   * documented behaviour of {@code FilteredTable.normalizeRow}.
+   *
+   * @throws SQLException if the probe queries fail
+   */
+  @Test
+  @Tag("edge-case")
+  @DisplayName("should normalize quoted empty string to NULL during CSV preparation")
+  @DataSet
+  @ExpectedDataSet
+  void shouldDistinguishEmptyStringFromNullValues() throws SQLException {
+    logger.info("Confirming empty cells and quoted empty strings both materialize as NULL");
+    try (final var connection = dataSource.getConnection();
+        final var statement = connection.createStatement()) {
+      try (final var resultSet =
+          statement.executeQuery(
+              "SELECT COUNT(*) FROM TABLE1 WHERE COLUMN2 IS NULL AND ID IN (1, 2)")) {
+        resultSet.next();
+        if (resultSet.getInt(1) != 2) {
+          throw new AssertionError(
+              "Expected COLUMN2 to be NULL for both ID=1 and ID=2 (empty cell and quoted empty)");
+        }
+      }
+      try (final var resultSet =
+          statement.executeQuery("SELECT COUNT(*) FROM TABLE1 WHERE COLUMN2 = ''")) {
+        resultSet.next();
+        if (resultSet.getInt(1) != 0) {
+          throw new AssertionError(
+              "Loader should not materialize quoted empty cells as empty strings");
+        }
+      }
+    }
+    logger.info("Empty-string normalization to NULL confirmed");
+  }
 }
