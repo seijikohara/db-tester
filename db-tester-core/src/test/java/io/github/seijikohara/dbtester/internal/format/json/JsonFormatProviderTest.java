@@ -180,6 +180,45 @@ class JsonFormatProviderTest {
     }
 
     /**
+     * Verifies that parse distinguishes an empty string from a null value.
+     *
+     * <p>JSON expresses null and empty string with distinct syntax. The parser preserves this
+     * distinction: a JSON null becomes a NULL CellValue, and a JSON empty string becomes a non-null
+     * empty-string CellValue.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("should preserve empty string as non-null when empty string exists in JSON")
+    void shouldPreserveEmptyString_whenEmptyStringExistsInJson(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createJsonFile(
+          tempDir,
+          "users.json",
+          """
+          [
+            {"ID": 1, "NAME": "", "EMAIL": null}
+          ]
+          """);
+
+      // When
+      final var result = provider.parse(tempDir);
+
+      // Then
+      final var row = result.getTables().getFirst().getRows().getFirst();
+      final var nameValue = row.getValue(new ColumnName("NAME"));
+      final var emailValue = row.getValue(new ColumnName("EMAIL"));
+      assertAll(
+          "JSON distinguishes empty string from null",
+          () -> assertFalse(nameValue.isNull(), "empty-string NAME should not be NULL"),
+          () -> assertEquals("", nameValue.value(), "empty-string NAME should be an empty string"),
+          () -> assertEquals(CellValue.NULL, emailValue, "null EMAIL should be NULL"));
+    }
+
+    /**
      * Verifies that parse handles multiple rows.
      *
      * @param tempDir temporary directory for test files

@@ -3,6 +3,7 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
@@ -21,15 +22,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Demonstrates NULL value and empty string handling in CSV files.
+ * Demonstrates NULL value and empty string handling across data formats.
  *
  * <p>This test shows:
  *
  * <ul>
  *   <li>Using empty cells to represent SQL NULL values
- *   <li>Distinguishing between NULL and empty string in VARCHAR columns
  *   <li>Handling NOT NULL constraints
- *   <li>NULL values in numeric and timestamp columns
+ *   <li>NULL values in numeric columns
+ *   <li>The NULL versus empty-string distinction available in JSON and YAML
  * </ul>
  *
  * <p>CSV format examples and NULL representation:
@@ -40,9 +41,10 @@ import org.slf4j.LoggerFactory;
  * 2,Another Value,Optional Value,200,42
  * }</pre>
  *
- * <p><strong>Important:</strong> Empty cells in CSV files are interpreted as SQL NULL for all
- * column types (VARCHAR, INTEGER, TIMESTAMP, etc.). For VARCHAR columns, to test empty strings
- * versus NULL, use quoted empty string {@code ""} for empty string and empty cell for NULL.
+ * <p><strong>Important:</strong> An empty CSV or TSV cell is interpreted as SQL NULL for all column
+ * types, and a quoted {@code ""} also materializes as NULL. The delimited formats cannot express a
+ * non-null empty string. To distinguish an empty string from NULL, use JSON or YAML, which provide
+ * distinct syntax for {@code null} and {@code ""}.
  */
 @ExtendWith(DatabaseTestExtension.class)
 @DisplayName("NullAndEmptyValuesTest")
@@ -178,8 +180,8 @@ final class NullAndEmptyValuesTest {
   }
 
   /**
-   * Documents that the CSV loader normalizes both a bare empty cell ({@code ,,}) and a quoted
-   * empty string ({@code ,"",}) to SQL {@code NULL} for database compatibility.
+   * Documents that the CSV loader materializes both a bare empty cell ({@code ,,}) and a quoted
+   * empty string ({@code ,"",}) as SQL {@code NULL}.
    *
    * <p>The fixture supplies two rows in the {@code shouldDistinguishEmptyStringFromNullValues}
    * scenario:
@@ -189,8 +191,9 @@ final class NullAndEmptyValuesTest {
    *   <li>ID=2 - COLUMN2 is quoted as {@code ""}
    * </ul>
    *
-   * <p>SQL probes confirm that both forms materialize as {@code NULL}, which matches the
-   * documented behaviour of {@code FilteredTable.normalizeRow}.
+   * <p>SQL probes confirm that both forms materialize as {@code NULL}. The delimited parser maps an
+   * empty field to NULL, so a delimited file cannot express a non-null empty string. Use JSON or
+   * YAML when the empty-string versus NULL distinction matters.
    *
    * @throws SQLException if the probe queries fail
    */
@@ -222,5 +225,50 @@ final class NullAndEmptyValuesTest {
       }
     }
     logger.info("Empty-string normalization to NULL confirmed");
+  }
+
+  /**
+   * Verifies that JSON preserves the distinction between {@code null} and an empty string.
+   *
+   * <p>The JSON fixture loads two rows into {@code JSON_VALUES}:
+   *
+   * <ul>
+   *   <li>ID=1 - COLUMN2 is JSON {@code null}, which materializes as SQL NULL
+   *   <li>ID=2 - COLUMN2 is JSON {@code ""}, which materializes as a non-null empty string
+   * </ul>
+   *
+   * <p>SQL probes confirm the row counts for each form. This demonstrates that JSON and YAML express
+   * an empty string that the delimited formats cannot.
+   *
+   * @throws SQLException if the probe queries fail
+   */
+  @Test
+  @Tag("edge-case")
+  @DisplayName("should preserve empty string distinct from NULL when loading JSON")
+  @DataSet(
+      sources =
+          @DataSetSource(
+              resourceLocation =
+                  "classpath:example/feature/NullAndEmptyValuesTest/jsonEmptyString/"))
+  void shouldPreserveEmptyStringDistinctFromNull_whenLoadingJson() throws SQLException {
+    logger.info("Confirming JSON null and empty string materialize distinctly");
+    try (final var connection = dataSource.getConnection();
+        final var statement = connection.createStatement()) {
+      try (final var resultSet =
+          statement.executeQuery("SELECT COUNT(*) FROM JSON_VALUES WHERE COLUMN2 IS NULL")) {
+        resultSet.next();
+        if (resultSet.getInt(1) != 1) {
+          throw new AssertionError("Expected exactly one NULL COLUMN2 (the JSON null row)");
+        }
+      }
+      try (final var resultSet =
+          statement.executeQuery("SELECT COUNT(*) FROM JSON_VALUES WHERE COLUMN2 = ''")) {
+        resultSet.next();
+        if (resultSet.getInt(1) != 1) {
+          throw new AssertionError("Expected exactly one empty-string COLUMN2 (the JSON \"\" row)");
+        }
+      }
+    }
+    logger.info("JSON empty-string preservation confirmed");
   }
 }

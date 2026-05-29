@@ -331,16 +331,31 @@ Row 2: `description` is "A description"
 
 ### Empty Strings vs NULL
 
+The delimited formats (CSV, TSV) cannot express a non-null empty string. Both an empty field and a
+quoted empty field materialize as SQL NULL:
+
 | File Content | Interpretation |
 |--------------|----------------|
 | Empty field | NULL |
-| Empty quoted field (`""`) | Empty string |
+| Empty quoted field (`""`) | NULL |
 
 Example:
 
 ```csv
-id,nullable_col,empty_string_col
+id,nullable_col,quoted_empty_col
 1,,""
+```
+
+- `nullable_col` = NULL
+- `quoted_empty_col` = NULL
+
+To distinguish an empty string from NULL, use JSON or YAML. These formats provide distinct syntax
+for `null` and `""`:
+
+```json
+[
+  {"id": 1, "nullable_col": null, "empty_string_col": ""}
+]
 ```
 
 - `nullable_col` = NULL
@@ -534,6 +549,7 @@ The framework uses Jackson `ObjectMapper` to parse JSON files.
 | Structure | Array of objects |
 | Column order | Determined by key order of the first object |
 | Null handling | JSON `null` maps to SQL NULL |
+| Empty string handling | JSON `""` maps to a non-null empty string, distinct from NULL |
 | Value conversion | All non-null values convert to strings |
 | Scenario filtering | Supported; include the scenario marker in each object (any key position) |
 
@@ -546,6 +562,7 @@ The framework uses Jackson YAML module (`YAMLMapper`) to parse YAML files.
 | Structure | List of mappings |
 | Column order | Determined by key order of the first mapping |
 | Null handling | YAML `null` or `~` maps to SQL NULL |
+| Empty string handling | YAML `""` maps to a non-null empty string, distinct from NULL |
 | Value conversion | All non-null values convert to strings |
 | Comments | Supported and ignored during parsing |
 | Scenario filtering | Supported; include the scenario marker in each mapping (any key position) |
