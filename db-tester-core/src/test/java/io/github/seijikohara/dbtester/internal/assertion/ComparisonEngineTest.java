@@ -500,10 +500,7 @@ class ComparisonEngineTest {
       assertDoesNotThrow(
           () ->
               ComparisonEngine.matches(
-                  ComparisonStrategy.DATE_FLEXIBLE,
-                  "garbage",
-                  "garbage",
-                  ComparisonMode.LENIENT),
+                  ComparisonStrategy.DATE_FLEXIBLE, "garbage", "garbage", ComparisonMode.LENIENT),
           "LENIENT DATE_FLEXIBLE should not throw on unparseable date");
     }
 
@@ -515,9 +512,7 @@ class ComparisonEngineTest {
       // When & Then
       assertThrows(
           ValidationException.class,
-          () ->
-              ComparisonEngine.matches(
-                  ComparisonStrategy.NUMERIC, "not-a-number", "100"),
+          () -> ComparisonEngine.matches(ComparisonStrategy.NUMERIC, "not-a-number", "100"),
           "Legacy matches(strategy, expected, actual) should behave like STRICT");
     }
   }
