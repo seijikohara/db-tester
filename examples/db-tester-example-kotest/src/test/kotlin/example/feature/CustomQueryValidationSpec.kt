@@ -8,8 +8,6 @@ import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.api.domain.CellValue
 import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
@@ -102,8 +100,8 @@ class CustomQueryValidationSpec :
                             .mapIndexedNotNull { index, column ->
                                 values.getOrNull(index)?.let { column to CellValue(it) }
                             }.toMap()
-                            .let { rowMap -> SimpleRow(rowMap) as Row }
-                    }.let { rows -> SimpleTable(TableName(tableName), columns, rows) }
+                            .let { rowMap -> Row.of(rowMap) }
+                    }.let { rows -> Table.of(TableName(tableName), columns, rows) }
             }
     }
 

@@ -10,8 +10,6 @@ import io.github.seijikohara.dbtester.api.domain.CellValue
 import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
 import io.github.seijikohara.dbtester.api.domain.TableName
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
@@ -115,8 +113,8 @@ class ComparisonStrategySpec extends Specification implements DatabaseTestSuppor
 				rowValues[col] = new CellValue(values[i])
 			}
 		}
-		Row row = new SimpleRow(rowValues)
-		return new SimpleTable(new TableName(tableName), columns, [row])
+		Row row = Row.of(rowValues)
+		return Table.of(new TableName(tableName), columns, [row])
 	}
 
 	// ==================== STRICT Strategy Tests ====================

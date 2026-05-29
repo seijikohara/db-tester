@@ -9,8 +9,6 @@ import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.api.domain.CellValue
 import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import java.sql.Date
@@ -113,9 +111,9 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 					rowMap[col] = new CellValue(values[i])
 				}
 			}
-			(Row) new SimpleRow(rowMap)
+			Row.of(rowMap)
 		}
-		new SimpleTable(new TableName(tableName), columns, rows)
+		Table.of(new TableName(tableName), columns, rows)
 	}
 
 	@DataSet

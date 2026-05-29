@@ -8,8 +8,6 @@ import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.api.domain.CellValue
 import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.assertions.throwables.shouldThrow
@@ -94,9 +92,9 @@ class ComparisonStrategySpec :
                         .mapIndexed { index, column ->
                             column to CellValue(values.getOrNull(index))
                         }.toMap()
-                        .let { rowValues -> SimpleRow(rowValues) as Row }
+                        .let { rowValues -> Row.of(rowValues) }
                         .let { row ->
-                            SimpleTable(TableName(tableName), columns, listOf(row))
+                            Table.of(TableName(tableName), columns, listOf(row))
                         }
                 }
     }
