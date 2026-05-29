@@ -1,0 +1,3 @@
+ID,UUID_VALUE,NAME,CREATED_AT
+1,,${faker.name.fullName},2024-01-15T10:00:00
+2,,${faker.name.fullName},2024-01-15T11:00:00

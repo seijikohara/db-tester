@@ -1,0 +1,4 @@
+[Scenario],ID,COLUMN1,COLUMN2,COLUMN3
+addProduct,1,Laptop,999.99,10
+addProduct,2,Tablet,299.99,15
+updatePrice,1,Laptop,899.99,10
