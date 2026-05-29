@@ -170,17 +170,8 @@ final class NestedConventionTest {
     @Test
     @Tag("normal")
     @DisplayName("should create new user with convention-based data loading")
-    @DataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
-                scenarioNames = "createUser"))
-    @ExpectedDataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation =
-                    "classpath:example/feature/NestedConventionTest/UserTests/expected/",
-                scenarioNames = "createUser"))
+    @DataSet(sources = @DataSetSource(scenarioNames = "createUser"))
+    @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "createUser"))
     void shouldCreateNewUser() throws Exception {
       // Given
       logger.info("Running nested test: shouldCreateNewUser");
@@ -212,17 +203,8 @@ final class NestedConventionTest {
     @Test
     @Tag("normal")
     @DisplayName("should update user status with convention-based data loading")
-    @DataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation = "classpath:example/feature/NestedConventionTest/UserTests/",
-                scenarioNames = "updateStatus"))
-    @ExpectedDataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation =
-                    "classpath:example/feature/NestedConventionTest/UserTests/expected/",
-                scenarioNames = "updateStatus"))
+    @DataSet(sources = @DataSetSource(scenarioNames = "updateStatus"))
+    @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "updateStatus"))
     void shouldUpdateUserStatus() throws Exception {
       // Given
       logger.info("Running nested test: shouldUpdateUserStatus");
@@ -266,17 +248,8 @@ final class NestedConventionTest {
     @Test
     @Tag("normal")
     @DisplayName("should add new product with convention-based data loading")
-    @DataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
-                scenarioNames = "addProduct"))
-    @ExpectedDataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation =
-                    "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
-                scenarioNames = "addProduct"))
+    @DataSet(sources = @DataSetSource(scenarioNames = "addProduct"))
+    @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "addProduct"))
     void shouldAddNewProduct() throws Exception {
       // Given
       logger.info("Running nested test: shouldAddNewProduct");
@@ -308,17 +281,8 @@ final class NestedConventionTest {
     @Test
     @Tag("normal")
     @DisplayName("should update product price with convention-based data loading")
-    @DataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation = "classpath:example/feature/NestedConventionTest/ProductTests/",
-                scenarioNames = "updatePrice"))
-    @ExpectedDataSet(
-        sources =
-            @DataSetSource(
-                resourceLocation =
-                    "classpath:example/feature/NestedConventionTest/ProductTests/expected/",
-                scenarioNames = "updatePrice"))
+    @DataSet(sources = @DataSetSource(scenarioNames = "updatePrice"))
+    @ExpectedDataSet(sources = @DataSetSource(scenarioNames = "updatePrice"))
     void shouldUpdateProductPrice() throws Exception {
       // Given
       logger.info("Running nested test: shouldUpdateProductPrice");
