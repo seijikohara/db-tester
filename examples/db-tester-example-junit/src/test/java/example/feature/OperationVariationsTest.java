@@ -4,10 +4,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.operation.Operation;
+import io.github.seijikohara.dbtester.api.preparation.DatabasePreparation;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import javax.sql.DataSource;
@@ -172,90 +176,78 @@ final class OperationVariationsTest {
   }
 
   /**
-   * Demonstrates INSERT operation behavior.
+   * Demonstrates {@link Operation#INSERT} via the programmatic preparation API.
    *
-   * <p>The INSERT operation adds new rows without deleting existing data. This test demonstrates
-   * INSERT by first clearing the table with DELETE_ALL, then inserting rows programmatically.
-   *
-   * <p>Note: Using @Preparation(operation = Operation.INSERT) directly would fail if data already
-   * exists in the table from previous tests, since INSERT does not clear existing data and would
-   * cause primary key constraint violations. This test uses DELETE_ALL preparation to ensure a
-   * clean slate, then demonstrates INSERT behavior in the test body.
+   * <p>The INSERT operation appends rows without clearing existing data and fails on primary key
+   * conflicts. To make the demonstration self-contained the test first clears the table via
+   * {@link Operation#DELETE_ALL} on the annotation-driven preparation, and then exercises the
+   * INSERT operation through {@link DatabasePreparation#execute(DataSource, TableSet, Operation)}.
    *
    * <p>Test flow:
    *
    * <ul>
-   *   <li>Preparation: DELETE_ALL - Clears table to ensure known initial state
-   *   <li>Execution: Inserts ID=1, ID=2, ID=3 to demonstrate INSERT behavior
-   *   <li>Expectation: Verifies all three products exist
+   *   <li>Preparation: DELETE_ALL - Clears table to ensure a known empty state
+   *   <li>Execution: Calls {@code DatabasePreparation.execute} with {@link Operation#INSERT}
+   *   <li>Expectation: Verifies the three inserted rows exist
    * </ul>
-   *
-   * @throws Exception if database operation fails
    */
   @Test
   @Tag("normal")
-  @DisplayName("should use INSERT operation to add new rows without deleting existing data")
+  @DisplayName("should use INSERT operation to add rows to an empty table")
   @DataSet(operation = Operation.DELETE_ALL)
   @ExpectedDataSet
-  void shouldUseInsertOperation() throws Exception {
+  void shouldUseInsertOperation() {
     // Given
     logger.info("Running INSERT operation test");
+    final var rows =
+        Table.ofValues(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2"),
+            List.of(
+                List.of(1, "Keyboard", 20),
+                List.of(2, "Monitor", 15),
+                List.of(3, "Smartwatch", 30)));
 
     // When
-    // Demonstrate INSERT by adding rows to the empty table
-    executeSql(
-        """
-        INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-        VALUES (1, 'Keyboard', 20, CURRENT_TIMESTAMP)
-        """);
-    executeSql(
-        """
-        INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-        VALUES (2, 'Monitor', 15, CURRENT_TIMESTAMP)
-        """);
-    executeSql(
-        """
-        INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-        VALUES (3, 'Smartwatch', 30, CURRENT_TIMESTAMP)
-        """);
+    DatabasePreparation.execute(dataSource, TableSet.of(rows), Operation.INSERT);
 
     // Then
     logger.info("INSERT operation completed");
   }
 
   /**
-   * Demonstrates UPDATE operation.
+   * Demonstrates {@link Operation#UPDATE} via the programmatic preparation API.
    *
-   * <p>Updates existing rows only. The UPDATE operation requires rows to already exist in the
-   * database. This test first inserts the required rows, then uses the business logic to update
-   * them.
+   * <p>The UPDATE operation modifies rows that already exist in the database and fails when a
+   * target primary key is missing. The annotation-driven preparation seeds the rows with
+   * CLEAN_INSERT, and then {@link DatabasePreparation#execute(DataSource, TableSet, Operation)}
+   * applies the UPDATE for the target row so the operation itself is invoked under test.
    *
    * <p>Test flow:
    *
    * <ul>
    *   <li>Preparation: CLEAN_INSERT - Creates ID=1 (Laptop, 5) and ID=2 (Monitor, 5)
-   *   <li>Execution: Updates ID=2 COLUMN2 from 5 to 8
+   *   <li>Execution: Calls {@code DatabasePreparation.execute} with {@link Operation#UPDATE} to
+   *       change ID=2 COLUMN2 from 5 to 8
    *   <li>Expectation: Verifies ID=1 (Laptop, 5) and ID=2 (Monitor, 8)
    * </ul>
-   *
-   * <p>Note: While Operation.UPDATE exists for specific use cases (updating existing fixtures),
-   * this test demonstrates a more common pattern where you set up initial data with CLEAN_INSERT
-   * and then test update logic.
-   *
-   * @throws Exception if database operation fails
    */
   @Test
   @Tag("normal")
   @DisplayName("should use UPDATE operation to modify existing rows")
   @DataSet(operation = Operation.CLEAN_INSERT)
   @ExpectedDataSet
-  void shouldUseUpdateOperation() throws Exception {
+  void shouldUseUpdateOperation() {
     // Given
     logger.info("Running UPDATE operation test");
+    final var updateRows =
+        Table.ofValues(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2"),
+            List.of(List.of(2, "Monitor", 8)));
 
     // When
-    // Update an existing row - ID=2 already exists from preparation
-    executeSql("UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2");
+    DatabasePreparation.execute(dataSource, TableSet.of(updateRows), Operation.UPDATE);
 
     // Then
     logger.info("UPDATE operation completed");
@@ -363,14 +355,15 @@ final class OperationVariationsTest {
   @DisplayName("should use DELETE operation to remove specific rows by primary key")
   @DataSet
   @ExpectedDataSet
-  void shouldUseDeleteOperation() throws Exception {
+  void shouldUseDeleteOperation() {
     // Given
     logger.info("Running DELETE operation test");
+    final var deletionTargets =
+        Table.ofValues(
+            "TABLE1", List.of("ID", "COLUMN1", "COLUMN2"), List.of(List.of(2, "Mouse", 5)));
 
     // When
-    // Execute business logic that deletes specific rows
-    // Simulate application code deleting row 2
-    executeSql("DELETE FROM TABLE1 WHERE ID = 2");
+    DatabasePreparation.execute(dataSource, TableSet.of(deletionTargets), Operation.DELETE);
 
     // Then
     logger.info("DELETE operation test completed");

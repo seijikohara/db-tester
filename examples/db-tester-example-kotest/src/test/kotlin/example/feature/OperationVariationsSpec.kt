@@ -3,7 +3,10 @@ package example.feature
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.dataset.Table
+import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.api.preparation.DatabasePreparation
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
@@ -124,52 +127,46 @@ class OperationVariationsSpec :
         }
 
     /**
-     * Demonstrates INSERT operation behavior.
+     * Demonstrates [Operation.INSERT] via the programmatic preparation API.
      *
-     * Uses DELETE_ALL preparation to ensure clean state, then demonstrates INSERT behavior.
+     * The annotation-driven preparation empties the table via [Operation.DELETE_ALL], then
+     * [DatabasePreparation.execute] appends rows using [Operation.INSERT].
      */
     @Test
     @DataSet(operation = Operation.DELETE_ALL)
     @ExpectedDataSet
-    fun `should use insert operation`(): Unit =
-        logger.info("Running insert operation test").also {
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-                VALUES (1, 'Keyboard', 20, CURRENT_TIMESTAMP)
-                """.trimIndent(),
+    fun `should use insert operation`() {
+        val rows =
+            Table.ofValues(
+                "TABLE1",
+                listOf("ID", "COLUMN1", "COLUMN2"),
+                listOf(
+                    listOf(1, "Keyboard", 20),
+                    listOf(2, "Monitor", 15),
+                    listOf(3, "Smartwatch", 30),
+                ),
             )
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-                VALUES (2, 'Monitor', 15, CURRENT_TIMESTAMP)
-                """.trimIndent(),
-            )
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-                VALUES (3, 'Smartwatch', 30, CURRENT_TIMESTAMP)
-                """.trimIndent(),
-            )
-            logger.info("Insert operation test completed")
-        }
+        DatabasePreparation.execute(dataSource, TableSet.of(rows), Operation.INSERT)
+    }
 
     /**
-     * Demonstrates UPDATE operation.
+     * Demonstrates [Operation.UPDATE] via the programmatic preparation API.
      *
-     * Updates existing rows only. The UPDATE operation requires rows to already exist.
+     * The annotation-driven [Operation.CLEAN_INSERT] seeds the rows, and
+     * [DatabasePreparation.execute] applies UPDATE to modify the targeted row.
      */
     @Test
     @DataSet(operation = Operation.CLEAN_INSERT)
     @ExpectedDataSet
-    fun `should use update operation`(): Unit =
-        logger.info("Running update operation test").also {
-            executeSql(dataSource, "UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2")
-            logger.info("Update operation test completed")
-        }
+    fun `should use update operation`() {
+        val updateRows =
+            Table.ofValues(
+                "TABLE1",
+                listOf("ID", "COLUMN1", "COLUMN2"),
+                listOf(listOf(2, "Monitor", 8)),
+            )
+        DatabasePreparation.execute(dataSource, TableSet.of(updateRows), Operation.UPDATE)
+    }
 
     /**
      * Demonstrates UPSERT operation.
@@ -215,16 +212,20 @@ class OperationVariationsSpec :
         }
 
     /**
-     * Demonstrates testing deletion scenarios with database validation.
+     * Demonstrates [Operation.DELETE] via the programmatic preparation API.
      */
     @Test
     @DataSet
     @ExpectedDataSet
-    fun `should use delete operation`(): Unit =
-        logger.info("Running delete operation test").also {
-            executeSql(dataSource, "DELETE FROM TABLE1 WHERE ID = 2")
-            logger.info("Delete operation test completed")
-        }
+    fun `should use delete operation`() {
+        val deletionTargets =
+            Table.ofValues(
+                "TABLE1",
+                listOf("ID", "COLUMN1", "COLUMN2"),
+                listOf(listOf(2, "Mouse", 5)),
+            )
+        DatabasePreparation.execute(dataSource, TableSet.of(deletionTargets), Operation.DELETE)
+    }
 
     /**
      * Demonstrates TRUNCATE_INSERT operation.
