@@ -133,8 +133,8 @@ class TableReaderTest {
     void shouldReturnTableWithData_whenRowsExist() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(2);
-      when(metaData.getColumnName(1)).thenReturn("ID");
-      when(metaData.getColumnName(2)).thenReturn("NAME");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(2)).thenReturn("NAME");
       when(resultSet.next()).thenReturn(true, false);
       when(resultSet.getObject(1)).thenReturn(1);
       when(resultSet.getObject(2)).thenReturn("John");
@@ -164,8 +164,8 @@ class TableReaderTest {
     void shouldReturnEmptyTable_whenNoRowsExist() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(2);
-      when(metaData.getColumnName(1)).thenReturn("ID");
-      when(metaData.getColumnName(2)).thenReturn("NAME");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(2)).thenReturn("NAME");
       when(resultSet.next()).thenReturn(false);
 
       // When
@@ -191,8 +191,8 @@ class TableReaderTest {
     void shouldHandleNullValues_whenColumnValueIsNull() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(2);
-      when(metaData.getColumnName(1)).thenReturn("ID");
-      when(metaData.getColumnName(2)).thenReturn("NAME");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(2)).thenReturn("NAME");
       when(resultSet.next()).thenReturn(true, false);
       when(resultSet.getObject(1)).thenReturn(1);
       when(resultSet.getObject(2)).thenReturn(null);
@@ -255,7 +255,7 @@ class TableReaderTest {
     void shouldUseCorrectSql_whenFetchingTable() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenReturn(false);
 
       // When
@@ -285,8 +285,8 @@ class TableReaderTest {
     void shouldUseCorrectSql_whenColumnsSpecified() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(2);
-      when(metaData.getColumnName(1)).thenReturn("ID");
-      when(metaData.getColumnName(2)).thenReturn("NAME");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(2)).thenReturn("NAME");
       when(resultSet.next()).thenReturn(false);
 
       final var columns = List.of(new ColumnName("ID"), new ColumnName("NAME"));
@@ -309,7 +309,7 @@ class TableReaderTest {
     void shouldUseSelectAll_whenColumnsEmpty() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenReturn(false);
 
       // When
@@ -339,7 +339,7 @@ class TableReaderTest {
     void shouldReturnDataSet_whenMultipleTablesProvided() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenReturn(false);
 
       // When
@@ -375,7 +375,7 @@ class TableReaderTest {
     void shouldHandleMultipleRows_whenResultSetHasMultipleRows() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenReturn(true, true, true, false);
       when(resultSet.getObject(1)).thenReturn(1, 2, 3);
       when(typeConverter.convert(1)).thenReturn(1);
@@ -390,17 +390,17 @@ class TableReaderTest {
     }
 
     /**
-     * Verifies that executeQuery throws exception on column name retrieval failure.
+     * Verifies that executeQuery throws exception on column label retrieval failure.
      *
      * @throws SQLException if a database error occurs
      */
     @Test
     @Tag("error")
-    @DisplayName("should throw exception when column name retrieval fails")
-    void shouldThrowException_whenColumnNameRetrievalFails() throws SQLException {
+    @DisplayName("should throw exception when column label retrieval fails")
+    void shouldThrowException_whenColumnLabelRetrievalFails() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenThrow(new SQLException("Column name error"));
+      when(metaData.getColumnLabel(1)).thenThrow(new SQLException("Column label error"));
 
       // When & Then
       final var exception =
@@ -410,12 +410,12 @@ class TableReaderTest {
               "should throw DatabaseTesterException");
       final var message = exception.getMessage();
       assertAll(
-          "column name retrieval exception",
+          "column label retrieval exception",
           () -> assertNotNull(message, "exception message should not be null"),
           () ->
               assertTrue(
-                  message != null && message.contains("Failed to retrieve column name"),
-                  "exception message should indicate column name failure"));
+                  message != null && message.contains("Failed to retrieve column label"),
+                  "exception message should indicate column label failure"));
     }
 
     /**
@@ -429,7 +429,7 @@ class TableReaderTest {
     void shouldThrowException_whenColumnReadFails() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenReturn(true);
       when(resultSet.getObject(1)).thenThrow(new SQLException("Read error"));
 
@@ -460,7 +460,7 @@ class TableReaderTest {
     void shouldConvertLobValues_whenLobColumnExists() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("DATA");
+      when(metaData.getColumnLabel(1)).thenReturn("DATA");
       when(resultSet.next()).thenReturn(true, false);
       final var mockBlob = new byte[] {1, 2, 3};
       when(resultSet.getObject(1)).thenReturn(mockBlob);
@@ -597,7 +597,7 @@ class TableReaderTest {
     void shouldThrowException_whenResultSetNextFails() throws SQLException {
       // Given
       when(metaData.getColumnCount()).thenReturn(1);
-      when(metaData.getColumnName(1)).thenReturn("ID");
+      when(metaData.getColumnLabel(1)).thenReturn("ID");
       when(resultSet.next()).thenThrow(new SQLException("Cursor error"));
 
       // When & Then

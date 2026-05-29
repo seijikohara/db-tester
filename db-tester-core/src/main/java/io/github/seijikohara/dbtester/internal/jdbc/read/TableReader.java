@@ -195,10 +195,14 @@ public final class TableReader {
                 .mapToObj(
                     i -> {
                       try {
-                        return new ColumnName(metaData.getColumnName(i));
+                        // Use the column label so SQL aliases (SELECT col AS alias) and computed
+                        // columns (SELECT SUM(x) AS total) match the expected dataset. For a plain
+                        // SELECT * the label defaults to the physical column name, so full-table
+                        // reads keep their previous behavior.
+                        return new ColumnName(metaData.getColumnLabel(i));
                       } catch (final SQLException e) {
                         throw new DatabaseTesterException(
-                            String.format("Failed to retrieve column name at index: %d", i), e);
+                            String.format("Failed to retrieve column label at index: %d", i), e);
                       }
                     })
                 .toList();

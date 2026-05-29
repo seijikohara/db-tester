@@ -149,12 +149,12 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 			VALUES (4, 1, '2024-01-25', 500.00, 'West')
 		''')
 
-		// Note: TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL
-		// aliases on plain column references. Plain columns are projected without an alias here
-		// so the expected column name matches the underlying table column.
+		// The expected column names use the SQL aliases, including the alias on the plain COLUMN1
+		// reference. TableReader reads column labels, so an alias on any projected column resolves
+		// to that alias in the result.
 		and: 'expected aggregates summarize per-category total and record count'
 		def expected = createTable('CATEGORY_TOTALS',
-				['COLUMN1', 'TOTAL_AMOUNT', 'RECORD_COUNT'],
+				['CATEGORY_ID', 'TOTAL_AMOUNT', 'RECORD_COUNT'],
 				[
 					[1, new BigDecimal('1700.00'), 3L],
 					[2, new BigDecimal('300.00'), 1L]
@@ -165,7 +165,7 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 				expected,
 				dataSource,
 				'CATEGORY_TOTALS',
-				'SELECT COLUMN1, SUM(COLUMN3) AS TOTAL_AMOUNT, COUNT(*) AS RECORD_COUNT' +
+				'SELECT COLUMN1 AS CATEGORY_ID, SUM(COLUMN3) AS TOTAL_AMOUNT, COUNT(*) AS RECORD_COUNT' +
 				' FROM TABLE1 GROUP BY COLUMN1 ORDER BY COLUMN1')
 	}
 
@@ -177,12 +177,12 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 			VALUES (4, 1, '2024-02-01', 600.00, 'North')
 		''')
 
-		// Note: TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL
-		// aliases on plain column references. Columns are projected without aliases so the
-		// expected column names mirror the underlying table columns.
+		// The expected column names use the SQL aliases applied to the joined columns. TableReader
+		// reads column labels, so CATEGORY_NAME and SALE_AMOUNT resolve to the aliases rather than
+		// the underlying table column names.
 		and: 'expected rows pair each sale with the category name'
 		def expected = createTable('SALES_WITH_CATEGORY',
-				['ID', 'NAME', 'COLUMN3'],
+				['ID', 'CATEGORY_NAME', 'SALE_AMOUNT'],
 				[
 					[1, 'Premium', new BigDecimal('500.00')],
 					[2, 'Standard', new BigDecimal('300.00')],
@@ -195,7 +195,7 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 				expected,
 				dataSource,
 				'SALES_WITH_CATEGORY',
-				'SELECT s.ID, c.NAME, s.COLUMN3' +
+				'SELECT s.ID, c.NAME AS CATEGORY_NAME, s.COLUMN3 AS SALE_AMOUNT' +
 				' FROM TABLE1 s INNER JOIN CATEGORIES c ON s.COLUMN1 = c.ID' +
 				' ORDER BY s.ID')
 	}

@@ -154,9 +154,9 @@ class CustomQueryValidationSpec :
     /**
      * Verifies that a GROUP BY aggregation returns the expected per-category totals.
      *
-     * TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL aliases on
-     * plain column references. Plain columns are projected without an alias so the expected
-     * column name matches the underlying table column.
+     * The expected column names use the SQL aliases, including the alias on the plain COLUMN1
+     * reference. TableReader reads column labels, so an alias on any projected column resolves to
+     * that alias in the result.
      */
     @Test
     @DataSet
@@ -170,7 +170,7 @@ class CustomQueryValidationSpec :
         val expected =
             createTable(
                 "CATEGORY_TOTALS",
-                listOf("COLUMN1", "TOTAL_AMOUNT", "RECORD_COUNT"),
+                listOf("CATEGORY_ID", "TOTAL_AMOUNT", "RECORD_COUNT"),
                 listOf(
                     listOf(1, BigDecimal("1700.00"), 3L),
                     listOf(2, BigDecimal("300.00"), 1L),
@@ -181,7 +181,7 @@ class CustomQueryValidationSpec :
             expected,
             dataSource,
             "CATEGORY_TOTALS",
-            "SELECT COLUMN1, SUM(COLUMN3) AS TOTAL_AMOUNT, COUNT(*) AS RECORD_COUNT" +
+            "SELECT COLUMN1 AS CATEGORY_ID, SUM(COLUMN3) AS TOTAL_AMOUNT, COUNT(*) AS RECORD_COUNT" +
                 " FROM TABLE1 GROUP BY COLUMN1 ORDER BY COLUMN1",
         )
     }
@@ -189,9 +189,9 @@ class CustomQueryValidationSpec :
     /**
      * Verifies that an INNER JOIN between sales and categories returns labeled rows.
      *
-     * TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL aliases on
-     * plain column references. Columns are projected without aliases so the expected column
-     * names mirror the underlying table columns.
+     * The expected column names use the SQL aliases applied to the joined columns. TableReader
+     * reads column labels, so CATEGORY_NAME and SALE_AMOUNT resolve to the aliases rather than the
+     * underlying table column names.
      */
     @Test
     @DataSet
@@ -205,7 +205,7 @@ class CustomQueryValidationSpec :
         val expected =
             createTable(
                 "SALES_WITH_CATEGORY",
-                listOf("ID", "NAME", "COLUMN3"),
+                listOf("ID", "CATEGORY_NAME", "SALE_AMOUNT"),
                 listOf(
                     listOf(1, "Premium", BigDecimal("500.00")),
                     listOf(2, "Standard", BigDecimal("300.00")),
@@ -218,7 +218,7 @@ class CustomQueryValidationSpec :
             expected,
             dataSource,
             "SALES_WITH_CATEGORY",
-            "SELECT s.ID, c.NAME, s.COLUMN3" +
+            "SELECT s.ID, c.NAME AS CATEGORY_NAME, s.COLUMN3 AS SALE_AMOUNT" +
                 " FROM TABLE1 s INNER JOIN CATEGORIES c ON s.COLUMN1 = c.ID" +
                 " ORDER BY s.ID",
         )

@@ -223,14 +223,13 @@ final class CustomQueryValidationTest {
         VALUES (4, 1, '2024-01-25', 500.00, 'West')
         """);
 
-    // Note: TableReader currently uses ResultSetMetaData#getColumnName, which returns the
-    // original column name for plain columns and ignores SQL aliases like `AS CATEGORY_ID`.
-    // Aggregate expressions still resolve to their alias, so plain columns are projected
-    // without an alias here. See follow-up task on switching TableReader to getColumnLabel.
+    // The expected column names use the SQL aliases, including the alias on the plain COLUMN1
+    // reference. TableReader reads column labels, so an alias on any projected column resolves to
+    // that alias in the result.
     final var expected =
         createTable(
             "CATEGORY_TOTALS",
-            List.of("COLUMN1", "TOTAL_AMOUNT", "RECORD_COUNT"),
+            List.of("CATEGORY_ID", "TOTAL_AMOUNT", "RECORD_COUNT"),
             List.of(
                 List.of(1, new BigDecimal("1700.00"), 3L),
                 List.of(2, new BigDecimal("300.00"), 1L)));
@@ -240,7 +239,7 @@ final class CustomQueryValidationTest {
         expected,
         dataSource,
         "CATEGORY_TOTALS",
-        "SELECT COLUMN1,"
+        "SELECT COLUMN1 AS CATEGORY_ID,"
             + " SUM(COLUMN3) AS TOTAL_AMOUNT,"
             + " COUNT(*) AS RECORD_COUNT"
             + " FROM TABLE1 GROUP BY COLUMN1 ORDER BY COLUMN1");
@@ -267,13 +266,13 @@ final class CustomQueryValidationTest {
         VALUES (4, 1, '2024-02-01', 600.00, 'North')
         """);
 
-    // Note: TableReader currently uses ResultSetMetaData#getColumnName, which returns the
-    // original column name and ignores SQL aliases. The columns are projected without aliases
-    // so the expected column names mirror the underlying table columns.
+    // The expected column names use the SQL aliases applied to the joined columns. TableReader
+    // reads column labels, so CATEGORY_NAME and SALE_AMOUNT resolve to the aliases rather than the
+    // underlying table column names.
     final var expected =
         createTable(
             "SALES_WITH_CATEGORY",
-            List.of("ID", "NAME", "COLUMN3"),
+            List.of("ID", "CATEGORY_NAME", "SALE_AMOUNT"),
             List.of(
                 List.of(1, "Premium", new BigDecimal("500.00")),
                 List.of(2, "Standard", new BigDecimal("300.00")),
@@ -285,7 +284,7 @@ final class CustomQueryValidationTest {
         expected,
         dataSource,
         "SALES_WITH_CATEGORY",
-        "SELECT s.ID, c.NAME, s.COLUMN3"
+        "SELECT s.ID, c.NAME AS CATEGORY_NAME, s.COLUMN3 AS SALE_AMOUNT"
             + " FROM TABLE1 s INNER JOIN CATEGORIES c ON s.COLUMN1 = c.ID"
             + " ORDER BY s.ID");
     logger.info("INNER JOIN query validation completed");
