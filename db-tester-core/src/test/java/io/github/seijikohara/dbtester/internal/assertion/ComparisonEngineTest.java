@@ -1,9 +1,13 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.github.seijikohara.dbtester.api.config.ComparisonMode;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -395,6 +399,126 @@ class ComparisonEngineTest {
       // When & Then
       assertFalse(
           ComparisonEngine.matches(strategy, "expected", null), "should not match null actual");
+    }
+  }
+
+  /** Tests for STRICT/LENIENT ComparisonMode handling around parse failures. */
+  @Nested
+  @DisplayName("ComparisonMode handling")
+  class ComparisonModeTests {
+
+    /** Tests for STRICT vs LENIENT mode behaviour. */
+    ComparisonModeTests() {}
+
+    /** Verifies that NUMERIC strategy throws in STRICT mode when expected is unparseable. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw ValidationException when NUMERIC parse fails in STRICT mode")
+    void shouldThrowValidationException_whenNumericParseFailsInStrictMode() {
+      // When & Then
+      assertThrows(
+          ValidationException.class,
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.NUMERIC, "not-a-number", "100", ComparisonMode.STRICT),
+          "STRICT NUMERIC should throw on non-numeric input");
+    }
+
+    /** Verifies that NUMERIC strategy falls back to equals in LENIENT mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should fall back to equals when NUMERIC parse fails in LENIENT mode")
+    void shouldFallBackToEquals_whenNumericParseFailsInLenientMode() {
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.NUMERIC, "not-a-number", "100", ComparisonMode.LENIENT),
+          "LENIENT NUMERIC should not throw on non-numeric input");
+      assertTrue(
+          ComparisonEngine.matches(
+              ComparisonStrategy.NUMERIC, "abc", "abc", ComparisonMode.LENIENT),
+          "LENIENT NUMERIC should return true when fallback equals matches");
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE throws in STRICT mode when parsing fails. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw ValidationException when TIMESTAMP_FLEXIBLE parse fails in STRICT")
+    void shouldThrowValidationException_whenTimestampParseFailsInStrictMode() {
+      // When & Then
+      assertThrows(
+          ValidationException.class,
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.TIMESTAMP_FLEXIBLE,
+                  "not-a-timestamp",
+                  "2024-01-01T00:00:00",
+                  ComparisonMode.STRICT),
+          "STRICT TIMESTAMP_FLEXIBLE should throw on unparseable timestamp");
+    }
+
+    /** Verifies that TIMESTAMP_FLEXIBLE falls back to string comparison in LENIENT mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should fall back to string comparison when TIMESTAMP_FLEXIBLE parse fails")
+    void shouldFallBackToString_whenTimestampParseFailsInLenientMode() {
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.TIMESTAMP_FLEXIBLE,
+                  "garbage",
+                  "garbage",
+                  ComparisonMode.LENIENT),
+          "LENIENT TIMESTAMP_FLEXIBLE should not throw on unparseable timestamp");
+    }
+
+    /** Verifies that DATE_FLEXIBLE throws in STRICT mode when parsing fails. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw ValidationException when DATE_FLEXIBLE parse fails in STRICT mode")
+    void shouldThrowValidationException_whenDateParseFailsInStrictMode() {
+      // When & Then
+      assertThrows(
+          ValidationException.class,
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.DATE_FLEXIBLE,
+                  "not-a-date",
+                  "2024-01-01",
+                  ComparisonMode.STRICT),
+          "STRICT DATE_FLEXIBLE should throw on unparseable date");
+    }
+
+    /** Verifies that DATE_FLEXIBLE falls back to string comparison in LENIENT mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should fall back to string comparison when DATE_FLEXIBLE parse fails")
+    void shouldFallBackToString_whenDateParseFailsInLenientMode() {
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.DATE_FLEXIBLE,
+                  "garbage",
+                  "garbage",
+                  ComparisonMode.LENIENT),
+          "LENIENT DATE_FLEXIBLE should not throw on unparseable date");
+    }
+
+    /** Verifies that the legacy matches overload defaults to STRICT mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should default to STRICT mode for the legacy matches overload")
+    void shouldDefaultToStrict_forLegacyOverload() {
+      // When & Then
+      assertThrows(
+          ValidationException.class,
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.NUMERIC, "not-a-number", "100"),
+          "Legacy matches(strategy, expected, actual) should behave like STRICT");
     }
   }
 }
