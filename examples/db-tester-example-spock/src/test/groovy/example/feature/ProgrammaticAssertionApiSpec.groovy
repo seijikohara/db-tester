@@ -2,9 +2,9 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
@@ -98,25 +98,35 @@ class ProgrammaticAssertionApiSpec extends Specification implements DatabaseTest
 	}
 
 	/**
-	 * Demonstrates basic programmatic assertion without annotations.
+	 * Demonstrates basic programmatic assertion without an {@code @ExpectedDataSet} annotation.
 	 *
-	 * <p>Shows direct use of {@link DatabaseAssertion} assertion APIs for custom validation scenarios
-	 * where annotation-based testing is insufficient.
-	 *
-	 * <p>Test flow:
-	 * <ul>
-	 *   <li>Preparation: TABLE1(1,Value1,100,Extra1), (2,Value2,200,Extra2)
-	 *   <li>Execution: Inserts (3,Value3,300,NULL)
-	 *   <li>Expectation: Verifies all three records including NULL COLUMN3
-	 * </ul>
+	 * <p>The expected table is built in code, the actual table is fetched from the database, and
+	 * verification is performed by {@link DatabaseAssertion#assertEquals}. This proves the
+	 * programmatic API runs against the real database state.
 	 */
 	@DataSet
-	@ExpectedDataSet
 	def 'should demonstrate basic programmatic API'() {
-		when: 'inserting new record with NULL column'
+		when: 'inserting a new record with NULL COLUMN3'
 		sql.execute "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)"
 
-		then: 'expectation phase verifies database state using standard annotation'
+		and: 'building the expected table in code'
+		def expected = Table.ofValues(
+				'TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2', 'COLUMN3'],
+				[
+					[1, 'Value1', 100, 'Extra1'],
+					[2, 'Value2', 200, 'Extra2'],
+					Arrays.asList(3, 'Value3', 300, null)
+				])
+
+		and: 'fetching the actual table from the database'
+		def actual = fetchTable(
+				'TABLE1',
+				'SELECT ID, COLUMN1, COLUMN2, COLUMN3 FROM TABLE1 ORDER BY ID',
+				['ID', 'COLUMN1', 'COLUMN2', 'COLUMN3'])
+
+		then: 'DatabaseAssertion.assertEquals accepts the comparison'
+		DatabaseAssertion.assertEquals(expected, actual)
 		noExceptionThrown()
 	}
 
@@ -160,7 +170,24 @@ class ProgrammaticAssertionApiSpec extends Specification implements DatabaseTest
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy features.
+	 * Fetches the current database state as a {@link Table} by running a query and projecting the
+	 * supplied columns.
+	 *
+	 * @param tableName the logical table name attached to the result
+	 * @param sqlQuery the SQL query that returns the actual rows
+	 * @param columnNames the columns to project, in the order they appear in the query
+	 * @return a {@link Table} containing the rows returned by the query
+	 */
+	private Table fetchTable(String tableName, String sqlQuery, List<String> columnNames) {
+		def rows = []
+		sql.eachRow(sqlQuery) { row ->
+			rows << columnNames.collect { row.getProperty(it) }
+		}
+		Table.ofValues(tableName, columnNames, rows)
+	}
+
+	/**
+	 * Executes a SQL script from the classpath.
 	 *
 	 * @param scriptPath the classpath resource path
 	 */
@@ -169,8 +196,6 @@ class ProgrammaticAssertionApiSpec extends Specification implements DatabaseTest
 		if (resource == null) {
 			throw new IllegalStateException("Script not found: $scriptPath")
 		}
-
-		// Use Groovy's text property and split with filter
 		resource.text
 				.split(';')
 				.collect { it.trim() }
