@@ -383,4 +383,80 @@ class OperationDefaultsTest {
       assertNotEquals(defaults1, defaults2, "different batchSize should not be equal");
     }
   }
+
+  /** Tests for comparisonMode(). */
+  @Nested
+  @DisplayName("comparisonMode()")
+  class ComparisonModeTest {
+
+    /** Tests for comparisonMode. */
+    ComparisonModeTest() {}
+
+    /** Verifies that standard defaults use STRICT comparison mode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("standard defaults use STRICT comparison mode")
+    void standardDefaultsUseStrictComparisonMode() {
+      final var defaults = OperationDefaults.standard();
+
+      assertEquals(
+          ComparisonMode.STRICT,
+          defaults.comparisonMode(),
+          "default comparisonMode should be STRICT");
+    }
+
+    /** Verifies that builder sets comparisonMode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("builder sets comparisonMode")
+    void builderSetsComparisonMode() {
+      final var defaults =
+          OperationDefaults.builder().comparisonMode(ComparisonMode.LENIENT).build();
+
+      assertEquals(
+          ComparisonMode.LENIENT, defaults.comparisonMode(), "comparisonMode should be LENIENT");
+    }
+
+    /** Verifies that withComparisonMode creates new instance. */
+    @Test
+    @Tag("normal")
+    @DisplayName("withComparisonMode creates new instance")
+    void withComparisonModeCreatesNewInstance() {
+      final var original = OperationDefaults.standard();
+      final var modified = original.withComparisonMode(ComparisonMode.LENIENT);
+
+      assertNotEquals(original, modified, "should be different instances");
+      assertEquals(
+          ComparisonMode.STRICT, original.comparisonMode(), "original should remain STRICT");
+      assertEquals(ComparisonMode.LENIENT, modified.comparisonMode(), "modified should be LENIENT");
+    }
+
+    /** Verifies that toBuilder preserves comparisonMode. */
+    @Test
+    @Tag("normal")
+    @DisplayName("toBuilder preserves comparisonMode")
+    void toBuilderPreservesComparisonMode() {
+      final var original =
+          OperationDefaults.builder().comparisonMode(ComparisonMode.LENIENT).build();
+      final var rebuilt = original.toBuilder().build();
+
+      assertEquals(original, rebuilt, "rebuilt should equal original");
+      assertEquals(
+          ComparisonMode.LENIENT,
+          rebuilt.comparisonMode(),
+          "rebuilt should preserve comparisonMode");
+    }
+
+    /** Verifies that different comparisonMode affects equals. */
+    @Test
+    @Tag("normal")
+    @DisplayName("different comparisonMode affects equals")
+    void differentComparisonModeAffectsEquals() {
+      final var defaults1 = OperationDefaults.standard();
+      final var defaults2 =
+          OperationDefaults.builder().comparisonMode(ComparisonMode.LENIENT).build();
+
+      assertNotEquals(defaults1, defaults2, "different comparisonMode should not be equal");
+    }
+  }
 }

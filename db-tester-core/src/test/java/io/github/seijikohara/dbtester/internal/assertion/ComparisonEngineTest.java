@@ -515,5 +515,86 @@ class ComparisonEngineTest {
           () -> ComparisonEngine.matches(ComparisonStrategy.NUMERIC, "not-a-number", "100"),
           "Legacy matches(strategy, expected, actual) should behave like STRICT");
     }
+
+    /**
+     * Verifies that NUMERIC parsing reports a non-finite operand as a parse failure.
+     *
+     * <p>A non-finite {@link Double} resolves to a Number but cannot construct a BigDecimal, so the
+     * conversion throws NumberFormatException. STRICT mode surfaces this as a ValidationException.
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw ValidationException when NUMERIC operand is non-finite in STRICT")
+    void shouldThrowValidationException_whenNumericOperandIsNonFiniteInStrictMode() {
+      // When & Then
+      assertThrows(
+          ValidationException.class,
+          () ->
+              ComparisonEngine.matches(
+                  ComparisonStrategy.NUMERIC, Double.NaN, 100, ComparisonMode.STRICT),
+          "STRICT NUMERIC should throw when an operand is not a finite number");
+    }
+
+    /**
+     * Verifies that NUMERIC parsing falls back to equals for a non-finite operand in LENIENT mode.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should fall back to equals when NUMERIC operand is non-finite in LENIENT")
+    void shouldFallBackToEquals_whenNumericOperandIsNonFiniteInLenientMode() {
+      // When & Then
+      assertTrue(
+          ComparisonEngine.matches(
+              ComparisonStrategy.NUMERIC, Double.NaN, Double.NaN, ComparisonMode.LENIENT),
+          "LENIENT NUMERIC should fall back to equals for identical non-finite operands");
+    }
+
+    /**
+     * Verifies that TIMESTAMP_FLEXIBLE parses an ISO-8601 instant that carries a leap second.
+     *
+     * <p>A leap-second timestamp fails the offset and local formatters but parses through {@link
+     * java.time.Instant}, which folds the {@code :60} second back into {@code :59} of the same
+     * minute. The comparison therefore equals the {@code :59} instant, not the following minute.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match leap-second timestamp against the folded instant")
+    void shouldMatch_whenTimestampCarriesLeapSecond() {
+      // When & Then
+      assertTrue(
+          ComparisonEngine.matches(
+              ComparisonStrategy.TIMESTAMP_FLEXIBLE,
+              "2024-12-31T23:59:60Z",
+              "2024-12-31T23:59:59Z",
+              ComparisonMode.STRICT),
+          "leap-second timestamp should fold to the :59 instant via Instant parsing");
+    }
+
+    /**
+     * Verifies that a STRICT parse failure message truncates an over-long operand.
+     *
+     * <p>The failure message includes a preview of each operand. A preview longer than 64
+     * characters is truncated to keep the message readable.
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should truncate over-long operand in STRICT failure message")
+    void shouldTruncateOperand_whenStrictFailureMessageIsBuilt() {
+      // Given
+      final var longValue = "x".repeat(200);
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              ValidationException.class,
+              () ->
+                  ComparisonEngine.matches(
+                      ComparisonStrategy.NUMERIC, longValue, "100", ComparisonMode.STRICT),
+              "STRICT NUMERIC should throw on a non-numeric operand");
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("..."),
+          "failure message should truncate the over-long operand preview");
+    }
   }
 }

@@ -197,13 +197,13 @@ public final class ComparisonEngine {
   /**
    * Produces a short, human-readable preview of a value for log and exception messages.
    *
+   * <p>All callers pass a non-null value because the comparison paths reject null operands before
+   * reaching a parse-failure branch.
+   *
    * @param value the value to summarize
    * @return a trimmed preview of the value
    */
-  private static String summarize(final @Nullable Object value) {
-    if (value == null) {
-      return "null";
-    }
+  private static String summarize(final Object value) {
     final var string = value.toString();
     return string.length() <= 64 ? string : string.substring(0, 61) + "...";
   }
