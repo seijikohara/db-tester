@@ -206,19 +206,26 @@ class FilteredTableTest {
     }
   }
 
-  /** Tests for empty string normalization. */
+  /** Tests for cell value preservation. */
   @Nested
-  @DisplayName("empty string normalization")
-  class EmptyStringNormalization {
+  @DisplayName("cell value preservation")
+  class CellValuePreservation {
 
-    /** Tests for empty string normalization. */
-    EmptyStringNormalization() {}
+    /** Tests for cell value preservation. */
+    CellValuePreservation() {}
 
-    /** Verifies that empty strings are converted to null. */
+    /**
+     * Verifies that an empty-string cell is preserved rather than converted to NULL.
+     *
+     * <p>FilteredTable projects each cell value as parsed. It does not collapse an empty string to
+     * NULL. An empty CSV or TSV cell already parses to NULL upstream, while a JSON or YAML empty
+     * string parses to a non-null empty string. Preserving the value keeps the NULL versus
+     * empty-string distinction expressed in JSON and YAML.
+     */
     @Test
     @Tag("edge-case")
-    @DisplayName("should convert empty strings to null when empty values exist")
-    void shouldConvertEmptyStringsToNull_whenEmptyValuesExist() {
+    @DisplayName("should preserve empty string as non-null when empty values exist")
+    void shouldPreserveEmptyString_whenEmptyValuesExist() {
       // Given
       final var sourceTable = createMockTableWithEmptyString();
       final var noScenarioFilter = new ScenarioFilter(new ScenarioMarker("$nonexistent"), Set.of());
@@ -228,8 +235,15 @@ class FilteredTableTest {
       final var result = filteredTable.getRows();
 
       // Then
-      assertNotNull(result, "result should not be null");
-      assertEquals(1, result.size(), "should have 1 row");
+      final var nameValue = result.get(0).getValue(new ColumnName("NAME"));
+      assertAll(
+          "empty string is preserved",
+          () -> assertNotNull(result, "result should not be null"),
+          () -> assertEquals(1, result.size(), "should have 1 row"),
+          () -> assertFalse(nameValue.isNull(), "empty-string NAME cell should not be NULL"),
+          () ->
+              assertEquals(
+                  "", nameValue.value(), "empty-string NAME cell should remain an empty string"));
     }
   }
 

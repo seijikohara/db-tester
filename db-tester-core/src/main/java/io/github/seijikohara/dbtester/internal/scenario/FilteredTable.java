@@ -2,16 +2,13 @@ package io.github.seijikohara.dbtester.internal.scenario;
 
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.dataset.Table;
-import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +23,9 @@ import org.slf4j.LoggerFactory;
  * specified, all rows are included. Otherwise, only rows matching the scenario names are included.
  * The scenario column is removed from the resulting columns and rows.
  *
- * <p>Empty strings in data values are converted to {@code null} for database compatibility.
+ * <p>Cell values are preserved as parsed. An empty CSV or TSV cell already parses to NULL, while a
+ * JSON or YAML empty string parses to a non-null empty string. This class does not collapse empty
+ * strings to NULL, so the NULL versus empty-string distinction reaches the database unchanged.
  *
  * <p>This class is immutable and thread-safe.
  *
@@ -61,7 +60,7 @@ public final class FilteredTable implements Table {
     this.columns = filter.deriveDataColumns(allColumns, scenarioColumn);
 
     final var filteredRows = filter.filterRows(sourceTable.getRows(), scenarioColumn);
-    this.rows = extractDataColumnsOnly(filteredRows, this.columns, scenarioColumn);
+    this.rows = extractDataColumnsOnly(filteredRows, this.columns);
 
     logger.debug(
         "Filtered table {} from {} to {} rows",
@@ -115,71 +114,31 @@ public final class FilteredTable implements Table {
    *
    * @param sourceRows the source rows
    * @param dataColumns the data columns to include
-   * @param scenarioColumn the scenario column to exclude, or null if not present
    * @return list of rows with only data columns
    */
   private List<Row> extractDataColumnsOnly(
-      final Collection<Row> sourceRows,
-      final Collection<ColumnName> dataColumns,
-      final @Nullable ColumnName scenarioColumn) {
-    return Optional.ofNullable(scenarioColumn)
-        .map(column -> sourceRows.stream().map(row -> extractRow(row, dataColumns)).toList())
-        .orElseGet(() -> sourceRows.stream().map(row -> normalizeRow(row, dataColumns)).toList());
+      final Collection<Row> sourceRows, final Collection<ColumnName> dataColumns) {
+    return sourceRows.stream().map(row -> projectDataColumns(row, dataColumns)).toList();
   }
 
   /**
-   * Normalizes a row by converting empty strings to null.
+   * Projects a row onto the data columns, preserving each cell value as parsed.
+   *
+   * <p>The cell values keep the representation chosen by the format parser. An empty CSV or TSV
+   * cell already parses to NULL, while a JSON or YAML empty string parses to a non-null empty
+   * string. This method does not collapse empty strings to NULL, so the NULL versus empty-string
+   * distinction expressed in JSON and YAML reaches the database unchanged.
    *
    * @param sourceRow the source row
-   * @param dataColumns the data columns
-   * @return normalized row
+   * @param dataColumns the data columns to include
+   * @return a row containing only the data columns
    */
-  private Row normalizeRow(final Row sourceRow, final Collection<ColumnName> dataColumns) {
+  private Row projectDataColumns(final Row sourceRow, final Collection<ColumnName> dataColumns) {
     final var values =
         dataColumns.stream()
             .collect(
                 Collectors.toMap(
-                    column -> column,
-                    column -> normalizeEmptyStringToNull(sourceRow.getValue(column)),
-                    (v1, v2) -> v1,
-                    LinkedHashMap::new));
+                    column -> column, sourceRow::getValue, (v1, v2) -> v1, LinkedHashMap::new));
     return new SimpleRow(values);
-  }
-
-  /**
-   * Extracts data columns from a row.
-   *
-   * @param sourceRow the source row
-   * @param dataColumns the data columns to extract
-   * @return row containing only data columns
-   */
-  private Row extractRow(final Row sourceRow, final Collection<ColumnName> dataColumns) {
-    final var values =
-        dataColumns.stream()
-            .collect(
-                Collectors.toMap(
-                    column -> column,
-                    column -> normalizeEmptyStringToNull(sourceRow.getValue(column)),
-                    (v1, v2) -> v1,
-                    LinkedHashMap::new));
-    return new SimpleRow(values);
-  }
-
-  /**
-   * Normalizes empty strings to null for database compatibility.
-   *
-   * <p>Empty CSV/TSV cells are read as empty strings. This method converts them to null to match
-   * database NULL semantics.
-   *
-   * @param dataValue the data value to normalize
-   * @return CellValue containing the normalized value (null if the value was an empty string)
-   */
-  private CellValue normalizeEmptyStringToNull(final CellValue dataValue) {
-    return Optional.ofNullable(dataValue.value())
-        .filter(String.class::isInstance)
-        .map(String.class::cast)
-        .filter(String::isEmpty)
-        .map(emptyString -> new CellValue(null))
-        .orElse(dataValue);
   }
 }
