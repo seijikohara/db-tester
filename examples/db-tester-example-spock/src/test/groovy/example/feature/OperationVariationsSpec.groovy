@@ -4,7 +4,10 @@ import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.dataset.Table
+import io.github.seijikohara.dbtester.api.dataset.TableSet
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.api.preparation.DatabasePreparation
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
 import javax.sql.DataSource
@@ -80,43 +83,50 @@ class OperationVariationsSpec extends Specification implements DatabaseTestSuppo
 	}
 
 	/**
-	 * Demonstrates INSERT operation behavior.
+	 * Demonstrates {@link Operation#INSERT} via the programmatic preparation API.
 	 *
-	 * <p>Uses DELETE_ALL preparation to ensure clean state, then demonstrates INSERT behavior.
+	 * <p>The annotation-driven preparation empties the table via DELETE_ALL, then
+	 * {@link DatabasePreparation#execute} appends rows using {@link Operation#INSERT}.
 	 */
 	@DataSet(operation = Operation.DELETE_ALL)
 	@ExpectedDataSet
 	def 'should use insert operation'() {
-		when: 'inserting products into empty table'
-		sql.executeInsert '''
-			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-			VALUES (1, 'Keyboard', 20, CURRENT_TIMESTAMP)
-		'''
-		sql.executeInsert '''
-			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-			VALUES (2, 'Monitor', 15, CURRENT_TIMESTAMP)
-		'''
-		sql.executeInsert '''
-			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)
-			VALUES (3, 'Smartwatch', 30, CURRENT_TIMESTAMP)
-		'''
+		given: 'the rows to insert via Operation.INSERT'
+		def rows = Table.ofValues(
+				'TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2'],
+				[
+					[1, 'Keyboard', 20],
+					[2, 'Monitor', 15],
+					[3, 'Smartwatch', 30]
+				])
 
-		then: 'all three products exist'
+		when: 'invoking DatabasePreparation.execute with Operation.INSERT'
+		DatabasePreparation.execute(dataSource, TableSet.of(rows), Operation.INSERT)
+
+		then: 'INSERT executes without exception'
 		noExceptionThrown()
 	}
 
 	/**
-	 * Demonstrates UPDATE operation.
+	 * Demonstrates {@link Operation#UPDATE} via the programmatic preparation API.
 	 *
-	 * <p>Updates existing rows only. The UPDATE operation requires rows to already exist.
+	 * <p>The annotation-driven CLEAN_INSERT seeds the rows, and {@link DatabasePreparation#execute}
+	 * applies UPDATE to modify the targeted row.
 	 */
 	@DataSet(operation = Operation.CLEAN_INSERT)
 	@ExpectedDataSet
 	def 'should use update operation'() {
-		when: 'updating an existing product'
-		sql.executeUpdate 'UPDATE TABLE1 SET COLUMN2 = 8 WHERE ID = 2'
+		given: 'the row to update via Operation.UPDATE'
+		def updateRows = Table.ofValues(
+				'TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2'],
+				[[2, 'Monitor', 8]])
 
-		then: 'product is updated'
+		when: 'invoking DatabasePreparation.execute with Operation.UPDATE'
+		DatabasePreparation.execute(dataSource, TableSet.of(updateRows), Operation.UPDATE)
+
+		then: 'UPDATE executes without exception'
 		noExceptionThrown()
 	}
 
@@ -157,15 +167,21 @@ class OperationVariationsSpec extends Specification implements DatabaseTestSuppo
 	}
 
 	/**
-	 * Demonstrates testing deletion scenarios with database validation.
+	 * Demonstrates {@link Operation#DELETE} via the programmatic preparation API.
 	 */
 	@DataSet
 	@ExpectedDataSet
 	def 'should use delete operation'() {
-		when: 'deleting a specific product'
-		sql.execute 'DELETE FROM TABLE1 WHERE ID = 2'
+		given: 'the row to remove via Operation.DELETE'
+		def deletionTargets = Table.ofValues(
+				'TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2'],
+				[[2, 'Mouse', 5]])
 
-		then: 'only remaining products exist'
+		when: 'invoking DatabasePreparation.execute with Operation.DELETE'
+		DatabasePreparation.execute(dataSource, TableSet.of(deletionTargets), Operation.DELETE)
+
+		then: 'DELETE executes without exception'
 		noExceptionThrown()
 	}
 

@@ -154,6 +154,40 @@ final class ComprehensiveDataTypesTest {
    *   <li>Expectation: Verifies all three records including BLOB (Base64) and CHAR (space-padded)
    * </ul>
    */
+  /**
+   * Verifies that the loader materializes empty CSV cells as SQL {@code NULL} across every
+   * representable type in the {@code DATA_TYPES} table.
+   *
+   * <p>The fixture supplies a single row whose nullable columns are all empty. The expected
+   * fixture mirrors the input so the {@code @ExpectedDataSet} verification proves that each
+   * nullable type is loaded as NULL.
+   */
+  @Test
+  @Tag("edge-case")
+  @DisplayName("should load empty cells as NULL for every nullable type")
+  @DataSet
+  @ExpectedDataSet
+  void shouldHandleNullableColumns() {
+    logger.info("Verifying nullable column handling across all data types");
+  }
+
+  /**
+   * Verifies that the loader can store boundary values for each integer, decimal, and date/time
+   * type without overflow or truncation.
+   *
+   * <p>The fixture supplies two rows pinned to the minimum and maximum supported values for each
+   * column. The expected fixture mirrors the input so the {@code @ExpectedDataSet} verification
+   * proves the values survive the round trip through JDBC.
+   */
+  @Test
+  @Tag("edge-case")
+  @DisplayName("should preserve minimum and maximum boundary values for all numeric types")
+  @DataSet
+  @ExpectedDataSet
+  void shouldHandleBoundaryValues() {
+    logger.info("Verifying minimum and maximum boundary values across all data types");
+  }
+
   @Test
   @Tag("normal")
   @DisplayName("should handle all H2 CSV-representable data types")

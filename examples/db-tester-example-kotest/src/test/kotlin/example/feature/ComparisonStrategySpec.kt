@@ -1,14 +1,13 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
+import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.dataset.Row
 import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.api.domain.CellValue
 import io.github.seijikohara.dbtester.api.domain.ColumnName
 import io.github.seijikohara.dbtester.api.domain.TableName
-import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
-import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.assertions.throwables.shouldThrow
@@ -28,6 +27,8 @@ import javax.sql.DataSource
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.NUMERIC] - Type-aware numeric comparison
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.CASE_INSENSITIVE] - Case-insensitive string comparison
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.TIMESTAMP_FLEXIBLE] - Flexible timestamp comparison
+ * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.DATE_FLEXIBLE] - Flexible date format comparison
+ * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.JSON_EQUIVALENT] - JSON structural comparison
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.NOT_NULL] - Only verify the value is not null
  * - [io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.regex] - Match against a regular expression
  */
@@ -37,6 +38,8 @@ class ComparisonStrategySpec :
     DatabaseTestSupport {
     companion object {
         private val logger = LoggerFactory.getLogger(ComparisonStrategySpec::class.java)
+
+        private const val EMAIL_PATTERN = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,}"
 
         private fun createDataSource(): DataSource =
             JdbcDataSource().apply {
@@ -89,9 +92,9 @@ class ComparisonStrategySpec :
                         .mapIndexed { index, column ->
                             column to CellValue(values.getOrNull(index))
                         }.toMap()
-                        .let { rowValues -> SimpleRow(rowValues) as Row }
+                        .let { rowValues -> Row.of(rowValues) }
                         .let { row ->
-                            SimpleTable(TableName(tableName), columns, listOf(row))
+                            Table.of(TableName(tableName), columns, listOf(row))
                         }
                 }
     }
@@ -113,131 +116,240 @@ class ComparisonStrategySpec :
 
     // ==================== STRICT Strategy Tests ====================
 
-    /**
-     * Verifies that strict strategy passes when values match exactly.
-     */
     @Test
     fun `strict strategy should pass when values match exactly`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice").let { actualTable ->
-                DatabaseAssertion.assertEquals(expectedTable, actualTable)
-            }
-        }
+        DatabaseAssertion.assertEquals(
+            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice"),
+            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice"),
+        )
 
-    /**
-     * Verifies that strict strategy fails when values differ.
-     */
     @Test
     fun `strict strategy should fail when values differ`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "ALICE").let { actualTable ->
-                shouldThrow<AssertionError> {
-                    DatabaseAssertion.assertEquals(expectedTable, actualTable)
-                }
-            }
-        }
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEquals(
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "Alice"),
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "ALICE"),
+            )
+        }.let { }
 
     // ==================== NUMERIC Strategy Tests ====================
 
-    /**
-     * Verifies that numeric strategy matches different numeric types with same value.
-     */
     @Test
-    fun `numeric strategy should match different numeric types with same value`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, 100).let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("100.00")).let { actualTable ->
-                DatabaseAssertion.assertEquals(expectedTable, actualTable)
-            }
-        }
+    fun `numeric strategy should match across numeric types when applied`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, 100),
+            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("100.00")),
+            ColumnStrategyMapping.numeric("AMOUNT"),
+        )
 
-    /**
-     * Verifies that numeric strategy matches values with different precision.
-     */
     @Test
-    fun `numeric strategy should match values with different precision`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("99.99")).let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("99.990")).let { actualTable ->
-                DatabaseAssertion.assertEquals(expectedTable, actualTable)
-            }
-        }
+    fun `numeric strategy should match scaled decimals when applied`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("99.99")),
+            createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("99.990")),
+            ColumnStrategyMapping.numeric("AMOUNT"),
+        )
+
+    @Test
+    fun `numeric strategy should fail when values are numerically distinct`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("99.99")),
+                createTable("COMPARISON_TEST", listOf("ID", "AMOUNT"), 1, BigDecimal("100.00")),
+                ColumnStrategyMapping.numeric("AMOUNT"),
+            )
+        }.let { }
 
     // ==================== CASE_INSENSITIVE Strategy Tests ====================
 
-    /**
-     * Verifies that case-insensitive strategy demonstrates case-sensitive comparison by default.
-     */
     @Test
-    fun `case-insensitive strategy should demonstrate case-sensitive comparison by default`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "alice").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "ALICE").let { actualTable ->
-                shouldThrow<AssertionError> {
-                    DatabaseAssertion.assertEquals(expectedTable, actualTable)
-                }
-            }
-        }
+    fun `default STRICT comparison should fail on case difference`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEquals(
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "alice"),
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "ALICE"),
+            )
+        }.let { }
+
+    @Test
+    fun `case-insensitive strategy should match across letter cases when applied`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "alice"),
+            createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "ALICE"),
+            ColumnStrategyMapping.caseInsensitive("NAME"),
+        )
+
+    @Test
+    fun `case-insensitive strategy should fail when text differs`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "alice"),
+                createTable("COMPARISON_TEST", listOf("ID", "NAME"), 1, "bob"),
+                ColumnStrategyMapping.caseInsensitive("NAME"),
+            )
+        }.let { }
 
     // ==================== IGNORE Strategy Tests ====================
 
-    /**
-     * Verifies that ignore strategy skips comparison for ignored columns.
-     */
     @Test
     fun `ignore strategy should skip comparison for ignored columns`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-01-01").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-12-31").let { actualTable ->
-                DatabaseAssertion.assertEqualsIgnoreColumns(expectedTable, actualTable, "TIMESTAMP")
-            }
-        }
+        DatabaseAssertion.assertEqualsIgnoreColumns(
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-01-01"),
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-12-31"),
+            "TIMESTAMP",
+        )
 
     // ==================== NOT_NULL Strategy Tests ====================
 
-    /**
-     * Verifies that not-null strategy passes when value is not null.
-     */
     @Test
-    fun `not-null strategy should pass when value is not null`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "expected-value").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "expected-value").let { actualTable ->
-                DatabaseAssertion.assertEquals(expectedTable, actualTable)
-            }
-        }
+    fun `not-null strategy should accept any non-null actual when applied`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "any-placeholder"),
+            createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "0xFEED-CAFE-1234"),
+            ColumnStrategyMapping.notNull("GENERATED_ID"),
+        )
 
-    /**
-     * Verifies that not-null strategy fails when value is null.
-     */
     @Test
-    fun `not-null strategy should fail when value is null`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "any-value").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, null).let { actualTable ->
-                shouldThrow<AssertionError> {
-                    DatabaseAssertion.assertEquals(expectedTable, actualTable)
-                }
-            }
-        }
+    fun `not-null strategy should fail when actual is null`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, "any-placeholder"),
+                createTable("COMPARISON_TEST", listOf("ID", "GENERATED_ID"), 1, null),
+                ColumnStrategyMapping.notNull("GENERATED_ID"),
+            )
+        }.let { }
+
+    // ==================== TIMESTAMP_FLEXIBLE Strategy Tests ====================
+
+    @Test
+    fun `timestamp-flexible strategy should match timestamps with different sub-second precision`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00.000"),
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00"),
+            ColumnStrategyMapping.timestampFlexible("TIMESTAMP"),
+        )
+
+    @Test
+    fun `timestamp-flexible strategy should fail when timestamps refer to different dates`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00"),
+                createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-07-15T10:30:00"),
+                ColumnStrategyMapping.timestampFlexible("TIMESTAMP"),
+            )
+        }.let { }
+
+    @Test
+    fun `timestamp-flexible strategy should match same instant across timezone offsets`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00+09:00"),
+            createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T01:30:00Z"),
+            ColumnStrategyMapping.timestampFlexible("TIMESTAMP"),
+        )
+
+    @Test
+    fun `timestamp-flexible strategy should fail when offsets shift instant`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00+09:00"),
+                createTable("COMPARISON_TEST", listOf("ID", "TIMESTAMP"), 1, "2024-06-15T10:30:00Z"),
+                ColumnStrategyMapping.timestampFlexible("TIMESTAMP"),
+            )
+        }.let { }
+
+    // ==================== DATE_FLEXIBLE Strategy Tests ====================
+
+    @Test
+    fun `date-flexible strategy should match ISO and slash formats`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024-06-15"),
+            createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024/06/15"),
+            ColumnStrategyMapping.dateFlexible("BIRTH_DATE"),
+        )
+
+    @Test
+    fun `date-flexible strategy should match dot-delimited date format`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024-06-15"),
+            createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024.06.15"),
+            ColumnStrategyMapping.dateFlexible("BIRTH_DATE"),
+        )
+
+    @Test
+    fun `date-flexible strategy should fail when dates differ`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024-06-15"),
+                createTable("COMPARISON_TEST", listOf("ID", "BIRTH_DATE"), 1, "2024-07-20"),
+                ColumnStrategyMapping.dateFlexible("BIRTH_DATE"),
+            )
+        }.let { }
+
+    // ==================== JSON_EQUIVALENT Strategy Tests ====================
+
+    @Test
+    fun `json-equivalent strategy should match JSON with different key order`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"name": "Alice", "age": 30}"""),
+            createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"age": 30, "name": "Alice"}"""),
+            ColumnStrategyMapping.jsonEquivalent("METADATA"),
+        )
+
+    @Test
+    fun `json-equivalent strategy should match nested JSON when keys are reordered`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable(
+                "COMPARISON_TEST",
+                listOf("ID", "METADATA"),
+                1,
+                """{"user":{"name":"Alice","roles":["admin","user"]}}""",
+            ),
+            createTable(
+                "COMPARISON_TEST",
+                listOf("ID", "METADATA"),
+                1,
+                """{"user":{"roles":["admin","user"],"name":"Alice"}}""",
+            ),
+            ColumnStrategyMapping.jsonEquivalent("METADATA"),
+        )
+
+    @Test
+    fun `json-equivalent strategy should fail when nested array order differs`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"tags":["alpha","beta","gamma"]}"""),
+                createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"tags":["gamma","alpha","beta"]}"""),
+                ColumnStrategyMapping.jsonEquivalent("METADATA"),
+            )
+        }.let { }
+
+    @Test
+    fun `json-equivalent strategy should fail when JSON values differ`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"name": "Alice", "age": 30}"""),
+                createTable("COMPARISON_TEST", listOf("ID", "METADATA"), 1, """{"name": "Bob", "age": 25}"""),
+                ColumnStrategyMapping.jsonEquivalent("METADATA"),
+            )
+        }.let { }
 
     // ==================== REGEX Strategy Tests ====================
 
-    /**
-     * Verifies that regex strategy matches value against pattern.
-     */
     @Test
-    fun `regex strategy should match value against pattern`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "alice@example.com").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "alice@example.com").let { actualTable ->
-                DatabaseAssertion.assertEquals(expectedTable, actualTable)
-            }
-        }
+    fun `regex strategy should match actual against pattern when applied`(): Unit =
+        DatabaseAssertion.assertEqualsWithStrategies(
+            createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "<PATTERN_EMAIL>"),
+            createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "alice@example.com"),
+            ColumnStrategyMapping.regex("EMAIL", EMAIL_PATTERN),
+        )
 
-    /**
-     * Verifies that regex strategy fails when value does not match pattern.
-     */
     @Test
-    fun `regex strategy should fail when value does not match pattern`(): Unit =
-        createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "alice@example.com").let { expectedTable ->
-            createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "invalid-email").let { actualTable ->
-                shouldThrow<AssertionError> {
-                    DatabaseAssertion.assertEquals(expectedTable, actualTable)
-                }
-            }
-        }
+    fun `regex strategy should fail when actual does not match pattern`(): Unit =
+        shouldThrow<AssertionError> {
+            DatabaseAssertion.assertEqualsWithStrategies(
+                createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "<PATTERN_EMAIL>"),
+                createTable("COMPARISON_TEST", listOf("ID", "EMAIL"), 1, "invalid-email"),
+                ColumnStrategyMapping.regex("EMAIL", EMAIL_PATTERN),
+            )
+        }.let { }
 }

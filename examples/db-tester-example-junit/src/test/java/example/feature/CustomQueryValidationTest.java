@@ -3,13 +3,23 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
-import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion;
+import io.github.seijikohara.dbtester.api.dataset.Row;
+import io.github.seijikohara.dbtester.api.dataset.Table;
+import io.github.seijikohara.dbtester.api.domain.CellValue;
+import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import javax.sql.DataSource;
 import org.h2.jdbcx.JdbcDataSource;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,21 +32,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Demonstrates database testing with custom query validation scenarios.
+ * Demonstrates database testing with SQL query result validation.
  *
- * <p>This test shows:
+ * <p>Each test prepares baseline data through {@link DataSet}, runs additional SQL that exercises
+ * the feature under test, then verifies the result of a SQL query (rather than the full table
+ * state) using {@link DatabaseQueryAssertion#assertEqualsByQuery}.
+ *
+ * <p>This test demonstrates four query patterns:
  *
  * <ul>
- *   <li>Testing INSERT operations with data
- *   <li>Using custom expectation paths for different scenarios
- *   <li>Validating filtered data
- *   <li>Testing aggregation scenarios
- *   <li>Validating date-range queries
+ *   <li>Filtering rows via a {@code WHERE} clause
+ *   <li>Aggregating rows via {@code GROUP BY} with {@code SUM} and {@code COUNT}
+ *   <li>Joining two tables via {@code INNER JOIN}
+ *   <li>Restricting rows to a date range via {@code BETWEEN}
  * </ul>
- *
- * <p>Note: For actual SQL query result validation using {@code
- * DatabaseQueryAssertion.assertEqualsByQuery}, you would need to programmatically create expected
- * datasets using DbUnit APIs.
  */
 @ExtendWith(DatabaseTestExtension.class)
 @DisplayName("CustomQueryValidationTest")
@@ -83,7 +92,7 @@ final class CustomQueryValidationTest {
   }
 
   /**
-   * Executes a SQL script from classpath.
+   * Executes a SQL script from the classpath.
    *
    * @param dataSource the DataSource to execute against
    * @param scriptPath the classpath resource path
@@ -131,152 +140,200 @@ final class CustomQueryValidationTest {
   }
 
   /**
-   * Demonstrates validation with filtered data.
+   * Builds an in-memory Table for use as an expected query result.
    *
-   * <p>Validates data after adding new record with specific filter criteria.
+   * @param tableName the logical table name attached to the query result
+   * @param columnNames the column names in order
+   * @param rowValues each inner list represents the cell values of one row, in column order
+   * @return a Table representing the expected query result
+   */
+  private static Table createTable(
+      final String tableName,
+      final List<String> columnNames,
+      final List<List<Object>> rowValues) {
+    final var columns = columnNames.stream().map(ColumnName::new).toList();
+    final var rows =
+        rowValues.stream()
+            .map(
+                values -> {
+                  final Map<ColumnName, CellValue> row = new LinkedHashMap<>();
+                  IntStream.range(0, Math.min(columns.size(), values.size()))
+                      .forEach(i -> row.put(columns.get(i), new CellValue(values.get(i))));
+                  return Row.of(row);
+                })
+            .toList();
+    return Table.of(new TableName(tableName), columns, rows);
+  }
+
+  /**
+   * Verifies that a {@code WHERE} filter returns only the matching rows after an insert.
    *
-   * <p>Test flow:
-   *
-   * <ul>
-   *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data
-   *   <li>Execution: Inserts ID=4 (COLUMN1=3, East region, 2024-01-25, 350.00)
-   *   <li>Expectation: Verifies all four records from {@code expected-filtered/}
-   * </ul>
+   * <p>The query restricts {@code TABLE1} to rows whose {@code COLUMN4} value equals {@code 'East'}.
+   * The expected result contains the pre-loaded East row plus the newly inserted East row, in
+   * primary-key order.
    */
   @Test
   @Tag("normal")
-  @DisplayName("should validate regional sales with filtered data")
+  @DisplayName("should return only East-region rows when WHERE filter is applied")
   @DataSet
-  @ExpectedDataSet(
-      sources =
-          @DataSetSource(
-              resourceLocation =
-                  "classpath:example/feature/CustomQueryValidationTest/expected-filtered/"))
-  void shouldValidateRegionalSales() {
+  void shouldReturnOnlyEastRegionRows_whenWhereFilterApplied() {
     // Given
-    logger.info("Running regional sales validation test");
-
-    // When
+    logger.info("Inserting a new East-region sale");
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 3, '2024-01-25', 350.00, 'East')
         """);
 
-    // Then
-    logger.info("Regional sales validation completed");
+    final var expected =
+        createTable(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3", "COLUMN4"),
+            List.of(
+                List.of(2, 2, Date.valueOf("2024-01-15"), new BigDecimal("300.00"), "East"),
+                List.of(4, 3, Date.valueOf("2024-01-25"), new BigDecimal("350.00"), "East")));
+
+    // When & Then
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected,
+        dataSource,
+        "TABLE1",
+        "SELECT ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4 FROM TABLE1"
+            + " WHERE COLUMN4 = 'East' ORDER BY ID");
+    logger.info("WHERE filter query validation completed");
   }
 
   /**
-   * Demonstrates validation with aggregated data.
+   * Verifies that a {@code GROUP BY} aggregation returns the expected per-category totals.
    *
-   * <p>Validates aggregated data after adding new record.
-   *
-   * <p>Test flow:
-   *
-   * <ul>
-   *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data
-   *   <li>Execution: Inserts ID=4 (COLUMN1=1, West region, 2024-01-25, 500.00)
-   *   <li>Expectation: Verifies all four records from {@code expected-aggregation/}
-   * </ul>
+   * <p>The query aggregates {@code TABLE1} by {@code COLUMN1}, computing the sum of {@code COLUMN3}
+   * and the row count per group. The expected result reflects the post-insert state across all
+   * categories.
    */
   @Test
   @Tag("normal")
-  @DisplayName("should validate sales summary with aggregated data")
+  @DisplayName("should return aggregated totals per category when GROUP BY applied")
   @DataSet
-  @ExpectedDataSet(
-      sources =
-          @DataSetSource(
-              resourceLocation =
-                  "classpath:example/feature/CustomQueryValidationTest/expected-aggregation/"))
-  void shouldValidateSalesSummary() {
+  void shouldReturnAggregatedTotalsPerCategory_whenGroupByApplied() {
     // Given
-    logger.info("Running sales summary validation test");
-
-    // When
+    logger.info("Inserting an additional Premium-category sale");
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 1, '2024-01-25', 500.00, 'West')
         """);
 
-    // Then
-    logger.info("Sales summary validation completed");
+    // Note: TableReader currently uses ResultSetMetaData#getColumnName, which returns the
+    // original column name for plain columns and ignores SQL aliases like `AS CATEGORY_ID`.
+    // Aggregate expressions still resolve to their alias, so plain columns are projected
+    // without an alias here. See follow-up task on switching TableReader to getColumnLabel.
+    final var expected =
+        createTable(
+            "CATEGORY_TOTALS",
+            List.of("COLUMN1", "TOTAL_AMOUNT", "RECORD_COUNT"),
+            List.of(
+                List.of(1, new BigDecimal("1700.00"), 3L),
+                List.of(2, new BigDecimal("300.00"), 1L)));
+
+    // When & Then
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected,
+        dataSource,
+        "CATEGORY_TOTALS",
+        "SELECT COLUMN1,"
+            + " SUM(COLUMN3) AS TOTAL_AMOUNT,"
+            + " COUNT(*) AS RECORD_COUNT"
+            + " FROM TABLE1 GROUP BY COLUMN1 ORDER BY COLUMN1");
+    logger.info("GROUP BY aggregation query validation completed");
   }
 
   /**
-   * Demonstrates validation with high-value records.
+   * Verifies that an {@code INNER JOIN} between sales and categories returns labeled rows.
    *
-   * <p>Validates data after adding a high-value record.
-   *
-   * <p>Test flow:
-   *
-   * <ul>
-   *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data (January)
-   *   <li>Execution: Inserts ID=4 (COLUMN1=1, North region, 2024-02-01, 600.00)
-   *   <li>Expectation: Verifies all four records including February data from {@code
-   *       expected-join/}
-   * </ul>
+   * <p>The query joins {@code TABLE1.COLUMN1} to {@code CATEGORIES.ID} and projects the category
+   * name alongside the sale amount. The expected result demonstrates the join surfaces the
+   * category label for each sale row.
    */
   @Test
   @Tag("normal")
-  @DisplayName("should validate high-value sales with join data")
+  @DisplayName("should return joined sale and category rows when INNER JOIN applied")
   @DataSet
-  @ExpectedDataSet(
-      sources =
-          @DataSetSource(
-              resourceLocation =
-                  "classpath:example/feature/CustomQueryValidationTest/expected-join/"))
-  void shouldValidateHighValueSales() {
+  void shouldReturnJoinedSaleAndCategoryRows_whenInnerJoinApplied() {
     // Given
-    logger.info("Running high-value sales validation test");
-
-    // When
+    logger.info("Inserting an additional sale to exercise the join");
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 1, '2024-02-01', 600.00, 'North')
         """);
 
-    // Then
-    logger.info("High-value sales validation completed");
+    // Note: TableReader currently uses ResultSetMetaData#getColumnName, which returns the
+    // original column name and ignores SQL aliases. The columns are projected without aliases
+    // so the expected column names mirror the underlying table columns.
+    final var expected =
+        createTable(
+            "SALES_WITH_CATEGORY",
+            List.of("ID", "NAME", "COLUMN3"),
+            List.of(
+                List.of(1, "Premium", new BigDecimal("500.00")),
+                List.of(2, "Standard", new BigDecimal("300.00")),
+                List.of(3, "Premium", new BigDecimal("700.00")),
+                List.of(4, "Premium", new BigDecimal("600.00"))));
+
+    // When & Then
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected,
+        dataSource,
+        "SALES_WITH_CATEGORY",
+        "SELECT s.ID, c.NAME, s.COLUMN3"
+            + " FROM TABLE1 s INNER JOIN CATEGORIES c ON s.COLUMN1 = c.ID"
+            + " ORDER BY s.ID");
+    logger.info("INNER JOIN query validation completed");
   }
 
   /**
-   * Demonstrates validation with date range filtering for January sales.
+   * Verifies that a {@code BETWEEN} date filter excludes rows outside the requested range.
    *
-   * <p>Validates that only January sales data is present in the database by adding a January record
-   * and verifying the final state contains only January data.
-   *
-   * <p>Test flow:
-   *
-   * <ul>
-   *   <li>Preparation: Loads TABLE1(ID=1,2,3) with January sales data
-   *   <li>Execution: Inserts ID=4 (COLUMN1=2, South region, 2024-01-25, 450.00)
-   *   <li>Expectation: Verifies all four January records from {@code expected-daterange/}
-   * </ul>
+   * <p>Two rows are inserted: one inside the January range and one in February. The query
+   * restricts {@code COLUMN2} to January 2024, and the expected result contains only the January
+   * rows.
    */
   @Test
   @Tag("normal")
-  @DisplayName("should validate January sales with date range filtering")
+  @DisplayName("should return only January rows when BETWEEN date filter applied")
   @DataSet
-  @ExpectedDataSet(
-      sources =
-          @DataSetSource(
-              resourceLocation =
-                  "classpath:example/feature/CustomQueryValidationTest/expected-daterange/"))
-  void shouldValidateJanuarySales() {
+  void shouldReturnOnlyJanuaryRows_whenBetweenDateFilterApplied() {
     // Given
-    logger.info("Running January sales validation test");
-
-    // When
+    logger.info("Inserting one January row and one February row");
     executeSql(
         """
         INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
         VALUES (4, 2, '2024-01-25', 450.00, 'South')
         """);
+    executeSql(
+        """
+        INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
+        VALUES (5, 1, '2024-02-05', 800.00, 'North')
+        """);
 
-    // Then
-    logger.info("January sales validation completed");
+    final var expected =
+        createTable(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3", "COLUMN4"),
+            List.of(
+                List.of(1, 1, Date.valueOf("2024-01-10"), new BigDecimal("500.00"), "West"),
+                List.of(2, 2, Date.valueOf("2024-01-15"), new BigDecimal("300.00"), "East"),
+                List.of(3, 1, Date.valueOf("2024-01-20"), new BigDecimal("700.00"), "North"),
+                List.of(4, 2, Date.valueOf("2024-01-25"), new BigDecimal("450.00"), "South")));
+
+    // When & Then
+    DatabaseQueryAssertion.assertEqualsByQuery(
+        expected,
+        dataSource,
+        "TABLE1",
+        "SELECT ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4 FROM TABLE1"
+            + " WHERE COLUMN2 BETWEEN DATE '2024-01-01' AND DATE '2024-01-31'"
+            + " ORDER BY ID");
+    logger.info("BETWEEN date filter query validation completed");
   }
 }

@@ -2,3 +2,5 @@
 shouldHandleNullValues,1,First Record,,100,
 shouldHandleNullValues,2,Second Record,Optional Value,200,42
 shouldHandleNullValues,3,Third Record,,300,
+shouldDistinguishEmptyStringFromNullValues,1,Null Record,,100,
+shouldDistinguishEmptyStringFromNullValues,2,Empty String Record,"",200,

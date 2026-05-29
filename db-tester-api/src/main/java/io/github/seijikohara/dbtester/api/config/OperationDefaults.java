@@ -42,6 +42,9 @@ public final class OperationDefaults {
   /** The number of rows per batch for INSERT operations. Zero means all rows in a single batch. */
   private final int batchSize;
 
+  /** Selects how the comparison engine reacts to parse failures inside flexible strategies. */
+  private final ComparisonMode comparisonMode;
+
   /**
    * Creates a new instance from the builder.
    *
@@ -52,6 +55,7 @@ public final class OperationDefaults {
     this.expectation = builder.expectation;
     this.floatingPointEpsilon = builder.floatingPointEpsilon;
     this.batchSize = builder.batchSize;
+    this.comparisonMode = builder.comparisonMode;
   }
 
   /**
@@ -114,6 +118,15 @@ public final class OperationDefaults {
   }
 
   /**
+   * Returns the comparison mode that governs flexible strategies.
+   *
+   * @return the comparison mode
+   */
+  public ComparisonMode comparisonMode() {
+    return comparisonMode;
+  }
+
+  /**
    * Creates a new OperationDefaults with the specified preparation operation.
    *
    * @param preparation the preparation operation
@@ -154,6 +167,16 @@ public final class OperationDefaults {
   }
 
   /**
+   * Creates a new OperationDefaults with the specified comparison mode.
+   *
+   * @param comparisonMode the comparison mode
+   * @return a new OperationDefaults with the specified comparison mode
+   */
+  public OperationDefaults withComparisonMode(final ComparisonMode comparisonMode) {
+    return toBuilder().comparisonMode(comparisonMode).build();
+  }
+
+  /**
    * Creates a new builder initialized with the values from this instance.
    *
    * @return a new builder with values copied from this instance
@@ -163,7 +186,8 @@ public final class OperationDefaults {
         .preparation(this.preparation)
         .expectation(this.expectation)
         .floatingPointEpsilon(this.floatingPointEpsilon)
-        .batchSize(this.batchSize);
+        .batchSize(this.batchSize)
+        .comparisonMode(this.comparisonMode);
   }
 
   @Override
@@ -177,12 +201,13 @@ public final class OperationDefaults {
     return preparation == other.preparation
         && expectation == other.expectation
         && Double.compare(floatingPointEpsilon, other.floatingPointEpsilon) == 0
-        && batchSize == other.batchSize;
+        && batchSize == other.batchSize
+        && comparisonMode == other.comparisonMode;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(preparation, expectation, floatingPointEpsilon, batchSize);
+    return Objects.hash(preparation, expectation, floatingPointEpsilon, batchSize, comparisonMode);
   }
 
   @Override
@@ -195,6 +220,8 @@ public final class OperationDefaults {
         + floatingPointEpsilon
         + ", batchSize="
         + batchSize
+        + ", comparisonMode="
+        + comparisonMode
         + ']';
   }
 
@@ -212,6 +239,9 @@ public final class OperationDefaults {
 
     /** The number of rows per batch for INSERT operations. */
     private int batchSize;
+
+    /** The comparison mode that governs flexible strategies. */
+    private ComparisonMode comparisonMode = ComparisonMode.STRICT;
 
     /** Creates a new builder with default values. */
     public Builder() {}
@@ -265,6 +295,17 @@ public final class OperationDefaults {
             String.format("batchSize must be zero or positive, but was: %d", batchSize));
       }
       this.batchSize = batchSize;
+      return this;
+    }
+
+    /**
+     * Sets the comparison mode that governs flexible strategies.
+     *
+     * @param comparisonMode the comparison mode
+     * @return this builder
+     */
+    public Builder comparisonMode(final ComparisonMode comparisonMode) {
+      this.comparisonMode = Objects.requireNonNull(comparisonMode, "comparisonMode");
       return this;
     }
 

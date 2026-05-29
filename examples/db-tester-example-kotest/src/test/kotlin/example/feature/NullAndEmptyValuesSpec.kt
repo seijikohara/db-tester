@@ -120,4 +120,32 @@ class NullAndEmptyValuesSpec :
             )
             logger.info("Record with NULL values inserted successfully")
         }
+
+    /**
+     * Documents that the CSV loader normalizes both empty cells and quoted empty strings to SQL
+     * NULL for database compatibility.
+     */
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should normalize quoted empty string to null`() {
+        dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement
+                    .executeQuery("SELECT COUNT(*) FROM TABLE1 WHERE COLUMN2 IS NULL AND ID IN (1, 2)")
+                    .use { rs ->
+                        rs.next()
+                        check(rs.getInt(1) == 2) {
+                            "Expected COLUMN2 to be NULL for both ID=1 and ID=2 (empty cell and quoted empty)"
+                        }
+                    }
+                statement.executeQuery("SELECT COUNT(*) FROM TABLE1 WHERE COLUMN2 = ''").use { rs ->
+                    rs.next()
+                    check(rs.getInt(1) == 0) {
+                        "Loader should not materialize quoted empty cells as empty strings"
+                    }
+                }
+            }
+        }
+    }
 }

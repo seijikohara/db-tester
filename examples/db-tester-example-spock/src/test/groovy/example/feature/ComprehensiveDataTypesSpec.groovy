@@ -147,6 +147,32 @@ class ComprehensiveDataTypesSpec extends Specification implements DatabaseTestSu
 	}
 
 	/**
+	 * Verifies that the loader materializes empty CSV cells as SQL NULL across every
+	 * representable type.
+	 */
+	@DataSet
+	@ExpectedDataSet
+	def 'should handle nullable columns'() {
+		when: 'the nullable scenario is loaded'
+		// preparation populates only the ID column; remaining columns are NULL
+		then: 'expectation phase verifies all columns are NULL'
+		noExceptionThrown()
+	}
+
+	/**
+	 * Verifies that the loader preserves minimum and maximum boundary values for every numeric
+	 * and date/time type.
+	 */
+	@DataSet
+	@ExpectedDataSet
+	def 'should handle boundary values'() {
+		when: 'the boundary-value scenario is loaded'
+		// preparation populates rows with min and max values per type
+		then: 'expectation phase verifies the boundary values survive the round trip'
+		noExceptionThrown()
+	}
+
+	/**
 	 * Executes a SQL script from classpath using Groovy 5 features.
 	 *
 	 * @param scriptPath the classpath resource path

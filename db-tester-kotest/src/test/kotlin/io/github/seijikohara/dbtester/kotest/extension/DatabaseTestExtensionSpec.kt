@@ -9,6 +9,8 @@ import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.mockk
+import javax.sql.DataSource
 
 /**
  * Unit tests for [DatabaseTestExtension].
@@ -95,8 +97,8 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
     @Test
     fun `should create instance with multi-DataSource registry provider`(): Unit =
         DataSourceRegistry().let { registry ->
-            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
-                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+            mockk<DataSource>(relaxed = true).let { defaultDs ->
+                mockk<DataSource>(relaxed = true).let { secondaryDs ->
                     registry.registerDefault(defaultDs)
                     registry.register("secondary", secondaryDs)
                     DatabaseTestExtension(registryProvider = { registry }).let { ext ->
@@ -116,9 +118,9 @@ class DatabaseTestExtensionSpec : AnnotationSpec() {
     @Test
     fun `should support multi-DataSource registration via registry`(): Unit =
         DataSourceRegistry().let { registry ->
-            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
-                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
-                    io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { tertiaryDs ->
+            mockk<DataSource>(relaxed = true).let { defaultDs ->
+                mockk<DataSource>(relaxed = true).let { secondaryDs ->
+                    mockk<DataSource>(relaxed = true).let { tertiaryDs ->
                         registry.registerDefault(defaultDs)
                         registry.register("secondary", secondaryDs)
                         registry.register("tertiary", tertiaryDs)
@@ -184,8 +186,8 @@ class DatabaseTestSupportSpec : AnnotationSpec() {
     @Test
     fun `should support multi-DataSource registry via interface`(): Unit =
         DataSourceRegistry().let { registry ->
-            io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { defaultDs ->
-                io.mockk.mockk<javax.sql.DataSource>(relaxed = true).let { secondaryDs ->
+            mockk<DataSource>(relaxed = true).let { defaultDs ->
+                mockk<DataSource>(relaxed = true).let { secondaryDs ->
                     registry.registerDefault(defaultDs)
                     registry.register("secondary", secondaryDs)
                     object : DatabaseTestSupport {

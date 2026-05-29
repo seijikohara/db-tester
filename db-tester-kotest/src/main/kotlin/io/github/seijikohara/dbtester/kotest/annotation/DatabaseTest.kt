@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.kotest.annotation
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.extensions.ApplyExtension
+import java.lang.annotation.Inherited
 
 /**
  * Annotation that enables database testing for a Kotest spec class.
@@ -64,5 +65,6 @@ import io.kotest.core.extensions.ApplyExtension
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 @MustBeDocumented
+@Inherited
 @ApplyExtension(DatabaseTestExtension::class)
 annotation class DatabaseTest

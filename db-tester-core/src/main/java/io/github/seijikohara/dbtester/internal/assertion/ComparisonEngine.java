@@ -1,6 +1,8 @@
 package io.github.seijikohara.dbtester.internal.assertion;
 
+import io.github.seijikohara.dbtester.api.config.ComparisonMode;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Executes comparison logic for {@link ComparisonStrategy} descriptors.
@@ -26,6 +30,9 @@ import org.jspecify.annotations.Nullable;
  * @see ComparisonStrategy
  */
 public final class ComparisonEngine {
+
+  /** Logger for surfacing lenient parse fallbacks. */
+  private static final Logger logger = LoggerFactory.getLogger(ComparisonEngine.class);
 
   /** Formatter for timestamps with timezone offset. */
   private static final DateTimeFormatter FLEXIBLE_OFFSET_FORMATTER =
@@ -85,13 +92,35 @@ public final class ComparisonEngine {
       final ComparisonStrategy strategy,
       final @Nullable Object expected,
       final @Nullable Object actual) {
+    return matches(strategy, expected, actual, ComparisonMode.STRICT);
+  }
+
+  /**
+   * Compares two values according to the specified strategy and {@link ComparisonMode}.
+   *
+   * <p>When {@code mode} is {@link ComparisonMode#STRICT}, the flexible strategies throw {@link
+   * ValidationException} on parse failures instead of silently returning the original value. When
+   * {@code mode} is {@link ComparisonMode#LENIENT}, parse failures log a warning and fall back to
+   * the historical comparison behaviour.
+   *
+   * @param strategy the comparison strategy descriptor
+   * @param expected the expected value
+   * @param actual the actual value
+   * @param mode the comparison mode governing parse-failure behaviour
+   * @return {@code true} if the values match according to the strategy, {@code false} otherwise
+   */
+  public static boolean matches(
+      final ComparisonStrategy strategy,
+      final @Nullable Object expected,
+      final @Nullable Object actual,
+      final ComparisonMode mode) {
     return switch (strategy.getType()) {
       case STRICT -> Objects.equals(expected, actual);
       case IGNORE -> true;
-      case NUMERIC -> compareNumeric(expected, actual);
+      case NUMERIC -> compareNumeric(expected, actual, mode);
       case CASE_INSENSITIVE -> compareCaseInsensitive(expected, actual);
-      case TIMESTAMP_FLEXIBLE -> compareTimestamp(expected, actual);
-      case DATE_FLEXIBLE -> compareDateFlexible(expected, actual);
+      case TIMESTAMP_FLEXIBLE -> compareTimestamp(expected, actual, mode);
+      case DATE_FLEXIBLE -> compareDateFlexible(expected, actual, mode);
       case JSON_EQUIVALENT -> compareJsonEquivalent(expected, actual);
       case NOT_NULL -> actual != null;
       case REGEX -> matchesRegex(strategy, actual);
@@ -101,15 +130,16 @@ public final class ComparisonEngine {
   // ========== Numeric comparison ==========
 
   /**
-   * Compares two values numerically.
+   * Compares two values numerically with mode-aware fallback behaviour.
    *
    * @param expected the expected value
    * @param actual the actual value
+   * @param mode the comparison mode governing parse-failure behaviour
    * @return {@code true} if numerically equal, {@code false} otherwise
    */
   private static boolean compareNumeric(
-      final @Nullable Object expected, final @Nullable Object actual) {
-    return compareNullable(expected, actual, ComparisonEngine::compareNumericValues);
+      final @Nullable Object expected, final @Nullable Object actual, final ComparisonMode mode) {
+    return compareNullable(expected, actual, (exp, act) -> compareNumericValues(exp, act, mode));
   }
 
   /**
@@ -117,24 +147,65 @@ public final class ComparisonEngine {
    *
    * @param expected the expected value (non-null)
    * @param actual the actual value (non-null)
+   * @param mode the comparison mode governing parse-failure behaviour
    * @return {@code true} if numerically equal, {@code false} otherwise
    */
-  private static boolean compareNumericValues(final Object expected, final Object actual) {
+  private static boolean compareNumericValues(
+      final Object expected, final Object actual, final ComparisonMode mode) {
     try {
-      return toNumber(expected)
-          .flatMap(
-              expNum ->
-                  toNumber(actual)
-                      .map(
-                          actNum -> {
-                            final var expectedDecimal = new BigDecimal(expNum.toString());
-                            final var actualDecimal = new BigDecimal(actNum.toString());
-                            return expectedDecimal.compareTo(actualDecimal) == 0;
-                          }))
-          .orElseGet(() -> Objects.equals(expected, actual));
+      final var expectedNumber = toNumber(expected);
+      final var actualNumber = toNumber(actual);
+      if (expectedNumber.isPresent() && actualNumber.isPresent()) {
+        final var expectedDecimal = new BigDecimal(expectedNumber.get().toString());
+        final var actualDecimal = new BigDecimal(actualNumber.get().toString());
+        return expectedDecimal.compareTo(actualDecimal) == 0;
+      }
+      return numericFallback(expected, actual, mode, "value is not numeric");
     } catch (final NumberFormatException e) {
-      return Objects.equals(expected, actual);
+      final var reason = e.getMessage();
+      return numericFallback(expected, actual, mode, reason != null ? reason : "invalid number");
     }
+  }
+
+  /**
+   * Applies the configured comparison mode to a numeric parse failure.
+   *
+   * @param expected the expected value
+   * @param actual the actual value
+   * @param mode the comparison mode
+   * @param reason the reason for the parse failure
+   * @return the fallback comparison result when lenient
+   * @throws ValidationException when {@code mode} is {@link ComparisonMode#STRICT}
+   */
+  private static boolean numericFallback(
+      final Object expected, final Object actual, final ComparisonMode mode, final String reason) {
+    if (mode == ComparisonMode.STRICT) {
+      throw new ValidationException(
+          String.format(
+              "NUMERIC strategy cannot parse value (%s). Expected=[%s] Actual=[%s]."
+                  + " Switch ComparisonMode to LENIENT to permit fallback equals comparison.",
+              reason, summarize(expected), summarize(actual)));
+    }
+    logger.warn(
+        "NUMERIC strategy parse failure ({}); falling back to equals. Expected=[{}] Actual=[{}]",
+        reason,
+        summarize(expected),
+        summarize(actual));
+    return Objects.equals(expected, actual);
+  }
+
+  /**
+   * Produces a short, human-readable preview of a value for log and exception messages.
+   *
+   * <p>All callers pass a non-null value because the comparison paths reject null operands before
+   * reaching a parse-failure branch.
+   *
+   * @param value the value to summarize
+   * @return a trimmed preview of the value
+   */
+  private static String summarize(final Object value) {
+    final var string = value.toString();
+    return string.length() <= 64 ? string : string.substring(0, 61) + "...";
   }
 
   /**
@@ -182,17 +253,18 @@ public final class ComparisonEngine {
    *
    * @param expected the expected value
    * @param actual the actual value
+   * @param mode the comparison mode governing parse-failure behaviour
    * @return {@code true} if timestamps represent the same instant (ignoring sub-second precision),
    *     {@code false} otherwise
    */
   private static boolean compareTimestamp(
-      final @Nullable Object expected, final @Nullable Object actual) {
+      final @Nullable Object expected, final @Nullable Object actual, final ComparisonMode mode) {
     return compareNullable(
         expected,
         actual,
         (exp, act) -> {
-          final var expectedEpoch = parseToEpochSecond(exp.toString());
-          final var actualEpoch = parseToEpochSecond(act.toString());
+          final var expectedEpoch = parseToEpochSecond(exp.toString(), mode);
+          final var actualEpoch = parseToEpochSecond(act.toString(), mode);
           return expectedEpoch.equals(actualEpoch);
         });
   }
@@ -211,9 +283,11 @@ public final class ComparisonEngine {
    * </ul>
    *
    * @param timestamp the timestamp string
-   * @return epoch seconds in UTC, or the original string if parsing fails
+   * @param mode the comparison mode governing parse-failure behaviour
+   * @return epoch seconds in UTC, or the original string if parsing fails in LENIENT mode
+   * @throws ValidationException if parsing fails in STRICT mode
    */
-  private static Object parseToEpochSecond(final String timestamp) {
+  private static Object parseToEpochSecond(final String timestamp, final ComparisonMode mode) {
     final var normalized = timestamp.trim().replace(' ', 'T');
 
     // Try parsing as OffsetDateTime (with timezone)
@@ -236,9 +310,19 @@ public final class ComparisonEngine {
     try {
       return Instant.parse(normalized).getEpochSecond();
     } catch (final DateTimeParseException ignored) {
-      // Parsing failed, return original string for equals comparison
+      // Parsing failed, defer to mode-driven fallback below
     }
 
+    if (mode == ComparisonMode.STRICT) {
+      throw new ValidationException(
+          String.format(
+              "TIMESTAMP_FLEXIBLE strategy cannot parse value as a timestamp: [%s]."
+                  + " Switch ComparisonMode to LENIENT to permit fallback string comparison.",
+              summarize(timestamp)));
+    }
+    logger.warn(
+        "TIMESTAMP_FLEXIBLE parse failure; falling back to string comparison. Value=[{}]",
+        summarize(timestamp));
     return timestamp;
   }
 
@@ -252,16 +336,17 @@ public final class ComparisonEngine {
    *
    * @param expected the expected value
    * @param actual the actual value
+   * @param mode the comparison mode governing parse-failure behaviour
    * @return {@code true} if both values represent the same date, {@code false} otherwise
    */
   private static boolean compareDateFlexible(
-      final @Nullable Object expected, final @Nullable Object actual) {
+      final @Nullable Object expected, final @Nullable Object actual, final ComparisonMode mode) {
     return compareNullable(
         expected,
         actual,
         (exp, act) -> {
-          final var expectedDate = parseToLocalDate(exp.toString());
-          final var actualDate = parseToLocalDate(act.toString());
+          final var expectedDate = parseToLocalDate(exp.toString(), mode);
+          final var actualDate = parseToLocalDate(act.toString(), mode);
           return expectedDate.equals(actualDate);
         });
   }
@@ -274,9 +359,11 @@ public final class ComparisonEngine {
    * date portion is extracted first.
    *
    * @param dateStr the date string to parse
-   * @return the parsed LocalDate, or the original string if parsing fails
+   * @param mode the comparison mode governing parse-failure behaviour
+   * @return the parsed LocalDate, or the original string if parsing fails in LENIENT mode
+   * @throws ValidationException if parsing fails in STRICT mode
    */
-  private static Object parseToLocalDate(final String dateStr) {
+  private static Object parseToLocalDate(final String dateStr, final ComparisonMode mode) {
     final var trimmed = dateStr.trim();
 
     // Extract date portion from timestamp if needed
@@ -300,9 +387,19 @@ public final class ComparisonEngine {
     try {
       return LocalDate.parse(datePart, DOT_DATE_FORMATTER);
     } catch (final DateTimeParseException ignored) {
-      // Parsing failed
+      // Parsing failed, defer to mode-driven fallback below
     }
 
+    if (mode == ComparisonMode.STRICT) {
+      throw new ValidationException(
+          String.format(
+              "DATE_FLEXIBLE strategy cannot parse value as a date: [%s]."
+                  + " Switch ComparisonMode to LENIENT to permit fallback string comparison.",
+              summarize(dateStr)));
+    }
+    logger.warn(
+        "DATE_FLEXIBLE parse failure; falling back to string comparison. Value=[{}]",
+        summarize(dateStr));
     return dateStr;
   }
 

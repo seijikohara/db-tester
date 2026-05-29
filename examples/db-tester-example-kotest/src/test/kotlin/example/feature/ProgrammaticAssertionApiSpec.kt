@@ -1,8 +1,9 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.dataset.Table
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestSupport
 import io.kotest.core.spec.style.AnnotationSpec
@@ -77,6 +78,34 @@ class ProgrammaticAssertionApiSpec :
                         statement.executeUpdate(sql)
                     }
                 }.let { }
+
+        /**
+         * Fetches the current database state as a [Table] by running a query and projecting the
+         * supplied columns.
+         *
+         * @param dataSource the data source to query
+         * @param tableName the logical table name attached to the result
+         * @param sqlQuery the SQL query that returns the actual rows
+         * @param columnNames the columns to project, in the order they appear in the query
+         * @return a [Table] containing the rows returned by the query
+         */
+        private fun fetchTable(
+            dataSource: DataSource,
+            tableName: String,
+            sqlQuery: String,
+            columnNames: List<String>,
+        ): Table =
+            dataSource.connection.use { connection ->
+                connection.prepareStatement(sqlQuery).use { statement ->
+                    statement.executeQuery().use { rs ->
+                        val rows = mutableListOf<List<Any?>>()
+                        while (rs.next()) {
+                            rows.add(columnNames.mapIndexed { i, _ -> rs.getObject(i + 1) })
+                        }
+                        Table.ofValues(tableName, columnNames, rows)
+                    }
+                }
+            }
     }
 
     override val dbTesterRegistry = DataSourceRegistry()
@@ -95,24 +124,40 @@ class ProgrammaticAssertionApiSpec :
         }
 
     /**
-     * Demonstrates basic programmatic assertion without annotations.
+     * Demonstrates basic programmatic assertion without an `@ExpectedDataSet` annotation.
      *
-     * Shows direct use of DatabaseAssertion assertion APIs for custom validation scenarios
-     * where annotation-based testing is insufficient.
-     *
-     * Test flow:
-     * - Preparation: TABLE1(1,Value1,100,Extra1), (2,Value2,200,Extra2)
-     * - Execution: Inserts (3,Value3,300,NULL)
-     * - Expectation: Verifies all three records including NULL COLUMN3
+     * The expected table is built in code, the actual table is fetched from the database, and
+     * verification runs through [DatabaseAssertion.assertEquals]. This proves the programmatic
+     * API runs against the real database state.
      */
     @Test
     @DataSet
-    @ExpectedDataSet
-    fun `should demonstrate basic programmatic API`(): Unit =
-        logger.info("Running basic programmatic API test").also {
-            executeSql(dataSource, "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)")
-            logger.info("Record inserted successfully")
-        }
+    fun `should demonstrate basic programmatic API`() {
+        executeSql(
+            dataSource,
+            "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)",
+        )
+
+        val expected =
+            Table.ofValues(
+                "TABLE1",
+                listOf("ID", "COLUMN1", "COLUMN2", "COLUMN3"),
+                listOf(
+                    listOf(1, "Value1", 100, "Extra1"),
+                    listOf(2, "Value2", 200, "Extra2"),
+                    listOf<Any?>(3, "Value3", 300, null),
+                ),
+            )
+        val actual =
+            fetchTable(
+                dataSource,
+                "TABLE1",
+                "SELECT ID, COLUMN1, COLUMN2, COLUMN3 FROM TABLE1 ORDER BY ID",
+                listOf("ID", "COLUMN1", "COLUMN2", "COLUMN3"),
+            )
+
+        DatabaseAssertion.assertEquals(expected, actual)
+    }
 
     /**
      * Demonstrates programmatic custom SQL query validation.

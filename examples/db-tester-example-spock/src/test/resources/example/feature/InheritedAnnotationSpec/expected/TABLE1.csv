@@ -2,6 +2,6 @@
 should use inherited preparation,1,Laptop,10,Warehouse A
 should use inherited preparation,2,Keyboard,50,Warehouse A
 should use inherited preparation,3,Monitor,20,Warehouse B
-overrideSetup,1,Laptop,50,Warehouse A
+overrideSetup,1,Laptop,50,Warehouse B
 combinedTest,1,Laptop,10,Warehouse C
 combinedTest,2,Keyboard,50,Warehouse A

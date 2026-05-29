@@ -11,7 +11,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifie
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExportExecutor;
 import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.PreparationExecutor;
 import java.util.Optional;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -86,7 +86,10 @@ public class DatabaseTestExtension
    */
   public static DataSourceRegistry getRegistry(final ExtensionContext extensionContext) {
     return getOrCreate(
-        extensionContext, STORE_KEY_REGISTRY, DataSourceRegistry.class, DataSourceRegistry::new);
+        extensionContext,
+        STORE_KEY_REGISTRY,
+        DataSourceRegistry.class,
+        key -> new DataSourceRegistry());
   }
 
   /**
@@ -329,15 +332,18 @@ public class DatabaseTestExtension
    */
   private static Configuration getConfiguration(final ExtensionContext extensionContext) {
     return getOrCreate(
-        extensionContext, STORE_KEY_CONFIGURATION, Configuration.class, Configuration::defaults);
+        extensionContext,
+        STORE_KEY_CONFIGURATION,
+        Configuration.class,
+        key -> Configuration.defaults());
   }
 
   /**
    * Generic get-or-create method for extension state management.
    *
-   * <p>Retrieves an instance from the extension context store, creating and storing it if not
-   * present. This pattern ensures lazy initialization and proper lifecycle management for per-class
-   * extension state. The method is thread-safe through the extension context store mechanism.
+   * <p>Retrieves an instance from the extension context store, creating and storing it atomically
+   * if not present. Uses {@link Store#computeIfAbsent(Object, Function, Class)} to ensure thread
+   * safety when JUnit Jupiter executes tests in parallel.
    *
    * @param <T> the type of the instance to retrieve or create
    * @param extensionContext the extension context providing access to the store
@@ -350,15 +356,9 @@ public class DatabaseTestExtension
       final ExtensionContext extensionContext,
       final String key,
       final Class<T> type,
-      final Supplier<T> factory) {
+      final Function<String, T> factory) {
     final var store = getClassScopedStore(extensionContext);
-    return Optional.ofNullable(store.get(key, type))
-        .orElseGet(
-            () -> {
-              final var instance = factory.get();
-              store.put(key, instance);
-              return instance;
-            });
+    return store.computeIfAbsent(key, factory, type);
   }
 
   /**

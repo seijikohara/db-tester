@@ -139,7 +139,7 @@ class ExpectationVerifierTest {
      * @throws NoSuchMethodException if the test method is not found
      */
     @Test
-    @Tag("exceptional")
+    @Tag("error")
     @DisplayName("should propagate validation exception from support")
     void shouldPropagateValidationException_fromSupport() throws NoSuchMethodException {
       // Given

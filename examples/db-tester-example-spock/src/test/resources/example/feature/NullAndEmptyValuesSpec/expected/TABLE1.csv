@@ -2,3 +2,5 @@
 should handle null values,1,First Record,,100,
 should handle null values,2,Second Record,Optional Value,200,42
 should handle null values,3,Third Record,,300,
+should normalize quoted empty string to null,1,Null Record,,100,
+should normalize quoted empty string to null,2,Empty String Record,"",200,

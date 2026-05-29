@@ -138,7 +138,8 @@ class PartialColumnValidationSpec extends Specification implements DatabaseTestS
 	 */
 	@DataSet
 	@ExpectedDataSet(sources = @DataSetSource(
-	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/'
+	resourceLocation = 'classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/',
+	excludeColumns = ['ID', 'COLUMN4', 'COLUMN5']
 	))
 	def 'should ignore auto generated columns'() {
 		when: 'inserting duplicate business values with different auto-generated ID'

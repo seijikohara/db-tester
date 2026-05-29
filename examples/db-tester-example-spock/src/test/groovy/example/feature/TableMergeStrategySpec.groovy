@@ -97,23 +97,27 @@ class TableMergeStrategySpec extends Specification {
 		}
 
 		/**
-		 * Verifies FIRST strategy configuration is applied.
+		 * Verifies FIRST strategy applies the first source and ignores the second when both are
+		 * supplied.
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/')
+		sources = [
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset1/'),
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/dataset2/')
+		]
 		)
 		@ExpectedDataSet(
 		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$FirstStrategySpec/should use only first dataset/expected/')
 		)
 		def 'should use only first dataset'() {
-			when: 'adding additional data'
+			when: 'appending an additional row outside the merged datasets'
 			sql.execute '''
 				INSERT INTO MERGE_TABLE (ID, NAME)
 				VALUES (3, 'Charlie')
 			'''
 
-			then: 'expectation verifies data'
+			then: 'expectation verifies data merged from dataset1 only plus the new row'
 			noExceptionThrown()
 		}
 
@@ -194,23 +198,27 @@ class TableMergeStrategySpec extends Specification {
 		}
 
 		/**
-		 * Verifies LAST strategy configuration is applied.
+		 * Verifies LAST strategy applies the last source and ignores the first when both are
+		 * supplied.
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
+		sources = [
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset1/'),
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/dataset2/')
+		]
 		)
 		@ExpectedDataSet(
 		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$LastStrategySpec/should use only last dataset/expected/')
 		)
 		def 'should use only last dataset'() {
-			when: 'adding additional data'
+			when: 'appending an additional row outside the merged datasets'
 			sql.execute '''
 				INSERT INTO MERGE_TABLE (ID, NAME)
 				VALUES (1, 'Alice')
 			'''
 
-			then: 'expectation verifies data'
+			then: 'expectation verifies data merged from dataset2 only plus the new row'
 			noExceptionThrown()
 		}
 
@@ -291,23 +299,22 @@ class TableMergeStrategySpec extends Specification {
 		}
 
 		/**
-		 * Verifies UNION strategy configuration is applied.
+		 * Verifies UNION strategy merges both sources and deduplicates rows shared between them.
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/')
+		sources = [
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset1/'),
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/dataset2/')
+		]
 		)
 		@ExpectedDataSet(
 		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionStrategySpec/should merge and remove duplicates/expected/')
 		)
 		def 'should merge and remove duplicates'() {
-			when: 'adding additional unique data'
-			sql.execute '''
-				INSERT INTO MERGE_TABLE (ID, NAME)
-				VALUES (3, 'Charlie')
-			'''
-
-			then: 'expectation verifies data'
+			when: 'merge strategy preparation runs'
+			// preparation has executed by the time this block runs
+			then: 'merge strategy deduplicates the overlapping row [2,Bob]'
 			noExceptionThrown()
 		}
 
@@ -388,23 +395,25 @@ class TableMergeStrategySpec extends Specification {
 		}
 
 		/**
-		 * Verifies UNION_ALL strategy configuration is applied.
+		 * Verifies UNION_ALL strategy merges both sources while preserving duplicate rows.
+		 *
+		 * <p>Operates on {@code MERGE_TABLE_NO_PK} so duplicate rows can survive the preparation
+		 * phase. This distinguishes UNION_ALL from UNION which would deduplicate the row [2,Bob].
 		 */
 		@DataSet(
 		operation = Operation.INSERT,
-		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/')
+		sources = [
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset1/'),
+			@DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/dataset2/')
+		]
 		)
 		@ExpectedDataSet(
 		sources = @DataSetSource(resourceLocation = 'classpath:example/feature/TableMergeStrategySpec$UnionAllStrategySpec/should merge and keep all rows/expected/')
 		)
 		def 'should merge and keep all rows'() {
-			when: 'adding additional data'
-			sql.execute '''
-				INSERT INTO MERGE_TABLE (ID, NAME)
-				VALUES (3, 'Charlie')
-			'''
-
-			then: 'expectation verifies data'
+			when: 'merge strategy preparation runs'
+			// preparation has executed by the time this block runs
+			then: 'merge strategy preserves the duplicate row [2,Bob]'
 			noExceptionThrown()
 		}
 

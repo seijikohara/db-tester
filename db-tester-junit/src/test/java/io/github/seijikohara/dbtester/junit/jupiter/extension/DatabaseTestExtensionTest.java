@@ -2,11 +2,13 @@ package io.github.seijikohara.dbtester.junit.jupiter.extension;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -26,6 +28,7 @@ import io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExportExecutor;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.function.Function;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,6 +38,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
+import org.mockito.ArgumentMatchers;
 
 /** Unit tests for {@link DatabaseTestExtension}. */
 @DisplayName("DatabaseTestExtension")
@@ -104,7 +108,11 @@ class DatabaseTestExtensionTest {
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(org.mockito.ArgumentMatchers.any(Namespace.class)))
           .thenReturn(mockStore);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(existingRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(existingRegistry);
 
       // When
       final var result = DatabaseTestExtension.getRegistry(mockContext);
@@ -127,7 +135,15 @@ class DatabaseTestExtensionTest {
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(org.mockito.ArgumentMatchers.any(Namespace.class)))
           .thenReturn(mockStore);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(null);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenAnswer(
+              invocation -> {
+                final Function<String, DataSourceRegistry> factory = invocation.getArgument(1);
+                return factory.apply(invocation.getArgument(0));
+              });
 
       // When
       final var result = DatabaseTestExtension.getRegistry(mockContext);
@@ -228,7 +244,7 @@ class DatabaseTestExtensionTest {
       final var result = extension.supportsParameter(parameterContext, mockContext);
 
       // Then
-      assertEquals(false, result, "should not support String parameter");
+      assertFalse(result, "should not support String parameter");
     }
   }
 
@@ -293,8 +309,8 @@ class DatabaseTestExtensionTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should process method-level DataSet annotation")
-    void shouldProcessMethodLevelDataSetAnnotation() throws Exception {
+    @DisplayName("should execute preparation when method-level DataSet annotation present")
+    void shouldExecutePreparation_whenMethodLevelDataSetAnnotationPresent() throws Exception {
       // Given
       final var mockConfiguration = mock(Configuration.class);
       final var mockLoader = mock(DataSetLoader.class);
@@ -309,8 +325,16 @@ class DatabaseTestExtensionTest {
       when(mockContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("configuration"),
+              ArgumentMatchers.<Function<String, Configuration>>any(),
+              eq(Configuration.class)))
+          .thenReturn(mockConfiguration);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(mockRegistry);
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockLoader.loadPreparationDataSets(any())).thenReturn(Collections.emptyList());
 
@@ -327,8 +351,8 @@ class DatabaseTestExtensionTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should process class-level DataSet annotation")
-    void shouldProcessClassLevelDataSetAnnotation() throws Exception {
+    @DisplayName("should execute preparation when class-level DataSet annotation present")
+    void shouldExecutePreparation_whenClassLevelDataSetAnnotationPresent() throws Exception {
       // Given
       final var mockConfiguration = mock(Configuration.class);
       final var mockLoader = mock(DataSetLoader.class);
@@ -343,8 +367,16 @@ class DatabaseTestExtensionTest {
       when(mockContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("configuration"),
+              ArgumentMatchers.<Function<String, Configuration>>any(),
+              eq(Configuration.class)))
+          .thenReturn(mockConfiguration);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(mockRegistry);
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockLoader.loadPreparationDataSets(any())).thenReturn(Collections.emptyList());
 
@@ -416,8 +448,9 @@ class DatabaseTestExtensionTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should process method-level ExpectedDataSet annotation")
-    void shouldProcessMethodLevelExpectedDataSetAnnotation() throws Exception {
+    @DisplayName("should execute verification when method-level ExpectedDataSet annotation present")
+    void shouldExecuteVerification_whenMethodLevelExpectedDataSetAnnotationPresent()
+        throws Exception {
       // Given
       final var mockConfiguration = mock(Configuration.class);
       final var mockLoader = mock(DataSetLoader.class);
@@ -434,8 +467,16 @@ class DatabaseTestExtensionTest {
       when(mockContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("configuration"),
+              ArgumentMatchers.<Function<String, Configuration>>any(),
+              eq(Configuration.class)))
+          .thenReturn(mockConfiguration);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(mockRegistry);
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
       when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
@@ -454,8 +495,9 @@ class DatabaseTestExtensionTest {
      */
     @Test
     @Tag("normal")
-    @DisplayName("should process class-level ExpectedDataSet annotation")
-    void shouldProcessClassLevelExpectedDataSetAnnotation() throws Exception {
+    @DisplayName("should execute verification when class-level ExpectedDataSet annotation present")
+    void shouldExecuteVerification_whenClassLevelExpectedDataSetAnnotationPresent()
+        throws Exception {
       // Given
       final var mockConfiguration = mock(Configuration.class);
       final var mockLoader = mock(DataSetLoader.class);
@@ -472,8 +514,16 @@ class DatabaseTestExtensionTest {
       when(mockContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("configuration"),
+              ArgumentMatchers.<Function<String, Configuration>>any(),
+              eq(Configuration.class)))
+          .thenReturn(mockConfiguration);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(mockRegistry);
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
       when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
@@ -522,8 +572,16 @@ class DatabaseTestExtensionTest {
       when(mockContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("configuration", Configuration.class)).thenReturn(mockConfiguration);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(mockRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("configuration"),
+              ArgumentMatchers.<Function<String, Configuration>>any(),
+              eq(Configuration.class)))
+          .thenReturn(mockConfiguration);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(mockRegistry);
       when(mockConfiguration.loader()).thenReturn(mockLoader);
       when(mockConfiguration.conventions()).thenReturn(mockConventions);
       when(mockLoader.loadExpectationDataSetsWithExclusions(any()))
@@ -568,7 +626,11 @@ class DatabaseTestExtensionTest {
       when(parentContext.getParent()).thenReturn(Optional.empty());
       when(mockContext.getRoot()).thenReturn(rootContext);
       when(rootContext.getStore(any(Namespace.class))).thenReturn(mockStore);
-      when(mockStore.get("registry", DataSourceRegistry.class)).thenReturn(existingRegistry);
+      when(mockStore.computeIfAbsent(
+              eq("registry"),
+              ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
+              eq(DataSourceRegistry.class)))
+          .thenReturn(existingRegistry);
 
       // When
       final var result = DatabaseTestExtension.getRegistry(mockContext);

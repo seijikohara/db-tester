@@ -3,7 +3,6 @@ package example.feature;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
-import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseAssertion;
 import io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion;
 import io.github.seijikohara.dbtester.api.dataset.Row;
@@ -14,7 +13,9 @@ import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -148,27 +149,62 @@ final class ProgrammaticAssertionApiTest {
   }
 
   /**
-   * Demonstrates basic programmatic assertion without annotations.
+   * Fetches the current database state as a {@link Table} by running a query and projecting the
+   * supplied columns.
    *
-   * <p>Shows direct use of {@link DatabaseAssertion} assertion APIs for custom validation scenarios
-   * where annotation-based testing is insufficient.
+   * <p>This helper shows how callers obtain an actual {@link Table} from the live database when
+   * comparing it against an expected {@link Table} via {@link DatabaseAssertion#assertEquals} or
+   * {@link DatabaseAssertion#assertEqualsIgnoreColumns}. The query result is wrapped in a {@link
+   * Table} keyed by the requested column names so that comparison aligns column-by-column.
+   *
+   * @param tableName the logical table name attached to the result
+   * @param sqlQuery the SQL query that returns the actual rows
+   * @param columnNames the columns to project, in the order they appear in the query
+   * @return a {@link Table} containing the rows returned by the query
+   */
+  private static Table fetchTable(
+      final String tableName, final String sqlQuery, final List<String> columnNames) {
+    final var columns = columnNames.stream().map(ColumnName::new).toList();
+    try (final var connection = dataSource.getConnection();
+        final var statement = connection.prepareStatement(sqlQuery);
+        final var resultSet = statement.executeQuery()) {
+      final var rows = new ArrayList<Row>();
+      while (resultSet.next()) {
+        final Map<ColumnName, CellValue> rowValues = new LinkedHashMap<>();
+        for (var i = 0; i < columns.size(); i++) {
+          final var raw = resultSet.getObject(i + 1);
+          rowValues.put(columns.get(i), raw == null ? CellValue.NULL : new CellValue(raw));
+        }
+        rows.add(Row.of(rowValues));
+      }
+      return Table.of(new TableName(tableName), columns, List.copyOf(rows));
+    } catch (final SQLException e) {
+      throw new RuntimeException(String.format("Failed to fetch table: %s", sqlQuery), e);
+    }
+  }
+
+  /**
+   * Demonstrates basic programmatic assertion without an {@code @ExpectedDataSet} annotation.
+   *
+   * <p>The expected table is built in code, the actual table is fetched from the database, and
+   * verification is performed by {@link DatabaseAssertion#assertEquals}. This proves that
+   * programmatic validation runs against the real database state rather than the framework's
+   * annotation-driven mechanism.
    *
    * <p>Test flow:
    *
    * <ul>
    *   <li>Preparation: TABLE1(1,Value1,100,Extra1), (2,Value2,200,Extra2)
    *   <li>Execution: Inserts (3,Value3,300,NULL)
-   *   <li>Expectation: Verifies all three records including NULL COLUMN3
+   *   <li>Expectation: Builds an expected table in code, fetches the actual table from the
+   *       database, and compares with {@link DatabaseAssertion#assertEquals}
    * </ul>
-   *
-   * @throws Exception if test fails
    */
   @Test
   @Tag("normal")
   @DisplayName("should demonstrate basic programmatic API for database validation")
   @DataSet
-  @ExpectedDataSet
-  void shouldDemonstrateBasicProgrammaticAPI() throws Exception {
+  void shouldDemonstrateBasicProgrammaticAPI() {
     // Given
     logger.info("Running programmatic API demonstration");
 
@@ -177,7 +213,22 @@ final class ProgrammaticAssertionApiTest {
         "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, NULL)");
 
     // Then
-    logger.info("Programmatic API demonstration completed - uses standard @Expectation validation");
+    final var expected =
+        Table.ofValues(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"),
+            List.of(
+                List.of(1, "Value1", 100, "Extra1"),
+                List.of(2, "Value2", 200, "Extra2"),
+                Arrays.asList(3, "Value3", 300, null)));
+    final var actual =
+        fetchTable(
+            "TABLE1",
+            "SELECT ID, COLUMN1, COLUMN2, COLUMN3 FROM TABLE1 ORDER BY ID",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"));
+
+    DatabaseAssertion.assertEquals(expected, actual);
+    logger.info("Programmatic API demonstration completed - DatabaseAssertion.assertEquals invoked");
   }
 
   /**
@@ -333,88 +384,36 @@ final class ProgrammaticAssertionApiTest {
   @Tag("normal")
   @DisplayName("should ignore specific columns using assertEqualsIgnoreColumns")
   @DataSet
-  void shouldIgnoreSpecificColumnsUsingAssertEqualsIgnoreColumns() throws Exception {
+  void shouldIgnoreSpecificColumnsUsingAssertEqualsIgnoreColumns() {
     // Given
     logger.info("Running assertEqualsIgnoreColumns demonstration");
 
     // When
-    // Insert a row where COLUMN3 has a non-deterministic value
+    // Insert a row whose COLUMN3 value is intentionally different from the placeholder used in
+    // the expected table. The exclusion of COLUMN3 must allow the assertion to succeed.
     executeSql(
-        "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3) VALUES (3, 'Value3', 300, 'RandomExtra')");
+        "INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3)"
+            + " VALUES (3, 'Value3', 300, 'RandomExtra')");
 
-    // Build expected data ignoring COLUMN3 (which might be auto-generated or volatile)
-    final var columnId = new ColumnName("ID");
-    final var columnValue = new ColumnName("COLUMN1");
-    final var columnNumber = new ColumnName("COLUMN2");
-    final var columnExtra = new ColumnName("COLUMN3");
-
-    final var row1 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(1),
-                columnValue, new CellValue("Value1"),
-                columnNumber, new CellValue(100),
-                columnExtra, new CellValue("Extra1")));
-    final var row2 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(2),
-                columnValue, new CellValue("Value2"),
-                columnNumber, new CellValue(200),
-                columnExtra, new CellValue("Extra2")));
-    final var row3 =
-        Row.of(
-            Map.of(
-                columnId,
-                new CellValue(3),
-                columnValue,
-                new CellValue("Value3"),
-                columnNumber,
-                new CellValue(300),
-                columnExtra,
-                new CellValue("IGNORED"))); // This value won't be compared
-
+    // Build expected data with deliberately wrong COLUMN3 placeholders to prove the ignore
+    // mechanism is the only reason the assertion succeeds.
     final var expectedTable =
-        Table.of(
-            new TableName("TABLE1"),
-            List.of(columnId, columnValue, columnNumber, columnExtra),
-            List.of(row1, row2, row3));
+        Table.ofValues(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"),
+            List.of(
+                List.of(1, "Value1", 100, "PLACEHOLDER_1"),
+                List.of(2, "Value2", 200, "PLACEHOLDER_2"),
+                List.of(3, "Value3", 300, "PLACEHOLDER_3")));
 
-    // Build actual table from query
-    final var actualRow1 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(1),
-                columnValue, new CellValue("Value1"),
-                columnNumber, new CellValue(100),
-                columnExtra, new CellValue("Extra1")));
-    final var actualRow2 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(2),
-                columnValue, new CellValue("Value2"),
-                columnNumber, new CellValue(200),
-                columnExtra, new CellValue("Extra2")));
-    final var actualRow3 =
-        Row.of(
-            Map.of(
-                columnId,
-                new CellValue(3),
-                columnValue,
-                new CellValue("Value3"),
-                columnNumber,
-                new CellValue(300),
-                columnExtra,
-                new CellValue("RandomExtra"))); // Different value but will be ignored
-
+    // Fetch the actual table from the database.
     final var actualTable =
-        Table.of(
-            new TableName("TABLE1"),
-            List.of(columnId, columnValue, columnNumber, columnExtra),
-            List.of(actualRow1, actualRow2, actualRow3));
+        fetchTable(
+            "TABLE1",
+            "SELECT ID, COLUMN1, COLUMN2, COLUMN3 FROM TABLE1 ORDER BY ID",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"));
 
     // Then
-    // Compare tables while ignoring COLUMN3
     DatabaseAssertion.assertEqualsIgnoreColumns(expectedTable, actualTable, "COLUMN3");
 
     logger.info("assertEqualsIgnoreColumns validation completed - COLUMN3 was ignored");
@@ -437,46 +436,28 @@ final class ProgrammaticAssertionApiTest {
   @Tag("normal")
   @DisplayName("should compare tables directly using assertEquals")
   @DataSet
-  void shouldCompareTablesDirectlyUsingAssertEquals() throws Exception {
-    // Given & When
+  void shouldCompareTablesDirectlyUsingAssertEquals() {
+    // Given
     logger.info("Running assertEquals demonstration");
 
-    // Build expected table
-    final var columnId = new ColumnName("ID");
-    final var columnValue = new ColumnName("COLUMN1");
-    final var columnNumber = new ColumnName("COLUMN2");
-    final var columnExtra = new ColumnName("COLUMN3");
-
-    final var row1 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(1),
-                columnValue, new CellValue("Value1"),
-                columnNumber, new CellValue(100),
-                columnExtra, new CellValue("Extra1")));
-    final var row2 =
-        Row.of(
-            Map.of(
-                columnId, new CellValue(2),
-                columnValue, new CellValue("Value2"),
-                columnNumber, new CellValue(200),
-                columnExtra, new CellValue("Extra2")));
-
+    // When
+    // Build the expected table from the known preparation contents.
     final var expectedTable =
-        Table.of(
-            new TableName("TABLE1"),
-            List.of(columnId, columnValue, columnNumber, columnExtra),
-            List.of(row1, row2));
+        Table.ofValues(
+            "TABLE1",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"),
+            List.of(
+                List.of(1, "Value1", 100, "Extra1"),
+                List.of(2, "Value2", 200, "Extra2")));
 
-    // Build actual table (simulating what would be read from the database)
+    // Fetch the actual table from the database so the comparison reflects real database state.
     final var actualTable =
-        Table.of(
-            new TableName("TABLE1"),
-            List.of(columnId, columnValue, columnNumber, columnExtra),
-            List.of(row1, row2)); // Same data as expected
+        fetchTable(
+            "TABLE1",
+            "SELECT ID, COLUMN1, COLUMN2, COLUMN3 FROM TABLE1 ORDER BY ID",
+            List.of("ID", "COLUMN1", "COLUMN2", "COLUMN3"));
 
     // Then
-    // Direct table comparison
     DatabaseAssertion.assertEquals(expectedTable, actualTable);
 
     logger.info("assertEquals validation completed - tables match exactly");

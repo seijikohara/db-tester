@@ -380,13 +380,14 @@ Defines default database operations for preparation and expectation phases.
 | `expectation` | `Operation` | `NONE` | Default operation executed after test completes |
 | `floatingPointEpsilon` | `double` | `1e-6` | Epsilon value for floating-point comparisons |
 | `batchSize` | `int` | `0` | Number of rows per batch for INSERT operations; zero means single batch |
+| `comparisonMode` | `ComparisonMode` | `STRICT` | Selects how flexible strategies react to parse failures |
 
 ### Factory Methods
 
 | Method | Description |
 |--------|-------------|
 | `builder()` | Creates a new builder for constructing OperationDefaults instances |
-| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation, `NONE` for expectation, `1e-6` for epsilon, and `0` for batch size |
+| `standard()` | Creates defaults with `CLEAN_INSERT` for preparation, `NONE` for expectation, `1e-6` for epsilon, `0` for batch size, and `STRICT` for comparison mode |
 
 ### Instance Methods
 
@@ -402,6 +403,7 @@ Defines default database operations for preparation and expectation phases.
 | `expectation(Operation)` | Sets the default operation for expectation phase |
 | `floatingPointEpsilon(double)` | Sets the epsilon value for floating-point comparisons |
 | `batchSize(int)` | Sets the number of rows per batch for INSERT operations (zero or positive) |
+| `comparisonMode(ComparisonMode)` | Sets the comparison mode that governs flexible-strategy parse failures |
 | `build()` | Builds a new OperationDefaults instance |
 
 ### With Methods (Fluent Copy)
@@ -412,6 +414,40 @@ Defines default database operations for preparation and expectation phases.
 | `withExpectation(Operation)` | Creates copy with specified expectation operation |
 | `withFloatingPointEpsilon(double)` | Creates copy with specified floating-point epsilon |
 | `withBatchSize(int)` | Creates copy with specified batch size |
+| `withComparisonMode(ComparisonMode)` | Creates copy with specified comparison mode |
+
+## ComparisonMode
+
+Selects how the comparison engine reacts to parse failures inside the flexible
+`ComparisonStrategy` variants (`NUMERIC`, `TIMESTAMP_FLEXIBLE`, `DATE_FLEXIBLE`).
+
+**Location**: `io.github.seijikohara.dbtester.api.config.ComparisonMode`
+
+**Type**: `enum`
+
+### Values
+
+| Value | Behaviour |
+|-------|-----------|
+| `STRICT` | Parse failures throw `ValidationException` so the test fails fast with a descriptive message. This is the default for new deployments. |
+| `LENIENT` | Parse failures log a SLF4J `warn` entry and fall back to the historical comparison (`Objects.equals` for NUMERIC, raw string comparison for TIMESTAMP_FLEXIBLE and DATE_FLEXIBLE). |
+
+### When to choose LENIENT
+
+Use `LENIENT` only when the dataset intentionally contains values that the flexible
+strategy cannot parse (for example, a placeholder marker that survives because another
+strategy ignores it). For routine validation prefer `STRICT` so unexpected formats
+surface as explicit errors instead of silently matching.
+
+### Configuring the mode
+
+```java
+Configuration config = Configuration.builder()
+    .operations(OperationDefaults.builder()
+        .comparisonMode(ComparisonMode.LENIENT)
+        .build())
+    .build();
+```
 
 ## DataFormat
 

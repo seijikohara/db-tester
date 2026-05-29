@@ -104,29 +104,26 @@ class DatabaseTestExtension(
         testCase: TestCase,
         execute: suspend (TestCase) -> TestResult,
     ): TestResult =
-        requireMethod(testCase)
-            .let { method ->
-                Triple(
-                    findDataSet(testCase, method),
-                    findExpectedDataSet(testCase, method),
-                    findExportDataSet(testCase, method),
-                )
-            }.let { (dataSet, expectedDataSet, exportDataSet) ->
-                when {
-                    dataSet != null || expectedDataSet != null || exportDataSet != null -> {
-                        executeWithAnnotations(testCase, execute, dataSet, expectedDataSet, exportDataSet)
-                    }
+        requireMethod(testCase).let { method ->
+            val dataSet = findDataSet(testCase, method)
+            val expectedDataSet = findExpectedDataSet(testCase, method)
+            val exportDataSet = findExportDataSet(testCase, method)
+            when {
+                dataSet != null || expectedDataSet != null || exportDataSet != null -> {
+                    executeWithAnnotations(testCase, method, execute, dataSet, expectedDataSet, exportDataSet)
+                }
 
-                    else -> {
-                        execute(testCase)
-                    }
+                else -> {
+                    execute(testCase)
                 }
             }
+        }
 
     /**
      * Executes the test case with dataset, expected dataset, and/or export dataset handling.
      *
      * @param testCase the test case being executed
+     * @param method the resolved test method
      * @param execute the function to execute the test case
      * @param dataSet the DataSet annotation, or null
      * @param expectedDataSet the ExpectedDataSet annotation, or null
@@ -135,12 +132,13 @@ class DatabaseTestExtension(
      */
     private suspend fun executeWithAnnotations(
         testCase: TestCase,
+        method: Method,
         execute: suspend (TestCase) -> TestResult,
         dataSet: DataSet?,
         expectedDataSet: ExpectedDataSet?,
         exportDataSet: ExportDataSet?,
     ): TestResult =
-        createTestContext(testCase, requireMethod(testCase)).let { testContext ->
+        createTestContext(testCase, method).let { testContext ->
             dataSet?.also {
                 logger.debug(
                     "Executing preparation for {}.{}()",
@@ -269,7 +267,9 @@ class DatabaseTestExtension(
      * Requires and returns the test method from the test case.
      *
      * For AnnotationSpec, the method name is derived from the test case name.
-     * Handles both regular method names and backtick-escaped names.
+     * Kotlin preserves backtick-escaped method names verbatim at the JVM level
+     * (spaces and all), so the test case name maps directly to the reflected
+     * method name.
      *
      * @param testCase the test case
      * @return the resolved method
@@ -279,13 +279,9 @@ class DatabaseTestExtension(
         testCase.spec::class.let { specClass ->
             specClass.members
                 .firstOrNull { it.name == testCase.name.name }
-                ?.let { member ->
-                    @Suppress("UNCHECKED_CAST")
-                    (member as? kotlin.reflect.KFunction<*>)?.javaMethod
-                }
+                ?.let { member -> (member as? kotlin.reflect.KFunction<*>)?.javaMethod }
                 ?: specClass.java.declaredMethods.firstOrNull { method ->
-                    method.name == sanitizeMethodName(testCase.name.name) ||
-                        method.name == testCase.name.name
+                    method.name == testCase.name.name
                 }
         } ?: throw IllegalStateException(
             String.format(
@@ -295,14 +291,6 @@ class DatabaseTestExtension(
                 testCase.spec::class.java.name,
             ),
         )
-
-    /**
-     * Sanitizes a method name by replacing spaces and removing backticks.
-     *
-     * @param name the original method name
-     * @return the sanitized method name
-     */
-    private fun sanitizeMethodName(name: String): String = name.replace("`", "").replace(" ", "\$")
 
     /**
      * Finds the effective [DataSet] annotation for the current test.

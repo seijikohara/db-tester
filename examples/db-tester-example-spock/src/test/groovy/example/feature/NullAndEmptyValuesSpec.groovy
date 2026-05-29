@@ -93,6 +93,22 @@ class NullAndEmptyValuesSpec extends Specification implements DatabaseTestSuppor
 		noExceptionThrown()
 	}
 
+	/**
+	 * Documents that the CSV loader normalizes both empty cells and quoted empty strings to SQL
+	 * NULL for database compatibility.
+	 */
+	@DataSet
+	@ExpectedDataSet
+	def 'should normalize quoted empty string to null'() {
+		when: 'probing the database after preparation'
+		def nullCount = sql.firstRow("SELECT COUNT(*) AS C FROM TABLE1 WHERE COLUMN2 IS NULL AND ID IN (1, 2)").C
+		def emptyCount = sql.firstRow("SELECT COUNT(*) AS C FROM TABLE1 WHERE COLUMN2 = ''").C
+
+		then: 'both forms of empty value are stored as NULL'
+		nullCount == 2
+		emptyCount == 0
+	}
+
 	private void executeScript(String scriptPath) {
 		def resource = getClass().classLoader.getResource(scriptPath)
 		if (resource == null) {

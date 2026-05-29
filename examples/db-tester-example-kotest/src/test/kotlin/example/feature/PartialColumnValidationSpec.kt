@@ -137,6 +137,7 @@ class PartialColumnValidationSpec :
         sources = [
             DataSetSource(
                 resourceLocation = "classpath:example/feature/PartialColumnValidationSpec/expected-ignore-columns/",
+                excludeColumns = ["ID", "COLUMN4", "COLUMN5"],
             ),
         ],
     )
