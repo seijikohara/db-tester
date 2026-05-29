@@ -144,4 +144,26 @@ class ComprehensiveDataTypesSpec :
             )
             logger.info("All data types inserted successfully")
         }
+
+    /**
+     * Verifies that the loader materializes empty CSV cells as SQL NULL across every
+     * representable type.
+     */
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should handle nullable columns`() {
+        logger.info("Verifying nullable column handling across all data types")
+    }
+
+    /**
+     * Verifies that the loader preserves minimum and maximum boundary values for every numeric
+     * and date/time type.
+     */
+    @Test
+    @DataSet
+    @ExpectedDataSet
+    fun `should handle boundary values`() {
+        logger.info("Verifying minimum and maximum boundary values across all data types")
+    }
 }
