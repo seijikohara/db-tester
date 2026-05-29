@@ -5,6 +5,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -166,7 +167,7 @@ final class TableOrderingStrategiesTest {
   @Test
   @Tag("normal")
   @DisplayName("should use automatic alphabetical table ordering")
-  @DataSet
+  @DataSet(tableOrdering = TableOrderingStrategy.ALPHABETICAL)
   @ExpectedDataSet
   void shouldUseAlphabeticalOrdering() throws Exception {
     // Given
