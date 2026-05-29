@@ -2,31 +2,37 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
-import io.github.seijikohara.dbtester.api.annotation.DataSetSource
-import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
+import io.github.seijikohara.dbtester.api.assertion.DatabaseQueryAssertion
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.dataset.Row
+import io.github.seijikohara.dbtester.api.dataset.Table
+import io.github.seijikohara.dbtester.api.domain.CellValue
+import io.github.seijikohara.dbtester.api.domain.ColumnName
+import io.github.seijikohara.dbtester.api.domain.TableName
+import io.github.seijikohara.dbtester.internal.dataset.SimpleRow
+import io.github.seijikohara.dbtester.internal.dataset.SimpleTable
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTestSupport
+import java.sql.Date
 import javax.sql.DataSource
 import org.h2.jdbcx.JdbcDataSource
 import spock.lang.Shared
 import spock.lang.Specification
 
 /**
- * Demonstrates database testing with custom query validation scenarios using Spock.
+ * Demonstrates database testing with SQL query result validation using Spock.
  *
- * <p>This specification illustrates:
+ * <p>Each feature prepares baseline data through {@link DataSet}, runs additional SQL that
+ * exercises the feature under test, then verifies the result of a SQL query (rather than the full
+ * table state) using {@link DatabaseQueryAssertion#assertEqualsByQuery}.
+ *
+ * <p>This specification demonstrates four query patterns:
  * <ul>
- *   <li>Testing INSERT operations with data
- *   <li>Using custom expectation paths for different scenarios
- *   <li>Validating filtered data
- *   <li>Testing aggregation scenarios
- *   <li>Validating date-range queries
+ *   <li>Filtering rows via a {@code WHERE} clause
+ *   <li>Aggregating rows via {@code GROUP BY} with {@code SUM} and {@code COUNT}
+ *   <li>Joining two tables via {@code INNER JOIN}
+ *   <li>Restricting rows to a date range via {@code BETWEEN}
  * </ul>
- *
- * <p>Note: For actual SQL query result validation using {@code
- * DatabaseQueryAssertion.assertEqualsByQuery}, you would need to programmatically create expected
- * datasets using DbUnit APIs.
  */
 @DatabaseTest
 class CustomQueryValidationSpec extends Specification implements DatabaseTestSupport {
@@ -39,12 +45,15 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 	@Shared
 	Sql sql
 
-	/** Static registry and DataSource shared across all tests. */
+	/** Static registry shared across all features. */
 	static DataSourceRegistry sharedRegistry
+
+	/** Static DataSource shared across all features. */
 	static DataSource sharedDataSource
 
 	/**
 	 * Gets the DataSourceRegistry (Groovy property accessor).
+	 *
 	 * @return the registry
 	 */
 	DataSourceRegistry getDbTesterRegistry() {
@@ -55,7 +64,7 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 	}
 
 	/**
-	 * Initializes shared resources (DataSource, Registry, SQL helper).
+	 * Initializes shared resources (DataSource and Registry).
 	 */
 	private static void initializeSharedResources() {
 		sharedDataSource = new JdbcDataSource().tap {
@@ -68,151 +77,174 @@ class CustomQueryValidationSpec extends Specification implements DatabaseTestSup
 	}
 
 	/**
-	 * Sets up H2 in-memory database connection and schema.
-	 * Uses Groovy compact syntax and extension methods.
+	 * Sets up the H2 in-memory database and schema.
 	 */
 	def setupSpec() {
-		// Ensure resources are initialized
 		if (sharedDataSource == null) {
 			initializeSharedResources()
 		}
 		dataSource = sharedDataSource
-
-		// Create Groovy SQL helper
 		sql = new Sql(dataSource)
-
-		// Execute DDL script using Groovy's resource handling
 		executeScript('ddl/feature/CustomQueryValidationSpec.sql')
 	}
 
 	/**
-	 * Cleans up database resources after all tests complete.
+	 * Closes the SQL helper.
 	 */
 	def cleanupSpec() {
 		sql?.close()
 	}
 
 	/**
-	 * Demonstrates validation with filtered data.
+	 * Builds an in-memory Table for use as an expected query result.
 	 *
-	 * <p>Validates data after adding new record with specific filter criteria.
-	 *
-	 * <p>Test flow:
-	 * <ul>
-	 *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data
-	 *   <li>Execution: Inserts ID=4 (COLUMN1=3, East region, 2024-01-25, 350.00)
-	 *   <li>Expectation: Verifies all four records from {@code expected-filtered/}
-	 * </ul>
+	 * @param tableName the logical table name attached to the query result
+	 * @param columnNames the column names in order
+	 * @param rowValues each inner list represents the cell values of one row, in column order
+	 * @return a Table representing the expected query result
 	 */
+	private static Table createTable(
+			String tableName, List<String> columnNames, List<List<Object>> rowValues) {
+		def columns = columnNames.collect { new ColumnName(it) }
+		def rows = rowValues.collect { values ->
+			Map<ColumnName, CellValue> rowMap = [:]
+			columns.eachWithIndex { col, i ->
+				if (i < values.size()) {
+					rowMap[col] = new CellValue(values[i])
+				}
+			}
+			(Row) new SimpleRow(rowMap)
+		}
+		new SimpleTable(new TableName(tableName), columns, rows)
+	}
+
 	@DataSet
-	@ExpectedDataSet(sources = @DataSetSource(
-	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-filtered/'
-	))
-	def 'should validate regional sales'() {
-		when: 'inserting new regional sales record'
-		sql.execute '''
+	def 'should return only East-region rows when WHERE filter applied'() {
+		given: 'an additional East-region sale is inserted'
+		sql.execute('''
 			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
 			VALUES (4, 3, '2024-01-25', 350.00, 'East')
-		'''
+		''')
 
-		then: 'expectation phase verifies filtered regional sales data'
-		noExceptionThrown()
+		and: 'expected rows are the pre-loaded East row and the newly inserted East row'
+		def expected = createTable('TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2', 'COLUMN3', 'COLUMN4'],
+				[
+					[2, 2, Date.valueOf('2024-01-15'), new BigDecimal('300.00'), 'East'],
+					[4, 3, Date.valueOf('2024-01-25'), new BigDecimal('350.00'), 'East']
+				])
+
+		expect: 'WHERE filter narrows the result to East rows in primary-key order'
+		DatabaseQueryAssertion.assertEqualsByQuery(
+				expected,
+				dataSource,
+				'TABLE1',
+				'SELECT ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4 FROM TABLE1' +
+				' WHERE COLUMN4 = \'East\' ORDER BY ID')
 	}
 
-	/**
-	 * Demonstrates validation with aggregated data.
-	 *
-	 * <p>Validates aggregated data after adding new record.
-	 *
-	 * <p>Test flow:
-	 * <ul>
-	 *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data
-	 *   <li>Execution: Inserts ID=4 (COLUMN1=1, West region, 2024-01-25, 500.00)
-	 *   <li>Expectation: Verifies all four records from {@code expected-aggregation/}
-	 * </ul>
-	 */
 	@DataSet
-	@ExpectedDataSet(sources = @DataSetSource(
-	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-aggregation/'
-	))
-	def 'should validate sales summary'() {
-		when: 'inserting new sales record for aggregation'
-		sql.execute '''
+	def 'should return aggregated totals per category when GROUP BY applied'() {
+		given: 'an additional Premium-category sale is inserted'
+		sql.execute('''
 			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
 			VALUES (4, 1, '2024-01-25', 500.00, 'West')
-		'''
+		''')
 
-		then: 'expectation phase verifies aggregated sales data'
-		noExceptionThrown()
+		// Note: TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL
+		// aliases on plain column references. Plain columns are projected without an alias here
+		// so the expected column name matches the underlying table column.
+		and: 'expected aggregates summarize per-category total and record count'
+		def expected = createTable('CATEGORY_TOTALS',
+				['COLUMN1', 'TOTAL_AMOUNT', 'RECORD_COUNT'],
+				[
+					[1, new BigDecimal('1700.00'), 3L],
+					[2, new BigDecimal('300.00'), 1L]
+				])
+
+		expect: 'GROUP BY aggregation matches the expected per-category rows'
+		DatabaseQueryAssertion.assertEqualsByQuery(
+				expected,
+				dataSource,
+				'CATEGORY_TOTALS',
+				'SELECT COLUMN1, SUM(COLUMN3) AS TOTAL_AMOUNT, COUNT(*) AS RECORD_COUNT' +
+				' FROM TABLE1 GROUP BY COLUMN1 ORDER BY COLUMN1')
 	}
 
-	/**
-	 * Demonstrates validation with high-value records.
-	 *
-	 * <p>Validates data after adding a high-value record.
-	 *
-	 * <p>Test flow:
-	 * <ul>
-	 *   <li>Preparation: Loads TABLE1(ID=1,2,3) with sales data (January)
-	 *   <li>Execution: Inserts ID=4 (COLUMN1=1, North region, 2024-02-01, 600.00)
-	 *   <li>Expectation: Verifies all four records including February data from {@code expected-join/}
-	 * </ul>
-	 */
 	@DataSet
-	@ExpectedDataSet(sources = @DataSetSource(
-	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-join/'
-	))
-	def 'should validate high value sales'() {
-		when: 'inserting high-value sales record'
-		sql.execute '''
+	def 'should return joined sale and category rows when INNER JOIN applied'() {
+		given: 'an additional Premium-category sale is inserted'
+		sql.execute('''
 			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
 			VALUES (4, 1, '2024-02-01', 600.00, 'North')
-		'''
+		''')
 
-		then: 'expectation phase verifies high-value sales with join scenario'
-		noExceptionThrown()
+		// Note: TableReader currently uses ResultSetMetaData#getColumnName, which ignores SQL
+		// aliases on plain column references. Columns are projected without aliases so the
+		// expected column names mirror the underlying table columns.
+		and: 'expected rows pair each sale with the category name'
+		def expected = createTable('SALES_WITH_CATEGORY',
+				['ID', 'NAME', 'COLUMN3'],
+				[
+					[1, 'Premium', new BigDecimal('500.00')],
+					[2, 'Standard', new BigDecimal('300.00')],
+					[3, 'Premium', new BigDecimal('700.00')],
+					[4, 'Premium', new BigDecimal('600.00')]
+				])
+
+		expect: 'INNER JOIN surfaces the category label for each sale row'
+		DatabaseQueryAssertion.assertEqualsByQuery(
+				expected,
+				dataSource,
+				'SALES_WITH_CATEGORY',
+				'SELECT s.ID, c.NAME, s.COLUMN3' +
+				' FROM TABLE1 s INNER JOIN CATEGORIES c ON s.COLUMN1 = c.ID' +
+				' ORDER BY s.ID')
 	}
 
-	/**
-	 * Demonstrates validation with date range filtering for January sales.
-	 *
-	 * <p>Validates that only January sales data is present in the database by adding a January record
-	 * and verifying the final state contains only January data.
-	 *
-	 * <p>Test flow:
-	 * <ul>
-	 *   <li>Preparation: Loads TABLE1(ID=1,2,3) with January sales data
-	 *   <li>Execution: Inserts ID=4 (COLUMN1=2, South region, 2024-01-25, 450.00)
-	 *   <li>Expectation: Verifies all four January records from {@code expected-daterange/}
-	 * </ul>
-	 */
 	@DataSet
-	@ExpectedDataSet(sources = @DataSetSource(
-	resourceLocation = 'classpath:example/feature/CustomQueryValidationSpec/expected-daterange/'
-	))
-	def 'should validate january sales'() {
-		when: 'inserting January sales record'
-		sql.execute '''
+	def 'should return only January rows when BETWEEN date filter applied'() {
+		given: 'one January row and one February row are inserted'
+		sql.execute('''
 			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
 			VALUES (4, 2, '2024-01-25', 450.00, 'South')
-		'''
+		''')
+		sql.execute('''
+			INSERT INTO TABLE1 (ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4)
+			VALUES (5, 1, '2024-02-05', 800.00, 'North')
+		''')
 
-		then: 'expectation phase verifies date-range filtered January sales'
-		noExceptionThrown()
+		and: 'expected rows include all four January records and exclude the February record'
+		def expected = createTable('TABLE1',
+				['ID', 'COLUMN1', 'COLUMN2', 'COLUMN3', 'COLUMN4'],
+				[
+					[1, 1, Date.valueOf('2024-01-10'), new BigDecimal('500.00'), 'West'],
+					[2, 2, Date.valueOf('2024-01-15'), new BigDecimal('300.00'), 'East'],
+					[3, 1, Date.valueOf('2024-01-20'), new BigDecimal('700.00'), 'North'],
+					[4, 2, Date.valueOf('2024-01-25'), new BigDecimal('450.00'), 'South']
+				])
+
+		expect: 'BETWEEN date filter excludes the February row'
+		DatabaseQueryAssertion.assertEqualsByQuery(
+				expected,
+				dataSource,
+				'TABLE1',
+				'SELECT ID, COLUMN1, COLUMN2, COLUMN3, COLUMN4 FROM TABLE1' +
+				' WHERE COLUMN2 BETWEEN DATE \'2024-01-01\' AND DATE \'2024-01-31\'' +
+				' ORDER BY ID')
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy features.
+	 * Executes a SQL script from the classpath.
 	 *
 	 * @param scriptPath the classpath resource path
+	 * @throws IllegalStateException if the script is not found
 	 */
 	private void executeScript(String scriptPath) {
 		def resource = getClass().classLoader.getResource(scriptPath)
 		if (resource == null) {
 			throw new IllegalStateException("Script not found: $scriptPath")
 		}
-
-		// Use Groovy's text property and split with filter
 		resource.text
 				.split(';')
 				.collect { it.trim() }
