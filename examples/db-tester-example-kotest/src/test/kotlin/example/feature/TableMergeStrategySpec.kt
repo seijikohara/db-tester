@@ -138,12 +138,16 @@ class FirstStrategySpec :
         }
 
     /**
-     * Verifies FIRST strategy configuration is applied.
+     * Verifies FIRST strategy applies the first source and ignores the second when both are
+     * supplied.
      */
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        sources = [DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/")],
+        sources = [
+            DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset1/"),
+            DataSetSource(resourceLocation = "classpath:example/feature/FirstStrategySpec/dataset2/"),
+        ],
     )
     @ExpectedDataSet(
         sources = [
@@ -152,17 +156,15 @@ class FirstStrategySpec :
             ),
         ],
     )
-    fun `should use only first dataset`(): Unit =
-        logger.info("Running FIRST strategy test").also {
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO MERGE_TABLE (ID, NAME)
-                VALUES (3, 'Charlie')
-                """.trimIndent(),
-            )
-            logger.info("Data inserted successfully")
-        }
+    fun `should use only first dataset`() {
+        executeSql(
+            dataSource,
+            """
+            INSERT INTO MERGE_TABLE (ID, NAME)
+            VALUES (3, 'Charlie')
+            """.trimIndent(),
+        )
+    }
 }
 
 /**
@@ -271,7 +273,10 @@ class LastStrategySpec :
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        sources = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/")],
+        sources = [
+            DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset1/"),
+            DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/dataset2/"),
+        ],
     )
     @ExpectedDataSet(
         sources = [DataSetSource(resourceLocation = "classpath:example/feature/LastStrategySpec/should use only last dataset/expected/")],
@@ -395,7 +400,10 @@ class UnionStrategySpec :
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        sources = [DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/")],
+        sources = [
+            DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset1/"),
+            DataSetSource(resourceLocation = "classpath:example/feature/UnionStrategySpec/dataset2/"),
+        ],
     )
     @ExpectedDataSet(
         sources = [
@@ -404,17 +412,10 @@ class UnionStrategySpec :
             ),
         ],
     )
-    fun `should merge and remove duplicates`(): Unit =
-        logger.info("Running UNION strategy test").also {
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO MERGE_TABLE (ID, NAME)
-                VALUES (3, 'Charlie')
-                """.trimIndent(),
-            )
-            logger.info("Data inserted successfully")
-        }
+    fun `should merge and remove duplicates`() {
+        // Merge strategy deduplicates the overlapping row [2, Bob]; no extra SQL is needed.
+        logger.info("UNION strategy merged dataset1 and dataset2 with deduplication")
+    }
 }
 
 /**
@@ -523,7 +524,10 @@ class UnionAllStrategySpec :
     @Test
     @DataSet(
         operation = Operation.INSERT,
-        sources = [DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/")],
+        sources = [
+            DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset1/"),
+            DataSetSource(resourceLocation = "classpath:example/feature/UnionAllStrategySpec/dataset2/"),
+        ],
     )
     @ExpectedDataSet(
         sources = [
@@ -532,15 +536,8 @@ class UnionAllStrategySpec :
             ),
         ],
     )
-    fun `should merge and keep all rows`(): Unit =
-        logger.info("Running UNION_ALL strategy test").also {
-            executeSql(
-                dataSource,
-                """
-                INSERT INTO MERGE_TABLE (ID, NAME)
-                VALUES (3, 'Charlie')
-                """.trimIndent(),
-            )
-            logger.info("Data inserted successfully")
-        }
+    fun `should merge and keep all rows`() {
+        // UNION_ALL preserves the duplicate row [2, Bob] in MERGE_TABLE_NO_PK; no extra SQL is needed.
+        logger.info("UNION_ALL strategy merged dataset1 and dataset2 preserving duplicates")
+    }
 }

@@ -406,21 +406,22 @@ final class TableMergeStrategyTest {
     }
 
     /**
-     * Verifies UNION_ALL strategy merges tables and keeps all rows.
+     * Verifies UNION_ALL strategy merges tables while preserving duplicate rows.
      *
-     * <p>Test loads two datasets with overlapping data:
+     * <p>Test loads two datasets with overlapping data on a primary-key-free table so that
+     * duplicate rows can survive the preparation phase:
      *
      * <ul>
-     *   <li>dataset1: MERGE_TABLE with rows [1=Alice, 2=Bob]
-     *   <li>dataset2: MERGE_TABLE with rows [2=Bob, 3=Charlie]
+     *   <li>dataset1: MERGE_TABLE_NO_PK with rows [1=Alice, 2=Bob]
+     *   <li>dataset2: MERGE_TABLE_NO_PK with rows [2=Bob, 3=Charlie]
      * </ul>
      *
-     * <p>With UNION_ALL strategy, all rows including duplicate [2=Bob] should be kept. Note: This
-     * may cause primary key violations if the table has a primary key constraint on ID.
+     * <p>With UNION_ALL strategy the duplicate row [2=Bob] must appear twice in the merged
+     * dataset, distinguishing UNION_ALL from UNION which would deduplicate it.
      */
     @Test
     @Tag("normal")
-    @DisplayName("should merge datasets and keep all rows when UNION_ALL strategy is configured")
+    @DisplayName("should merge datasets and keep duplicate rows when UNION_ALL strategy applied")
     @DataSet(
         operation = Operation.INSERT,
         sources = {
@@ -440,7 +441,6 @@ final class TableMergeStrategyTest {
     void shouldMergeAndKeepAllRows() {
       // When & Then
       logger.info("Testing UNION_ALL merge strategy - expecting all rows including duplicates");
-      // No operation needed - just verify the merged result
       logger.info("UNION_ALL merge strategy test completed");
     }
   }
