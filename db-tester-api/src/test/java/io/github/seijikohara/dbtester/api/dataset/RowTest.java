@@ -166,11 +166,11 @@ class RowTest {
     /** Tests for SimpleRow record. */
     SimpleRowTest() {}
 
-    /** Verifies that getValues returns immutable map. */
+    /** Verifies that values returns immutable map. */
     @Test
     @Tag("normal")
-    @DisplayName("getValues returns immutable map")
-    void getValuesReturnsImmutableMap() {
+    @DisplayName("values returns immutable map")
+    void valuesReturnsImmutableMap() {
       final var col = new ColumnName("id");
       final var row = Row.of(Map.of(col, new CellValue("1")));
 
@@ -180,11 +180,11 @@ class RowTest {
       assertEquals(new CellValue("1"), values.get(col));
     }
 
-    /** Verifies that getValue returns value for existing column. */
+    /** Verifies that value returns value for existing column. */
     @Test
     @Tag("normal")
-    @DisplayName("getValue returns value for existing column")
-    void getValueReturnsValueForExistingColumn() {
+    @DisplayName("value returns value for existing column")
+    void valueReturnsValueForExistingColumn() {
       final var col = new ColumnName("name");
       final var value = new CellValue("Alice");
       final var row = Row.of(Map.of(col, value));
@@ -194,11 +194,11 @@ class RowTest {
       assertEquals(value, result);
     }
 
-    /** Verifies that getValue returns NULL for non-existent column. */
+    /** Verifies that value returns NULL for non-existent column. */
     @Test
     @Tag("normal")
-    @DisplayName("getValue returns NULL for non-existent column")
-    void getValueReturnsNullForNonExistentColumn() {
+    @DisplayName("value returns NULL for non-existent column")
+    void valueReturnsNullForNonExistentColumn() {
       final var col = new ColumnName("id");
       final var row = Row.of(Map.of(col, new CellValue("1")));
 
@@ -207,11 +207,11 @@ class RowTest {
       assertEquals(CellValue.NULL, result);
     }
 
-    /** Verifies that getValue returns NULL for empty row. */
+    /** Verifies that value returns NULL for empty row. */
     @Test
     @Tag("normal")
-    @DisplayName("getValue returns NULL for empty row")
-    void getValueReturnsNullForEmptyRow() {
+    @DisplayName("value returns NULL for empty row")
+    void valueReturnsNullForEmptyRow() {
       final var row = Row.of(Map.of());
 
       final var result = row.value(new ColumnName("any"));
@@ -219,11 +219,11 @@ class RowTest {
       assertEquals(CellValue.NULL, result);
     }
 
-    /** Verifies that getValues preserves all column-value pairs. */
+    /** Verifies that values preserves all column-value pairs. */
     @Test
     @Tag("normal")
-    @DisplayName("getValues preserves all column-value pairs")
-    void getValuesPreservesAllColumnValuePairs() {
+    @DisplayName("values preserves all column-value pairs")
+    void valuesPreservesAllColumnValuePairs() {
       final var col1 = new ColumnName("id");
       final var col2 = new ColumnName("name");
       final var col3 = new ColumnName("email");

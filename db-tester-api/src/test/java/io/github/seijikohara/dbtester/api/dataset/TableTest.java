@@ -210,22 +210,22 @@ class TableTest {
     /** Tests for SimpleTable record. */
     SimpleTableTest() {}
 
-    /** Verifies that getName returns table name. */
+    /** Verifies that name returns table name. */
     @Test
     @Tag("normal")
-    @DisplayName("getName returns table name")
-    void getNameReturnsTableName() {
+    @DisplayName("name returns table name")
+    void nameReturnsTableName() {
       final var tableName = new TableName("test_table");
       final var table = Table.of(tableName, List.of(new ColumnName("col1")), List.of());
 
       assertEquals(tableName, table.name());
     }
 
-    /** Verifies that getColumns returns immutable list. */
+    /** Verifies that columns returns immutable list. */
     @Test
     @Tag("normal")
-    @DisplayName("getColumns returns immutable list")
-    void getColumnsReturnsImmutableList() {
+    @DisplayName("columns returns immutable list")
+    void columnsReturnsImmutableList() {
       final var columns = List.of(new ColumnName("id"), new ColumnName("name"));
       final var table = Table.of(new TableName("test"), columns, List.of());
 
@@ -236,11 +236,11 @@ class TableTest {
       assertEquals("name", result.get(1).value());
     }
 
-    /** Verifies that getRows returns immutable list. */
+    /** Verifies that rows returns immutable list. */
     @Test
     @Tag("normal")
-    @DisplayName("getRows returns immutable list")
-    void getRowsReturnsImmutableList() {
+    @DisplayName("rows returns immutable list")
+    void rowsReturnsImmutableList() {
       final var row1 = Row.of(Map.of(new ColumnName("id"), new CellValue("1")));
       final var row2 = Row.of(Map.of(new ColumnName("id"), new CellValue("2")));
       final var table =
@@ -251,11 +251,11 @@ class TableTest {
       assertEquals(2, result.size());
     }
 
-    /** Verifies that getRowCount returns correct count. */
+    /** Verifies that rowCount returns correct count. */
     @Test
     @Tag("normal")
-    @DisplayName("getRowCount returns correct count")
-    void getRowCountReturnsCorrectCount() {
+    @DisplayName("rowCount returns correct count")
+    void rowCountReturnsCorrectCount() {
       final var row1 = Row.of(Map.of(new ColumnName("id"), new CellValue("1")));
       final var row2 = Row.of(Map.of(new ColumnName("id"), new CellValue("2")));
       final var row3 = Row.of(Map.of(new ColumnName("id"), new CellValue("3")));
@@ -265,11 +265,11 @@ class TableTest {
       assertEquals(3, table.rowCount());
     }
 
-    /** Verifies that getRowCount equals getRows().size(). */
+    /** Verifies that rowCount equals rows().size(). */
     @Test
     @Tag("normal")
-    @DisplayName("getRowCount equals getRows().size()")
-    void getRowCountEqualsGetRowsSize() {
+    @DisplayName("rowCount equals rows().size()")
+    void rowCountEqualsRowsSize() {
       final var row = Row.of(Map.of(new ColumnName("id"), new CellValue("1")));
       final var table =
           Table.of(new TableName("test"), List.of(new ColumnName("id")), List.of(row));

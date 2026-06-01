@@ -63,15 +63,15 @@ class FilteredTableTest {
     }
   }
 
-  /** Tests for the getName() method. */
+  /** Tests for the name() method. */
   @Nested
-  @DisplayName("getName() method")
-  class GetNameMethod {
+  @DisplayName("name() method")
+  class NameMethod {
 
-    /** Tests for the getName method. */
-    GetNameMethod() {}
+    /** Tests for the name method. */
+    NameMethod() {}
 
-    /** Verifies that getName returns table name. */
+    /** Verifies that name returns table name. */
     @Test
     @Tag("normal")
     @DisplayName("should return table name when called")
@@ -88,15 +88,15 @@ class FilteredTableTest {
     }
   }
 
-  /** Tests for the getColumns() method. */
+  /** Tests for the columns() method. */
   @Nested
-  @DisplayName("getColumns() method")
-  class GetColumnsMethod {
+  @DisplayName("columns() method")
+  class ColumnsMethod {
 
-    /** Tests for the getColumns method. */
-    GetColumnsMethod() {}
+    /** Tests for the columns method. */
+    ColumnsMethod() {}
 
-    /** Verifies that getColumns excludes scenario column. */
+    /** Verifies that columns excludes scenario column. */
     @Test
     @Tag("normal")
     @DisplayName("should exclude scenario column when scenario column exists")
@@ -121,7 +121,7 @@ class FilteredTableTest {
               assertEquals(new ColumnName("NAME"), result.get(1), "second column should be NAME"));
     }
 
-    /** Verifies that getColumns returns all columns when no scenario column. */
+    /** Verifies that columns returns all columns when no scenario column. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return all columns when no scenario column exists")
@@ -138,15 +138,15 @@ class FilteredTableTest {
     }
   }
 
-  /** Tests for the getRows() method. */
+  /** Tests for the rows() method. */
   @Nested
-  @DisplayName("getRows() method")
-  class GetRowsMethod {
+  @DisplayName("rows() method")
+  class RowsMethod {
 
-    /** Tests for the getRows method. */
-    GetRowsMethod() {}
+    /** Tests for the rows method. */
+    RowsMethod() {}
 
-    /** Verifies that getRows returns filtered rows. */
+    /** Verifies that rows returns filtered rows. */
     @Test
     @Tag("normal")
     @DisplayName("should return filtered rows when scenario column exists")
@@ -163,7 +163,7 @@ class FilteredTableTest {
       assertEquals(1, result.size(), "should have 1 filtered row");
     }
 
-    /** Verifies that getRows returns all rows when filter is not active. */
+    /** Verifies that rows returns all rows when filter is not active. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return all rows when filter is not active")
@@ -181,15 +181,15 @@ class FilteredTableTest {
     }
   }
 
-  /** Tests for the getRowCount() method. */
+  /** Tests for the rowCount() method. */
   @Nested
-  @DisplayName("getRowCount() method")
-  class GetRowCountMethod {
+  @DisplayName("rowCount() method")
+  class RowCountMethod {
 
-    /** Tests for the getRowCount method. */
-    GetRowCountMethod() {}
+    /** Tests for the rowCount method. */
+    RowCountMethod() {}
 
-    /** Verifies that getRowCount returns filtered row count. */
+    /** Verifies that rowCount returns filtered row count. */
     @Test
     @Tag("normal")
     @DisplayName("should return filtered row count when called")

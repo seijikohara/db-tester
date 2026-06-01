@@ -85,15 +85,15 @@ class FilteredTableSetTest {
     }
   }
 
-  /** Tests for the getTables() method. */
+  /** Tests for the tables() method. */
   @Nested
-  @DisplayName("getTables() method")
-  class GetTablesMethod {
+  @DisplayName("tables() method")
+  class TablesMethod {
 
-    /** Tests for the getTables method. */
-    GetTablesMethod() {}
+    /** Tests for the tables method. */
+    TablesMethod() {}
 
-    /** Verifies that getTables returns filtered tables. */
+    /** Verifies that tables returns filtered tables. */
     @Test
     @Tag("normal")
     @DisplayName("should return filtered tables when called")
@@ -112,7 +112,7 @@ class FilteredTableSetTest {
           () -> assertEquals(1, result.size(), "should have one table"));
     }
 
-    /** Verifies that getTables returns immutable list. */
+    /** Verifies that tables returns immutable list. */
     @Test
     @Tag("normal")
     @DisplayName("should return immutable list when called")
@@ -129,15 +129,15 @@ class FilteredTableSetTest {
     }
   }
 
-  /** Tests for the getTable() method. */
+  /** Tests for the table() method. */
   @Nested
-  @DisplayName("getTable(TableName) method")
-  class GetTableMethod {
+  @DisplayName("table(TableName) method")
+  class TableMethod {
 
-    /** Tests for the getTable method. */
-    GetTableMethod() {}
+    /** Tests for the table method. */
+    TableMethod() {}
 
-    /** Verifies that getTable returns table when it exists. */
+    /** Verifies that table returns table when it exists. */
     @Test
     @Tag("normal")
     @DisplayName("should return table when table exists")
@@ -155,7 +155,7 @@ class FilteredTableSetTest {
       assertEquals(tableName, result.orElseThrow().name(), "should have correct table name");
     }
 
-    /** Verifies that getTable returns empty when table does not exist. */
+    /** Verifies that table returns empty when table does not exist. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when table does not exist")
@@ -173,15 +173,15 @@ class FilteredTableSetTest {
     }
   }
 
-  /** Tests for the getDataSource() method. */
+  /** Tests for the dataSource() method. */
   @Nested
-  @DisplayName("getDataSource() method")
-  class GetDataSourceMethod {
+  @DisplayName("dataSource() method")
+  class DataSourceMethod {
 
-    /** Tests for the getDataSource method. */
-    GetDataSourceMethod() {}
+    /** Tests for the dataSource method. */
+    DataSourceMethod() {}
 
-    /** Verifies that getDataSource returns data source when present. */
+    /** Verifies that dataSource returns data source when present. */
     @Test
     @Tag("normal")
     @DisplayName("should return data source when present")
@@ -198,7 +198,7 @@ class FilteredTableSetTest {
       assertEquals(mockDataSource, result.orElseThrow(), "should return correct data source");
     }
 
-    /** Verifies that getDataSource returns empty when null. */
+    /** Verifies that dataSource returns empty when null. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when data source is null")

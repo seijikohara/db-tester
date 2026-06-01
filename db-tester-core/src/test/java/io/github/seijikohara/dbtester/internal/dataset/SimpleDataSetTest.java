@@ -85,15 +85,15 @@ class SimpleTableSetTest {
     }
   }
 
-  /** Tests for the getTables() method. */
+  /** Tests for the tables() method. */
   @Nested
-  @DisplayName("getTables() method")
-  class GetTablesMethod {
+  @DisplayName("tables() method")
+  class TablesMethod {
 
-    /** Tests for the getTables method. */
-    GetTablesMethod() {}
+    /** Tests for the tables method. */
+    TablesMethod() {}
 
-    /** Verifies that getTables returns all tables. */
+    /** Verifies that tables returns all tables. */
     @Test
     @Tag("normal")
     @DisplayName("should return all tables when called")
@@ -117,7 +117,7 @@ class SimpleTableSetTest {
           () -> assertTrue(result.contains(table3), "should contain ORDERS table"));
     }
 
-    /** Verifies that getTables returns unmodifiable list. */
+    /** Verifies that tables returns unmodifiable list. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return unmodifiable list when called")
@@ -137,15 +137,15 @@ class SimpleTableSetTest {
     }
   }
 
-  /** Tests for the getTable(TableName) method. */
+  /** Tests for the table(TableName) method. */
   @Nested
-  @DisplayName("getTable(TableName) method")
-  class GetTableMethod {
+  @DisplayName("table(TableName) method")
+  class TableMethod {
 
-    /** Tests for the getTable method. */
-    GetTableMethod() {}
+    /** Tests for the table method. */
+    TableMethod() {}
 
-    /** Verifies that getTable returns table when it exists. */
+    /** Verifies that table returns table when it exists. */
     @Test
     @Tag("normal")
     @DisplayName("should return table when it exists")
@@ -165,7 +165,7 @@ class SimpleTableSetTest {
           () -> assertEquals(usersTable, result.orElseThrow(), "should return USERS table"));
     }
 
-    /** Verifies that getTable returns empty when table does not exist. */
+    /** Verifies that table returns empty when table does not exist. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when table does not exist")
@@ -181,7 +181,7 @@ class SimpleTableSetTest {
       assertFalse(result.isPresent(), "should return empty for non-existent table");
     }
 
-    /** Verifies that getTable returns empty when dataset is empty. */
+    /** Verifies that table returns empty when dataset is empty. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when dataset is empty")
@@ -196,7 +196,7 @@ class SimpleTableSetTest {
       assertFalse(result.isPresent(), "should return empty for empty dataset");
     }
 
-    /** Verifies that getTable returns first match when multiple tables with same name exist. */
+    /** Verifies that table returns first match when multiple tables with same name exist. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return first match when multiple tables have same name")
@@ -217,15 +217,15 @@ class SimpleTableSetTest {
     }
   }
 
-  /** Tests for the getDataSource() method. */
+  /** Tests for the dataSource() method. */
   @Nested
-  @DisplayName("getDataSource() method")
-  class GetDataSourceMethod {
+  @DisplayName("dataSource() method")
+  class DataSourceMethod {
 
-    /** Tests for the getDataSource method. */
-    GetDataSourceMethod() {}
+    /** Tests for the dataSource method. */
+    DataSourceMethod() {}
 
-    /** Verifies that getDataSource returns empty. */
+    /** Verifies that dataSource returns empty. */
     @Test
     @Tag("normal")
     @DisplayName("should return empty when called")

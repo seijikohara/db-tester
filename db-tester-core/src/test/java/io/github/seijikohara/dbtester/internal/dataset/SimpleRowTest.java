@@ -93,15 +93,15 @@ class SimpleRowTest {
     }
   }
 
-  /** Tests for the getValues() method. */
+  /** Tests for the values() method. */
   @Nested
-  @DisplayName("getValues() method")
-  class GetValuesMethod {
+  @DisplayName("values() method")
+  class ValuesMethod {
 
-    /** Tests for the getValues method. */
-    GetValuesMethod() {}
+    /** Tests for the values method. */
+    ValuesMethod() {}
 
-    /** Verifies that getValues returns all values. */
+    /** Verifies that values returns all values. */
     @Test
     @Tag("normal")
     @DisplayName("should return all values when called")
@@ -128,7 +128,7 @@ class SimpleRowTest {
           () -> assertEquals(value3, result.get(column3), "should have null value"));
     }
 
-    /** Verifies that getValues returns unmodifiable map. */
+    /** Verifies that values returns unmodifiable map. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return unmodifiable map when called")
@@ -150,15 +150,15 @@ class SimpleRowTest {
     }
   }
 
-  /** Tests for the getValue(ColumnName) method. */
+  /** Tests for the value(ColumnName) method. */
   @Nested
-  @DisplayName("getValue(ColumnName) method")
-  class GetValueMethod {
+  @DisplayName("value(ColumnName) method")
+  class ValueMethod {
 
-    /** Tests for the getValue method. */
-    GetValueMethod() {}
+    /** Tests for the value method. */
+    ValueMethod() {}
 
-    /** Verifies that getValue returns value when column exists. */
+    /** Verifies that value returns value when column exists. */
     @Test
     @Tag("normal")
     @DisplayName("should return value when column exists")

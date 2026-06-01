@@ -117,13 +117,13 @@ class SimpleTableTest {
     }
   }
 
-  /** Tests for the getName() method. */
+  /** Tests for the name() method. */
   @Nested
-  @DisplayName("getName() method")
-  class GetNameMethod {
+  @DisplayName("name() method")
+  class NameMethod {
 
-    /** Tests for the getName method. */
-    GetNameMethod() {}
+    /** Tests for the name method. */
+    NameMethod() {}
 
     /** Verifies that getName returns table name. */
     @Test
@@ -142,15 +142,15 @@ class SimpleTableTest {
     }
   }
 
-  /** Tests for the getColumns() method. */
+  /** Tests for the columns() method. */
   @Nested
-  @DisplayName("getColumns() method")
-  class GetColumnsMethod {
+  @DisplayName("columns() method")
+  class ColumnsMethod {
 
-    /** Tests for the getColumns method. */
-    GetColumnsMethod() {}
+    /** Tests for the columns method. */
+    ColumnsMethod() {}
 
-    /** Verifies that getColumns returns all columns. */
+    /** Verifies that columns returns all columns. */
     @Test
     @Tag("normal")
     @DisplayName("should return all columns when called")
@@ -167,7 +167,7 @@ class SimpleTableTest {
       assertEquals(columns, result, "should return all columns");
     }
 
-    /** Verifies that getColumns returns unmodifiable list. */
+    /** Verifies that columns returns unmodifiable list. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return unmodifiable list when called")
@@ -187,15 +187,15 @@ class SimpleTableTest {
     }
   }
 
-  /** Tests for the getRows() method. */
+  /** Tests for the rows() method. */
   @Nested
-  @DisplayName("getRows() method")
-  class GetRowsMethod {
+  @DisplayName("rows() method")
+  class RowsMethod {
 
-    /** Tests for the getRows method. */
-    GetRowsMethod() {}
+    /** Tests for the rows method. */
+    RowsMethod() {}
 
-    /** Verifies that getRows returns all rows. */
+    /** Verifies that rows returns all rows. */
     @Test
     @Tag("normal")
     @DisplayName("should return all rows when called")
@@ -214,7 +214,7 @@ class SimpleTableTest {
       assertEquals(rows, result, "should return all rows");
     }
 
-    /** Verifies that getRows returns unmodifiable list. */
+    /** Verifies that rows returns unmodifiable list. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return unmodifiable list when called")
@@ -236,15 +236,15 @@ class SimpleTableTest {
     }
   }
 
-  /** Tests for the getRowCount() method. */
+  /** Tests for the rowCount() method. */
   @Nested
-  @DisplayName("getRowCount() method")
-  class GetRowCountMethod {
+  @DisplayName("rowCount() method")
+  class RowCountMethod {
 
-    /** Tests for the getRowCount method. */
-    GetRowCountMethod() {}
+    /** Tests for the rowCount method. */
+    RowCountMethod() {}
 
-    /** Verifies that getRowCount returns correct count. */
+    /** Verifies that rowCount returns correct count. */
     @Test
     @Tag("normal")
     @DisplayName("should return correct count when called")
@@ -264,7 +264,7 @@ class SimpleTableTest {
       assertEquals(3, result, "should return correct row count");
     }
 
-    /** Verifies that getRowCount returns zero for empty table. */
+    /** Verifies that rowCount returns zero for empty table. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return zero when table is empty")
