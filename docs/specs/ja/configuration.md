@@ -518,6 +518,7 @@ static void setup(ExtensionContext context) {
 
 | 値 | 説明 |
 |----|------|
+| `UNSET` | アノテーションのデフォルトのセンチネル。グローバルな `VerificationSettings.rowOrdering()` に委譲する |
 | `ORDERED` | 位置による比較（インデックスによる行ごとの比較）。デフォルト動作 |
 | `UNORDERED` | セットベースの比較（位置に関係なく行をマッチング） |
 

@@ -169,6 +169,29 @@ class ColumnTest {
       // Then
       assertFalse(column.hasMetadata(), "column should not have metadata with minimal settings");
     }
+
+    /**
+     * Verifies that builder retains metadata fields set without jdbcType, primary key, or ordinal
+     * position.
+     */
+    @Test
+    @Tag("edge-case")
+    @DisplayName("retains nullable, precision, scale, and default value without other metadata")
+    void shouldRetainMetadata_whenOnlyValueConstraintsProvided() {
+      // When
+      final var column =
+          Column.builder("amount").nullable(false).precision(10).scale(2).defaultValue("0").build();
+
+      // Then
+      assertTrue(column.getMetadata().isPresent(), "metadata should be present");
+      final var metadata = column.getMetadata().orElseThrow();
+      assertAll(
+          "metadata should retain all configured value constraints",
+          () -> assertFalse(metadata.nullable(), "nullable should be false"),
+          () -> assertEquals(10, metadata.precision(), "precision should be 10"),
+          () -> assertEquals(2, metadata.scale(), "scale should be 2"),
+          () -> assertEquals("0", metadata.defaultValue(), "default value should be 0"));
+    }
   }
 
   /** Tests for withComparisonStrategy method. */

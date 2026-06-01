@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
@@ -157,7 +158,7 @@ public final class DelimitedParser {
 
       // First row is the header
       final var headerRow = iterator.next();
-      final var columnNames = parseColumnNames(headerRow);
+      final var columnNames = parseColumnNames(headerRow, file);
 
       // Remaining rows are data - convert iterator to stream
       final var templateProcessor = new TemplateProcessor();
@@ -196,11 +197,33 @@ public final class DelimitedParser {
   /**
    * Parses column names from the header row.
    *
+   * <p>A duplicate header is rejected rather than silently merged. The row value map keys on {@link
+   * ColumnName}, so a repeated header would discard one column's data without warning.
+   *
    * @param headerRow the header row array
+   * @param file the source file, used for error reporting
    * @return list of column names
+   * @throws DataSetLoadException if the header row contains duplicate column names
    */
-  private List<ColumnName> parseColumnNames(final String[] headerRow) {
-    return Arrays.stream(headerRow).map(String::trim).map(ColumnName::new).toList();
+  private List<ColumnName> parseColumnNames(final String[] headerRow, final Path file) {
+    final var columnNames =
+        Arrays.stream(headerRow).map(String::trim).map(ColumnName::new).toList();
+    final var duplicates =
+        columnNames.stream()
+            .map(ColumnName::value)
+            .collect(Collectors.groupingBy(name -> name, Collectors.counting()))
+            .entrySet()
+            .stream()
+            .filter(entry -> entry.getValue() > 1)
+            .map(Map.Entry::getKey)
+            .sorted()
+            .toList();
+    if (!duplicates.isEmpty()) {
+      throw new DataSetLoadException(
+          String.format(
+              "Duplicate column header(s) %s in file: %s", duplicates, file.toAbsolutePath()));
+    }
+    return columnNames;
   }
 
   /**

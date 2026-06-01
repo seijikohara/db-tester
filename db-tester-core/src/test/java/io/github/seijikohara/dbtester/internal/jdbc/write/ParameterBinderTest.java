@@ -400,23 +400,26 @@ class ParameterBinderTest {
     }
 
     /**
-     * Verifies that bindWithType converts string to float.
+     * Verifies that bindWithType binds SQL FLOAT as double-precision.
+     *
+     * <p>SQL FLOAT maps to Java double per the JDBC type-mapping spec. The chosen value carries
+     * precision beyond 32-bit float resolution to guard against narrowing regressions.
      *
      * @throws SQLException if a database error occurs
      */
     @Test
     @Tag("normal")
-    @DisplayName("should convert string to float when SQL type is FLOAT")
-    void shouldConvertToFloat_whenSqlTypeIsFloat() throws SQLException {
+    @DisplayName("should convert string to double when SQL type is FLOAT")
+    void shouldConvertToDouble_whenSqlTypeIsFloat() throws SQLException {
       // Given
       final var statement = mock(PreparedStatement.class);
-      final var dataValue = new CellValue("3.14");
+      final var dataValue = new CellValue("3.141592653589793");
 
       // When
       binder.bindWithType(statement, 1, dataValue, Types.FLOAT);
 
       // Then
-      verify(statement).setFloat(eq(1), eq(3.14f));
+      verify(statement).setDouble(eq(1), eq(3.141592653589793));
     }
 
     /**

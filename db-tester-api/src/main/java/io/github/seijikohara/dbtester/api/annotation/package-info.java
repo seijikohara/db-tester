@@ -18,8 +18,8 @@
  *
  * <p>When explicit locations are omitted, {@link
  * io.github.seijikohara.dbtester.api.config.ConventionSettings} maps test classes and methods to
- * dataset directories. Format-specific providers (CSV by default) are discovered via {@link
- * java.util.ServiceLoader}.
+ * dataset directories. Format-specific providers (AUTO detection by default) are discovered via
+ * {@link java.util.ServiceLoader}.
  */
 @NullMarked
 package io.github.seijikohara.dbtester.api.annotation;

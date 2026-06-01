@@ -58,7 +58,7 @@ class ConfigurationCustomizationSpec :
                         .baseDirectory(null) // use classpath-relative resolution
                         .expectationSuffix("/verify") // custom expectation suffix
                         .scenarioMarker("[TestCase]") // custom scenario marker
-                        .dataFormat(DataFormat.CSV) // use CSV format (default)
+                        .dataFormat(DataFormat.CSV) // explicitly configure CSV format
                         .tableMergeStrategy(TableMergeStrategy.UNION_ALL) // use UNION_ALL merge strategy (default)
                         .loadOrderFileName(ConventionSettings.DEFAULT_LOAD_ORDER_FILE_NAME)
                         .build(),

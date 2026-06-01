@@ -102,7 +102,7 @@ final class DataFormatTest {
   }
 
   /**
-   * Tests CSV format (default configuration).
+   * Tests CSV format (explicit configuration).
    *
    * <p>CSV files use comma as field delimiter:
    *
@@ -133,7 +133,7 @@ final class DataFormatTest {
     static void setupDatabase(final ExtensionContext context) throws Exception {
       logger.info("Setting up database for CSV format test");
 
-      // CSV is the default format, but we explicitly configure it for clarity
+      // AUTO is the default format; this test configures CSV explicitly
       final var csvConfig =
           Configuration.builder()
               .conventions(ConventionSettings.builder().dataFormat(DataFormat.CSV).build())

@@ -2,6 +2,7 @@ package example.feature
 
 import groovy.sql.Sql
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.spock.extension.DatabaseTest
@@ -17,9 +18,9 @@ import spock.lang.Specification
  * <p>This specification shows:
  * <ul>
  *   <li>Using empty cells to represent SQL NULL values
- *   <li>Distinguishing between NULL and empty string in VARCHAR columns
  *   <li>Handling NOT NULL constraints
  *   <li>NULL values in numeric and timestamp columns
+ *   <li>The NULL versus empty-string distinction available in JSON and YAML
  * </ul>
  *
  * <p>CSV format examples and NULL representation:
@@ -29,8 +30,10 @@ import spock.lang.Specification
  * 2,Another Value,Optional Value,200,42
  * }</pre>
  *
- * <p><strong>Important:</strong> Empty cells in CSV files are interpreted as SQL NULL
- * for all column types.
+ * <p><strong>Important:</strong> An empty CSV or TSV cell is interpreted as SQL NULL for all
+ * column types, and a quoted {@code ""} also materializes as NULL. The delimited formats cannot
+ * express a non-null empty string. To distinguish an empty string from NULL, use JSON or YAML,
+ * which provide distinct syntax for {@code null} and {@code ""}.
  */
 @DatabaseTest
 class NullAndEmptyValuesSpec extends Specification implements DatabaseTestSupport {
@@ -107,6 +110,23 @@ class NullAndEmptyValuesSpec extends Specification implements DatabaseTestSuppor
 		then: 'both forms of empty value are stored as NULL'
 		nullCount == 2
 		emptyCount == 0
+	}
+
+	/**
+	 * Demonstrates that JSON preserves an empty string as distinct from NULL.
+	 *
+	 * <p>A JSON {@code null} materializes as SQL NULL, while a JSON {@code ""} materializes as a
+	 * non-null empty string. This distinction is unavailable in CSV and TSV.
+	 */
+	@DataSet(sources = @DataSetSource(resourceLocation = 'classpath:example/feature/NullAndEmptyValuesSpec/jsonEmptyString/'))
+	def 'should preserve empty string distinct from null when loading json'() {
+		when: 'probing JSON_VALUES after preparation'
+		def nullCount = sql.firstRow("SELECT COUNT(*) AS C FROM JSON_VALUES WHERE COLUMN2 IS NULL").C
+		def emptyCount = sql.firstRow("SELECT COUNT(*) AS C FROM JSON_VALUES WHERE COLUMN2 = ''").C
+
+		then: 'JSON null becomes NULL and JSON empty string is preserved'
+		nullCount == 1
+		emptyCount == 1
 	}
 
 	private void executeScript(String scriptPath) {

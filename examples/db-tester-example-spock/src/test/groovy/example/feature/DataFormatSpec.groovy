@@ -21,7 +21,7 @@ import spock.lang.Specification
  *
  * <p>This specification demonstrates:
  * <ul>
- *   <li>Using CSV format (default) with {@link DataFormat#CSV}
+ *   <li>Using CSV format explicitly with {@link DataFormat#CSV}
  *   <li>Using TSV format with {@link DataFormat#TSV}
  *   <li>Configuring data format via {@link ConventionSettings}
  * </ul>
@@ -31,7 +31,7 @@ import spock.lang.Specification
 class DataFormatSpec extends Specification {
 
 	/**
-	 * Tests CSV format (default configuration).
+	 * Tests CSV format (explicit configuration).
 	 *
 	 * <p>CSV files use comma as field delimiter:
 	 * <pre>
@@ -76,7 +76,7 @@ class DataFormatSpec extends Specification {
 			sharedRegistry = new DataSourceRegistry()
 			sharedRegistry.registerDefault(sharedDataSource)
 
-			// CSV is the default format, but we explicitly configure it for clarity
+			// AUTO is the default format; this test configures CSV explicitly
 			sharedConfiguration = Configuration.builder()
 					.conventions(
 					ConventionSettings.builder()

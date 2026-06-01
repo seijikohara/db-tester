@@ -472,8 +472,8 @@ The framework converts string values from dataset files to SQL types:
 | `INTEGER`, `SMALLINT` | `Integer.parseInt()` |
 | `BIGINT` | `Long.parseLong()` |
 | `DECIMAL`, `NUMERIC` | `new BigDecimal()` |
-| `REAL`, `FLOAT` | `Float.parseFloat()` |
-| `DOUBLE` | `Double.parseDouble()` |
+| `REAL` | `Float.parseFloat()` |
+| `FLOAT`, `DOUBLE` | `Double.parseDouble()` |
 | `BOOLEAN`, `BIT` | `Boolean.parseBoolean()` |
 | `DATE` | `LocalDate.parse()` |
 | `TIME` | `LocalTime.parse()` |

@@ -188,7 +188,7 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
    *   <li>Default resource location (convention-based: {@code classpath:[test-class]/})
    *   <li>Test method name as the scenario name
    *   <li>Default data source
-   *   <li>Configured data format (CSV by default)
+   *   <li>Configured data format (AUTO by default)
    * </ul>
    *
    * @param context the test execution context

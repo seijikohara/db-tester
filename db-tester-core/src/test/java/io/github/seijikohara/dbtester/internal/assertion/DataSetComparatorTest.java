@@ -15,6 +15,7 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
@@ -912,6 +913,71 @@ class DataSetComparatorTest {
           () ->
               assertTrue(
                   message != null && message.contains("USERS"), "should mention the table name"));
+    }
+
+    /**
+     * Verifies that unordered probing continues past a non-matching candidate when a flexible
+     * strategy is configured.
+     */
+    @Test
+    @Tag("normal")
+    @DisplayName("should match rows when a flexible strategy is configured and order differs")
+    void shouldMatch_whenFlexibleStrategyConfiguredAndOrderDiffers() {
+      // Given
+      final var expected =
+          createTableWithRows(
+              "USERS", List.of("ID", "AMOUNT"), List.of(List.of("1", "100"), List.of("2", "200")));
+      final var actual =
+          createTableWithRows(
+              "USERS",
+              List.of("ID", "AMOUNT"),
+              List.of(List.of("2", "200.0"), List.of("1", "100.00")));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("AMOUNT", ColumnStrategyMapping.of("AMOUNT", ComparisonStrategy.NUMERIC));
+
+      // When & Then
+      assertDoesNotThrow(
+          () ->
+              comparator.assertEqualsUnorderedWithStrategies(
+                  expected, actual, Set.of(), strategies),
+          "should match numerically equal rows regardless of order");
+    }
+
+    /**
+     * Verifies that an unparseable strategy value surfaces a clean assertion failure instead of
+     * propagating the parse exception.
+     *
+     * <p>Under STRICT mode a flexible strategy throws when a value cannot be parsed. During
+     * unordered probing this must be treated as a non-match so the comparison reports an unmatched
+     * row rather than aborting with the parse exception.
+     */
+    @Test
+    @Tag("error")
+    @DisplayName(
+        "should report unmatched row when a strategy value cannot be parsed in STRICT mode")
+    void shouldReportUnmatchedRow_whenStrategyValueUnparseableInStrictMode() {
+      // Given
+      final var expected =
+          createTableWithRows("USERS", List.of("ID", "AMOUNT"), List.of(List.of("1", "100")));
+      final var actual =
+          createTableWithRows(
+              "USERS", List.of("ID", "AMOUNT"), List.of(List.of("1", "not-a-number")));
+      final var strategies = new HashMap<String, ColumnStrategyMapping>();
+      strategies.put("AMOUNT", ColumnStrategyMapping.of("AMOUNT", ComparisonStrategy.NUMERIC));
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              AssertionError.class,
+              () ->
+                  comparator.assertEqualsUnorderedWithStrategies(
+                      expected, actual, Set.of(), strategies),
+              "should fail with AssertionError, not propagate the parse exception");
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("[no matching row]"),
+          "should report the row as unmatched");
     }
   }
 

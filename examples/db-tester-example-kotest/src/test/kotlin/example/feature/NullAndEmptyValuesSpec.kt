@@ -1,6 +1,7 @@
 package example.feature
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
+import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
@@ -16,9 +17,9 @@ import javax.sql.DataSource
  *
  * This specification shows:
  * - Using empty cells to represent SQL NULL values
- * - Distinguishing between NULL and empty string in VARCHAR columns
  * - Handling NOT NULL constraints
  * - NULL values in numeric and timestamp columns
+ * - The NULL versus empty-string distinction available in JSON and YAML
  *
  * CSV format examples and NULL representation:
  * ```
@@ -27,8 +28,11 @@ import javax.sql.DataSource
  * 2,Another Value,Optional Value,200,42
  * ```
  *
- * **Important:** Empty cells in CSV files are interpreted as SQL NULL
- * for all column types.
+ * **Important:** An empty CSV or TSV cell is interpreted as SQL NULL for all
+ * column types, and a quoted `""` also materializes as NULL. The delimited
+ * formats cannot express a non-null empty string. To distinguish an empty
+ * string from NULL, use JSON or YAML, which provide distinct syntax for
+ * `null` and `""`.
  */
 @DatabaseTest
 class NullAndEmptyValuesSpec :
@@ -147,5 +151,32 @@ class NullAndEmptyValuesSpec :
                 }
             }
         }
+    }
+
+    /**
+     * Demonstrates that JSON preserves an empty string as distinct from NULL.
+     *
+     * A JSON `null` materializes as SQL NULL, while a JSON `""` materializes as a
+     * non-null empty string. This distinction is unavailable in CSV and TSV.
+     */
+    @Test
+    @DataSet(
+        sources = [DataSetSource(resourceLocation = "classpath:example/feature/NullAndEmptyValuesSpec/jsonEmptyString/")],
+    )
+    fun `should preserve empty string distinct from null when loading json`() {
+        logger.info("Confirming JSON null and empty string materialize distinctly")
+        dataSource.connection.use { connection ->
+            connection.createStatement().use { statement ->
+                statement.executeQuery("SELECT COUNT(*) FROM JSON_VALUES WHERE COLUMN2 IS NULL").use { rs ->
+                    rs.next()
+                    check(rs.getInt(1) == 1) { "Expected exactly one NULL COLUMN2 (the JSON null row)" }
+                }
+                statement.executeQuery("SELECT COUNT(*) FROM JSON_VALUES WHERE COLUMN2 = ''").use { rs ->
+                    rs.next()
+                    check(rs.getInt(1) == 1) { "Expected exactly one empty-string COLUMN2 (the JSON \"\" row)" }
+                }
+            }
+        }
+        logger.info("JSON empty-string preservation confirmed")
     }
 }
