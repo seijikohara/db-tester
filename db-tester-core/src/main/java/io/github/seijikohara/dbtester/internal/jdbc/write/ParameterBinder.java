@@ -153,8 +153,8 @@ public final class ParameterBinder {
       switch (sqlType) {
         case Types.INTEGER, Types.SMALLINT, Types.TINYINT -> stmt.setInt(index, parseInt(strValue));
         case Types.BIGINT -> stmt.setLong(index, parseLong(strValue));
-        case Types.FLOAT, Types.REAL -> stmt.setFloat(index, parseFloat(strValue));
-        case Types.DOUBLE -> stmt.setDouble(index, parseDouble(strValue));
+        case Types.REAL -> stmt.setFloat(index, parseFloat(strValue));
+        case Types.FLOAT, Types.DOUBLE -> stmt.setDouble(index, parseDouble(strValue));
         case Types.DECIMAL, Types.NUMERIC -> stmt.setBigDecimal(index, parseBigDecimal(strValue));
         case Types.BIT, Types.BOOLEAN -> stmt.setBoolean(index, parseBoolean(strValue));
         case Types.DATE -> stmt.setDate(index, parseDate(strValue));

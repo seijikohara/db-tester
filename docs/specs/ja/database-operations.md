@@ -461,8 +461,8 @@ Invalid SQL identifier: 'user-accounts'. Identifiers must start with a letter or
 | `INTEGER`, `SMALLINT` | `Integer.parseInt()` |
 | `BIGINT` | `Long.parseLong()` |
 | `DECIMAL`, `NUMERIC` | `new BigDecimal()` |
-| `REAL`, `FLOAT` | `Float.parseFloat()` |
-| `DOUBLE` | `Double.parseDouble()` |
+| `REAL` | `Float.parseFloat()` |
+| `FLOAT`, `DOUBLE` | `Double.parseDouble()` |
 | `BOOLEAN`, `BIT` | `Boolean.parseBoolean()` |
 | `DATE` | `LocalDate.parse()` |
 | `TIME` | `LocalTime.parse()` |
