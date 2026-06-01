@@ -22,9 +22,9 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getTables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返す |
-| `getTable(TableName)` | `Optional<Table>` | 名前でテーブルを検索 |
-| `getDataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返す |
+| `tables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返す |
+| `table(TableName)` | `Optional<Table>` | 名前でテーブルを検索 |
+| `dataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返す |
 
 **保証事項**:
 
@@ -50,16 +50,16 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getName()` | `TableName` | テーブル識別子を返す |
-| `getColumns()` | `List<ColumnName>` | 定義順序でカラム名を返す |
-| `getRows()` | `List<Row>` | すべての行を返す（空の場合もあります） |
-| `getRowCount()` | `int` | 行数を返す |
+| `name()` | `TableName` | テーブル識別子を返す |
+| `columns()` | `List<ColumnName>` | 定義順序でカラム名を返す |
+| `rows()` | `List<Row>` | すべての行を返す（空の場合もあります） |
+| `rowCount()` | `int` | 行数を返す |
 
 **保証事項**:
 
 - カラム順序はすべての行で一貫しています
 - 返されるすべてのコレクションはイミュータブルです
-- 行数は`getRows().size()`と等しくなります
+- 行数は`rows().size()`と等しくなります
 
 ## Row
 
@@ -78,8 +78,8 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getValues()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返す |
-| `getValue(ColumnName)` | `CellValue` | カラムの値を返す。存在しない場合は`CellValue.NULL` |
+| `values()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返す |
+| `value(ColumnName)` | `CellValue` | カラムの値を返す。存在しない場合は`CellValue.NULL` |
 
 ## ドメイン値オブジェクト
 
@@ -150,119 +150,6 @@ description: "DB Testerのデータセットインターフェースリファレ
 | フィールド | 型 | 説明 |
 |------------|-----|------|
 | `value` | `String` | DataSource名文字列 |
-
-### Column
-
-メタデータと比較戦略を持つデータベースカラムを表します。
-
-**パッケージ**: `io.github.seijikohara.dbtester.api.domain.Column`
-
-**型**: `final class`（`Comparable<Column>`を実装）
-
-**フィールド**:
-
-| フィールド | 型 | 説明 |
-|------------|-----|------|
-| `name` | `ColumnName` | カラム識別子 |
-| `metadata` | `@Nullable ColumnMetadata` | スキーマ検証用のオプショナルなカラムメタデータ |
-| `comparisonStrategy` | `ComparisonStrategy` | このカラムの比較戦略（デフォルト: `STRICT`） |
-
-**ファクトリメソッド**:
-
-| メソッド | 説明 |
-|----------|------|
-| `of(String)` | デフォルト戦略かつメタデータなしでカラムを作成 |
-| `of(ColumnName)` | 既存のColumnNameからカラムを作成 |
-| `builder(String)` | カスタムプロパティ用のビルダーを作成 |
-| `builder(ColumnName)` | 既存のColumnNameからビルダーを作成 |
-
-**インスタンスメソッド**:
-
-| メソッド | 戻り値型 | 説明 |
-|----------|---------|------|
-| `getName()` | `ColumnName` | カラム名を返す |
-| `getNameValue()` | `String` | カラム名を文字列として返します |
-| `getMetadata()` | `Optional<ColumnMetadata>` | メタデータが利用可能な場合に返します |
-| `getComparisonStrategy()` | `ComparisonStrategy` | 比較戦略を返す |
-| `hasMetadata()` | `boolean` | メタデータが存在する場合`true`を返す |
-| `isIgnored()` | `boolean` | 戦略がIGNOREの場合`true`を返す |
-| `withComparisonStrategy(ComparisonStrategy)` | `Column` | 更新された戦略で新しいColumnを返す |
-| `withMetadata(ColumnMetadata)` | `Column` | 更新されたメタデータで新しいColumnを返す |
-
-### Cell
-
-データベース行内の単一のセル値を表します。
-
-**パッケージ**: `io.github.seijikohara.dbtester.api.domain.Cell`
-
-**型**: `final class`
-
-**フィールド**:
-
-| フィールド | 型 | 説明 |
-|------------|-----|------|
-| `column` | `Column` | カラム定義 |
-| `value` | `CellValue` | セル値 |
-
-**ファクトリメソッド**:
-
-| メソッド | 説明 |
-|----------|------|
-| `of(Column, CellValue)` | 指定されたカラムと値でセルを作成 |
-| `of(String, CellValue)` | カラム名と値でセルを作成 |
-| `of(String, @Nullable Object)` | カラム名と生の値でセルを作成 |
-| `nullCell(Column)` | 指定されたカラムのNULLセルを作成 |
-
-**インスタンスメソッド**:
-
-| メソッド | 戻り値型 | 説明 |
-|----------|---------|------|
-| `getColumn()` | `Column` | カラムを返す |
-| `getColumnName()` | `ColumnName` | カラム名を返す |
-| `getValue()` | `CellValue` | セル値を返す |
-| `getRawValue()` | `Optional<Object>` | 生の値を返す。NULLの場合はempty |
-| `isNull()` | `boolean` | 値がNULLの場合`true`を返す |
-| `shouldIgnore()` | `boolean` | カラム戦略がIGNOREの場合`true`を返す |
-| `getValueAsString()` | `Optional<String>` | 値をStringとして返します。NULLの場合はempty |
-| `getValueAsNumber()` | `Optional<Number>` | 値をNumberとして返します。該当しない場合はempty |
-
-### ColumnMetadata
-
-データベースカラムのスキーマプロパティを記述するイミュータブルなメタデータです。
-
-**パッケージ**: `io.github.seijikohara.dbtester.api.domain.ColumnMetadata`
-
-**型**: `record`
-
-**フィールド**:
-
-| フィールド | 型 | 説明 |
-|------------|-----|------|
-| `jdbcType` | `@Nullable JDBCType` | カラムのSQL型。不明な場合はnull |
-| `nullable` | `boolean` | カラムがNULL値を許可するかどうか |
-| `primaryKey` | `boolean` | カラムが主キーの一部かどうか |
-| `ordinalPosition` | `int` | テーブル内の1始まりの位置（不明な場合は0） |
-| `precision` | `int` | 数値精度または文字列長（該当しない場合は0） |
-| `scale` | `int` | 数値スケール（該当しない場合は0） |
-| `defaultValue` | `@Nullable String` | 文字列としてのデフォルト値。ない場合はnull |
-
-**ファクトリメソッド**:
-
-| メソッド | 説明 |
-|----------|------|
-| `of(JDBCType, boolean)` | 最小限の情報でメタデータを作成 |
-| `primaryKey(JDBCType)` | 主キーカラム用のメタデータを作成 |
-
-**インスタンスメソッド**:
-
-| メソッド | 戻り値型 | 説明 |
-|----------|---------|------|
-| `isNumeric()` | `boolean` | カラム型が数値の場合`true`を返す |
-| `isTextual()` | `boolean` | カラム型がテキストベースの場合`true`を返す |
-| `isTemporal()` | `boolean` | カラム型が日付/時間の場合`true`を返す |
-| `isBinary()` | `boolean` | カラム型がバイナリの場合`true`を返す |
-| `isBoolean()` | `boolean` | カラム型がブール値の場合`true`を返す |
-| `isLikelyAutoIncrement()` | `boolean` | カラムが自動インクリメントと推定される場合`true`を返す |
 
 ### ColumnStrategyMapping
 

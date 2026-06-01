@@ -22,9 +22,9 @@ Represents a collection of database tables.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getTables()` | `List<Table>` | Returns immutable list of tables in declaration order |
-| `getTable(TableName)` | `Optional<Table>` | Finds table by name |
-| `getDataSource()` | `Optional<DataSource>` | Returns bound DataSource if specified |
+| `tables()` | `List<Table>` | Returns immutable list of tables in declaration order |
+| `table(TableName)` | `Optional<Table>` | Finds table by name |
+| `dataSource()` | `Optional<DataSource>` | Returns bound DataSource if specified |
 
 **Guarantees**:
 
@@ -50,16 +50,16 @@ Represents the structure and data of a database table.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getName()` | `TableName` | Returns table identifier |
-| `getColumns()` | `List<ColumnName>` | Returns column names in definition order |
-| `getRows()` | `List<Row>` | Returns all rows (may be empty) |
-| `getRowCount()` | `int` | Returns number of rows |
+| `name()` | `TableName` | Returns table identifier |
+| `columns()` | `List<ColumnName>` | Returns column names in definition order |
+| `rows()` | `List<Row>` | Returns all rows (may be empty) |
+| `rowCount()` | `int` | Returns number of rows |
 
 **Guarantees**:
 
 - Column order is consistent across all rows
 - All returned collections are immutable
-- Row count equals `getRows().size()`
+- Row count equals `rows().size()`
 
 ## Row
 
@@ -78,8 +78,8 @@ Represents a single database record.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getValues()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
-| `getValue(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
+| `values()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
+| `value(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
 
 ## Domain Value Objects
 
@@ -150,119 +150,6 @@ Immutable identifier for a registered DataSource.
 | Field | Type | Description |
 |-------|------|-------------|
 | `value` | `String` | DataSource name string |
-
-### Column
-
-Represents a database column with metadata and comparison strategy.
-
-**Location**: `io.github.seijikohara.dbtester.api.domain.Column`
-
-**Type**: `final class` (implements `Comparable<Column>`)
-
-**Fields**:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | `ColumnName` | Column identifier |
-| `metadata` | `@Nullable ColumnMetadata` | Optional column metadata for schema validation |
-| `comparisonStrategy` | `ComparisonStrategy` | Comparison strategy for this column (default: `STRICT`) |
-
-**Factory Methods**:
-
-| Method | Description |
-|--------|-------------|
-| `of(String)` | Creates a column with default strategy and no metadata |
-| `of(ColumnName)` | Creates a column from an existing ColumnName |
-| `builder(String)` | Creates a builder for custom properties |
-| `builder(ColumnName)` | Creates a builder from an existing ColumnName |
-
-**Instance Methods**:
-
-| Method | Return Type | Description |
-|--------|-------------|-------------|
-| `getName()` | `ColumnName` | Returns column name |
-| `getNameValue()` | `String` | Returns column name as a string |
-| `getMetadata()` | `Optional<ColumnMetadata>` | Returns metadata if available |
-| `getComparisonStrategy()` | `ComparisonStrategy` | Returns comparison strategy |
-| `hasMetadata()` | `boolean` | Returns `true` if metadata is present |
-| `isIgnored()` | `boolean` | Returns `true` if strategy is IGNORE |
-| `withComparisonStrategy(ComparisonStrategy)` | `Column` | Returns new Column with updated strategy |
-| `withMetadata(ColumnMetadata)` | `Column` | Returns new Column with updated metadata |
-
-### Cell
-
-Represents a single cell value within a database row.
-
-**Location**: `io.github.seijikohara.dbtester.api.domain.Cell`
-
-**Type**: `final class`
-
-**Fields**:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `column` | `Column` | Column definition |
-| `value` | `CellValue` | Cell value |
-
-**Factory Methods**:
-
-| Method | Description |
-|--------|-------------|
-| `of(Column, CellValue)` | Creates a cell with the specified column and value |
-| `of(String, CellValue)` | Creates a cell with a column name and value |
-| `of(String, @Nullable Object)` | Creates a cell with a column name and raw value |
-| `nullCell(Column)` | Creates a NULL cell for the specified column |
-
-**Instance Methods**:
-
-| Method | Return Type | Description |
-|--------|-------------|-------------|
-| `getColumn()` | `Column` | Returns the column |
-| `getColumnName()` | `ColumnName` | Returns the column name |
-| `getValue()` | `CellValue` | Returns the cell value |
-| `getRawValue()` | `Optional<Object>` | Returns the raw value, or empty if NULL |
-| `isNull()` | `boolean` | Returns `true` if value is NULL |
-| `shouldIgnore()` | `boolean` | Returns `true` if column strategy is IGNORE |
-| `getValueAsString()` | `Optional<String>` | Returns value as String, or empty if NULL |
-| `getValueAsNumber()` | `Optional<Number>` | Returns value as Number, or empty if not applicable |
-
-### ColumnMetadata
-
-Immutable metadata describing the schema properties of a database column.
-
-**Location**: `io.github.seijikohara.dbtester.api.domain.ColumnMetadata`
-
-**Type**: `record`
-
-**Fields**:
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `jdbcType` | `@Nullable JDBCType` | The SQL type of the column, or null if unknown |
-| `nullable` | `boolean` | Whether the column allows NULL values |
-| `primaryKey` | `boolean` | Whether the column is part of the primary key |
-| `ordinalPosition` | `int` | 1-based position in the table (0 if unknown) |
-| `precision` | `int` | Numeric precision or character length (0 if not applicable) |
-| `scale` | `int` | Numeric scale (0 if not applicable) |
-| `defaultValue` | `@Nullable String` | Default value as a string, or null if none |
-
-**Factory Methods**:
-
-| Method | Description |
-|--------|-------------|
-| `of(JDBCType, boolean)` | Creates metadata with minimal information |
-| `primaryKey(JDBCType)` | Creates metadata for a primary key column |
-
-**Instance Methods**:
-
-| Method | Return Type | Description |
-|--------|-------------|-------------|
-| `isNumeric()` | `boolean` | Returns `true` if column type is numeric |
-| `isTextual()` | `boolean` | Returns `true` if column type is text-based |
-| `isTemporal()` | `boolean` | Returns `true` if column type is date/time |
-| `isBinary()` | `boolean` | Returns `true` if column type is binary |
-| `isBoolean()` | `boolean` | Returns `true` if column type is boolean |
-| `isLikelyAutoIncrement()` | `boolean` | Returns `true` if column appears to be auto-increment |
 
 ### ColumnStrategyMapping
 

@@ -101,10 +101,10 @@ class DeleteExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
 
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
@@ -140,7 +140,7 @@ class DeleteExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
-      when(table.getRows()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -162,8 +162,8 @@ class DeleteExecutorTest {
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
       final var row = mock(Row.class);
-      when(table.getRows()).thenReturn(List.of(row));
-      when(table.getColumns()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of(row));
+      when(table.columns()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -195,7 +195,7 @@ class DeleteExecutorTest {
       final var statement = mock(Statement.class);
 
       final var table = mock(Table.class);
-      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.name()).thenReturn(new TableName("USERS"));
 
       when(sqlBuilder.buildDeleteAll("USERS")).thenReturn("DELETE FROM USERS");
       when(connection.createStatement()).thenReturn(statement);
@@ -263,9 +263,9 @@ class DeleteExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
       when(connection.prepareStatement(anyString()))
@@ -296,10 +296,10 @@ class DeleteExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
@@ -330,10 +330,10 @@ class DeleteExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
@@ -364,9 +364,9 @@ class DeleteExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
       when(sqlBuilder.buildDelete("USERS", columnName))
           .thenReturn("DELETE FROM USERS WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);

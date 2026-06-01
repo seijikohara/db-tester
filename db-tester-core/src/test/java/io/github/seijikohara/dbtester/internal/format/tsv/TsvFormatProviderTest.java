@@ -105,14 +105,14 @@ class TsvFormatProviderTest {
       assertAll(
           "dataset should contain parsed table",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.tables().size(), "should have one table"));
 
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "table should have correct structure",
-          () -> assertEquals("users", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals(1, table.getRowCount(), "should have 1 row"));
+          () -> assertEquals("users", table.name().value(), "should have correct table name"),
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals(1, table.rowCount(), "should have 1 row"));
     }
 
     /**
@@ -134,7 +134,7 @@ class TsvFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      assertEquals(2, result.getTables().size(), "should have two tables");
+      assertEquals(2, result.tables().size(), "should have two tables");
     }
 
     /**
@@ -155,9 +155,9 @@ class TsvFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var nameValue = row.getValue(new ColumnName("NAME"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var nameValue = row.value(new ColumnName("NAME"));
 
       assertEquals(CellValue.NULL, nameValue, "empty cell should be NULL");
     }

@@ -7,8 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-import io.github.seijikohara.dbtester.api.domain.ColumnMetadata;
-import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,14 +39,9 @@ import org.jspecify.annotations.Nullable;
  *       - path: "row[0].STATUS"
  *         expected: COMPLETED
  *         actual: PENDING
- *         column:
- *           type: VARCHAR
- *           nullable: true
  *       - path: "row[1].AMOUNT"
  *         expected: 100.00
  *         actual: 99.99
- *         column:
- *           type: "DECIMAL(10,2)"
  * }</pre>
  */
 public final class ComparisonResult {
@@ -91,7 +84,7 @@ public final class ComparisonResult {
   public void addTableCountMismatch(final int expected, final int actual) {
     addDifference(
         "(dataset)",
-        new Difference("table_count", String.valueOf(expected), String.valueOf(actual), null));
+        new Difference("table_count", String.valueOf(expected), String.valueOf(actual)));
   }
 
   /**
@@ -100,7 +93,7 @@ public final class ComparisonResult {
    * @param tableName the name of the missing table
    */
   public void addMissingTable(final String tableName) {
-    addDifference(tableName, new Difference("table", "exists", "not found", null));
+    addDifference(tableName, new Difference("table", "exists", "not found"));
   }
 
   /**
@@ -112,8 +105,7 @@ public final class ComparisonResult {
    */
   public void addRowCountMismatch(final String tableName, final int expected, final int actual) {
     addDifference(
-        tableName,
-        new Difference("row_count", String.valueOf(expected), String.valueOf(actual), null));
+        tableName, new Difference("row_count", String.valueOf(expected), String.valueOf(actual)));
   }
 
   /**
@@ -131,71 +123,8 @@ public final class ComparisonResult {
       final String columnName,
       final @Nullable Object expected,
       final @Nullable Object actual) {
-    addValueMismatch(tableName, rowIndex, columnName, expected, actual, null);
-  }
-
-  /**
-   * Adds a cell value mismatch with column metadata.
-   *
-   * @param tableName the table name
-   * @param rowIndex the row index (0-based)
-   * @param columnName the column name
-   * @param expected the expected value
-   * @param actual the actual value
-   * @param metadata the column metadata (nullable)
-   */
-  public void addValueMismatch(
-      final String tableName,
-      final int rowIndex,
-      final String columnName,
-      final @Nullable Object expected,
-      final @Nullable Object actual,
-      final @Nullable ColumnMetadata metadata) {
     final var path = String.format("row[%d].%s", rowIndex, columnName);
-    final var columnInfo = createColumnInfo(metadata);
-    addDifference(
-        tableName, new Difference(path, formatValue(expected), formatValue(actual), columnInfo));
-  }
-
-  /**
-   * Creates column info from metadata.
-   *
-   * @param metadata the column metadata
-   * @return the column info or null
-   */
-  private @Nullable ColumnInfo createColumnInfo(final @Nullable ColumnMetadata metadata) {
-    return Optional.ofNullable(metadata).map(this::toColumnInfo).orElse(null);
-  }
-
-  /**
-   * Converts column metadata to column info.
-   *
-   * @param columnMetadata the column metadata
-   * @return the column info
-   */
-  private ColumnInfo toColumnInfo(final ColumnMetadata columnMetadata) {
-    return new ColumnInfo(
-        formatJdbcType(columnMetadata), columnMetadata.nullable(), columnMetadata.primaryKey());
-  }
-
-  /**
-   * Formats JDBC type with precision/scale.
-   *
-   * @param columnMetadata the column metadata
-   * @return the formatted type string
-   */
-  private String formatJdbcType(final ColumnMetadata columnMetadata) {
-    final var typeName =
-        Optional.ofNullable(columnMetadata.jdbcType()).map(JDBCType::getName).orElse("UNKNOWN");
-    final int precision = columnMetadata.precision();
-    final int scale = columnMetadata.scale();
-
-    if (precision <= 0) {
-      return typeName;
-    }
-    return scale > 0
-        ? String.format("%s(%d,%d)", typeName, precision, scale)
-        : String.format("%s(%d)", typeName, precision);
+    addDifference(tableName, new Difference(path, formatValue(expected), formatValue(actual)));
   }
 
   /**
@@ -208,7 +137,7 @@ public final class ComparisonResult {
   public void addMissingColumn(
       final String tableName, final int rowIndex, final String columnName) {
     final var path = String.format("row[%d].%s", rowIndex, columnName);
-    addDifference(tableName, new Difference(path, "exists", "column not found", null));
+    addDifference(tableName, new Difference(path, "exists", "column not found"));
   }
 
   /**
@@ -252,7 +181,6 @@ public final class ComparisonResult {
    * <ul>
    *   <li>Summary with status and total differences
    *   <li>Tables grouped with their differences
-   *   <li>Column metadata when available
    * </ul>
    *
    * @return the formatted YAML message
@@ -352,22 +280,7 @@ public final class ComparisonResult {
    * @param path the path to the differing element (e.g., "row[0].NAME")
    * @param expected the expected value
    * @param actual the actual value
-   * @param column the column metadata (nullable)
    */
-  @JsonPropertyOrder({"path", "expected", "actual", "column"})
-  @JsonInclude(JsonInclude.Include.NON_NULL)
-  private record Difference(
-      String path, String expected, String actual, @Nullable ColumnInfo column) {}
-
-  /**
-   * Column metadata for inclusion in difference output.
-   *
-   * @param type the JDBC type with precision/scale
-   * @param nullable whether the column allows null
-   * @param primaryKey whether the column is a primary key
-   */
-  @JsonPropertyOrder({"type", "nullable", "primary_key"})
-  @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-  private record ColumnInfo(
-      String type, boolean nullable, @JsonProperty("primary_key") boolean primaryKey) {}
+  @JsonPropertyOrder({"path", "expected", "actual"})
+  private record Difference(String path, String expected, String actual) {}
 }

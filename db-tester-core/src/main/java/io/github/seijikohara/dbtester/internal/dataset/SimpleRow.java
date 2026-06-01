@@ -30,7 +30,7 @@ public final class SimpleRow implements Row {
    * @return immutable mapping of columns to their values
    */
   @Override
-  public Map<ColumnName, CellValue> getValues() {
+  public Map<ColumnName, CellValue> values() {
     return values;
   }
 
@@ -41,7 +41,7 @@ public final class SimpleRow implements Row {
    * @return the data value for the requested column, or {@link CellValue#NULL} when absent
    */
   @Override
-  public CellValue getValue(final ColumnName column) {
+  public CellValue value(final ColumnName column) {
     return values.getOrDefault(column, CellValue.NULL);
   }
 }

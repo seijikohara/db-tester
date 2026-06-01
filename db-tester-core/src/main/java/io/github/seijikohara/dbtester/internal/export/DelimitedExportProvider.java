@@ -60,7 +60,7 @@ abstract class DelimitedExportProvider extends AbstractExportProvider {
 
       // Write data rows
       table
-          .getRows()
+          .rows()
           .forEach(
               row -> {
                 final List<@Nullable String> values = new java.util.ArrayList<>();
@@ -87,11 +87,11 @@ abstract class DelimitedExportProvider extends AbstractExportProvider {
    */
   private List<ColumnName> getExportableColumns(
       final Table table, final ExportConfiguration config) {
-    final var columns = table.getColumns();
+    final var columns = table.columns();
 
     // If not omitting LOBs, return all columns
-    if (!table.getRows().isEmpty()) {
-      final var firstRow = table.getRows().getFirst();
+    if (!table.rows().isEmpty()) {
+      final var firstRow = table.rows().getFirst();
       return columns.stream().filter(col -> !shouldOmitColumn(firstRow, col, config)).toList();
     }
 
@@ -108,7 +108,7 @@ abstract class DelimitedExportProvider extends AbstractExportProvider {
    */
   private @Nullable String formatCellValue(
       final Row row, final ColumnName columnName, final ExportConfiguration config) {
-    final var cellValue = row.getValues().get(columnName);
+    final var cellValue = row.values().get(columnName);
     if (cellValue == null || cellValue.isNull()) {
       return config.nullValue();
     }

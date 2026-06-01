@@ -15,12 +15,6 @@
  * <p>Domain models:
  *
  * <ul>
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.Column} — column with metadata and
- *       comparison strategy
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.ColumnMetadata} — schema metadata (type,
- *       constraints, precision)
- *   <li>{@link io.github.seijikohara.dbtester.api.domain.Cell} — column-value pair with comparison
- *       support
  *   <li>{@link io.github.seijikohara.dbtester.api.domain.CellValue} — cell values with NULL
  *       handling
  *   <li>{@link io.github.seijikohara.dbtester.api.domain.ComparisonStrategy} — configurable value

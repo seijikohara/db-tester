@@ -125,12 +125,12 @@ class YamlExportProviderTest {
       final var col1 = new ColumnName("ID");
       final var col2 = new ColumnName("CUSTOMER");
       final var row = mock(Row.class);
-      when(row.getValues()).thenReturn(Map.of(col1, new CellValue("1"), col2, CellValue.NULL));
+      when(row.values()).thenReturn(Map.of(col1, new CellValue("1"), col2, CellValue.NULL));
 
       final var table = mock(Table.class);
-      when(table.getName()).thenReturn(new TableName("ORDERS"));
-      when(table.getColumns()).thenReturn(List.of(col1, col2));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("ORDERS"));
+      when(table.columns()).thenReturn(List.of(col1, col2));
+      when(table.rows()).thenReturn(List.of(row));
 
       when(tableReader.fetchTable(any(DataSource.class), anyString())).thenReturn(table);
 
@@ -193,9 +193,9 @@ class YamlExportProviderTest {
   private static Table createMockTable(
       final String tableName, final List<String> columnNames, final List<Row> rows) {
     final var table = mock(Table.class);
-    when(table.getName()).thenReturn(new TableName(tableName));
-    when(table.getColumns()).thenReturn(columnNames.stream().map(ColumnName::new).toList());
-    when(table.getRows()).thenReturn(rows);
+    when(table.name()).thenReturn(new TableName(tableName));
+    when(table.columns()).thenReturn(columnNames.stream().map(ColumnName::new).toList());
+    when(table.rows()).thenReturn(rows);
     return table;
   }
 
@@ -212,7 +212,7 @@ class YamlExportProviderTest {
             .collect(
                 Collectors.toMap(
                     e -> new ColumnName(e.getKey()), e -> new CellValue(e.getValue())));
-    when(row.getValues()).thenReturn(cellValues);
+    when(row.values()).thenReturn(cellValues);
     return row;
   }
 }

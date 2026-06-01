@@ -440,7 +440,7 @@ static void setup(ExtensionContext context) {
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
 | `hasExtension()` | `boolean` | `AUTO`では`false`、他の形式では`true`を返す |
-| `getExtension()` | `String` | ドットを含むファイル拡張子を返す。`AUTO`の場合は`UnsupportedOperationException`をスロー |
+| `extension()` | `String` | ドットを含むファイル拡張子を返す。`AUTO`の場合は`UnsupportedOperationException`をスロー |
 
 ### ファイル検出
 

@@ -6,10 +6,7 @@ package io.github.seijikohara.dbtester.api.domain;
  * <p>Provides compile-time type safety for column names in database operations. All instances are
  * guaranteed to have non-blank, trimmed string values.
  *
- * <p>For richer column modeling including metadata and comparison strategies, use {@link Column}.
- *
  * @param value canonical column identifier (trimmed, non-blank)
- * @see Column
  */
 public record ColumnName(String value) implements Comparable<ColumnName> {
 

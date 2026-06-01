@@ -44,7 +44,7 @@ public enum Operation {
    *   <li>If no matching row exists, insert the new row
    * </ul>
    *
-   * @since 1.1
+   * @since 0.4.0
    */
   UPSERT,
 

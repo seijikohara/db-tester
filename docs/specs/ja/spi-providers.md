@@ -17,7 +17,7 @@ description: "DB TesterのSPIプロバイダーインターフェースリファ
 
 ```java
 public interface DataSetLoaderProvider {
-    DataSetLoader getLoader();
+    DataSetLoader loader();
 }
 ```
 
@@ -309,10 +309,10 @@ public interface QueryAssertionProvider {
 
 ```java
 public interface TypeHandler<T> {
-    Class<T> getJavaType();
-    List<Integer> getSqlTypes();
-    default List<String> getSupportedDatabases();
-    default int getPriority();
+    Class<T> javaType();
+    List<Integer> sqlTypes();
+    default List<String> supportedDatabases();
+    default int priority();
     T read(ResultSet resultSet, int columnIndex) throws SQLException;
     void write(PreparedStatement ps, int parameterIndex, T value) throws SQLException;
     String format(T value);
@@ -324,16 +324,16 @@ public interface TypeHandler<T> {
 
 | メソッド | 説明 |
 |----------|------|
-| `getJavaType()` | このハンドラーが生成するJava型を返す |
-| `getSqlTypes()` | このハンドラーがサポートするSQL型コード（`java.sql.Types`）を返す |
-| `getSupportedDatabases()` | データベース製品名を返す。全データベース対応の場合は空リスト |
-| `getPriority()` | ハンドラー選択の優先度（大きいほど優先）。デフォルト0 |
+| `javaType()` | このハンドラーが生成するJava型を返す |
+| `sqlTypes()` | このハンドラーがサポートするSQL型コード（`java.sql.Types`）を返す |
+| `supportedDatabases()` | データベース製品名を返す。全データベース対応の場合は空リスト |
+| `priority()` | ハンドラー選択の優先度（大きいほど優先）。デフォルト0 |
 | `read(...)` | `ResultSet`から値を読み取る |
 | `write(...)` | `PreparedStatement`に値を書き込む |
 | `format(...)` | エクスポート用に値を文字列に変換する |
 | `parse(...)` | インポート用に文字列値を解析する |
 
-**選択**: 同一SQL型に複数のハンドラーが存在する場合、`getPriority()`が最も高いハンドラーを選択する。データベース固有のハンドラー（`getSupportedDatabases()`が空でない）は、製品名が一致する場合に汎用ハンドラーより優先される。
+**選択**: 同一SQL型に複数のハンドラーが存在する場合、`priority()`が最も高いハンドラーを選択する。データベース固有のハンドラー（`supportedDatabases()`が空でない）は、製品名が一致する場合に汎用ハンドラーより優先される。
 
 ## CoreモジュールSPI
 

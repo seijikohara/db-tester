@@ -225,10 +225,9 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     final var rawExcludeColumns = expectedTableSet.excludeColumns();
     final var excludeColumns = resolveExcludeColumnPatterns(rawExcludeColumns, tableSet);
     final var columnStrategies = expectedTableSet.columnStrategies();
-    final DataSource dataSource =
-        tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
+    final DataSource dataSource = tableSet.dataSource().orElseGet(() -> context.registry().get(""));
 
-    final var tableCount = tableSet.getTables().size();
+    final var tableCount = tableSet.tables().size();
     logger.info(
         "Validating expectation TableSet for {}: {} tables ({}, {})",
         context.testMethod().getName(),
@@ -289,8 +288,8 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     }
 
     final var allColumnNames =
-        tableSet.getTables().stream()
-            .map(Table::getColumns)
+        tableSet.tables().stream()
+            .map(Table::columns)
             .flatMap(Collection::stream)
             .map(ColumnName::value)
             .collect(Collectors.toUnmodifiableSet());

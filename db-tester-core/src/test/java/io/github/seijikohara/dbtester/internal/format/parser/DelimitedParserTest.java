@@ -95,7 +95,7 @@ class DelimitedParserTest {
       assertAll(
           "dataset should be empty",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(0, result.getTables().size(), "should have no tables"));
+          () -> assertEquals(0, result.tables().size(), "should have no tables"));
     }
 
     /**
@@ -115,14 +115,14 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      assertEquals(1, result.getTables().size(), "should have one table");
+      assertEquals(1, result.tables().size(), "should have one table");
 
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "table should have correct structure",
-          () -> assertEquals("users", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals(1, table.getRowCount(), "should have 1 row"));
+          () -> assertEquals("users", table.name().value(), "should have correct table name"),
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals(1, table.rowCount(), "should have 1 row"));
     }
 
     /**
@@ -143,8 +143,8 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      assertEquals(3, table.getRowCount(), "should have 3 rows");
+      final var table = result.tables().getFirst();
+      assertEquals(3, table.rowCount(), "should have 3 rows");
     }
 
     /**
@@ -165,9 +165,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var nameValue = row.getValue(new ColumnName("NAME"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var nameValue = row.value(new ColumnName("NAME"));
 
       assertEquals(CellValue.NULL, nameValue, "empty cell should be NULL");
     }
@@ -189,8 +189,8 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      assertEquals(2, table.getRowCount(), "should have 2 non-empty rows");
+      final var table = result.tables().getFirst();
+      assertEquals(2, table.rowCount(), "should have 2 non-empty rows");
     }
 
     /**
@@ -291,8 +291,8 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      assertEquals("MY_TABLE", table.getName().value(), "should extract table name from filename");
+      final var table = result.tables().getFirst();
+      assertEquals("MY_TABLE", table.name().value(), "should extract table name from filename");
     }
 
     /**
@@ -313,9 +313,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var descValue = row.value(new ColumnName("DESCRIPTION"));
 
       assertNotNull(descValue.value(), "description value should not be null");
       assertEquals("Hello, World", descValue.value().toString(), "should preserve quoted content");
@@ -340,7 +340,7 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var tableNames = result.getTables().stream().map(t -> t.getName().value()).toList();
+      final var tableNames = result.tables().stream().map(t -> t.name().value()).toList();
 
       assertAll(
           "tables should be sorted alphabetically",
@@ -384,12 +384,12 @@ class DelimitedParserTest {
       final var result = tsvParser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "table should have correct structure",
-          () -> assertEquals("users", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals(1, table.getRowCount(), "should have 1 row"));
+          () -> assertEquals("users", table.name().value(), "should have correct table name"),
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals(1, table.rowCount(), "should have 1 row"));
     }
 
     /**
@@ -433,10 +433,10 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var nameValue = row.getValue(new ColumnName("NAME"));
-      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var nameValue = row.value(new ColumnName("NAME"));
+      final var descValue = row.value(new ColumnName("DESCRIPTION"));
       assertNotNull(nameValue.value(), "NAME value should not be null");
       assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
       final var nameStr = nameValue.value().toString();
@@ -465,11 +465,11 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var rows = table.getRows();
-      final var row1Name = rows.getFirst().getValue(new ColumnName("NAME"));
-      final var row1City = rows.getFirst().getValue(new ColumnName("CITY"));
-      final var row2City = rows.get(1).getValue(new ColumnName("CITY"));
+      final var table = result.tables().getFirst();
+      final var rows = table.rows();
+      final var row1Name = rows.getFirst().value(new ColumnName("NAME"));
+      final var row1City = rows.getFirst().value(new ColumnName("CITY"));
+      final var row2City = rows.get(1).value(new ColumnName("CITY"));
       assertNotNull(row1Name.value(), "first row NAME value should not be null");
       assertNotNull(row1City.value(), "first row CITY value should not be null");
       assertNotNull(row2City.value(), "second row CITY value should not be null");
@@ -501,9 +501,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      assertEquals(2, table.getRowCount(), "should have 2 rows");
-      final var nameValue = table.getRows().getFirst().getValue(new ColumnName("NAME"));
+      final var table = result.tables().getFirst();
+      assertEquals(2, table.rowCount(), "should have 2 rows");
+      final var nameValue = table.rows().getFirst().value(new ColumnName("NAME"));
       assertNotNull(nameValue.value(), "NAME value should not be null");
       assertEquals("张伟", nameValue.value().toString(), "should preserve Chinese name");
     }
@@ -527,8 +527,8 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var statusValue = table.getRows().getFirst().getValue(new ColumnName("STATUS"));
+      final var table = result.tables().getFirst();
+      final var statusValue = table.rows().getFirst().value(new ColumnName("STATUS"));
       assertNotNull(statusValue.value(), "STATUS value should not be null");
       assertEquals("✅ done", statusValue.value().toString(), "should preserve emoji characters");
     }
@@ -560,9 +560,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var descValue = row.value(new ColumnName("DESCRIPTION"));
       assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
       assertEquals(
           "John \"IT Manager\" Smith",
@@ -587,9 +587,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var descValue = row.getValue(new ColumnName("DESCRIPTION"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var descValue = row.value(new ColumnName("DESCRIPTION"));
       assertNotNull(descValue.value(), "DESCRIPTION value should not be null");
       assertEquals(
           "Line1\nLine2",
@@ -615,9 +615,9 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var cellValue = row.getValue(new ColumnName("VALUE"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var cellValue = row.value(new ColumnName("VALUE"));
       assertNotNull(cellValue.value(), "VALUE value should not be null");
       assertEquals(
           "  ", cellValue.value().toString(), "should preserve whitespace in quoted fields");
@@ -658,11 +658,11 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "large dataset should be parsed correctly",
-          () -> assertEquals(1000, table.getRowCount(), "should have 1000 rows"),
-          () -> assertEquals(4, table.getColumns().size(), "should have 4 columns"));
+          () -> assertEquals(1000, table.rowCount(), "should have 1000 rows"),
+          () -> assertEquals(4, table.columns().size(), "should have 4 columns"));
     }
 
     /**
@@ -691,17 +691,13 @@ class DelimitedParserTest {
       // Then
       assertAll(
           "multiple tables should be parsed",
-          () -> assertEquals(2, result.getTables().size(), "should have 2 tables"),
+          () -> assertEquals(2, result.tables().size(), "should have 2 tables"),
           () ->
               assertEquals(
-                  500,
-                  result.getTables().getFirst().getRowCount(),
-                  "first table should have 500 rows"),
+                  500, result.tables().getFirst().rowCount(), "first table should have 500 rows"),
           () ->
               assertEquals(
-                  500,
-                  result.getTables().get(1).getRowCount(),
-                  "second table should have 500 rows"));
+                  500, result.tables().get(1).rowCount(), "second table should have 500 rows"));
     }
   }
 
@@ -731,11 +727,11 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "table should have header but no rows",
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals(0, table.getRowCount(), "should have 0 rows"));
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals(0, table.rowCount(), "should have 0 rows"));
     }
 
     /**
@@ -756,10 +752,10 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
       assertEquals(
-          CellValue.NULL, row.getValue(new ColumnName("EMAIL")), "missing column should be NULL");
+          CellValue.NULL, row.value(new ColumnName("EMAIL")), "missing column should be NULL");
     }
 
     /**
@@ -780,13 +776,13 @@ class DelimitedParserTest {
       final var result = parser.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var nameValue = table.getRows().getFirst().getValue(new ColumnName("NAME"));
+      final var table = result.tables().getFirst();
+      final var nameValue = table.rows().getFirst().value(new ColumnName("NAME"));
       assertNotNull(nameValue.value(), "NAME value should not be null");
       final var nameStr = nameValue.value().toString();
       assertAll(
           "table should only have header columns",
-          () -> assertEquals(2, table.getColumns().size(), "should have 2 columns"),
+          () -> assertEquals(2, table.columns().size(), "should have 2 columns"),
           () -> assertEquals("John", nameStr, "should have correct NAME value"));
     }
   }

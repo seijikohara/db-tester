@@ -50,7 +50,7 @@ public interface TableSet {
    *
    * @return immutable list of tables composing the dataset
    */
-  List<Table> getTables();
+  List<Table> tables();
 
   /**
    * Resolves a table by name.
@@ -59,14 +59,14 @@ public interface TableSet {
    * @return an Optional containing the matching table, or empty if the dataset does not contain
    *     that table
    */
-  Optional<Table> getTable(TableName tableName);
+  Optional<Table> table(TableName tableName);
 
   /**
    * Returns the data source that should be used when executing the dataset.
    *
    * @return an Optional containing the bound data source, or empty if not specified
    */
-  Optional<DataSource> getDataSource();
+  Optional<DataSource> dataSource();
 
   /**
    * Simple immutable implementation of {@link TableSet}.
@@ -78,22 +78,12 @@ public interface TableSet {
     /**
      * {@inheritDoc}
      *
-     * @return immutable list of tables in this dataset
-     */
-    @Override
-    public List<Table> getTables() {
-      return tables;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @param tableName the name of the table to retrieve
      * @return an Optional containing the table if found, or empty if not found
      */
     @Override
-    public Optional<Table> getTable(final TableName tableName) {
-      return tables.stream().filter(t -> t.getName().equals(tableName)).findFirst();
+    public Optional<Table> table(final TableName tableName) {
+      return tables.stream().filter(t -> t.name().equals(tableName)).findFirst();
     }
 
     /**
@@ -102,7 +92,7 @@ public interface TableSet {
      * @return an Optional that is always empty since this dataset has no associated data source
      */
     @Override
-    public Optional<DataSource> getDataSource() {
+    public Optional<DataSource> dataSource() {
       return Optional.empty();
     }
   }

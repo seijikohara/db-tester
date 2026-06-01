@@ -21,12 +21,12 @@ import java.util.List;
  * <pre>{@code
  * public class PostgresJsonHandler implements TypeHandler<JsonNode> {
  *     @Override
- *     public Class<JsonNode> getJavaType() {
+ *     public Class<JsonNode> javaType() {
  *         return JsonNode.class;
  *     }
  *
  *     @Override
- *     public List<Integer> getSqlTypes() {
+ *     public List<Integer> sqlTypes() {
  *         return List.of(Types.OTHER);  // PostgreSQL JSON/JSONB
  *     }
  *
@@ -54,7 +54,7 @@ public interface TypeHandler<T> {
    *
    * @return the Java class for the handled type
    */
-  Class<T> getJavaType();
+  Class<T> javaType();
 
   /**
    * Returns the SQL type codes this handler supports.
@@ -64,7 +64,7 @@ public interface TypeHandler<T> {
    *
    * @return list of SQL type codes
    */
-  List<Integer> getSqlTypes();
+  List<Integer> sqlTypes();
 
   /**
    * Returns the database product names this handler is specialized for.
@@ -76,7 +76,7 @@ public interface TypeHandler<T> {
    *
    * @return list of supported database product names, or empty for all databases
    */
-  default List<String> getSupportedDatabases() {
+  default List<String> supportedDatabases() {
     return List.of();
   }
 
@@ -90,7 +90,7 @@ public interface TypeHandler<T> {
    *
    * @return the handler priority (higher values take precedence)
    */
-  default int getPriority() {
+  default int priority() {
     return 0;
   }
 

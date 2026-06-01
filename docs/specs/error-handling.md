@@ -55,14 +55,9 @@ tables:
       - path: "row[0].STATUS"
         expected: COMPLETED
         actual: PENDING
-        column:
-          type: VARCHAR(50)
-          nullable: true
       - path: "row[1].AMOUNT"
         expected: 100.00
         actual: 99.99
-        column:
-          type: "DECIMAL(10,2)"
 ```
 
 The output is **valid YAML** after the first summary line.
@@ -77,7 +72,6 @@ Standard YAML libraries parse this output for CI/CD integration.
 | `tables.<name>.differences` | List of differences for each table |
 | `path` | Location: `table_count`, `row_count`, or `row[N].COLUMN` |
 | `expected` and `actual` | The expected and actual values |
-| `column` | JDBC metadata (type, nullable, primary_key) when available |
 
 ### Difference Types
 
@@ -311,9 +305,6 @@ org.example.UserRepositoryTest > shouldCreateUser FAILED
               - path: "row[0].EMAIL"
                 expected: john@example.com
                 actual: jane@example.com
-                column:
-                  type: VARCHAR(255)
-                  nullable: false
 
         at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.assertEquals(DataSetComparator.java:85)
         at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier.verify(ExpectationVerifier.java:42)

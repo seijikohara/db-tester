@@ -32,7 +32,7 @@ public final class SimpleTableSet implements TableSet {
    * @return immutable list of tables in this dataset
    */
   @Override
-  public List<Table> getTables() {
+  public List<Table> tables() {
     return tables;
   }
 
@@ -43,8 +43,8 @@ public final class SimpleTableSet implements TableSet {
    * @return an Optional containing the table if found, or empty if not found
    */
   @Override
-  public Optional<Table> getTable(final TableName tableName) {
-    return tables.stream().filter(t -> t.getName().equals(tableName)).findFirst();
+  public Optional<Table> table(final TableName tableName) {
+    return tables.stream().filter(t -> t.name().equals(tableName)).findFirst();
   }
 
   /**
@@ -53,7 +53,7 @@ public final class SimpleTableSet implements TableSet {
    * @return an Optional that is always empty since this dataset has no associated data source
    */
   @Override
-  public Optional<DataSource> getDataSource() {
+  public Optional<DataSource> dataSource() {
     return Optional.empty();
   }
 }

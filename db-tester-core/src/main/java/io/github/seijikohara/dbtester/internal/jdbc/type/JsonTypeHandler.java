@@ -46,22 +46,22 @@ public final class JsonTypeHandler implements TypeHandler<JsonNode> {
   }
 
   @Override
-  public Class<JsonNode> getJavaType() {
+  public Class<JsonNode> javaType() {
     return JsonNode.class;
   }
 
   @Override
-  public List<Integer> getSqlTypes() {
+  public List<Integer> sqlTypes() {
     return SUPPORTED_SQL_TYPES;
   }
 
   @Override
-  public List<String> getSupportedDatabases() {
+  public List<String> supportedDatabases() {
     return SUPPORTED_DATABASES;
   }
 
   @Override
-  public int getPriority() {
+  public int priority() {
     return 20; // Higher priority than UuidTypeHandler for PostgreSQL
   }
 

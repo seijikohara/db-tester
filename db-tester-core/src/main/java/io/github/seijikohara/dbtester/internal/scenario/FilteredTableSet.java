@@ -44,7 +44,7 @@ public final class FilteredTableSet implements TableSet {
       final ScenarioFilter filter,
       final @Nullable DataSource dataSource) {
     this.tables =
-        sourceTableSet.getTables().stream()
+        sourceTableSet.tables().stream()
             .map(table -> (Table) new FilteredTable(table, filter))
             .toList();
     this.dataSource = dataSource;
@@ -61,7 +61,7 @@ public final class FilteredTableSet implements TableSet {
    * @return immutable list of scenario-filtered tables
    */
   @Override
-  public List<Table> getTables() {
+  public List<Table> tables() {
     return tables;
   }
 
@@ -72,8 +72,8 @@ public final class FilteredTableSet implements TableSet {
    * @return an Optional containing the table if found, or empty if not found
    */
   @Override
-  public Optional<Table> getTable(final TableName tableName) {
-    return tables.stream().filter(t -> t.getName().equals(tableName)).findFirst();
+  public Optional<Table> table(final TableName tableName) {
+    return tables.stream().filter(t -> t.name().equals(tableName)).findFirst();
   }
 
   /**
@@ -82,7 +82,7 @@ public final class FilteredTableSet implements TableSet {
    * @return an Optional containing the data source if specified, or empty otherwise
    */
   @Override
-  public Optional<DataSource> getDataSource() {
+  public Optional<DataSource> dataSource() {
     return Optional.ofNullable(dataSource);
   }
 }

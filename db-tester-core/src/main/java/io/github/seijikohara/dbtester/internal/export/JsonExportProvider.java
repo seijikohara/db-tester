@@ -78,7 +78,7 @@ public final class JsonExportProvider extends AbstractExportProvider {
       generator.useDefaultPrettyPrinter();
       generator.writeStartArray();
 
-      table.getRows().forEach(row -> writeRow(generator, row, columns, config));
+      table.rows().forEach(row -> writeRow(generator, row, columns, config));
 
       generator.writeEndArray();
     } catch (final IOException e) {
@@ -101,10 +101,10 @@ public final class JsonExportProvider extends AbstractExportProvider {
    */
   private List<ColumnName> getExportableColumns(
       final Table table, final ExportConfiguration config) {
-    final var columns = table.getColumns();
+    final var columns = table.columns();
 
-    if (!table.getRows().isEmpty()) {
-      final var firstRow = table.getRows().getFirst();
+    if (!table.rows().isEmpty()) {
+      final var firstRow = table.rows().getFirst();
       return columns.stream().filter(col -> !shouldOmitColumn(firstRow, col, config)).toList();
     }
 
@@ -159,7 +159,7 @@ public final class JsonExportProvider extends AbstractExportProvider {
       final ColumnName column,
       final ExportConfiguration config)
       throws IOException {
-    final var cellValue = row.getValues().get(column);
+    final var cellValue = row.values().get(column);
 
     if (cellValue == null || cellValue.isNull()) {
       generator.writeNull();

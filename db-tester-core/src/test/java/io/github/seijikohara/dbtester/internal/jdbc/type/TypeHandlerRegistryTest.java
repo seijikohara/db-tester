@@ -225,17 +225,17 @@ class TypeHandlerRegistryTest {
     }
 
     @Override
-    public Class<String> getJavaType() {
+    public Class<String> javaType() {
       return String.class;
     }
 
     @Override
-    public List<Integer> getSqlTypes() {
+    public List<Integer> sqlTypes() {
       return List.of(Types.OTHER);
     }
 
     @Override
-    public int getPriority() {
+    public int priority() {
       return priority;
     }
 

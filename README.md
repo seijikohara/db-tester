@@ -575,14 +575,9 @@ tables:
       - path: "row[0].STATUS"
         expected: COMPLETED
         actual: PENDING
-        column:
-          type: VARCHAR(50)
-          nullable: true
       - path: "row[1].AMOUNT"
         expected: 100.00
         actual: 99.99
-        column:
-          type: "DECIMAL(10,2)"
 ```
 
 ### Output Structure
@@ -594,7 +589,6 @@ tables:
 | `tables.<name>.differences` | List of differences for each table |
 | `path` | Location: `table_count`, `row_count`, or `row[N].COLUMN` |
 | `expected` / `actual` | Expected and actual values |
-| `column` | JDBC metadata when available |
 
 ---
 

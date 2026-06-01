@@ -73,18 +73,16 @@ public final class DataSetMerger {
     // Use the first non-null data source
     final @Nullable DataSource dataSource =
         tableSets.stream()
-            .map(TableSet::getDataSource)
+            .map(TableSet::dataSource)
             .flatMap(Optional::stream)
             .findFirst()
             .orElse(null);
 
     tableSets.stream()
-        .flatMap(tableSet -> tableSet.getTables().stream())
+        .flatMap(tableSet -> tableSet.tables().stream())
         .forEach(
             table ->
-                tablesByName
-                    .computeIfAbsent(table.getName(), unused -> new ArrayList<>())
-                    .add(table));
+                tablesByName.computeIfAbsent(table.name(), unused -> new ArrayList<>()).add(table));
 
     // Merge tables according to strategy
     final List<Table> mergedTables =
@@ -147,7 +145,7 @@ public final class DataSetMerger {
     final Set<ColumnName> seenColumns = new LinkedHashSet<>();
     final List<ColumnName> allColumns =
         tables.stream()
-            .flatMap(table -> table.getColumns().stream())
+            .flatMap(table -> table.columns().stream())
             .filter(seenColumns::add)
             .toList();
 
@@ -158,12 +156,12 @@ public final class DataSetMerger {
       final Set<RowKey> seenRows = new LinkedHashSet<>();
       allRows =
           tables.stream()
-              .flatMap(table -> table.getRows().stream())
+              .flatMap(table -> table.rows().stream())
               .filter(row -> seenRows.add(new RowKey(row, allColumns)))
               .toList();
     } else {
       // Just concatenate all rows for UNION ALL
-      allRows = tables.stream().flatMap(table -> table.getRows().stream()).toList();
+      allRows = tables.stream().flatMap(table -> table.rows().stream()).toList();
     }
 
     logger.debug(
@@ -192,8 +190,7 @@ public final class DataSetMerger {
         case RowKey other when this == other -> true;
         case RowKey other ->
             columns.stream()
-                .allMatch(
-                    column -> Objects.equals(row.getValue(column), other.row.getValue(column)));
+                .allMatch(column -> Objects.equals(row.value(column), other.row.value(column)));
         case null, default -> false;
       };
     }
@@ -201,7 +198,7 @@ public final class DataSetMerger {
     @Override
     public int hashCode() {
       return columns.stream()
-          .map(column -> Objects.hashCode(row.getValue(column)))
+          .map(column -> Objects.hashCode(row.value(column)))
           .reduce(1, (accumulated, hash) -> 31 * accumulated + hash);
     }
   }
@@ -212,35 +209,30 @@ public final class DataSetMerger {
    * <p>This is an internal implementation used by the merger.
    *
    * @param tables the tables in this dataset
-   * @param dataSource the data source for this dataset, or null
+   * @param boundDataSource the data source for this dataset, or null
    */
-  private record MergedTableSet(List<Table> tables, @Nullable DataSource dataSource)
+  private record MergedTableSet(List<Table> tables, @Nullable DataSource boundDataSource)
       implements TableSet {
 
     /**
      * Creates a new merged dataset with immutable tables.
      *
      * @param tables the tables to include
-     * @param dataSource the data source, or null
+     * @param boundDataSource the data source, or null
      */
-    private MergedTableSet(final List<Table> tables, final @Nullable DataSource dataSource) {
+    private MergedTableSet(final List<Table> tables, final @Nullable DataSource boundDataSource) {
       this.tables = List.copyOf(tables);
-      this.dataSource = dataSource;
+      this.boundDataSource = boundDataSource;
     }
 
     @Override
-    public List<Table> getTables() {
-      return tables;
+    public Optional<Table> table(final TableName tableName) {
+      return tables.stream().filter(table -> table.name().equals(tableName)).findFirst();
     }
 
     @Override
-    public Optional<Table> getTable(final TableName tableName) {
-      return tables.stream().filter(table -> table.getName().equals(tableName)).findFirst();
-    }
-
-    @Override
-    public Optional<DataSource> getDataSource() {
-      return Optional.ofNullable(dataSource);
+    public Optional<DataSource> dataSource() {
+      return Optional.ofNullable(boundDataSource);
     }
   }
 }

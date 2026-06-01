@@ -80,12 +80,10 @@ class DataSetFactoryTest {
       assertAll(
           "data set should be created",
           () -> assertNotNull(dataSet, "data set should not be null"),
-          () -> assertEquals(1, dataSet.getTables().size(), "should have one table"),
+          () -> assertEquals(1, dataSet.tables().size(), "should have one table"),
           () ->
               assertEquals(
-                  "TABLE1",
-                  dataSet.getTables().get(0).getName().value(),
-                  "table name should be TABLE1"));
+                  "TABLE1", dataSet.tables().get(0).name().value(), "table name should be TABLE1"));
     }
 
     /**
@@ -112,11 +110,11 @@ class DataSetFactoryTest {
           factory.createTableSet(tempDir, scenarioNames, scenarioMarker, DataFormat.CSV, null);
 
       // Then
-      final var table = dataSet.getTables().get(0);
-      final var rows = table.getRows();
+      final var table = dataSet.tables().get(0);
+      final var rows = table.rows();
       assertAll(
           "data set should be filtered by scenario",
-          () -> assertEquals(1, dataSet.getTables().size(), "should have one table"),
+          () -> assertEquals(1, dataSet.tables().size(), "should have one table"),
           () -> assertEquals(2, rows.size(), "should have two rows matching scenario1"));
     }
 
@@ -145,7 +143,7 @@ class DataSetFactoryTest {
       assertAll(
           "CSV extension should be detected",
           () -> assertNotNull(dataSet, "data set should not be null"),
-          () -> assertEquals(2, dataSet.getTables().size(), "should have two tables"));
+          () -> assertEquals(2, dataSet.tables().size(), "should have two tables"));
     }
 
     /**
@@ -259,7 +257,7 @@ class DataSetFactoryTest {
       assertAll(
           "AUTO should load CSV files",
           () -> assertNotNull(dataSet, "data set should not be null"),
-          () -> assertEquals(1, dataSet.getTables().size(), "should have one table"));
+          () -> assertEquals(1, dataSet.tables().size(), "should have one table"));
     }
 
     /**
@@ -286,7 +284,7 @@ class DataSetFactoryTest {
       assertAll(
           "AUTO should load mixed formats",
           () -> assertNotNull(dataSet, "data set should not be null"),
-          () -> assertEquals(2, dataSet.getTables().size(), "should have two tables"));
+          () -> assertEquals(2, dataSet.tables().size(), "should have two tables"));
     }
 
     /**

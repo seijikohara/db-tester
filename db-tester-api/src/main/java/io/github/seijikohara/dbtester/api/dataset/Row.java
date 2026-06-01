@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
  * <p>A row is an immutable collection of column-value pairs that correspond to a single database
  * record. Each row belongs to a specific table and contains values for one or more columns.
  *
- * <p>All row instances are immutable. The {@link #getValues()} method returns an immutable map,
+ * <p>All row instances are immutable. The {@link #values()} method returns an immutable map,
  * ensuring that the row data cannot be modified after creation.
  *
  * @see Table
@@ -68,7 +68,7 @@ public interface Row {
    *
    * @return immutable mapping of columns to their values
    */
-  Map<ColumnName, CellValue> getValues();
+  Map<ColumnName, CellValue> values();
 
   /**
    * Resolves the value associated with the specified column.
@@ -78,7 +78,7 @@ public interface Row {
    * @param column the identifier of the column to look up
    * @return the data value for the requested column, wrapping {@code null} when absent
    */
-  CellValue getValue(ColumnName column);
+  CellValue value(ColumnName column);
 
   /**
    * Simple immutable implementation of {@link Row}.
@@ -90,21 +90,11 @@ public interface Row {
     /**
      * {@inheritDoc}
      *
-     * @return immutable mapping of columns to their values
-     */
-    @Override
-    public Map<ColumnName, CellValue> getValues() {
-      return values;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @param column the identifier of the column to look up
      * @return the data value for the requested column, or {@link CellValue#NULL} when absent
      */
     @Override
-    public CellValue getValue(final ColumnName column) {
+    public CellValue value(final ColumnName column) {
       return values.getOrDefault(column, CellValue.NULL);
     }
   }

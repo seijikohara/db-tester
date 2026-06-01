@@ -17,7 +17,7 @@ Provides the default `DataSetLoader` implementation.
 
 ```java
 public interface DataSetLoaderProvider {
-    DataSetLoader getLoader();
+    DataSetLoader loader();
 }
 ```
 
@@ -311,10 +311,10 @@ Handles custom database type conversion for reading, writing, and formatting val
 
 ```java
 public interface TypeHandler<T> {
-    Class<T> getJavaType();
-    List<Integer> getSqlTypes();
-    default List<String> getSupportedDatabases();
-    default int getPriority();
+    Class<T> javaType();
+    List<Integer> sqlTypes();
+    default List<String> supportedDatabases();
+    default int priority();
     T read(ResultSet resultSet, int columnIndex) throws SQLException;
     void write(PreparedStatement ps, int parameterIndex, T value) throws SQLException;
     String format(T value);
@@ -326,18 +326,18 @@ public interface TypeHandler<T> {
 
 | Method | Description |
 |--------|-------------|
-| `getJavaType()` | Returns the Java type this handler produces |
-| `getSqlTypes()` | Returns SQL type codes (`java.sql.Types`) this handler supports |
-| `getSupportedDatabases()` | Returns database product names, or empty list for all databases |
-| `getPriority()` | Priority for handler selection (higher = preferred); default 0 |
+| `javaType()` | Returns the Java type this handler produces |
+| `sqlTypes()` | Returns SQL type codes (`java.sql.Types`) this handler supports |
+| `supportedDatabases()` | Returns database product names, or empty list for all databases |
+| `priority()` | Priority for handler selection (higher = preferred); default 0 |
 | `read(...)` | Reads a value from a `ResultSet` |
 | `write(...)` | Writes a value to a `PreparedStatement` |
 | `format(...)` | Converts a value to string for export |
 | `parse(...)` | Parses a string value from import |
 
 **Selection**: When multiple handlers support the same SQL type, the handler with the
-highest `getPriority()` is selected. Database-specific handlers (non-empty
-`getSupportedDatabases()`) take precedence over generic handlers when the database
+highest `priority()` is selected. Database-specific handlers (non-empty
+`supportedDatabases()`) take precedence over generic handlers when the database
 product name matches.
 
 ## Core Module SPIs

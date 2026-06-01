@@ -69,28 +69,28 @@ public final class UpsertExecutor implements TableExecutor {
    */
   private void upsertTable(
       final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
-    if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
+    if (table.rows().isEmpty() || table.columns().isEmpty()) {
       return;
     }
 
-    final var columns = table.getColumns();
+    final var columns = table.columns();
     final var primaryKeyColumn = columns.getFirst();
     final var updateColumns = columns.subList(1, columns.size());
 
     table
-        .getRows()
+        .rows()
         .forEach(
             row -> {
               final var updated =
                   updateExecutor.tryUpdateRow(
-                      table.getName().value(),
+                      table.name().value(),
                       primaryKeyColumn,
                       updateColumns,
                       row,
                       connection,
                       queryTimeout);
               if (!updated) {
-                logger.trace("Update affected no rows, inserting into {}", table.getName().value());
+                logger.trace("Update affected no rows, inserting into {}", table.name().value());
                 insertExecutor.insertRow(table, row, connection, queryTimeout);
               }
             });

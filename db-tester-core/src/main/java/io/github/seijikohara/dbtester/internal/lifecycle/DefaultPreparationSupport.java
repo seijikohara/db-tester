@@ -76,8 +76,8 @@ public final class DefaultPreparationSupport implements PreparationSupport {
    */
   private void executeTableSet(
       final TestContext context, final TableSet tableSet, final DataSet dataSet) {
-    final var dataSource = tableSet.getDataSource().orElseGet(() -> context.registry().get(""));
-    final var tableCount = tableSet.getTables().size();
+    final var dataSource = tableSet.dataSource().orElseGet(() -> context.registry().get(""));
+    final var tableCount = tableSet.tables().size();
 
     logger.info(
         "Executing preparation TableSet for {}: {} tables",

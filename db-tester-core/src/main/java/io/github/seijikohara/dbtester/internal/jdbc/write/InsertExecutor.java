@@ -95,15 +95,15 @@ public final class InsertExecutor implements TableExecutor {
       final Connection connection,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
-    if (table.getRows().isEmpty()) {
+    if (table.rows().isEmpty()) {
       return;
     }
 
     final var sql = sqlBuilder.buildInsert(table);
     logger.trace("Executing INSERT: {}", sql);
 
-    final var columnTypes = getColumnTypes(connection, table.getName().value());
-    final var rows = table.getRows();
+    final var columnTypes = getColumnTypes(connection, table.name().value());
+    final var rows = table.rows();
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
@@ -113,7 +113,7 @@ public final class InsertExecutor implements TableExecutor {
         logger.debug(
             "Inserting {} rows into {} with batch size {}",
             rows.size(),
-            table.getName().value(),
+            table.name().value(),
             batchSize);
         insertWithChunking(preparedStatement, rows, table, columnTypes, batchSize);
       } else {
@@ -143,7 +143,7 @@ public final class InsertExecutor implements TableExecutor {
               run(
                   () ->
                       parameterBinder.bindRowWithTypes(
-                          preparedStatement, rows.get(index), table.getColumns(), columnTypes));
+                          preparedStatement, rows.get(index), table.columns(), columnTypes));
               run(preparedStatement::addBatch);
 
               if ((index + 1) % batchSize == 0) {
@@ -174,7 +174,7 @@ public final class InsertExecutor implements TableExecutor {
           run(
               () ->
                   parameterBinder.bindRowWithTypes(
-                      preparedStatement, row, table.getColumns(), columnTypes));
+                      preparedStatement, row, table.columns(), columnTypes));
           run(preparedStatement::addBatch);
         });
     run(preparedStatement::executeBatch);
@@ -210,7 +210,7 @@ public final class InsertExecutor implements TableExecutor {
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
       applyTimeout(preparedStatement, queryTimeout);
-      run(() -> parameterBinder.bindRow(preparedStatement, row, table.getColumns()));
+      run(() -> parameterBinder.bindRow(preparedStatement, row, table.columns()));
       run(preparedStatement::executeUpdate);
     }
   }

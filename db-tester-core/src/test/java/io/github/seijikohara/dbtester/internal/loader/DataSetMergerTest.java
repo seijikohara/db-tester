@@ -82,7 +82,7 @@ class DataSetMergerTest {
       assertAll(
           "result should be empty",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertTrue(result.getTables().isEmpty(), "should have no tables"));
+          () -> assertTrue(result.tables().isEmpty(), "should have no tables"));
     }
   }
 
@@ -109,11 +109,11 @@ class DataSetMergerTest {
       assertAll(
           "result should match input",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
           () ->
               assertEquals(
-                  "TABLE1", result.getTables().get(0).getName().value(), "table name should match"),
-          () -> assertEquals(1, result.getTables().get(0).getRows().size(), "should have one row"));
+                  "TABLE1", result.tables().get(0).name().value(), "table name should match"),
+          () -> assertEquals(1, result.tables().get(0).rows().size(), "should have one row"));
     }
   }
 
@@ -138,16 +138,16 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.FIRST);
 
       // Then
-      final var table = result.getTables().get(0);
-      final var rows = table.getRows();
+      final var table = result.tables().get(0);
+      final var rows = table.rows();
       assertAll(
           "should use first table",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
           () -> assertEquals(1, rows.size(), "should have one row from first table"),
           () ->
               assertEquals(
                   "1",
-                  rows.get(0).getValue(new ColumnName("id")).value(),
+                  rows.get(0).value(new ColumnName("id")).value(),
                   "id should be from first table"));
     }
   }
@@ -173,16 +173,16 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.LAST);
 
       // Then
-      final var table = result.getTables().get(0);
-      final var rows = table.getRows();
+      final var table = result.tables().get(0);
+      final var rows = table.rows();
       assertAll(
           "should use last table",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
           () -> assertEquals(1, rows.size(), "should have one row from last table"),
           () ->
               assertEquals(
                   "2",
-                  rows.get(0).getValue(new ColumnName("id")).value(),
+                  rows.get(0).value(new ColumnName("id")).value(),
                   "id should be from last table"));
     }
   }
@@ -208,11 +208,11 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION);
 
       // Then
-      final var table = result.getTables().get(0);
+      final var table = result.tables().get(0);
       assertAll(
           "should have unique rows",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
-          () -> assertEquals(1, table.getRows().size(), "should have one row after deduplication"));
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
+          () -> assertEquals(1, table.rows().size(), "should have one row after deduplication"));
     }
 
     /** Verifies that merge keeps distinct rows. */
@@ -228,11 +228,11 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION);
 
       // Then
-      final var table = result.getTables().get(0);
+      final var table = result.tables().get(0);
       assertAll(
           "should have all distinct rows",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
-          () -> assertEquals(2, table.getRows().size(), "should have two distinct rows"));
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
+          () -> assertEquals(2, table.rows().size(), "should have two distinct rows"));
     }
   }
 
@@ -257,13 +257,12 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION_ALL);
 
       // Then
-      final var table = result.getTables().get(0);
+      final var table = result.tables().get(0);
       assertAll(
           "should have all rows",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
           () ->
-              assertEquals(
-                  2, table.getRows().size(), "should have two rows (duplicates preserved)"));
+              assertEquals(2, table.rows().size(), "should have two rows (duplicates preserved)"));
     }
 
     /** Verifies that merge combines rows from different datasets. */
@@ -279,11 +278,11 @@ class DataSetMergerTest {
       final var result = merger.merge(List.of(dataSet1, dataSet2), TableMergeStrategy.UNION_ALL);
 
       // Then
-      final var table = result.getTables().get(0);
+      final var table = result.tables().get(0);
       assertAll(
           "should combine all rows",
-          () -> assertEquals(1, result.getTables().size(), "should have one table"),
-          () -> assertEquals(2, table.getRows().size(), "should have two rows combined"));
+          () -> assertEquals(1, result.tables().size(), "should have one table"),
+          () -> assertEquals(2, table.rows().size(), "should have two rows combined"));
     }
   }
 
@@ -310,16 +309,14 @@ class DataSetMergerTest {
       // Then
       assertAll(
           "should have both tables",
-          () -> assertEquals(2, result.getTables().size(), "should have two tables"),
+          () -> assertEquals(2, result.tables().size(), "should have two tables"),
           () ->
               assertEquals(
-                  "TABLE1",
-                  result.getTables().get(0).getName().value(),
-                  "first table should be TABLE1"),
+                  "TABLE1", result.tables().get(0).name().value(), "first table should be TABLE1"),
           () ->
               assertEquals(
                   "TABLE2",
-                  result.getTables().get(1).getName().value(),
+                  result.tables().get(1).name().value(),
                   "second table should be TABLE2"));
     }
   }

@@ -119,8 +119,7 @@ public final class TypeHandlerRegistry {
   private Optional<TypeHandler<?>> findHandlerInternal(
       final int sqlType, final @Nullable String databaseProductName) {
     // Find all handlers that support this SQL type
-    final var candidates =
-        handlers.stream().filter(h -> h.getSqlTypes().contains(sqlType)).toList();
+    final var candidates = handlers.stream().filter(h -> h.sqlTypes().contains(sqlType)).toList();
 
     if (candidates.isEmpty()) {
       return Optional.empty();
@@ -130,8 +129,8 @@ public final class TypeHandlerRegistry {
     if (databaseProductName != null) {
       final var dbSpecificHandlers =
           candidates.stream()
-              .filter(h -> h.getSupportedDatabases().contains(databaseProductName))
-              .max(Comparator.comparingInt(TypeHandler::getPriority));
+              .filter(h -> h.supportedDatabases().contains(databaseProductName))
+              .max(Comparator.comparingInt(TypeHandler::priority));
 
       if (dbSpecificHandlers.isPresent()) {
         return dbSpecificHandlers.map(h -> (TypeHandler<?>) h);
@@ -140,8 +139,8 @@ public final class TypeHandlerRegistry {
 
     // Fall back to generic handlers (those with empty database list)
     return candidates.stream()
-        .filter(h -> h.getSupportedDatabases().isEmpty())
-        .max(Comparator.comparingInt(TypeHandler::getPriority))
+        .filter(h -> h.supportedDatabases().isEmpty())
+        .max(Comparator.comparingInt(TypeHandler::priority))
         .map(h -> (TypeHandler<?>) h);
   }
 

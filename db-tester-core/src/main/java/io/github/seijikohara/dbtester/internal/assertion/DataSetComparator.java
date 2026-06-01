@@ -93,8 +93,8 @@ public class DataSetComparator {
       final TableSet actual,
       final @Nullable AssertionFailureHandler failureHandler) {
     final var result = new ComparisonResult();
-    final var expectedTables = expected.getTables();
-    final var actualTables = actual.getTables();
+    final var expectedTables = expected.tables();
+    final var actualTables = actual.tables();
 
     if (expectedTables.size() != actualTables.size()) {
       result.addTableCountMismatch(expectedTables.size(), actualTables.size());
@@ -103,9 +103,9 @@ public class DataSetComparator {
     // Compare each expected table with actual
     expectedTables.forEach(
         expectedTable -> {
-          final var tableName = expectedTable.getName();
+          final var tableName = expectedTable.name();
           actual
-              .getTable(tableName)
+              .table(tableName)
               .ifPresentOrElse(
                   actualTable -> compareTable(expectedTable, actualTable, result),
                   () -> result.addMissingTable(tableName.value()));
@@ -148,9 +148,9 @@ public class DataSetComparator {
    */
   private void compareTable(
       final Table expected, final Table actual, final ComparisonResult result) {
-    final var tableName = expected.getName().value();
-    final var expectedRows = expected.getRows();
-    final var actualRows = actual.getRows();
+    final var tableName = expected.name().value();
+    final var expectedRows = expected.rows();
+    final var actualRows = actual.rows();
 
     logger.debug(
         "Comparing table '{}': expected {} rows, actual {} rows",
@@ -184,16 +184,16 @@ public class DataSetComparator {
   public void assertEqualsWithAdditionalColumns(
       final Table expected, final Table actual, final Collection<String> additionalColumnNames) {
     final var result = new ComparisonResult();
-    final var tableName = expected.getName().value();
-    final var expectedRows = expected.getRows();
-    final var actualRows = actual.getRows();
+    final var tableName = expected.name().value();
+    final var expectedRows = expected.rows();
+    final var actualRows = actual.rows();
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
 
     // Combine expected columns with additional columns
     final var columnsToCompare =
         Stream.concat(
-                expected.getColumns().stream(), additionalColumnNames.stream().map(ColumnName::new))
+                expected.columns().stream(), additionalColumnNames.stream().map(ColumnName::new))
             .collect(Collectors.toSet());
 
     compareRowPairs(
@@ -247,12 +247,12 @@ public class DataSetComparator {
     final var tableNameObj = new TableName(tableName);
     final var expectedTable =
         expected
-            .getTable(tableNameObj)
+            .table(tableNameObj)
             .orElseThrow(
                 () -> new AssertionError(String.format("Expected table not found: %s", tableName)));
     final var actualTable =
         actual
-            .getTable(tableNameObj)
+            .table(tableNameObj)
             .orElseThrow(
                 () -> new AssertionError(String.format("Actual table not found: %s", tableName)));
 
@@ -273,9 +273,9 @@ public class DataSetComparator {
       final Table expected, final Table actual, final Collection<String> ignoreColumnNames) {
     final var result = new ComparisonResult();
     final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
-    final var tableName = expected.getName().value();
-    final var expectedRows = expected.getRows();
-    final var actualRows = actual.getRows();
+    final var tableName = expected.name().value();
+    final var expectedRows = expected.rows();
+    final var actualRows = actual.rows();
 
     if (!ignoreSet.isEmpty()) {
       logger.debug("Excluding columns from comparison");
@@ -319,9 +319,9 @@ public class DataSetComparator {
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     final var result = new ComparisonResult();
     final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
-    final var tableName = expected.getName().value();
-    final var expectedRows = expected.getRows();
-    final var actualRows = actual.getRows();
+    final var tableName = expected.name().value();
+    final var expectedRows = expected.rows();
+    final var actualRows = actual.rows();
 
     if (!ignoreSet.isEmpty()) {
       logger.debug("Excluding columns from comparison");
@@ -429,9 +429,9 @@ public class DataSetComparator {
       final Map<String, ColumnStrategyMapping> columnStrategies) {
     final var result = new ComparisonResult();
     final var ignoreSet = normalizeColumnNames(ignoreColumnNames);
-    final var tableName = expected.getName().value();
-    final var expectedRows = expected.getRows();
-    final var actualRows = actual.getRows();
+    final var tableName = expected.name().value();
+    final var expectedRows = expected.rows();
+    final var actualRows = actual.rows();
 
     if (!ignoreSet.isEmpty()) {
       logger.debug("Excluding columns from comparison");
@@ -514,14 +514,14 @@ public class DataSetComparator {
       final Row actual,
       final Set<String> ignoreSet,
       final Map<String, ColumnStrategyMapping> columnStrategies) {
-    return expected.getValues().keySet().stream()
+    return expected.values().keySet().stream()
         // Filter out ignored columns
         .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
         // Check if all remaining columns match
         .allMatch(
             columnName -> {
-              final var expectedValue = expected.getValue(columnName);
-              final var actualValue = actual.getValue(columnName);
+              final var expectedValue = expected.value(columnName);
+              final var actualValue = actual.value(columnName);
               final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
 
               // Get strategy for this column, or use default comparison
@@ -573,7 +573,7 @@ public class DataSetComparator {
       final Row expectedRow,
       final ComparisonResult result) {
     expectedRow
-        .getValues()
+        .values()
         .forEach(
             (columnName, expectedValue) ->
                 result.addValueMismatch(
@@ -600,7 +600,7 @@ public class DataSetComparator {
       final Row actualRow,
       final ComparisonResult result) {
     actualRow
-        .getValues()
+        .values()
         .forEach(
             (columnName, actualValue) ->
                 result.addValueMismatch(
@@ -686,7 +686,7 @@ public class DataSetComparator {
       final Row expected,
       final Row actual,
       final ComparisonResult result) {
-    compareRowColumns(tableName, rowIndex, expected, actual, expected.getValues().keySet(), result);
+    compareRowColumns(tableName, rowIndex, expected, actual, expected.values().keySet(), result);
   }
 
   /**
@@ -707,7 +707,7 @@ public class DataSetComparator {
       final Set<String> ignoreSet,
       final ComparisonResult result) {
     final var columnsToCompare =
-        expected.getValues().keySet().stream()
+        expected.values().keySet().stream()
             .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
             .collect(Collectors.toSet());
     compareRowColumns(tableName, rowIndex, expected, actual, columnsToCompare, result);
@@ -732,15 +732,15 @@ public class DataSetComparator {
       final Set<String> ignoreSet,
       final Map<String, ColumnStrategyMapping> columnStrategies,
       final ComparisonResult result) {
-    expected.getValues().keySet().stream()
+    expected.values().keySet().stream()
         // Filter out ignored columns
         .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
         // Filter columns that fail comparison
         .filter(
             columnName -> {
               final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
-              final var expectedValue = expected.getValue(columnName);
-              final var actualValue = actual.getValue(columnName);
+              final var expectedValue = expected.value(columnName);
+              final var actualValue = actual.value(columnName);
 
               // Get strategy for this column, or use default comparison
               final var strategyMapping = columnStrategies.get(upperColumnName);
@@ -757,8 +757,8 @@ public class DataSetComparator {
                     tableName,
                     rowIndex,
                     columnName.value(),
-                    extractValueOrNull(expected.getValue(columnName)),
-                    extractValueOrNull(actual.getValue(columnName))));
+                    extractValueOrNull(expected.value(columnName)),
+                    extractValueOrNull(actual.value(columnName))));
   }
 
   /**
@@ -800,17 +800,15 @@ public class DataSetComparator {
       final Set<ColumnName> columnsToCompare,
       final ComparisonResult result) {
     columnsToCompare.stream()
-        .filter(
-            columnName ->
-                !valuesAreEqual(expected.getValue(columnName), actual.getValue(columnName)))
+        .filter(columnName -> !valuesAreEqual(expected.value(columnName), actual.value(columnName)))
         .forEach(
             columnName ->
                 result.addValueMismatch(
                     tableName,
                     rowIndex,
                     columnName.value(),
-                    extractValueOrNull(expected.getValue(columnName)),
-                    extractValueOrNull(actual.getValue(columnName))));
+                    extractValueOrNull(expected.value(columnName)),
+                    extractValueOrNull(actual.value(columnName))));
   }
 
   /**

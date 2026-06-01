@@ -83,7 +83,7 @@ public final class ParameterBinder {
         .forEach(
             i -> {
               try {
-                bind(stmt, i + 1, row.getValue(columnList.get(i)));
+                bind(stmt, i + 1, row.value(columnList.get(i)));
               } catch (final SQLException e) {
                 throw new RuntimeException(e);
               }
@@ -115,7 +115,7 @@ public final class ParameterBinder {
                 final var column = columnList.get(i);
                 final var upperName = column.value().toUpperCase(Locale.ROOT);
                 final var sqlType = columnTypes.getOrDefault(upperName, Types.VARCHAR);
-                bindWithType(stmt, i + 1, row.getValue(column), sqlType);
+                bindWithType(stmt, i + 1, row.value(column), sqlType);
               } catch (final SQLException e) {
                 throw new RuntimeException(e);
               }

@@ -48,9 +48,9 @@ class TableSetTest {
       final var tableSet = TableSet.of(List.of(table1, table2));
 
       assertNotNull(tableSet);
-      assertEquals(2, tableSet.getTables().size());
-      assertEquals("users", tableSet.getTables().get(0).getName().value());
-      assertEquals("orders", tableSet.getTables().get(1).getName().value());
+      assertEquals(2, tableSet.tables().size());
+      assertEquals("users", tableSet.tables().get(0).name().value());
+      assertEquals("orders", tableSet.tables().get(1).name().value());
     }
 
     /** Verifies that of(List) creates empty TableSet from empty list. */
@@ -61,7 +61,7 @@ class TableSetTest {
       final var tableSet = TableSet.of(List.of());
 
       assertNotNull(tableSet);
-      assertTrue(tableSet.getTables().isEmpty());
+      assertTrue(tableSet.tables().isEmpty());
     }
   }
 
@@ -92,7 +92,7 @@ class TableSetTest {
       final var tableSet = TableSet.of(table1, table2);
 
       assertNotNull(tableSet);
-      assertEquals(2, tableSet.getTables().size());
+      assertEquals(2, tableSet.tables().size());
     }
 
     /** Verifies that of() creates empty TableSet with no arguments. */
@@ -103,7 +103,7 @@ class TableSetTest {
       final var tableSet = TableSet.of();
 
       assertNotNull(tableSet);
-      assertTrue(tableSet.getTables().isEmpty());
+      assertTrue(tableSet.tables().isEmpty());
     }
   }
 
@@ -115,11 +115,11 @@ class TableSetTest {
     /** Tests for SimpleTableSet record. */
     SimpleTableSetTest() {}
 
-    /** Verifies that getTables returns immutable list. */
+    /** Verifies that tables returns immutable list. */
     @Test
     @Tag("normal")
-    @DisplayName("getTables returns immutable list")
-    void getTablesReturnsImmutableList() {
+    @DisplayName("tables returns immutable list")
+    void tablesReturnsImmutableList() {
       final var table =
           Table.of(
               new TableName("users"),
@@ -127,56 +127,56 @@ class TableSetTest {
               List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var tables = tableSet.getTables();
+      final var tables = tableSet.tables();
 
       assertEquals(1, tables.size());
     }
 
-    /** Verifies that getTable returns matching table. */
+    /** Verifies that table returns matching table. */
     @Test
     @Tag("normal")
-    @DisplayName("getTable returns matching table")
-    void getTableReturnsMatchingTable() {
+    @DisplayName("table returns matching table")
+    void tableReturnsMatchingTable() {
       final var tableName = new TableName("users");
       final var table = Table.of(tableName, List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var result = tableSet.getTable(tableName);
+      final var result = tableSet.table(tableName);
 
       assertTrue(result.isPresent());
-      assertEquals(tableName, result.get().getName());
+      assertEquals(tableName, result.get().name());
     }
 
-    /** Verifies that getTable returns empty for non-existent table. */
+    /** Verifies that table returns empty for non-existent table. */
     @Test
     @Tag("normal")
-    @DisplayName("getTable returns empty for non-existent table")
-    void getTableReturnsEmptyForNonExistentTable() {
+    @DisplayName("table returns empty for non-existent table")
+    void tableReturnsEmptyForNonExistentTable() {
       final var table = Table.of(new TableName("users"), List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var result = tableSet.getTable(new TableName("orders"));
+      final var result = tableSet.table(new TableName("orders"));
 
       assertTrue(result.isEmpty());
     }
 
-    /** Verifies that getDataSource returns empty for SimpleTableSet. */
+    /** Verifies that dataSource returns empty for SimpleTableSet. */
     @Test
     @Tag("normal")
-    @DisplayName("getDataSource returns empty for SimpleTableSet")
-    void getDataSourceReturnsEmptyForSimpleTableSet() {
+    @DisplayName("dataSource returns empty for SimpleTableSet")
+    void dataSourceReturnsEmptyForSimpleTableSet() {
       final var tableSet = TableSet.of(List.of());
 
-      final var result = tableSet.getDataSource();
+      final var result = tableSet.dataSource();
 
       assertTrue(result.isEmpty());
     }
 
-    /** Verifies that getTable finds first matching table when multiple tables exist. */
+    /** Verifies that table finds first matching table when multiple tables exist. */
     @Test
     @Tag("normal")
-    @DisplayName("getTable finds first matching table when multiple tables exist")
-    void getTableFindsFirstMatchingTable() {
+    @DisplayName("table finds first matching table when multiple tables exist")
+    void tableFindsFirstMatchingTable() {
       final var table1 =
           Table.of(
               new TableName("users"),
@@ -186,10 +186,10 @@ class TableSetTest {
           Table.of(new TableName("orders"), List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table1, table2));
 
-      final var result = tableSet.getTable(new TableName("users"));
+      final var result = tableSet.table(new TableName("users"));
 
       assertTrue(result.isPresent());
-      assertEquals(1, result.get().getRows().size());
+      assertEquals(1, result.get().rows().size());
     }
   }
 }

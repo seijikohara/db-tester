@@ -46,7 +46,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // Then
-      final var result = row.getValues();
+      final var result = row.values();
       assertAll(
           "row should contain all provided values",
           () -> assertEquals(2, result.size(), "should have 2 entries"),
@@ -70,7 +70,7 @@ class SimpleRowTest {
       mutableMap.put(new ColumnName("COL2"), new CellValue("value2"));
 
       // Then
-      final var result = row.getValues();
+      final var result = row.values();
       assertAll(
           "row values should not be affected by changes to original map",
           () -> assertEquals(1, result.size(), "should still have only 1 entry"),
@@ -89,19 +89,19 @@ class SimpleRowTest {
       final var row = new SimpleRow(emptyMap);
 
       // Then
-      assertEquals(0, row.getValues().size(), "should have no entries");
+      assertEquals(0, row.values().size(), "should have no entries");
     }
   }
 
-  /** Tests for the getValues() method. */
+  /** Tests for the values() method. */
   @Nested
-  @DisplayName("getValues() method")
-  class GetValuesMethod {
+  @DisplayName("values() method")
+  class ValuesMethod {
 
-    /** Tests for the getValues method. */
-    GetValuesMethod() {}
+    /** Tests for the values method. */
+    ValuesMethod() {}
 
-    /** Verifies that getValues returns all values. */
+    /** Verifies that values returns all values. */
     @Test
     @Tag("normal")
     @DisplayName("should return all values when called")
@@ -117,7 +117,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result = row.getValues();
+      final var result = row.values();
 
       // Then
       assertAll(
@@ -128,7 +128,7 @@ class SimpleRowTest {
           () -> assertEquals(value3, result.get(column3), "should have null value"));
     }
 
-    /** Verifies that getValues returns unmodifiable map. */
+    /** Verifies that values returns unmodifiable map. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return unmodifiable map when called")
@@ -140,7 +140,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result = row.getValues();
+      final var result = row.values();
 
       // Then
       assertThrows(
@@ -150,15 +150,15 @@ class SimpleRowTest {
     }
   }
 
-  /** Tests for the getValue(ColumnName) method. */
+  /** Tests for the value(ColumnName) method. */
   @Nested
-  @DisplayName("getValue(ColumnName) method")
-  class GetValueMethod {
+  @DisplayName("value(ColumnName) method")
+  class ValueMethod {
 
-    /** Tests for the getValue method. */
-    GetValueMethod() {}
+    /** Tests for the value method. */
+    ValueMethod() {}
 
-    /** Verifies that getValue returns value when column exists. */
+    /** Verifies that value returns value when column exists. */
     @Test
     @Tag("normal")
     @DisplayName("should return value when column exists")
@@ -172,8 +172,8 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result1 = row.getValue(column1);
-      final var result2 = row.getValue(column2);
+      final var result1 = row.value(column1);
+      final var result2 = row.value(column2);
 
       // Then
       assertAll(
@@ -195,7 +195,7 @@ class SimpleRowTest {
       final var nonExistentColumn = new ColumnName("NON_EXISTENT");
 
       // When
-      final var result = row.getValue(nonExistentColumn);
+      final var result = row.value(nonExistentColumn);
 
       // Then
       assertAll(

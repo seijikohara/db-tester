@@ -98,15 +98,15 @@ Tests must be grouped by **method under test** using `@Nested` classes:
 ### Example
 
 ```java
-/** Tests for the getValue() method. */
+/** Tests for the value() method. */
 @Nested
-@DisplayName("getValue(ColumnName) method")
-class GetValueMethod {
+@DisplayName("value(ColumnName) method")
+class ValueMethod {
 
-  /** Tests for the getValue method. */
-  GetValueMethod() {}
+  /** Tests for the value method. */
+  ValueMethod() {}
 
-  /** Verifies that getValue returns value when column exists. */
+  /** Verifies that value returns value when column exists. */
   @Test
   @Tag("normal")
   @DisplayName("should return value when column exists")
@@ -298,7 +298,7 @@ void shouldStoreValues_whenValidMapProvided() {
   final var row = new CsvRow(values);
 
   // Then
-  final var result = row.getValues();
+  final var result = row.values();
   assertAll(
       "row should contain all provided values",
       () -> assertEquals(2, result.size(), "should have 2 entries"),
@@ -357,9 +357,9 @@ private static Table createMockTable(
     final List<ColumnName> columns,
     final List<Row> rows) {
   final var mockTable = mock(Table.class);
-  when(mockTable.getName()).thenReturn(tableName);
-  when(mockTable.getColumns()).thenReturn(columns);
-  when(mockTable.getRows()).thenReturn(rows);
+  when(mockTable.name()).thenReturn(tableName);
+  when(mockTable.columns()).thenReturn(columns);
+  when(mockTable.rows()).thenReturn(rows);
   return mockTable;
 }
 ```

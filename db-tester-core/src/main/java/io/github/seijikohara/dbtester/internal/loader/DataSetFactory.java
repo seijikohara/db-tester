@@ -93,8 +93,8 @@ public final class DataSetFactory {
       logger.debug("Using AUTO format detection for directory: {}", directory);
       rawTableSet = new AutoFormatResolver().resolve(directory);
     } else {
-      validateDataFilesExist(directory, dataFormat.getExtension());
-      final var fileExtension = new FileExtension(dataFormat.getExtension());
+      validateDataFilesExist(directory, dataFormat.extension());
+      final var fileExtension = new FileExtension(dataFormat.extension());
       final var provider = FormatRegistry.getProvider(fileExtension);
       logger.debug(
           "Using format provider: {} for extension: {}",

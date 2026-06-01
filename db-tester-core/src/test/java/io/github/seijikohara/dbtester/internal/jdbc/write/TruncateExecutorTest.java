@@ -80,7 +80,7 @@ class TruncateExecutorTest {
       final var statement = mock(Statement.class);
 
       final var table = mock(Table.class);
-      when(table.getName()).thenReturn(new TableName("USERS"));
+      when(table.name()).thenReturn(new TableName("USERS"));
 
       when(sqlBuilder.buildTruncate("USERS")).thenReturn("TRUNCATE TABLE USERS");
       when(connection.createStatement()).thenReturn(statement);

@@ -209,7 +209,7 @@ abstract class AbstractExportProvider implements ExportProvider {
       return false;
     }
 
-    final var value = row.getValues().get(columnName);
+    final var value = row.values().get(columnName);
     if (value == null || value.isNull()) {
       return false;
     }

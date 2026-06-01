@@ -95,11 +95,11 @@ class UpsertExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
 
       when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(true);
@@ -139,7 +139,7 @@ class UpsertExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
-      when(table.getRows()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -163,8 +163,8 @@ class UpsertExecutorTest {
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
       final var row = mock(Row.class);
-      when(table.getRows()).thenReturn(List.of(row));
-      when(table.getColumns()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of(row));
+      when(table.columns()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -191,9 +191,9 @@ class UpsertExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
 
       when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(true);
@@ -229,9 +229,9 @@ class UpsertExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
 
       when(updateExecutor.tryUpdateRow(anyString(), any(), anyList(), any(), any(), any()))
           .thenReturn(false);

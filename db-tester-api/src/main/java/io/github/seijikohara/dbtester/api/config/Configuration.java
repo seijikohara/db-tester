@@ -68,7 +68,7 @@ public final class Configuration {
     private static DataSetLoader loadProvider() {
       return ServiceLoader.load(DataSetLoaderProvider.class)
           .findFirst()
-          .map(DataSetLoaderProvider::getLoader)
+          .map(DataSetLoaderProvider::loader)
           .orElseThrow(
               () ->
                   new IllegalStateException(

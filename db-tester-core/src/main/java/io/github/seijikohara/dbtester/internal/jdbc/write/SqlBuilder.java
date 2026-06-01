@@ -30,14 +30,13 @@ public final class SqlBuilder {
    */
   public String buildInsert(final Table table) {
     final var columns =
-        table.getColumns().stream()
+        table.columns().stream()
             .map(col -> validate(col.value()))
             .collect(Collectors.joining(", "));
     final var placeholders =
-        table.getColumns().stream().map(c -> "?").collect(Collectors.joining(", "));
+        table.columns().stream().map(c -> "?").collect(Collectors.joining(", "));
     return String.format(
-        "INSERT INTO %s (%s) VALUES (%s)",
-        validate(table.getName().value()), columns, placeholders);
+        "INSERT INTO %s (%s) VALUES (%s)", validate(table.name().value()), columns, placeholders);
   }
 
   /**

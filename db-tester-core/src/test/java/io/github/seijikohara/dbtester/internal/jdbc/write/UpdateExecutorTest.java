@@ -101,11 +101,11 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
@@ -140,7 +140,7 @@ class UpdateExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
-      when(table.getRows()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -164,8 +164,8 @@ class UpdateExecutorTest {
       final var row = mock(Row.class);
       final var pkColumn = new ColumnName("ID");
 
-      when(table.getRows()).thenReturn(List.of(row));
-      when(table.getColumns()).thenReturn(List.of(pkColumn));
+      when(table.rows()).thenReturn(List.of(row));
+      when(table.columns()).thenReturn(List.of(pkColumn));
 
       // When
       executor.execute(List.of(table), connection);
@@ -199,8 +199,8 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
@@ -231,8 +231,8 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(999));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(row.value(pkColumn)).thenReturn(new CellValue(999));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
 
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
@@ -294,9 +294,9 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
       when(connection.prepareStatement(anyString()))
@@ -328,11 +328,11 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
@@ -364,11 +364,11 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
@@ -400,9 +400,9 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(pkColumn, nameColumn));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(pkColumn, nameColumn));
+      when(table.rows()).thenReturn(List.of(row));
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
@@ -471,8 +471,8 @@ class UpdateExecutorTest {
       final var pkColumn = new ColumnName("ID");
       final var nameColumn = new ColumnName("NAME");
 
-      when(row.getValue(pkColumn)).thenReturn(new CellValue(1));
-      when(row.getValue(nameColumn)).thenReturn(new CellValue("John"));
+      when(row.value(pkColumn)).thenReturn(new CellValue(1));
+      when(row.value(nameColumn)).thenReturn(new CellValue("John"));
       when(sqlBuilder.buildUpdate("USERS", pkColumn, List.of(nameColumn)))
           .thenReturn("UPDATE USERS SET NAME = ? WHERE ID = ?");
       when(connection.prepareStatement(anyString())).thenReturn(statement);

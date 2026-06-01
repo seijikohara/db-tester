@@ -304,7 +304,7 @@ The framework selects providers as follows when multiple providers exist:
 |-----|-----------|
 | `DataSetLoaderProvider` | First found |
 | `ScenarioNameResolver` | Sorted by `priority()`, first where `canResolve()` returns true |
-| `TypeHandler` | By SQL type, then `getPriority()` (highest wins); database-specific match preferred |
+| `TypeHandler` | By SQL type, then `priority()` (highest wins); database-specific match preferred |
 | `FormatProvider` | First matching `supportedFileExtension()` |
 
 ## Related Specifications

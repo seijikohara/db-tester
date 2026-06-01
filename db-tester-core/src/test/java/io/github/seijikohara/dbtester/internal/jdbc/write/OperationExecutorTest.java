@@ -143,7 +143,7 @@ class OperationExecutorTest {
 
       when(dataSource.getConnection()).thenReturn(connection);
       when(connection.getAutoCommit()).thenReturn(true);
-      when(dataSet.getTables()).thenReturn(List.of());
+      when(dataSet.tables()).thenReturn(List.of());
 
       // When
       executor.execute(Operation.NONE, dataSet, dataSource, TableOrderingStrategy.ALPHABETICAL);
@@ -172,7 +172,7 @@ class OperationExecutorTest {
       final var table = mock(Table.class);
 
       when(dataSource.getConnection()).thenReturn(connection);
-      when(dataSet.getTables()).thenReturn(List.of(table));
+      when(dataSet.tables()).thenReturn(List.of(table));
       doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
           .when(insertExecutor)
           .execute(any(), any(), any(), anyInt());
@@ -203,7 +203,7 @@ class OperationExecutorTest {
       final var table = mock(Table.class);
 
       when(dataSource.getConnection()).thenReturn(connection);
-      when(dataSet.getTables()).thenReturn(List.of(table));
+      when(dataSet.tables()).thenReturn(List.of(table));
       doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
           .when(insertExecutor)
           .execute(any(), any(), any(), anyInt());
@@ -248,7 +248,7 @@ class OperationExecutorTest {
 
       when(dataSource.getConnection()).thenReturn(connection);
       when(connection.getAutoCommit()).thenReturn(true);
-      when(dataSet.getTables()).thenReturn(List.of(table));
+      when(dataSet.tables()).thenReturn(List.of(table));
       doThrow(new DatabaseOperationException("Insert failed", new SQLException("Insert failed")))
           .when(insertExecutor)
           .execute(any(), any(), any(), anyInt());
@@ -291,7 +291,7 @@ class OperationExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
-      when(dataSet.getTables()).thenReturn(List.of());
+      when(dataSet.tables()).thenReturn(List.of());
 
       // When
       executor.executeOperation(
@@ -318,7 +318,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -341,7 +341,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -364,7 +364,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -387,7 +387,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -410,7 +410,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -433,7 +433,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -457,7 +457,7 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -482,7 +482,7 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -516,7 +516,7 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -542,7 +542,7 @@ class OperationExecutorTest {
       final var table1 = mock(Table.class);
       final var table2 = mock(Table.class);
       final var tables = List.of(table1, table2);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -568,10 +568,10 @@ class OperationExecutorTest {
       final var tableC = mock(Table.class);
       final var tableA = mock(Table.class);
       final var tableB = mock(Table.class);
-      when(tableC.getName()).thenReturn(new TableName("C_TABLE"));
-      when(tableA.getName()).thenReturn(new TableName("A_TABLE"));
-      when(tableB.getName()).thenReturn(new TableName("B_TABLE"));
-      when(dataSet.getTables()).thenReturn(List.of(tableC, tableA, tableB));
+      when(tableC.name()).thenReturn(new TableName("C_TABLE"));
+      when(tableA.name()).thenReturn(new TableName("A_TABLE"));
+      when(tableB.name()).thenReturn(new TableName("B_TABLE"));
+      when(dataSet.tables()).thenReturn(List.of(tableC, tableA, tableB));
 
       // When
       executor.executeOperation(
@@ -598,9 +598,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       // Return reversed order (B before A)
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
@@ -632,9 +632,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       // Return same order (no reordering needed)
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
@@ -664,9 +664,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
           .thenThrow(
@@ -697,9 +697,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       // Return reversed order (B before A)
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
@@ -728,9 +728,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
           .thenThrow(
@@ -760,9 +760,9 @@ class OperationExecutorTest {
       final var tableB = mock(Table.class);
       final var tableNameA = new TableName("TABLE_A");
       final var tableNameB = new TableName("TABLE_B");
-      when(tableA.getName()).thenReturn(tableNameA);
-      when(tableB.getName()).thenReturn(tableNameB);
-      when(dataSet.getTables()).thenReturn(List.of(tableA, tableB));
+      when(tableA.name()).thenReturn(tableNameA);
+      when(tableB.name()).thenReturn(tableNameB);
+      when(dataSet.tables()).thenReturn(List.of(tableA, tableB));
       when(connection.getSchema()).thenReturn("PUBLIC");
       // Return same order
       when(tableOrderResolver.resolveOrder(any(), any(), any()))
@@ -797,7 +797,7 @@ class OperationExecutorTest {
       final var connection = mock(Connection.class);
       final var dataSet = mock(TableSet.class);
       final var tables = List.<Table>of();
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -821,7 +821,7 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(
@@ -851,7 +851,7 @@ class OperationExecutorTest {
       final var dataSet = mock(TableSet.class);
       final var table = mock(Table.class);
       final var tables = List.of(table);
-      when(dataSet.getTables()).thenReturn(tables);
+      when(dataSet.tables()).thenReturn(tables);
 
       // When
       executor.executeOperation(

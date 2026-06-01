@@ -62,7 +62,7 @@ class AutoFormatResolverTest {
       assertAll(
           "should load all CSV tables",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(2, result.getTables().size(), "should have 2 tables"));
+          () -> assertEquals(2, result.tables().size(), "should have 2 tables"));
     }
 
     /**
@@ -89,7 +89,7 @@ class AutoFormatResolverTest {
       assertAll(
           "should load JSON table",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getTables().size(), "should have 1 table"));
+          () -> assertEquals(1, result.tables().size(), "should have 1 table"));
     }
 
     /**
@@ -114,7 +114,7 @@ class AutoFormatResolverTest {
       assertAll(
           "should load tables from both formats",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(2, result.getTables().size(), "should have 2 tables"));
+          () -> assertEquals(2, result.tables().size(), "should have 2 tables"));
     }
 
     /**
@@ -140,7 +140,7 @@ class AutoFormatResolverTest {
       assertAll(
           "should load all tables from all formats",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(3, result.getTables().size(), "should have 3 tables"));
+          () -> assertEquals(3, result.tables().size(), "should have 3 tables"));
     }
 
     /**
@@ -165,7 +165,7 @@ class AutoFormatResolverTest {
       assertAll(
           "should load only supported files",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getTables().size(), "should have 1 table"));
+          () -> assertEquals(1, result.tables().size(), "should have 1 table"));
     }
 
     /**

@@ -85,15 +85,15 @@ class FilteredTableSetTest {
     }
   }
 
-  /** Tests for the getTables() method. */
+  /** Tests for the tables() method. */
   @Nested
-  @DisplayName("getTables() method")
-  class GetTablesMethod {
+  @DisplayName("tables() method")
+  class TablesMethod {
 
-    /** Tests for the getTables method. */
-    GetTablesMethod() {}
+    /** Tests for the tables method. */
+    TablesMethod() {}
 
-    /** Verifies that getTables returns filtered tables. */
+    /** Verifies that tables returns filtered tables. */
     @Test
     @Tag("normal")
     @DisplayName("should return filtered tables when called")
@@ -103,7 +103,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getTables();
+      final var result = filteredDataSet.tables();
 
       // Then
       assertAll(
@@ -112,7 +112,7 @@ class FilteredTableSetTest {
           () -> assertEquals(1, result.size(), "should have one table"));
     }
 
-    /** Verifies that getTables returns immutable list. */
+    /** Verifies that tables returns immutable list. */
     @Test
     @Tag("normal")
     @DisplayName("should return immutable list when called")
@@ -122,22 +122,22 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getTables();
+      final var result = filteredDataSet.tables();
 
       // Then
       assertNotNull(result, "result should not be null");
     }
   }
 
-  /** Tests for the getTable() method. */
+  /** Tests for the table() method. */
   @Nested
-  @DisplayName("getTable(TableName) method")
-  class GetTableMethod {
+  @DisplayName("table(TableName) method")
+  class TableMethod {
 
-    /** Tests for the getTable method. */
-    GetTableMethod() {}
+    /** Tests for the table method. */
+    TableMethod() {}
 
-    /** Verifies that getTable returns table when it exists. */
+    /** Verifies that table returns table when it exists. */
     @Test
     @Tag("normal")
     @DisplayName("should return table when table exists")
@@ -148,14 +148,14 @@ class FilteredTableSetTest {
       final var tableName = new TableName("users");
 
       // When
-      final var result = filteredDataSet.getTable(tableName);
+      final var result = filteredDataSet.table(tableName);
 
       // Then
       assertTrue(result.isPresent(), "table should be present");
-      assertEquals(tableName, result.orElseThrow().getName(), "should have correct table name");
+      assertEquals(tableName, result.orElseThrow().name(), "should have correct table name");
     }
 
-    /** Verifies that getTable returns empty when table does not exist. */
+    /** Verifies that table returns empty when table does not exist. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when table does not exist")
@@ -166,22 +166,22 @@ class FilteredTableSetTest {
       final var tableName = new TableName("nonexistent");
 
       // When
-      final var result = filteredDataSet.getTable(tableName);
+      final var result = filteredDataSet.table(tableName);
 
       // Then
       assertFalse(result.isPresent(), "table should not be present");
     }
   }
 
-  /** Tests for the getDataSource() method. */
+  /** Tests for the dataSource() method. */
   @Nested
-  @DisplayName("getDataSource() method")
-  class GetDataSourceMethod {
+  @DisplayName("dataSource() method")
+  class DataSourceMethod {
 
-    /** Tests for the getDataSource method. */
-    GetDataSourceMethod() {}
+    /** Tests for the dataSource method. */
+    DataSourceMethod() {}
 
-    /** Verifies that getDataSource returns data source when present. */
+    /** Verifies that dataSource returns data source when present. */
     @Test
     @Tag("normal")
     @DisplayName("should return data source when present")
@@ -191,14 +191,14 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getDataSource();
+      final var result = filteredDataSet.dataSource();
 
       // Then
       assertTrue(result.isPresent(), "data source should be present");
       assertEquals(mockDataSource, result.orElseThrow(), "should return correct data source");
     }
 
-    /** Verifies that getDataSource returns empty when null. */
+    /** Verifies that dataSource returns empty when null. */
     @Test
     @Tag("edge-case")
     @DisplayName("should return empty when data source is null")
@@ -208,7 +208,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, null);
 
       // When
-      final var result = filteredDataSet.getDataSource();
+      final var result = filteredDataSet.dataSource();
 
       // Then
       assertFalse(result.isPresent(), "data source should not be present");
@@ -223,7 +223,7 @@ class FilteredTableSetTest {
   private TableSet createMockDataSet() {
     final var mockDataSet = mock(TableSet.class);
     final var mockTable = createMockTable();
-    when(mockDataSet.getTables()).thenReturn(List.of(mockTable));
+    when(mockDataSet.tables()).thenReturn(List.of(mockTable));
     return mockDataSet;
   }
 
@@ -239,10 +239,10 @@ class FilteredTableSetTest {
         List.of(new ColumnName("$scenario"), new ColumnName("ID"), new ColumnName("NAME"));
     final var row = createMockRow();
 
-    when(mockTable.getName()).thenReturn(tableName);
-    when(mockTable.getColumns()).thenReturn(columns);
-    when(mockTable.getRows()).thenReturn(List.of(row));
-    when(mockTable.getRowCount()).thenReturn(1);
+    when(mockTable.name()).thenReturn(tableName);
+    when(mockTable.columns()).thenReturn(columns);
+    when(mockTable.rows()).thenReturn(List.of(row));
+    when(mockTable.rowCount()).thenReturn(1);
 
     return mockTable;
   }
@@ -259,10 +259,10 @@ class FilteredTableSetTest {
     values.put(new ColumnName("ID"), new CellValue("1"));
     values.put(new ColumnName("NAME"), new CellValue("John"));
 
-    when(mockRow.getValue(new ColumnName("$scenario"))).thenReturn(new CellValue("test"));
-    when(mockRow.getValue(new ColumnName("ID"))).thenReturn(new CellValue("1"));
-    when(mockRow.getValue(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
-    when(mockRow.getValues()).thenReturn(values);
+    when(mockRow.value(new ColumnName("$scenario"))).thenReturn(new CellValue("test"));
+    when(mockRow.value(new ColumnName("ID"))).thenReturn(new CellValue("1"));
+    when(mockRow.value(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
+    when(mockRow.values()).thenReturn(values);
 
     return mockRow;
   }

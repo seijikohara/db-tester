@@ -125,8 +125,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -152,8 +152,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -188,8 +188,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -219,8 +219,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -259,8 +259,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -291,8 +291,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -334,8 +334,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -388,8 +388,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -422,8 +422,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -466,8 +466,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -500,8 +500,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -534,8 +534,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -577,8 +577,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -609,8 +609,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
@@ -640,8 +640,8 @@ class DefaultExpectationSupportTest {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
-      when(tableSet.getDataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.getTables()).thenReturn(List.of());
+      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
+      when(tableSet.tables()).thenReturn(List.of());
 
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);

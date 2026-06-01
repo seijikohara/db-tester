@@ -68,24 +68,22 @@ public final class DeleteExecutor implements TableExecutor {
    */
   private void deleteTable(
       final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
-    if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
+    if (table.rows().isEmpty() || table.columns().isEmpty()) {
       return;
     }
 
-    final var primaryKeyColumn = table.getColumns().getFirst();
-    final var sql = sqlBuilder.buildDelete(table.getName().value(), primaryKeyColumn);
+    final var primaryKeyColumn = table.columns().getFirst();
+    final var sql = sqlBuilder.buildDelete(table.name().value(), primaryKeyColumn);
     logger.trace("Executing DELETE: {}", sql);
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
       applyTimeout(preparedStatement, queryTimeout);
       table
-          .getRows()
+          .rows()
           .forEach(
               row -> {
-                run(
-                    () ->
-                        parameterBinder.bind(preparedStatement, 1, row.getValue(primaryKeyColumn)));
+                run(() -> parameterBinder.bind(preparedStatement, 1, row.value(primaryKeyColumn)));
                 run(preparedStatement::addBatch);
               });
       run(preparedStatement::executeBatch);
@@ -100,7 +98,7 @@ public final class DeleteExecutor implements TableExecutor {
    * @throws DatabaseOperationException if a database error occurs
    */
   public void executeDeleteAll(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> deleteAllRows(table.getName().value(), connection, null));
+    tables.forEach(table -> deleteAllRows(table.name().value(), connection, null));
   }
 
   /**
@@ -115,7 +113,7 @@ public final class DeleteExecutor implements TableExecutor {
       final List<Table> tables,
       final Connection connection,
       final @Nullable Duration queryTimeout) {
-    tables.forEach(table -> deleteAllRows(table.getName().value(), connection, queryTimeout));
+    tables.forEach(table -> deleteAllRows(table.name().value(), connection, queryTimeout));
   }
 
   /**

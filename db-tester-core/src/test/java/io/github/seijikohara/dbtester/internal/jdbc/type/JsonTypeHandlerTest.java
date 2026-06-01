@@ -41,42 +41,42 @@ class JsonTypeHandlerTest {
     handler = new JsonTypeHandler();
   }
 
-  /** Tests for the getJavaType() method. */
+  /** Tests for the javaType() method. */
   @Nested
-  @DisplayName("getJavaType() method")
+  @DisplayName("javaType() method")
   class GetJavaTypeMethod {
 
-    /** Tests for the getJavaType method. */
+    /** Tests for the javaType method. */
     GetJavaTypeMethod() {}
 
-    /** Verifies that getJavaType returns JsonNode class. */
+    /** Verifies that javaType returns JsonNode class. */
     @Test
     @Tag("normal")
     @DisplayName("should return JsonNode class when called")
     void shouldReturnJsonNodeClass_whenCalled() {
       // When
-      final var result = handler.getJavaType();
+      final var result = handler.javaType();
 
       // Then
       assertEquals(JsonNode.class, result, "should return JsonNode class");
     }
   }
 
-  /** Tests for the getSqlTypes() method. */
+  /** Tests for the sqlTypes() method. */
   @Nested
-  @DisplayName("getSqlTypes() method")
+  @DisplayName("sqlTypes() method")
   class GetSqlTypesMethod {
 
-    /** Tests for the getSqlTypes method. */
+    /** Tests for the sqlTypes method. */
     GetSqlTypesMethod() {}
 
-    /** Verifies that getSqlTypes returns OTHER type. */
+    /** Verifies that sqlTypes returns OTHER type. */
     @Test
     @Tag("normal")
     @DisplayName("should return OTHER type when called")
     void shouldReturnOtherType_whenCalled() {
       // When
-      final var result = handler.getSqlTypes();
+      final var result = handler.sqlTypes();
 
       // Then
       assertAll(
@@ -86,21 +86,21 @@ class JsonTypeHandlerTest {
     }
   }
 
-  /** Tests for the getSupportedDatabases() method. */
+  /** Tests for the supportedDatabases() method. */
   @Nested
-  @DisplayName("getSupportedDatabases() method")
+  @DisplayName("supportedDatabases() method")
   class GetSupportedDatabasesMethod {
 
-    /** Tests for the getSupportedDatabases method. */
+    /** Tests for the supportedDatabases method. */
     GetSupportedDatabasesMethod() {}
 
-    /** Verifies that getSupportedDatabases includes PostgreSQL. */
+    /** Verifies that supportedDatabases includes PostgreSQL. */
     @Test
     @Tag("normal")
     @DisplayName("should return PostgreSQL when called")
     void shouldReturnPostgres_whenCalled() {
       // When
-      final var result = handler.getSupportedDatabases();
+      final var result = handler.supportedDatabases();
 
       // Then
       assertAll(
@@ -110,22 +110,22 @@ class JsonTypeHandlerTest {
     }
   }
 
-  /** Tests for the getPriority() method. */
+  /** Tests for the priority() method. */
   @Nested
-  @DisplayName("getPriority() method")
+  @DisplayName("priority() method")
   class GetPriorityMethod {
 
-    /** Tests for the getPriority method. */
+    /** Tests for the priority method. */
     GetPriorityMethod() {}
 
-    /** Verifies that getPriority returns higher than UUID handler. */
+    /** Verifies that priority returns higher than UUID handler. */
     @Test
     @Tag("normal")
     @DisplayName("should return higher priority than UUID handler")
     void shouldReturnHigherPriority_thanUuidHandler() {
       // When
-      final var jsonPriority = handler.getPriority();
-      final var uuidPriority = new UuidTypeHandler().getPriority();
+      final var jsonPriority = handler.priority();
+      final var uuidPriority = new UuidTypeHandler().priority();
 
       // Then
       assertTrue(

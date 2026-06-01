@@ -115,14 +115,14 @@ class JsonFormatProviderTest {
       assertAll(
           "dataset should contain parsed table",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.tables().size(), "should have one table"));
 
-      final var table = result.getTables().getFirst();
+      final var table = result.tables().getFirst();
       assertAll(
           "table should have correct structure",
-          () -> assertEquals("users", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals(1, table.getRowCount(), "should have 1 row"));
+          () -> assertEquals("users", table.name().value(), "should have correct table name"),
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals(1, table.rowCount(), "should have 1 row"));
     }
 
     /**
@@ -144,7 +144,7 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      assertEquals(2, result.getTables().size(), "should have two tables");
+      assertEquals(2, result.tables().size(), "should have two tables");
     }
 
     /**
@@ -172,9 +172,9 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var nameValue = row.getValue(new ColumnName("NAME"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var nameValue = row.value(new ColumnName("NAME"));
 
       assertEquals(CellValue.NULL, nameValue, "null cell should be NULL");
     }
@@ -208,9 +208,9 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var row = result.getTables().getFirst().getRows().getFirst();
-      final var nameValue = row.getValue(new ColumnName("NAME"));
-      final var emailValue = row.getValue(new ColumnName("EMAIL"));
+      final var row = result.tables().getFirst().rows().getFirst();
+      final var nameValue = row.value(new ColumnName("NAME"));
+      final var emailValue = row.value(new ColumnName("EMAIL"));
       assertAll(
           "JSON distinguishes empty string from null",
           () -> assertFalse(nameValue.isNull(), "empty-string NAME should not be NULL"),
@@ -245,8 +245,8 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      assertEquals(3, table.getRowCount(), "should have 3 rows");
+      final var table = result.tables().getFirst();
+      assertEquals(3, table.rowCount(), "should have 3 rows");
     }
 
     /**
@@ -273,10 +273,10 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var priceValue = row.getValue(new ColumnName("PRICE"));
-      final var quantityValue = row.getValue(new ColumnName("QUANTITY"));
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var priceValue = row.value(new ColumnName("PRICE"));
+      final var quantityValue = row.value(new ColumnName("QUANTITY"));
 
       assertAll(
           "numeric values should be converted to strings",
@@ -395,9 +395,9 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var idString = (String) row.getValue(new ColumnName("ID")).value();
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var idString = (String) row.value(new ColumnName("ID")).value();
 
       assertAll(
           "UUID expression should be resolved",
@@ -440,20 +440,20 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var rows = table.getRows();
+      final var table = result.tables().getFirst();
+      final var rows = table.rows();
 
       assertAll(
           "sequence expressions should be resolved incrementally",
           () ->
               assertEquals(
                   "1",
-                  rows.getFirst().getValue(new ColumnName("ID")).value(),
+                  rows.getFirst().value(new ColumnName("ID")).value(),
                   "first row should have sequence value 1"),
           () ->
               assertEquals(
                   "2",
-                  rows.get(1).getValue(new ColumnName("ID")).value(),
+                  rows.get(1).value(new ColumnName("ID")).value(),
                   "second row should have sequence value 2"));
     }
 
@@ -482,21 +482,21 @@ class JsonFormatProviderTest {
       final var result = provider.parse(tempDir);
 
       // Then
-      final var table = result.getTables().getFirst();
-      final var row = table.getRows().getFirst();
-      final var nameString = (String) row.getValue(new ColumnName("NAME")).value();
+      final var table = result.tables().getFirst();
+      final var row = table.rows().getFirst();
+      final var nameString = (String) row.value(new ColumnName("NAME")).value();
 
       assertAll(
           "numeric values should be passed through unchanged",
           () ->
               assertEquals(
                   "42",
-                  row.getValue(new ColumnName("ID")).value(),
+                  row.value(new ColumnName("ID")).value(),
                   "integer should be converted to string"),
           () ->
               assertEquals(
                   "99.99",
-                  row.getValue(new ColumnName("PRICE")).value(),
+                  row.value(new ColumnName("PRICE")).value(),
                   "decimal should be converted to string"),
           () ->
               assertFalse(
