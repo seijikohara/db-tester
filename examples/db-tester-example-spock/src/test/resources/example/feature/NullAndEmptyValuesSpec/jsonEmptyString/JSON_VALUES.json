@@ -1,0 +1,4 @@
+[
+  {"ID": 1, "COLUMN1": "Null Record", "COLUMN2": null},
+  {"ID": 2, "COLUMN1": "Empty String Record", "COLUMN2": ""}
+]
