@@ -108,10 +108,10 @@ class InsertExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
 
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
@@ -170,7 +170,7 @@ class InsertExecutorTest {
       // Given
       final var connection = mock(Connection.class);
       final var table = mock(Table.class);
-      when(table.getRows()).thenReturn(List.of());
+      when(table.rows()).thenReturn(List.of());
 
       // When
       executor.execute(List.of(table), connection);
@@ -204,7 +204,7 @@ class InsertExecutorTest {
       final var row = mock(Row.class);
       final var columnName = new ColumnName("ID");
 
-      when(table.getColumns()).thenReturn(List.of(columnName));
+      when(table.columns()).thenReturn(List.of(columnName));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
 
@@ -231,7 +231,7 @@ class InsertExecutorTest {
       final var row = mock(Row.class);
       final var cause = new SQLException("Connection refused");
 
-      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(table.columns()).thenReturn(List.of(new ColumnName("ID")));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(connection.prepareStatement(anyString())).thenThrow(cause);
 
@@ -259,7 +259,7 @@ class InsertExecutorTest {
       final var row = mock(Row.class);
       final var cause = new SQLException("Duplicate key");
 
-      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(table.columns()).thenReturn(List.of(new ColumnName("ID")));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
       when(statement.executeUpdate()).thenThrow(cause);
@@ -289,7 +289,7 @@ class InsertExecutorTest {
       final var timeout = Duration.ofSeconds(30);
       final var cause = new SQLException("Timeout not supported");
 
-      when(table.getColumns()).thenReturn(List.of(new ColumnName("ID")));
+      when(table.columns()).thenReturn(List.of(new ColumnName("ID")));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(connection.prepareStatement(anyString())).thenReturn(statement);
       doThrow(cause).when(statement).setQueryTimeout(anyInt());
@@ -327,9 +327,9 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Connection lost");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(mock(Row.class)));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement(anyString())).thenThrow(cause);
@@ -358,9 +358,9 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Query execution failed");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(mock(Row.class)));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement(anyString())).thenReturn(metadataStatement);
@@ -391,9 +391,9 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Metadata unavailable");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(mock(Row.class)));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement(anyString())).thenReturn(metadataStatement);
@@ -428,10 +428,10 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Batch execution failed");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -472,10 +472,10 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Batch add failed");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
-      when(row.getValue(columnName)).thenReturn(new CellValue(1));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
+      when(row.value(columnName)).thenReturn(new CellValue(1));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -517,9 +517,9 @@ class InsertExecutorTest {
       final var timeout = Duration.ofSeconds(30);
       final var cause = new SQLException("Timeout not supported");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(row));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(row));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -556,9 +556,9 @@ class InsertExecutorTest {
       final var columnName = new ColumnName("ID");
       final var cause = new SQLException("Connection refused");
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(List.of(mock(Row.class)));
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(List.of(mock(Row.class)));
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement(anyString())).thenThrow(cause);
@@ -605,14 +605,14 @@ class InsertExecutorTest {
               .mapToObj(
                   i -> {
                     final var row = mock(Row.class);
-                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    when(row.value(columnName)).thenReturn(new CellValue(i));
                     return row;
                   })
               .toList();
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(rows);
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(rows);
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -655,14 +655,14 @@ class InsertExecutorTest {
               .mapToObj(
                   i -> {
                     final var row = mock(Row.class);
-                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    when(row.value(columnName)).thenReturn(new CellValue(i));
                     return row;
                   })
               .toList();
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(rows);
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(rows);
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -705,14 +705,14 @@ class InsertExecutorTest {
               .mapToObj(
                   i -> {
                     final var row = mock(Row.class);
-                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    when(row.value(columnName)).thenReturn(new CellValue(i));
                     return row;
                   })
               .toList();
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(rows);
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(rows);
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -755,14 +755,14 @@ class InsertExecutorTest {
               .mapToObj(
                   i -> {
                     final var row = mock(Row.class);
-                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    when(row.value(columnName)).thenReturn(new CellValue(i));
                     return row;
                   })
               .toList();
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(rows);
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(rows);
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))
@@ -805,14 +805,14 @@ class InsertExecutorTest {
               .mapToObj(
                   i -> {
                     final var row = mock(Row.class);
-                    when(row.getValue(columnName)).thenReturn(new CellValue(i));
+                    when(row.value(columnName)).thenReturn(new CellValue(i));
                     return row;
                   })
               .toList();
 
-      when(table.getName()).thenReturn(new TableName("USERS"));
-      when(table.getColumns()).thenReturn(List.of(columnName));
-      when(table.getRows()).thenReturn(rows);
+      when(table.name()).thenReturn(new TableName("USERS"));
+      when(table.columns()).thenReturn(List.of(columnName));
+      when(table.rows()).thenReturn(rows);
       when(sqlBuilder.buildInsert(table)).thenReturn("INSERT INTO USERS (ID) VALUES (?)");
       when(sqlBuilder.buildMetadataQuery("USERS")).thenReturn("SELECT * FROM USERS WHERE 1=0");
       when(connection.prepareStatement("SELECT * FROM USERS WHERE 1=0"))

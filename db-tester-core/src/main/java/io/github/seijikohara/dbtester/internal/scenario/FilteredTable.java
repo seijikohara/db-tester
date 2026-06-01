@@ -53,19 +53,19 @@ public final class FilteredTable implements Table {
    * @param filter the scenario filter to apply
    */
   public FilteredTable(final Table sourceTable, final ScenarioFilter filter) {
-    this.tableName = sourceTable.getName();
+    this.tableName = sourceTable.name();
 
-    final var allColumns = sourceTable.getColumns();
+    final var allColumns = sourceTable.columns();
     final var scenarioColumn = filter.findScenarioColumn(allColumns).orElse(null);
     this.columns = filter.deriveDataColumns(allColumns, scenarioColumn);
 
-    final var filteredRows = filter.filterRows(sourceTable.getRows(), scenarioColumn);
+    final var filteredRows = filter.filterRows(sourceTable.rows(), scenarioColumn);
     this.rows = extractDataColumnsOnly(filteredRows, this.columns);
 
     logger.debug(
         "Filtered table {} from {} to {} rows",
         tableName.value(),
-        sourceTable.getRowCount(),
+        sourceTable.rowCount(),
         rows.size());
   }
 
@@ -75,7 +75,7 @@ public final class FilteredTable implements Table {
    * @return the table name
    */
   @Override
-  public TableName getName() {
+  public TableName name() {
     return tableName;
   }
 
@@ -85,7 +85,7 @@ public final class FilteredTable implements Table {
    * @return immutable list of column names (excluding scenario marker)
    */
   @Override
-  public List<ColumnName> getColumns() {
+  public List<ColumnName> columns() {
     return columns;
   }
 
@@ -95,7 +95,7 @@ public final class FilteredTable implements Table {
    * @return immutable list of scenario-filtered rows
    */
   @Override
-  public List<Row> getRows() {
+  public List<Row> rows() {
     return rows;
   }
 
@@ -105,7 +105,7 @@ public final class FilteredTable implements Table {
    * @return the number of rows in this table
    */
   @Override
-  public int getRowCount() {
+  public int rowCount() {
     return rows.size();
   }
 
@@ -138,7 +138,7 @@ public final class FilteredTable implements Table {
         dataColumns.stream()
             .collect(
                 Collectors.toMap(
-                    column -> column, sourceRow::getValue, (v1, v2) -> v1, LinkedHashMap::new));
+                    column -> column, sourceRow::value, (v1, v2) -> v1, LinkedHashMap::new));
     return new SimpleRow(values);
   }
 }

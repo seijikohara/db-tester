@@ -46,7 +46,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // Then
-      final var result = row.getValues();
+      final var result = row.values();
       assertAll(
           "row should contain all provided values",
           () -> assertEquals(2, result.size(), "should have 2 entries"),
@@ -70,7 +70,7 @@ class SimpleRowTest {
       mutableMap.put(new ColumnName("COL2"), new CellValue("value2"));
 
       // Then
-      final var result = row.getValues();
+      final var result = row.values();
       assertAll(
           "row values should not be affected by changes to original map",
           () -> assertEquals(1, result.size(), "should still have only 1 entry"),
@@ -89,7 +89,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(emptyMap);
 
       // Then
-      assertEquals(0, row.getValues().size(), "should have no entries");
+      assertEquals(0, row.values().size(), "should have no entries");
     }
   }
 
@@ -117,7 +117,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result = row.getValues();
+      final var result = row.values();
 
       // Then
       assertAll(
@@ -140,7 +140,7 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result = row.getValues();
+      final var result = row.values();
 
       // Then
       assertThrows(
@@ -172,8 +172,8 @@ class SimpleRowTest {
       final var row = new SimpleRow(values);
 
       // When
-      final var result1 = row.getValue(column1);
-      final var result2 = row.getValue(column2);
+      final var result1 = row.value(column1);
+      final var result2 = row.value(column2);
 
       // Then
       assertAll(
@@ -195,7 +195,7 @@ class SimpleRowTest {
       final var nonExistentColumn = new ColumnName("NON_EXISTENT");
 
       // When
-      final var result = row.getValue(nonExistentColumn);
+      final var result = row.value(nonExistentColumn);
 
       // Then
       assertAll(

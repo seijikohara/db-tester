@@ -81,7 +81,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, filter);
 
       // When
-      final var result = filteredTable.getName();
+      final var result = filteredTable.name();
 
       // Then
       assertEquals(new TableName("users"), result, "should return correct table name");
@@ -106,7 +106,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, filter);
 
       // When
-      final var result = filteredTable.getColumns();
+      final var result = filteredTable.columns();
 
       // Then
       assertAll(
@@ -131,7 +131,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, filter);
 
       // When
-      final var result = filteredTable.getColumns();
+      final var result = filteredTable.columns();
 
       // Then
       assertEquals(2, result.size(), "should have all 2 columns");
@@ -156,7 +156,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, filter);
 
       // When
-      final var result = filteredTable.getRows();
+      final var result = filteredTable.rows();
 
       // Then
       assertNotNull(result, "result should not be null");
@@ -174,7 +174,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, inactiveFilter);
 
       // When
-      final var result = filteredTable.getRows();
+      final var result = filteredTable.rows();
 
       // Then
       assertNotNull(result, "result should not be null");
@@ -199,7 +199,7 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, filter);
 
       // When
-      final var result = filteredTable.getRowCount();
+      final var result = filteredTable.rowCount();
 
       // Then
       assertEquals(1, result, "should return correct row count");
@@ -232,10 +232,10 @@ class FilteredTableTest {
       final var filteredTable = new FilteredTable(sourceTable, noScenarioFilter);
 
       // When
-      final var result = filteredTable.getRows();
+      final var result = filteredTable.rows();
 
       // Then
-      final var nameValue = result.get(0).getValue(new ColumnName("NAME"));
+      final var nameValue = result.get(0).value(new ColumnName("NAME"));
       assertAll(
           "empty string is preserved",
           () -> assertNotNull(result, "result should not be null"),
@@ -259,10 +259,10 @@ class FilteredTableTest {
         List.of(new ColumnName("$scenario"), new ColumnName("ID"), new ColumnName("NAME"));
     final var row = createMockRowWithScenario("test");
 
-    when(mockTable.getName()).thenReturn(tableName);
-    when(mockTable.getColumns()).thenReturn(columns);
-    when(mockTable.getRows()).thenReturn(List.of(row));
-    when(mockTable.getRowCount()).thenReturn(1);
+    when(mockTable.name()).thenReturn(tableName);
+    when(mockTable.columns()).thenReturn(columns);
+    when(mockTable.rows()).thenReturn(List.of(row));
+    when(mockTable.rowCount()).thenReturn(1);
 
     return mockTable;
   }
@@ -278,10 +278,10 @@ class FilteredTableTest {
     final var columns = List.of(new ColumnName("ID"), new ColumnName("NAME"));
     final var row = createMockRowWithoutScenario();
 
-    when(mockTable.getName()).thenReturn(tableName);
-    when(mockTable.getColumns()).thenReturn(columns);
-    when(mockTable.getRows()).thenReturn(List.of(row));
-    when(mockTable.getRowCount()).thenReturn(1);
+    when(mockTable.name()).thenReturn(tableName);
+    when(mockTable.columns()).thenReturn(columns);
+    when(mockTable.rows()).thenReturn(List.of(row));
+    when(mockTable.rowCount()).thenReturn(1);
 
     return mockTable;
   }
@@ -297,10 +297,10 @@ class FilteredTableTest {
     final var columns = List.of(new ColumnName("ID"), new ColumnName("NAME"));
     final var row = createMockRowWithEmptyString();
 
-    when(mockTable.getName()).thenReturn(tableName);
-    when(mockTable.getColumns()).thenReturn(columns);
-    when(mockTable.getRows()).thenReturn(List.of(row));
-    when(mockTable.getRowCount()).thenReturn(1);
+    when(mockTable.name()).thenReturn(tableName);
+    when(mockTable.columns()).thenReturn(columns);
+    when(mockTable.rows()).thenReturn(List.of(row));
+    when(mockTable.rowCount()).thenReturn(1);
 
     return mockTable;
   }
@@ -318,10 +318,10 @@ class FilteredTableTest {
     values.put(new ColumnName("ID"), new CellValue("1"));
     values.put(new ColumnName("NAME"), new CellValue("John"));
 
-    when(mockRow.getValue(new ColumnName("$scenario"))).thenReturn(new CellValue(scenarioValue));
-    when(mockRow.getValue(new ColumnName("ID"))).thenReturn(new CellValue("1"));
-    when(mockRow.getValue(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
-    when(mockRow.getValues()).thenReturn(values);
+    when(mockRow.value(new ColumnName("$scenario"))).thenReturn(new CellValue(scenarioValue));
+    when(mockRow.value(new ColumnName("ID"))).thenReturn(new CellValue("1"));
+    when(mockRow.value(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
+    when(mockRow.values()).thenReturn(values);
 
     return mockRow;
   }
@@ -337,9 +337,9 @@ class FilteredTableTest {
     values.put(new ColumnName("ID"), new CellValue("1"));
     values.put(new ColumnName("NAME"), new CellValue("John"));
 
-    when(mockRow.getValue(new ColumnName("ID"))).thenReturn(new CellValue("1"));
-    when(mockRow.getValue(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
-    when(mockRow.getValues()).thenReturn(values);
+    when(mockRow.value(new ColumnName("ID"))).thenReturn(new CellValue("1"));
+    when(mockRow.value(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
+    when(mockRow.values()).thenReturn(values);
 
     return mockRow;
   }
@@ -355,9 +355,9 @@ class FilteredTableTest {
     values.put(new ColumnName("ID"), new CellValue("1"));
     values.put(new ColumnName("NAME"), new CellValue(""));
 
-    when(mockRow.getValue(new ColumnName("ID"))).thenReturn(new CellValue("1"));
-    when(mockRow.getValue(new ColumnName("NAME"))).thenReturn(new CellValue(""));
-    when(mockRow.getValues()).thenReturn(values);
+    when(mockRow.value(new ColumnName("ID"))).thenReturn(new CellValue("1"));
+    when(mockRow.value(new ColumnName("NAME"))).thenReturn(new CellValue(""));
+    when(mockRow.values()).thenReturn(values);
 
     return mockRow;
   }

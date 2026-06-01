@@ -61,7 +61,7 @@ public final class DefaultQueryAssertionProvider implements QueryAssertionProvid
     final var actualTable = tableReader.executeQuery(dataSource, sqlQuery, tableName);
     final var expectedTable =
         expected
-            .getTable(new TableName(tableName))
+            .table(new TableName(tableName))
             .orElseThrow(
                 () -> new AssertionError(String.format("Expected table not found: %s", tableName)));
 

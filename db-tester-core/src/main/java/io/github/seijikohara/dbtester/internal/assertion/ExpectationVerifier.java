@@ -120,7 +120,7 @@ public final class ExpectationVerifier {
 
     logger.debug(
         "Verifying expectation for {} tables with {} ordering, {} table ordering, and epsilon {}",
-        expectedTableSet.getTables().size(),
+        expectedTableSet.tables().size(),
         rowOrdering,
         tableOrdering,
         operationDefaults.floatingPointEpsilon());
@@ -145,12 +145,12 @@ public final class ExpectationVerifier {
 
     // Resolve table processing order
     final var orderedTables =
-        resolveTableOrder(expectedTableSet.getTables(), dataSource, tableOrdering);
+        resolveTableOrder(expectedTableSet.tables(), dataSource, tableOrdering);
 
     orderedTables.forEach(
         expectedTable -> {
-          final var tableName = expectedTable.getName().value();
-          final var expectedColumns = expectedTable.getColumns();
+          final var tableName = expectedTable.name().value();
+          final var expectedColumns = expectedTable.columns();
 
           logger.trace(
               "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
@@ -160,8 +160,8 @@ public final class ExpectationVerifier {
           logger.trace(
               "Comparing table {}: expected {} rows, actual {} rows ({})",
               tableName,
-              expectedTable.getRowCount(),
-              actualTable.getRowCount(),
+              expectedTable.rowCount(),
+              actualTable.rowCount(),
               rowOrdering);
 
           effectiveComparator.assertEqualsWithStrategies(
@@ -173,7 +173,7 @@ public final class ExpectationVerifier {
         });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
   }
 
   /**
@@ -216,7 +216,7 @@ public final class ExpectationVerifier {
       final TableSet expectedTableSet,
       final DataSource dataSource,
       final @Nullable Collection<String> excludeColumns) {
-    logger.debug("Verifying expectation for {} tables", expectedTableSet.getTables().size());
+    logger.debug("Verifying expectation for {} tables", expectedTableSet.tables().size());
 
     // Normalize exclude columns to uppercase for case-insensitive matching
     final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
@@ -226,11 +226,11 @@ public final class ExpectationVerifier {
     }
 
     expectedTableSet
-        .getTables()
+        .tables()
         .forEach(
             expectedTable -> {
-              final var tableName = expectedTable.getName().value();
-              final var expectedColumns = expectedTable.getColumns();
+              final var tableName = expectedTable.name().value();
+              final var expectedColumns = expectedTable.columns();
 
               logger.trace(
                   "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
@@ -242,8 +242,8 @@ public final class ExpectationVerifier {
               logger.trace(
                   "Comparing table {}: expected {} rows, actual {} rows",
                   tableName,
-                  expectedTable.getRowCount(),
-                  actualTable.getRowCount());
+                  expectedTable.rowCount(),
+                  actualTable.rowCount());
 
               // Compare with or without column exclusion
               if (normalizedExcludeColumns.isEmpty()) {
@@ -255,7 +255,7 @@ public final class ExpectationVerifier {
             });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
   }
 
   /**
@@ -285,7 +285,7 @@ public final class ExpectationVerifier {
       return;
     }
 
-    logger.debug("Verifying expectation for {} tables", expectedTableSet.getTables().size());
+    logger.debug("Verifying expectation for {} tables", expectedTableSet.tables().size());
 
     final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
 
@@ -296,11 +296,11 @@ public final class ExpectationVerifier {
     logger.debug("Using column strategies for: {}", columnStrategies.keySet());
 
     expectedTableSet
-        .getTables()
+        .tables()
         .forEach(
             expectedTable -> {
-              final var tableName = expectedTable.getName().value();
-              final var expectedColumns = expectedTable.getColumns();
+              final var tableName = expectedTable.name().value();
+              final var expectedColumns = expectedTable.columns();
 
               logger.trace(
                   "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
@@ -311,15 +311,15 @@ public final class ExpectationVerifier {
               logger.trace(
                   "Comparing table {}: expected {} rows, actual {} rows",
                   tableName,
-                  expectedTable.getRowCount(),
-                  actualTable.getRowCount());
+                  expectedTable.rowCount(),
+                  actualTable.rowCount());
 
               comparator.assertEqualsWithStrategies(
                   expectedTable, actualTable, normalizedExcludeColumns, columnStrategies);
             });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
   }
 
   /**
@@ -344,7 +344,7 @@ public final class ExpectationVerifier {
       final RowOrdering rowOrdering) {
     logger.debug(
         "Verifying expectation for {} tables with {} ordering",
-        expectedTableSet.getTables().size(),
+        expectedTableSet.tables().size(),
         rowOrdering);
 
     final var normalizedExcludeColumns = normalizeExcludeColumns(excludeColumns);
@@ -360,11 +360,11 @@ public final class ExpectationVerifier {
     }
 
     expectedTableSet
-        .getTables()
+        .tables()
         .forEach(
             expectedTable -> {
-              final var tableName = expectedTable.getName().value();
-              final var expectedColumns = expectedTable.getColumns();
+              final var tableName = expectedTable.name().value();
+              final var expectedColumns = expectedTable.columns();
 
               logger.trace(
                   "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
@@ -375,8 +375,8 @@ public final class ExpectationVerifier {
               logger.trace(
                   "Comparing table {}: expected {} rows, actual {} rows ({})",
                   tableName,
-                  expectedTable.getRowCount(),
-                  actualTable.getRowCount(),
+                  expectedTable.rowCount(),
+                  actualTable.rowCount(),
                   rowOrdering);
 
               comparator.assertEqualsWithStrategies(
@@ -388,7 +388,7 @@ public final class ExpectationVerifier {
             });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
   }
 
   /**
@@ -418,7 +418,7 @@ public final class ExpectationVerifier {
       final OperationDefaults operationDefaults) {
     logger.debug(
         "Verifying expectation for {} tables with {} ordering and epsilon {}",
-        expectedTableSet.getTables().size(),
+        expectedTableSet.tables().size(),
         rowOrdering,
         operationDefaults.floatingPointEpsilon());
 
@@ -438,11 +438,11 @@ public final class ExpectationVerifier {
     }
 
     expectedTableSet
-        .getTables()
+        .tables()
         .forEach(
             expectedTable -> {
-              final var tableName = expectedTable.getName().value();
-              final var expectedColumns = expectedTable.getColumns();
+              final var tableName = expectedTable.name().value();
+              final var expectedColumns = expectedTable.columns();
 
               logger.trace(
                   "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
@@ -453,8 +453,8 @@ public final class ExpectationVerifier {
               logger.trace(
                   "Comparing table {}: expected {} rows, actual {} rows ({})",
                   tableName,
-                  expectedTable.getRowCount(),
-                  actualTable.getRowCount(),
+                  expectedTable.rowCount(),
+                  actualTable.rowCount(),
                   rowOrdering);
 
               effectiveComparator.assertEqualsWithStrategies(
@@ -466,7 +466,7 @@ public final class ExpectationVerifier {
             });
 
     logger.debug(
-        "Successfully verified expectation for {} tables", expectedTableSet.getTables().size());
+        "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
   }
 
   /**
@@ -519,13 +519,13 @@ public final class ExpectationVerifier {
   private List<Table> resolveTableOrderAuto(final List<Table> tables, final DataSource dataSource) {
     try (final var connection = dataSource.getConnection()) {
       final var schema = getSchema(connection).orElse(null);
-      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var tableNames = tables.stream().map(Table::name).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
       if (!tableNames.equals(orderedNames)) {
         logger.debug("Resolved verification table order based on foreign keys: {}", orderedNames);
         final var tableMap =
-            tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+            tables.stream().collect(Collectors.toMap(Table::name, Function.identity()));
         return orderedNames.stream().map(tableMap::get).toList();
       }
     } catch (final SQLException e) {
@@ -548,7 +548,7 @@ public final class ExpectationVerifier {
       final List<Table> tables, final DataSource dataSource) {
     try (final var connection = dataSource.getConnection()) {
       final var schema = getSchema(connection).orElse(null);
-      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var tableNames = tables.stream().map(Table::name).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
       if (tableNames.equals(orderedNames)) {
@@ -558,7 +558,7 @@ public final class ExpectationVerifier {
 
       logger.debug("Resolved verification table order based on foreign keys: {}", orderedNames);
       final var tableMap =
-          tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+          tables.stream().collect(Collectors.toMap(Table::name, Function.identity()));
       return orderedNames.stream().map(tableMap::get).toList();
 
     } catch (final SQLException e) {
@@ -578,7 +578,7 @@ public final class ExpectationVerifier {
   private List<Table> resolveTableOrderAlphabetically(final List<Table> tables) {
     logger.debug("Sorting verification tables alphabetically");
     return tables.stream()
-        .sorted(Comparator.comparing(table -> table.getName().value().toLowerCase(Locale.ROOT)))
+        .sorted(Comparator.comparing(table -> table.name().value().toLowerCase(Locale.ROOT)))
         .toList();
   }
 

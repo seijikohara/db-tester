@@ -45,10 +45,10 @@ class TableTest {
       final var table = Table.of(tableName, columns, rows);
 
       assertNotNull(table);
-      assertEquals(tableName, table.getName());
-      assertEquals(2, table.getColumns().size());
-      assertEquals(1, table.getRows().size());
-      assertEquals(1, table.getRowCount());
+      assertEquals(tableName, table.name());
+      assertEquals(2, table.columns().size());
+      assertEquals(1, table.rows().size());
+      assertEquals(1, table.rowCount());
     }
 
     /** Verifies that of creates Table with empty rows. */
@@ -62,8 +62,8 @@ class TableTest {
       final var table = Table.of(tableName, columns, List.of());
 
       assertNotNull(table);
-      assertTrue(table.getRows().isEmpty());
-      assertEquals(0, table.getRowCount());
+      assertTrue(table.rows().isEmpty());
+      assertEquals(0, table.rowCount());
     }
   }
 
@@ -85,10 +85,10 @@ class TableTest {
       final var table = Table.of("users", List.of("id", "name"), List.of(row));
 
       assertNotNull(table);
-      assertEquals("users", table.getName().value());
-      assertEquals(2, table.getColumns().size());
-      assertEquals("id", table.getColumns().get(0).value());
-      assertEquals("name", table.getColumns().get(1).value());
+      assertEquals("users", table.name().value());
+      assertEquals(2, table.columns().size());
+      assertEquals("id", table.columns().get(0).value());
+      assertEquals("name", table.columns().get(1).value());
     }
 
     /** Verifies that of creates Table with empty column list. */
@@ -99,7 +99,7 @@ class TableTest {
       final var table = Table.of("empty_columns", List.of(), List.of());
 
       assertNotNull(table);
-      assertTrue(table.getColumns().isEmpty());
+      assertTrue(table.columns().isEmpty());
     }
   }
 
@@ -127,15 +127,13 @@ class TableTest {
       // Then
       assertAll(
           "table should contain correct structure and data",
-          () -> assertEquals("USERS", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(3, table.getColumns().size(), "should have 3 columns"),
-          () -> assertEquals("ID", table.getColumns().get(0).value(), "first column should be ID"),
+          () -> assertEquals("USERS", table.name().value(), "should have correct table name"),
+          () -> assertEquals(3, table.columns().size(), "should have 3 columns"),
+          () -> assertEquals("ID", table.columns().get(0).value(), "first column should be ID"),
           () ->
-              assertEquals(
-                  "NAME", table.getColumns().get(1).value(), "second column should be NAME"),
-          () ->
-              assertEquals("AGE", table.getColumns().get(2).value(), "third column should be AGE"),
-          () -> assertEquals(2, table.getRowCount(), "should have 2 rows"));
+              assertEquals("NAME", table.columns().get(1).value(), "second column should be NAME"),
+          () -> assertEquals("AGE", table.columns().get(2).value(), "third column should be AGE"),
+          () -> assertEquals(2, table.rowCount(), "should have 2 rows"));
     }
 
     /** Verifies that ofValues handles null values in rows. */
@@ -154,17 +152,15 @@ class TableTest {
       final var table = Table.ofValues("USERS", columns, rows);
 
       // Then
-      final var row = table.getRows().get(0);
+      final var row = table.rows().get(0);
       assertAll(
           "row should handle null value correctly",
           () ->
               assertEquals(
-                  new CellValue(1), row.getValue(new ColumnName("ID")), "should have ID value"),
+                  new CellValue(1), row.value(new ColumnName("ID")), "should have ID value"),
           () ->
               assertEquals(
-                  CellValue.NULL,
-                  row.getValue(new ColumnName("NAME")),
-                  "should have NULL for NAME"));
+                  CellValue.NULL, row.value(new ColumnName("NAME")), "should have NULL for NAME"));
     }
 
     /** Verifies that ofValues throws exception when row size mismatches column count. */
@@ -199,10 +195,10 @@ class TableTest {
       // Then
       assertAll(
           "empty table should have correct structure",
-          () -> assertEquals("EMPTY", table.getName().value(), "should have correct table name"),
-          () -> assertEquals(1, table.getColumns().size(), "should have 1 column"),
-          () -> assertEquals(0, table.getRowCount(), "should have 0 rows"),
-          () -> assertTrue(table.getRows().isEmpty(), "rows should be empty"));
+          () -> assertEquals("EMPTY", table.name().value(), "should have correct table name"),
+          () -> assertEquals(1, table.columns().size(), "should have 1 column"),
+          () -> assertEquals(0, table.rowCount(), "should have 0 rows"),
+          () -> assertTrue(table.rows().isEmpty(), "rows should be empty"));
     }
   }
 
@@ -222,7 +218,7 @@ class TableTest {
       final var tableName = new TableName("test_table");
       final var table = Table.of(tableName, List.of(new ColumnName("col1")), List.of());
 
-      assertEquals(tableName, table.getName());
+      assertEquals(tableName, table.name());
     }
 
     /** Verifies that getColumns returns immutable list. */
@@ -233,7 +229,7 @@ class TableTest {
       final var columns = List.of(new ColumnName("id"), new ColumnName("name"));
       final var table = Table.of(new TableName("test"), columns, List.of());
 
-      final var result = table.getColumns();
+      final var result = table.columns();
 
       assertEquals(2, result.size());
       assertEquals("id", result.get(0).value());
@@ -250,7 +246,7 @@ class TableTest {
       final var table =
           Table.of(new TableName("test"), List.of(new ColumnName("id")), List.of(row1, row2));
 
-      final var result = table.getRows();
+      final var result = table.rows();
 
       assertEquals(2, result.size());
     }
@@ -266,7 +262,7 @@ class TableTest {
       final var table =
           Table.of(new TableName("test"), List.of(new ColumnName("id")), List.of(row1, row2, row3));
 
-      assertEquals(3, table.getRowCount());
+      assertEquals(3, table.rowCount());
     }
 
     /** Verifies that getRowCount equals getRows().size(). */
@@ -278,7 +274,7 @@ class TableTest {
       final var table =
           Table.of(new TableName("test"), List.of(new ColumnName("id")), List.of(row));
 
-      assertEquals(table.getRows().size(), table.getRowCount());
+      assertEquals(table.rows().size(), table.rowCount());
     }
   }
 }

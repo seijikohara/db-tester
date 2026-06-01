@@ -72,11 +72,11 @@ public final class UpdateExecutor implements TableExecutor {
    */
   private void updateTable(
       final Table table, final Connection connection, final @Nullable Duration queryTimeout) {
-    if (table.getRows().isEmpty() || table.getColumns().isEmpty()) {
+    if (table.rows().isEmpty() || table.columns().isEmpty()) {
       return;
     }
 
-    final var columns = table.getColumns();
+    final var columns = table.columns();
     final var primaryKeyColumn = columns.getFirst();
     final var updateColumns = columns.subList(1, columns.size());
 
@@ -84,15 +84,14 @@ public final class UpdateExecutor implements TableExecutor {
       return;
     }
 
-    final var sql =
-        sqlBuilder.buildUpdate(table.getName().value(), primaryKeyColumn, updateColumns);
+    final var sql = sqlBuilder.buildUpdate(table.name().value(), primaryKeyColumn, updateColumns);
     logger.trace("Executing UPDATE: {}", sql);
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
       final var preparedStatement = statementResource.value();
       applyTimeout(preparedStatement, queryTimeout);
       table
-          .getRows()
+          .rows()
           .forEach(
               row -> {
                 IntStream.range(0, updateColumns.size())
@@ -103,13 +102,13 @@ public final class UpdateExecutor implements TableExecutor {
                                     parameterBinder.bind(
                                         preparedStatement,
                                         index + 1,
-                                        row.getValue(updateColumns.get(index)))));
+                                        row.value(updateColumns.get(index)))));
                 run(
                     () ->
                         parameterBinder.bind(
                             preparedStatement,
                             updateColumns.size() + 1,
-                            row.getValue(primaryKeyColumn)));
+                            row.value(primaryKeyColumn)));
                 run(preparedStatement::addBatch);
               });
       run(preparedStatement::executeBatch);
@@ -182,13 +181,11 @@ public final class UpdateExecutor implements TableExecutor {
                   run(
                       () ->
                           parameterBinder.bind(
-                              preparedStatement,
-                              index + 1,
-                              row.getValue(updateColumns.get(index)))));
+                              preparedStatement, index + 1, row.value(updateColumns.get(index)))));
       run(
           () ->
               parameterBinder.bind(
-                  preparedStatement, updateColumns.size() + 1, row.getValue(primaryKeyColumn)));
+                  preparedStatement, updateColumns.size() + 1, row.value(primaryKeyColumn)));
       return get(preparedStatement::executeUpdate) > 0;
     }
   }

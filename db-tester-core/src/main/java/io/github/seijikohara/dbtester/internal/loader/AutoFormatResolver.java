@@ -84,7 +84,7 @@ public final class AutoFormatResolver {
               extension.value(),
               provider.getClass().getSimpleName());
           final var tableSet = provider.parse(directory);
-          allTables.addAll(tableSet.getTables());
+          allTables.addAll(tableSet.tables());
         });
 
     logger.debug("Loaded {} tables from {} format(s)", allTables.size(), groupedByExtension.size());

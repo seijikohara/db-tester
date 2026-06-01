@@ -152,8 +152,8 @@ class ParameterBinderTest {
       final var column2 = new ColumnName("NAME");
       final var columns = List.of(column1, column2);
 
-      when(row.getValue(column1)).thenReturn(new CellValue(1));
-      when(row.getValue(column2)).thenReturn(new CellValue("John"));
+      when(row.value(column1)).thenReturn(new CellValue(1));
+      when(row.value(column2)).thenReturn(new CellValue("John"));
 
       // When
       binder.bindRow(statement, row, columns);
@@ -209,8 +209,8 @@ class ParameterBinderTest {
       final var columns = List.of(column1, column2);
       final var columnTypes = Map.of("ID", Types.INTEGER, "NAME", Types.VARCHAR);
 
-      when(row.getValue(column1)).thenReturn(new CellValue("42"));
-      when(row.getValue(column2)).thenReturn(new CellValue("John"));
+      when(row.value(column1)).thenReturn(new CellValue("42"));
+      when(row.value(column2)).thenReturn(new CellValue("John"));
 
       // When
       binder.bindRowWithTypes(statement, row, columns, columnTypes);
@@ -236,7 +236,7 @@ class ParameterBinderTest {
       final var columns = List.of(column1);
       final var columnTypes = Map.of("ID", Types.BIGINT);
 
-      when(row.getValue(column1)).thenReturn(new CellValue("12345"));
+      when(row.value(column1)).thenReturn(new CellValue("12345"));
 
       // When
       binder.bindRowWithTypes(statement, row, columns, columnTypes);
@@ -261,7 +261,7 @@ class ParameterBinderTest {
       final var columns = List.of(column1);
       final var columnTypes = Map.<String, Integer>of();
 
-      when(row.getValue(column1)).thenReturn(new CellValue("value"));
+      when(row.value(column1)).thenReturn(new CellValue("value"));
 
       // When
       binder.bindRowWithTypes(statement, row, columns, columnTypes);

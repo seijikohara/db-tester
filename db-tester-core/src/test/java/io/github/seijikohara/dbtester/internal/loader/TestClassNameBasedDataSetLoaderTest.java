@@ -136,7 +136,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "data sets should be loaded",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
 
     /**
@@ -193,7 +193,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "data sets should be loaded",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
 
     /**
@@ -281,7 +281,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "data sets should be loaded from explicit location",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
 
     /**
@@ -309,7 +309,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "data sets should be loaded from explicit location",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
 
     /**
@@ -344,7 +344,7 @@ class TestClassNameBasedDataSetLoaderTest {
           () ->
               assertEquals(
                   1,
-                  result.get(0).getTables().size(),
+                  result.get(0).tables().size(),
                   "should have one table (same name tables are merged)"));
     }
 
@@ -540,7 +540,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "data sets should be loaded from baseDirectory",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
 
     /**
@@ -595,7 +595,7 @@ class TestClassNameBasedDataSetLoaderTest {
           "expectation data sets should be loaded from baseDirectory with suffix",
           () -> assertNotNull(result, "result should not be null"),
           () -> assertEquals(1, result.size(), "should have one data set"),
-          () -> assertEquals(1, result.get(0).getTables().size(), "should have one table"));
+          () -> assertEquals(1, result.get(0).tables().size(), "should have one table"));
     }
   }
 

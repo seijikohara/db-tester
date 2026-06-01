@@ -49,7 +49,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(tables);
 
       // Then
-      assertEquals(2, dataSet.getTables().size(), "should have 2 tables");
+      assertEquals(2, dataSet.tables().size(), "should have 2 tables");
     }
 
     /** Verifies that constructor creates defensive copy of tables. */
@@ -66,7 +66,7 @@ class SimpleTableSetTest {
       mutableTables.add(createTable("PRODUCTS", List.of("ID")));
 
       // Then
-      assertEquals(1, dataSet.getTables().size(), "tables should not be affected by modification");
+      assertEquals(1, dataSet.tables().size(), "tables should not be affected by modification");
     }
 
     /** Verifies that constructor handles empty table list. */
@@ -81,7 +81,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(emptyTables);
 
       // Then
-      assertEquals(0, dataSet.getTables().size(), "should have no tables");
+      assertEquals(0, dataSet.tables().size(), "should have no tables");
     }
   }
 
@@ -106,7 +106,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(tables);
 
       // When
-      final var result = dataSet.getTables();
+      final var result = dataSet.tables();
 
       // Then
       assertAll(
@@ -127,7 +127,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of(table1));
 
       // When
-      final var result = dataSet.getTables();
+      final var result = dataSet.tables();
 
       // Then
       assertThrows(
@@ -156,7 +156,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of(usersTable, productsTable));
 
       // When
-      final var result = dataSet.getTable(new TableName("USERS"));
+      final var result = dataSet.table(new TableName("USERS"));
 
       // Then
       assertAll(
@@ -175,7 +175,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of(usersTable));
 
       // When
-      final var result = dataSet.getTable(new TableName("NON_EXISTENT"));
+      final var result = dataSet.table(new TableName("NON_EXISTENT"));
 
       // Then
       assertFalse(result.isPresent(), "should return empty for non-existent table");
@@ -190,7 +190,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of());
 
       // When
-      final var result = dataSet.getTable(new TableName("USERS"));
+      final var result = dataSet.table(new TableName("USERS"));
 
       // Then
       assertFalse(result.isPresent(), "should return empty for empty dataset");
@@ -207,7 +207,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of(usersTable1, usersTable2));
 
       // When
-      final var result = dataSet.getTable(new TableName("USERS"));
+      final var result = dataSet.table(new TableName("USERS"));
 
       // Then
       assertAll(
@@ -234,7 +234,7 @@ class SimpleTableSetTest {
       final var dataSet = new SimpleTableSet(List.of());
 
       // When
-      final var result = dataSet.getDataSource();
+      final var result = dataSet.dataSource();
 
       // Then
       assertFalse(result.isPresent(), "SimpleTableSet should always return empty DataSource");

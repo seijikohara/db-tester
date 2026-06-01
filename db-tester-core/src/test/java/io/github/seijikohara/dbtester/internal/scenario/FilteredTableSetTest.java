@@ -103,7 +103,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getTables();
+      final var result = filteredDataSet.tables();
 
       // Then
       assertAll(
@@ -122,7 +122,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getTables();
+      final var result = filteredDataSet.tables();
 
       // Then
       assertNotNull(result, "result should not be null");
@@ -148,11 +148,11 @@ class FilteredTableSetTest {
       final var tableName = new TableName("users");
 
       // When
-      final var result = filteredDataSet.getTable(tableName);
+      final var result = filteredDataSet.table(tableName);
 
       // Then
       assertTrue(result.isPresent(), "table should be present");
-      assertEquals(tableName, result.orElseThrow().getName(), "should have correct table name");
+      assertEquals(tableName, result.orElseThrow().name(), "should have correct table name");
     }
 
     /** Verifies that getTable returns empty when table does not exist. */
@@ -166,7 +166,7 @@ class FilteredTableSetTest {
       final var tableName = new TableName("nonexistent");
 
       // When
-      final var result = filteredDataSet.getTable(tableName);
+      final var result = filteredDataSet.table(tableName);
 
       // Then
       assertFalse(result.isPresent(), "table should not be present");
@@ -191,7 +191,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, mockDataSource);
 
       // When
-      final var result = filteredDataSet.getDataSource();
+      final var result = filteredDataSet.dataSource();
 
       // Then
       assertTrue(result.isPresent(), "data source should be present");
@@ -208,7 +208,7 @@ class FilteredTableSetTest {
       final var filteredDataSet = new FilteredTableSet(sourceDataSet, filter, null);
 
       // When
-      final var result = filteredDataSet.getDataSource();
+      final var result = filteredDataSet.dataSource();
 
       // Then
       assertFalse(result.isPresent(), "data source should not be present");
@@ -223,7 +223,7 @@ class FilteredTableSetTest {
   private TableSet createMockDataSet() {
     final var mockDataSet = mock(TableSet.class);
     final var mockTable = createMockTable();
-    when(mockDataSet.getTables()).thenReturn(List.of(mockTable));
+    when(mockDataSet.tables()).thenReturn(List.of(mockTable));
     return mockDataSet;
   }
 
@@ -239,10 +239,10 @@ class FilteredTableSetTest {
         List.of(new ColumnName("$scenario"), new ColumnName("ID"), new ColumnName("NAME"));
     final var row = createMockRow();
 
-    when(mockTable.getName()).thenReturn(tableName);
-    when(mockTable.getColumns()).thenReturn(columns);
-    when(mockTable.getRows()).thenReturn(List.of(row));
-    when(mockTable.getRowCount()).thenReturn(1);
+    when(mockTable.name()).thenReturn(tableName);
+    when(mockTable.columns()).thenReturn(columns);
+    when(mockTable.rows()).thenReturn(List.of(row));
+    when(mockTable.rowCount()).thenReturn(1);
 
     return mockTable;
   }
@@ -259,10 +259,10 @@ class FilteredTableSetTest {
     values.put(new ColumnName("ID"), new CellValue("1"));
     values.put(new ColumnName("NAME"), new CellValue("John"));
 
-    when(mockRow.getValue(new ColumnName("$scenario"))).thenReturn(new CellValue("test"));
-    when(mockRow.getValue(new ColumnName("ID"))).thenReturn(new CellValue("1"));
-    when(mockRow.getValue(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
-    when(mockRow.getValues()).thenReturn(values);
+    when(mockRow.value(new ColumnName("$scenario"))).thenReturn(new CellValue("test"));
+    when(mockRow.value(new ColumnName("ID"))).thenReturn(new CellValue("1"));
+    when(mockRow.value(new ColumnName("NAME"))).thenReturn(new CellValue("John"));
+    when(mockRow.values()).thenReturn(values);
 
     return mockRow;
   }

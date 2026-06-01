@@ -67,8 +67,8 @@ class SqlBuilderTest {
     void shouldReturnCorrectSql_whenTableHasColumns() {
       // Given
       final var mockTable = mock(Table.class);
-      when(mockTable.getName()).thenReturn(new TableName("USERS"));
-      when(mockTable.getColumns())
+      when(mockTable.name()).thenReturn(new TableName("USERS"));
+      when(mockTable.columns())
           .thenReturn(
               List.of(new ColumnName("ID"), new ColumnName("NAME"), new ColumnName("EMAIL")));
 
@@ -89,8 +89,8 @@ class SqlBuilderTest {
     void shouldHandleSingleColumn_whenTableHasOneColumn() {
       // Given
       final var mockTable = mock(Table.class);
-      when(mockTable.getName()).thenReturn(new TableName("SIMPLE"));
-      when(mockTable.getColumns()).thenReturn(List.of(new ColumnName("VALUE")));
+      when(mockTable.name()).thenReturn(new TableName("SIMPLE"));
+      when(mockTable.columns()).thenReturn(List.of(new ColumnName("VALUE")));
 
       // When
       final var result = builder.buildInsert(mockTable);

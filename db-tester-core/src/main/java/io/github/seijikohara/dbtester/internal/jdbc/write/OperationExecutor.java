@@ -176,7 +176,7 @@ public final class OperationExecutor {
     logger.debug(
         "Executing operation {} on dataset with {} tables using strategy {} (transactionMode={}, timeout={}, batchSize={})",
         operation,
-        tableSet.getTables().size(),
+        tableSet.tables().size(),
         tableOrderingStrategy,
         transactionMode,
         queryTimeout,
@@ -322,7 +322,7 @@ public final class OperationExecutor {
       final TableOrderingStrategy tableOrderingStrategy,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
-    final var tables = resolveTableOrder(tableSet.getTables(), connection, tableOrderingStrategy);
+    final var tables = resolveTableOrder(tableSet.tables(), connection, tableOrderingStrategy);
 
     switch (operation) {
       case NONE -> {
@@ -386,13 +386,13 @@ public final class OperationExecutor {
     // Try foreign key resolution
     try {
       final var schema = getSchema(connection).orElse(null);
-      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var tableNames = tables.stream().map(Table::name).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
       if (!tableNames.equals(orderedNames)) {
         logger.debug("Resolved table order based on foreign keys: {}", orderedNames);
         final var tableMap =
-            tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+            tables.stream().collect(Collectors.toMap(Table::name, Function.identity()));
         return orderedNames.stream().map(tableMap::get).toList();
       }
     } catch (final DatabaseOperationException e) {
@@ -414,7 +414,7 @@ public final class OperationExecutor {
       final List<Table> tables, final Connection connection) {
     try {
       final var schema = getSchema(connection).orElse(null);
-      final var tableNames = tables.stream().map(Table::getName).toList();
+      final var tableNames = tables.stream().map(Table::name).toList();
       final var orderedNames = tableOrderResolver.resolveOrder(tableNames, connection, schema);
 
       if (tableNames.equals(orderedNames)) {
@@ -424,7 +424,7 @@ public final class OperationExecutor {
 
       logger.debug("Resolved table order based on foreign keys: {}", orderedNames);
       final var tableMap =
-          tables.stream().collect(Collectors.toMap(Table::getName, Function.identity()));
+          tables.stream().collect(Collectors.toMap(Table::name, Function.identity()));
       return orderedNames.stream().map(tableMap::get).toList();
 
     } catch (final DatabaseOperationException e) {
@@ -442,7 +442,7 @@ public final class OperationExecutor {
   private List<Table> resolveTableOrderAlphabetically(final List<Table> tables) {
     logger.debug("Sorting tables alphabetically");
     return tables.stream()
-        .sorted(Comparator.comparing(table -> table.getName().value().toLowerCase(Locale.ROOT)))
+        .sorted(Comparator.comparing(table -> table.name().value().toLowerCase(Locale.ROOT)))
         .toList();
   }
 

@@ -43,7 +43,7 @@ class RowTest {
       final var row = Row.of(values);
 
       assertNotNull(row);
-      assertEquals(2, row.getValues().size());
+      assertEquals(2, row.values().size());
     }
 
     /** Verifies that of creates Row with empty values. */
@@ -54,7 +54,7 @@ class RowTest {
       final var row = Row.of(Map.of());
 
       assertNotNull(row);
-      assertTrue(row.getValues().isEmpty());
+      assertTrue(row.values().isEmpty());
     }
   }
 
@@ -81,21 +81,21 @@ class RowTest {
       // Then
       assertAll(
           "row should contain all column-value pairs",
-          () -> assertEquals(3, row.getValues().size(), "should have 3 entries"),
+          () -> assertEquals(3, row.values().size(), "should have 3 entries"),
           () ->
               assertEquals(
                   new CellValue(1),
-                  row.getValue(new ColumnName("ID")),
+                  row.value(new ColumnName("ID")),
                   "should have correct ID value"),
           () ->
               assertEquals(
                   new CellValue("Alice"),
-                  row.getValue(new ColumnName("NAME")),
+                  row.value(new ColumnName("NAME")),
                   "should have correct NAME value"),
           () ->
               assertEquals(
                   new CellValue(30),
-                  row.getValue(new ColumnName("AGE")),
+                  row.value(new ColumnName("AGE")),
                   "should have correct AGE value"));
     }
 
@@ -118,12 +118,10 @@ class RowTest {
           "row should handle null value",
           () ->
               assertEquals(
-                  new CellValue(1), row.getValue(new ColumnName("ID")), "should have ID value"),
+                  new CellValue(1), row.value(new ColumnName("ID")), "should have ID value"),
           () ->
               assertEquals(
-                  CellValue.NULL,
-                  row.getValue(new ColumnName("NAME")),
-                  "should have NULL for NAME"));
+                  CellValue.NULL, row.value(new ColumnName("NAME")), "should have NULL for NAME"));
     }
 
     /** Verifies that of throws exception when sizes mismatch. */
@@ -156,7 +154,7 @@ class RowTest {
       final var row = Row.of(List.of(), List.of());
 
       // Then
-      assertTrue(row.getValues().isEmpty(), "row should have no values");
+      assertTrue(row.values().isEmpty(), "row should have no values");
     }
   }
 
@@ -176,7 +174,7 @@ class RowTest {
       final var col = new ColumnName("id");
       final var row = Row.of(Map.of(col, new CellValue("1")));
 
-      final var values = row.getValues();
+      final var values = row.values();
 
       assertEquals(1, values.size());
       assertEquals(new CellValue("1"), values.get(col));
@@ -191,7 +189,7 @@ class RowTest {
       final var value = new CellValue("Alice");
       final var row = Row.of(Map.of(col, value));
 
-      final var result = row.getValue(col);
+      final var result = row.value(col);
 
       assertEquals(value, result);
     }
@@ -204,7 +202,7 @@ class RowTest {
       final var col = new ColumnName("id");
       final var row = Row.of(Map.of(col, new CellValue("1")));
 
-      final var result = row.getValue(new ColumnName("non_existent"));
+      final var result = row.value(new ColumnName("non_existent"));
 
       assertEquals(CellValue.NULL, result);
     }
@@ -216,7 +214,7 @@ class RowTest {
     void getValueReturnsNullForEmptyRow() {
       final var row = Row.of(Map.of());
 
-      final var result = row.getValue(new ColumnName("any"));
+      final var result = row.value(new ColumnName("any"));
 
       assertEquals(CellValue.NULL, result);
     }
@@ -237,10 +235,10 @@ class RowTest {
 
       final var row = Row.of(values);
 
-      assertEquals(3, row.getValues().size());
-      assertEquals(new CellValue("1"), row.getValue(col1));
-      assertEquals(new CellValue("John"), row.getValue(col2));
-      assertEquals(new CellValue("john@example.com"), row.getValue(col3));
+      assertEquals(3, row.values().size());
+      assertEquals(new CellValue("1"), row.value(col1));
+      assertEquals(new CellValue("John"), row.value(col2));
+      assertEquals(new CellValue("john@example.com"), row.value(col3));
     }
   }
 }

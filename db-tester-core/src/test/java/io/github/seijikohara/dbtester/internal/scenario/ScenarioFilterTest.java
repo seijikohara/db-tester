@@ -470,7 +470,7 @@ class ScenarioFilterTest {
   private static Row createMockRow(final ColumnName columnName, final String value) {
     final var row = mock(Row.class);
     final var cellValue = new CellValue(value);
-    when(row.getValue(columnName)).thenReturn(cellValue);
+    when(row.value(columnName)).thenReturn(cellValue);
     return row;
   }
 }

@@ -48,9 +48,9 @@ class TableSetTest {
       final var tableSet = TableSet.of(List.of(table1, table2));
 
       assertNotNull(tableSet);
-      assertEquals(2, tableSet.getTables().size());
-      assertEquals("users", tableSet.getTables().get(0).getName().value());
-      assertEquals("orders", tableSet.getTables().get(1).getName().value());
+      assertEquals(2, tableSet.tables().size());
+      assertEquals("users", tableSet.tables().get(0).name().value());
+      assertEquals("orders", tableSet.tables().get(1).name().value());
     }
 
     /** Verifies that of(List) creates empty TableSet from empty list. */
@@ -61,7 +61,7 @@ class TableSetTest {
       final var tableSet = TableSet.of(List.of());
 
       assertNotNull(tableSet);
-      assertTrue(tableSet.getTables().isEmpty());
+      assertTrue(tableSet.tables().isEmpty());
     }
   }
 
@@ -92,7 +92,7 @@ class TableSetTest {
       final var tableSet = TableSet.of(table1, table2);
 
       assertNotNull(tableSet);
-      assertEquals(2, tableSet.getTables().size());
+      assertEquals(2, tableSet.tables().size());
     }
 
     /** Verifies that of() creates empty TableSet with no arguments. */
@@ -103,7 +103,7 @@ class TableSetTest {
       final var tableSet = TableSet.of();
 
       assertNotNull(tableSet);
-      assertTrue(tableSet.getTables().isEmpty());
+      assertTrue(tableSet.tables().isEmpty());
     }
   }
 
@@ -127,7 +127,7 @@ class TableSetTest {
               List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var tables = tableSet.getTables();
+      final var tables = tableSet.tables();
 
       assertEquals(1, tables.size());
     }
@@ -141,10 +141,10 @@ class TableSetTest {
       final var table = Table.of(tableName, List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var result = tableSet.getTable(tableName);
+      final var result = tableSet.table(tableName);
 
       assertTrue(result.isPresent());
-      assertEquals(tableName, result.get().getName());
+      assertEquals(tableName, result.get().name());
     }
 
     /** Verifies that getTable returns empty for non-existent table. */
@@ -155,7 +155,7 @@ class TableSetTest {
       final var table = Table.of(new TableName("users"), List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table));
 
-      final var result = tableSet.getTable(new TableName("orders"));
+      final var result = tableSet.table(new TableName("orders"));
 
       assertTrue(result.isEmpty());
     }
@@ -167,7 +167,7 @@ class TableSetTest {
     void getDataSourceReturnsEmptyForSimpleTableSet() {
       final var tableSet = TableSet.of(List.of());
 
-      final var result = tableSet.getDataSource();
+      final var result = tableSet.dataSource();
 
       assertTrue(result.isEmpty());
     }
@@ -186,10 +186,10 @@ class TableSetTest {
           Table.of(new TableName("orders"), List.of(new ColumnName("id")), List.of());
       final var tableSet = TableSet.of(List.of(table1, table2));
 
-      final var result = tableSet.getTable(new TableName("users"));
+      final var result = tableSet.table(new TableName("users"));
 
       assertTrue(result.isPresent());
-      assertEquals(1, result.get().getRows().size());
+      assertEquals(1, result.get().rows().size());
     }
   }
 }

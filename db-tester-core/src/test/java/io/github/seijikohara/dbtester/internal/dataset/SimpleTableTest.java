@@ -52,9 +52,9 @@ class SimpleTableTest {
       // Then
       assertAll(
           "table should contain all provided values",
-          () -> assertEquals(tableName, table.getName(), "should have correct table name"),
-          () -> assertEquals(columns, table.getColumns(), "should have correct columns"),
-          () -> assertEquals(rows, table.getRows(), "should have correct rows"));
+          () -> assertEquals(tableName, table.name(), "should have correct table name"),
+          () -> assertEquals(columns, table.columns(), "should have correct columns"),
+          () -> assertEquals(rows, table.rows(), "should have correct rows"));
     }
 
     /** Verifies that constructor creates defensive copy of columns. */
@@ -73,7 +73,7 @@ class SimpleTableTest {
       mutableColumns.add(new ColumnName("NAME"));
 
       // Then
-      assertEquals(1, table.getColumns().size(), "columns should not be affected by modification");
+      assertEquals(1, table.columns().size(), "columns should not be affected by modification");
     }
 
     /** Verifies that constructor creates defensive copy of rows. */
@@ -92,7 +92,7 @@ class SimpleTableTest {
       mutableRows.add(new SimpleRow(Map.of(new ColumnName("ID"), new CellValue(2))));
 
       // Then
-      assertEquals(1, table.getRows().size(), "rows should not be affected by modification");
+      assertEquals(1, table.rows().size(), "rows should not be affected by modification");
     }
 
     /** Verifies that constructor handles empty columns and rows. */
@@ -111,9 +111,9 @@ class SimpleTableTest {
       // Then
       assertAll(
           "table should be empty",
-          () -> assertEquals(tableName, table.getName(), "should have correct table name"),
-          () -> assertEquals(0, table.getColumns().size(), "should have no columns"),
-          () -> assertEquals(0, table.getRows().size(), "should have no rows"));
+          () -> assertEquals(tableName, table.name(), "should have correct table name"),
+          () -> assertEquals(0, table.columns().size(), "should have no columns"),
+          () -> assertEquals(0, table.rows().size(), "should have no rows"));
     }
   }
 
@@ -135,7 +135,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(tableName, List.of(), List.of());
 
       // When
-      final var result = table.getName();
+      final var result = table.name();
 
       // Then
       assertEquals(tableName, result, "should return correct table name");
@@ -161,7 +161,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("USERS"), columns, List.of());
 
       // When
-      final var result = table.getColumns();
+      final var result = table.columns();
 
       // Then
       assertEquals(columns, result, "should return all columns");
@@ -177,7 +177,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("USERS"), columns, List.of());
 
       // When
-      final var result = table.getColumns();
+      final var result = table.columns();
 
       // Then
       assertThrows(
@@ -208,7 +208,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 
       // When
-      final var result = table.getRows();
+      final var result = table.rows();
 
       // Then
       assertEquals(rows, result, "should return all rows");
@@ -226,7 +226,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 
       // When
-      final var result = table.getRows();
+      final var result = table.rows();
 
       // Then
       assertThrows(
@@ -258,7 +258,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("USERS"), columns, rows);
 
       // When
-      final var result = table.getRowCount();
+      final var result = table.rowCount();
 
       // Then
       assertEquals(3, result, "should return correct row count");
@@ -273,7 +273,7 @@ class SimpleTableTest {
       final var table = new SimpleTable(new TableName("EMPTY"), List.of(), List.of());
 
       // When
-      final var result = table.getRowCount();
+      final var result = table.rowCount();
 
       // Then
       assertEquals(0, result, "should return zero for empty table");

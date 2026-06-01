@@ -41,7 +41,7 @@ public final class SimpleTable implements Table {
    * @return the table name
    */
   @Override
-  public TableName getName() {
+  public TableName name() {
     return name;
   }
 
@@ -51,7 +51,7 @@ public final class SimpleTable implements Table {
    * @return immutable list of column names
    */
   @Override
-  public List<ColumnName> getColumns() {
+  public List<ColumnName> columns() {
     return columns;
   }
 
@@ -61,7 +61,7 @@ public final class SimpleTable implements Table {
    * @return immutable list of rows
    */
   @Override
-  public List<Row> getRows() {
+  public List<Row> rows() {
     return rows;
   }
 
@@ -71,7 +71,7 @@ public final class SimpleTable implements Table {
    * @return the number of rows in this table
    */
   @Override
-  public int getRowCount() {
+  public int rowCount() {
     return rows.size();
   }
 }

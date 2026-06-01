@@ -107,9 +107,9 @@ public final class DefaultExportSupport implements ExportSupport {
     final var tableSets = context.configuration().loader().loadPreparationDataSets(context);
     final var tableNames =
         tableSets.stream()
-            .map(TableSet::getTables)
+            .map(TableSet::tables)
             .flatMap(List::stream)
-            .map(Table::getName)
+            .map(Table::name)
             .map(TableName::value)
             .distinct()
             .collect(Collectors.toUnmodifiableList());

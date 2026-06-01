@@ -40,7 +40,7 @@ public final class TruncateExecutor implements TableExecutor {
 
   @Override
   public void execute(final List<Table> tables, final Connection connection) {
-    tables.forEach(table -> truncateTable(table.getName().value(), connection, null));
+    tables.forEach(table -> truncateTable(table.name().value(), connection, null));
   }
 
   @Override
@@ -48,7 +48,7 @@ public final class TruncateExecutor implements TableExecutor {
       final List<Table> tables,
       final Connection connection,
       final @Nullable Duration queryTimeout) {
-    tables.forEach(table -> truncateTable(table.getName().value(), connection, queryTimeout));
+    tables.forEach(table -> truncateTable(table.name().value(), connection, queryTimeout));
   }
 
   /**

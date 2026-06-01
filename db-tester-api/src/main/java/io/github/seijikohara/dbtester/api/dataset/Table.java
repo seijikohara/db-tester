@@ -84,7 +84,7 @@ public interface Table {
    *
    * @return the table identifier
    */
-  TableName getName();
+  TableName name();
 
   /**
    * Returns the column names in the order expected by the dataset.
@@ -94,25 +94,25 @@ public interface Table {
    *
    * @return immutable list of column identifiers (non-empty)
    */
-  List<ColumnName> getColumns();
+  List<ColumnName> columns();
 
   /**
    * Returns all rows contained in this table.
    *
-   * <p>Each row contains values corresponding to the columns returned by {@link #getColumns()}.
+   * <p>Each row contains values corresponding to the columns returned by {@link #columns()}.
    *
    * @return immutable list of rows (may be empty)
    */
-  List<Row> getRows();
+  List<Row> rows();
 
   /**
    * Returns the number of rows in this table.
    *
-   * <p>Equivalent to {@code getRows().size()}.
+   * <p>Equivalent to {@code rows().size()}.
    *
    * @return number of rows contained in the table (zero or positive)
    */
-  int getRowCount();
+  int rowCount();
 
   /**
    * Simple immutable implementation of {@link Table}.
@@ -124,42 +124,12 @@ public interface Table {
   record SimpleTable(TableName name, List<ColumnName> columns, List<Row> rows) implements Table {
 
     /**
-     * {@inheritDoc}
-     *
-     * @return the table name
-     */
-    @Override
-    public TableName getName() {
-      return name;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return immutable list of column names
-     */
-    @Override
-    public List<ColumnName> getColumns() {
-      return columns;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return immutable list of rows
-     */
-    @Override
-    public List<Row> getRows() {
-      return rows;
-    }
-
-    /**
-     * {@inheritDoc}
+     * Returns the number of rows in this table.
      *
      * @return the number of rows in this table
      */
     @Override
-    public int getRowCount() {
+    public int rowCount() {
       return rows.size();
     }
   }

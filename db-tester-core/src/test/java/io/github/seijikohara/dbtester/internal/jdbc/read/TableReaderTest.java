@@ -148,9 +148,9 @@ class TableReaderTest {
       assertAll(
           "fetch table results",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals("USERS", result.getName().value(), "table name should match"),
-          () -> assertEquals(2, result.getColumns().size(), "should have 2 columns"),
-          () -> assertEquals(1, result.getRows().size(), "should have 1 row"));
+          () -> assertEquals("USERS", result.name().value(), "table name should match"),
+          () -> assertEquals(2, result.columns().size(), "should have 2 columns"),
+          () -> assertEquals(1, result.rows().size(), "should have 1 row"));
     }
 
     /**
@@ -175,9 +175,9 @@ class TableReaderTest {
       assertAll(
           "empty table results",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals("USERS", result.getName().value(), "table name should match"),
-          () -> assertEquals(2, result.getColumns().size(), "should have 2 columns"),
-          () -> assertTrue(result.getRows().isEmpty(), "should have no rows"));
+          () -> assertEquals("USERS", result.name().value(), "table name should match"),
+          () -> assertEquals(2, result.columns().size(), "should have 2 columns"),
+          () -> assertTrue(result.rows().isEmpty(), "should have no rows"));
     }
 
     /**
@@ -206,12 +206,12 @@ class TableReaderTest {
       assertAll(
           "null value handling",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(1, result.getRows().size(), "should have 1 row"),
+          () -> assertEquals(1, result.rows().size(), "should have 1 row"),
           () -> {
-            final var row = result.getRows().getFirst();
+            final var row = result.rows().getFirst();
             assertEquals(
                 CellValue.NULL,
-                row.getValue(new ColumnName("NAME")),
+                row.value(new ColumnName("NAME")),
                 "null value should be CellValue.NULL");
           });
     }
@@ -346,11 +346,11 @@ class TableReaderTest {
       final var result = reader.fetchTableSet(dataSource, List.of("USERS", "PRODUCTS"));
 
       // Then
-      final var tableNames = result.getTables().stream().map(t -> t.getName().value()).toList();
+      final var tableNames = result.tables().stream().map(t -> t.name().value()).toList();
       assertAll(
           "fetch dataset results",
           () -> assertNotNull(result, "result should not be null"),
-          () -> assertEquals(2, result.getTables().size(), "should have 2 tables"),
+          () -> assertEquals(2, result.tables().size(), "should have 2 tables"),
           () -> assertTrue(tableNames.contains("USERS"), "should contain USERS table"),
           () -> assertTrue(tableNames.contains("PRODUCTS"), "should contain PRODUCTS table"));
     }
@@ -386,7 +386,7 @@ class TableReaderTest {
       final var result = reader.executeQuery(dataSource, "SELECT ID FROM USERS", "USERS");
 
       // Then
-      assertEquals(3, result.getRows().size(), "should have 3 rows");
+      assertEquals(3, result.rows().size(), "should have 3 rows");
     }
 
     /**
@@ -470,7 +470,7 @@ class TableReaderTest {
       final var result = reader.executeQuery(dataSource, "SELECT DATA FROM BLOBS", "BLOBS");
 
       // Then
-      assertEquals(1, result.getRows().size(), "should have 1 row");
+      assertEquals(1, result.rows().size(), "should have 1 row");
       verify(typeConverter).convert(mockBlob);
     }
 

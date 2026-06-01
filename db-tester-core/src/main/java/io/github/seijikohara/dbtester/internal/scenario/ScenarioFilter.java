@@ -180,7 +180,7 @@ public final class ScenarioFilter {
    * @return optional containing the ScenarioName, or empty if null or blank
    */
   private Optional<ScenarioName> readScenarioName(final Row row, final ColumnName columnName) {
-    final var dataValue = row.getValue(columnName);
+    final var dataValue = row.value(columnName);
     return Optional.ofNullable(dataValue.value())
         .map(Object::toString)
         .map(String::trim)

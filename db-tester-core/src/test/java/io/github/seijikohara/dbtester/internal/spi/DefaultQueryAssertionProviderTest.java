@@ -102,8 +102,7 @@ class DefaultQueryAssertionProviderTest {
       final var tableName = "users";
       final Collection<String> ignoreColumns = List.of("CREATED_AT");
 
-      when(expectedDataSet.getTable(new TableName(tableName)))
-          .thenReturn(Optional.of(expectedTable));
+      when(expectedDataSet.table(new TableName(tableName))).thenReturn(Optional.of(expectedTable));
       when(mockTableReader.executeQuery(dataSource, query, tableName)).thenReturn(actualTable);
       doNothing()
           .when(mockComparator)
@@ -129,7 +128,7 @@ class DefaultQueryAssertionProviderTest {
       final var tableName = "nonexistent";
       final Collection<String> ignoreColumns = List.of();
 
-      when(expectedDataSet.getTable(new TableName(tableName))).thenReturn(Optional.empty());
+      when(expectedDataSet.table(new TableName(tableName))).thenReturn(Optional.empty());
 
       // When & Then
       assertThrows(
