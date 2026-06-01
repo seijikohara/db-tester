@@ -92,7 +92,7 @@ To resolve, remove duplicate files or specify a concrete format:
 | メソッド | AUTOの挙動 |
 |---------|------------|
 | `hasExtension()` | `false`を返す |
-| `getExtension()` | `UnsupportedOperationException`をスロー |
+| `extension()` | `UnsupportedOperationException`をスロー |
 
 
 ## ファイル構造

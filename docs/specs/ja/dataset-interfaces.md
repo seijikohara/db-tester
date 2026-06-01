@@ -22,9 +22,9 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getTables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返す |
-| `getTable(TableName)` | `Optional<Table>` | 名前でテーブルを検索 |
-| `getDataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返す |
+| `tables()` | `List<Table>` | 宣言順序で格納されたテーブルのイミュータブルリストを返す |
+| `table(TableName)` | `Optional<Table>` | 名前でテーブルを検索 |
+| `dataSource()` | `Optional<DataSource>` | 指定された場合、バインドされたDataSourceを返す |
 
 **保証事項**:
 
@@ -50,16 +50,16 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getName()` | `TableName` | テーブル識別子を返す |
-| `getColumns()` | `List<ColumnName>` | 定義順序でカラム名を返す |
-| `getRows()` | `List<Row>` | すべての行を返す（空の場合もあります） |
-| `getRowCount()` | `int` | 行数を返す |
+| `name()` | `TableName` | テーブル識別子を返す |
+| `columns()` | `List<ColumnName>` | 定義順序でカラム名を返す |
+| `rows()` | `List<Row>` | すべての行を返す（空の場合もあります） |
+| `rowCount()` | `int` | 行数を返す |
 
 **保証事項**:
 
 - カラム順序はすべての行で一貫しています
 - 返されるすべてのコレクションはイミュータブルです
-- 行数は`getRows().size()`と等しくなります
+- 行数は`rows().size()`と等しくなります
 
 ## Row
 
@@ -78,8 +78,8 @@ description: "DB Testerのデータセットインターフェースリファレ
 
 | メソッド | 戻り値型 | 説明 |
 |----------|---------|------|
-| `getValues()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返す |
-| `getValue(ColumnName)` | `CellValue` | カラムの値を返す。存在しない場合は`CellValue.NULL` |
+| `values()` | `Map<ColumnName, CellValue>` | イミュータブルなカラム値マッピングを返す |
+| `value(ColumnName)` | `CellValue` | カラムの値を返す。存在しない場合は`CellValue.NULL` |
 
 ## ドメイン値オブジェクト
 

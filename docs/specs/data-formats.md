@@ -99,7 +99,7 @@ Using `AUTO` throws `IllegalArgumentException`.
 | Method | AUTO Behavior |
 |--------|---------------|
 | `hasExtension()` | Returns `false` |
-| `getExtension()` | Throws `UnsupportedOperationException` |
+| `extension()` | Throws `UnsupportedOperationException` |
 
 ## File Structure
 

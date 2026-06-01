@@ -30,22 +30,22 @@ public final class UuidTypeHandler implements TypeHandler<UUID> {
   public UuidTypeHandler() {}
 
   @Override
-  public Class<UUID> getJavaType() {
+  public Class<UUID> javaType() {
     return UUID.class;
   }
 
   @Override
-  public List<Integer> getSqlTypes() {
+  public List<Integer> sqlTypes() {
     return SUPPORTED_SQL_TYPES;
   }
 
   @Override
-  public List<String> getSupportedDatabases() {
+  public List<String> supportedDatabases() {
     return SUPPORTED_DATABASES;
   }
 
   @Override
-  public int getPriority() {
+  public int priority() {
     return 10;
   }
 

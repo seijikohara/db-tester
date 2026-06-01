@@ -37,42 +37,42 @@ class UuidTypeHandlerTest {
     handler = new UuidTypeHandler();
   }
 
-  /** Tests for the getJavaType() method. */
+  /** Tests for the javaType() method. */
   @Nested
-  @DisplayName("getJavaType() method")
+  @DisplayName("javaType() method")
   class GetJavaTypeMethod {
 
-    /** Tests for the getJavaType method. */
+    /** Tests for the javaType method. */
     GetJavaTypeMethod() {}
 
-    /** Verifies that getJavaType returns UUID class. */
+    /** Verifies that javaType returns UUID class. */
     @Test
     @Tag("normal")
     @DisplayName("should return UUID class when called")
     void shouldReturnUuidClass_whenCalled() {
       // When
-      final var result = handler.getJavaType();
+      final var result = handler.javaType();
 
       // Then
       assertEquals(UUID.class, result, "should return UUID class");
     }
   }
 
-  /** Tests for the getSqlTypes() method. */
+  /** Tests for the sqlTypes() method. */
   @Nested
-  @DisplayName("getSqlTypes() method")
+  @DisplayName("sqlTypes() method")
   class GetSqlTypesMethod {
 
-    /** Tests for the getSqlTypes method. */
+    /** Tests for the sqlTypes method. */
     GetSqlTypesMethod() {}
 
-    /** Verifies that getSqlTypes returns OTHER type. */
+    /** Verifies that sqlTypes returns OTHER type. */
     @Test
     @Tag("normal")
     @DisplayName("should return OTHER type when called")
     void shouldReturnOtherType_whenCalled() {
       // When
-      final var result = handler.getSqlTypes();
+      final var result = handler.sqlTypes();
 
       // Then
       assertAll(
@@ -82,21 +82,21 @@ class UuidTypeHandlerTest {
     }
   }
 
-  /** Tests for the getSupportedDatabases() method. */
+  /** Tests for the supportedDatabases() method. */
   @Nested
-  @DisplayName("getSupportedDatabases() method")
+  @DisplayName("supportedDatabases() method")
   class GetSupportedDatabasesMethod {
 
-    /** Tests for the getSupportedDatabases method. */
+    /** Tests for the supportedDatabases method. */
     GetSupportedDatabasesMethod() {}
 
-    /** Verifies that getSupportedDatabases includes PostgreSQL and H2. */
+    /** Verifies that supportedDatabases includes PostgreSQL and H2. */
     @Test
     @Tag("normal")
     @DisplayName("should return PostgreSQL and H2 when called")
     void shouldReturnPostgresAndH2_whenCalled() {
       // When
-      final var result = handler.getSupportedDatabases();
+      final var result = handler.supportedDatabases();
 
       // Then
       assertAll(

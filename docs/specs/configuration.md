@@ -472,7 +472,7 @@ Defines supported file formats for dataset files.
 | Method | Return Type | Description |
 |--------|-------------|-------------|
 | `hasExtension()` | `boolean` | Returns `false` for `AUTO`, `true` for all other formats |
-| `getExtension()` | `String` | Returns file extension including dot; throws `UnsupportedOperationException` for `AUTO` |
+| `extension()` | `String` | Returns file extension including dot; throws `UnsupportedOperationException` for `AUTO` |
 
 ### File Discovery
 

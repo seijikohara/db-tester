@@ -77,7 +77,7 @@ public enum DataFormat {
    * @return the file extension
    * @throws UnsupportedOperationException if this format is {@link #AUTO}
    */
-  public String getExtension() {
+  public String extension() {
     if (extension == null) {
       throw new UnsupportedOperationException(
           "AUTO format does not have a single file extension. Use hasExtension() to check first.");

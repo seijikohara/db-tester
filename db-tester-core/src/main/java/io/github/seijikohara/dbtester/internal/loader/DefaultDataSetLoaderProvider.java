@@ -26,7 +26,7 @@ public final class DefaultDataSetLoaderProvider implements DataSetLoaderProvider
    * @return the default dataset loader
    */
   @Override
-  public DataSetLoader getLoader() {
+  public DataSetLoader loader() {
     return DEFAULT_LOADER;
   }
 }

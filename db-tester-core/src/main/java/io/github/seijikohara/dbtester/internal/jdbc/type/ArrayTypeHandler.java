@@ -36,22 +36,22 @@ public final class ArrayTypeHandler implements TypeHandler<Object[]> {
 
   @Override
   @SuppressWarnings("unchecked")
-  public Class<Object[]> getJavaType() {
+  public Class<Object[]> javaType() {
     return Object[].class;
   }
 
   @Override
-  public List<Integer> getSqlTypes() {
+  public List<Integer> sqlTypes() {
     return SUPPORTED_SQL_TYPES;
   }
 
   @Override
-  public List<String> getSupportedDatabases() {
+  public List<String> supportedDatabases() {
     return SUPPORTED_DATABASES;
   }
 
   @Override
-  public int getPriority() {
+  public int priority() {
     return 10;
   }
 

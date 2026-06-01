@@ -22,9 +22,9 @@ Represents a collection of database tables.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getTables()` | `List<Table>` | Returns immutable list of tables in declaration order |
-| `getTable(TableName)` | `Optional<Table>` | Finds table by name |
-| `getDataSource()` | `Optional<DataSource>` | Returns bound DataSource if specified |
+| `tables()` | `List<Table>` | Returns immutable list of tables in declaration order |
+| `table(TableName)` | `Optional<Table>` | Finds table by name |
+| `dataSource()` | `Optional<DataSource>` | Returns bound DataSource if specified |
 
 **Guarantees**:
 
@@ -50,16 +50,16 @@ Represents the structure and data of a database table.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getName()` | `TableName` | Returns table identifier |
-| `getColumns()` | `List<ColumnName>` | Returns column names in definition order |
-| `getRows()` | `List<Row>` | Returns all rows (may be empty) |
-| `getRowCount()` | `int` | Returns number of rows |
+| `name()` | `TableName` | Returns table identifier |
+| `columns()` | `List<ColumnName>` | Returns column names in definition order |
+| `rows()` | `List<Row>` | Returns all rows (may be empty) |
+| `rowCount()` | `int` | Returns number of rows |
 
 **Guarantees**:
 
 - Column order is consistent across all rows
 - All returned collections are immutable
-- Row count equals `getRows().size()`
+- Row count equals `rows().size()`
 
 ## Row
 
@@ -78,8 +78,8 @@ Represents a single database record.
 
 | Method | Return Type | Description |
 |--------|-------------|-------------|
-| `getValues()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
-| `getValue(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
+| `values()` | `Map<ColumnName, CellValue>` | Returns immutable column-value mapping |
+| `value(ColumnName)` | `CellValue` | Returns value for column; `CellValue.NULL` if absent |
 
 ## Domain Value Objects
 

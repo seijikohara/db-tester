@@ -303,7 +303,7 @@ com.example.XmlFormatProvider
 |-----|----------|
 | `DataSetLoaderProvider` | 最初に見つかったもの |
 | `ScenarioNameResolver` | `priority()`でソート、`canResolve()`がtrueを返す最初のもの |
-| `TypeHandler` | SQL型でマッチし、`getPriority()`で選択（最大値が優先）; データベース固有のマッチを優先 |
+| `TypeHandler` | SQL型でマッチし、`priority()`で選択（最大値が優先）; データベース固有のマッチを優先 |
 | `FormatProvider` | 一致する`supportedFileExtension()`を持つ最初のもの |
 
 ## 関連仕様

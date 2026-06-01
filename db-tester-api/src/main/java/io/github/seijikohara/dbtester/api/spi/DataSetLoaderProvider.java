@@ -27,5 +27,5 @@ public interface DataSetLoaderProvider {
    *
    * @return the default dataset loader
    */
-  DataSetLoader getLoader();
+  DataSetLoader loader();
 }

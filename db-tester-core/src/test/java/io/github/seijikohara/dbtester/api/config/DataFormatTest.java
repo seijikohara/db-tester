@@ -52,17 +52,17 @@ class DataFormatTest {
       assertFalse(result, "AUTO should not have a specific extension");
     }
 
-    /** Verifies that getExtension throws UnsupportedOperationException for AUTO. */
+    /** Verifies that extension throws UnsupportedOperationException for AUTO. */
     @Test
     @Tag("error")
-    @DisplayName("should throw UnsupportedOperationException when getExtension called")
+    @DisplayName("should throw UnsupportedOperationException when extension called")
     void shouldThrowException_whenGetExtensionCalled() {
       // When & Then
       final var exception =
           assertThrows(
               UnsupportedOperationException.class,
-              () -> DataFormat.AUTO.getExtension(),
-              "getExtension should throw for AUTO");
+              () -> DataFormat.AUTO.extension(),
+              "extension should throw for AUTO");
 
       final var message = exception.getMessage();
       assertNotNull(message, "exception message should not be null");
@@ -84,7 +84,7 @@ class DataFormatTest {
     @DisplayName("should have .csv extension")
     void shouldHaveCsvExtension() {
       // When
-      final var extension = DataFormat.CSV.getExtension();
+      final var extension = DataFormat.CSV.extension();
 
       // Then
       assertEquals(".csv", extension, "CSV extension should be .csv");
@@ -129,7 +129,7 @@ class DataFormatTest {
     @DisplayName("should have .tsv extension")
     void shouldHaveTsvExtension() {
       // When
-      final var extension = DataFormat.TSV.getExtension();
+      final var extension = DataFormat.TSV.extension();
 
       // Then
       assertEquals(".tsv", extension, "TSV extension should be .tsv");
@@ -162,7 +162,7 @@ class DataFormatTest {
     @DisplayName("should have .json extension")
     void shouldHaveJsonExtension() {
       // When
-      final var extension = DataFormat.JSON.getExtension();
+      final var extension = DataFormat.JSON.extension();
 
       // Then
       assertEquals(".json", extension, "JSON extension should be .json");
@@ -195,7 +195,7 @@ class DataFormatTest {
     @DisplayName("should have .yaml extension")
     void shouldHaveYamlExtension() {
       // When
-      final var extension = DataFormat.YAML.getExtension();
+      final var extension = DataFormat.YAML.extension();
 
       // Then
       assertEquals(".yaml", extension, "YAML extension should be .yaml");
