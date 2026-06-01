@@ -23,6 +23,10 @@
   // Use platform-native auto-merge so branch protection and required checks are honored.
   platformAutomerge: true,
 
+  // Remediate transitive (indirect) dependency vulnerabilities via lockfile updates,
+  // preserving the coverage previously provided by Dependabot security updates (now disabled).
+  transitiveRemediation: true,
+
   packageRules: [
     {
       // Auto-merge low-risk updates. Major updates require manual review.
