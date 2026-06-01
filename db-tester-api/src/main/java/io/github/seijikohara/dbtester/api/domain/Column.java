@@ -351,8 +351,19 @@ public final class Column implements Comparable<Column> {
      * @return a new Column with the configured properties
      */
     public Column build() {
+      // Construct metadata when any metadata-bearing field deviates from its default. Omitting
+      // nullable, precision, scale, or defaultValue from this gate would silently discard those
+      // configured values when no jdbcType, primary key, or ordinal position is set.
+      final var hasMetadata =
+          jdbcType != null
+              || primaryKey
+              || ordinalPosition > 0
+              || !nullable
+              || precision > 0
+              || scale > 0
+              || defaultValue != null;
       final ColumnMetadata metadata;
-      if (jdbcType != null || primaryKey || ordinalPosition > 0) {
+      if (hasMetadata) {
         metadata =
             new ColumnMetadata(
                 jdbcType, nullable, primaryKey, ordinalPosition, precision, scale, defaultValue);
