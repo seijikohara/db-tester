@@ -248,6 +248,33 @@ class DelimitedParserTest {
     }
 
     /**
+     * Verifies that parse throws exception when the header row contains duplicate column names.
+     *
+     * @param tempDir temporary directory for test files
+     * @throws IOException if file operations fail
+     */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when header has duplicate column names")
+    void shouldThrowException_whenHeaderHasDuplicateColumns(final @TempDir Path tempDir)
+        throws IOException {
+      // Given
+      createCsvFile(tempDir, "users.csv", "ID,NAME,ID", "1,John,2");
+
+      // When & Then
+      final var exception =
+          assertThrows(
+              DataSetLoadException.class,
+              () -> parser.parse(tempDir),
+              "should throw DataSetLoadException");
+
+      final var message = exception.getMessage();
+      assertTrue(
+          message != null && message.contains("Duplicate column header") && message.contains("ID"),
+          "exception should mention the duplicated column header");
+    }
+
+    /**
      * Verifies that parse extracts table name from filename.
      *
      * @param tempDir temporary directory for test files
