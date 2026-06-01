@@ -406,6 +406,6 @@ class ErrorHandlingSpec :
                 }
             logger.info("Full error message demonstrating context:\n{}", exception.message)
             exception.message shouldNotBe null
-            exception.message!!.isNotEmpty()
+            exception.message!!.shouldNotBeEmpty()
         }
 }
