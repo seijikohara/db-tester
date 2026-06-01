@@ -68,7 +68,7 @@ class DbTesterProperties {
 	 *       (default: /expected)
 	 *   <li>{@code db-tester.convention.scenario-marker} - Column name for scenario filtering
 	 *       (default: [Scenario])
-	 *   <li>{@code db-tester.convention.data-format} - Dataset file format (default: CSV)
+	 *   <li>{@code db-tester.convention.data-format} - Dataset file format (default: AUTO)
 	 *   <li>{@code db-tester.convention.table-merge-strategy} - Strategy for merging tables (default:
 	 *       UNION_ALL)
 	 *   <li>{@code db-tester.convention.load-order-file-name} - File name for table loading order

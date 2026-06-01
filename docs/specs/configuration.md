@@ -553,6 +553,7 @@ Defines how rows are compared during expectation verification.
 
 | Value | Description |
 |-------|-------------|
+| `UNSET` | Annotation default sentinel. Defers to global `VerificationSettings.rowOrdering()`. |
 | `ORDERED` | Positional comparison (row-by-row by index). Default behavior. |
 | `UNORDERED` | Set-based comparison (rows matched regardless of position) |
 

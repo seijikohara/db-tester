@@ -63,10 +63,10 @@ public @interface DataSetSource {
   /**
    * Lists the scenario identifiers that should be retained when loading the dataset.
    *
-   * <p>If the dataset format exposes a scenario marker column (for example, the default CSV format
-   * uses {@code [Scenario]}), only rows whose marker matches one of the supplied names are
-   * included. Providing an empty array delegates the decision to the framework, which uses the test
-   * method name as the single scenario.
+   * <p>If the dataset format exposes a scenario marker column (for example, the CSV format uses
+   * {@code [Scenario]}), only rows whose marker matches one of the supplied names are included.
+   * Providing an empty array delegates the decision to the framework, which uses the test method
+   * name as the single scenario.
    *
    * @return scenario names to keep, or an empty array to fall back to the test method name
    */

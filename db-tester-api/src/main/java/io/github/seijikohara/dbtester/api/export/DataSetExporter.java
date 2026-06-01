@@ -57,6 +57,7 @@ public final class DataSetExporter {
    * @param outputDirectory the directory to write files to
    * @param format the export format
    * @throws DatabaseTesterException if export fails or no provider is found for the format
+   * @throws IllegalArgumentException if format is {@link DataFormat#AUTO}
    */
   public static void export(
       final DataSource dataSource,
@@ -78,6 +79,7 @@ public final class DataSetExporter {
    * @param format the export format
    * @param config the export configuration
    * @throws DatabaseTesterException if export fails or no provider is found for the format
+   * @throws IllegalArgumentException if format is {@link DataFormat#AUTO}
    */
   public static void export(
       final DataSource dataSource,
@@ -100,6 +102,7 @@ public final class DataSetExporter {
    * @param outputDirectory the directory to write the file to
    * @param format the export format
    * @throws DatabaseTesterException if export fails or no provider is found for the format
+   * @throws IllegalArgumentException if format is {@link DataFormat#AUTO}
    */
   public static void exportQuery(
       final DataSource dataSource,
@@ -123,6 +126,7 @@ public final class DataSetExporter {
    * @param format the export format
    * @param config the export configuration
    * @throws DatabaseTesterException if export fails or no provider is found for the format
+   * @throws IllegalArgumentException if format is {@link DataFormat#AUTO}
    */
   public static void exportQuery(
       final DataSource dataSource,

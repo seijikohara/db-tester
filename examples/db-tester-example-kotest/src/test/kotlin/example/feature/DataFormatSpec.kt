@@ -26,7 +26,7 @@ import javax.sql.DataSource
  * Demonstrates different data format configurations (CSV and TSV) with Kotest.
  *
  * This specification demonstrates:
- * - Using CSV format (default) with [DataFormat.CSV]
+ * - Using CSV format explicitly with [DataFormat.CSV]
  * - Using TSV format with [DataFormat.TSV]
  * - Configuring data format via [ConventionSettings]
  *
@@ -35,7 +35,7 @@ import javax.sql.DataSource
 object DataFormatSpec
 
 /**
- * Tests CSV format (default configuration).
+ * Tests CSV format (explicit configuration).
  *
  * CSV files use comma as field delimiter:
  * ```
