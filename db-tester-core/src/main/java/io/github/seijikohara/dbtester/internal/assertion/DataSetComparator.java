@@ -11,6 +11,7 @@ import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.TableName;
+import io.github.seijikohara.dbtester.api.exception.ValidationException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigDecimal;
@@ -526,11 +527,36 @@ public class DataSetComparator {
               // Get strategy for this column, or use default comparison
               final var strategyMapping = columnStrategies.get(upperColumnName);
               if (strategyMapping != null) {
-                return compareWithStrategy(expectedValue, actualValue, strategyMapping.strategy());
+                return matchesForRowProbe(expectedValue, actualValue, strategyMapping.strategy());
               }
               // Default: use standard comparison
               return valuesAreEqual(expectedValue, actualValue);
             });
+  }
+
+  /**
+   * Compares values with a strategy during UNORDERED row probing, treating a parse failure as a
+   * non-match.
+   *
+   * <p>UNORDERED matching probes every unmatched actual row to locate a match. A wrong candidate
+   * whose value cannot be parsed under a flexible strategy in STRICT mode must count as a non-match
+   * rather than aborting the entire comparison. A genuine failure still surfaces through the
+   * unmatched-row report when no candidate matches.
+   *
+   * @param expected the expected cell value (nullable)
+   * @param actual the actual cell value (nullable)
+   * @param strategy the comparison strategy to use
+   * @return true if the values match, false if they differ or cannot be parsed
+   */
+  private boolean matchesForRowProbe(
+      final @Nullable CellValue expected,
+      final @Nullable CellValue actual,
+      final ComparisonStrategy strategy) {
+    try {
+      return compareWithStrategy(expected, actual, strategy);
+    } catch (final ValidationException ignored) {
+      return false;
+    }
   }
 
   /**
