@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.api.export;
 import io.github.seijikohara.dbtester.api.config.ConventionSettings;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Configuration for data export operations.
@@ -164,6 +165,54 @@ public final class ExportConfiguration {
    */
   public String loadOrderFileName() {
     return loadOrderFileName;
+  }
+
+  @Override
+  public boolean equals(final @Nullable Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof ExportConfiguration other)) {
+      return false;
+    }
+    return nullValue.equals(other.nullValue)
+        && dateFormatter.equals(other.dateFormatter)
+        && timeFormatter.equals(other.timeFormatter)
+        && timestampFormatter.equals(other.timestampFormatter)
+        && lobHandling == other.lobHandling
+        && writeLoadOrderFile == other.writeLoadOrderFile
+        && loadOrderFileName.equals(other.loadOrderFileName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        nullValue,
+        dateFormatter,
+        timeFormatter,
+        timestampFormatter,
+        lobHandling,
+        writeLoadOrderFile,
+        loadOrderFileName);
+  }
+
+  @Override
+  public String toString() {
+    return "ExportConfiguration[nullValue="
+        + nullValue
+        + ", dateFormatter="
+        + dateFormatter
+        + ", timeFormatter="
+        + timeFormatter
+        + ", timestampFormatter="
+        + timestampFormatter
+        + ", lobHandling="
+        + lobHandling
+        + ", writeLoadOrderFile="
+        + writeLoadOrderFile
+        + ", loadOrderFileName="
+        + loadOrderFileName
+        + "]";
   }
 
   /** Builder for constructing {@link ExportConfiguration} instances. */
