@@ -246,9 +246,6 @@ tables:
       - path: "row[0].EMAIL"
         expected: john@example.com
         actual: john@test.com
-        column:
-          type: VARCHAR(255)
-          nullable: false
 ```
 
 ::: tip

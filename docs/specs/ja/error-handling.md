@@ -53,14 +53,9 @@ tables:
       - path: "row[0].STATUS"
         expected: COMPLETED
         actual: PENDING
-        column:
-          type: VARCHAR(50)
-          nullable: true
       - path: "row[1].AMOUNT"
         expected: 100.00
         actual: 99.99
-        column:
-          type: "DECIMAL(10,2)"
 ```
 
 出力は（最初の要約行の後）**有効なYAML**です。標準YAMLライブラリでCI/CD統合用に解析できます。
@@ -74,7 +69,6 @@ tables:
 | `tables.<name>.differences` | 各テーブルの差異リスト |
 | `path` | 場所: `table_count`、`row_count`、または`row[N].COLUMN` |
 | `expected` / `actual` | 期待値と実際の値 |
-| `column` | 利用可能な場合のJDBCメタデータ（type、nullable、primary_key） |
 
 ### 差異の種類
 
@@ -307,9 +301,6 @@ org.example.UserRepositoryTest > shouldCreateUser FAILED
               - path: "row[0].EMAIL"
                 expected: john@example.com
                 actual: jane@example.com
-                column:
-                  type: VARCHAR(255)
-                  nullable: false
 
         at io.github.seijikohara.dbtester.internal.assertion.DataSetComparator.assertEquals(DataSetComparator.java:85)
         at io.github.seijikohara.dbtester.junit.jupiter.lifecycle.ExpectationVerifier.verify(ExpectationVerifier.java:42)

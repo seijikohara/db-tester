@@ -24,8 +24,6 @@ import org.jspecify.annotations.Nullable;
  *   <li>{@link #NOT_NULL} - Only verify the value is not null
  *   <li>{@link #regex(String)} - Match against a regular expression pattern
  * </ul>
- *
- * @see Column
  */
 public final class ComparisonStrategy {
 
