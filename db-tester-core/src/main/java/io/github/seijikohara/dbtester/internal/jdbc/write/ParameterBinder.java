@@ -5,6 +5,8 @@ import static io.github.seijikohara.dbtester.internal.domain.InternalConstants.B
 import io.github.seijikohara.dbtester.api.dataset.Row;
 import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
+import io.github.seijikohara.dbtester.api.spi.TypeHandler;
+import io.github.seijikohara.dbtester.internal.jdbc.type.TypeHandlerRegistry;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Date;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Binds parameter values to JDBC PreparedStatements with type conversion.
@@ -44,8 +47,22 @@ import java.util.stream.IntStream;
  */
 public final class ParameterBinder {
 
-  /** Creates a new parameter binder. */
-  public ParameterBinder() {}
+  /** The registry that resolves custom type handlers by SQL type and database product. */
+  private final TypeHandlerRegistry typeHandlerRegistry;
+
+  /** Creates a new parameter binder using the default {@link TypeHandlerRegistry}. */
+  public ParameterBinder() {
+    this(TypeHandlerRegistry.getInstance());
+  }
+
+  /**
+   * Creates a new parameter binder with the specified type handler registry.
+   *
+   * @param typeHandlerRegistry the registry that resolves custom type handlers
+   */
+  ParameterBinder(final TypeHandlerRegistry typeHandlerRegistry) {
+    this.typeHandlerRegistry = typeHandlerRegistry;
+  }
 
   /**
    * Sets a single parameter on a prepared statement.
@@ -99,13 +116,15 @@ public final class ParameterBinder {
    * @param row the row containing values
    * @param columns the column names in order
    * @param columnTypes map of uppercase column names to SQL types
+   * @param databaseProductName the database product name for type-handler resolution, or null
    * @throws SQLException if a database error occurs
    */
   public void bindRowWithTypes(
       final PreparedStatement stmt,
       final Row row,
       final Collection<ColumnName> columns,
-      final Map<String, Integer> columnTypes)
+      final Map<String, Integer> columnTypes,
+      final @Nullable String databaseProductName)
       throws SQLException {
     final List<ColumnName> columnList = List.copyOf(columns);
     IntStream.range(0, columnList.size())
@@ -115,7 +134,7 @@ public final class ParameterBinder {
                 final var column = columnList.get(i);
                 final var upperName = column.value().toUpperCase(Locale.ROOT);
                 final var sqlType = columnTypes.getOrDefault(upperName, Types.VARCHAR);
-                bindWithType(stmt, i + 1, row.value(column), sqlType);
+                bindWithType(stmt, i + 1, row.value(column), sqlType, databaseProductName);
               } catch (final SQLException e) {
                 throw new RuntimeException(e);
               }
@@ -133,10 +152,15 @@ public final class ParameterBinder {
    * @param index the parameter index (1-based)
    * @param dataValue the value to set
    * @param sqlType the SQL type of the column
+   * @param databaseProductName the database product name for type-handler resolution, or null
    * @throws SQLException if a database error occurs
    */
   public void bindWithType(
-      final PreparedStatement stmt, final int index, final CellValue dataValue, final int sqlType)
+      final PreparedStatement stmt,
+      final int index,
+      final CellValue dataValue,
+      final int sqlType,
+      final @Nullable String databaseProductName)
       throws SQLException {
     if (dataValue.isNull()) {
       stmt.setNull(index, sqlType);
@@ -146,6 +170,12 @@ public final class ParameterBinder {
     final var value = dataValue.value();
     if (!(value instanceof String strValue)) {
       stmt.setObject(index, value);
+      return;
+    }
+
+    final var handler = typeHandlerRegistry.findHandler(sqlType, databaseProductName);
+    if (handler.isPresent()) {
+      writeWithHandler(handler.get(), stmt, index, strValue);
       return;
     }
 
@@ -168,6 +198,26 @@ public final class ParameterBinder {
     } catch (final IllegalArgumentException e) {
       stmt.setObject(index, value);
     }
+  }
+
+  /**
+   * Writes a string value using a resolved custom type handler.
+   *
+   * @param handler the type handler resolved for the column
+   * @param stmt the prepared statement
+   * @param index the parameter index (1-based)
+   * @param strValue the string value to parse and write
+   * @throws SQLException if writing fails
+   */
+  @SuppressWarnings("unchecked")
+  private void writeWithHandler(
+      final TypeHandler<?> handler,
+      final PreparedStatement stmt,
+      final int index,
+      final String strValue)
+      throws SQLException {
+    final var typedHandler = (TypeHandler<Object>) handler;
+    typedHandler.write(stmt, index, typedHandler.parse(strValue));
   }
 
   /**

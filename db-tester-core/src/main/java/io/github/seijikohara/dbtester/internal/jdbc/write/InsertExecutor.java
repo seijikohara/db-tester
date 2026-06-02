@@ -9,6 +9,7 @@ import io.github.seijikohara.dbtester.api.dataset.Table;
 import io.github.seijikohara.dbtester.api.exception.DatabaseOperationException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
@@ -103,6 +104,7 @@ public final class InsertExecutor implements TableExecutor {
     logger.trace("Executing INSERT: {}", sql);
 
     final var columnTypes = getColumnTypes(connection, table.name().value());
+    final var dbProductName = resolveDatabaseProductName(connection);
     final var rows = table.rows();
 
     try (final var statementResource = open(() -> connection.prepareStatement(sql))) {
@@ -115,9 +117,9 @@ public final class InsertExecutor implements TableExecutor {
             rows.size(),
             table.name().value(),
             batchSize);
-        insertWithChunking(preparedStatement, rows, table, columnTypes, batchSize);
+        insertWithChunking(preparedStatement, rows, table, columnTypes, dbProductName, batchSize);
       } else {
-        insertAllAtOnce(preparedStatement, rows, table, columnTypes);
+        insertAllAtOnce(preparedStatement, rows, table, columnTypes, dbProductName);
       }
     }
   }
@@ -129,6 +131,7 @@ public final class InsertExecutor implements TableExecutor {
    * @param rows the rows to insert
    * @param table the table metadata
    * @param columnTypes the column type mappings
+   * @param databaseProductName the database product name for type-handler resolution, or null
    * @param batchSize the number of rows per batch flush
    */
   private void insertWithChunking(
@@ -136,6 +139,7 @@ public final class InsertExecutor implements TableExecutor {
       final List<Row> rows,
       final Table table,
       final Map<String, Integer> columnTypes,
+      final @Nullable String databaseProductName,
       final int batchSize) {
     IntStream.range(0, rows.size())
         .forEach(
@@ -143,7 +147,11 @@ public final class InsertExecutor implements TableExecutor {
               run(
                   () ->
                       parameterBinder.bindRowWithTypes(
-                          preparedStatement, rows.get(index), table.columns(), columnTypes));
+                          preparedStatement,
+                          rows.get(index),
+                          table.columns(),
+                          columnTypes,
+                          databaseProductName));
               run(preparedStatement::addBatch);
 
               if ((index + 1) % batchSize == 0) {
@@ -163,18 +171,20 @@ public final class InsertExecutor implements TableExecutor {
    * @param rows the rows to insert
    * @param table the table metadata
    * @param columnTypes the column type mappings
+   * @param databaseProductName the database product name for type-handler resolution, or null
    */
   private void insertAllAtOnce(
       final PreparedStatement preparedStatement,
       final List<Row> rows,
       final Table table,
-      final Map<String, Integer> columnTypes) {
+      final Map<String, Integer> columnTypes,
+      final @Nullable String databaseProductName) {
     rows.forEach(
         row -> {
           run(
               () ->
                   parameterBinder.bindRowWithTypes(
-                      preparedStatement, row, table.columns(), columnTypes));
+                      preparedStatement, row, table.columns(), columnTypes, databaseProductName));
           run(preparedStatement::addBatch);
         });
     run(preparedStatement::executeBatch);
@@ -212,6 +222,26 @@ public final class InsertExecutor implements TableExecutor {
       applyTimeout(preparedStatement, queryTimeout);
       run(() -> parameterBinder.bindRow(preparedStatement, row, table.columns()));
       run(preparedStatement::executeUpdate);
+    }
+  }
+
+  /**
+   * Resolves the database product name from the connection metadata.
+   *
+   * <p>The product name selects database-specific {@link
+   * io.github.seijikohara.dbtester.api.spi.TypeHandler} implementations. A null result disables
+   * custom type handling for the operation, falling back to standard JDBC binding.
+   *
+   * @param connection the database connection
+   * @return the database product name, or null if it cannot be determined
+   */
+  private @Nullable String resolveDatabaseProductName(final Connection connection) {
+    try {
+      final var metaData = connection.getMetaData();
+      return metaData != null ? metaData.getDatabaseProductName() : null;
+    } catch (final SQLException e) {
+      logger.debug("Unable to resolve database product name for type handlers", e);
+      return null;
     }
   }
 
