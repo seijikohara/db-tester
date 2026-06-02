@@ -182,6 +182,8 @@ flowchart LR
 
 ## JPMSサポート
 
+このフレームワークは明示的なモジュールシステム方針を採用しています。中核となるJava APIとその主要なJUnitバインディングを構成する3モジュールは、強いカプセル化のために手書きの`module-info.java`を提供します。残りのモジュールは安定した`Automatic-Module-Name`のみを提供します。Groovy/KotlinモジュールとSpring統合モジュールは、フレームワーク固有または言語固有の依存関係を持ち、完全なモジュール記述子の価値が低いため、名前を凍結したまま自動モジュールとします。利用者はどちらの形式でも同じモジュール名を`requires`するため、モジュール名は記述子の形式に関わらず公開契約の一部です。
+
 ### 完全なモジュールサポート
 
 以下のモジュールは完全な`module-info.java`を提供します。
@@ -198,6 +200,7 @@ flowchart LR
 
 | モジュール | Automatic-Module-Name |
 |------------|----------------------|
+| `db-tester-spring-support` | `io.github.seijikohara.dbtester.spring.support` |
 | `db-tester-spock` | `io.github.seijikohara.dbtester.spock` |
 | `db-tester-kotest` | `io.github.seijikohara.dbtester.kotest` |
 | `db-tester-junit-spring-boot-starter` | `io.github.seijikohara.dbtester.junit.spring.autoconfigure` |
