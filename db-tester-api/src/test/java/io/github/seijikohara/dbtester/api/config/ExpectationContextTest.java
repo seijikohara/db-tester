@@ -80,7 +80,12 @@ class ExpectationContextTest {
 
       // When
       final var context =
-          ExpectationContext.of(excludeColumns, columnStrategies, rowOrdering, operationDefaults);
+          ExpectationContext.of(
+              excludeColumns,
+              columnStrategies,
+              rowOrdering,
+              operationDefaults,
+              TableOrderingStrategy.AUTO);
 
       // Then
       assertAll(
@@ -120,7 +125,11 @@ class ExpectationContextTest {
       final var mutableList = new ArrayList<>(List.of("COL1", "COL2"));
       final var context =
           ExpectationContext.of(
-              mutableList, Map.of(), RowOrdering.ORDERED, OperationDefaults.standard());
+              mutableList,
+              Map.of(),
+              RowOrdering.ORDERED,
+              OperationDefaults.standard(),
+              TableOrderingStrategy.AUTO);
 
       // When
       mutableList.add("COL3");
@@ -139,7 +148,11 @@ class ExpectationContextTest {
           new HashMap<>(Map.of("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")));
       final var context =
           ExpectationContext.of(
-              List.of(), mutableMap, RowOrdering.ORDERED, OperationDefaults.standard());
+              List.of(),
+              mutableMap,
+              RowOrdering.ORDERED,
+              OperationDefaults.standard(),
+              TableOrderingStrategy.AUTO);
 
       // When
       mutableMap.put("NAME", ColumnStrategyMapping.strict("NAME"));
@@ -156,7 +169,11 @@ class ExpectationContextTest {
       // Given
       final var context =
           ExpectationContext.of(
-              List.of("COL1"), Map.of(), RowOrdering.ORDERED, OperationDefaults.standard());
+              List.of("COL1"),
+              Map.of(),
+              RowOrdering.ORDERED,
+              OperationDefaults.standard(),
+              TableOrderingStrategy.AUTO);
 
       // When & Then
       assertThrows(
@@ -176,7 +193,8 @@ class ExpectationContextTest {
               List.of(),
               Map.of("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")),
               RowOrdering.ORDERED,
-              OperationDefaults.standard());
+              OperationDefaults.standard(),
+              TableOrderingStrategy.AUTO);
 
       // When & Then
       assertThrows(

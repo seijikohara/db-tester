@@ -41,15 +41,6 @@ public interface OperationProvider {
         DataSource dataSource,
         TableOrderingStrategy tableOrderingStrategy,
         TransactionMode transactionMode,
-        @Nullable Duration queryTimeout);
-
-    // バッチサイズ制御付き（デフォルトではベースのexecuteに委譲）
-    default void execute(
-        Operation operation,
-        TableSet tableSet,
-        DataSource dataSource,
-        TableOrderingStrategy tableOrderingStrategy,
-        TransactionMode transactionMode,
         @Nullable Duration queryTimeout,
         int batchSize);
 }
@@ -67,7 +58,7 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | テーブル処理順序の戦略 |
 | `transactionMode` | `TransactionMode` | トランザクション動作モード |
 | `queryTimeout` | `@Nullable Duration` | クエリタイムアウト、またはタイムアウトなしの場合はnull |
-| `batchSize` | `int` | INSERTバッチあたりの行数（0 = 単一バッチ）、バッチオーバーロードで使用 |
+| `batchSize` | `int` | INSERTバッチあたりの行数（0 = 単一バッチ） |
 
 **操作**:
 
@@ -143,12 +134,8 @@ public interface AssertionProvider {
 
 ```java
 public interface ExpectationProvider {
-    // 基本検証（abstract）
-    void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
-
-    // ExpectationContextパラメータオブジェクト付き（default）
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   ExpectationContext context);
+    void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                           ExpectationContext context);
 }
 ```
 
@@ -158,7 +145,6 @@ public interface ExpectationProvider {
 
 | メソッド | 説明 |
 |----------|------|
-| `verifyExpectation(TableSet, DataSource)` | 基本的なデータベース状態検証 |
 | `verifyExpectation(TableSet, DataSource, ExpectationContext)` | フルコンテキスト付き検証（除外、戦略、順序、デフォルト） |
 
 **ExpectationContext** (`io.github.seijikohara.dbtester.api.config.ExpectationContext`):
@@ -183,11 +169,7 @@ var context = ExpectationContext.defaults()
     .withRowOrdering(RowOrdering.UNORDERED)
     .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
-// 4パラメータのファクトリメソッド（テーブル順序はAUTOがデフォルト）
-var context = ExpectationContext.of(
-    excludeColumns, columnStrategies, rowOrdering, operationDefaults);
-
-// 5パラメータのファクトリメソッド（テーブル順序を明示指定）
+// 全パラメータのファクトリメソッド
 var context = ExpectationContext.of(
     excludeColumns, columnStrategies, rowOrdering, operationDefaults,
     TableOrderingStrategy.FOREIGN_KEY);

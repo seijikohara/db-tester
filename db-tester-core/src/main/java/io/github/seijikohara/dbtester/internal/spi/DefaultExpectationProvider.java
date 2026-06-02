@@ -34,11 +34,6 @@ public final class DefaultExpectationProvider implements ExpectationProvider {
   }
 
   @Override
-  public void verifyExpectation(final TableSet expectedTableSet, final DataSource dataSource) {
-    expectationVerifier.verifyExpectation(expectedTableSet, dataSource);
-  }
-
-  @Override
   public void verifyExpectation(
       final TableSet expectedTableSet,
       final DataSource dataSource,
