@@ -48,7 +48,6 @@ dependencies {
     "testCompileOnly"(catalog.findLibrary("checker-qual").get())
     "errorprone"(catalog.findLibrary("errorprone-annotations").get())
     "errorprone"(catalog.findLibrary("errorprone-core").get())
-    "errorprone"(catalog.findLibrary("errorprone-refaster").get())
     "errorprone"(catalog.findLibrary("nullaway").get())
 }
 
