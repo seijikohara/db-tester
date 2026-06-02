@@ -57,8 +57,6 @@ public final class Jdbc {
     public void close() {
       try {
         value.close();
-      } catch (final SQLException e) {
-        throw new DatabaseOperationException(e);
       } catch (final Exception e) {
         throw new DatabaseOperationException(e);
       }

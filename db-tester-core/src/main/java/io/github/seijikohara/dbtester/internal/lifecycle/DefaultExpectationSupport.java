@@ -174,7 +174,7 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
       final io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy tableOrdering,
       final int retryCount,
       final Duration retryDelay) {
-    ValidationException lastException = null;
+    AssertionError lastError = null;
 
     for (int attempt = 0; attempt <= retryCount; attempt++) {
       try {
@@ -193,8 +193,8 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
 
         // Success - exit the retry loop
         return;
-      } catch (final ValidationException e) {
-        lastException = e;
+      } catch (final AssertionError e) {
+        lastError = e;
         if (attempt < retryCount) {
           logger.debug("Verification failed, will retry: {}", e.getMessage());
         }
@@ -204,8 +204,8 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
       }
     }
 
-    // All retries exhausted, throw the last exception
-    throw Objects.requireNonNull(lastException, "lastException must not be null after retry loop");
+    // All retries exhausted, throw the last data mismatch
+    throw Objects.requireNonNull(lastError, "lastError must not be null after retry loop");
   }
 
   /**
@@ -248,24 +248,15 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
         ExpectationContext.of(
             excludeColumns, columnStrategies, rowOrdering, operationDefaults, tableOrdering);
 
-    try {
-      expectationProvider.verifyExpectation(tableSet, dataSource, expectationContext);
+    // Data mismatches surface as AssertionError (carrying the structured diff) and parse or
+    // strategy failures surface as ValidationException. Both propagate unchanged so callers can
+    // catch a single, well-defined type per failure category.
+    expectationProvider.verifyExpectation(tableSet, dataSource, expectationContext);
 
-      logger.info(
-          "Expectation validation completed successfully for {}: {} tables",
-          context.testMethod().getName(),
-          tableCount);
-    } catch (final ValidationException e) {
-      throw new ValidationException(
-          String.format(
-              "Failed to verify expectation TableSet for %s", context.testMethod().getName()),
-          e);
-    } catch (final AssertionError e) {
-      throw new ValidationException(
-          String.format(
-              "Failed to verify expectation TableSet for %s", context.testMethod().getName()),
-          e);
-    }
+    logger.info(
+        "Expectation validation completed successfully for {}: {} tables",
+        context.testMethod().getName(),
+        tableCount);
   }
 
   /**

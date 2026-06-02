@@ -75,16 +75,21 @@ Indicates database operation failure.
 
 ## ValidationException
 
-Indicates assertion or validation failure.
+Indicates that verification could not be completed, as opposed to a data mismatch.
 
 **Typical Causes**:
 
-- Expected and actual data mismatch
-- Row count differences
-- Column value mismatches
+- A value cannot be parsed for a flexible comparison strategy under `ComparisonMode.STRICT`
+- A comparison strategy cannot be applied to a value
+- Verification is interrupted during a retry delay
 
-**Output Format**: Validation errors output a human-readable summary followed by YAML details.
-See [Error Handling - Validation Errors](error-handling#validation-errors) for format details.
+A data mismatch (row count difference or column value difference) throws `java.lang.AssertionError`,
+not `ValidationException`. The assertion API and the annotation-driven path both surface mismatches
+as `AssertionError` so a single `catch (AssertionError)` covers both entry points.
+
+**Output Format**: An `AssertionError` for a mismatch carries a human-readable summary followed by
+YAML details. See [Error Handling - Validation Errors](error-handling#validation-errors) for format
+details.
 
 ## Default Values Reference
 
