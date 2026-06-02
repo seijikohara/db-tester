@@ -18,6 +18,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
           { text: 'Getting Started', link: '/getting-started' },
           { text: 'Overview', link: '/overview' },
           { text: 'Architecture', link: '/architecture' },
+          { text: 'Versioning Policy', link: '/versioning' },
         ],
       },
       {

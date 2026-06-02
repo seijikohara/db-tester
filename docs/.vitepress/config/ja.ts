@@ -18,6 +18,7 @@ export const ja: LocaleSpecificConfig<DefaultTheme.Config> = {
           { text: 'はじめに', link: '/ja/getting-started' },
           { text: '概要', link: '/ja/overview' },
           { text: 'アーキテクチャ', link: '/ja/architecture' },
+          { text: 'バージョニング方針', link: '/ja/versioning' },
         ],
       },
       {

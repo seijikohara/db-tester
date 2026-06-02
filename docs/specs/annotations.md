@@ -20,17 +20,17 @@ The `db-tester-api` module exports packages organized into three layers by inten
 The User API contains the types that most users interact with directly:
 
 - **`annotation`** -- `@DataSet`, `@ExpectedDataSet`, `@DataSetSource`, `@ColumnStrategy`
-- **`assertion`** -- `DatabaseAssertion`, `DatabaseQueryAssertion` for programmatic database verification
 - **`config`** -- `Configuration`, `ConventionSettings`, `DataSourceRegistry`, `ExpectationContext`
 - **`operation`** -- `Operation` enum (`CLEAN_INSERT`, `INSERT`, `TRUNCATE_INSERT`, and others)
 - **`exception`** -- Framework exceptions (passive consumption via catch/inspect)
-- **`export`** -- `DataSetExporter` for exporting database content to files
 - **`preparation`** -- `DatabasePreparation` for programmatic test data setup
 
 ### Advanced API
 
-The Advanced API provides programmatic access to datasets and type-safe value objects:
+The Advanced API provides programmatic access to assertions, datasets, and type-safe value objects:
 
+- **`assertion`** -- `DatabaseAssertion`, `DatabaseQueryAssertion` for programmatic database verification
+- **`export`** -- `DataSetExporter` for exporting database content to files
 - **`domain`** -- Type-safe value objects (`CellValue`, `TableName`, `ColumnName`, `ComparisonStrategy`)
 - **`dataset`** -- `TableSet`, `Table`, `Row` interfaces for dataset representation
 
