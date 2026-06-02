@@ -7,6 +7,7 @@ import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+import io.github.seijikohara.dbtester.api.domain.Strategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.shouldBe
@@ -229,12 +230,12 @@ class DbTesterKotestAutoConfigurationSpec : AnnotationSpec() {
                 val timestampStrategy =
                     DbTesterProperties.ColumnStrategyProperty().apply {
                         columnName = "CREATED_AT"
-                        strategy = ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE
+                        strategy = Strategy.TIMESTAMP_FLEXIBLE
                     }
                 val ignoreStrategy =
                     DbTesterProperties.ColumnStrategyProperty().apply {
                         columnName = "updated_at"
-                        strategy = ComparisonStrategy.Type.IGNORE
+                        strategy = Strategy.IGNORE
                     }
                 customProperties.verification.columnStrategies = mutableListOf(timestampStrategy, ignoreStrategy)
             }.let { customProperties ->

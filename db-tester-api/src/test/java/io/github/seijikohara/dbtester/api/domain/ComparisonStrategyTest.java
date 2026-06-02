@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
@@ -42,10 +43,7 @@ class ComparisonStrategyTest {
     @DisplayName("should have STRICT type")
     void shouldHaveStrictType_whenCreated() {
       // When & Then
-      assertEquals(
-          ComparisonStrategy.Type.STRICT,
-          ComparisonStrategy.STRICT.getType(),
-          "should have STRICT type");
+      assertEquals(Strategy.STRICT, ComparisonStrategy.STRICT.type(), "should have STRICT type");
     }
   }
 
@@ -73,10 +71,7 @@ class ComparisonStrategyTest {
     @DisplayName("should have IGNORE type")
     void shouldHaveIgnoreType_whenCreated() {
       // When & Then
-      assertEquals(
-          ComparisonStrategy.Type.IGNORE,
-          ComparisonStrategy.IGNORE.getType(),
-          "should have IGNORE type");
+      assertEquals(Strategy.IGNORE, ComparisonStrategy.IGNORE.type(), "should have IGNORE type");
     }
   }
 
@@ -94,10 +89,7 @@ class ComparisonStrategyTest {
     @DisplayName("should have NUMERIC type")
     void shouldHaveNumericType_whenCreated() {
       // When & Then
-      assertEquals(
-          ComparisonStrategy.Type.NUMERIC,
-          ComparisonStrategy.NUMERIC.getType(),
-          "should have NUMERIC type");
+      assertEquals(Strategy.NUMERIC, ComparisonStrategy.NUMERIC.type(), "should have NUMERIC type");
     }
   }
 
@@ -116,8 +108,8 @@ class ComparisonStrategyTest {
     void shouldHaveCaseInsensitiveType_whenCreated() {
       // When & Then
       assertEquals(
-          ComparisonStrategy.Type.CASE_INSENSITIVE,
-          ComparisonStrategy.CASE_INSENSITIVE.getType(),
+          Strategy.CASE_INSENSITIVE,
+          ComparisonStrategy.CASE_INSENSITIVE.type(),
           "should have CASE_INSENSITIVE type");
     }
   }
@@ -137,8 +129,8 @@ class ComparisonStrategyTest {
     void shouldHaveTimestampFlexibleType_whenCreated() {
       // When & Then
       assertEquals(
-          ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE,
-          ComparisonStrategy.TIMESTAMP_FLEXIBLE.getType(),
+          Strategy.TIMESTAMP_FLEXIBLE,
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE.type(),
           "should have TIMESTAMP_FLEXIBLE type");
     }
   }
@@ -158,9 +150,7 @@ class ComparisonStrategyTest {
     void shouldHaveNotNullType_whenCreated() {
       // When & Then
       assertEquals(
-          ComparisonStrategy.Type.NOT_NULL,
-          ComparisonStrategy.NOT_NULL.getType(),
-          "should have NOT_NULL type");
+          Strategy.NOT_NULL, ComparisonStrategy.NOT_NULL.type(), "should have NOT_NULL type");
     }
   }
 
@@ -181,11 +171,11 @@ class ComparisonStrategyTest {
       final var strategy = ComparisonStrategy.regex("test.*");
 
       // When & Then
-      assertEquals(ComparisonStrategy.Type.REGEX, strategy.getType(), "should have REGEX type");
-      assertTrue(strategy.getPattern().isPresent(), "should have pattern");
+      assertEquals(Strategy.REGEX, strategy.type(), "should have REGEX type");
+      assertTrue(strategy.pattern().isPresent(), "should have pattern");
       assertEquals(
           "test.*",
-          strategy.getPattern().map(p -> p.pattern()).orElse(""),
+          strategy.pattern().map(p -> p.pattern()).orElse(""),
           "should have correct pattern string");
     }
   }
@@ -205,8 +195,8 @@ class ComparisonStrategyTest {
     void shouldHaveDateFlexibleType_whenCreated() {
       // When & Then
       assertEquals(
-          ComparisonStrategy.Type.DATE_FLEXIBLE,
-          ComparisonStrategy.DATE_FLEXIBLE.getType(),
+          Strategy.DATE_FLEXIBLE,
+          ComparisonStrategy.DATE_FLEXIBLE.type(),
           "should have DATE_FLEXIBLE type");
     }
   }
@@ -226,9 +216,88 @@ class ComparisonStrategyTest {
     void shouldHaveJsonEquivalentType_whenCreated() {
       // When & Then
       assertEquals(
-          ComparisonStrategy.Type.JSON_EQUIVALENT,
-          ComparisonStrategy.JSON_EQUIVALENT.getType(),
+          Strategy.JSON_EQUIVALENT,
+          ComparisonStrategy.JSON_EQUIVALENT.type(),
           "should have JSON_EQUIVALENT type");
+    }
+  }
+
+  /** Tests for the of() factory methods. */
+  @Nested
+  @DisplayName("of(Strategy) and of(Strategy, String) methods")
+  class OfMethod {
+
+    /** Tests for the of methods. */
+    OfMethod() {}
+
+    /** Verifies that of returns the shared constant for non-regex strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should return shared constant when non-regex strategy")
+    void shouldReturnSharedConstant_whenNonRegexStrategy() {
+      // When & Then
+      assertSame(ComparisonStrategy.STRICT, ComparisonStrategy.of(Strategy.STRICT), "STRICT");
+      assertSame(ComparisonStrategy.IGNORE, ComparisonStrategy.of(Strategy.IGNORE), "IGNORE");
+      assertSame(ComparisonStrategy.NUMERIC, ComparisonStrategy.of(Strategy.NUMERIC), "NUMERIC");
+      assertSame(
+          ComparisonStrategy.CASE_INSENSITIVE,
+          ComparisonStrategy.of(Strategy.CASE_INSENSITIVE),
+          "CASE_INSENSITIVE");
+      assertSame(
+          ComparisonStrategy.TIMESTAMP_FLEXIBLE,
+          ComparisonStrategy.of(Strategy.TIMESTAMP_FLEXIBLE),
+          "TIMESTAMP_FLEXIBLE");
+      assertSame(
+          ComparisonStrategy.DATE_FLEXIBLE,
+          ComparisonStrategy.of(Strategy.DATE_FLEXIBLE),
+          "DATE_FLEXIBLE");
+      assertSame(
+          ComparisonStrategy.JSON_EQUIVALENT,
+          ComparisonStrategy.of(Strategy.JSON_EQUIVALENT),
+          "JSON_EQUIVALENT");
+      assertSame(ComparisonStrategy.NOT_NULL, ComparisonStrategy.of(Strategy.NOT_NULL), "NOT_NULL");
+    }
+
+    /** Verifies that of ignores the pattern for non-regex strategies. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should ignore pattern when non-regex strategy")
+    void shouldIgnorePattern_whenNonRegexStrategy() {
+      // When & Then
+      assertSame(
+          ComparisonStrategy.STRICT,
+          ComparisonStrategy.of(Strategy.STRICT, "ignored"),
+          "pattern is ignored for STRICT");
+    }
+
+    /** Verifies that of builds a regex strategy when a pattern is supplied. */
+    @Test
+    @Tag("normal")
+    @DisplayName("should build regex strategy when pattern supplied")
+    void shouldBuildRegexStrategy_whenPatternSupplied() {
+      // When
+      final var strategy = ComparisonStrategy.of(Strategy.REGEX, "\\d+");
+
+      // Then
+      assertEquals(Strategy.REGEX, strategy.type(), "should have REGEX type");
+      assertEquals(
+          "\\d+", strategy.pattern().map(p -> p.pattern()).orElse(""), "should keep the pattern");
+    }
+
+    /** Verifies that of(Strategy) rejects REGEX without a pattern. */
+    @Test
+    @Tag("error")
+    @DisplayName("should throw exception when regex without pattern")
+    void shouldThrowException_whenRegexWithoutPattern() {
+      // When & Then
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> ComparisonStrategy.of(Strategy.REGEX),
+          "REGEX without a pattern should throw");
+      assertThrows(
+          IllegalArgumentException.class,
+          () -> ComparisonStrategy.of(Strategy.REGEX, " "),
+          "REGEX with a blank pattern should throw");
     }
   }
 

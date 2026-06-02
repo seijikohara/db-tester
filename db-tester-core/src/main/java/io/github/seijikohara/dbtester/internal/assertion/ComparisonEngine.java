@@ -114,7 +114,7 @@ public final class ComparisonEngine {
       final @Nullable Object expected,
       final @Nullable Object actual,
       final ComparisonMode mode) {
-    return switch (strategy.getType()) {
+    return switch (strategy.type()) {
       case STRICT -> Objects.equals(expected, actual);
       case IGNORE -> true;
       case NUMERIC -> compareNumeric(expected, actual, mode);
@@ -465,7 +465,7 @@ public final class ComparisonEngine {
   private static boolean matchesRegex(
       final ComparisonStrategy strategy, final @Nullable Object actual) {
     return strategy
-        .getPattern()
+        .pattern()
         .flatMap(p -> Optional.ofNullable(actual).map(a -> p.matcher(a.toString()).matches()))
         .orElse(false);
   }

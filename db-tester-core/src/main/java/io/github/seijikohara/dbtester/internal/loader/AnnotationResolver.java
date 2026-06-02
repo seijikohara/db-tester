@@ -6,6 +6,7 @@ import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
+import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import io.github.seijikohara.dbtester.internal.spi.ScenarioNameResolverRegistry;
@@ -187,9 +188,7 @@ public final class AnnotationResolver {
   private ColumnStrategyMapping toColumnStrategyMapping(final ColumnStrategy columnStrategy) {
     try {
       final var strategy =
-          columnStrategy
-              .strategy()
-              .toComparisonStrategy(columnStrategy.pattern(), columnStrategy.options());
+          ComparisonStrategy.of(columnStrategy.strategy(), columnStrategy.pattern());
       return ColumnStrategyMapping.of(columnStrategy.name(), strategy);
     } catch (final IllegalArgumentException e) {
       throw new IllegalArgumentException(

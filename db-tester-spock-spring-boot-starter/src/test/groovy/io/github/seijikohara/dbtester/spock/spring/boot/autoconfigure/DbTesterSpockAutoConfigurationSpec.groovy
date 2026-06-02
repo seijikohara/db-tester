@@ -7,6 +7,7 @@ import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+import io.github.seijikohara.dbtester.api.domain.Strategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import java.time.Duration
 import javax.sql.DataSource
@@ -268,11 +269,11 @@ class DbTesterSpockAutoConfigurationSpec extends Specification {
 		given: 'custom column strategies'
 		def timestampStrategy = new DbTesterProperties.ColumnStrategyProperty()
 		timestampStrategy.columnName = 'CREATED_AT'
-		timestampStrategy.strategy = ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE
+		timestampStrategy.strategy = Strategy.TIMESTAMP_FLEXIBLE
 
 		def ignoreStrategy = new DbTesterProperties.ColumnStrategyProperty()
 		ignoreStrategy.columnName = 'updated_at'
-		ignoreStrategy.strategy = ComparisonStrategy.Type.IGNORE
+		ignoreStrategy.strategy = Strategy.IGNORE
 
 		properties.verification.columnStrategies = [
 			timestampStrategy,

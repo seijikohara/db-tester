@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.annotation;
 
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -76,14 +77,4 @@ public @interface ColumnStrategy {
    * @return the regex pattern, or empty string if not using REGEX strategy
    */
   String pattern() default "";
-
-  /**
-   * Strategy-specific options for parameterized strategies.
-   *
-   * <p>This attribute is reserved for future use by strategies that require additional parameters
-   * beyond the {@link #pattern()} attribute.
-   *
-   * @return the strategy options, or empty string if not applicable
-   */
-  String options() default "";
 }
