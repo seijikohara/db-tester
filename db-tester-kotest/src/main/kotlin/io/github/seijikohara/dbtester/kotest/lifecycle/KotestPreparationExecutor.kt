@@ -9,7 +9,7 @@ import java.util.ServiceLoader
  * Executes the preparation phase of database testing.
  *
  * This class delegates to [PreparationSupport] for the actual preparation logic. It
- * provides a Kotest-specific facade for backward compatibility and framework-specific customization.
+ * provides a Kotest-specific facade for framework-specific customization.
  *
  * @property support the preparation support
  * @see PreparationSupport

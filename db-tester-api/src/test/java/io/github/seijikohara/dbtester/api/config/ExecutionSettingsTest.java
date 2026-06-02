@@ -50,62 +50,6 @@ class ExecutionSettingsTest {
     }
   }
 
-  /** Tests for of() factory method. */
-  @Nested
-  @DisplayName("of()")
-  class OfTest {
-
-    /** Tests for of() factory method. */
-    OfTest() {}
-
-    /** Verifies that of creates instance with custom values. */
-    @Test
-    @Tag("normal")
-    @DisplayName("creates instance with custom values")
-    void createsInstanceWithCustomValues() {
-      // Given
-      final var timeout = Duration.ofSeconds(30);
-
-      // When
-      final var settings = ExecutionSettings.of(timeout, TransactionMode.AUTO_COMMIT);
-
-      // Then
-      assertAll(
-          "of() should create instance with specified values",
-          () -> assertEquals(timeout, settings.queryTimeout(), "queryTimeout should be 30 seconds"),
-          () ->
-              assertEquals(
-                  TransactionMode.AUTO_COMMIT,
-                  settings.transactionMode(),
-                  "transactionMode should be AUTO_COMMIT"));
-    }
-
-    /** Verifies that of accepts null query timeout. */
-    @Test
-    @Tag("normal")
-    @DisplayName("accepts null query timeout")
-    void acceptsNullQueryTimeout() {
-      // When
-      final var settings = ExecutionSettings.of(null, TransactionMode.SINGLE_TRANSACTION);
-
-      // Then
-      assertNull(settings.queryTimeout(), "queryTimeout should be null");
-    }
-
-    /** Verifies that of throws exception for null transaction mode. */
-    @Test
-    @Tag("error")
-    @DisplayName("throws exception for null transaction mode")
-    @SuppressWarnings("NullAway")
-    void throwsExceptionForNullTransactionMode() {
-      // When & Then
-      assertThrows(
-          NullPointerException.class,
-          () -> ExecutionSettings.of(Duration.ofSeconds(10), null),
-          "should throw NullPointerException for null transactionMode");
-    }
-  }
-
   /** Tests for builder() factory method. */
   @Nested
   @DisplayName("builder()")

@@ -8,7 +8,7 @@ import io.github.seijikohara.dbtester.api.spi.ExpectationSupport
  * Validates expectation datasets against the live database after test execution.
  *
  * <p>This class delegates to {@link ExpectationSupport} for the actual verification logic. It
- * provides a Spock-specific facade for backward compatibility and framework-specific customization.
+ * provides a Spock-specific facade for framework-specific customization.
  *
  * @see ExpectationSupport
  * @see SpockPreparationExecutor

@@ -9,7 +9,7 @@ import java.util.ServiceLoader;
  * Executes the preparation phase of database testing.
  *
  * <p>This class delegates to {@link PreparationSupport} for the actual preparation logic. It
- * provides a JUnit-specific facade for backward compatibility and framework-specific customization.
+ * provides a JUnit-specific facade for framework-specific customization.
  *
  * @see PreparationSupport
  */

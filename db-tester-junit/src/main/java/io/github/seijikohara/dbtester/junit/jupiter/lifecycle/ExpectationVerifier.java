@@ -9,7 +9,7 @@ import java.util.ServiceLoader;
  * Validates expectation datasets against the live database after test execution.
  *
  * <p>This class delegates to {@link ExpectationSupport} for the actual verification logic. It
- * provides a JUnit-specific facade for backward compatibility and framework-specific customization.
+ * provides a JUnit-specific facade for framework-specific customization.
  *
  * @see ExpectationSupport
  * @see PreparationExecutor

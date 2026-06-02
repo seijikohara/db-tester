@@ -54,17 +54,6 @@ public final class ScenarioNameResolverRegistry {
   }
 
   /**
-   * Returns all registered resolvers.
-   *
-   * <p>The returned list is sorted by priority (highest first) and is immutable.
-   *
-   * @return immutable list of registered resolvers
-   */
-  public static List<ScenarioNameResolver> getResolvers() {
-    return RESOLVERS;
-  }
-
-  /**
    * Loads all resolver implementations via ServiceLoader.
    *
    * @return immutable list of resolvers sorted by priority (descending)

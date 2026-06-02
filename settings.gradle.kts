@@ -1,6 +1,6 @@
 // Gradle 9+ settings
-// Configuration Cache can be enabled via --configuration-cache flag or gradle.properties
-// Note: Some plugins (e.g., Spotless) may not fully support Configuration Cache yet
+// Configuration Cache is enabled by default in gradle.properties (problems=fail)
+// Note: Some plugins (e.g., Spotless) are not Configuration Cache compatible and opt out per task
 
 // Plugin version management
 // https://docs.gradle.org/current/userguide/plugins.html#sec:plugin_management

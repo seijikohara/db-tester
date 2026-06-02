@@ -11,9 +11,9 @@ import java.nio.file.Path;
  * CSV, TSV, JSON) and convert them into {@link TableSet} instances that can be used by the database
  * testing framework.
  *
- * <p>Unlike the legacy {@code DataSetFormatProvider}, this interface separates format parsing from
- * scenario filtering. Scenario filtering is applied as a separate layer using the classes in the
- * {@code io.github.seijikohara.dbtester.internal.scenario} package.
+ * <p>This interface separates format parsing from scenario filtering. Scenario filtering is applied
+ * as a separate layer using the classes in the {@code
+ * io.github.seijikohara.dbtester.internal.scenario} package.
  *
  * <p>Implementations must be thread-safe and stateless (or use immutable state). File extension
  * matching is case-insensitive.
