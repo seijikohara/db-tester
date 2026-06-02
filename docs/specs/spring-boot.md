@@ -50,9 +50,14 @@ Manual DataSource registration is not required. The starter handles registration
 
 ::: code-group
 
+Each framework provides a `@SpringBootDatabaseTest` annotation that registers the extension and
+discovers the DataSource from the Spring context.
+
+::: code-group
+
 ```java [JUnit]
 @SpringBootTest
-@ExtendWith(SpringBootDatabaseTestExtension.class)
+@SpringBootDatabaseTest
 class UserRepositoryTest {
 
     @Test
@@ -79,11 +84,8 @@ class UserRepositorySpec extends Specification {
 
 ```kotlin [Kotest]
 @SpringBootTest
+@SpringBootDatabaseTest
 class UserRepositorySpec : AnnotationSpec() {
-
-    init {
-        extensions(SpringBootDatabaseTestExtension())
-    }
 
     @Test
     @DataSet
@@ -96,11 +98,16 @@ class UserRepositorySpec : AnnotationSpec() {
 
 :::
 
-| Framework | Registration Method |
-|-----------|-------------------|
-| JUnit | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
-| Spock | `@SpringBootDatabaseTest` (annotation-driven extension) |
-| Kotest | `init { extensions(SpringBootDatabaseTestExtension()) }` |
+The `@SpringBootDatabaseTest` annotation is the recommended activation for all three frameworks. The
+underlying `SpringBootDatabaseTestExtension` remains available for manual registration when a
+framework-native idiom is preferred (`@ExtendWith(SpringBootDatabaseTestExtension.class)` for JUnit,
+`extensions(SpringBootDatabaseTestExtension())` for Kotest).
+
+| Framework | Recommended Activation | Manual Alternative |
+|-----------|------------------------|--------------------|
+| JUnit | `@SpringBootDatabaseTest` | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
+| Spock | `@SpringBootDatabaseTest` | -- |
+| Kotest | `@SpringBootDatabaseTest` | `extensions(SpringBootDatabaseTestExtension())` |
 
 ## Multiple DataSources
 

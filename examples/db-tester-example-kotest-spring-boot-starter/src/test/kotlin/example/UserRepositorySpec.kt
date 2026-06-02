@@ -2,7 +2,7 @@ package example
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
-import io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure.SpringBootDatabaseTestExtension
+import io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure.SpringBootDatabaseTest
 import io.kotest.core.spec.style.AnnotationSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -15,9 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest
  * Integration tests for UserRepository demonstrating db-tester-kotest-spring-boot-starter.
  *
  * This test class demonstrates how the database testing framework integrates with Spring Boot
- * using [SpringBootDatabaseTestExtension] for automatic DataSource registration:
+ * using [SpringBootDatabaseTest] for automatic DataSource registration:
  *
- * - Automatic DataSource registration via [SpringBootDatabaseTestExtension] - no manual setup required
+ * - Automatic DataSource registration via [SpringBootDatabaseTest] - no manual setup required
  * - Convention-based CSV file resolution
  * - `@DataSet` and `@ExpectedDataSet` annotations for database state management
  * - Spring Data JPA integration with test framework
@@ -27,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest
  * - `src/test/resources/example/UserRepositorySpec/expected/USERS.csv`
  */
 @SpringBootTest(classes = [ExampleApplication::class])
+@SpringBootDatabaseTest
 class UserRepositorySpec : AnnotationSpec() {
     companion object {
         private val logger = LoggerFactory.getLogger(UserRepositorySpec::class.java)
@@ -34,10 +35,6 @@ class UserRepositorySpec : AnnotationSpec() {
 
     @Autowired
     private lateinit var userRepository: UserRepository
-
-    init {
-        extensions(SpringBootDatabaseTestExtension())
-    }
 
     /**
      * Verifies that findAllByOrderByIdAsc returns all users from the prepared database.
