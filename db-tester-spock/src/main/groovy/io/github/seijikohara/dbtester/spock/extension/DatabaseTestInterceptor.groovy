@@ -44,13 +44,13 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 	protected final ExportDataSet exportDataSet
 
 	/** Executor for the preparation phase. */
-	protected final SpockPreparationExecutor preparationExecutor = new SpockPreparationExecutor()
+	protected final SpockPreparationExecutor preparationExecutor
 
 	/** Verifier for the expectation phase. */
-	protected final SpockExpectationVerifier expectationVerifier = new SpockExpectationVerifier()
+	protected final SpockExpectationVerifier expectationVerifier
 
 	/** Executor for the export phase. */
-	protected final SpockExportExecutor exportExecutor = new SpockExportExecutor()
+	protected final SpockExportExecutor exportExecutor
 
 	/**
 	 * Creates a new interceptor with the given annotations.
@@ -61,9 +61,32 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 	 */
 	DatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet,
 	ExportDataSet exportDataSet) {
+		this(dataSet, expectedDataSet, exportDataSet,
+		new SpockPreparationExecutor(), new SpockExpectationVerifier(), new SpockExportExecutor())
+	}
+
+	/**
+	 * Creates a new interceptor with explicit lifecycle collaborators.
+	 *
+	 * <p>This constructor exists to inject test doubles for the preparation, verification, and
+	 * export phases. Production code uses the three-argument constructor.
+	 *
+	 * @param dataSet the data set annotation (may be null)
+	 * @param expectedDataSet the expected data set annotation (may be null)
+	 * @param exportDataSet the export data set annotation (may be null)
+	 * @param preparationExecutor the preparation executor
+	 * @param expectationVerifier the expectation verifier
+	 * @param exportExecutor the export executor
+	 */
+	DatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet,
+	ExportDataSet exportDataSet, SpockPreparationExecutor preparationExecutor,
+	SpockExpectationVerifier expectationVerifier, SpockExportExecutor exportExecutor) {
 		this.dataSet = dataSet
 		this.expectedDataSet = expectedDataSet
 		this.exportDataSet = exportDataSet
+		this.preparationExecutor = preparationExecutor
+		this.expectationVerifier = expectationVerifier
+		this.exportExecutor = exportExecutor
 	}
 
 	@Override

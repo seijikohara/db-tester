@@ -48,27 +48,26 @@ tasks.withType<JacocoCoverageVerification>().configureEach {
     }
 }
 
-val jacocoExcludedModules =
-    setOf(
-        "db-tester-spock",
-        "db-tester-spock-spring-boot-starter",
-        "db-tester-kotest",
-        "db-tester-kotest-spring-boot-starter",
+// Framework entry points that drive real database I/O through test-framework internals
+// (Spock IMethodInvocation, Kotest TestCase) are verified by integration tests in examples/,
+// not unit coverage. Exclude only the classes that resist isolated unit testing per module.
+val jacocoExclusionsByModule =
+    mapOf(
+        "db-tester-spock" to listOf("**/DatabaseTestExtension*.class"),
+        "db-tester-spock-spring-boot-starter" to
+            listOf(
+                "**/SpringBootDatabaseTestExtension*.class",
+                "**/SpringBootDatabaseTestInterceptor*.class",
+            ),
+        "db-tester-kotest-spring-boot-starter" to listOf("**/SpringBootDatabaseTestExtension*.class"),
     )
 
-if (project.name in jacocoExcludedModules) {
+jacocoExclusionsByModule[project.name]?.let { exclusions ->
     afterEvaluate {
         tasks.withType<JacocoCoverageVerification>().configureEach {
             classDirectories.setFrom(
                 classDirectories.files.map {
-                    fileTree(it) {
-                        exclude(
-                            "**/DatabaseTestExtension*.class",
-                            "**/DatabaseTestInterceptor*.class",
-                            "**/SpringBootDatabaseTestExtension*.class",
-                            "**/SpringBootDatabaseTestInterceptor*.class",
-                        )
-                    }
+                    fileTree(it) { exclude(exclusions) }
                 },
             )
         }

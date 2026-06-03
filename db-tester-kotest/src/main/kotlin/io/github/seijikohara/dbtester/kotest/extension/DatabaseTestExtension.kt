@@ -84,14 +84,47 @@ class DatabaseTestExtension(
     private val registryProvider: (() -> DataSourceRegistry)? = null,
     private val configurationProvider: (() -> Configuration)? = null,
 ) : TestCaseExtension {
+    // All primary-constructor parameters carry defaults so Kotlin synthesizes a
+    // no-argument constructor. Kotest instantiates this extension reflectively
+    // through @DatabaseTest / @ApplyExtension, which requires that no-arg constructor.
+
+    /** Executor for the preparation phase. */
+    private var preparationExecutor: KotestPreparationExecutor = KotestPreparationExecutor()
+
+    /** Verifier for the expectation phase. */
+    private var expectationVerifier: KotestExpectationVerifier = KotestExpectationVerifier()
+
+    /** Executor for the export phase. */
+    private var exportExecutor: KotestExportExecutor = KotestExportExecutor()
+
+    /**
+     * Creates an extension with injected lifecycle collaborators.
+     *
+     * This constructor exists to supply test doubles for the preparation, verification, and
+     * export phases. Production code uses the primary constructor.
+     *
+     * @param registryProvider optional provider for the [DataSourceRegistry], or null
+     * @param configurationProvider optional provider for the [Configuration], or null
+     * @param preparationExecutor the preparation executor
+     * @param expectationVerifier the expectation verifier
+     * @param exportExecutor the export executor
+     */
+    internal constructor(
+        registryProvider: (() -> DataSourceRegistry)?,
+        configurationProvider: (() -> Configuration)?,
+        preparationExecutor: KotestPreparationExecutor,
+        expectationVerifier: KotestExpectationVerifier,
+        exportExecutor: KotestExportExecutor,
+    ) : this(registryProvider, configurationProvider) {
+        this.preparationExecutor = preparationExecutor
+        this.expectationVerifier = expectationVerifier
+        this.exportExecutor = exportExecutor
+    }
+
     /** Companion object containing class-level constants and logger. */
     companion object {
         private val logger = LoggerFactory.getLogger(DatabaseTestExtension::class.java)
     }
-
-    private val preparationExecutor = KotestPreparationExecutor()
-    private val expectationVerifier = KotestExpectationVerifier()
-    private val exportExecutor = KotestExportExecutor()
 
     /**
      * Intercepts test case execution to handle preparation and expectation phases.
