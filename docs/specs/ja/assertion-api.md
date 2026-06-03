@@ -301,7 +301,7 @@ DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSE
 
 | プロパティ | 型 | デフォルト | 説明 |
 |-----------|-----|----------|------|
-| `tableOrderingStrategy` | `TableOrderingStrategy` | `AUTO` | テーブル処理順序を決定する戦略 |
+| `tableOrdering` | `TableOrderingStrategy` | `AUTO` | テーブル処理順序を決定する戦略 |
 | `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | トランザクション動作モード |
 | `queryTimeout` | `@Nullable Duration` | `null` | クエリタイムアウト。nullの場合はドライバーデフォルトを使用 |
 | `batchSize` | `int` | `0` | バッチあたりの行数。ゼロは単一バッチ実行を意味する |
@@ -310,7 +310,7 @@ DatabasePreparation.execute(dataSource, TableSet.of(users), Operation.CLEAN_INSE
 
 | メソッド | 説明 |
 |----------|------|
-| `withTableOrderingStrategy(TableOrderingStrategy)` | 指定した戦略で新しいインスタンスを返す |
+| `withTableOrdering(TableOrderingStrategy)` | 指定した戦略で新しいインスタンスを返す |
 | `withTransactionMode(TransactionMode)` | 指定したモードで新しいインスタンスを返す |
 | `withQueryTimeout(@Nullable Duration)` | 指定したタイムアウトで新しいインスタンスを返す |
 | `withBatchSize(int)` | 指定したバッチサイズで新しいインスタンスを返す |
@@ -323,7 +323,7 @@ var config = PreparationConfig.standard();
 
 // カスタム設定
 var config = PreparationConfig.standard()
-    .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+    .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY)
     .withTransactionMode(TransactionMode.AUTO_COMMIT)
     .withBatchSize(500);
 ```

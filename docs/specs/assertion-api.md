@@ -313,7 +313,7 @@ then use `with*()` methods to customize.
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
-| `tableOrderingStrategy` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
+| `tableOrdering` | `TableOrderingStrategy` | `AUTO` | Strategy for determining table processing order |
 | `transactionMode` | `TransactionMode` | `SINGLE_TRANSACTION` | Transaction behavior mode |
 | `queryTimeout` | `@Nullable Duration` | `null` | Query timeout; null uses driver default |
 | `batchSize` | `int` | `0` | Rows per batch; zero means single-batch execution |
@@ -322,7 +322,7 @@ then use `with*()` methods to customize.
 
 | Method | Description |
 |--------|-------------|
-| `withTableOrderingStrategy(TableOrderingStrategy)` | Returns a new instance with the specified strategy |
+| `withTableOrdering(TableOrderingStrategy)` | Returns a new instance with the specified strategy |
 | `withTransactionMode(TransactionMode)` | Returns a new instance with the specified mode |
 | `withQueryTimeout(@Nullable Duration)` | Returns a new instance with the specified timeout |
 | `withBatchSize(int)` | Returns a new instance with the specified batch size |
@@ -335,7 +335,7 @@ var config = PreparationConfig.standard();
 
 // Custom configuration
 var config = PreparationConfig.standard()
-    .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+    .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY)
     .withTransactionMode(TransactionMode.AUTO_COMMIT)
     .withBatchSize(500);
 ```

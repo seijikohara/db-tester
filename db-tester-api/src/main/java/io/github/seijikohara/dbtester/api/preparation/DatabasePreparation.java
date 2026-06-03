@@ -161,7 +161,7 @@ public final class DatabasePreparation {
             operation,
             tableSet,
             dataSource,
-            config.tableOrderingStrategy(),
+            config.tableOrdering(),
             config.transactionMode(),
             config.queryTimeout(),
             config.batchSize());

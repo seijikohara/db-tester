@@ -63,7 +63,7 @@ public final class TestOperationProvider implements OperationProvider {
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
@@ -74,7 +74,7 @@ public final class TestOperationProvider implements OperationProvider {
                 operation,
                 tableSet,
                 dataSource,
-                tableOrderingStrategy,
+                tableOrdering,
                 transactionMode,
                 wrapNullable(queryTimeout),
                 batchSize)));

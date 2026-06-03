@@ -42,17 +42,11 @@ public final class DefaultOperationProvider implements OperationProvider {
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
     operationExecutor.execute(
-        operation,
-        tableSet,
-        dataSource,
-        tableOrderingStrategy,
-        transactionMode,
-        queryTimeout,
-        batchSize);
+        operation, tableSet, dataSource, tableOrdering, transactionMode, queryTimeout, batchSize);
   }
 }

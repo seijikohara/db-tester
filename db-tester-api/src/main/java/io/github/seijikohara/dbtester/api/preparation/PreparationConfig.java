@@ -15,7 +15,7 @@ import org.jspecify.annotations.Nullable;
  * <p>Default values:
  *
  * <ul>
- *   <li>{@code tableOrderingStrategy} = {@link TableOrderingStrategy#AUTO}
+ *   <li>{@code tableOrdering} = {@link TableOrderingStrategy#AUTO}
  *   <li>{@code transactionMode} = {@link TransactionMode#SINGLE_TRANSACTION}
  *   <li>{@code queryTimeout} = {@code null} (no timeout)
  *   <li>{@code batchSize} = {@code 0} (single batch)
@@ -35,7 +35,7 @@ import org.jspecify.annotations.Nullable;
  * DatabasePreparation.execute(dataSource, tableSet, Operation.CLEAN_INSERT, config);
  * }</pre>
  *
- * @param tableOrderingStrategy the strategy for determining table processing order
+ * @param tableOrdering the strategy for determining table processing order
  * @param transactionMode the transaction behavior mode
  * @param queryTimeout the query timeout, or null to use driver default (typically unlimited)
  * @param batchSize the number of rows per INSERT batch; zero means single-batch execution (all rows
@@ -43,7 +43,7 @@ import org.jspecify.annotations.Nullable;
  * @see DatabasePreparation
  */
 public record PreparationConfig(
-    TableOrderingStrategy tableOrderingStrategy,
+    TableOrderingStrategy tableOrdering,
     TransactionMode transactionMode,
     @Nullable Duration queryTimeout,
     int batchSize) {
@@ -76,13 +76,12 @@ public record PreparationConfig(
   /**
    * Returns a new instance with the specified table ordering strategy.
    *
-   * @param tableOrderingStrategy the table ordering strategy
+   * @param tableOrdering the table ordering strategy
    * @return a new instance with the specified strategy
    */
-  public PreparationConfig withTableOrderingStrategy(
-      final TableOrderingStrategy tableOrderingStrategy) {
+  public PreparationConfig withTableOrdering(final TableOrderingStrategy tableOrdering) {
     return new PreparationConfig(
-        tableOrderingStrategy, this.transactionMode, this.queryTimeout, this.batchSize);
+        tableOrdering, this.transactionMode, this.queryTimeout, this.batchSize);
   }
 
   /**
@@ -93,7 +92,7 @@ public record PreparationConfig(
    */
   public PreparationConfig withTransactionMode(final TransactionMode transactionMode) {
     return new PreparationConfig(
-        this.tableOrderingStrategy, transactionMode, this.queryTimeout, this.batchSize);
+        this.tableOrdering, transactionMode, this.queryTimeout, this.batchSize);
   }
 
   /**
@@ -104,7 +103,7 @@ public record PreparationConfig(
    */
   public PreparationConfig withQueryTimeout(final @Nullable Duration queryTimeout) {
     return new PreparationConfig(
-        this.tableOrderingStrategy, this.transactionMode, queryTimeout, this.batchSize);
+        this.tableOrdering, this.transactionMode, queryTimeout, this.batchSize);
   }
 
   /**
@@ -117,6 +116,6 @@ public record PreparationConfig(
    */
   public PreparationConfig withBatchSize(final int batchSize) {
     return new PreparationConfig(
-        this.tableOrderingStrategy, this.transactionMode, this.queryTimeout, batchSize);
+        this.tableOrdering, this.transactionMode, this.queryTimeout, batchSize);
   }
 }

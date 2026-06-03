@@ -179,7 +179,7 @@ class ProgrammaticPreparationApiSpec extends Specification implements DatabaseTe
 		def config = PreparationConfig.standard()
 				.withBatchSize(2)
 				.withTransactionMode(TransactionMode.AUTO_COMMIT)
-				.withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+				.withTableOrdering(TableOrderingStrategy.FOREIGN_KEY)
 
 		when: 'executing cleanInsert with custom configuration'
 		DatabasePreparation.cleanInsert(dataSource, tableSet, config)
@@ -254,7 +254,7 @@ class ProgrammaticPreparationApiSpec extends Specification implements DatabaseTe
 
 		def config = PreparationConfig.standard()
 				.withTransactionMode(TransactionMode.AUTO_COMMIT)
-				.withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY)
+				.withTableOrdering(TableOrderingStrategy.FOREIGN_KEY)
 
 		when: 'executing CLEAN_INSERT with explicit configuration'
 		DatabasePreparation.execute(dataSource, tableSet, Operation.CLEAN_INSERT, config)
