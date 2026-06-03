@@ -48,11 +48,13 @@ dependencies {
 
 ## 拡張機能の登録
 
+各フレームワークは、拡張機能を登録しSpringコンテキストからDataSourceを検出する`@SpringBootDatabaseTest`アノテーションを提供します。
+
 ::: code-group
 
 ```java [JUnit]
 @SpringBootTest
-@ExtendWith(SpringBootDatabaseTestExtension.class)
+@SpringBootDatabaseTest
 class UserRepositoryTest {
 
     @Test
@@ -79,11 +81,8 @@ class UserRepositorySpec extends Specification {
 
 ```kotlin [Kotest]
 @SpringBootTest
+@SpringBootDatabaseTest
 class UserRepositorySpec : AnnotationSpec() {
-
-    init {
-        extensions(SpringBootDatabaseTestExtension())
-    }
 
     @Test
     @DataSet
@@ -96,11 +95,13 @@ class UserRepositorySpec : AnnotationSpec() {
 
 :::
 
-| フレームワーク | 登録方法 |
-|------------|---------|
-| JUnit | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
-| Spock | `@SpringBootDatabaseTest`（アノテーション駆動型拡張） |
-| Kotest | `init { extensions(SpringBootDatabaseTestExtension()) }` |
+`@SpringBootDatabaseTest`アノテーションは3フレームワークすべてで推奨される起動方法です。フレームワーク固有のイディオムを優先する場合は、基盤の`SpringBootDatabaseTestExtension`を手動登録することもできます（JUnitは`@ExtendWith(SpringBootDatabaseTestExtension.class)`、Kotestは`extensions(SpringBootDatabaseTestExtension())`）。
+
+| フレームワーク | 推奨される起動方法 | 手動の代替手段 |
+|------------|------------------|--------------|
+| JUnit | `@SpringBootDatabaseTest` | `@ExtendWith(SpringBootDatabaseTestExtension.class)` |
+| Spock | `@SpringBootDatabaseTest` | -- |
+| Kotest | `@SpringBootDatabaseTest` | `extensions(SpringBootDatabaseTestExtension())` |
 
 ## 複数DataSource
 

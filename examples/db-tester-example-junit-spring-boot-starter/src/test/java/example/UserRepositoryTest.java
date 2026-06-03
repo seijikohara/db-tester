@@ -6,12 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
-import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTestExtension;
+import io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.SpringBootDatabaseTest;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +20,10 @@ import org.springframework.boot.test.context.SpringBootTest;
  * Integration tests for UserRepository demonstrating db-tester-junit-spring-boot-starter.
  *
  * <p>This test class demonstrates how the database testing framework integrates with Spring Boot
- * using {@link SpringBootDatabaseTestExtension} for automatic DataSource registration:
+ * using {@link SpringBootDatabaseTest} for automatic DataSource registration:
  *
  * <ul>
- *   <li>Automatic DataSource registration via {@link SpringBootDatabaseTestExtension} - no manual
+ *   <li>Automatic DataSource registration via {@link SpringBootDatabaseTest} - no manual
  *       {@code @BeforeAll} setup required
  *   <li>Convention-based CSV file resolution
  *   <li>{@code @DataSet} and {@code @ExpectedDataSet} annotations for database state management
@@ -39,7 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * </ul>
  */
 @SpringBootTest(classes = ExampleApplication.class)
-@ExtendWith(SpringBootDatabaseTestExtension.class)
+@SpringBootDatabaseTest
 @DisplayName("UserRepositoryTest")
 class UserRepositoryTest {
 
