@@ -26,9 +26,6 @@ import org.jspecify.annotations.Nullable;
  *     .transactionMode(TransactionMode.AUTO_COMMIT)
  *     .build();
  *
- * // Using factory method
- * var settings = ExecutionSettings.of(Duration.ofSeconds(30), TransactionMode.AUTO_COMMIT);
- *
  * // Modifying existing settings
  * var modified = settings.withTransactionMode(TransactionMode.AUTO_COMMIT);
  * }</pre>
@@ -71,19 +68,6 @@ public final class ExecutionSettings {
    */
   public static ExecutionSettings standard() {
     return builder().build();
-  }
-
-  /**
-   * Creates an execution settings instance with the specified values.
-   *
-   * @param queryTimeout the query timeout duration, or null to use driver default (typically
-   *     unlimited)
-   * @param transactionMode the transaction mode
-   * @return a new ExecutionSettings instance
-   */
-  public static ExecutionSettings of(
-      final @Nullable Duration queryTimeout, final TransactionMode transactionMode) {
-    return builder().queryTimeout(queryTimeout).transactionMode(transactionMode).build();
   }
 
   /**

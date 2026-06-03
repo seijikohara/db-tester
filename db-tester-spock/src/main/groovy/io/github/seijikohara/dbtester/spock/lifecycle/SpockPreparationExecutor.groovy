@@ -8,7 +8,7 @@ import io.github.seijikohara.dbtester.api.spi.PreparationSupport
  * Executes the preparation phase of database testing for Spock specifications.
  *
  * <p>This class delegates to {@link PreparationSupport} for the actual preparation logic. It
- * provides a Spock-specific facade for backward compatibility and framework-specific customization.
+ * provides a Spock-specific facade for framework-specific customization.
  *
  * @see PreparationSupport
  */

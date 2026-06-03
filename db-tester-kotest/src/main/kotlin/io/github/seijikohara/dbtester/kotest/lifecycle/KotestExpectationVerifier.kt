@@ -9,7 +9,7 @@ import java.util.ServiceLoader
  * Validates expectation datasets against the live database after test execution.
  *
  * This class delegates to [ExpectationSupport] for the actual verification logic. It
- * provides a Kotest-specific facade for backward compatibility and framework-specific customization.
+ * provides a Kotest-specific facade for framework-specific customization.
  *
  * @property support the expectation support
  * @see ExpectationSupport
