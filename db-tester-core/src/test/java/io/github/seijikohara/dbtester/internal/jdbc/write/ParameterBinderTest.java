@@ -186,7 +186,7 @@ class ParameterBinderTest {
 
   /** Tests for the bindRowWithTypes() method. */
   @Nested
-  @DisplayName("bindRowWithTypes(PreparedStatement, Row, Collection, Map) method")
+  @DisplayName("bindRowWithTypes(PreparedStatement, Row, Collection, Map, String) method")
   class BindRowWithTypesMethod {
 
     /** Tests for the bindRowWithTypes method. */
@@ -213,7 +213,7 @@ class ParameterBinderTest {
       when(row.value(column2)).thenReturn(new CellValue("John"));
 
       // When
-      binder.bindRowWithTypes(statement, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes, null);
 
       // Then
       verify(statement).setInt(eq(1), eq(42));
@@ -239,7 +239,7 @@ class ParameterBinderTest {
       when(row.value(column1)).thenReturn(new CellValue("12345"));
 
       // When
-      binder.bindRowWithTypes(statement, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes, null);
 
       // Then
       verify(statement).setLong(eq(1), eq(12345L));
@@ -264,7 +264,7 @@ class ParameterBinderTest {
       when(row.value(column1)).thenReturn(new CellValue("value"));
 
       // When
-      binder.bindRowWithTypes(statement, row, columns, columnTypes);
+      binder.bindRowWithTypes(statement, row, columns, columnTypes, null);
 
       // Then
       verify(statement).setObject(eq(1), eq("value"));
@@ -273,7 +273,7 @@ class ParameterBinderTest {
 
   /** Tests for the bindWithType() method. */
   @Nested
-  @DisplayName("bindWithType(PreparedStatement, int, CellValue, int) method")
+  @DisplayName("bindWithType(PreparedStatement, int, CellValue, int, String) method")
   class BindWithTypeMethod {
 
     /** Tests for the bindWithType method. */
@@ -293,7 +293,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue(null);
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER, null);
 
       // Then
       verify(statement).setNull(eq(1), eq(Types.INTEGER));
@@ -313,7 +313,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue(42);
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER, null);
 
       // Then
       verify(statement).setObject(eq(1), eq(42));
@@ -333,7 +333,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("42");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER, null);
 
       // Then
       verify(statement).setInt(eq(1), eq(42));
@@ -353,7 +353,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("9223372036854775807");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.BIGINT);
+      binder.bindWithType(statement, 1, dataValue, Types.BIGINT, null);
 
       // Then
       verify(statement).setLong(eq(1), eq(Long.MAX_VALUE));
@@ -373,7 +373,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("true");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.BOOLEAN);
+      binder.bindWithType(statement, 1, dataValue, Types.BOOLEAN, null);
 
       // Then
       verify(statement).setBoolean(eq(1), eq(true));
@@ -393,7 +393,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("not-a-number");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.INTEGER);
+      binder.bindWithType(statement, 1, dataValue, Types.INTEGER, null);
 
       // Then
       verify(statement).setObject(eq(1), eq("not-a-number"));
@@ -416,7 +416,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("3.141592653589793");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.FLOAT);
+      binder.bindWithType(statement, 1, dataValue, Types.FLOAT, null);
 
       // Then
       verify(statement).setDouble(eq(1), eq(3.141592653589793));
@@ -436,7 +436,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2.5");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.REAL);
+      binder.bindWithType(statement, 1, dataValue, Types.REAL, null);
 
       // Then
       verify(statement).setFloat(eq(1), eq(2.5f));
@@ -456,7 +456,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("3.141592653589793");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.DOUBLE);
+      binder.bindWithType(statement, 1, dataValue, Types.DOUBLE, null);
 
       // Then
       verify(statement).setDouble(eq(1), eq(3.141592653589793));
@@ -476,7 +476,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("123.456");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.DECIMAL);
+      binder.bindWithType(statement, 1, dataValue, Types.DECIMAL, null);
 
       // Then
       verify(statement).setBigDecimal(eq(1), eq(new java.math.BigDecimal("123.456")));
@@ -496,7 +496,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("999.99");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.NUMERIC);
+      binder.bindWithType(statement, 1, dataValue, Types.NUMERIC, null);
 
       // Then
       verify(statement).setBigDecimal(eq(1), eq(new java.math.BigDecimal("999.99")));
@@ -516,7 +516,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2024-01-15");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.DATE);
+      binder.bindWithType(statement, 1, dataValue, Types.DATE, null);
 
       // Then
       verify(statement).setDate(eq(1), eq(java.sql.Date.valueOf("2024-01-15")));
@@ -536,7 +536,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2024-01-15 10:30:00");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.DATE);
+      binder.bindWithType(statement, 1, dataValue, Types.DATE, null);
 
       // Then
       verify(statement).setDate(eq(1), eq(java.sql.Date.valueOf("2024-01-15")));
@@ -556,7 +556,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("10:30:45");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIME);
+      binder.bindWithType(statement, 1, dataValue, Types.TIME, null);
 
       // Then
       verify(statement).setTime(eq(1), eq(java.sql.Time.valueOf("10:30:45")));
@@ -576,7 +576,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2024-01-15 10:30:45");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIME);
+      binder.bindWithType(statement, 1, dataValue, Types.TIME, null);
 
       // Then
       verify(statement).setTime(eq(1), eq(java.sql.Time.valueOf("10:30:45")));
@@ -596,7 +596,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("10:30:45.123");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIME);
+      binder.bindWithType(statement, 1, dataValue, Types.TIME, null);
 
       // Then
       verify(statement).setTime(eq(1), eq(java.sql.Time.valueOf("10:30:45")));
@@ -616,7 +616,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2024-01-15 10:30:45");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIMESTAMP);
+      binder.bindWithType(statement, 1, dataValue, Types.TIMESTAMP, null);
 
       // Then
       verify(statement).setTimestamp(eq(1), eq(java.sql.Timestamp.valueOf("2024-01-15 10:30:45")));
@@ -638,7 +638,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue(base64);
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.BLOB);
+      binder.bindWithType(statement, 1, dataValue, Types.BLOB, null);
 
       // Then
       verify(statement).setBytes(eq(1), eq(bytes));
@@ -658,7 +658,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("Hello");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.BINARY);
+      binder.bindWithType(statement, 1, dataValue, Types.BINARY, null);
 
       // Then
       verify(statement)
@@ -679,7 +679,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("100");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.SMALLINT);
+      binder.bindWithType(statement, 1, dataValue, Types.SMALLINT, null);
 
       // Then
       verify(statement).setInt(eq(1), eq(100));
@@ -699,7 +699,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("10");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TINYINT);
+      binder.bindWithType(statement, 1, dataValue, Types.TINYINT, null);
 
       // Then
       verify(statement).setInt(eq(1), eq(10));
@@ -718,23 +718,23 @@ class ParameterBinderTest {
       final var statement = mock(PreparedStatement.class);
 
       // When & Then - "1" should be true
-      binder.bindWithType(statement, 1, new CellValue("1"), Types.BOOLEAN);
+      binder.bindWithType(statement, 1, new CellValue("1"), Types.BOOLEAN, null);
       verify(statement).setBoolean(eq(1), eq(true));
 
       // When & Then - "yes" should be true
-      binder.bindWithType(statement, 2, new CellValue("yes"), Types.BOOLEAN);
+      binder.bindWithType(statement, 2, new CellValue("yes"), Types.BOOLEAN, null);
       verify(statement).setBoolean(eq(2), eq(true));
 
       // When & Then - "y" should be true
-      binder.bindWithType(statement, 3, new CellValue("Y"), Types.BOOLEAN);
+      binder.bindWithType(statement, 3, new CellValue("Y"), Types.BOOLEAN, null);
       verify(statement).setBoolean(eq(3), eq(true));
 
       // When & Then - "false" should be false
-      binder.bindWithType(statement, 4, new CellValue("false"), Types.BOOLEAN);
+      binder.bindWithType(statement, 4, new CellValue("false"), Types.BOOLEAN, null);
       verify(statement).setBoolean(eq(4), eq(false));
 
       // When & Then - "0" should be false
-      binder.bindWithType(statement, 5, new CellValue("0"), Types.BOOLEAN);
+      binder.bindWithType(statement, 5, new CellValue("0"), Types.BOOLEAN, null);
       verify(statement).setBoolean(eq(5), eq(false));
     }
 
@@ -752,7 +752,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("true");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.BIT);
+      binder.bindWithType(statement, 1, dataValue, Types.BIT, null);
 
       // Then
       verify(statement).setBoolean(eq(1), eq(true));
@@ -772,7 +772,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("test data");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.VARBINARY);
+      binder.bindWithType(statement, 1, dataValue, Types.VARBINARY, null);
 
       // Then
       verify(statement)
@@ -793,7 +793,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("long binary data");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.LONGVARBINARY);
+      binder.bindWithType(statement, 1, dataValue, Types.LONGVARBINARY, null);
 
       // Then
       verify(statement)
@@ -815,7 +815,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("10:30:45");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIME_WITH_TIMEZONE);
+      binder.bindWithType(statement, 1, dataValue, Types.TIME_WITH_TIMEZONE, null);
 
       // Then
       verify(statement).setTime(eq(1), eq(java.sql.Time.valueOf("10:30:45")));
@@ -835,7 +835,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("2024-01-15 10:30:45");
 
       // When
-      binder.bindWithType(statement, 1, dataValue, Types.TIMESTAMP_WITH_TIMEZONE);
+      binder.bindWithType(statement, 1, dataValue, Types.TIMESTAMP_WITH_TIMEZONE, null);
 
       // Then
       verify(statement).setTimestamp(eq(1), eq(java.sql.Timestamp.valueOf("2024-01-15 10:30:45")));
@@ -855,7 +855,7 @@ class ParameterBinderTest {
       final var dataValue = new CellValue("some value");
 
       // When - using an uncommon type like STRUCT
-      binder.bindWithType(statement, 1, dataValue, Types.STRUCT);
+      binder.bindWithType(statement, 1, dataValue, Types.STRUCT, null);
 
       // Then
       verify(statement).setObject(eq(1), eq("some value"));

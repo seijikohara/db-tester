@@ -9,10 +9,14 @@ import io.github.seijikohara.dbtester.api.domain.CellValue;
 import io.github.seijikohara.dbtester.api.domain.ColumnName;
 import io.github.seijikohara.dbtester.api.domain.TableName;
 import io.github.seijikohara.dbtester.api.exception.DatabaseTesterException;
+import io.github.seijikohara.dbtester.api.spi.TypeHandler;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleRow;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTable;
 import io.github.seijikohara.dbtester.internal.dataset.SimpleTableSet;
+import io.github.seijikohara.dbtester.internal.jdbc.type.TypeHandlerRegistry;
+import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -37,9 +41,12 @@ public final class TableReader {
   /** The type converter for handling CLOB/BLOB values. */
   private final TypeConverter typeConverter;
 
+  /** The registry that resolves custom type handlers by SQL type and database product. */
+  private final TypeHandlerRegistry typeHandlerRegistry;
+
   /** Creates a new table reader with a default type converter. */
   public TableReader() {
-    this.typeConverter = new TypeConverter();
+    this(new TypeConverter());
   }
 
   /**
@@ -48,7 +55,18 @@ public final class TableReader {
    * @param typeConverter the type converter to use
    */
   public TableReader(final TypeConverter typeConverter) {
+    this(typeConverter, TypeHandlerRegistry.getInstance());
+  }
+
+  /**
+   * Creates a new table reader with the specified type converter and type handler registry.
+   *
+   * @param typeConverter the type converter to use
+   * @param typeHandlerRegistry the registry that resolves custom type handlers
+   */
+  TableReader(final TypeConverter typeConverter, final TypeHandlerRegistry typeHandlerRegistry) {
     this.typeConverter = typeConverter;
+    this.typeHandlerRegistry = typeHandlerRegistry;
   }
 
   /**
@@ -186,6 +204,8 @@ public final class TableReader {
         statement.setQueryTimeout((int) queryTimeout.toSeconds());
       }
 
+      final var databaseProductName = resolveDatabaseProductName(connection);
+
       try (final var resultSet = statement.executeQuery()) {
         final var metaData = resultSet.getMetaData();
         final var columnCount = metaData.getColumnCount();
@@ -207,7 +227,8 @@ public final class TableReader {
                     })
                 .toList();
 
-        final var rows = readAllRows(resultSet, columnNames, columnCount);
+        final var rows =
+            readAllRows(resultSet, columnNames, columnCount, metaData, databaseProductName);
 
         return new SimpleTable(new TableName(tableName), columnNames, rows);
       }
@@ -228,11 +249,17 @@ public final class TableReader {
    * @param resultSet the result set to read
    * @param columnNames the column names
    * @param columnCount the number of columns
+   * @param metaData the result set metadata for resolving column SQL types
+   * @param databaseProductName the database product name for type-handler resolution
    * @return list of rows
    * @throws SQLException if reading fails
    */
   private List<Row> readAllRows(
-      final ResultSet resultSet, final List<ColumnName> columnNames, final int columnCount)
+      final ResultSet resultSet,
+      final List<ColumnName> columnNames,
+      final int columnCount,
+      final ResultSetMetaData metaData,
+      final String databaseProductName)
       throws SQLException {
     final var rows = new ArrayList<Row>();
     while (resultSet.next()) {
@@ -242,11 +269,7 @@ public final class TableReader {
               i -> {
                 try {
                   final var columnName = columnNames.get(i - 1);
-                  final var rawValue = resultSet.getObject(i);
-                  // Convert LOB types immediately to avoid issues with closed connections
-                  final var value = typeConverter.convert(rawValue);
-                  // Use CellValue.NULL for null database values
-                  values.put(columnName, value != null ? new CellValue(value) : CellValue.NULL);
+                  values.put(columnName, readCell(resultSet, metaData, i, databaseProductName));
                 } catch (final SQLException e) {
                   throw new DatabaseTesterException(
                       String.format("Failed to read column at index: %d", i), e);
@@ -255,5 +278,70 @@ public final class TableReader {
       rows.add(new SimpleRow(values));
     }
     return List.copyOf(rows);
+  }
+
+  /**
+   * Reads a single column value, applying a custom type handler when one is registered.
+   *
+   * <p>When a {@link TypeHandler} is registered for the column SQL type and database product, the
+   * handler reads and formats the value. Otherwise the value is read with {@link
+   * ResultSet#getObject(int)} and normalized by the {@link TypeConverter}.
+   *
+   * @param resultSet the result set positioned at the current row
+   * @param metaData the result set metadata
+   * @param columnIndex the column index (1-based)
+   * @param databaseProductName the database product name for type-handler resolution
+   * @return the cell value, or {@link CellValue#NULL} for a null database value
+   * @throws SQLException if reading fails
+   */
+  private CellValue readCell(
+      final ResultSet resultSet,
+      final ResultSetMetaData metaData,
+      final int columnIndex,
+      final String databaseProductName)
+      throws SQLException {
+    final var sqlType = metaData.getColumnType(columnIndex);
+    final var handler = typeHandlerRegistry.findHandler(sqlType, databaseProductName);
+    if (handler.isPresent()) {
+      final var formatted = readWithHandler(handler.get(), resultSet, columnIndex);
+      return formatted != null ? new CellValue(formatted) : CellValue.NULL;
+    }
+    // Convert LOB types immediately to avoid issues with closed connections.
+    final var value = typeConverter.convert(resultSet.getObject(columnIndex));
+    return value != null ? new CellValue(value) : CellValue.NULL;
+  }
+
+  /**
+   * Reads a value with a resolved custom type handler and formats it for the dataset.
+   *
+   * @param handler the type handler resolved for the column
+   * @param resultSet the result set positioned at the current row
+   * @param columnIndex the column index (1-based)
+   * @return the formatted value, or null if the database value is null
+   * @throws SQLException if reading fails
+   */
+  @SuppressWarnings("unchecked")
+  private @Nullable String readWithHandler(
+      final TypeHandler<?> handler, final ResultSet resultSet, final int columnIndex)
+      throws SQLException {
+    final var typedHandler = (TypeHandler<Object>) handler;
+    final var value = typedHandler.read(resultSet, columnIndex);
+    return value != null ? typedHandler.format(value) : null;
+  }
+
+  /**
+   * Resolves the database product name from the connection metadata.
+   *
+   * <p>The product name selects database-specific {@link TypeHandler} implementations. An empty
+   * result disables custom type handling for the read, falling back to standard JDBC reads.
+   *
+   * @param connection the database connection
+   * @return the database product name, or an empty string if it cannot be determined
+   * @throws SQLException if metadata access fails
+   */
+  private String resolveDatabaseProductName(final Connection connection) throws SQLException {
+    final var metaData = connection.getMetaData();
+    final var name = metaData != null ? metaData.getDatabaseProductName() : null;
+    return name != null ? name : "";
   }
 }

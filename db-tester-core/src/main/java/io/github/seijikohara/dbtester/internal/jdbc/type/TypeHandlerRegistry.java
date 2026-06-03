@@ -100,16 +100,6 @@ public final class TypeHandlerRegistry {
   }
 
   /**
-   * Finds the best matching handler without database-specific filtering.
-   *
-   * @param sqlType the SQL type code from {@link java.sql.Types}
-   * @return the best matching handler, or empty if none found
-   */
-  public Optional<TypeHandler<?>> findHandler(final int sqlType) {
-    return findHandler(sqlType, null);
-  }
-
-  /**
    * Internal handler lookup with priority-based selection.
    *
    * @param sqlType the SQL type code
@@ -151,15 +141,6 @@ public final class TypeHandlerRegistry {
    */
   public List<TypeHandler<?>> getHandlers() {
     return handlers;
-  }
-
-  /**
-   * Clears the handler cache.
-   *
-   * <p>This is primarily useful for testing.
-   */
-  public void clearCache() {
-    cache.clear();
   }
 
   /**
