@@ -184,6 +184,14 @@ Operations and comparison strategies use the strategy pattern:
 
 ## JPMS Support
 
+The framework applies an explicit module-system policy. The three modules that form the core Java
+API and its primary JUnit binding ship a hand-authored `module-info.java` for strong encapsulation.
+The remaining modules ship only a stable `Automatic-Module-Name`: the Groovy and Kotlin modules and
+the Spring integration modules carry framework-specific or language-specific dependencies that make a
+full module descriptor low-value, so they remain automatic modules with frozen names. A consumer
+`requires` the same module name in either case, so the names are part of the public contract
+regardless of descriptor form.
+
 ### Full Module Support
 
 These modules provide complete `module-info.java`:
@@ -200,6 +208,7 @@ These modules use `Automatic-Module-Name` in `MANIFEST.MF`:
 
 | Module | Automatic-Module-Name |
 |--------|----------------------|
+| `db-tester-spring-support` | `io.github.seijikohara.dbtester.spring.support` |
 | `db-tester-spock` | `io.github.seijikohara.dbtester.spock` |
 | `db-tester-kotest` | `io.github.seijikohara.dbtester.kotest` |
 | `db-tester-junit-spring-boot-starter` | `io.github.seijikohara.dbtester.junit.spring.autoconfigure` |

@@ -15,7 +15,7 @@ module io.github.seijikohara.dbtester.junit {
   requires transitive io.github.seijikohara.dbtester.api;
   requires transitive org.junit.jupiter.api;
   requires java.sql;
-  requires org.jspecify;
+  requires transitive org.jspecify;
   requires static org.slf4j;
 
   // SPI service consumers
