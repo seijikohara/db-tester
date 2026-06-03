@@ -11,6 +11,7 @@ import io.github.seijikohara.dbtester.api.config.ExpectationContext;
 import io.github.seijikohara.dbtester.api.config.OperationDefaults;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.dataset.TableSet;
+import io.github.seijikohara.dbtester.api.operation.TableOrderingStrategy;
 import io.github.seijikohara.dbtester.internal.assertion.ExpectationVerifier;
 import java.util.List;
 import java.util.Map;
@@ -74,34 +75,6 @@ class DefaultExpectationProviderTest {
     }
   }
 
-  /** Tests for the verifyExpectation(TableSet, DataSource) method. */
-  @Nested
-  @DisplayName("verifyExpectation(TableSet, DataSource) method")
-  class VerifyExpectationMethod {
-
-    /** Tests for the verifyExpectation method. */
-    VerifyExpectationMethod() {}
-
-    /** Verifies that verifyExpectation delegates to expectation verifier. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should delegate to expectation verifier when called")
-    void shouldDelegateToExpectationVerifier_whenCalled() {
-      // Given
-      final var expectedDataSet = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-      doNothing()
-          .when(mockExpectationVerifier)
-          .verifyExpectation(any(TableSet.class), any(DataSource.class));
-
-      // When
-      provider.verifyExpectation(expectedDataSet, dataSource);
-
-      // Then
-      verify(mockExpectationVerifier).verifyExpectation(expectedDataSet, dataSource);
-    }
-  }
-
   /** Tests for the verifyExpectation(TableSet, DataSource, ExpectationContext) method. */
   @Nested
   @DisplayName("verifyExpectation(TableSet, DataSource, ExpectationContext) method")
@@ -144,7 +117,8 @@ class DefaultExpectationProviderTest {
               List.of("CREATED_AT"),
               Map.of("EMAIL", ColumnStrategyMapping.caseInsensitive("EMAIL")),
               RowOrdering.UNORDERED,
-              OperationDefaults.standard());
+              OperationDefaults.standard(),
+              TableOrderingStrategy.AUTO);
       doNothing()
           .when(mockExpectationVerifier)
           .verifyExpectation(

@@ -46,32 +46,8 @@ public interface OperationProvider {
    * TransactionMode#SINGLE_TRANSACTION}, changes are committed on success or rolled back on
    * failure.
    *
-   * @param operation the operation to execute
-   * @param tableSet the dataset to operate on
-   * @param dataSource the data source for database connections
-   * @param tableOrderingStrategy the strategy for determining table processing order
-   * @param transactionMode the transaction behavior mode
-   * @param queryTimeout the query timeout, or null for no timeout
-   * @throws DatabaseTesterException if the operation fails
-   */
-  void execute(
-      Operation operation,
-      TableSet tableSet,
-      DataSource dataSource,
-      TableOrderingStrategy tableOrderingStrategy,
-      TransactionMode transactionMode,
-      @Nullable Duration queryTimeout);
-
-  /**
-   * Executes a database operation on the given dataset with batch size control.
-   *
-   * <p>This method extends the base {@link #execute} method with an additional batch size parameter
-   * for controlling INSERT batch flushing. A batch size of zero means all rows are added to a
-   * single batch (default behavior). A positive value causes the executor to flush the batch every
-   * N rows.
-   *
-   * <p>The default implementation ignores the batch size and delegates to the base {@link #execute}
-   * method, maintaining backward compatibility for existing providers.
+   * <p>The batch size controls INSERT batch flushing. A batch size of zero adds all rows to a
+   * single batch. A positive value flushes the batch every N rows.
    *
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
@@ -82,14 +58,12 @@ public interface OperationProvider {
    * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
    * @throws DatabaseTesterException if the operation fails
    */
-  default void execute(
+  void execute(
       Operation operation,
       TableSet tableSet,
       DataSource dataSource,
       TableOrderingStrategy tableOrderingStrategy,
       TransactionMode transactionMode,
       @Nullable Duration queryTimeout,
-      int batchSize) {
-    execute(operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout);
-  }
+      int batchSize);
 }

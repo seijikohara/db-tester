@@ -79,32 +79,6 @@ public record ExpectationContext(
    * Creates a new ExpectationContext from the provided parameters.
    *
    * <p>This factory method accepts {@link Collection} for exclude columns and converts it to an
-   * immutable {@link Set} internally. The table ordering strategy defaults to {@link
-   * TableOrderingStrategy#AUTO}.
-   *
-   * @param excludeColumns column names to exclude from comparison
-   * @param columnStrategies column comparison strategies keyed by uppercase column name
-   * @param rowOrdering the row comparison strategy
-   * @param operationDefaults the operation defaults containing comparison settings
-   * @return a new ExpectationContext
-   */
-  public static ExpectationContext of(
-      final Collection<String> excludeColumns,
-      final Map<String, ColumnStrategyMapping> columnStrategies,
-      final RowOrdering rowOrdering,
-      final OperationDefaults operationDefaults) {
-    return new ExpectationContext(
-        Set.copyOf(excludeColumns),
-        columnStrategies,
-        rowOrdering,
-        operationDefaults,
-        TableOrderingStrategy.AUTO);
-  }
-
-  /**
-   * Creates a new ExpectationContext from the provided parameters.
-   *
-   * <p>This factory method accepts {@link Collection} for exclude columns and converts it to an
    * immutable {@link Set} internally.
    *
    * @param excludeColumns column names to exclude from comparison

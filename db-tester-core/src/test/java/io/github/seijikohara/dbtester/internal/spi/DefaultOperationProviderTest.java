@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.internal.spi;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -103,14 +104,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              isNull());
+              isNull(),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
 
     /** Verifies that execute handles INSERT operation. */
@@ -133,14 +135,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              isNull());
+              isNull(),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
 
     /** Verifies that execute handles DELETE_ALL operation. */
@@ -163,14 +166,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              isNull());
+              isNull(),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
 
     /** Verifies that execute handles TRUNCATE_TABLE operation. */
@@ -193,14 +197,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              isNull());
+              isNull(),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
 
     /** Verifies that execute passes query timeout to operation executor. */
@@ -223,14 +228,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              any(Duration.class));
+              any(Duration.class),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
 
     /** Verifies that execute handles NONE transaction mode. */
@@ -253,14 +259,15 @@ class DefaultOperationProviderTest {
               any(DataSource.class),
               any(TableOrderingStrategy.class),
               any(TransactionMode.class),
-              isNull());
+              isNull(),
+              anyInt());
 
       // When
-      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+      provider.execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
 
       // Then
       verify(mockOperationExecutor)
-          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout);
+          .execute(operation, dataSet, dataSource, strategy, transactionMode, queryTimeout, 0);
     }
   }
 }

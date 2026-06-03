@@ -41,15 +41,6 @@ public interface OperationProvider {
         DataSource dataSource,
         TableOrderingStrategy tableOrderingStrategy,
         TransactionMode transactionMode,
-        @Nullable Duration queryTimeout);
-
-    // With batch size control (default delegates to base execute)
-    default void execute(
-        Operation operation,
-        TableSet tableSet,
-        DataSource dataSource,
-        TableOrderingStrategy tableOrderingStrategy,
-        TransactionMode transactionMode,
         @Nullable Duration queryTimeout,
         int batchSize);
 }
@@ -67,7 +58,7 @@ public interface OperationProvider {
 | `tableOrderingStrategy` | `TableOrderingStrategy` | Strategy for table processing order |
 | `transactionMode` | `TransactionMode` | Transaction behavior mode |
 | `queryTimeout` | `@Nullable Duration` | Query timeout, or null for no timeout |
-| `batchSize` | `int` | Rows per INSERT batch (0 = single batch), used by the batch overload |
+| `batchSize` | `int` | Rows per INSERT batch (0 = single batch) |
 
 **Operations**:
 
@@ -143,12 +134,8 @@ Verifies database state against expected datasets.
 
 ```java
 public interface ExpectationProvider {
-    // Basic verification (abstract)
-    void verifyExpectation(TableSet expectedTableSet, DataSource dataSource);
-
-    // With ExpectationContext parameter object (default)
-    default void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
-                                   ExpectationContext context);
+    void verifyExpectation(TableSet expectedTableSet, DataSource dataSource,
+                           ExpectationContext context);
 }
 ```
 
@@ -158,7 +145,6 @@ public interface ExpectationProvider {
 
 | Method | Description |
 |--------|-------------|
-| `verifyExpectation(TableSet, DataSource)` | Basic database state verification |
 | `verifyExpectation(TableSet, DataSource, ExpectationContext)` | Verify with full context (exclusions, strategies, ordering, defaults) |
 
 **ExpectationContext** (`io.github.seijikohara.dbtester.api.config.ExpectationContext`):
@@ -183,11 +169,7 @@ var context = ExpectationContext.defaults()
     .withRowOrdering(RowOrdering.UNORDERED)
     .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
-// Factory method with 4 parameters (table ordering defaults to AUTO)
-var context = ExpectationContext.of(
-    excludeColumns, columnStrategies, rowOrdering, operationDefaults);
-
-// Factory method with 5 parameters (explicit table ordering)
+// Factory method with all parameters
 var context = ExpectationContext.of(
     excludeColumns, columnStrategies, rowOrdering, operationDefaults,
     TableOrderingStrategy.FOREIGN_KEY);

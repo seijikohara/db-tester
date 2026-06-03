@@ -65,26 +65,6 @@ public final class TestOperationProvider implements OperationProvider {
       final DataSource dataSource,
       final TableOrderingStrategy tableOrderingStrategy,
       final TransactionMode transactionMode,
-      final @Nullable Duration queryTimeout) {
-    INVOCATIONS.add(
-        new Invocation(
-            "execute(6-arg)",
-            List.of(
-                operation,
-                tableSet,
-                dataSource,
-                tableOrderingStrategy,
-                transactionMode,
-                wrapNullable(queryTimeout))));
-  }
-
-  @Override
-  public void execute(
-      final Operation operation,
-      final TableSet tableSet,
-      final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy,
-      final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
     INVOCATIONS.add(
