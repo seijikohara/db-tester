@@ -145,6 +145,9 @@ jobs:
         with:
           fetch-depth: 0  # Required for axion-release-plugin
 
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
       - name: Set up JDK ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v5
         with:
