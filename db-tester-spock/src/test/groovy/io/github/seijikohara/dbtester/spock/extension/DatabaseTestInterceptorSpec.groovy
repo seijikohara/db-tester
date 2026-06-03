@@ -6,7 +6,14 @@ import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
 import io.github.seijikohara.dbtester.api.annotation.ExportDataSet
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
+import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.api.operation.Operation
+import io.github.seijikohara.dbtester.api.spi.ExpectationSupport
+import io.github.seijikohara.dbtester.api.spi.ExportSupport
+import io.github.seijikohara.dbtester.api.spi.PreparationSupport
+import io.github.seijikohara.dbtester.spock.lifecycle.SpockExpectationVerifier
+import io.github.seijikohara.dbtester.spock.lifecycle.SpockExportExecutor
+import io.github.seijikohara.dbtester.spock.lifecycle.SpockPreparationExecutor
 import org.spockframework.runtime.extension.IMethodInterceptor
 import org.spockframework.runtime.extension.IMethodInvocation
 import spock.lang.Specification
@@ -17,9 +24,9 @@ import spock.lang.Specification
  * <p>This specification verifies the Spock method interceptor that handles
  * database setup, verification, and export operations.
  *
- * <p>Note: Due to Spock's limitation on mocking final classes like Method,
- * SpecInfo, FeatureInfo, and IMethodInvocation, these tests focus on
- * constructor and interface verification.
+ * <p>The {@code intercept} tests inject mock SPI support behind real lifecycle
+ * executors and override {@code createTestContext} to bypass Spock invocation
+ * reflection, isolating the orchestration branches under test.
  */
 class DatabaseTestInterceptorSpec extends Specification {
 
@@ -195,10 +202,111 @@ class DatabaseTestInterceptorSpec extends Specification {
 		interceptor != null
 	}
 
-	// Note: Tests for intercept() method are not included because IMethodInvocation
-	// and related Spock internal classes cannot be mocked with Spock's mocking framework.
-	// The DatabaseTestInterceptor functionality is tested through integration tests
-	// in the examples module.
+	def 'intercept runs preparation before the test and verifies on success'() {
+		given: 'mock SPI support and a passing test'
+		def prepSupport = Mock(PreparationSupport)
+		def expectSupport = Mock(ExpectationSupport)
+		def exportSupport = Mock(ExportSupport)
+		def dataSet = Mock(DataSet)
+		def expectedDataSet = Mock(ExpectedDataSet)
+		def context = newContext()
+		def interceptor = newInterceptor(dataSet, expectedDataSet, null,
+				prepSupport, expectSupport, exportSupport, context)
+		def invocation = Mock(IMethodInvocation)
+
+		when: 'intercepting'
+		interceptor.intercept(invocation)
+
+		then: 'preparation runs, the test proceeds, then verification runs'
+		1 * prepSupport.execute(context, dataSet)
+		1 * invocation.proceed()
+		1 * expectSupport.verify(context, expectedDataSet)
+		0 * exportSupport.export(_, _)
+	}
+
+	def 'intercept skips verification and rethrows when the test fails'() {
+		given:
+		def expectSupport = Mock(ExpectationSupport)
+		def expectedDataSet = Mock(ExpectedDataSet)
+		def context = newContext()
+		def interceptor = newInterceptor(null, expectedDataSet, null,
+				Mock(PreparationSupport), expectSupport, Mock(ExportSupport), context)
+		def invocation = Mock(IMethodInvocation)
+		def failure = new RuntimeException('boom')
+
+		when:
+		interceptor.intercept(invocation)
+
+		then: 'the failure propagates and verification is skipped'
+		1 * invocation.proceed() >> { throw failure }
+		0 * expectSupport.verify(_, _)
+		def e = thrown(RuntimeException)
+		e.is(failure)
+	}
+
+	def 'intercept exports on success when onFailureOnly is false'() {
+		given:
+		def exportSupport = Mock(ExportSupport)
+		def exportDataSet = Mock(ExportDataSet) { onFailureOnly() >> false }
+		def context = newContext()
+		def interceptor = newInterceptor(null, null, exportDataSet,
+				Mock(PreparationSupport), Mock(ExpectationSupport), exportSupport, context)
+
+		when:
+		interceptor.intercept(Mock(IMethodInvocation))
+
+		then:
+		1 * exportSupport.export(context, exportDataSet)
+	}
+
+	def 'intercept skips export on success when onFailureOnly is true'() {
+		given:
+		def exportSupport = Mock(ExportSupport)
+		def exportDataSet = Mock(ExportDataSet) { onFailureOnly() >> true }
+		def context = newContext()
+		def interceptor = newInterceptor(null, null, exportDataSet,
+				Mock(PreparationSupport), Mock(ExpectationSupport), exportSupport, context)
+
+		when:
+		interceptor.intercept(Mock(IMethodInvocation))
+
+		then:
+		0 * exportSupport.export(_, _)
+	}
+
+	def 'intercept exports on failure when onFailureOnly is true'() {
+		given:
+		def exportSupport = Mock(ExportSupport)
+		def exportDataSet = Mock(ExportDataSet) { onFailureOnly() >> true }
+		def context = newContext()
+		def interceptor = newInterceptor(null, null, exportDataSet,
+				Mock(PreparationSupport), Mock(ExpectationSupport), exportSupport, context)
+		def invocation = Mock(IMethodInvocation)
+
+		when:
+		interceptor.intercept(invocation)
+
+		then: 'export runs because the test failed, and the failure propagates'
+		1 * invocation.proceed() >> { throw new RuntimeException('boom') }
+		1 * exportSupport.export(context, exportDataSet)
+		thrown(RuntimeException)
+	}
+
+	def 'intercept swallows export errors so they do not mask the result'() {
+		given:
+		def exportSupport = Mock(ExportSupport)
+		def exportDataSet = Mock(ExportDataSet) { onFailureOnly() >> false }
+		def context = newContext()
+		def interceptor = newInterceptor(null, null, exportDataSet,
+				Mock(PreparationSupport), Mock(ExpectationSupport), exportSupport, context)
+
+		when:
+		interceptor.intercept(Mock(IMethodInvocation))
+
+		then: 'the export error is caught and not rethrown'
+		1 * exportSupport.export(context, exportDataSet) >> { throw new RuntimeException('export failed') }
+		noExceptionThrown()
+	}
 
 	def 'should get default Configuration when spec does not implement DatabaseTestSupport'() {
 		given: 'a test interceptor'
@@ -291,5 +399,50 @@ class DatabaseTestInterceptorSpec extends Specification {
 		registry.has('secondary')
 		registry.getDefault() == defaultDs
 		registry.get('secondary') == secondaryDs
+	}
+
+	/**
+	 * Creates a TestContext backed by arbitrary class and method metadata.
+	 *
+	 * <p>The class and method only feed diagnostic log messages, so any reflective
+	 * method serves the purpose.
+	 *
+	 * @return a test context
+	 */
+	private static TestContext newContext() {
+		new TestContext(String, String.getMethod('toString'),
+				Configuration.defaults(), new DataSourceRegistry())
+	}
+
+	/**
+	 * Creates an interceptor with real executors backed by mock SPI support.
+	 *
+	 * <p>The executors are concrete facade classes that the JDK-proxy mock maker cannot
+	 * mock, so this wraps each one around its mockable SPI interface. The anonymous
+	 * subclass overrides {@code createTestContext} to bypass Spock invocation reflection,
+	 * isolating the orchestration logic under test.
+	 *
+	 * @param dataSet the data set annotation, or null
+	 * @param expectedDataSet the expected data set annotation, or null
+	 * @param exportDataSet the export data set annotation, or null
+	 * @param prepSupport the preparation SPI support
+	 * @param expectSupport the expectation SPI support
+	 * @param exportSupport the export SPI support
+	 * @param context the test context returned from createTestContext
+	 * @return the interceptor under test
+	 */
+	private static DatabaseTestInterceptor newInterceptor(DataSet dataSet,
+			ExpectedDataSet expectedDataSet, ExportDataSet exportDataSet,
+			PreparationSupport prepSupport, ExpectationSupport expectSupport,
+			ExportSupport exportSupport, TestContext context) {
+		def prep = new SpockPreparationExecutor(prepSupport)
+		def verify = new SpockExpectationVerifier(expectSupport)
+		def export = new SpockExportExecutor(exportSupport)
+		new DatabaseTestInterceptor(dataSet, expectedDataSet, exportDataSet, prep, verify, export) {
+					@Override
+					protected TestContext createTestContext(IMethodInvocation invocation) {
+						context
+					}
+				}
 	}
 }
