@@ -20,17 +20,17 @@ description: "DB Testerのアノテーションリファレンス: @DataSet、@E
 ユーザーAPIには、大半のユーザーが直接使用する型が含まれます。
 
 - **`annotation`** — `@DataSet`、`@ExpectedDataSet`、`@DataSetSource`、`@ColumnStrategy`
-- **`assertion`** — `DatabaseAssertion`、`DatabaseQueryAssertion`によるプログラマティックなデータベース状態検証
 - **`config`** — `Configuration`、`ConventionSettings`、`DataSourceRegistry`、`ExpectationContext`
 - **`operation`** — `Operation` enum（`CLEAN_INSERT`、`INSERT`、`TRUNCATE_INSERT`他）
 - **`exception`** — フレームワーク例外（catch/inspectによる受動利用）
-- **`export`** — `DataSetExporter`によるデータベースコンテンツのファイルエクスポート
 - **`preparation`** — `DatabasePreparation`によるプログラマティックなテストデータセットアップ
 
 ### アドバンストAPI
 
-アドバンストAPIはデータセットと型安全な値オブジェクトへのプログラマティックなアクセスを提供します。
+アドバンストAPIはアサーション、データセット、型安全な値オブジェクトへのプログラマティックなアクセスを提供します。
 
+- **`assertion`** — `DatabaseAssertion`、`DatabaseQueryAssertion`によるプログラマティックなデータベース状態検証
+- **`export`** — `DataSetExporter`によるデータベースコンテンツのファイルエクスポート
 - **`domain`** — 型安全な値オブジェクト（`CellValue`、`TableName`、`ColumnName`、`ComparisonStrategy`）
 - **`dataset`** — `TableSet`、`Table`、`Row`インターフェースによるデータセット表現
 

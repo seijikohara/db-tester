@@ -126,7 +126,7 @@ ID,NAME,EMAIL
 | Convention-based | Automatic dataset discovery based on test class package and name |
 | Multi-format data | CSV, TSV, JSON, and YAML dataset support |
 | Template expressions | Dynamic values using `${uuid}`, `${sequence}`, `${now}`, `${faker.*}` |
-| 11 comparison strategies | Column-level verification: STRICT, REGEX, DATE_FLEXIBLE, JSON_EQUIVALENT, and more |
+| 9 comparison strategies | Column-level verification: STRICT, REGEX, DATE_FLEXIBLE, JSON_EQUIVALENT, and more |
 | Dataset export | Export database tables to CSV, TSV, JSON, or YAML via `@ExportDataSet` or `DataSetExporter` |
 | Scenario filtering | Share dataset files across tests using the `[Scenario]` column |
 | Batch insert | Configurable batch size for large dataset insertion |
@@ -596,7 +596,7 @@ tables:
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `DataSetLoadException: Could not find dataset directory` | CSV path does not match test class | Verify directory structure matches package path |
+| `DataSetLoadException: Dataset directory not found for test method ...` | CSV path does not match test class | Verify directory structure matches package path |
 | `DataSourceNotFoundException` | DataSource not registered | Register in `@BeforeAll` or use a Spring Boot starter |
 
 ---
