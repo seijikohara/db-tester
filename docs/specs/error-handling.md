@@ -23,7 +23,8 @@ classDiagram
 
 | Exception | Cause |
 |-----------|-------|
-| `ValidationException` | Expected vs actual data mismatch |
+| `java.lang.AssertionError` | Expected vs actual data mismatch (row count or column value) |
+| `ValidationException` | Verification could not complete (parse or strategy failure under STRICT mode) |
 | `DataSetLoadException` | Dataset file read or parse failure |
 | `DataSourceNotFoundException` | DataSource not registered |
 | `DatabaseOperationException` | SQL execution failure |
@@ -31,8 +32,10 @@ classDiagram
 
 ## Validation Errors
 
-The framework throws `ValidationException` when expectation verification fails
-(`@ExpectedDataSet` phase).
+The framework throws `java.lang.AssertionError` when expectation verification finds a data mismatch
+(`@ExpectedDataSet` phase). Retry, when configured, retries on this mismatch. A `ValidationException`
+is reserved for failures that prevent verification from completing, such as an unparseable value under
+`ComparisonMode.STRICT`; these are not retried.
 
 ### Output Format
 

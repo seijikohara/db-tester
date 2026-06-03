@@ -22,7 +22,8 @@ classDiagram
 
 | 例外 | 原因 |
 |------|------|
-| `ValidationException` | 期待値と実際のデータの不一致 |
+| `java.lang.AssertionError` | 期待値と実際のデータの不一致（行数またはカラム値） |
+| `ValidationException` | 検証を完了できなかった（STRICTモードでのパース/戦略失敗） |
 | `DataSetLoadException` | データセットファイルの読み込み/解析失敗 |
 | `DataSourceNotFoundException` | DataSourceが登録されていない |
 | `DatabaseOperationException` | SQL実行失敗 |
@@ -31,7 +32,7 @@ classDiagram
 
 ## 検証エラー
 
-期待値検証が失敗すると、フレームワークは`ValidationException`をスローします（`@ExpectedDataSet`フェーズ）。
+期待値検証でデータの不一致が見つかると、フレームワークは`java.lang.AssertionError`をスローします（`@ExpectedDataSet`フェーズ）。リトライを設定している場合は、この不一致に対して再試行します。`ValidationException`は、`ComparisonMode.STRICT`下でパースできない値など、検証自体を完了できない失敗のために予約されており、再試行されません。
 
 ### 出力形式
 

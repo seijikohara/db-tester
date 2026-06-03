@@ -3,7 +3,6 @@ package io.github.seijikohara.dbtester.internal.lifecycle;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -144,11 +143,11 @@ class DefaultExpectationSupportTest {
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
-    /** Verifies that verification throws on first failure when retryCount is 0. */
+    /** Verifies that a parse or strategy failure (ValidationException) is not retried. */
     @Test
     @Tag("normal")
-    @DisplayName("should throw immediately when retryCount is zero and verification fails")
-    void shouldThrowImmediately_whenRetryCountIsZeroAndVerificationFails() {
+    @DisplayName("should not retry when a ValidationException is thrown")
+    void shouldNotRetry_whenValidationExceptionThrown() {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
@@ -158,23 +157,18 @@ class DefaultExpectationSupportTest {
       final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
       when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
 
-      when(verification.retryCount()).thenReturn(0);
+      when(expectedDataSet.retryCount()).thenReturn(2);
+      when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
 
-      doThrow(new ValidationException("Mismatch"))
+      doThrow(new ValidationException("Unparseable value"))
           .when(expectationProvider)
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
-      final var exception =
-          assertThrows(
-              ValidationException.class,
-              () -> support.verify(context, expectedDataSet),
-              "should throw ValidationException when verification fails");
-
-      final var message = exception.getMessage();
-      assertTrue(
-          message != null && message.contains("Failed to verify"),
-          "exception message should indicate verification failure");
+      assertThrows(
+          ValidationException.class,
+          () -> support.verify(context, expectedDataSet),
+          "ValidationException should propagate without retry");
 
       verify(expectationProvider, times(1))
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
@@ -197,8 +191,8 @@ class DefaultExpectationSupportTest {
       when(expectedDataSet.retryCount()).thenReturn(2);
       when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
 
-      // First call fails, second call succeeds
-      doThrow(new ValidationException("Mismatch"))
+      // First call fails with a data mismatch, second call succeeds
+      doThrow(new AssertionError("Mismatch"))
           .doNothing()
           .when(expectationProvider)
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
@@ -211,11 +205,11 @@ class DefaultExpectationSupportTest {
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
     }
 
-    /** Verifies that all retries are exhausted before throwing. */
+    /** Verifies that all retries are exhausted before throwing the data mismatch. */
     @Test
     @Tag("error")
-    @DisplayName("should throw after all retries are exhausted")
-    void shouldThrow_whenAllRetriesExhausted() {
+    @DisplayName("should throw AssertionError after all retries are exhausted")
+    void shouldThrowAssertionError_whenAllRetriesExhausted() {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
@@ -228,109 +222,34 @@ class DefaultExpectationSupportTest {
       when(expectedDataSet.retryCount()).thenReturn(2);
       when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
 
-      doThrow(new ValidationException("Persistent mismatch"))
+      doThrow(new AssertionError("Persistent mismatch"))
           .when(expectationProvider)
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
-      final var exception =
+      final var error =
           assertThrows(
-              ValidationException.class,
+              AssertionError.class,
               () -> support.verify(context, expectedDataSet),
-              "should throw after all retries exhausted");
+              "should throw the data mismatch after all retries exhausted");
 
-      final var message = exception.getMessage();
+      final var message = error.getMessage();
       assertAll(
           "retry exhaustion behavior",
           () ->
               assertTrue(
-                  message != null && message.contains("Failed to verify"),
-                  "exception message should indicate verification failure"),
+                  message != null && message.contains("Persistent mismatch"),
+                  "exception message should carry the mismatch detail"),
           () ->
               verify(expectationProvider, times(3))
                   .verifyExpectation(any(), any(), any(ExpectationContext.class)));
     }
 
-    /** Verifies that AssertionError is retried when retryCount is positive. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should retry on AssertionError when retryCount is positive")
-    void shouldRetryOnAssertionError_whenRetryCountIsPositive() {
-      // Given
-      final var tableSet = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.tables()).thenReturn(List.of());
-
-      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
-      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
-
-      when(expectedDataSet.retryCount()).thenReturn(2);
-      when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
-
-      // First call throws AssertionError, second call succeeds
-      doThrow(new AssertionError("Data mismatch"))
-          .doNothing()
-          .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(ExpectationContext.class));
-
-      // When & Then
-      assertDoesNotThrow(
-          () -> support.verify(context, expectedDataSet),
-          "should not throw when retry succeeds after AssertionError");
-
-      verify(expectationProvider, times(2))
-          .verifyExpectation(any(), any(), any(ExpectationContext.class));
-    }
-
-    /** Verifies that AssertionError exhausting retries throws ValidationException with cause. */
+    /** Verifies that a data mismatch throws immediately when retryCount is zero. */
     @Test
     @Tag("error")
-    @DisplayName("should throw ValidationException when AssertionError exhausts retries")
-    void shouldThrowValidationException_whenAssertionErrorExhaustsRetries() {
-      // Given
-      final var tableSet = mock(TableSet.class);
-      final var dataSource = mock(DataSource.class);
-      when(tableSet.dataSource()).thenReturn(Optional.of(dataSource));
-      when(tableSet.tables()).thenReturn(List.of());
-
-      final var expectedTableSets = List.of(ExpectedTableSet.of(tableSet));
-      when(loader.loadExpectationDataSetsWithExclusions(context)).thenReturn(expectedTableSets);
-
-      when(expectedDataSet.retryCount()).thenReturn(1);
-      when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
-
-      doThrow(new AssertionError("Persistent data mismatch"))
-          .when(expectationProvider)
-          .verifyExpectation(any(), any(), any(ExpectationContext.class));
-
-      // When & Then
-      final var exception =
-          assertThrows(
-              ValidationException.class,
-              () -> support.verify(context, expectedDataSet),
-              "should throw ValidationException wrapping AssertionError");
-
-      assertAll(
-          "AssertionError retry exhaustion",
-          () ->
-              assertTrue(
-                  exception.getMessage() != null
-                      && exception.getMessage().contains("Failed to verify"),
-                  "exception message should indicate verification failure"),
-          () ->
-              assertInstanceOf(
-                  AssertionError.class, exception.getCause(), "cause should be AssertionError"),
-          () ->
-              verify(expectationProvider, times(2))
-                  .verifyExpectation(any(), any(), any(ExpectationContext.class)));
-    }
-
-    /** Verifies that AssertionError with zero retries throws immediately as ValidationException. */
-    @Test
-    @Tag("error")
-    @DisplayName("should throw immediately when retryCount is zero and AssertionError thrown")
-    void shouldThrowImmediately_whenRetryCountIsZeroAndAssertionErrorThrown() {
+    @DisplayName("should throw AssertionError immediately when retryCount is zero")
+    void shouldThrowImmediately_whenRetryCountIsZeroAndMismatch() {
       // Given
       final var tableSet = mock(TableSet.class);
       final var dataSource = mock(DataSource.class);
@@ -347,17 +266,18 @@ class DefaultExpectationSupportTest {
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
-      final var exception =
+      final var error =
           assertThrows(
-              ValidationException.class,
+              AssertionError.class,
               () -> support.verify(context, expectedDataSet),
-              "should throw ValidationException wrapping AssertionError");
+              "should throw the data mismatch immediately");
 
       assertAll(
-          "immediate AssertionError wrapping",
+          "immediate mismatch",
           () ->
-              assertInstanceOf(
-                  AssertionError.class, exception.getCause(), "cause should be AssertionError"),
+              assertTrue(
+                  error.getMessage() != null && error.getMessage().contains("Data mismatch"),
+                  "exception message should carry the mismatch detail"),
           () ->
               verify(expectationProvider, times(1))
                   .verifyExpectation(any(), any(), any(ExpectationContext.class)));
@@ -399,13 +319,13 @@ class DefaultExpectationSupportTest {
       when(expectedDataSet.retryDelayMillis()).thenReturn(0L);
       when(verification.retryCount()).thenReturn(5);
 
-      doThrow(new ValidationException("Mismatch"))
+      doThrow(new AssertionError("Mismatch"))
           .when(expectationProvider)
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertThrows(
-          ValidationException.class,
+          AssertionError.class,
           () -> support.verify(context, expectedDataSet),
           "should throw after annotation retryCount is exhausted");
 
@@ -434,13 +354,13 @@ class DefaultExpectationSupportTest {
       when(verification.retryCount()).thenReturn(1);
       when(verification.retryDelay()).thenReturn(Duration.ZERO);
 
-      doThrow(new ValidationException("Mismatch"))
+      doThrow(new AssertionError("Mismatch"))
           .when(expectationProvider)
           .verifyExpectation(any(), any(), any(ExpectationContext.class));
 
       // When & Then
       assertThrows(
-          ValidationException.class,
+          AssertionError.class,
           () -> support.verify(context, expectedDataSet),
           "should throw after global retryCount is exhausted");
 
