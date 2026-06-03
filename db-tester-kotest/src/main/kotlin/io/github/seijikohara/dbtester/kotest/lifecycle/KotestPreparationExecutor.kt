@@ -14,11 +14,11 @@ import java.util.ServiceLoader
  * @property support the preparation support
  * @see PreparationSupport
  */
-class KotestPreparationExecutor internal constructor(
+public class KotestPreparationExecutor internal constructor(
     private val support: PreparationSupport,
 ) {
     /** Creates a new preparation executor with a support loaded via ServiceLoader. */
-    constructor() : this(loadPreparationSupport())
+    public constructor() : this(loadPreparationSupport())
 
     /**
      * Executes the preparation phase.
@@ -29,13 +29,13 @@ class KotestPreparationExecutor internal constructor(
      * @param context the test context containing configuration and registry
      * @param dataSet the DataSet annotation specifying the operation to perform
      */
-    fun execute(
+    public fun execute(
         context: TestContext,
         dataSet: DataSet,
     ): Unit = support.execute(context, dataSet)
 
     /** Companion object containing factory methods. */
-    companion object {
+    private companion object {
         private fun loadPreparationSupport(): PreparationSupport =
             ServiceLoader
                 .load(PreparationSupport::class.java)

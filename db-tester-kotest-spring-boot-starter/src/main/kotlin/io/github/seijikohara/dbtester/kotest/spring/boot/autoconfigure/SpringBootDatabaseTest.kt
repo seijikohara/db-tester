@@ -40,4 +40,4 @@ import java.lang.annotation.Inherited
 @MustBeDocumented
 @Inherited
 @ApplyExtension(SpringBootDatabaseTestExtension::class)
-annotation class SpringBootDatabaseTest
+public annotation class SpringBootDatabaseTest

@@ -18,6 +18,11 @@ spotless {
     }
 }
 
+// Enforce explicit visibility and return types on the published Kotlin API surface.
+kotlin {
+    explicitApi()
+}
+
 extensions.configure<DokkaExtension> {
     dokkaSourceSets.configureEach {
         reportUndocumented.set(true)

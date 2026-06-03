@@ -38,7 +38,7 @@ import javax.sql.DataSource
     matchIfMissing = true,
 )
 @EnableConfigurationProperties(DbTesterProperties::class)
-class DbTesterKotestAutoConfiguration {
+public class DbTesterKotestAutoConfiguration {
     /**
      * Creates a Configuration bean from the DB Tester properties.
      *
@@ -50,7 +50,8 @@ class DbTesterKotestAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun dbTesterConfiguration(properties: DbTesterProperties): Configuration = DbTesterConfigurationFactory.toConfiguration(properties)
+    public fun dbTesterConfiguration(properties: DbTesterProperties): Configuration =
+        DbTesterConfigurationFactory.toConfiguration(properties)
 
     /**
      * Creates a [DataSourceRegistrar] bean.
@@ -64,5 +65,5 @@ class DbTesterKotestAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun dataSourceRegistrar(properties: DbTesterProperties): DataSourceRegistrar = DataSourceRegistrar(properties)
+    public fun dataSourceRegistrar(properties: DbTesterProperties): DataSourceRegistrar = DataSourceRegistrar(properties)
 }

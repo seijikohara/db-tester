@@ -15,11 +15,11 @@ import java.util.ServiceLoader
  * @see ExpectationSupport
  * @see KotestPreparationExecutor
  */
-class KotestExpectationVerifier internal constructor(
+public class KotestExpectationVerifier internal constructor(
     private val support: ExpectationSupport,
 ) {
     /** Creates a new expectation verifier with a support loaded via ServiceLoader. */
-    constructor() : this(loadExpectationSupport())
+    public constructor() : this(loadExpectationSupport())
 
     /**
      * Verifies the database state against expected datasets.
@@ -32,13 +32,13 @@ class KotestExpectationVerifier internal constructor(
      * @param expectedDataSet the ExpectedDataSet annotation containing row ordering and retry settings
      * @throws AssertionError if the database state does not match the expected state after retries
      */
-    fun verify(
+    public fun verify(
         context: TestContext,
         expectedDataSet: ExpectedDataSet,
     ): Unit = support.verify(context, expectedDataSet)
 
     /** Companion object containing factory methods. */
-    companion object {
+    private companion object {
         private fun loadExpectationSupport(): ExpectationSupport =
             ServiceLoader
                 .load(ExpectationSupport::class.java)

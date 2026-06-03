@@ -48,14 +48,14 @@ import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
  * @see io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest
  * @see DatabaseTestExtension
  */
-interface DatabaseTestSupport {
+public interface DatabaseTestSupport {
     /**
      * The data source registry for database connections.
      *
      * This property must be implemented by the spec class. Register your
      * [javax.sql.DataSource] instances with this registry before tests run.
      */
-    val dbTesterRegistry: DataSourceRegistry
+    public val dbTesterRegistry: DataSourceRegistry
 
     /**
      * Optional custom configuration for database testing.
@@ -64,6 +64,6 @@ interface DatabaseTestSupport {
      * scenario marker, or operation defaults. When not overridden, returns
      * the default configuration.
      */
-    val dbTesterConfiguration: Configuration
+    public val dbTesterConfiguration: Configuration
         get() = Configuration.defaults()
 }

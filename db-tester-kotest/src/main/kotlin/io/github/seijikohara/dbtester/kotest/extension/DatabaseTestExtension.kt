@@ -80,7 +80,7 @@ import kotlin.reflect.jvm.javaMethod
  * @see DataSet
  * @see ExpectedDataSet
  */
-class DatabaseTestExtension(
+public class DatabaseTestExtension public constructor(
     private val registryProvider: (() -> DataSourceRegistry)? = null,
     private val configurationProvider: (() -> Configuration)? = null,
 ) : TestCaseExtension {
@@ -100,7 +100,7 @@ class DatabaseTestExtension(
     /**
      * Creates an extension with injected lifecycle collaborators.
      *
-     * This constructor exists to supply test doubles for the preparation, verification, and
+     * <p>This constructor exists to supply test doubles for the preparation, verification, and
      * export phases. Production code uses the primary constructor.
      *
      * @param registryProvider optional provider for the [DataSourceRegistry], or null
@@ -122,7 +122,7 @@ class DatabaseTestExtension(
     }
 
     /** Companion object containing class-level constants and logger. */
-    companion object {
+    private companion object {
         private val logger = LoggerFactory.getLogger(DatabaseTestExtension::class.java)
     }
 
