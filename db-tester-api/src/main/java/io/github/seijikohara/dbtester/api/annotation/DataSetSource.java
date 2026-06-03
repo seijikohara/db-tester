@@ -1,5 +1,6 @@
 package io.github.seijikohara.dbtester.api.annotation;
 
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;

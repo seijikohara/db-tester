@@ -208,18 +208,12 @@ Configures the comparison strategy for a column during expectation verification.
 | `name` | `String` | (required) | Column name (case-insensitive) |
 | `strategy` | `Strategy` | `STRICT` | Comparison strategy to use |
 | `pattern` | `String` | `""` | Regex pattern for `REGEX` strategy |
-| `options` | `String` | `""` | Strategy-specific options (see below) |
-
-**Options Attribute**:
-
-The `options` attribute is reserved for future use by strategies that require additional parameters
-beyond the `pattern` attribute.
 
 ## Strategy
 
 Enum defining comparison strategy types for use in `@ColumnStrategy` annotations.
 
-**Location**: `io.github.seijikohara.dbtester.api.annotation.Strategy`
+**Location**: `io.github.seijikohara.dbtester.api.domain.Strategy`
 
 **Values**:
 

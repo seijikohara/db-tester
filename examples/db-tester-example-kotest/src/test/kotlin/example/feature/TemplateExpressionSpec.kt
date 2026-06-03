@@ -4,7 +4,7 @@ import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy
 import io.github.seijikohara.dbtester.api.annotation.DataSet
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet
-import io.github.seijikohara.dbtester.api.annotation.Strategy
+import io.github.seijikohara.dbtester.api.domain.Strategy
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.api.operation.Operation
 import io.github.seijikohara.dbtester.kotest.annotation.DatabaseTest

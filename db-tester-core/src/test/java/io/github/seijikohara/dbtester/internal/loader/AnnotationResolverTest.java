@@ -11,9 +11,9 @@ import io.github.seijikohara.dbtester.api.annotation.ColumnStrategy;
 import io.github.seijikohara.dbtester.api.annotation.DataSet;
 import io.github.seijikohara.dbtester.api.annotation.DataSetSource;
 import io.github.seijikohara.dbtester.api.annotation.ExpectedDataSet;
-import io.github.seijikohara.dbtester.api.annotation.Strategy;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
 import io.github.seijikohara.dbtester.api.domain.DataSourceName;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import io.github.seijikohara.dbtester.api.scenario.ScenarioName;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -810,15 +810,12 @@ class AnnotationResolverTest {
           () -> {
             final var uuidMapping = result.get("UUID");
             assertNotNull(uuidMapping, "UUID mapping should not be null");
-            assertEquals(
-                ComparisonStrategy.Type.REGEX,
-                uuidMapping.strategy().getType(),
-                "should be REGEX type");
+            assertEquals(Strategy.REGEX, uuidMapping.strategy().type(), "should be REGEX type");
           },
           () -> {
             final var uuidMapping = result.get("UUID");
             assertNotNull(uuidMapping, "UUID mapping should not be null");
-            assertTrue(uuidMapping.strategy().getPattern().isPresent(), "should have pattern");
+            assertTrue(uuidMapping.strategy().pattern().isPresent(), "should have pattern");
           });
     }
   }

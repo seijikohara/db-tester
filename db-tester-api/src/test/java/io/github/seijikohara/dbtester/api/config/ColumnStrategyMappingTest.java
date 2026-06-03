@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -235,10 +236,9 @@ class ColumnStrategyMappingTest {
 
       // Then
       assertEquals("UUID", mapping.columnName(), "column name should be normalized");
-      assertEquals(ComparisonStrategy.Type.REGEX, mapping.strategy().getType(), "should be REGEX");
-      assertTrue(mapping.strategy().getPattern().isPresent(), "should have pattern");
-      assertEquals(
-          pattern, mapping.strategy().getPattern().get().pattern(), "pattern should match");
+      assertEquals(Strategy.REGEX, mapping.strategy().type(), "should be REGEX");
+      assertTrue(mapping.strategy().pattern().isPresent(), "should have pattern");
+      assertEquals(pattern, mapping.strategy().pattern().get().pattern(), "pattern should match");
     }
   }
 

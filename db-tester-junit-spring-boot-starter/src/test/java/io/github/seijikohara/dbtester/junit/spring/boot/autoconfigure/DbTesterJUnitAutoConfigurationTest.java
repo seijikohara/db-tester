@@ -14,6 +14,7 @@ import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.config.TransactionMode;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import java.time.Duration;
 import java.util.List;
@@ -227,15 +228,15 @@ class DbTesterJUnitAutoConfigurationTest {
       // Given
       final var timestampStrategy = new DbTesterProperties.ColumnStrategyProperty();
       timestampStrategy.setColumnName("CREATED_AT");
-      timestampStrategy.setStrategy(ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE);
+      timestampStrategy.setStrategy(Strategy.TIMESTAMP_FLEXIBLE);
 
       final var ignoreStrategy = new DbTesterProperties.ColumnStrategyProperty();
       ignoreStrategy.setColumnName("updated_at");
-      ignoreStrategy.setStrategy(ComparisonStrategy.Type.IGNORE);
+      ignoreStrategy.setStrategy(Strategy.IGNORE);
 
       final var regexStrategy = new DbTesterProperties.ColumnStrategyProperty();
       regexStrategy.setColumnName("EMAIL");
-      regexStrategy.setStrategy(ComparisonStrategy.Type.REGEX);
+      regexStrategy.setStrategy(Strategy.REGEX);
       regexStrategy.setPattern("^[a-z]+@[a-z]+\\.[a-z]+$");
 
       properties
@@ -262,8 +263,8 @@ class DbTesterJUnitAutoConfigurationTest {
                   "UPDATED_AT should have IGNORE strategy"),
           () ->
               assertEquals(
-                  ComparisonStrategy.Type.REGEX,
-                  Objects.requireNonNull(strategies.get("EMAIL")).strategy().getType(),
+                  Strategy.REGEX,
+                  Objects.requireNonNull(strategies.get("EMAIL")).strategy().type(),
                   "EMAIL should have REGEX strategy type"));
     }
 
@@ -291,10 +292,10 @@ class DbTesterJUnitAutoConfigurationTest {
       // Given
       final var validStrategy = new DbTesterProperties.ColumnStrategyProperty();
       validStrategy.setColumnName("CREATED_AT");
-      validStrategy.setStrategy(ComparisonStrategy.Type.IGNORE);
+      validStrategy.setStrategy(Strategy.IGNORE);
 
       final var invalidStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      invalidStrategy.setStrategy(ComparisonStrategy.Type.STRICT);
+      invalidStrategy.setStrategy(Strategy.STRICT);
 
       properties.getVerification().setColumnStrategies(List.of(validStrategy, invalidStrategy));
 

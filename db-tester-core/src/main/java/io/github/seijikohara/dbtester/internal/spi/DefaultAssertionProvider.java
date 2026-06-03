@@ -111,10 +111,7 @@ public final class DefaultAssertionProvider implements AssertionProvider {
     // Extract columns marked with IGNORE strategy for the ignore set
     final var ignoreSet =
         columnStrategies.stream()
-            .filter(
-                mapping ->
-                    mapping.strategy().getType()
-                        == io.github.seijikohara.dbtester.api.domain.ComparisonStrategy.Type.IGNORE)
+            .filter(mapping -> mapping.strategy().isIgnore())
             .map(mapping -> mapping.columnName().toUpperCase(Locale.ROOT))
             .collect(Collectors.toSet());
 

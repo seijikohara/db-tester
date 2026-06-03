@@ -208,17 +208,12 @@ void testWithColumnStrategies() { }
 | `name` | `String` | (必須) | カラム名（大文字小文字を区別しない） |
 | `strategy` | `Strategy` | `STRICT` | 使用する比較戦略 |
 | `pattern` | `String` | `""` | `REGEX`戦略用の正規表現パターン |
-| `options` | `String` | `""` | 戦略固有のオプション（下記参照） |
-
-**options属性**:
-
-`options`属性は、`pattern`属性以外の追加パラメータを必要とする将来の戦略のために予約されています。
 
 ## Strategy
 
 `@ColumnStrategy`アノテーションで使用する比較戦略の種類を定義するenumです。
 
-**パッケージ**: `io.github.seijikohara.dbtester.api.annotation.Strategy`
+**パッケージ**: `io.github.seijikohara.dbtester.api.domain.Strategy`
 
 **値**:
 

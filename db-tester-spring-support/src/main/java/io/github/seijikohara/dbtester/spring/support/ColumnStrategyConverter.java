@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.spring.support;
 
 import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping;
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import java.util.Locale;
 import java.util.Map;
 import org.jspecify.annotations.Nullable;
@@ -22,51 +23,34 @@ public final class ColumnStrategyConverter {
   private ColumnStrategyConverter() {}
 
   /**
-   * Converts a {@link ComparisonStrategy.Type} and optional pattern to a {@link
-   * ComparisonStrategy}.
+   * Converts a {@link Strategy} and optional pattern to a {@link ComparisonStrategy}.
    *
-   * <p>For the {@link ComparisonStrategy.Type#REGEX} type, the pattern parameter is required.
+   * <p>For {@link Strategy#REGEX}, the pattern parameter is required.
    *
-   * @param type the comparison strategy type
-   * @param pattern the regex pattern (required for REGEX type, ignored otherwise)
+   * @param strategy the comparison strategy type
+   * @param pattern the regex pattern (required for REGEX, ignored otherwise)
    * @return the corresponding ComparisonStrategy instance
-   * @throws IllegalArgumentException if REGEX type is specified without a pattern
+   * @throws IllegalArgumentException if REGEX is specified without a pattern
    */
   public static ComparisonStrategy toComparisonStrategy(
-      final ComparisonStrategy.Type type, final @Nullable String pattern) {
-    return switch (type) {
-      case STRICT -> ComparisonStrategy.STRICT;
-      case IGNORE -> ComparisonStrategy.IGNORE;
-      case NUMERIC -> ComparisonStrategy.NUMERIC;
-      case CASE_INSENSITIVE -> ComparisonStrategy.CASE_INSENSITIVE;
-      case TIMESTAMP_FLEXIBLE -> ComparisonStrategy.TIMESTAMP_FLEXIBLE;
-      case DATE_FLEXIBLE -> ComparisonStrategy.DATE_FLEXIBLE;
-      case JSON_EQUIVALENT -> ComparisonStrategy.JSON_EQUIVALENT;
-      case NOT_NULL -> ComparisonStrategy.NOT_NULL;
-      case REGEX -> {
-        if (pattern == null || pattern.isBlank()) {
-          throw new IllegalArgumentException("pattern is required for REGEX strategy");
-        }
-        yield ComparisonStrategy.regex(pattern);
-      }
-    };
+      final Strategy strategy, final @Nullable String pattern) {
+    return ComparisonStrategy.of(strategy, pattern);
   }
 
   /**
-   * Creates a {@link ColumnStrategyMapping} from the given column name, strategy type, and optional
+   * Creates a {@link ColumnStrategyMapping} from the given column name, strategy, and optional
    * pattern.
    *
    * @param columnName the column name (case-insensitive)
-   * @param type the comparison strategy type
-   * @param pattern the regex pattern (required for REGEX type, ignored otherwise)
+   * @param strategy the comparison strategy type
+   * @param pattern the regex pattern (required for REGEX, ignored otherwise)
    * @return a new ColumnStrategyMapping instance
-   * @throws IllegalArgumentException if columnName is blank, or REGEX type is specified without a
+   * @throws IllegalArgumentException if columnName is blank, or REGEX is specified without a
    *     pattern
    */
   public static ColumnStrategyMapping toColumnStrategyMapping(
-      final String columnName, final ComparisonStrategy.Type type, final @Nullable String pattern) {
-    final var strategy = toComparisonStrategy(type, pattern);
-    return ColumnStrategyMapping.of(columnName, strategy);
+      final String columnName, final Strategy strategy, final @Nullable String pattern) {
+    return ColumnStrategyMapping.of(columnName, ComparisonStrategy.of(strategy, pattern));
   }
 
   /**

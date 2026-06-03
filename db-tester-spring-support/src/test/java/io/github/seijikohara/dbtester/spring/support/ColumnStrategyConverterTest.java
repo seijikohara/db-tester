@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
@@ -20,7 +21,7 @@ class ColumnStrategyConverterTest {
 
   /** Tests for the toComparisonStrategy() method. */
   @Nested
-  @DisplayName("toComparisonStrategy(Type, String) method")
+  @DisplayName("toComparisonStrategy(Strategy, String) method")
   class ToComparisonStrategyMethod {
 
     /** Tests for the toComparisonStrategy method. */
@@ -32,8 +33,7 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return STRICT strategy when STRICT type provided")
     void shouldReturnStrictStrategy_whenStrictTypeProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.STRICT, null);
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.STRICT, null);
 
       // Then
       assertEquals(ComparisonStrategy.STRICT, result, "should return STRICT strategy");
@@ -45,8 +45,7 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return IGNORE strategy when IGNORE type provided")
     void shouldReturnIgnoreStrategy_whenIgnoreTypeProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.IGNORE, null);
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.IGNORE, null);
 
       // Then
       assertEquals(ComparisonStrategy.IGNORE, result, "should return IGNORE strategy");
@@ -58,8 +57,7 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return NUMERIC strategy when NUMERIC type provided")
     void shouldReturnNumericStrategy_whenNumericTypeProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.NUMERIC, null);
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.NUMERIC, null);
 
       // Then
       assertEquals(ComparisonStrategy.NUMERIC, result, "should return NUMERIC strategy");
@@ -72,8 +70,7 @@ class ColumnStrategyConverterTest {
     void shouldReturnCaseInsensitiveStrategy_whenCaseInsensitiveTypeProvided() {
       // When
       final var result =
-          ColumnStrategyConverter.toComparisonStrategy(
-              ComparisonStrategy.Type.CASE_INSENSITIVE, null);
+          ColumnStrategyConverter.toComparisonStrategy(Strategy.CASE_INSENSITIVE, null);
 
       // Then
       assertEquals(
@@ -87,8 +84,7 @@ class ColumnStrategyConverterTest {
     void shouldReturnTimestampFlexibleStrategy_whenTimestampFlexibleTypeProvided() {
       // When
       final var result =
-          ColumnStrategyConverter.toComparisonStrategy(
-              ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE, null);
+          ColumnStrategyConverter.toComparisonStrategy(Strategy.TIMESTAMP_FLEXIBLE, null);
 
       // Then
       assertEquals(
@@ -103,8 +99,7 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return DATE_FLEXIBLE strategy when DATE_FLEXIBLE type provided")
     void shouldReturnDateFlexibleStrategy_whenDateFlexibleTypeProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.DATE_FLEXIBLE, null);
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.DATE_FLEXIBLE, null);
 
       // Then
       assertEquals(
@@ -118,8 +113,7 @@ class ColumnStrategyConverterTest {
     void shouldReturnJsonEquivalentStrategy_whenJsonEquivalentTypeProvided() {
       // When
       final var result =
-          ColumnStrategyConverter.toComparisonStrategy(
-              ComparisonStrategy.Type.JSON_EQUIVALENT, null);
+          ColumnStrategyConverter.toComparisonStrategy(Strategy.JSON_EQUIVALENT, null);
 
       // Then
       assertEquals(
@@ -132,8 +126,7 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return NOT_NULL strategy when NOT_NULL type provided")
     void shouldReturnNotNullStrategy_whenNotNullTypeProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.NOT_NULL, null);
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.NOT_NULL, null);
 
       // Then
       assertEquals(ComparisonStrategy.NOT_NULL, result, "should return NOT_NULL strategy");
@@ -145,19 +138,16 @@ class ColumnStrategyConverterTest {
     @DisplayName("should return REGEX strategy when REGEX type with pattern provided")
     void shouldReturnRegexStrategy_whenRegexTypeWithPatternProvided() {
       // When
-      final var result =
-          ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.REGEX, "^[a-z]+$");
+      final var result = ColumnStrategyConverter.toComparisonStrategy(Strategy.REGEX, "^[a-z]+$");
 
       // Then
       assertAll(
           "should return REGEX strategy with pattern",
-          () ->
-              assertEquals(
-                  ComparisonStrategy.Type.REGEX, result.getType(), "should have REGEX type"),
+          () -> assertEquals(Strategy.REGEX, result.type(), "should have REGEX type"),
           () ->
               assertEquals(
                   "^[a-z]+$",
-                  result.getPattern().orElseThrow().pattern(),
+                  result.pattern().orElseThrow().pattern(),
                   "should have correct pattern"));
     }
 
@@ -170,9 +160,7 @@ class ColumnStrategyConverterTest {
       final var exception =
           assertThrows(
               IllegalArgumentException.class,
-              () ->
-                  ColumnStrategyConverter.toComparisonStrategy(
-                      ComparisonStrategy.Type.REGEX, null));
+              () -> ColumnStrategyConverter.toComparisonStrategy(Strategy.REGEX, null));
 
       assertNotNull(exception.getMessage(), "exception should have a message");
     }
@@ -185,7 +173,7 @@ class ColumnStrategyConverterTest {
       // When & Then
       assertThrows(
           IllegalArgumentException.class,
-          () -> ColumnStrategyConverter.toComparisonStrategy(ComparisonStrategy.Type.REGEX, "  "));
+          () -> ColumnStrategyConverter.toComparisonStrategy(Strategy.REGEX, "  "));
     }
   }
 
@@ -205,7 +193,7 @@ class ColumnStrategyConverterTest {
       // When
       final var mapping =
           ColumnStrategyConverter.toColumnStrategyMapping(
-              "CREATED_AT", ComparisonStrategy.Type.TIMESTAMP_FLEXIBLE, null);
+              "CREATED_AT", Strategy.TIMESTAMP_FLEXIBLE, null);
 
       // Then
       assertAll(
@@ -225,8 +213,7 @@ class ColumnStrategyConverterTest {
     void shouldNormalizeColumnName_toUppercase() {
       // When
       final var mapping =
-          ColumnStrategyConverter.toColumnStrategyMapping(
-              "created_at", ComparisonStrategy.Type.IGNORE, null);
+          ColumnStrategyConverter.toColumnStrategyMapping("created_at", Strategy.IGNORE, null);
 
       // Then
       assertEquals("CREATED_AT", mapping.columnName(), "should uppercase column name");
@@ -240,17 +227,13 @@ class ColumnStrategyConverterTest {
       // When
       final var mapping =
           ColumnStrategyConverter.toColumnStrategyMapping(
-              "EMAIL", ComparisonStrategy.Type.REGEX, "^[a-z]+@[a-z]+\\.[a-z]+$");
+              "EMAIL", Strategy.REGEX, "^[a-z]+@[a-z]+\\.[a-z]+$");
 
       // Then
       assertAll(
           "mapping should have REGEX strategy with pattern",
           () -> assertEquals("EMAIL", mapping.columnName(), "should have correct column name"),
-          () ->
-              assertEquals(
-                  ComparisonStrategy.Type.REGEX,
-                  mapping.strategy().getType(),
-                  "should have REGEX type"));
+          () -> assertEquals(Strategy.REGEX, mapping.strategy().type(), "should have REGEX type"));
     }
   }
 
@@ -269,8 +252,7 @@ class ColumnStrategyConverterTest {
     void shouldCreateMapEntry_withUppercaseKey() {
       // Given
       final var mapping =
-          ColumnStrategyConverter.toColumnStrategyMapping(
-              "created_at", ComparisonStrategy.Type.IGNORE, null);
+          ColumnStrategyConverter.toColumnStrategyMapping("created_at", Strategy.IGNORE, null);
 
       // When
       final var entry = ColumnStrategyConverter.toMapEntry("created_at", mapping);

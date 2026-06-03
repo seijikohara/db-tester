@@ -5,7 +5,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat
 import io.github.seijikohara.dbtester.api.config.RowOrdering
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy
 import io.github.seijikohara.dbtester.api.config.TransactionMode
-import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy
+import io.github.seijikohara.dbtester.api.domain.Strategy
 import io.github.seijikohara.dbtester.api.operation.Operation
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.NestedConfigurationProperty
@@ -102,7 +102,7 @@ class DbTesterProperties {
     /**
      * Property for configuring a column-level comparison strategy.
      *
-     * Each entry associates a column name with a [ComparisonStrategy.Type] and an optional
+     * Each entry associates a column name with a [Strategy] and an optional
      * pattern for regex-based strategies.
      */
     class ColumnStrategyProperty {
@@ -110,7 +110,7 @@ class DbTesterProperties {
         var columnName: String? = null
 
         /** The comparison strategy type. */
-        var strategy: ComparisonStrategy.Type? = null
+        var strategy: Strategy? = null
 
         /** The regex pattern for REGEX strategy. */
         var pattern: String? = null

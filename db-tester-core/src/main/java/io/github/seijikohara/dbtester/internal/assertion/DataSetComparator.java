@@ -332,8 +332,7 @@ public class DataSetComparator {
       logger.debug("Applying comparison strategies");
       logger.debug("  Table: {}", tableName);
       columnStrategies.forEach(
-          (columnName, mapping) ->
-              logger.debug("  {}: {}", columnName, mapping.strategy().getType()));
+          (columnName, mapping) -> logger.debug("  {}: {}", columnName, mapping.strategy().type()));
     }
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);
@@ -442,8 +441,7 @@ public class DataSetComparator {
       logger.debug("Applying comparison strategies");
       logger.debug("  Table: {}", tableName);
       columnStrategies.forEach(
-          (columnName, mapping) ->
-              logger.debug("  {}: {}", columnName, mapping.strategy().getType()));
+          (columnName, mapping) -> logger.debug("  {}: {}", columnName, mapping.strategy().type()));
     }
 
     checkRowCountMismatch(tableName, expectedRows, actualRows, result);

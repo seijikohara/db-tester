@@ -5,7 +5,7 @@ import io.github.seijikohara.dbtester.api.config.DataFormat;
 import io.github.seijikohara.dbtester.api.config.RowOrdering;
 import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
 import io.github.seijikohara.dbtester.api.config.TransactionMode;
-import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
+import io.github.seijikohara.dbtester.api.domain.Strategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -471,8 +471,8 @@ public class DbTesterProperties {
   /**
    * Property for configuring a column-level comparison strategy.
    *
-   * <p>Each entry associates a column name with a {@link ComparisonStrategy.Type} and an optional
-   * pattern for regex-based strategies.
+   * <p>Each entry associates a column name with a {@link Strategy} and an optional pattern for
+   * regex-based strategies.
    *
    * <p>Example usage in {@code application.properties}:
    *
@@ -495,7 +495,7 @@ public class DbTesterProperties {
     private @Nullable String columnName;
 
     /** The comparison strategy type. */
-    private ComparisonStrategy.@Nullable Type strategy;
+    private @Nullable Strategy strategy;
 
     /** The regex pattern for REGEX strategy. */
     private @Nullable String pattern;
@@ -523,7 +523,7 @@ public class DbTesterProperties {
      *
      * @return the strategy type, or null if not set
      */
-    public ComparisonStrategy.@Nullable Type getStrategy() {
+    public @Nullable Strategy getStrategy() {
       return strategy;
     }
 
@@ -532,7 +532,7 @@ public class DbTesterProperties {
      *
      * @param strategy the strategy type
      */
-    public void setStrategy(final ComparisonStrategy.@Nullable Type strategy) {
+    public void setStrategy(final @Nullable Strategy strategy) {
       this.strategy = strategy;
     }
 
