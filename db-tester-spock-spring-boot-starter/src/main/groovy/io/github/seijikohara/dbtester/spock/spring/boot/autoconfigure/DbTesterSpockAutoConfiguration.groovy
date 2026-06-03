@@ -1,15 +1,11 @@
 package io.github.seijikohara.dbtester.spock.spring.boot.autoconfigure
 
-import io.github.seijikohara.dbtester.api.config.ColumnStrategyMapping
 import io.github.seijikohara.dbtester.api.config.Configuration
-import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.api.config.ExecutionSettings
-import io.github.seijikohara.dbtester.api.config.OperationDefaults
-import io.github.seijikohara.dbtester.api.config.VerificationSettings
-import io.github.seijikohara.dbtester.spring.support.ColumnStrategyConverter
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrar
+import io.github.seijikohara.dbtester.spring.support.DbTesterConfigurationFactory
+import io.github.seijikohara.dbtester.spring.support.DbTesterProperties
 import javax.sql.DataSource
-import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -27,8 +23,8 @@ import org.springframework.context.annotation.Bean
  *   <li>{@code db-tester.enabled} property is true (default)
  * </ul>
  *
- * <p>The configuration provides {@link Configuration}, {@link DataSourceRegistry}, and {@link
- * DataSourceRegistrar} beans that enable automatic DataSource registration from the Spring context.
+ * <p>The configuration provides {@link Configuration} and {@link DataSourceRegistrar} beans that
+ * enable automatic DataSource registration from the Spring context.
  *
  * <p>The {@code SpringBootDatabaseTestExtension} automatically discovers Spring-managed DataSources
  * and registers them with the testing framework.
@@ -54,70 +50,7 @@ class DbTesterSpockAutoConfiguration {
 	@Bean
 	@ConditionalOnMissingBean
 	Configuration dbTesterConfiguration(DbTesterProperties properties) {
-		def conventionProps = properties.convention
-		def verificationProps = properties.verification
-		def executionProps = properties.execution
-		def operationProps = properties.operation
-
-		def conventions = ConventionSettings.builder()
-				.baseDirectory(conventionProps.baseDirectory)
-				.expectationSuffix(conventionProps.expectationSuffix)
-				.scenarioMarker(conventionProps.scenarioMarker)
-				.dataFormat(conventionProps.dataFormat)
-				.tableMergeStrategy(conventionProps.tableMergeStrategy)
-				.loadOrderFileName(conventionProps.loadOrderFileName)
-				.build()
-
-		Map<String, ColumnStrategyMapping> columnStrategies = verificationProps.columnStrategies
-				.findAll { it.columnName && !it.columnName.blank && it.strategy }
-				.collectEntries { prop ->
-					def mapping = ColumnStrategyConverter.toColumnStrategyMapping(
-							prop.columnName, prop.strategy, prop.pattern)
-					def entry = ColumnStrategyConverter.toMapEntry(prop.columnName, mapping)
-					[(entry.key): entry.value]
-				}
-
-		def verification = VerificationSettings.builder()
-				.globalExcludeColumns(verificationProps.globalExcludeColumns)
-				.globalColumnStrategies(columnStrategies)
-				.rowOrdering(verificationProps.rowOrdering)
-				.retryCount(verificationProps.retryCount)
-				.retryDelay(verificationProps.retryDelay)
-				.build()
-
-		def execution = ExecutionSettings.builder()
-				.queryTimeout(executionProps.queryTimeout)
-				.transactionMode(executionProps.transactionMode)
-				.build()
-
-		def operations = OperationDefaults.builder()
-				.preparation(operationProps.preparation)
-				.expectation(operationProps.expectation)
-				.build()
-
-		return Configuration.builder()
-				.conventions(conventions)
-				.verification(verification)
-				.execution(execution)
-				.operations(operations)
-				.build()
-	}
-
-	/**
-	 * Creates a DataSourceRegistry bean and registers all available DataSources.
-	 *
-	 * <p>If a single DataSource is available, it is registered as the default. If multiple
-	 * DataSources are available, they are registered by their bean names.
-	 *
-	 * @param dataSources provider for all DataSource beans
-	 * @return the data source registry
-	 */
-	@Bean
-	@ConditionalOnMissingBean
-	DataSourceRegistry dbTesterDataSourceRegistry(ObjectProvider<DataSource> dataSources) {
-		def registry = new DataSourceRegistry()
-		dataSources.stream().findFirst().ifPresent { registry.registerDefault(it) }
-		return registry
+		return DbTesterConfigurationFactory.toConfiguration(properties)
 	}
 
 	/**

@@ -54,6 +54,7 @@ tasks.withType<JacocoCoverageVerification>().configureEach {
 val jacocoExclusionsByModule =
     mapOf(
         "db-tester-spock" to listOf("**/DatabaseTestExtension*.class"),
+        "db-tester-junit-spring-boot-starter" to listOf("**/SpringBootDatabaseTestExtension*.class"),
         "db-tester-spock-spring-boot-starter" to
             listOf(
                 "**/SpringBootDatabaseTestExtension*.class",

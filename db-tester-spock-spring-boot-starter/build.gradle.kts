@@ -18,14 +18,9 @@ dependencies {
     implementation(libs.spock.spring)
     implementation(libs.spring.boot.autoconfigure)
     implementation(libs.groovy)
-    annotationProcessor(libs.spring.boot.configuration.processor)
 
     compileOnly(libs.spring.boot.starter.jdbc)
     compileOnly(libs.spring.boot.starter.test)
-}
-
-tasks.named<JavaCompile>("compileJava") {
-    inputs.files(tasks.named("processResources"))
 }
 
 testing {

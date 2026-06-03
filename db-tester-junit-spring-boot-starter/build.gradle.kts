@@ -13,14 +13,9 @@ dependencies {
     implementation(project(":db-tester-core"))
     implementation(project(":db-tester-spring-support"))
     implementation(libs.spring.boot.autoconfigure)
-    annotationProcessor(libs.spring.boot.configuration.processor)
 
     compileOnly(libs.spring.boot.starter.jdbc)
     compileOnly(libs.spring.boot.starter.test)
-}
-
-tasks.named<JavaCompile>("compileJava") {
-    inputs.files(tasks.named("processResources"))
 }
 
 testing {
