@@ -111,7 +111,6 @@ classDiagram
 | `@DataSetSource` | `columnStrategies` | `{}` | 全カラムにデフォルトSTRICT |
 | `@ColumnStrategy` | `strategy` | `STRICT` | 完全一致 |
 | `@ColumnStrategy` | `pattern` | `""` | パターンなし |
-| `@ColumnStrategy` | `options` | `""` | オプションなし |
 
 **マジックバリュー: `-1`**
 

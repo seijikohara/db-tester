@@ -115,7 +115,6 @@ This table lists the default values for all configurable attributes.
 | `@DataSetSource` | `columnStrategies` | `{}` | Default STRICT for all columns |
 | `@ColumnStrategy` | `strategy` | `STRICT` | Exact match |
 | `@ColumnStrategy` | `pattern` | `""` | No pattern |
-| `@ColumnStrategy` | `options` | `""` | No options |
 
 **Magic Value: `-1`**
 
