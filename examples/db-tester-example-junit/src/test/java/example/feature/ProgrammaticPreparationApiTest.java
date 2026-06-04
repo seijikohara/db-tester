@@ -260,7 +260,7 @@ final class ProgrammaticPreparationApiTest {
           PreparationConfig.standard()
               .withBatchSize(2)
               .withTransactionMode(TransactionMode.AUTO_COMMIT)
-              .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY);
+              .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
       // When
       DatabasePreparation.cleanInsert(dataSource, tableSet, config);
@@ -372,7 +372,7 @@ final class ProgrammaticPreparationApiTest {
       final var config =
           PreparationConfig.standard()
               .withTransactionMode(TransactionMode.AUTO_COMMIT)
-              .withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY);
+              .withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
       // When
       DatabasePreparation.execute(dataSource, tableSet, Operation.CLEAN_INSERT, config);

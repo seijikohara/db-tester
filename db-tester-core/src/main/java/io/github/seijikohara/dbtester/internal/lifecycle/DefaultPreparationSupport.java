@@ -106,20 +106,14 @@ public final class DefaultPreparationSupport implements PreparationSupport {
       final DataSet dataSet,
       final DataSource dataSource) {
     final var operation = dataSet.operation();
-    final var tableOrderingStrategy = dataSet.tableOrdering();
+    final var tableOrdering = dataSet.tableOrdering();
     final var execution = context.configuration().execution();
     final var transactionMode = execution.transactionMode();
     final var queryTimeout = execution.queryTimeout();
     final var batchSize = resolveBatchSize(dataSet, context);
 
     operationProvider.execute(
-        operation,
-        tableSet,
-        dataSource,
-        tableOrderingStrategy,
-        transactionMode,
-        queryTimeout,
-        batchSize);
+        operation, tableSet, dataSource, tableOrdering, transactionMode, queryTimeout, batchSize);
   }
 
   /**

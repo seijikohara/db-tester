@@ -67,4 +67,4 @@ import java.lang.annotation.Inherited
 @MustBeDocumented
 @Inherited
 @ApplyExtension(DatabaseTestExtension::class)
-annotation class DatabaseTest
+public annotation class DatabaseTest

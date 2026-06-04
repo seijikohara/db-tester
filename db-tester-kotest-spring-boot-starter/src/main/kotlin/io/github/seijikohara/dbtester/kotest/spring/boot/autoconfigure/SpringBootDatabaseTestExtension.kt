@@ -43,11 +43,11 @@ import org.springframework.test.context.TestContextManager
  * @see DataSourceRegistrar
  * @see DbTesterKotestAutoConfiguration
  */
-class SpringBootDatabaseTestExtension :
+public class SpringBootDatabaseTestExtension :
     SpecExtension,
     TestCaseExtension {
     /** Companion object containing class-level logger. */
-    companion object {
+    private companion object {
         private val logger = LoggerFactory.getLogger(SpringBootDatabaseTestExtension::class.java)
     }
 

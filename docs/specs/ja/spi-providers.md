@@ -39,7 +39,7 @@ public interface OperationProvider {
         Operation operation,
         TableSet tableSet,
         DataSource dataSource,
-        TableOrderingStrategy tableOrderingStrategy,
+        TableOrderingStrategy tableOrdering,
         TransactionMode transactionMode,
         @Nullable Duration queryTimeout,
         int batchSize);
@@ -55,7 +55,7 @@ public interface OperationProvider {
 | `operation` | `Operation` | 実行するデータベース操作 |
 | `tableSet` | `TableSet` | テーブルと行を含むテーブルセット |
 | `dataSource` | `DataSource` | コネクション用のJDBCデータソース |
-| `tableOrderingStrategy` | `TableOrderingStrategy` | テーブル処理順序の戦略 |
+| `tableOrdering` | `TableOrderingStrategy` | テーブル処理順序の戦略 |
 | `transactionMode` | `TransactionMode` | トランザクション動作モード |
 | `queryTimeout` | `@Nullable Duration` | クエリタイムアウト、またはタイムアウトなしの場合はnull |
 | `batchSize` | `int` | INSERTバッチあたりの行数（0 = 単一バッチ） |

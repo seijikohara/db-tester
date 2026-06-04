@@ -114,21 +114,16 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @throws DatabaseTesterException if the operation fails
    */
   public void execute(
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy) {
+      final TableOrderingStrategy tableOrdering) {
     execute(
-        operation,
-        tableSet,
-        dataSource,
-        tableOrderingStrategy,
-        TransactionMode.SINGLE_TRANSACTION,
-        null);
+        operation, tableSet, dataSource, tableOrdering, TransactionMode.SINGLE_TRANSACTION, null);
   }
 
   /**
@@ -137,7 +132,7 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @param transactionMode the transaction behavior mode
    * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseTesterException if the operation fails
@@ -146,11 +141,10 @@ public final class OperationExecutor {
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout) {
-    execute(
-        operation, tableSet, dataSource, tableOrderingStrategy, transactionMode, queryTimeout, 0);
+    execute(operation, tableSet, dataSource, tableOrdering, transactionMode, queryTimeout, 0);
   }
 
   /**
@@ -159,7 +153,7 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @param transactionMode the transaction behavior mode
    * @param queryTimeout the query timeout, or null for no timeout
    * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
@@ -169,7 +163,7 @@ public final class OperationExecutor {
       final Operation operation,
       final TableSet tableSet,
       final DataSource dataSource,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final TransactionMode transactionMode,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
@@ -177,7 +171,7 @@ public final class OperationExecutor {
         "Executing operation {} on dataset with {} tables using strategy {} (transactionMode={}, timeout={}, batchSize={})",
         operation,
         tableSet.tables().size(),
-        tableOrderingStrategy,
+        tableOrdering,
         transactionMode,
         queryTimeout,
         batchSize);
@@ -188,8 +182,7 @@ public final class OperationExecutor {
 
       try {
         configureTransaction(connection, transactionMode);
-        executeOperation(
-            operation, tableSet, connection, tableOrderingStrategy, queryTimeout, batchSize);
+        executeOperation(operation, tableSet, connection, tableOrdering, queryTimeout, batchSize);
         commitIfRequired(connection, transactionMode);
         logger.debug("Successfully executed operation {}", operation);
       } catch (final DatabaseOperationException e) {
@@ -274,15 +267,15 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param connection the database connection
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @throws DatabaseOperationException if a database error occurs
    */
   void executeOperation(
       final Operation operation,
       final TableSet tableSet,
       final Connection connection,
-      final TableOrderingStrategy tableOrderingStrategy) {
-    executeOperation(operation, tableSet, connection, tableOrderingStrategy, null);
+      final TableOrderingStrategy tableOrdering) {
+    executeOperation(operation, tableSet, connection, tableOrdering, null);
   }
 
   /**
@@ -291,7 +284,7 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param connection the database connection
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @param queryTimeout the query timeout, or null for no timeout
    * @throws DatabaseOperationException if a database error occurs
    */
@@ -299,9 +292,9 @@ public final class OperationExecutor {
       final Operation operation,
       final TableSet tableSet,
       final Connection connection,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final @Nullable Duration queryTimeout) {
-    executeOperation(operation, tableSet, connection, tableOrderingStrategy, queryTimeout, 0);
+    executeOperation(operation, tableSet, connection, tableOrdering, queryTimeout, 0);
   }
 
   /**
@@ -310,7 +303,7 @@ public final class OperationExecutor {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param connection the database connection
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @param queryTimeout the query timeout, or null for no timeout
    * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
    * @throws DatabaseOperationException if a database error occurs
@@ -319,10 +312,10 @@ public final class OperationExecutor {
       final Operation operation,
       final TableSet tableSet,
       final Connection connection,
-      final TableOrderingStrategy tableOrderingStrategy,
+      final TableOrderingStrategy tableOrdering,
       final @Nullable Duration queryTimeout,
       final int batchSize) {
-    final var tables = resolveTableOrder(tableSet.tables(), connection, tableOrderingStrategy);
+    final var tables = resolveTableOrder(tableSet.tables(), connection, tableOrdering);
 
     switch (operation) {
       case NONE -> {

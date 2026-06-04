@@ -52,7 +52,7 @@ public interface OperationProvider {
    * @param operation the operation to execute
    * @param tableSet the dataset to operate on
    * @param dataSource the data source for database connections
-   * @param tableOrderingStrategy the strategy for determining table processing order
+   * @param tableOrdering the strategy for determining table processing order
    * @param transactionMode the transaction behavior mode
    * @param queryTimeout the query timeout, or null for no timeout
    * @param batchSize the number of rows per INSERT batch, or zero for single-batch execution
@@ -62,7 +62,7 @@ public interface OperationProvider {
       Operation operation,
       TableSet tableSet,
       DataSource dataSource,
-      TableOrderingStrategy tableOrderingStrategy,
+      TableOrderingStrategy tableOrdering,
       TransactionMode transactionMode,
       @Nullable Duration queryTimeout,
       int batchSize);

@@ -42,7 +42,7 @@ class PreparationConfigTest {
           () ->
               assertEquals(
                   TableOrderingStrategy.AUTO,
-                  config.tableOrderingStrategy(),
+                  config.tableOrdering(),
                   "should use AUTO table ordering"),
           () ->
               assertEquals(
@@ -82,15 +82,15 @@ class PreparationConfigTest {
     }
   }
 
-  /** Tests for the withTableOrderingStrategy() method. */
+  /** Tests for the withTableOrdering() method. */
   @Nested
-  @DisplayName("withTableOrderingStrategy() method")
+  @DisplayName("withTableOrdering() method")
   class WithTableOrderingStrategyMethod {
 
-    /** Tests for the withTableOrderingStrategy method. */
+    /** Tests for the withTableOrdering method. */
     WithTableOrderingStrategyMethod() {}
 
-    /** Verifies that withTableOrderingStrategy returns new instance with updated strategy. */
+    /** Verifies that withTableOrdering returns new instance with updated strategy. */
     @Test
     @Tag("normal")
     @DisplayName("should return new instance with updated strategy")
@@ -99,7 +99,7 @@ class PreparationConfigTest {
       final var original = PreparationConfig.standard();
 
       // When
-      final var result = original.withTableOrderingStrategy(TableOrderingStrategy.FOREIGN_KEY);
+      final var result = original.withTableOrdering(TableOrderingStrategy.FOREIGN_KEY);
 
       // Then
       assertAll(
@@ -107,7 +107,7 @@ class PreparationConfigTest {
           () ->
               assertEquals(
                   TableOrderingStrategy.FOREIGN_KEY,
-                  result.tableOrderingStrategy(),
+                  result.tableOrdering(),
                   "should use FOREIGN_KEY strategy"),
           () ->
               assertEquals(
@@ -151,8 +151,8 @@ class PreparationConfigTest {
                   "should use AUTO_COMMIT mode"),
           () ->
               assertEquals(
-                  original.tableOrderingStrategy(),
-                  result.tableOrderingStrategy(),
+                  original.tableOrdering(),
+                  result.tableOrdering(),
                   "should preserve table ordering strategy"));
     }
   }

@@ -23,9 +23,9 @@ import java.lang.reflect.Method
  * @see ScenarioNameResolver
  * @see AnnotationSpec
  */
-class KotestScenarioNameResolver : ScenarioNameResolver {
+public class KotestScenarioNameResolver : ScenarioNameResolver {
     /** Companion object containing class-level constants. */
-    companion object {
+    private companion object {
         /** Priority for Kotest resolver, higher than default JUnit resolver. */
         private const val KOTEST_PRIORITY = 100
     }
