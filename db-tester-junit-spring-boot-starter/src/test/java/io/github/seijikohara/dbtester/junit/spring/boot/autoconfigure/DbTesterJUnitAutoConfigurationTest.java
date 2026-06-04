@@ -1,33 +1,15 @@
 package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import io.github.seijikohara.dbtester.api.config.DataFormat;
-import io.github.seijikohara.dbtester.api.config.RowOrdering;
-import io.github.seijikohara.dbtester.api.config.TableMergeStrategy;
-import io.github.seijikohara.dbtester.api.config.TransactionMode;
-import io.github.seijikohara.dbtester.api.domain.ComparisonStrategy;
-import io.github.seijikohara.dbtester.api.domain.Strategy;
 import io.github.seijikohara.dbtester.api.operation.Operation;
-import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
-import javax.sql.DataSource;
+import io.github.seijikohara.dbtester.spring.support.DbTesterProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
 
 /** Unit tests for {@link DbTesterJUnitAutoConfiguration}. */
 @DisplayName("DbTesterJUnitAutoConfiguration")
@@ -78,373 +60,23 @@ class DbTesterJUnitAutoConfigurationTest {
     /** Tests for the dbTesterConfiguration method. */
     DbTesterConfigurationMethod() {}
 
-    /** Verifies that dbTesterConfiguration returns Configuration.defaults(). */
+    /** Verifies that dbTesterConfiguration delegates to the factory. */
     @Test
     @Tag("normal")
-    @DisplayName("should return default Configuration")
-    void should_return_default_configuration() {
-      // Given & When
+    @DisplayName("should build Configuration from properties")
+    void should_build_configuration_from_properties() {
+      // Given
+      properties.getOperation().setPreparation(Operation.INSERT);
+
+      // When
       final var config = autoConfiguration.dbTesterConfiguration(properties);
 
       // Then
       assertNotNull(config, "configuration should not be null");
-    }
-
-    /** Verifies that Configuration has conventions. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Configuration with conventions")
-    void should_return_configuration_with_conventions() {
-      // Given & When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertNotNull(config.conventions(), "conventions should not be null");
-    }
-
-    /** Verifies that Configuration has operations. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Configuration with operations")
-    void should_return_configuration_with_operations() {
-      // Given & When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertNotNull(config.operations(), "operations should not be null");
-    }
-
-    /** Verifies that Configuration has verification settings. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Configuration with verification settings")
-    void should_return_configuration_with_verification() {
-      // Given & When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertNotNull(config.verification(), "verification should not be null");
-    }
-
-    /** Verifies that Configuration has execution settings. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Configuration with execution settings")
-    void should_return_configuration_with_execution() {
-      // Given & When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertNotNull(config.execution(), "execution should not be null");
-    }
-
-    /** Verifies that Configuration has loader. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return Configuration with loader")
-    void should_return_configuration_with_loader() {
-      // Given & When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertNotNull(config.loader(), "loader should not be null");
-    }
-
-    /** Verifies that custom convention properties are mapped to Configuration. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should map custom convention properties to Configuration")
-    void should_map_custom_convention_properties() {
-      // Given
-      properties.getConvention().setBaseDirectory("/custom/base");
-      properties.getConvention().setExpectationSuffix("/verify");
-      properties.getConvention().setScenarioMarker("[TestCase]");
-      properties.getConvention().setDataFormat(DataFormat.TSV);
-      properties.getConvention().setTableMergeStrategy(TableMergeStrategy.FIRST);
-      properties.getConvention().setLoadOrderFileName("custom-order.txt");
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      final var conventions = config.conventions();
-      assertAll(
-          "convention properties should be mapped",
-          () -> assertEquals("/custom/base", conventions.baseDirectory(), "baseDirectory mismatch"),
-          () ->
-              assertEquals(
-                  "/verify", conventions.expectationSuffix(), "expectationSuffix mismatch"),
-          () -> assertEquals("[TestCase]", conventions.scenarioMarker(), "scenarioMarker mismatch"),
-          () -> assertEquals(DataFormat.TSV, conventions.dataFormat(), "dataFormat mismatch"),
-          () ->
-              assertEquals(
-                  TableMergeStrategy.FIRST,
-                  conventions.tableMergeStrategy(),
-                  "tableMergeStrategy mismatch"),
-          () ->
-              assertEquals(
-                  "custom-order.txt",
-                  conventions.loadOrderFileName(),
-                  "loadOrderFileName mismatch"));
-    }
-
-    /** Verifies that custom verification properties are mapped to Configuration. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should map custom verification properties to Configuration")
-    void should_map_custom_verification_properties() {
-      // Given
-      properties.getVerification().setGlobalExcludeColumns(Set.of("created_at", "updated_at"));
-      properties.getVerification().setRowOrdering(RowOrdering.UNORDERED);
-      properties.getVerification().setRetryCount(3);
-      properties.getVerification().setRetryDelay(Duration.ofSeconds(2));
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      final var verification = config.verification();
-      assertAll(
-          "verification properties should be mapped",
-          () ->
-              assertEquals(
-                  Set.of("created_at", "updated_at"),
-                  verification.globalExcludeColumns(),
-                  "globalExcludeColumns mismatch"),
-          () ->
-              assertEquals(
-                  RowOrdering.UNORDERED, verification.rowOrdering(), "rowOrdering mismatch"),
-          () -> assertEquals(3, verification.retryCount(), "retryCount mismatch"),
-          () ->
-              assertEquals(
-                  Duration.ofSeconds(2), verification.retryDelay(), "retryDelay mismatch"));
-    }
-
-    /** Verifies that column strategies properties are mapped to Configuration. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should map column strategies properties to Configuration")
-    void should_map_column_strategies_properties() {
-      // Given
-      final var timestampStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      timestampStrategy.setColumnName("CREATED_AT");
-      timestampStrategy.setStrategy(Strategy.TIMESTAMP_FLEXIBLE);
-
-      final var ignoreStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      ignoreStrategy.setColumnName("updated_at");
-      ignoreStrategy.setStrategy(Strategy.IGNORE);
-
-      final var regexStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      regexStrategy.setColumnName("EMAIL");
-      regexStrategy.setStrategy(Strategy.REGEX);
-      regexStrategy.setPattern("^[a-z]+@[a-z]+\\.[a-z]+$");
-
-      properties
-          .getVerification()
-          .setColumnStrategies(List.of(timestampStrategy, ignoreStrategy, regexStrategy));
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      final var strategies = config.verification().globalColumnStrategies();
-      assertAll(
-          "column strategies should be mapped",
-          () -> assertEquals(3, strategies.size(), "should have 3 strategies"),
-          () ->
-              assertEquals(
-                  ComparisonStrategy.TIMESTAMP_FLEXIBLE,
-                  Objects.requireNonNull(strategies.get("CREATED_AT")).strategy(),
-                  "CREATED_AT should have TIMESTAMP_FLEXIBLE strategy"),
-          () ->
-              assertEquals(
-                  ComparisonStrategy.IGNORE,
-                  Objects.requireNonNull(strategies.get("UPDATED_AT")).strategy(),
-                  "UPDATED_AT should have IGNORE strategy"),
-          () ->
-              assertEquals(
-                  Strategy.REGEX,
-                  Objects.requireNonNull(strategies.get("EMAIL")).strategy().type(),
-                  "EMAIL should have REGEX strategy type"));
-    }
-
-    /** Verifies that empty column strategies produces empty map. */
-    @Test
-    @Tag("edge-case")
-    @DisplayName("should produce empty column strategies when none configured")
-    void should_produce_empty_column_strategies_when_none_configured() {
-      // Given - default properties
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertTrue(
-          config.verification().globalColumnStrategies().isEmpty(),
-          "column strategies should be empty");
-    }
-
-    /** Verifies that column strategies with null column name are filtered out. */
-    @Test
-    @Tag("edge-case")
-    @DisplayName("should filter out column strategies with null column name")
-    void should_filter_out_column_strategies_with_null_column_name() {
-      // Given
-      final var validStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      validStrategy.setColumnName("CREATED_AT");
-      validStrategy.setStrategy(Strategy.IGNORE);
-
-      final var invalidStrategy = new DbTesterProperties.ColumnStrategyProperty();
-      invalidStrategy.setStrategy(Strategy.STRICT);
-
-      properties.getVerification().setColumnStrategies(List.of(validStrategy, invalidStrategy));
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
       assertEquals(
-          1,
-          config.verification().globalColumnStrategies().size(),
-          "should have only 1 valid strategy");
-    }
-
-    /** Verifies that custom execution properties are mapped to Configuration. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should map custom execution properties to Configuration")
-    void should_map_custom_execution_properties() {
-      // Given
-      properties.getExecution().setQueryTimeout(Duration.ofSeconds(30));
-      properties.getExecution().setTransactionMode(TransactionMode.AUTO_COMMIT);
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      final var execution = config.execution();
-      assertAll(
-          "execution properties should be mapped",
-          () ->
-              assertEquals(
-                  Duration.ofSeconds(30), execution.queryTimeout(), "queryTimeout mismatch"),
-          () ->
-              assertEquals(
-                  TransactionMode.AUTO_COMMIT,
-                  execution.transactionMode(),
-                  "transactionMode mismatch"));
-    }
-
-    /** Verifies that custom operation properties are mapped to Configuration. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should map custom operation properties to Configuration")
-    void should_map_custom_operation_properties() {
-      // Given
-      properties.getOperation().setPreparation(Operation.INSERT);
-      properties.getOperation().setExpectation(Operation.DELETE_ALL);
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      final var operations = config.operations();
-      assertAll(
-          "operation properties should be mapped",
-          () -> assertEquals(Operation.INSERT, operations.preparation(), "preparation mismatch"),
-          () ->
-              assertEquals(Operation.DELETE_ALL, operations.expectation(), "expectation mismatch"));
-    }
-
-    /** Verifies that default properties produce default Configuration values. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should produce default values for all Configuration sections")
-    void should_produce_default_values_for_all_sections() {
-      // Given - default properties
-
-      // When
-      final var config = autoConfiguration.dbTesterConfiguration(properties);
-
-      // Then
-      assertAll(
-          "default Configuration values should be correct",
-          () -> assertNull(config.conventions().baseDirectory(), "baseDirectory should be null"),
-          () ->
-              assertEquals(
-                  RowOrdering.ORDERED,
-                  config.verification().rowOrdering(),
-                  "rowOrdering should be ORDERED"),
-          () -> assertEquals(0, config.verification().retryCount(), "retryCount should be 0"),
-          () -> assertNull(config.execution().queryTimeout(), "queryTimeout should be null"),
-          () ->
-              assertEquals(
-                  TransactionMode.SINGLE_TRANSACTION,
-                  config.execution().transactionMode(),
-                  "transactionMode should be SINGLE_TRANSACTION"),
-          () ->
-              assertEquals(
-                  Operation.CLEAN_INSERT,
-                  config.operations().preparation(),
-                  "preparation should be CLEAN_INSERT"),
-          () ->
-              assertEquals(
-                  Operation.NONE, config.operations().expectation(), "expectation should be NONE"));
-    }
-  }
-
-  /** Tests for the dbTesterDataSourceRegistry bean. */
-  @Nested
-  @DisplayName("dbTesterDataSourceRegistry(ObjectProvider) method")
-  class DbTesterDataSourceRegistryMethod {
-
-    /** Tests for the dbTesterDataSourceRegistry method. */
-    DbTesterDataSourceRegistryMethod() {}
-
-    /** Verifies that dbTesterDataSourceRegistry returns registry. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should return DataSourceRegistry")
-    void should_return_data_source_registry() {
-      // Given
-      final var dataSourceProvider = createEmptyDataSourceProvider();
-
-      // When
-      final var registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider);
-
-      // Then
-      assertNotNull(registry, "registry should not be null");
-    }
-
-    /** Verifies that registry has default when DataSource provided. */
-    @Test
-    @Tag("normal")
-    @DisplayName("should register DataSource as default when provided")
-    void should_register_data_source_as_default_when_provided() {
-      // Given
-      final var dataSource = mock(DataSource.class);
-      final var dataSourceProvider = createDataSourceProvider(dataSource);
-
-      // When
-      final var registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider);
-
-      // Then
-      assertTrue(registry.hasDefault(), "should have default DataSource");
-    }
-
-    /** Verifies that registry has no default when no DataSource provided. */
-    @Test
-    @Tag("edge-case")
-    @DisplayName("should not have default when no DataSource provided")
-    void should_not_have_default_when_no_data_source_provided() {
-      // Given
-      final var dataSourceProvider = createEmptyDataSourceProvider();
-
-      // When
-      final var registry = autoConfiguration.dbTesterDataSourceRegistry(dataSourceProvider);
-
-      // Then
-      assertFalse(registry.hasDefault(), "should not have default DataSource");
+          Operation.INSERT,
+          config.operations().preparation(),
+          "preparation should be mapped from properties");
     }
   }
 
@@ -467,35 +99,5 @@ class DbTesterJUnitAutoConfigurationTest {
       // Then
       assertNotNull(registrar, "registrar should not be null");
     }
-  }
-
-  /**
-   * Creates an empty ObjectProvider for DataSource using Mockito.
-   *
-   * @return the mock provider
-   */
-  @SuppressWarnings("unchecked")
-  private ObjectProvider<DataSource> createEmptyDataSourceProvider() {
-    final var provider = mock(ObjectProvider.class);
-    when(provider.getIfAvailable()).thenReturn(null);
-    when(provider.getIfUnique()).thenReturn(null);
-    when(provider.stream()).thenReturn(Stream.empty());
-    return provider;
-  }
-
-  /**
-   * Creates an ObjectProvider with a single DataSource using Mockito.
-   *
-   * @param dataSource the DataSource to provide
-   * @return the mock provider
-   */
-  @SuppressWarnings("unchecked")
-  private ObjectProvider<DataSource> createDataSourceProvider(final DataSource dataSource) {
-    final var provider = mock(ObjectProvider.class);
-    when(provider.getObject()).thenReturn(dataSource);
-    when(provider.getIfAvailable()).thenReturn(dataSource);
-    when(provider.getIfUnique()).thenReturn(dataSource);
-    when(provider.stream()).thenReturn(Stream.of(dataSource));
-    return provider;
   }
 }

@@ -54,7 +54,7 @@
     },
     {
       "name": "db-tester.verification.column-strategies",
-      "type": "java.util.List<io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure.DbTesterProperties.ColumnStrategyProperty>",
+      "type": "java.util.List<io.github.seijikohara.dbtester.spring.support.DbTesterProperties.ColumnStrategyProperty>",
       "description": "Column-level comparison strategies for expectation verification. Each entry specifies a column name, strategy type, and optional regex pattern."
     },
     {

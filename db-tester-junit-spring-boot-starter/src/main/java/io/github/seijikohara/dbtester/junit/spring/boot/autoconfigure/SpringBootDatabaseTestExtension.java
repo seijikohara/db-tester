@@ -2,6 +2,7 @@ package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
 
 import io.github.seijikohara.dbtester.api.config.Configuration;
 import io.github.seijikohara.dbtester.junit.jupiter.extension.DatabaseTestExtension;
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrar;
 import java.util.Optional;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;

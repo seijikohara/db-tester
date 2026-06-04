@@ -1,4 +1,4 @@
-package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
+package io.github.seijikohara.dbtester.spring.support;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;

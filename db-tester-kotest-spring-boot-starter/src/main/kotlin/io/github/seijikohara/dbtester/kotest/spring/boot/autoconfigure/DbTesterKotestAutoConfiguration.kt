@@ -1,13 +1,10 @@
 package io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure
 
 import io.github.seijikohara.dbtester.api.config.Configuration
-import io.github.seijikohara.dbtester.api.config.ConventionSettings
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
-import io.github.seijikohara.dbtester.api.config.ExecutionSettings
-import io.github.seijikohara.dbtester.api.config.OperationDefaults
-import io.github.seijikohara.dbtester.api.config.VerificationSettings
-import io.github.seijikohara.dbtester.spring.support.ColumnStrategyConverter
-import org.springframework.beans.factory.ObjectProvider
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrar
+import io.github.seijikohara.dbtester.spring.support.DbTesterConfigurationFactory
+import io.github.seijikohara.dbtester.spring.support.DbTesterProperties
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
@@ -53,76 +50,7 @@ class DbTesterKotestAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    fun dbTesterConfiguration(properties: DbTesterProperties): Configuration =
-        run {
-            val conventions =
-                ConventionSettings
-                    .builder()
-                    .baseDirectory(properties.convention.baseDirectory)
-                    .expectationSuffix(properties.convention.expectationSuffix)
-                    .scenarioMarker(properties.convention.scenarioMarker)
-                    .dataFormat(properties.convention.dataFormat)
-                    .tableMergeStrategy(properties.convention.tableMergeStrategy)
-                    .loadOrderFileName(properties.convention.loadOrderFileName)
-                    .build()
-            val columnStrategies =
-                properties.verification.columnStrategies
-                    .filter { it.columnName != null && it.columnName!!.isNotBlank() && it.strategy != null }
-                    .associate { prop ->
-                        val mapping =
-                            ColumnStrategyConverter.toColumnStrategyMapping(
-                                prop.columnName!!,
-                                prop.strategy!!,
-                                prop.pattern,
-                            )
-                        val entry = ColumnStrategyConverter.toMapEntry(prop.columnName!!, mapping)
-                        entry.key to entry.value
-                    }
-            val verification =
-                VerificationSettings
-                    .builder()
-                    .globalExcludeColumns(properties.verification.globalExcludeColumns)
-                    .globalColumnStrategies(columnStrategies)
-                    .rowOrdering(properties.verification.rowOrdering)
-                    .retryCount(properties.verification.retryCount)
-                    .retryDelay(properties.verification.retryDelay)
-                    .build()
-            val execution =
-                ExecutionSettings
-                    .builder()
-                    .queryTimeout(properties.execution.queryTimeout)
-                    .transactionMode(properties.execution.transactionMode)
-                    .build()
-            val operations =
-                OperationDefaults
-                    .builder()
-                    .preparation(properties.operation.preparation)
-                    .expectation(properties.operation.expectation)
-                    .build()
-            Configuration
-                .builder()
-                .conventions(conventions)
-                .verification(verification)
-                .execution(execution)
-                .operations(operations)
-                .build()
-        }
-
-    /**
-     * Creates a DataSourceRegistry bean and registers all available DataSources.
-     *
-     * If a single DataSource is available, it will be registered as the default. If multiple
-     * DataSources are available, they will be registered by their bean names.
-     *
-     * @param dataSources provider for all DataSource beans
-     * @return the data source registry
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    fun dbTesterDataSourceRegistry(dataSources: ObjectProvider<DataSource>): DataSourceRegistry =
-        DataSourceRegistry().also { registry ->
-            dataSources.stream().findFirst().ifPresent { registry.registerDefault(it) }
-        }
+    fun dbTesterConfiguration(properties: DbTesterProperties): Configuration = DbTesterConfigurationFactory.toConfiguration(properties)
 
     /**
      * Creates a [DataSourceRegistrar] bean.

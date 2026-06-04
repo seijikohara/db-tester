@@ -1,8 +1,6 @@
-package io.github.seijikohara.dbtester.junit.spring.boot.autoconfigure;
+package io.github.seijikohara.dbtester.spring.support;
 
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry;
-import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrarSupport;
-import io.github.seijikohara.dbtester.spring.support.PrimaryBeanResolver;
 import java.util.Optional;
 import javax.sql.DataSource;
 import org.jspecify.annotations.Nullable;
@@ -29,7 +27,6 @@ import org.springframework.context.ApplicationContextAware;
  *
  * @see DataSourceRegistry
  * @see DataSourceRegistrarSupport
- * @see DbTesterJUnitAutoConfiguration
  */
 public final class DataSourceRegistrar implements ApplicationContextAware {
 

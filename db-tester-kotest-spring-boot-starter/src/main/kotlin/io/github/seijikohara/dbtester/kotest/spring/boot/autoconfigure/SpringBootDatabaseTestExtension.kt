@@ -3,6 +3,7 @@ package io.github.seijikohara.dbtester.kotest.spring.boot.autoconfigure
 import io.github.seijikohara.dbtester.api.config.Configuration
 import io.github.seijikohara.dbtester.api.config.DataSourceRegistry
 import io.github.seijikohara.dbtester.kotest.extension.DatabaseTestExtension
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrar
 import io.kotest.core.extensions.SpecExtension
 import io.kotest.core.extensions.TestCaseExtension
 import io.kotest.core.spec.Spec
@@ -143,21 +144,6 @@ class SpringBootDatabaseTestExtension :
      */
     private fun registerDataSourcesFromContext(applicationContext: ApplicationContext): Unit =
         when {
-            applicationContext.containsBean("dbTesterDataSourceRegistry") -> {
-                registry = applicationContext.getBean("dbTesterDataSourceRegistry", DataSourceRegistry::class.java)
-                logger.debug("Using Spring-managed DataSourceRegistry")
-
-                // Always register DataSources for consistency with JUnit behavior
-                when {
-                    applicationContext.containsBean("dataSourceRegistrar") -> {
-                        applicationContext.getBean(DataSourceRegistrar::class.java).registerAll(registry!!)
-                        logger.debug("Registered DataSources into Spring-managed DataSourceRegistry")
-                    }
-
-                    else -> {}
-                }
-            }
-
             applicationContext.containsBean("dataSourceRegistrar") -> {
                 registry = DataSourceRegistry()
                 logger.info("Automatically registering Spring DataSources with database testing framework")

@@ -11,9 +11,15 @@ dependencies {
     api(project(":db-tester-api"))
 
     implementation(libs.spring.context)
+    implementation(libs.spring.boot.autoconfigure)
+    annotationProcessor(libs.spring.boot.configuration.processor)
 
     compileOnly(platform(libs.slf4j.bom))
     compileOnly(libs.slf4j.api)
+}
+
+tasks.named<JavaCompile>("compileJava") {
+    inputs.files(tasks.named("processResources"))
 }
 
 testing {
@@ -27,6 +33,9 @@ testing {
                 implementation(platform(libs.slf4j.bom))
                 implementation(libs.slf4j.api)
                 runtimeOnly(libs.slf4j.simple)
+                // Configuration.build() resolves a DataSetLoaderProvider via ServiceLoader at
+                // runtime, which db-tester-core supplies. Required only for factory tests.
+                runtimeOnly(project(":db-tester-core"))
             }
         }
     }

@@ -9,7 +9,9 @@ import io.github.seijikohara.dbtester.api.context.TestContext
 import io.github.seijikohara.dbtester.spock.lifecycle.SpockExpectationVerifier
 import io.github.seijikohara.dbtester.spock.lifecycle.SpockExportExecutor
 import io.github.seijikohara.dbtester.spock.lifecycle.SpockPreparationExecutor
+import io.github.seijikohara.dbtester.spring.support.DataSourceRegistrar
 import java.lang.reflect.Method
+import java.util.concurrent.ConcurrentHashMap
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.spockframework.runtime.extension.IMethodInterceptor
@@ -35,6 +37,14 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 
 	/** Logger for this class. */
 	private static final Logger logger = LoggerFactory.getLogger(SpringBootDatabaseTestInterceptor)
+
+	/**
+	 * Cache of TestContextManager instances keyed by specification class.
+	 *
+	 * <p>Each specification resolves its Spring TestContext once, avoiding repeated bootstrap
+	 * resolution for every feature method.
+	 */
+	private static final Map<Class<?>, TestContextManager> TEST_CONTEXT_MANAGERS = new ConcurrentHashMap<>()
 
 	/** The data set annotation for preparation phase (may be null). */
 	private final DataSet dataSet
@@ -147,7 +157,7 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		def specClass = spec.class
 
 		try {
-			def manager = new TestContextManager(specClass)
+			def manager = TEST_CONTEXT_MANAGERS.computeIfAbsent(specClass) { new TestContextManager(it) }
 			manager.prepareTestInstance(spec)
 			manager.testContext.applicationContext
 		} catch (Exception e) {
@@ -188,7 +198,7 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 	 */
 	private DataSourceRegistry getDataSourceRegistry(ApplicationContext applicationContext) {
 		try {
-			def registry = applicationContext.getBean('dbTesterDataSourceRegistry', DataSourceRegistry)
+			def registry = new DataSourceRegistry()
 
 			// Always register DataSources for consistency with JUnit behavior
 			if (applicationContext.containsBean('dataSourceRegistrar')) {
@@ -198,9 +208,9 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 
 			registry
 		} catch (Exception e) {
-			logger.error('Failed to get DataSourceRegistry from Spring context', e)
+			logger.error('Failed to build DataSourceRegistry from Spring context', e)
 			throw new IllegalStateException(
-			'DataSourceRegistry bean not found in Spring context. ' +
+			'Failed to register DataSources from Spring context. ' +
 			'Ensure db-tester-spock-spring-boot-starter is properly configured.', e)
 		}
 	}

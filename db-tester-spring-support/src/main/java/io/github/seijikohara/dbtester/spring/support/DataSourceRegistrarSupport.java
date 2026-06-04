@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 public final class DataSourceRegistrarSupport {
 
   /** Default bean name used as fallback when no primary DataSource is found. */
-  public static final String DEFAULT_DATASOURCE_BEAN_NAME = "dataSource";
+  private static final String DEFAULT_DATASOURCE_BEAN_NAME = "dataSource";
 
   /** Prevents instantiation of this utility class. */
   private DataSourceRegistrarSupport() {
@@ -92,7 +92,7 @@ public final class DataSourceRegistrarSupport {
    * @param isPrimaryPredicate predicate to check if a bean name is marked as primary
    * @return an Optional containing the default DataSource entry, or empty if none found
    */
-  public static Optional<Map.Entry<String, DataSource>> resolveDefaultDataSource(
+  static Optional<Map.Entry<String, DataSource>> resolveDefaultDataSource(
       final Map<String, DataSource> dataSources, final Predicate<String> isPrimaryPredicate) {
 
     // Single DataSource is automatically the default
@@ -112,7 +112,7 @@ public final class DataSourceRegistrarSupport {
    * @param isPrimaryPredicate predicate to check if a bean name is marked as primary
    * @return an Optional containing the primary DataSource entry, or empty if none found
    */
-  public static Optional<Map.Entry<String, DataSource>> findPrimaryDataSource(
+  static Optional<Map.Entry<String, DataSource>> findPrimaryDataSource(
       final Map<String, DataSource> dataSources, final Predicate<String> isPrimaryPredicate) {
 
     return dataSources.entrySet().stream()
@@ -127,7 +127,7 @@ public final class DataSourceRegistrarSupport {
    * @param beanName the bean name to search for
    * @return an Optional containing the matching DataSource entry, or empty if not found
    */
-  public static Optional<Map.Entry<String, DataSource>> findDataSourceByName(
+  static Optional<Map.Entry<String, DataSource>> findDataSourceByName(
       final Map<String, DataSource> dataSources, final @Nullable String beanName) {
 
     if (beanName == null) {
