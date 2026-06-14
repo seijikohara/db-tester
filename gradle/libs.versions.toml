@@ -28,7 +28,7 @@ spock = "2.4-groovy-5.0"
 spotless = "8.6.0"
 spring-boot = "4.0.6"
 spring-dependency-management = "1.1.7"
-spring-framework = "7.0.7"
+spring-framework = "7.0.8"
 testcontainers = "2.0.5"
 version-catalog-update = "1.1.0"
 
