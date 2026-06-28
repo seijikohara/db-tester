@@ -1,7 +1,7 @@
 [versions]
 axion-release = "1.21.2"
 checker-qual = "4.2.0"
-datafaker = "2.6.0"
+datafaker = "2.7.0"
 derby = "10.17.1.0"
 dokka = "2.2.0"
 errorprone = "2.50.0"
