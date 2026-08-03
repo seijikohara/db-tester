@@ -62,7 +62,7 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 	DatabaseTestInterceptor(DataSet dataSet, ExpectedDataSet expectedDataSet,
 	ExportDataSet exportDataSet) {
 		this(dataSet, expectedDataSet, exportDataSet,
-		new SpockPreparationExecutor(), new SpockExpectationVerifier(), new SpockExportExecutor())
+				new SpockPreparationExecutor(), new SpockExpectationVerifier(), new SpockExportExecutor())
 	}
 
 	/**

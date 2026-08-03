@@ -33,10 +33,10 @@ class SpringBootDatabaseTestExtension implements IAnnotationDrivenExtension<Spri
 				.collect { feature ->
 					def method = feature.featureMethod.reflection
 					[
-						feature        : feature,
-						dataSet        : AnnotationUtils.findOnElement(DataSet, method) ?: classDataSet,
+						feature : feature,
+						dataSet : AnnotationUtils.findOnElement(DataSet, method) ?: classDataSet,
 						expectedDataSet: AnnotationUtils.findOnElement(ExpectedDataSet, method) ?: classExpectedDataSet,
-						exportDataSet  : AnnotationUtils.findOnElement(ExportDataSet, method) ?: classExportDataSet
+						exportDataSet : AnnotationUtils.findOnElement(ExportDataSet, method) ?: classExportDataSet
 					]
 				}
 				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }
