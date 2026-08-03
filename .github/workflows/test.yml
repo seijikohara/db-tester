@@ -2,7 +2,16 @@ name: Test
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+
+# Serialize per branch. The integration tests start Oracle, MySQL, PostgreSQL,
+# SQL Server and Neo4j containers per example module, so overlapping runs
+# contend for runner resources and push the Oracle startup past its timeout.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
