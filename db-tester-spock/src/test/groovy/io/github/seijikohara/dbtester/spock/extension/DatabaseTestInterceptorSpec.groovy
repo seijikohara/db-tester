@@ -304,7 +304,9 @@ class DatabaseTestInterceptorSpec extends Specification {
 		interceptor.intercept(Mock(IMethodInvocation))
 
 		then: 'the export error is caught and not rethrown'
-		1 * exportSupport.export(context, exportDataSet) >> { throw new RuntimeException('export failed') }
+		1 * exportSupport.export(context, exportDataSet) >> {
+			throw new RuntimeException('export failed')
+		}
 		noExceptionThrown()
 	}
 

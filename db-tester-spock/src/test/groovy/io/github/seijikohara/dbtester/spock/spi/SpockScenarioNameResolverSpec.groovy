@@ -74,7 +74,7 @@ class SpockScenarioNameResolverSpec extends Specification {
 		def junitDefaultPriority = ScenarioNameResolver.DEFAULT_PRIORITY
 
 		expect: 'Spock priority is higher'
-		spockPriority > junitDefaultPriority
+		spockPriority> junitDefaultPriority
 	}
 
 	def 'should return non-null ScenarioName for regular method'() {

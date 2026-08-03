@@ -157,7 +157,9 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 		def specClass = spec.class
 
 		try {
-			def manager = TEST_CONTEXT_MANAGERS.computeIfAbsent(specClass) { new TestContextManager(it) }
+			def manager = TEST_CONTEXT_MANAGERS.computeIfAbsent(specClass) {
+				new TestContextManager(it)
+			}
 			manager.prepareTestInstance(spec)
 			manager.testContext.applicationContext
 		} catch (Exception e) {
