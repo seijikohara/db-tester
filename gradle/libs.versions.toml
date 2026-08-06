@@ -30,7 +30,7 @@ spring-boot = "4.1.0"
 spring-dependency-management = "1.1.7"
 spring-framework = "7.0.8"
 testcontainers = "2.0.5"
-version-catalog-update = "1.1.0"
+version-catalog-update = "1.1.1"
 
 [libraries]
 checker-qual = { module = "org.checkerframework:checker-qual", version.ref = "checker-qual" }
