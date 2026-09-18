@@ -380,7 +380,7 @@ final class JsonNormalizer {
   private static String serialize(final Object value) {
     return switch (value) {
       case Map<?, ?> map -> serializeObject((Map<String, Object>) map);
-      case List<?> list -> serializeArray(list);
+      case List<?> list -> serializeArray((List<Object>) list);
       case JsonString jsonStr -> escapeString(jsonStr.value());
       case String str -> str;
       default -> value.toString();
@@ -415,7 +415,7 @@ final class JsonNormalizer {
    * @param list the array to serialize
    * @return the serialized JSON array string
    */
-  private static String serializeArray(final List<?> list) {
+  private static String serializeArray(final List<Object> list) {
     final var sb = new StringBuilder("[");
     var first = true;
     for (final var item : list) {
