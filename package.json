@@ -5,9 +5,7 @@
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
-    "docs:preview": "vitepress preview docs",
-    "deps:update": "npx npm-check-updates -u && npm install",
-    "deps:check": "npx npm-check-updates"
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "mermaid": "^12.2.0",
