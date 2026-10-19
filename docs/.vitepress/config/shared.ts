@@ -168,7 +168,7 @@ export const shared = defineConfig({
       md.renderer.rules.fence = (tokens, idx, options, env, self) => {
         const token = tokens[idx]
         if (token.info.trim() === 'mermaid') {
-          return `<Mermaid id="mermaid-${idx}" graph="${encodeURIComponent(token.content)}"></Mermaid>`
+          return `<Mermaid graph="${encodeURIComponent(token.content)}"></Mermaid>`
         }
         return fence(tokens, idx, options, env, self)
       }
