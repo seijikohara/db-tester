@@ -1,4 +1,4 @@
-import type { DefaultTheme, HeadConfig, UserConfig } from 'vitepress'
+import type { DefaultTheme, HeadConfig } from 'vitepress'
 import { defineConfig } from 'vitepress'
 
 export const shared = defineConfig({
@@ -162,6 +162,17 @@ export const shared = defineConfig({
         },
       },
     ],
+    config(md) {
+      // Mermaid needs the DOM, so emit a placeholder that theme/Mermaid.vue renders in the browser.
+      const fence = md.renderer.rules.fence!
+      md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+        const token = tokens[idx]
+        if (token.info.trim() === 'mermaid') {
+          return `<Mermaid graph="${encodeURIComponent(token.content)}"></Mermaid>`
+        }
+        return fence(tokens, idx, options, env, self)
+      }
+    },
   },
 
   themeConfig: {
@@ -209,8 +220,4 @@ export const shared = defineConfig({
   vite: {
     publicDir: '../public',
   },
-
-  mermaid: {
-    theme: 'neutral',
-  },
-} as UserConfig)
+})
