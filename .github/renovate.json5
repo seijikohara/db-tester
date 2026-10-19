@@ -55,6 +55,14 @@
       groupName: "test frameworks",
       matchPackageNames: ["/^org\\.junit/", "/^org\\.spockframework/", "/^io\\.kotest/"],
     },
+    {
+      // Spock encodes the Groovy line in its version (2.5-groovy-6.0 requires
+      // Groovy 6.0.0), so a "minor" Spock bump could pull in the Groovy 6 major
+      // without the dashboard approval it needs. Drop this rule when groovy-bom 6 is adopted.
+      description: "Keep Spock on the Groovy 5 variant until the Groovy 6 major is approved",
+      matchPackageNames: ["/^org\\.spockframework/"],
+      allowedVersions: "/-groovy-5\\.0$/",
+    },
   ],
   vulnerabilityAlerts: {
     description: "Raise security fixes immediately and require manual review",
