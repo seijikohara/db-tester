@@ -31,6 +31,10 @@ class MSSQLServerIntegrationSpec : AnnotationSpec() {
             MSSQLServerContainer("mcr.microsoft.com/mssql/server:latest")
                 .acceptLicense()
                 .withPassword("StrongPassword123!")
+                // SQL Server 2025 images occasionally crash during startup
+                // (microsoft/mssql-docker#974); retry with a shorter per-attempt timeout.
+                .withStartupAttempts(3)
+                .withStartupTimeoutSeconds(120)
 
         /**
          * Creates a SQL Server DataSource from the Testcontainer.

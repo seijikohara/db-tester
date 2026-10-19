@@ -46,7 +46,11 @@ final class MSSQLServerIntegrationTest {
   static final MSSQLServerContainer mssql =
       new MSSQLServerContainer("mcr.microsoft.com/mssql/server:latest")
           .acceptLicense()
-          .withPassword("StrongPassword123!");
+          .withPassword("StrongPassword123!")
+          // SQL Server 2025 images occasionally crash during startup
+          // (microsoft/mssql-docker#974); retry with a shorter per-attempt timeout.
+          .withStartupAttempts(3)
+          .withStartupTimeoutSeconds(120);
 
   /**
    * Sets up SQL Server database connection and schema using Testcontainers.
