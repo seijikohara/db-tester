@@ -32,6 +32,40 @@ dependencies {
 
 :::
 
+### Spring Boot BOMを使用する場合のGroovyバージョン
+
+Spockモジュールには、Groovy 6とSpock 2.5（`-groovy-6.0`版）が必要です。Spring Boot BOMはGroovy 5を管理します
+（Spring Boot 4.1.1ではGroovy 5.0.8）。Spring Boot BOMが依存関係のバージョンを決める場合、Spockのコンパイラプラグインは
+Specificationのコンパイル時にGroovy 5を拒否します（`IncompatibleGroovyVersionException`）。管理対象のGroovyバージョンを
+上書きしてください。
+
+::: code-group
+
+```groovy [Gradle (Groovy DSL)]
+// io.spring.dependency-managementプラグインを使用する場合
+ext['groovy.version'] = '6.0.0'
+```
+
+```kotlin [Gradle (Kotlin DSL)]
+// io.spring.dependency-managementプラグインを使用する場合
+extra["groovy.version"] = "6.0.0"
+```
+
+```xml [Maven]
+<!-- spring-boot-starter-parentを使用する場合 -->
+<properties>
+    <groovy.version>6.0.0</groovy.version>
+</properties>
+```
+
+:::
+
+- Spring Boot BOMを`platform(...)`でインポートするGradleビルドでは、上書きしなくてもGroovy 6が解決されます。
+  `enforcedPlatform(...)`はGroovy 5を強制するため、代わりに`platform(...)`を使用してください。
+- `<dependencyManagement>`で`spring-boot-dependencies`をインポートするMavenビルドでは、`spring-boot-dependencies`より前に
+  `org.apache.groovy:groovy-bom` 6.0.0をインポートしてください。Mavenは、同じアーティファクトを管理するBOMのうち、
+  最初にインポートしたBOMを適用します。
+
 ## 自動DataSource検出
 
 3つのスターターは`db-tester-spring-support`を通じて同一の自動設定動作を共有します。

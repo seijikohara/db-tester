@@ -118,10 +118,10 @@ The framework uses JSpecify annotations for null safety:
 | Component | Version | Notes |
 |-----------|---------|-------|
 | Java | 21 or later | JPMS module support |
-| Groovy | 5 or later | For Spock modules |
+| Groovy | 6.x | For Spock modules |
 | Kotlin | 2 or later | For Kotest modules |
 | JUnit | 6 or later | JUnit Jupiter extension model |
-| Spock | 2 or later | Annotation-driven extension model |
+| Spock | 2.5 or later (`-groovy-6.0` variant) | Annotation-driven extension model |
 | Kotest | 6 or later | AnnotationSpec with TestCaseExtension |
 | Spring Boot | 4 or later | For Spring Boot Starter modules |
 

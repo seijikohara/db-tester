@@ -15,7 +15,7 @@ paths: "**/*Spec.groovy"
 ### Required Dependencies
 
 - **Spock 2.x**: Primary testing framework for Groovy
-- **Groovy 5**: Language runtime
+- **Groovy 6**: Language runtime
 - **Testcontainers** (Optional): For database integration tests
 
 ### Framework Imports

@@ -111,7 +111,7 @@ abstract class InheritanceSpecBase extends Specification implements DatabaseTest
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy 5 features.
+	 * Executes a SQL script from classpath using Groovy features.
 	 *
 	 * @param scriptPath the classpath resource path
 	 */

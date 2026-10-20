@@ -116,10 +116,10 @@ nullセーフティのためにJSpecifyアノテーションを使用します�
 | コンポーネント | バージョン | 備考 |
 |----------------|------------|------|
 | Java | 21以降 | JPMS module-info.javaサポート |
-| Groovy | 5以降 | Spockモジュール用 |
+| Groovy | 6.x | Spockモジュール用 |
 | Kotlin | 2以降 | Kotestモジュール用 |
 | JUnit | 6以降 | JUnit Jupiter拡張モデル |
-| Spock | 2以降 | アノテーション駆動型拡張モデル |
+| Spock | 2.5以降（`-groovy-6.0`版） | アノテーション駆動型拡張モデル |
 | Kotest | 6以降 | AnnotationSpecとTestCaseExtension |
 | Spring Boot | 4以降 | Spring Boot Starterモジュール用 |
 

@@ -146,7 +146,7 @@ ID,NAME,EMAIL
 |-----------|---------|
 | Java | 21 or later |
 | JUnit | 6 (for JUnit integration) |
-| Spock | 2 with Groovy 5 (for Spock integration) |
+| Spock | 2.5 with Groovy 6 (for Spock integration) |
 | Kotest | 6 with Kotlin 2 (for Kotest integration) |
 | Spring Boot | 4 (for Spring Boot integration) |
 

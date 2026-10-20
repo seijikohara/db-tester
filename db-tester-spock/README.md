@@ -27,8 +27,22 @@ dependency. Add only `db-tester-spock` to your project.
 ## Requirements
 
 - Java 21 or later
-- Groovy 5 or later
-- Spock 2 or later
+- Groovy 6.x
+- Spock 2.5 or later (`-groovy-6.0` variant)
+
+If your build applies the Spring Boot BOM, override its managed Groovy version. See
+[Spring Boot Integration](https://seijikohara.github.io/db-tester/spring-boot#groovy-version-with-the-spring-boot-bom).
+
+Groovy 6 moved the classic call-site runtime into `org.apache.groovy:groovy-callsite`. If you use a library
+compiled for that runtime, such as `testcontainers-spock` 2.0.x, add `groovy-callsite` to the test runtime
+classpath:
+
+```kotlin
+dependencies {
+    testRuntimeOnly(platform("org.apache.groovy:groovy-bom:6.0.0"))
+    testRuntimeOnly("org.apache.groovy:groovy-callsite")
+}
+```
 
 ## Installation
 

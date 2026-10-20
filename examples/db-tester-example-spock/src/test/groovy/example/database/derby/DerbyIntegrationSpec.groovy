@@ -106,7 +106,7 @@ class DerbyIntegrationSpec extends Specification implements DatabaseTestSupport 
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy 5 features.
+	 * Executes a SQL script from classpath using Groovy features.
 	 *
 	 * @param scriptPath the classpath resource path
 	 */

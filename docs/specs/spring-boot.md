@@ -32,6 +32,40 @@ dependencies {
 
 :::
 
+### Groovy version with the Spring Boot BOM
+
+The Spock modules require Groovy 6 and Spock 2.5 (`-groovy-6.0` variant). The Spring Boot BOM manages
+Groovy 5 (Spring Boot 4.1.1 manages Groovy 5.0.8). When the Spring Boot BOM controls dependency versions,
+the Spock compiler plugin rejects Groovy 5 while it compiles specifications
+(`IncompatibleGroovyVersionException`). Override the managed Groovy version:
+
+::: code-group
+
+```groovy [Gradle (Groovy DSL)]
+// With the io.spring.dependency-management plugin
+ext['groovy.version'] = '6.0.0'
+```
+
+```kotlin [Gradle (Kotlin DSL)]
+// With the io.spring.dependency-management plugin
+extra["groovy.version"] = "6.0.0"
+```
+
+```xml [Maven]
+<!-- With spring-boot-starter-parent -->
+<properties>
+    <groovy.version>6.0.0</groovy.version>
+</properties>
+```
+
+:::
+
+- A Gradle build that imports the Spring Boot BOM with `platform(...)` resolves Groovy 6 without an
+  override. `enforcedPlatform(...)` forces Groovy 5, so use `platform(...)` instead.
+- A Maven build that imports `spring-boot-dependencies` in `<dependencyManagement>` must import
+  `org.apache.groovy:groovy-bom` 6.0.0 before `spring-boot-dependencies`. Maven applies the first
+  imported BOM that manages an artifact.
+
 ## Automatic DataSource Discovery
 
 All three starters share the same auto-configuration behavior via `db-tester-spring-support`:
