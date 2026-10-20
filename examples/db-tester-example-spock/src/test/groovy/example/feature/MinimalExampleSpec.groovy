@@ -19,7 +19,7 @@ import spock.lang.Specification
  *   <li>Automatic CSV file resolution based on specification class and feature method names
  *   <li>Method-level {@code @DataSet} and {@code @ExpectedDataSet} annotations
  *   <li>Single table operations with minimal configuration
- *   <li>H2 in-memory database setup using Groovy 5 features
+ *   <li>H2 in-memory database setup using Groovy features
  * </ul>
  *
  * <p>CSV files are located at:
@@ -69,7 +69,7 @@ class MinimalExampleSpec extends Specification implements DatabaseTestSupport {
 
 	/**
 	 * Sets up H2 in-memory database connection and schema.
-	 * Uses Groovy 5 compact syntax and extension methods.
+	 * Uses Groovy compact syntax and extension methods.
 	 */
 	def setupSpec() {
 		// Ensure resources are initialized
@@ -116,7 +116,7 @@ class MinimalExampleSpec extends Specification implements DatabaseTestSupport {
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy 5 features.
+	 * Executes a SQL script from classpath using Groovy features.
 	 *
 	 * @param scriptPath the classpath resource path
 	 */

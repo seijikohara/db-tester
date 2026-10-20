@@ -6,7 +6,7 @@ derby = "10.17.1.0"
 dokka = "2.2.0"
 errorprone = "2.50.0"
 errorprone-plugin = "5.1.1"
-groovy = "5.1.3"
+groovy = "6.0.0"
 h2 = "2.5.252"
 hsqldb = "2.7.4"
 jackson = "2.22.3"
@@ -24,7 +24,7 @@ nullaway = "0.14.2"
 oracle-ojdbc = "23.26.3.0.0"
 postgresql = "42.7.14"
 slf4j = "2.0.20"
-spock = "2.4-groovy-5.0"
+spock = "2.5-groovy-6.0"
 spotless = "8.10.2"
 spring-boot = "4.1.1"
 spring-dependency-management = "1.1.7"
@@ -47,6 +47,7 @@ gradle-maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", 
 gradle-spotless = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }
 groovy = { module = "org.apache.groovy:groovy" }
 groovy-bom = { module = "org.apache.groovy:groovy-bom", version.ref = "groovy" }
+groovy-callsite = { module = "org.apache.groovy:groovy-callsite" }
 groovy-sql = { module = "org.apache.groovy:groovy-sql" }
 h2 = { module = "com.h2database:h2", version.ref = "h2" }
 hsqldb = { module = "org.hsqldb:hsqldb", version.ref = "hsqldb" }

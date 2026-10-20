@@ -57,11 +57,12 @@
     },
     {
       // Spock encodes the Groovy line in its version (2.5-groovy-6.0 requires
-      // Groovy 6.0.0), so a "minor" Spock bump could pull in the Groovy 6 major
-      // without the dashboard approval it needs. Drop this rule when groovy-bom 6 is adopted.
-      description: "Keep Spock on the Groovy 5 variant until the Groovy 6 major is approved",
+      // Groovy 6.0.0), so a "minor" Spock bump could switch to another Groovy line
+      // without the dashboard approval that a groovy-bom major needs. Change the
+      // suffix only together with an approved groovy-bom major update.
+      description: "Keep Spock on the variant for the project's Groovy line (Groovy 6)",
       matchPackageNames: ["/^org\\.spockframework/"],
-      allowedVersions: "/-groovy-5\\.0$/",
+      allowedVersions: "/-groovy-6\\.0$/",
     },
   ],
   vulnerabilityAlerts: {

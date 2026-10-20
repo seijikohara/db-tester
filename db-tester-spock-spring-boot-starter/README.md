@@ -26,8 +26,8 @@ This module extends `db-tester-spock` with Spring Boot auto-configuration.
 ## Requirements
 
 - Java 21 or later
-- Groovy 5 or later
-- Spock 2 or later
+- Groovy 6.x
+- Spock 2.5 or later (`-groovy-6.0` variant)
 - Spring Boot 4 or later
 
 ## Installation
@@ -53,6 +53,27 @@ dependencies {
 
 For the latest version, see
 [Maven Central](https://central.sonatype.com/artifact/io.github.seijikohara/db-tester-spock-spring-boot-starter).
+
+## Groovy Version with the Spring Boot BOM
+
+The Spring Boot BOM manages Groovy 5, but this starter requires Groovy 6. Spock's compiler plugin rejects
+Groovy 5 when it compiles specifications. If your build applies the Spring Boot BOM, override the managed
+Groovy version:
+
+```kotlin
+// build.gradle.kts with the io.spring.dependency-management plugin
+extra["groovy.version"] = "6.0.0"
+```
+
+```xml
+<!-- pom.xml with spring-boot-starter-parent -->
+<properties>
+    <groovy.version>6.0.0</groovy.version>
+</properties>
+```
+
+See [Spring Boot Integration](https://seijikohara.github.io/db-tester/spring-boot#groovy-version-with-the-spring-boot-bom)
+for other build setups.
 
 ## Usage
 

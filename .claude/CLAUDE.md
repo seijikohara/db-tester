@@ -22,7 +22,7 @@ See @README.md for project details.
 ## Technology Stack
 
 - Java 21 (via Gradle toolchain)
-- Groovy 5 (for Spock module)
+- Groovy 6 (for Spock module)
 - Kotlin 2 (for Kotest module)
 - Gradle wrapper with Kotlin DSL
 - JUnit 6, Spock 2, Kotest 6

@@ -23,6 +23,13 @@ guarantees for each API tier.
   `java.lang.AssertionError` (carrying the structured diff) instead of `ValidationException`.
   `ValidationException` now signals only that verification could not complete (parse or strategy
   failure).
+- **Breaking:** `db-tester-spock` and `db-tester-spock-spring-boot-starter` now require Groovy 6 and
+  Spock 2.5 (`2.5-groovy-6.0`) instead of Groovy 5 and Spock 2.4 (`2.4-groovy-5.0`). The Spring Boot
+  BOM still manages Groovy 5, so builds that apply it must override the managed `groovy.version`. See
+  [Spring Boot Integration](docs/specs/spring-boot.md#groovy-version-with-the-spring-boot-bom).
+  Groovy 6 moved the classic call-site runtime into `org.apache.groovy:groovy-callsite`. Libraries
+  compiled for that runtime, such as `testcontainers-spock` 2.0.x, need it on the test runtime
+  classpath.
 
 ### Added
 

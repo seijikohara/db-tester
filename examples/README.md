@@ -15,7 +15,7 @@ This directory contains example tests demonstrating the features of the DB Teste
 ## Prerequisites
 
 - Java 21 or later
-- Groovy 5 or later (for Spock examples)
+- Groovy 6.x (for Spock examples)
 - Kotlin 2 or later (for Kotest examples)
 - H2 Database (included as test dependency)
 - Docker (optional, for Testcontainers-based integration tests)

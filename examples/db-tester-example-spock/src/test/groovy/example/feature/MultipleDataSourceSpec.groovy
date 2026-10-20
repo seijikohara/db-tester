@@ -186,7 +186,7 @@ class MultipleDataSourceSpec extends Specification implements DatabaseTestSuppor
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy 5 features.
+	 * Executes a SQL script from classpath using Groovy features.
 	 *
 	 * @param sql the Groovy SQL helper
 	 * @param scriptPath the classpath resource path

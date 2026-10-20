@@ -98,7 +98,7 @@ class ConfigurationCustomizationSpec extends Specification implements DatabaseTe
 
 	/**
 	 * Sets up H2 in-memory database connection and schema.
-	 * Uses Groovy 5 compact syntax and extension methods.
+	 * Uses Groovy compact syntax and extension methods.
 	 */
 	def setupSpec() {
 		// Ensure resources are initialized
@@ -196,7 +196,7 @@ class ConfigurationCustomizationSpec extends Specification implements DatabaseTe
 	}
 
 	/**
-	 * Executes a SQL script from classpath using Groovy 5 features.
+	 * Executes a SQL script from classpath using Groovy features.
 	 *
 	 * @param scriptPath the classpath resource path
 	 */

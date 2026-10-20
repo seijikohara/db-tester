@@ -7,6 +7,10 @@ plugins {
 
 description = "DB Tester Example - Spock Spring Boot Starter Integration"
 
+// The Spring Boot BOM manages Groovy 5, but Spock's -groovy-6.0 variant refuses to compile specs
+// with any Groovy version other than 6.x. Override the managed version, as consumers must.
+extra["groovy.version"] = libs.versions.groovy.get()
+
 dependencies {
     implementation(platform(libs.groovy.bom))
     implementation(libs.groovy)

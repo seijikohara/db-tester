@@ -13,7 +13,7 @@ This module contains example tests demonstrating the features of the DB Tester f
 ## Prerequisites
 
 - Java 21 or later
-- Groovy 5 or later
+- Groovy 6.x
 - H2 Database (included as test dependency)
 - Docker (optional, for Testcontainers-based integration tests)
 

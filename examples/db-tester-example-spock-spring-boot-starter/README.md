@@ -12,7 +12,7 @@ This module contains example tests demonstrating the DB Tester framework with Sp
 ## Prerequisites
 
 - Java 21 or later
-- Groovy 5 or later
+- Groovy 6.x
 - Spring Boot 4 or later
 - H2 Database (included as test dependency)
 

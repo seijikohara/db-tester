@@ -14,6 +14,9 @@ testing {
                 implementation(platform(libs.groovy.bom))
                 implementation(libs.groovy)
                 implementation(libs.groovy.sql)
+                // testcontainers-spock is compiled for the classic call-site runtime, which Groovy 6
+                // moved out of groovy into groovy-callsite (GROOVY-12185).
+                runtimeOnly(libs.groovy.callsite)
 
                 implementation(libs.derby.client)
                 implementation(libs.derby.embedded)
