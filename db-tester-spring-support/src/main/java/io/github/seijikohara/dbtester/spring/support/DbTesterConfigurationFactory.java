@@ -51,18 +51,16 @@ public final class DbTesterConfigurationFactory {
 
     final Map<String, ColumnStrategyMapping> columnStrategies =
         verificationProps.getColumnStrategies().stream()
-            .filter(
-                prop ->
-                    prop.getColumnName() != null
-                        && !prop.getColumnName().isBlank()
-                        && prop.getStrategy() != null)
-            .map(
-                prop -> {
-                  final var mapping =
-                      ColumnStrategyConverter.toColumnStrategyMapping(
-                          prop.getColumnName(), prop.getStrategy(), prop.getPattern());
-                  return ColumnStrategyConverter.toMapEntry(prop.getColumnName(), mapping);
-                })
+            .filter(prop ->
+                prop.getColumnName() != null
+                    && !prop.getColumnName().isBlank()
+                    && prop.getStrategy() != null)
+            .map(prop -> {
+              final var mapping =
+                  ColumnStrategyConverter.toColumnStrategyMapping(
+                      prop.getColumnName(), prop.getStrategy(), prop.getPattern());
+              return ColumnStrategyConverter.toMapEntry(prop.getColumnName(), mapping);
+            })
             .collect(
                 Collectors.toMap(
                     Map.Entry::getKey, Map.Entry::getValue, (first, second) -> second));

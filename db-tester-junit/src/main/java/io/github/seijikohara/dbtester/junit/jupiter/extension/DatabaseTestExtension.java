@@ -121,15 +121,14 @@ public class DatabaseTestExtension
   @Override
   public void beforeEach(final ExtensionContext context) {
     Optional.ofNullable(findDataSet(context))
-        .ifPresent(
-            dataSet -> {
-              final var testContext = createTestContext(context);
-              logger.debug(
-                  "Executing beforeEach for {}.{}()",
-                  testContext.testClass().getSimpleName(),
-                  testContext.testMethod().getName());
-              preparationExecutor.execute(testContext, dataSet);
-            });
+        .ifPresent(dataSet -> {
+          final var testContext = createTestContext(context);
+          logger.debug(
+              "Executing beforeEach for {}.{}()",
+              testContext.testClass().getSimpleName(),
+              testContext.testMethod().getName());
+          preparationExecutor.execute(testContext, dataSet);
+        });
   }
 
   /**
@@ -162,15 +161,14 @@ public class DatabaseTestExtension
         return;
       }
       Optional.ofNullable(findExpectedDataSet(context))
-          .ifPresent(
-              expectedDataSet -> {
-                final var testContext = createTestContext(context);
-                logger.debug(
-                    "Executing afterEach for {}.{}()",
-                    testContext.testClass().getSimpleName(),
-                    testContext.testMethod().getName());
-                expectationVerifier.verify(testContext, expectedDataSet);
-              });
+          .ifPresent(expectedDataSet -> {
+            final var testContext = createTestContext(context);
+            logger.debug(
+                "Executing afterEach for {}.{}()",
+                testContext.testClass().getSimpleName(),
+                testContext.testMethod().getName());
+            expectationVerifier.verify(testContext, expectedDataSet);
+          });
     } catch (final Exception e) {
       testFailed = true;
       throw e;

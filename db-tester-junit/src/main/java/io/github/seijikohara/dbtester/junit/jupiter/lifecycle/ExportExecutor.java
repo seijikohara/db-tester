@@ -25,11 +25,10 @@ public final class ExportExecutor {
     this.support =
         ServiceLoader.load(ExportSupport.class)
             .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "No ExportSupport implementation found. "
-                            + "Ensure db-tester-core is on the classpath."));
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "No ExportSupport implementation found. "
+                        + "Ensure db-tester-core is on the classpath."));
   }
 
   /**

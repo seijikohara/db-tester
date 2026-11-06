@@ -142,22 +142,20 @@ public final class InsertExecutor implements TableExecutor {
       final @Nullable String databaseProductName,
       final int batchSize) {
     IntStream.range(0, rows.size())
-        .forEach(
-            index -> {
-              run(
-                  () ->
-                      parameterBinder.bindRowWithTypes(
-                          preparedStatement,
-                          rows.get(index),
-                          table.columns(),
-                          columnTypes,
-                          databaseProductName));
-              run(preparedStatement::addBatch);
+        .forEach(index -> {
+          run(() ->
+              parameterBinder.bindRowWithTypes(
+                  preparedStatement,
+                  rows.get(index),
+                  table.columns(),
+                  columnTypes,
+                  databaseProductName));
+          run(preparedStatement::addBatch);
 
-              if ((index + 1) % batchSize == 0) {
-                run(preparedStatement::executeBatch);
-              }
-            });
+          if ((index + 1) % batchSize == 0) {
+            run(preparedStatement::executeBatch);
+          }
+        });
 
     if (rows.size() % batchSize != 0) {
       run(preparedStatement::executeBatch);
@@ -179,14 +177,12 @@ public final class InsertExecutor implements TableExecutor {
       final Table table,
       final Map<String, Integer> columnTypes,
       final @Nullable String databaseProductName) {
-    rows.forEach(
-        row -> {
-          run(
-              () ->
-                  parameterBinder.bindRowWithTypes(
-                      preparedStatement, row, table.columns(), columnTypes, databaseProductName));
-          run(preparedStatement::addBatch);
-        });
+    rows.forEach(row -> {
+      run(() ->
+          parameterBinder.bindRowWithTypes(
+              preparedStatement, row, table.columns(), columnTypes, databaseProductName));
+      run(preparedStatement::addBatch);
+    });
     run(preparedStatement::executeBatch);
   }
 

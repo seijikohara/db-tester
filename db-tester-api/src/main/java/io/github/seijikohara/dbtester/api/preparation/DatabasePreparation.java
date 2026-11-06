@@ -66,11 +66,10 @@ public final class DatabasePreparation {
     private static OperationProvider loadProvider() {
       return ServiceLoader.load(OperationProvider.class)
           .findFirst()
-          .orElseThrow(
-              () ->
-                  new IllegalStateException(
-                      "No OperationProvider implementation found. "
-                          + "Add db-tester-core to your classpath."));
+          .orElseThrow(() ->
+              new IllegalStateException(
+                  "No OperationProvider implementation found. "
+                      + "Add db-tester-core to your classpath."));
     }
   }
 

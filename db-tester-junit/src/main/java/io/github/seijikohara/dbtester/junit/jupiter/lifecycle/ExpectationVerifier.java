@@ -24,11 +24,10 @@ public final class ExpectationVerifier {
     this.support =
         ServiceLoader.load(ExpectationSupport.class)
             .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "No ExpectationSupport implementation found. "
-                            + "Ensure db-tester-core is on the classpath."));
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "No ExpectationSupport implementation found. "
+                        + "Ensure db-tester-core is on the classpath."));
   }
 
   /**

@@ -994,13 +994,12 @@ class DataSetComparatorTest {
     final var columns = columnNames.stream().map(ColumnName::new).toList();
     final var rows =
         rowsData.stream()
-            .map(
-                values -> {
-                  final var map = new java.util.LinkedHashMap<ColumnName, CellValue>();
-                  IntStream.range(0, columns.size())
-                      .forEach(i -> map.put(columns.get(i), new CellValue(values.get(i))));
-                  return (Row) new SimpleRow(map);
-                })
+            .map(values -> {
+              final var map = new java.util.LinkedHashMap<ColumnName, CellValue>();
+              IntStream.range(0, columns.size())
+                  .forEach(i -> map.put(columns.get(i), new CellValue(values.get(i))));
+              return (Row) new SimpleRow(map);
+            })
             .toList();
     return new SimpleTable(new TableName(tableName), columns, rows);
   }

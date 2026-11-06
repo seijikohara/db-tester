@@ -69,11 +69,10 @@ public final class Configuration {
       return ServiceLoader.load(DataSetLoaderProvider.class)
           .findFirst()
           .map(DataSetLoaderProvider::loader)
-          .orElseThrow(
-              () ->
-                  new IllegalStateException(
-                      "No DataSetLoaderProvider implementation found. "
-                          + "Add db-tester-core to your classpath."));
+          .orElseThrow(() ->
+              new IllegalStateException(
+                  "No DataSetLoaderProvider implementation found. "
+                      + "Add db-tester-core to your classpath."));
     }
   }
 

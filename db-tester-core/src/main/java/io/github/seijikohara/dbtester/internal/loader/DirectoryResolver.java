@@ -100,7 +100,8 @@ record DirectoryResolver(
     if (supportedFileExtensions.isEmpty()) {
       throw new IllegalStateException(
           """
-          No format providers are registered. Register a FormatProvider implementation before executing database tests.""");
+          No format providers are registered. Register a FormatProvider implementation before executing database tests.\
+          """);
     }
 
     try (final var files = Files.list(directory)) {
@@ -122,7 +123,8 @@ record DirectoryResolver(
                   1. Add at least one data file (e.g., TABLE_NAME%s) to this directory
                   2. Or register a format provider for the desired file extension
 
-                See: %s""",
+                See: %s\
+                """,
                 testClass.getSimpleName(),
                 testMethodName,
                 directory.toAbsolutePath(),
@@ -183,41 +185,39 @@ record DirectoryResolver(
   private Path resolveClasspathDirectory(final String location) {
     final var resourcePath = location.substring(CLASSPATH_PREFIX.length());
     return Optional.ofNullable(testClass().getClassLoader().getResource(resourcePath))
-        .map(
-            resourceUrl -> {
-              try {
-                return Path.of(resourceUrl.toURI());
-              } catch (final URISyntaxException e) {
-                throw new DataSetLoadException(
-                    String.format("Failed to convert classpath resource to Path: %s", resourceUrl),
-                    e);
-              }
-            })
-        .orElseThrow(
-            () -> {
-              final var expectedLocation = String.format("src/test/resources/%s", resourcePath);
-              final var message =
-                  String.format(
-                      """
-                      Dataset directory not found for test method '%s.%s'
+        .map(resourceUrl -> {
+          try {
+            return Path.of(resourceUrl.toURI());
+          } catch (final URISyntaxException e) {
+            throw new DataSetLoadException(
+                String.format("Failed to convert classpath resource to Path: %s", resourceUrl), e);
+          }
+        })
+        .orElseThrow(() -> {
+          final var expectedLocation = String.format("src/test/resources/%s", resourcePath);
+          final var message =
+              String.format(
+                  """
+                  Dataset directory not found for test method '%s.%s'
 
-                      Searched location: classpath:%s
-                      Expected location: %s
+                  Searched location: classpath:%s
+                  Expected location: %s
 
-                      To fix:
-                        1. Create the directory: %s
-                        2. Add dataset files (e.g., TABLE_NAME.csv) with table data
-                        3. Or specify an explicit location: @DataSetSource(resourceLocation = "...")
+                  To fix:
+                    1. Create the directory: %s
+                    2. Add dataset files (e.g., TABLE_NAME.csv) with table data
+                    3. Or specify an explicit location: @DataSetSource(resourceLocation = "...")
 
-                      See: %s""",
-                      testClass.getSimpleName(),
-                      testMethodName,
-                      resourcePath,
-                      expectedLocation,
-                      expectedLocation,
-                      DATASET_DOCS_URL);
-              return new DataSetLoadException(message);
-            });
+                  See: %s\
+                  """,
+                  testClass.getSimpleName(),
+                  testMethodName,
+                  resourcePath,
+                  expectedLocation,
+                  expectedLocation,
+                  DATASET_DOCS_URL);
+          return new DataSetLoadException(message);
+        });
   }
 
   /**
@@ -242,7 +242,8 @@ record DirectoryResolver(
                 1. Create the directory and add dataset files
                 2. Or verify the path is correct
 
-              See: %s""",
+              See: %s\
+              """,
               testClass.getSimpleName(), testMethodName, location, DATASET_DOCS_URL);
       throw new DataSetLoadException(message);
     }
@@ -253,7 +254,8 @@ record DirectoryResolver(
               """
               Path exists but is not a directory: '%s'
 
-              Hint: Ensure the path points to a directory, not a file.""",
+              Hint: Ensure the path points to a directory, not a file.\
+              """,
               location);
       throw new DataSetLoadException(message);
     }
@@ -290,11 +292,10 @@ record DirectoryResolver(
     return Optional.ofNullable(baseDirectory)
         .filter(Predicate.not(String::isEmpty))
         .map(dir -> String.format("%s%s", dir, normalizedSuffix))
-        .orElseGet(
-            () ->
-                String.format(
-                    "%s%s%s",
-                    CLASSPATH_PREFIX, testClass().getName().replace('.', '/'), normalizedSuffix));
+        .orElseGet(() ->
+            String.format(
+                "%s%s%s",
+                CLASSPATH_PREFIX, testClass().getName().replace('.', '/'), normalizedSuffix));
   }
 
   /**

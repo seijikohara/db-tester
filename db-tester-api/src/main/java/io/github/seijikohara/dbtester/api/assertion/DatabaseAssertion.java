@@ -42,10 +42,9 @@ public final class DatabaseAssertion {
     private static AssertionProvider loadProvider() {
       return ServiceLoader.load(AssertionProvider.class)
           .findFirst()
-          .orElseThrow(
-              () ->
-                  new IllegalStateException(
-                      "No AssertionProvider implementation found. Add db-tester-core to your classpath."));
+          .orElseThrow(() ->
+              new IllegalStateException(
+                  "No AssertionProvider implementation found. Add db-tester-core to your classpath."));
     }
   }
 

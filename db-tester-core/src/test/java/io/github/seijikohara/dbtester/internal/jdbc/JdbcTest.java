@@ -67,10 +67,9 @@ class JdbcTest {
           assertThrows(
               DatabaseOperationException.class,
               () ->
-                  Jdbc.run(
-                      () -> {
-                        throw cause;
-                      }));
+                  Jdbc.run(() -> {
+                    throw cause;
+                  }));
 
       assertEquals(cause, exception.getCause(), "cause should be the original SQLException");
     }
@@ -120,10 +119,9 @@ class JdbcTest {
           assertThrows(
               DatabaseOperationException.class,
               () ->
-                  Jdbc.get(
-                      () -> {
-                        throw cause;
-                      }));
+                  Jdbc.get(() -> {
+                    throw cause;
+                  }));
 
       assertEquals(cause, exception.getCause(), "cause should be the original SQLException");
     }
@@ -169,10 +167,9 @@ class JdbcTest {
       // Given
       final var cause = new SQLException("Insert failed");
       final Consumer<Integer> consumer =
-          Jdbc.wrapConsumer(
-              i -> {
-                throw cause;
-              });
+          Jdbc.wrapConsumer(i -> {
+            throw cause;
+          });
 
       // When/Then
       final var exception =
@@ -222,10 +219,9 @@ class JdbcTest {
       // Given
       final var cause = new SQLException("Lookup failed");
       final Function<String, Integer> function =
-          Jdbc.wrapFunction(
-              s -> {
-                throw cause;
-              });
+          Jdbc.wrapFunction(s -> {
+            throw cause;
+          });
 
       // When/Then
       final var exception =
@@ -274,10 +270,9 @@ class JdbcTest {
       // Given
       final var cause = new SQLException("Cannot get value");
       final Supplier<String> supplier =
-          Jdbc.wrapSupplier(
-              () -> {
-                throw cause;
-              });
+          Jdbc.wrapSupplier(() -> {
+            throw cause;
+          });
 
       // When/Then
       final var exception = assertThrows(DatabaseOperationException.class, supplier::get);

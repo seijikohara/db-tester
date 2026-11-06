@@ -161,7 +161,7 @@ class DatabaseTestInterceptor implements IMethodInterceptor {
 				featureMethod,
 				getConfiguration(invocation),
 				getRegistry(invocation)
-				)
+		)
 	}
 
 	/**

@@ -143,7 +143,7 @@ class SpringBootDatabaseTestInterceptor implements IMethodInterceptor {
 				featureMethod,
 				getConfiguration(applicationContext),
 				getDataSourceRegistry(applicationContext)
-				)
+		)
 	}
 
 	/**

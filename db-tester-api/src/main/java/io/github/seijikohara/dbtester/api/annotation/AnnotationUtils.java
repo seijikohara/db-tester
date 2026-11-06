@@ -96,10 +96,9 @@ public final class AnnotationUtils {
   private static <T extends Annotation> Optional<T> findOnClassHierarchy(
       final Class<T> annotationType, final Class<?> testClass) {
     return Optional.<T>ofNullable(findOnElement(annotationType, testClass))
-        .or(
-            () ->
-                Optional.ofNullable(testClass.getSuperclass())
-                    .flatMap(parent -> findOnClassHierarchy(annotationType, parent)));
+        .or(() ->
+            Optional.ofNullable(testClass.getSuperclass())
+                .flatMap(parent -> findOnClassHierarchy(annotationType, parent)));
   }
 
   /**

@@ -68,13 +68,12 @@ abstract class AbstractExportProvider implements ExportProvider {
 
     createDirectoryIfNeeded(outputDirectory);
 
-    tableNames.forEach(
-        tableName -> {
-          final var table = tableReader.fetchTable(dataSource, tableName);
-          final var outputPath = resolveOutputPath(outputDirectory, tableName);
-          writeTable(table, outputPath, config);
-          logger.debug("Exported table {} to {}", tableName, outputPath);
-        });
+    tableNames.forEach(tableName -> {
+      final var table = tableReader.fetchTable(dataSource, tableName);
+      final var outputPath = resolveOutputPath(outputDirectory, tableName);
+      writeTable(table, outputPath, config);
+      logger.debug("Exported table {} to {}", tableName, outputPath);
+    });
 
     if (config.writeLoadOrderFile()) {
       writeLoadOrderFile(outputDirectory, tableNames, config.loadOrderFileName());

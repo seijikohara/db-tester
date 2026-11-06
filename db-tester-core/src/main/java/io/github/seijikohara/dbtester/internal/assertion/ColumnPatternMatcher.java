@@ -70,15 +70,14 @@ public final class ColumnPatternMatcher {
             .collect(Collectors.toUnmodifiableSet());
 
     return excludeEntries.stream()
-        .flatMap(
-            entry -> {
-              if (isPattern(entry)) {
-                final var pattern = globToRegex(entry.toUpperCase(Locale.ROOT));
-                return upperColumnNames.stream().filter(name -> pattern.matcher(name).matches());
-              } else {
-                return java.util.stream.Stream.of(entry.toUpperCase(Locale.ROOT));
-              }
-            })
+        .flatMap(entry -> {
+          if (isPattern(entry)) {
+            final var pattern = globToRegex(entry.toUpperCase(Locale.ROOT));
+            return upperColumnNames.stream().filter(name -> pattern.matcher(name).matches());
+          } else {
+            return java.util.stream.Stream.of(entry.toUpperCase(Locale.ROOT));
+          }
+        })
         .collect(Collectors.toUnmodifiableSet());
   }
 

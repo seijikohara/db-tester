@@ -141,9 +141,8 @@ public final class DataSourceRegistry {
   private String buildMissingDataSourceMessage(final @Nullable String name) {
     return Optional.ofNullable(name)
         .filter(Predicate.not(String::isBlank))
-        .map(
-            dataSourceName ->
-                String.format("No data source registered for name: %s", dataSourceName))
+        .map(dataSourceName ->
+            String.format("No data source registered for name: %s", dataSourceName))
         .orElse("No default data source registered");
   }
 }

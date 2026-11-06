@@ -383,13 +383,11 @@ class DataSourceRegistryTest {
         // When
         final var futures =
             IntStream.range(0, THREAD_COUNT)
-                .mapToObj(
-                    i ->
-                        executor.submit(
-                            () -> {
-                              awaitLatch(latch);
-                              registry.registerDefault(mock(DataSource.class));
-                            }))
+                .mapToObj(i ->
+                    executor.submit(() -> {
+                      awaitLatch(latch);
+                      registry.registerDefault(mock(DataSource.class));
+                    }))
                 .toList();
         latch.countDown();
         awaitAllFutures(futures);
@@ -423,17 +421,15 @@ class DataSourceRegistryTest {
         // When
         final var futures =
             IntStream.range(0, THREAD_COUNT)
-                .mapToObj(
-                    i ->
-                        executor.submit(
-                            () -> {
-                              awaitLatch(latch);
-                              final var name = "db" + i;
-                              registry.register(name, mock(DataSource.class));
-                              assertDoesNotThrow(
-                                  () -> registry.get(name),
-                                  "get should not throw for registered data source");
-                            }))
+                .mapToObj(i ->
+                    executor.submit(() -> {
+                      awaitLatch(latch);
+                      final var name = "db" + i;
+                      registry.register(name, mock(DataSource.class));
+                      assertDoesNotThrow(
+                          () -> registry.get(name),
+                          "get should not throw for registered data source");
+                    }))
                 .toList();
         latch.countDown();
         awaitAllFutures(futures);
@@ -465,17 +461,15 @@ class DataSourceRegistryTest {
         // When
         final var futures =
             IntStream.range(0, THREAD_COUNT)
-                .mapToObj(
-                    i ->
-                        executor.submit(
-                            () -> {
-                              awaitLatch(latch);
-                              if (i % 2 == 0) {
-                                registry.register("db" + i, mock(DataSource.class));
-                              } else {
-                                registry.clear();
-                              }
-                            }))
+                .mapToObj(i ->
+                    executor.submit(() -> {
+                      awaitLatch(latch);
+                      if (i % 2 == 0) {
+                        registry.register("db" + i, mock(DataSource.class));
+                      } else {
+                        registry.clear();
+                      }
+                    }))
                 .toList();
         latch.countDown();
         awaitAllFutures(futures);
@@ -495,14 +489,13 @@ class DataSourceRegistryTest {
      * @param futures the futures to await
      */
     private void awaitAllFutures(final java.util.List<? extends Future<?>> futures) {
-      futures.forEach(
-          future -> {
-            try {
-              future.get(10, TimeUnit.SECONDS);
-            } catch (final Exception ignored) {
-              // Exceptions from individual tasks are acceptable in concurrency tests
-            }
-          });
+      futures.forEach(future -> {
+        try {
+          future.get(10, TimeUnit.SECONDS);
+        } catch (final Exception ignored) {
+          // Exceptions from individual tasks are acceptable in concurrency tests
+        }
+      });
     }
 
     /**

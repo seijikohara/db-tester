@@ -97,14 +97,13 @@ public final class ParameterBinder {
       throws SQLException {
     final List<ColumnName> columnList = List.copyOf(columns);
     IntStream.range(0, columnList.size())
-        .forEach(
-            i -> {
-              try {
-                bind(stmt, i + 1, row.value(columnList.get(i)));
-              } catch (final SQLException e) {
-                throw new RuntimeException(e);
-              }
-            });
+        .forEach(i -> {
+          try {
+            bind(stmt, i + 1, row.value(columnList.get(i)));
+          } catch (final SQLException e) {
+            throw new RuntimeException(e);
+          }
+        });
   }
 
   /**
@@ -128,17 +127,16 @@ public final class ParameterBinder {
       throws SQLException {
     final List<ColumnName> columnList = List.copyOf(columns);
     IntStream.range(0, columnList.size())
-        .forEach(
-            i -> {
-              try {
-                final var column = columnList.get(i);
-                final var upperName = column.value().toUpperCase(Locale.ROOT);
-                final var sqlType = columnTypes.getOrDefault(upperName, Types.VARCHAR);
-                bindWithType(stmt, i + 1, row.value(column), sqlType, databaseProductName);
-              } catch (final SQLException e) {
-                throw new RuntimeException(e);
-              }
-            });
+        .forEach(i -> {
+          try {
+            final var column = columnList.get(i);
+            final var upperName = column.value().toUpperCase(Locale.ROOT);
+            final var sqlType = columnTypes.getOrDefault(upperName, Types.VARCHAR);
+            bindWithType(stmt, i + 1, row.value(column), sqlType, databaseProductName);
+          } catch (final SQLException e) {
+            throw new RuntimeException(e);
+          }
+        });
   }
 
   /**
@@ -233,16 +231,15 @@ public final class ParameterBinder {
     final int columnCount = metaData.getColumnCount();
 
     IntStream.rangeClosed(1, columnCount)
-        .forEach(
-            i -> {
-              try {
-                final var columnName = metaData.getColumnName(i).toUpperCase(Locale.ROOT);
-                final var columnType = metaData.getColumnType(i);
-                columnTypes.put(columnName, columnType);
-              } catch (final SQLException e) {
-                throw new RuntimeException(e);
-              }
-            });
+        .forEach(i -> {
+          try {
+            final var columnName = metaData.getColumnName(i).toUpperCase(Locale.ROOT);
+            final var columnType = metaData.getColumnType(i);
+            columnTypes.put(columnName, columnType);
+          } catch (final SQLException e) {
+            throw new RuntimeException(e);
+          }
+        });
 
     return columnTypes;
   }

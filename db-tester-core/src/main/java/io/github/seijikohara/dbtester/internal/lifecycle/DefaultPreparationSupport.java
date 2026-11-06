@@ -30,11 +30,10 @@ public final class DefaultPreparationSupport implements PreparationSupport {
     this.operationProvider =
         ServiceLoader.load(OperationProvider.class)
             .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "No OperationProvider implementation found. "
-                            + "Ensure db-tester-core is on the classpath."));
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "No OperationProvider implementation found. "
+                        + "Ensure db-tester-core is on the classpath."));
   }
 
   /**

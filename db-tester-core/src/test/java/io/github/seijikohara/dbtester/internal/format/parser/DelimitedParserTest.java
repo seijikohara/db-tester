@@ -647,10 +647,8 @@ class DelimitedParserTest {
       final var header = "ID,NAME,EMAIL,AMOUNT";
       final var rows =
           IntStream.rangeClosed(1, 1000)
-              .mapToObj(
-                  i ->
-                      String.format(
-                          "%d,User%d,user%d@example.com,%d.%02d", i, i, i, i * 10, i % 100))
+              .mapToObj(i ->
+                  String.format("%d,User%d,user%d@example.com,%d.%02d", i, i, i, i * 10, i % 100))
               .collect(Collectors.joining("\n"));
       Files.writeString(tempDir.resolve("large.csv"), header + "\n" + rows);
 

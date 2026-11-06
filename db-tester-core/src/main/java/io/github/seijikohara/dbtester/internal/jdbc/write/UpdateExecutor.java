@@ -92,25 +92,17 @@ public final class UpdateExecutor implements TableExecutor {
       applyTimeout(preparedStatement, queryTimeout);
       table
           .rows()
-          .forEach(
-              row -> {
-                IntStream.range(0, updateColumns.size())
-                    .forEach(
-                        index ->
-                            run(
-                                () ->
-                                    parameterBinder.bind(
-                                        preparedStatement,
-                                        index + 1,
-                                        row.value(updateColumns.get(index)))));
-                run(
-                    () ->
+          .forEach(row -> {
+            IntStream.range(0, updateColumns.size())
+                .forEach(index ->
+                    run(() ->
                         parameterBinder.bind(
-                            preparedStatement,
-                            updateColumns.size() + 1,
-                            row.value(primaryKeyColumn)));
-                run(preparedStatement::addBatch);
-              });
+                            preparedStatement, index + 1, row.value(updateColumns.get(index)))));
+            run(() ->
+                parameterBinder.bind(
+                    preparedStatement, updateColumns.size() + 1, row.value(primaryKeyColumn)));
+            run(preparedStatement::addBatch);
+          });
       run(preparedStatement::executeBatch);
     }
   }
@@ -176,16 +168,13 @@ public final class UpdateExecutor implements TableExecutor {
       final var preparedStatement = statementResource.value();
       applyTimeout(preparedStatement, queryTimeout);
       IntStream.range(0, updateColumns.size())
-          .forEach(
-              index ->
-                  run(
-                      () ->
-                          parameterBinder.bind(
-                              preparedStatement, index + 1, row.value(updateColumns.get(index)))));
-      run(
-          () ->
-              parameterBinder.bind(
-                  preparedStatement, updateColumns.size() + 1, row.value(primaryKeyColumn)));
+          .forEach(index ->
+              run(() ->
+                  parameterBinder.bind(
+                      preparedStatement, index + 1, row.value(updateColumns.get(index)))));
+      run(() ->
+          parameterBinder.bind(
+              preparedStatement, updateColumns.size() + 1, row.value(primaryKeyColumn)));
       return get(preparedStatement::executeUpdate) > 0;
     }
   }

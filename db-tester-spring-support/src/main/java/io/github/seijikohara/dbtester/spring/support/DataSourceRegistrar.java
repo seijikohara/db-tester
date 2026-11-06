@@ -106,10 +106,9 @@ public final class DataSourceRegistrar implements ApplicationContextAware {
    */
   private ApplicationContext resolveApplicationContext() {
     return Optional.ofNullable(applicationContext)
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    "ApplicationContext not set. "
-                        + "Ensure this bean is managed by Spring and properly initialized."));
+        .orElseThrow(() ->
+            new IllegalStateException(
+                "ApplicationContext not set. "
+                    + "Ensure this bean is managed by Spring and properly initialized."));
   }
 }

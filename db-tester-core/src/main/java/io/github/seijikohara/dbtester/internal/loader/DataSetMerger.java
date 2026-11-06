@@ -80,9 +80,8 @@ public final class DataSetMerger {
 
     tableSets.stream()
         .flatMap(tableSet -> tableSet.tables().stream())
-        .forEach(
-            table ->
-                tablesByName.computeIfAbsent(table.name(), unused -> new ArrayList<>()).add(table));
+        .forEach(table ->
+            tablesByName.computeIfAbsent(table.name(), unused -> new ArrayList<>()).add(table));
 
     // Merge tables according to strategy
     final List<Table> mergedTables =

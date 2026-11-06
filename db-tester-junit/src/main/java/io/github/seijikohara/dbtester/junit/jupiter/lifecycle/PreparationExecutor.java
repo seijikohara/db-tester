@@ -23,11 +23,10 @@ public final class PreparationExecutor {
     this.support =
         ServiceLoader.load(PreparationSupport.class)
             .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "No PreparationSupport implementation found. "
-                            + "Ensure db-tester-core is on the classpath."));
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "No PreparationSupport implementation found. "
+                        + "Ensure db-tester-core is on the classpath."));
   }
 
   /**

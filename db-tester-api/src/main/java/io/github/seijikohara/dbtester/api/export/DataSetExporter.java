@@ -220,9 +220,8 @@ public final class DataSetExporter {
         .map(ServiceLoader.Provider::get)
         .filter(provider -> provider.supportedFormat() == format)
         .findFirst()
-        .orElseThrow(
-            () ->
-                new DatabaseTesterException(
-                    String.format("No ExportProvider found for format: %s", format)));
+        .orElseThrow(() ->
+            new DatabaseTesterException(
+                String.format("No ExportProvider found for format: %s", format)));
   }
 }
