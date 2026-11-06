@@ -143,11 +143,10 @@ public final class TopologicalSorter<T> {
   private void processReadyElements(final Set<T> ready) {
     elements.stream()
         .filter(element -> ready.contains(element) && !visited.contains(element))
-        .forEach(
-            element -> {
-              result.add(element);
-              visited.add(element);
-              remaining.remove(element);
-            });
+        .forEach(element -> {
+          result.add(element);
+          visited.add(element);
+          remaining.remove(element);
+        });
   }
 }

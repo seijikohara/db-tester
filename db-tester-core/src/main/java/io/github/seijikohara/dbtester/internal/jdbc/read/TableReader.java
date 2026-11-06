@@ -212,19 +212,18 @@ public final class TableReader {
 
         final var columnNames =
             IntStream.rangeClosed(1, columnCount)
-                .mapToObj(
-                    i -> {
-                      try {
-                        // Use the column label so SQL aliases (SELECT col AS alias) and computed
-                        // columns (SELECT SUM(x) AS total) match the expected dataset. For a plain
-                        // SELECT * the label defaults to the physical column name, so full-table
-                        // reads keep their previous behavior.
-                        return new ColumnName(metaData.getColumnLabel(i));
-                      } catch (final SQLException e) {
-                        throw new DatabaseTesterException(
-                            String.format("Failed to retrieve column label at index: %d", i), e);
-                      }
-                    })
+                .mapToObj(i -> {
+                  try {
+                    // Use the column label so SQL aliases (SELECT col AS alias) and computed
+                    // columns (SELECT SUM(x) AS total) match the expected dataset. For a plain
+                    // SELECT * the label defaults to the physical column name, so full-table
+                    // reads keep their previous behavior.
+                    return new ColumnName(metaData.getColumnLabel(i));
+                  } catch (final SQLException e) {
+                    throw new DatabaseTesterException(
+                        String.format("Failed to retrieve column label at index: %d", i), e);
+                  }
+                })
                 .toList();
 
         final var rows =
@@ -265,16 +264,15 @@ public final class TableReader {
     while (resultSet.next()) {
       final var values = new LinkedHashMap<ColumnName, CellValue>();
       IntStream.rangeClosed(1, columnCount)
-          .forEach(
-              i -> {
-                try {
-                  final var columnName = columnNames.get(i - 1);
-                  values.put(columnName, readCell(resultSet, metaData, i, databaseProductName));
-                } catch (final SQLException e) {
-                  throw new DatabaseTesterException(
-                      String.format("Failed to read column at index: %d", i), e);
-                }
-              });
+          .forEach(i -> {
+            try {
+              final var columnName = columnNames.get(i - 1);
+              values.put(columnName, readCell(resultSet, metaData, i, databaseProductName));
+            } catch (final SQLException e) {
+              throw new DatabaseTesterException(
+                  String.format("Failed to read column at index: %d", i), e);
+            }
+          });
       rows.add(new SimpleRow(values));
     }
     return List.copyOf(rows);

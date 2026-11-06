@@ -83,12 +83,11 @@ public final class FormatRegistry {
    */
   public static FormatProvider getProvider(final FileExtension fileExtension) {
     return Optional.ofNullable(PROVIDERS.get(fileExtension))
-        .orElseThrow(
-            () ->
-                new ConfigurationException(
-                    String.format(
-                        "No format provider registered for file extension: %s. Registered extensions: %s",
-                        fileExtension.value(), getSupportedExtensions())));
+        .orElseThrow(() ->
+            new ConfigurationException(
+                String.format(
+                    "No format provider registered for file extension: %s. Registered extensions: %s",
+                    fileExtension.value(), getSupportedExtensions())));
   }
 
   /**

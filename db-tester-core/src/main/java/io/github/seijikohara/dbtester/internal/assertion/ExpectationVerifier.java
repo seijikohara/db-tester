@@ -147,30 +147,28 @@ public final class ExpectationVerifier {
     final var orderedTables =
         resolveTableOrder(expectedTableSet.tables(), dataSource, tableOrdering);
 
-    orderedTables.forEach(
-        expectedTable -> {
-          final var tableName = expectedTable.name().value();
-          final var expectedColumns = expectedTable.columns();
+    orderedTables.forEach(expectedTable -> {
+      final var tableName = expectedTable.name().value();
+      final var expectedColumns = expectedTable.columns();
 
-          logger.trace(
-              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+      logger.trace("Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
+      final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-          logger.trace(
-              "Comparing table {}: expected {} rows, actual {} rows ({})",
-              tableName,
-              expectedTable.rowCount(),
-              actualTable.rowCount(),
-              rowOrdering);
+      logger.trace(
+          "Comparing table {}: expected {} rows, actual {} rows ({})",
+          tableName,
+          expectedTable.rowCount(),
+          actualTable.rowCount(),
+          rowOrdering);
 
-          effectiveComparator.assertEqualsWithStrategies(
-              expectedTable,
-              actualTable,
-              normalizedExcludeColumns,
-              effectiveColumnStrategies,
-              rowOrdering);
-        });
+      effectiveComparator.assertEqualsWithStrategies(
+          expectedTable,
+          actualTable,
+          normalizedExcludeColumns,
+          effectiveColumnStrategies,
+          rowOrdering);
+    });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
@@ -227,32 +225,30 @@ public final class ExpectationVerifier {
 
     expectedTableSet
         .tables()
-        .forEach(
-            expectedTable -> {
-              final var tableName = expectedTable.name().value();
-              final var expectedColumns = expectedTable.columns();
+        .forEach(expectedTable -> {
+          final var tableName = expectedTable.name().value();
+          final var expectedColumns = expectedTable.columns();
 
-              logger.trace(
-                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+          logger.trace(
+              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-              // Fetch actual table data with only the expected columns
-              final var actualTable =
-                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+          // Fetch actual table data with only the expected columns
+          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-              logger.trace(
-                  "Comparing table {}: expected {} rows, actual {} rows",
-                  tableName,
-                  expectedTable.rowCount(),
-                  actualTable.rowCount());
+          logger.trace(
+              "Comparing table {}: expected {} rows, actual {} rows",
+              tableName,
+              expectedTable.rowCount(),
+              actualTable.rowCount());
 
-              // Compare with or without column exclusion
-              if (normalizedExcludeColumns.isEmpty()) {
-                comparator.assertEquals(expectedTable, actualTable, null);
-              } else {
-                comparator.assertEqualsIgnoreColumns(
-                    expectedTable, actualTable, normalizedExcludeColumns);
-              }
-            });
+          // Compare with or without column exclusion
+          if (normalizedExcludeColumns.isEmpty()) {
+            comparator.assertEquals(expectedTable, actualTable, null);
+          } else {
+            comparator.assertEqualsIgnoreColumns(
+                expectedTable, actualTable, normalizedExcludeColumns);
+          }
+        });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
@@ -297,26 +293,24 @@ public final class ExpectationVerifier {
 
     expectedTableSet
         .tables()
-        .forEach(
-            expectedTable -> {
-              final var tableName = expectedTable.name().value();
-              final var expectedColumns = expectedTable.columns();
+        .forEach(expectedTable -> {
+          final var tableName = expectedTable.name().value();
+          final var expectedColumns = expectedTable.columns();
 
-              logger.trace(
-                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+          logger.trace(
+              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-              final var actualTable =
-                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-              logger.trace(
-                  "Comparing table {}: expected {} rows, actual {} rows",
-                  tableName,
-                  expectedTable.rowCount(),
-                  actualTable.rowCount());
+          logger.trace(
+              "Comparing table {}: expected {} rows, actual {} rows",
+              tableName,
+              expectedTable.rowCount(),
+              actualTable.rowCount());
 
-              comparator.assertEqualsWithStrategies(
-                  expectedTable, actualTable, normalizedExcludeColumns, columnStrategies);
-            });
+          comparator.assertEqualsWithStrategies(
+              expectedTable, actualTable, normalizedExcludeColumns, columnStrategies);
+        });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
@@ -361,31 +355,29 @@ public final class ExpectationVerifier {
 
     expectedTableSet
         .tables()
-        .forEach(
-            expectedTable -> {
-              final var tableName = expectedTable.name().value();
-              final var expectedColumns = expectedTable.columns();
+        .forEach(expectedTable -> {
+          final var tableName = expectedTable.name().value();
+          final var expectedColumns = expectedTable.columns();
 
-              logger.trace(
-                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+          logger.trace(
+              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-              final var actualTable =
-                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-              logger.trace(
-                  "Comparing table {}: expected {} rows, actual {} rows ({})",
-                  tableName,
-                  expectedTable.rowCount(),
-                  actualTable.rowCount(),
-                  rowOrdering);
+          logger.trace(
+              "Comparing table {}: expected {} rows, actual {} rows ({})",
+              tableName,
+              expectedTable.rowCount(),
+              actualTable.rowCount(),
+              rowOrdering);
 
-              comparator.assertEqualsWithStrategies(
-                  expectedTable,
-                  actualTable,
-                  normalizedExcludeColumns,
-                  effectiveColumnStrategies,
-                  rowOrdering);
-            });
+          comparator.assertEqualsWithStrategies(
+              expectedTable,
+              actualTable,
+              normalizedExcludeColumns,
+              effectiveColumnStrategies,
+              rowOrdering);
+        });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.tables().size());
@@ -439,31 +431,29 @@ public final class ExpectationVerifier {
 
     expectedTableSet
         .tables()
-        .forEach(
-            expectedTable -> {
-              final var tableName = expectedTable.name().value();
-              final var expectedColumns = expectedTable.columns();
+        .forEach(expectedTable -> {
+          final var tableName = expectedTable.name().value();
+          final var expectedColumns = expectedTable.columns();
 
-              logger.trace(
-                  "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
+          logger.trace(
+              "Fetching table {} with {} expected columns", tableName, expectedColumns.size());
 
-              final var actualTable =
-                  tableReader.fetchTable(dataSource, tableName, expectedColumns);
+          final var actualTable = tableReader.fetchTable(dataSource, tableName, expectedColumns);
 
-              logger.trace(
-                  "Comparing table {}: expected {} rows, actual {} rows ({})",
-                  tableName,
-                  expectedTable.rowCount(),
-                  actualTable.rowCount(),
-                  rowOrdering);
+          logger.trace(
+              "Comparing table {}: expected {} rows, actual {} rows ({})",
+              tableName,
+              expectedTable.rowCount(),
+              actualTable.rowCount(),
+              rowOrdering);
 
-              effectiveComparator.assertEqualsWithStrategies(
-                  expectedTable,
-                  actualTable,
-                  normalizedExcludeColumns,
-                  effectiveColumnStrategies,
-                  rowOrdering);
-            });
+          effectiveComparator.assertEqualsWithStrategies(
+              expectedTable,
+              actualTable,
+              normalizedExcludeColumns,
+              effectiveColumnStrategies,
+              rowOrdering);
+        });
 
     logger.debug(
         "Successfully verified expectation for {} tables", expectedTableSet.tables().size());

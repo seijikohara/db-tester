@@ -66,17 +66,16 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
 
     return annotationResolver
         .findDataSet(testMethod, testClass)
-        .map(
-            dataSet -> {
-              final var dataSetSources = dataSet.sources();
-              // When sources is empty, load from convention-based location with default config
-              final var loadedTableSets =
-                  dataSetSources.length == 0
-                      ? loadConventionBasedTableSet(context, null)
-                      : loadTableSets(context, List.of(dataSetSources), null);
-              // Merge datasets if there are multiple
-              return mergeTableSets(loadedTableSets, mergeStrategy);
-            })
+        .map(dataSet -> {
+          final var dataSetSources = dataSet.sources();
+          // When sources is empty, load from convention-based location with default config
+          final var loadedTableSets =
+              dataSetSources.length == 0
+                  ? loadConventionBasedTableSet(context, null)
+                  : loadTableSets(context, List.of(dataSetSources), null);
+          // Merge datasets if there are multiple
+          return mergeTableSets(loadedTableSets, mergeStrategy);
+        })
         .orElse(List.of());
   }
 
@@ -96,17 +95,16 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
 
     return annotationResolver
         .findExpectedDataSet(testMethod, testClass)
-        .map(
-            expectedDataSet -> {
-              final var dataSetSources = expectedDataSet.sources();
-              // When sources is empty, load from convention-based location with default config
-              final var loadedTableSets =
-                  dataSetSources.length == 0
-                      ? loadConventionBasedTableSet(context, expectFileSuffix)
-                      : loadTableSets(context, List.of(dataSetSources), expectFileSuffix);
-              // Merge datasets if there are multiple
-              return mergeTableSets(loadedTableSets, mergeStrategy);
-            })
+        .map(expectedDataSet -> {
+          final var dataSetSources = expectedDataSet.sources();
+          // When sources is empty, load from convention-based location with default config
+          final var loadedTableSets =
+              dataSetSources.length == 0
+                  ? loadConventionBasedTableSet(context, expectFileSuffix)
+                  : loadTableSets(context, List.of(dataSetSources), expectFileSuffix);
+          // Merge datasets if there are multiple
+          return mergeTableSets(loadedTableSets, mergeStrategy);
+        })
         .orElse(List.of());
   }
 
@@ -129,30 +127,27 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
 
     return annotationResolver
         .findExpectedDataSet(testMethod, testClass)
-        .map(
-            expectedDataSet -> {
-              final var dataSetSources = expectedDataSet.sources();
-              // When sources is empty, load from convention-based location with default config
-              if (dataSetSources.length == 0) {
-                final var loadedTableSets = loadConventionBasedTableSet(context, expectFileSuffix);
-                final var mergedTableSets = mergeTableSets(loadedTableSets, mergeStrategy);
-                // Use only global settings when no DataSetSource annotations
-                return mergedTableSets.stream()
-                    .map(
-                        tableSet ->
-                            ExpectedTableSet.of(
-                                tableSet, globalExcludeColumns, globalColumnStrategies))
-                    .toList();
-              } else {
-                // Load with annotation-level settings
-                return loadExpectedTableSetsWithConfigurations(
-                    context,
-                    List.of(dataSetSources),
-                    expectFileSuffix,
-                    globalExcludeColumns,
-                    globalColumnStrategies);
-              }
-            })
+        .map(expectedDataSet -> {
+          final var dataSetSources = expectedDataSet.sources();
+          // When sources is empty, load from convention-based location with default config
+          if (dataSetSources.length == 0) {
+            final var loadedTableSets = loadConventionBasedTableSet(context, expectFileSuffix);
+            final var mergedTableSets = mergeTableSets(loadedTableSets, mergeStrategy);
+            // Use only global settings when no DataSetSource annotations
+            return mergedTableSets.stream()
+                .map(tableSet ->
+                    ExpectedTableSet.of(tableSet, globalExcludeColumns, globalColumnStrategies))
+                .toList();
+          } else {
+            // Load with annotation-level settings
+            return loadExpectedTableSetsWithConfigurations(
+                context,
+                List.of(dataSetSources),
+                expectFileSuffix,
+                globalExcludeColumns,
+                globalColumnStrategies);
+          }
+        })
         .orElse(List.of());
   }
 
@@ -265,21 +260,18 @@ public final class TestClassNameBasedDataSetLoader implements DataSetLoader {
       final Map<String, ColumnStrategyMapping> globalColumnStrategies) {
     final var processor = new DataSetProcessor(context, suffix, annotationResolver, dataSetFactory);
     return dataSetSourceAnnotations.stream()
-        .map(
-            annotation -> {
-              final var tableSet = processor.createTableSet(annotation);
-              final var annotationExcludeColumns =
-                  annotationResolver.resolveExcludeColumns(annotation);
-              final var annotationColumnStrategies =
-                  annotationResolver.resolveColumnStrategies(annotation);
-              // Combine annotation-level and global settings
-              final var combinedExcludeColumns =
-                  combineExcludeColumns(annotationExcludeColumns, globalExcludeColumns);
-              final var combinedColumnStrategies =
-                  combineColumnStrategies(annotationColumnStrategies, globalColumnStrategies);
-              return ExpectedTableSet.of(
-                  tableSet, combinedExcludeColumns, combinedColumnStrategies);
-            })
+        .map(annotation -> {
+          final var tableSet = processor.createTableSet(annotation);
+          final var annotationExcludeColumns = annotationResolver.resolveExcludeColumns(annotation);
+          final var annotationColumnStrategies =
+              annotationResolver.resolveColumnStrategies(annotation);
+          // Combine annotation-level and global settings
+          final var combinedExcludeColumns =
+              combineExcludeColumns(annotationExcludeColumns, globalExcludeColumns);
+          final var combinedColumnStrategies =
+              combineColumnStrategies(annotationColumnStrategies, globalColumnStrategies);
+          return ExpectedTableSet.of(tableSet, combinedExcludeColumns, combinedColumnStrategies);
+        })
         .toList();
   }
 

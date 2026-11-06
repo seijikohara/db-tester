@@ -139,11 +139,10 @@ class DatabaseTestExtensionTest {
               eq("registry"),
               ArgumentMatchers.<Function<String, DataSourceRegistry>>any(),
               eq(DataSourceRegistry.class)))
-          .thenAnswer(
-              invocation -> {
-                final Function<String, DataSourceRegistry> factory = invocation.getArgument(1);
-                return factory.apply(invocation.getArgument(0));
-              });
+          .thenAnswer(invocation -> {
+            final Function<String, DataSourceRegistry> factory = invocation.getArgument(1);
+            return factory.apply(invocation.getArgument(0));
+          });
 
       // When
       final var result = DatabaseTestExtension.getRegistry(mockContext);

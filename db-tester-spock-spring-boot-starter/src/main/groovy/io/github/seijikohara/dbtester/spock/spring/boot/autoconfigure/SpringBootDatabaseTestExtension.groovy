@@ -42,9 +42,9 @@ class SpringBootDatabaseTestExtension implements IAnnotationDrivenExtension<Spri
 				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }
 				.each {
 					it.feature.addInterceptor(new SpringBootDatabaseTestInterceptor(
-							it.dataSet as DataSet,
-							it.expectedDataSet as ExpectedDataSet,
-							it.exportDataSet as ExportDataSet
+									it.dataSet as DataSet,
+									it.expectedDataSet as ExpectedDataSet,
+									it.exportDataSet as ExportDataSet
 							))
 				}
 	}

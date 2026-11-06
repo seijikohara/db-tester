@@ -602,12 +602,11 @@ class InsertExecutorTest {
 
       final var rows =
           IntStream.range(0, 5)
-              .mapToObj(
-                  i -> {
-                    final var row = mock(Row.class);
-                    when(row.value(columnName)).thenReturn(new CellValue(i));
-                    return row;
-                  })
+              .mapToObj(i -> {
+                final var row = mock(Row.class);
+                when(row.value(columnName)).thenReturn(new CellValue(i));
+                return row;
+              })
               .toList();
 
       when(table.name()).thenReturn(new TableName("USERS"));
@@ -652,12 +651,11 @@ class InsertExecutorTest {
 
       final var rows =
           IntStream.range(0, 3)
-              .mapToObj(
-                  i -> {
-                    final var row = mock(Row.class);
-                    when(row.value(columnName)).thenReturn(new CellValue(i));
-                    return row;
-                  })
+              .mapToObj(i -> {
+                final var row = mock(Row.class);
+                when(row.value(columnName)).thenReturn(new CellValue(i));
+                return row;
+              })
               .toList();
 
       when(table.name()).thenReturn(new TableName("USERS"));
@@ -702,12 +700,11 @@ class InsertExecutorTest {
 
       final var rows =
           IntStream.range(0, 4)
-              .mapToObj(
-                  i -> {
-                    final var row = mock(Row.class);
-                    when(row.value(columnName)).thenReturn(new CellValue(i));
-                    return row;
-                  })
+              .mapToObj(i -> {
+                final var row = mock(Row.class);
+                when(row.value(columnName)).thenReturn(new CellValue(i));
+                return row;
+              })
               .toList();
 
       when(table.name()).thenReturn(new TableName("USERS"));
@@ -752,12 +749,11 @@ class InsertExecutorTest {
 
       final var rows =
           IntStream.range(0, 3)
-              .mapToObj(
-                  i -> {
-                    final var row = mock(Row.class);
-                    when(row.value(columnName)).thenReturn(new CellValue(i));
-                    return row;
-                  })
+              .mapToObj(i -> {
+                final var row = mock(Row.class);
+                when(row.value(columnName)).thenReturn(new CellValue(i));
+                return row;
+              })
               .toList();
 
       when(table.name()).thenReturn(new TableName("USERS"));
@@ -802,12 +798,11 @@ class InsertExecutorTest {
 
       final var rows =
           IntStream.range(0, 3)
-              .mapToObj(
-                  i -> {
-                    final var row = mock(Row.class);
-                    when(row.value(columnName)).thenReturn(new CellValue(i));
-                    return row;
-                  })
+              .mapToObj(i -> {
+                final var row = mock(Row.class);
+                when(row.value(columnName)).thenReturn(new CellValue(i));
+                return row;
+              })
               .toList();
 
       when(table.name()).thenReturn(new TableName("USERS"));

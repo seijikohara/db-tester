@@ -42,11 +42,10 @@ public final class DefaultExpectationSupport implements ExpectationSupport {
     this.expectationProvider =
         ServiceLoader.load(ExpectationProvider.class)
             .findFirst()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        "No ExpectationProvider implementation found. "
-                            + "Ensure db-tester-core is on the classpath."));
+            .orElseThrow(() ->
+                new IllegalStateException(
+                    "No ExpectationProvider implementation found. "
+                        + "Ensure db-tester-core is on the classpath."));
   }
 
   /**

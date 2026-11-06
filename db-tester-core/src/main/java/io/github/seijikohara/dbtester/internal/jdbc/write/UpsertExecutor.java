@@ -79,20 +79,19 @@ public final class UpsertExecutor implements TableExecutor {
 
     table
         .rows()
-        .forEach(
-            row -> {
-              final var updated =
-                  updateExecutor.tryUpdateRow(
-                      table.name().value(),
-                      primaryKeyColumn,
-                      updateColumns,
-                      row,
-                      connection,
-                      queryTimeout);
-              if (!updated) {
-                logger.trace("Update affected no rows, inserting into {}", table.name().value());
-                insertExecutor.insertRow(table, row, connection, queryTimeout);
-              }
-            });
+        .forEach(row -> {
+          final var updated =
+              updateExecutor.tryUpdateRow(
+                  table.name().value(),
+                  primaryKeyColumn,
+                  updateColumns,
+                  row,
+                  connection,
+                  queryTimeout);
+          if (!updated) {
+            logger.trace("Update affected no rows, inserting into {}", table.name().value());
+            insertExecutor.insertRow(table, row, connection, queryTimeout);
+          }
+        });
   }
 }

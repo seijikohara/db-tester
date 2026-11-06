@@ -101,15 +101,14 @@ public class DataSetComparator {
     }
 
     // Compare each expected table with actual
-    expectedTables.forEach(
-        expectedTable -> {
-          final var tableName = expectedTable.name();
-          actual
-              .table(tableName)
-              .ifPresentOrElse(
-                  actualTable -> compareTable(expectedTable, actualTable, result),
-                  () -> result.addMissingTable(tableName.value()));
-        });
+    expectedTables.forEach(expectedTable -> {
+      final var tableName = expectedTable.name();
+      actual
+          .table(tableName)
+          .ifPresentOrElse(
+              actualTable -> compareTable(expectedTable, actualTable, result),
+              () -> result.addMissingTable(tableName.value()));
+    });
 
     // Report all differences
     if (result.hasDifferences()) {
@@ -452,26 +451,24 @@ public class DataSetComparator {
 
     // For each expected row, find a matching actual row
     IntStream.range(0, expectedRows.size())
-        .forEach(
-            expectedIndex -> {
-              final var expectedRow = expectedRows.get(expectedIndex);
-              final var matchIndex =
-                  findMatchingRowIndex(
-                      expectedRow, actualRows, unmatchedActualIndices, ignoreSet, columnStrategies);
+        .forEach(expectedIndex -> {
+          final var expectedRow = expectedRows.get(expectedIndex);
+          final var matchIndex =
+              findMatchingRowIndex(
+                  expectedRow, actualRows, unmatchedActualIndices, ignoreSet, columnStrategies);
 
-              if (matchIndex >= 0) {
-                // Mark this actual row as matched
-                unmatchedActualIndices.remove(Integer.valueOf(matchIndex));
-              } else {
-                // No matching row found - report the expected row as unmatched
-                reportUnmatchedExpectedRow(tableName, expectedIndex, expectedRow, result);
-              }
-            });
+          if (matchIndex >= 0) {
+            // Mark this actual row as matched
+            unmatchedActualIndices.remove(Integer.valueOf(matchIndex));
+          } else {
+            // No matching row found - report the expected row as unmatched
+            reportUnmatchedExpectedRow(tableName, expectedIndex, expectedRow, result);
+          }
+        });
 
     // Report any unmatched actual rows (extra rows in database)
-    unmatchedActualIndices.forEach(
-        actualIndex ->
-            reportUnmatchedActualRow(tableName, actualIndex, actualRows.get(actualIndex), result));
+    unmatchedActualIndices.forEach(actualIndex ->
+        reportUnmatchedActualRow(tableName, actualIndex, actualRows.get(actualIndex), result));
 
     result.assertNoDifferences();
   }
@@ -516,20 +513,19 @@ public class DataSetComparator {
         // Filter out ignored columns
         .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
         // Check if all remaining columns match
-        .allMatch(
-            columnName -> {
-              final var expectedValue = expected.value(columnName);
-              final var actualValue = actual.value(columnName);
-              final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
+        .allMatch(columnName -> {
+          final var expectedValue = expected.value(columnName);
+          final var actualValue = actual.value(columnName);
+          final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
 
-              // Get strategy for this column, or use default comparison
-              final var strategyMapping = columnStrategies.get(upperColumnName);
-              if (strategyMapping != null) {
-                return matchesForRowProbe(expectedValue, actualValue, strategyMapping.strategy());
-              }
-              // Default: use standard comparison
-              return valuesAreEqual(expectedValue, actualValue);
-            });
+          // Get strategy for this column, or use default comparison
+          final var strategyMapping = columnStrategies.get(upperColumnName);
+          if (strategyMapping != null) {
+            return matchesForRowProbe(expectedValue, actualValue, strategyMapping.strategy());
+          }
+          // Default: use standard comparison
+          return valuesAreEqual(expectedValue, actualValue);
+        });
   }
 
   /**
@@ -572,14 +568,13 @@ public class DataSetComparator {
       final ComparisonResult result) {
     expectedRow
         .values()
-        .forEach(
-            (columnName, expectedValue) ->
-                result.addValueMismatch(
-                    tableName,
-                    rowIndex,
-                    columnName.value(),
-                    extractValueOrNull(expectedValue),
-                    "[no matching row]"));
+        .forEach((columnName, expectedValue) ->
+            result.addValueMismatch(
+                tableName,
+                rowIndex,
+                columnName.value(),
+                extractValueOrNull(expectedValue),
+                "[no matching row]"));
   }
 
   /**
@@ -599,14 +594,13 @@ public class DataSetComparator {
       final ComparisonResult result) {
     actualRow
         .values()
-        .forEach(
-            (columnName, actualValue) ->
-                result.addValueMismatch(
-                    tableName,
-                    actualIndex,
-                    columnName.value(),
-                    "[no matching row]",
-                    extractValueOrNull(actualValue)));
+        .forEach((columnName, actualValue) ->
+            result.addValueMismatch(
+                tableName,
+                actualIndex,
+                columnName.value(),
+                "[no matching row]",
+                extractValueOrNull(actualValue)));
   }
 
   /**
@@ -644,14 +638,9 @@ public class DataSetComparator {
       final RowComparator rowComparator) {
     final int rowsToCompare = Math.min(expectedRows.size(), actualRows.size());
     IntStream.range(0, rowsToCompare)
-        .forEach(
-            rowIndex ->
-                rowComparator.compare(
-                    tableName,
-                    rowIndex,
-                    expectedRows.get(rowIndex),
-                    actualRows.get(rowIndex),
-                    result));
+        .forEach(rowIndex ->
+            rowComparator.compare(
+                tableName, rowIndex, expectedRows.get(rowIndex), actualRows.get(rowIndex), result));
   }
 
   /** Functional interface for row comparison operations. */
@@ -734,29 +723,27 @@ public class DataSetComparator {
         // Filter out ignored columns
         .filter(columnName -> !ignoreSet.contains(columnName.value().toUpperCase(Locale.ROOT)))
         // Filter columns that fail comparison
-        .filter(
-            columnName -> {
-              final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
-              final var expectedValue = expected.value(columnName);
-              final var actualValue = actual.value(columnName);
+        .filter(columnName -> {
+          final var upperColumnName = columnName.value().toUpperCase(Locale.ROOT);
+          final var expectedValue = expected.value(columnName);
+          final var actualValue = actual.value(columnName);
 
-              // Get strategy for this column, or use default comparison
-              final var strategyMapping = columnStrategies.get(upperColumnName);
-              if (strategyMapping != null) {
-                return !compareWithStrategy(expectedValue, actualValue, strategyMapping.strategy());
-              }
-              // Default: use standard comparison
-              return !valuesAreEqual(expectedValue, actualValue);
-            })
+          // Get strategy for this column, or use default comparison
+          final var strategyMapping = columnStrategies.get(upperColumnName);
+          if (strategyMapping != null) {
+            return !compareWithStrategy(expectedValue, actualValue, strategyMapping.strategy());
+          }
+          // Default: use standard comparison
+          return !valuesAreEqual(expectedValue, actualValue);
+        })
         // Collect mismatches
-        .forEach(
-            columnName ->
-                result.addValueMismatch(
-                    tableName,
-                    rowIndex,
-                    columnName.value(),
-                    extractValueOrNull(expected.value(columnName)),
-                    extractValueOrNull(actual.value(columnName))));
+        .forEach(columnName ->
+            result.addValueMismatch(
+                tableName,
+                rowIndex,
+                columnName.value(),
+                extractValueOrNull(expected.value(columnName)),
+                extractValueOrNull(actual.value(columnName))));
   }
 
   /**
@@ -799,14 +786,13 @@ public class DataSetComparator {
       final ComparisonResult result) {
     columnsToCompare.stream()
         .filter(columnName -> !valuesAreEqual(expected.value(columnName), actual.value(columnName)))
-        .forEach(
-            columnName ->
-                result.addValueMismatch(
-                    tableName,
-                    rowIndex,
-                    columnName.value(),
-                    extractValueOrNull(expected.value(columnName)),
-                    extractValueOrNull(actual.value(columnName))));
+        .forEach(columnName ->
+            result.addValueMismatch(
+                tableName,
+                rowIndex,
+                columnName.value(),
+                extractValueOrNull(expected.value(columnName)),
+                extractValueOrNull(actual.value(columnName))));
   }
 
   /**
@@ -909,11 +895,10 @@ public class DataSetComparator {
       final @Nullable T actual,
       final java.util.function.BiFunction<T, T, Boolean> comparator) {
     return Optional.ofNullable(expected)
-        .map(
-            expectedValue ->
-                Optional.ofNullable(actual)
-                    .map(actualValue -> comparator.apply(expectedValue, actualValue))
-                    .orElse(false))
+        .map(expectedValue ->
+            Optional.ofNullable(actual)
+                .map(actualValue -> comparator.apply(expectedValue, actualValue))
+                .orElse(false))
         .orElseGet(() -> actual == null);
   }
 

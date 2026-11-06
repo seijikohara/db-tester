@@ -61,12 +61,11 @@ abstract class DelimitedExportProvider extends AbstractExportProvider {
       // Write data rows
       table
           .rows()
-          .forEach(
-              row -> {
-                final List<@Nullable String> values = new java.util.ArrayList<>();
-                columns.forEach(col -> values.add(formatCellValue(row, col, config)));
-                writeDataRow(writer, values);
-              });
+          .forEach(row -> {
+            final List<@Nullable String> values = new java.util.ArrayList<>();
+            columns.forEach(col -> values.add(formatCellValue(row, col, config)));
+            writeDataRow(writer, values);
+          });
     } catch (final IOException e) {
       throw new DatabaseTesterException(
           String.format("Failed to write table to: %s", outputPath), e);

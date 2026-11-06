@@ -128,16 +128,15 @@ public final class YamlExportProvider extends AbstractExportProvider {
     try {
       generator.writeStartObject();
 
-      columns.forEach(
-          column -> {
-            try {
-              generator.writeFieldName(column.value());
-              writeValue(generator, row, column, config);
-            } catch (final IOException e) {
-              throw new DatabaseTesterException(
-                  String.format("Failed to write column: %s", column.value()), e);
-            }
-          });
+      columns.forEach(column -> {
+        try {
+          generator.writeFieldName(column.value());
+          writeValue(generator, row, column, config);
+        } catch (final IOException e) {
+          throw new DatabaseTesterException(
+              String.format("Failed to write column: %s", column.value()), e);
+        }
+      });
 
       generator.writeEndObject();
     } catch (final IOException e) {

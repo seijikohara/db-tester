@@ -54,9 +54,9 @@ class DatabaseTestExtension implements IAnnotationDrivenExtension<DatabaseTest> 
 				.findAll { it.dataSet || it.expectedDataSet || it.exportDataSet }
 				.each {
 					it.feature.addInterceptor(new DatabaseTestInterceptor(
-							it.dataSet as DataSet,
-							it.expectedDataSet as ExpectedDataSet,
-							it.exportDataSet as ExportDataSet
+									it.dataSet as DataSet,
+									it.expectedDataSet as ExpectedDataSet,
+									it.exportDataSet as ExportDataSet
 							))
 				}
 	}

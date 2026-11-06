@@ -39,11 +39,10 @@ public final class DatabaseQueryAssertion {
     private static QueryAssertionProvider loadProvider() {
       return ServiceLoader.load(QueryAssertionProvider.class)
           .findFirst()
-          .orElseThrow(
-              () ->
-                  new IllegalStateException(
-                      "No QueryAssertionProvider implementation found."
-                          + " Add db-tester-core to your classpath."));
+          .orElseThrow(() ->
+              new IllegalStateException(
+                  "No QueryAssertionProvider implementation found."
+                      + " Add db-tester-core to your classpath."));
     }
   }
 

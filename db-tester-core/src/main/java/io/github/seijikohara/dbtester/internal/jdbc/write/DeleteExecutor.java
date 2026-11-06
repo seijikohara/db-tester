@@ -81,11 +81,10 @@ public final class DeleteExecutor implements TableExecutor {
       applyTimeout(preparedStatement, queryTimeout);
       table
           .rows()
-          .forEach(
-              row -> {
-                run(() -> parameterBinder.bind(preparedStatement, 1, row.value(primaryKeyColumn)));
-                run(preparedStatement::addBatch);
-              });
+          .forEach(row -> {
+            run(() -> parameterBinder.bind(preparedStatement, 1, row.value(primaryKeyColumn)));
+            run(preparedStatement::addBatch);
+          });
       run(preparedStatement::executeBatch);
     }
   }

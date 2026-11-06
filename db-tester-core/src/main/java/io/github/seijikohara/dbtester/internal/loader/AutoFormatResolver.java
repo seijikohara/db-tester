@@ -76,16 +76,15 @@ public final class AutoFormatResolver {
     final var groupedByExtension = groupByExtension(supportedFiles);
     final var allTables = new ArrayList<Table>();
 
-    groupedByExtension.forEach(
-        (extension, paths) -> {
-          final var provider = FormatRegistry.getProvider(extension);
-          logger.debug(
-              "Parsing {} files with provider: {}",
-              extension.value(),
-              provider.getClass().getSimpleName());
-          final var tableSet = provider.parse(directory);
-          allTables.addAll(tableSet.tables());
-        });
+    groupedByExtension.forEach((extension, paths) -> {
+      final var provider = FormatRegistry.getProvider(extension);
+      logger.debug(
+          "Parsing {} files with provider: {}",
+          extension.value(),
+          provider.getClass().getSimpleName());
+      final var tableSet = provider.parse(directory);
+      allTables.addAll(tableSet.tables());
+    });
 
     logger.debug("Loaded {} tables from {} format(s)", allTables.size(), groupedByExtension.size());
 
@@ -103,11 +102,10 @@ public final class AutoFormatResolver {
     try (final var paths = Files.list(directory)) {
       return paths
           .filter(Files::isRegularFile)
-          .filter(
-              path ->
-                  FileExtension.fromFileName(path.getFileName().toString())
-                      .map(FormatRegistry::hasProvider)
-                      .orElse(false))
+          .filter(path ->
+              FileExtension.fromFileName(path.getFileName().toString())
+                  .map(FormatRegistry::hasProvider)
+                  .orElse(false))
           .toList();
     } catch (final IOException e) {
       throw new DataSetLoadException(
@@ -125,12 +123,11 @@ public final class AutoFormatResolver {
   private void detectTableNameConflicts(final List<Path> supportedFiles) {
     final var tableNameToFiles = new TreeMap<String, List<String>>();
 
-    supportedFiles.forEach(
-        path -> {
-          final var fileName = path.getFileName().toString();
-          final var tableName = extractTableName(fileName);
-          tableNameToFiles.computeIfAbsent(tableName, k -> new ArrayList<>()).add(fileName);
-        });
+    supportedFiles.forEach(path -> {
+      final var fileName = path.getFileName().toString();
+      final var tableName = extractTableName(fileName);
+      tableNameToFiles.computeIfAbsent(tableName, k -> new ArrayList<>()).add(fileName);
+    });
 
     final var conflicts =
         tableNameToFiles.entrySet().stream()
@@ -153,14 +150,11 @@ public final class AutoFormatResolver {
   private Map<FileExtension, List<Path>> groupByExtension(final List<Path> supportedFiles) {
     return supportedFiles.stream()
         .collect(
-            Collectors.groupingBy(
-                path ->
-                    FileExtension.fromFileName(path.getFileName().toString())
-                        .orElseThrow(
-                            () ->
-                                new DataSetLoadException(
-                                    String.format(
-                                        "Failed to extract extension from file: %s", path)))));
+            Collectors.groupingBy(path ->
+                FileExtension.fromFileName(path.getFileName().toString())
+                    .orElseThrow(() ->
+                        new DataSetLoadException(
+                            String.format("Failed to extract extension from file: %s", path)))));
   }
 
   /**
@@ -237,17 +231,15 @@ public final class AutoFormatResolver {
         "The following table names are defined in multiple files with different formats:");
     details.append(System.lineSeparator());
 
-    conflicts.forEach(
-        (tableName, fileNames) -> {
-          details.append(System.lineSeparator());
-          details.append(String.format("  Table '%s':", tableName));
-          details.append(System.lineSeparator());
-          fileNames.forEach(
-              fileName -> {
-                details.append(String.format("    - %s", fileName));
-                details.append(System.lineSeparator());
-              });
-        });
+    conflicts.forEach((tableName, fileNames) -> {
+      details.append(System.lineSeparator());
+      details.append(String.format("  Table '%s':", tableName));
+      details.append(System.lineSeparator());
+      fileNames.forEach(fileName -> {
+        details.append(String.format("    - %s", fileName));
+        details.append(System.lineSeparator());
+      });
+    });
 
     details.append(System.lineSeparator());
     details.append("Each table name must be unique across all file formats in a directory.");

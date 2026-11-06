@@ -238,14 +238,13 @@ class DataSourceRegistrarTest {
 
     dataSources
         .keySet()
-        .forEach(
-            beanName -> {
-              when(context.containsBeanDefinition(beanName)).thenReturn(true);
-              when(beanFactory.containsBeanDefinition(beanName)).thenReturn(true);
-              final var beanDef = mock(BeanDefinition.class);
-              when(beanDef.isPrimary()).thenReturn(false);
-              when(beanFactory.getBeanDefinition(beanName)).thenReturn(beanDef);
-            });
+        .forEach(beanName -> {
+          when(context.containsBeanDefinition(beanName)).thenReturn(true);
+          when(beanFactory.containsBeanDefinition(beanName)).thenReturn(true);
+          final var beanDef = mock(BeanDefinition.class);
+          when(beanDef.isPrimary()).thenReturn(false);
+          when(beanFactory.getBeanDefinition(beanName)).thenReturn(beanDef);
+        });
 
     return context;
   }

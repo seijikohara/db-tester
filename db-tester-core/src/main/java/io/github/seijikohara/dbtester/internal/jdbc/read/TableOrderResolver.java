@@ -117,16 +117,14 @@ public final class TableOrderResolver {
     final var catalog = get(connection::getCatalog);
 
     return tableNames.stream()
-        .map(
-            tableName -> {
-              final var tableDependencies =
-                  extractTableDependencies(
-                      tableName, tableNameSet, databaseMetaData, catalog, schema);
-              if (!tableDependencies.isEmpty()) {
-                logger.trace("Table {} depends on: {}", tableName, tableDependencies);
-              }
-              return Map.entry(tableName, tableDependencies);
-            })
+        .map(tableName -> {
+          final var tableDependencies =
+              extractTableDependencies(tableName, tableNameSet, databaseMetaData, catalog, schema);
+          if (!tableDependencies.isEmpty()) {
+            logger.trace("Table {} depends on: {}", tableName, tableDependencies);
+          }
+          return Map.entry(tableName, tableDependencies);
+        })
         .filter(Predicate.not(entry -> entry.getValue().isEmpty()))
         .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }
@@ -150,9 +148,8 @@ public final class TableOrderResolver {
     try (final var resultSetResource =
         open(() -> databaseMetaData.getImportedKeys(catalog, schema, tableName.value()))) {
       return streamResultSet(resultSetResource.value(), rs -> get(() -> rs.getString(PKTABLE_NAME)))
-          .map(
-              referencedTableName ->
-                  extractReferencedTableName(referencedTableName, tableName, tableNameSet))
+          .map(referencedTableName ->
+              extractReferencedTableName(referencedTableName, tableName, tableNameSet))
           .flatMap(Optional::stream)
           .collect(Collectors.toUnmodifiableSet());
     }

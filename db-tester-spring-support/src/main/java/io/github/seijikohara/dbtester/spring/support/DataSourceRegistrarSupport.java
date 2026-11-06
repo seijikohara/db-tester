@@ -62,19 +62,17 @@ public final class DataSourceRegistrarSupport {
     logger.info("Registering {} DataSource(s) with DataSourceRegistry", dataSources.size());
 
     // Register each DataSource by name
-    dataSources.forEach(
-        (name, dataSource) -> {
-          registry.register(name, dataSource);
-          logger.debug("Registered DataSource '{}' with registry", name);
-        });
+    dataSources.forEach((name, dataSource) -> {
+      registry.register(name, dataSource);
+      logger.debug("Registered DataSource '{}' with registry", name);
+    });
 
     // Register default DataSource
     resolveDefaultDataSource(dataSources, isPrimaryPredicate)
-        .ifPresent(
-            entry -> {
-              registry.registerDefault(entry.getValue());
-              logger.info("Registered DataSource '{}' as default", entry.getKey());
-            });
+        .ifPresent(entry -> {
+          registry.registerDefault(entry.getValue());
+          logger.info("Registered DataSource '{}' as default", entry.getKey());
+        });
   }
 
   /**
